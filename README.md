@@ -5,7 +5,7 @@ Note: File structure will continuously be updated
 ```
 └── PEAR_ReactNativeExpo
     ├── app
-    │   ├── assets    -- will contain the images `.jpg`, `.png`, etc.
+    │   ├── assets     -- will contain the images `.jpg`, `.png`, etc.
     │   │   
     │   ├── components -- reusable code to be used in screens; buttons.
     │   │   
