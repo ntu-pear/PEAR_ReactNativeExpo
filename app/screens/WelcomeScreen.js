@@ -1,5 +1,8 @@
 import React from "react";
-import { ImageBackground, View, StyleSheet, Image, Text } from "react-native";
+import { ImageBackground, View, StyleSheet, Image } from "react-native";
+
+// Custom Import from https://reactnativeelements.com/docs/components/listitem
+
 
 // Constant import
 import colors from "../config/colors";
