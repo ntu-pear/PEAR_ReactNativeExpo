@@ -1,22 +1,26 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-import WelcomeScreen from './app/screens/WelcomeScreen';
+import { StatusBar } from "expo-status-bar";
+import { StyleSheet, Text, View } from "react-native";
+
+// Custom import from https://docs.nativebase.io/
+import { NativeBaseProvider } from "native-base";
+
+// Import from Screens or Compponents
+import WelcomeScreen from "./app/screens/WelcomeScreen";
 
 export default function App() {
   return (
-    <WelcomeScreen />
-    // <View style={styles.container}>
-    //   <Text>Open up App.js to start working on your app!</Text>
-    //   <StatusBar style="auto" />
-    // </View>
+    // NativeBaseProvider is a component that makes the theme available throughout your app.
+    <NativeBaseProvider>
+      <WelcomeScreen />
+    </NativeBaseProvider>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
