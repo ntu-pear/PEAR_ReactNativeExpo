@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { ImageBackground, View, StyleSheet, Image } from "react-native";
 
 // Custom Import from https://reactnativeelements.com/docs/
-import { Select } from "native-base";
+import { Select,  Input } from "native-base";
 
 // Constant import
 import colors from "../config/colors";
@@ -13,7 +13,7 @@ import AppButton from "../components/AppButton";
 
 function WelcomeScreen(props) {
   // React useState hook to manage select list item
-  let [service, setService] = React.useState("");
+  let [service, setService] = useState("");
 
   const onPressLogin = () => {
     // TODO: Auth on login here
@@ -33,10 +33,12 @@ function WelcomeScreen(props) {
         <AppText style={styles.tagLine}>Care</AppText> */}
       </View>
       <View style={styles.credentialsContainer}>
+        <Input placeholder="jess@gmail.com"/>
         <Select
           style={styles.selectionList}
           selectedValue={service}
           accessibilityLabel="Select Role"
+          placeholder="Supervisor"
           minWidth="full"
           minHeight="3%"
           onValueChange={(itemValue) => setService(itemValue)}
@@ -47,6 +49,7 @@ function WelcomeScreen(props) {
           <Select.Item label="Caregiver" value="caregiver" />
           <Select.Item label="Nurse" value="nurse" />
         </Select>
+        <Input placeholder="Password"/>
       </View>
 
       <View style={styles.buttonsContainer}>
