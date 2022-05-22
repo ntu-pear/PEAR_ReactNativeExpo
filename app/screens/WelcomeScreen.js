@@ -1,20 +1,36 @@
 import React from "react";
-import { ImageBackground, View, StyleSheet, Image} from "react-native";
-import colors  from '../config/colors';
+import { ImageBackground, View, StyleSheet, Image, Text } from "react-native";
+
+// Constant import
+import colors from "../config/colors";
+
+// Import from components
+import AppText from "../components/AppText";
+import AppButton from "../components/AppButton";
 
 function WelcomeScreen(props) {
+  const onPressLogin = () => {
+    // TODO: Auth on login here
+    console.log("Clicking");
+  };
+
   return (
     <ImageBackground
       style={styles.background}
-      blurRadius={10}
+      blurRadius={8}
       source={require("../assets/login_background.jpg")}
     >
       <View style={styles.logoContainer}>
-          <Image 
-            source={require('../assets/pear_v2.png')}
-            style={styles.logo}
+        <Image source={require("../assets/pear_v2.png")} style={styles.logo} />
+        <AppText style={styles.tagLine}>PEAR</AppText>
+        {/* <AppText style={styles.tagLine}>Where We</AppText>
+        <AppText style={styles.tagLine}>Care</AppText> */}
+      </View>
 
-          />
+      <View style={styles.credentialsContainer}></View>
+
+      <View style={styles.buttonsContainer}>
+        <AppButton title="Login" color="green" onPress={onPressLogin} />
       </View>
     </ImageBackground>
   );
@@ -23,17 +39,27 @@ function WelcomeScreen(props) {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    alignItems: "center"
+    alignItems: "center",
+    justifyContent: "flex-end",
+  },
+  buttonsContainer: {
+    width: "100%",
+    padding: 20,
   },
   logo: {
-      width: 100,
-      height: 150,
-      tintColor: colors.black,
+    width: 100,
+    height: 150,
+    tintColor: colors.black,
   },
   logoContainer: {
-      top: 100,
-      position: "absolute",
-      alignItems: "center",
+    top: 100,
+    position: "absolute",
+    alignItems: "center",
+  },
+  tagLine: {
+    fontWeight: "bold",
+    paddingVertical: 800,
+    fontSize: 80,
   },
 });
 
