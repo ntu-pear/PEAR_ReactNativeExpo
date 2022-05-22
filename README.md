@@ -29,3 +29,11 @@ Note: File structure will continuously be updated
 
 ## PR Conventions
 #### TODO: Set up pr conventions
+
+## External Resources Used
+1. https://reactnativeelements.com/ similar to react bootstrap
+2. 
+
+
+## Proper Conventions
+#### TODO
