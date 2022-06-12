@@ -44,9 +44,6 @@ function WelcomeScreen(props) {
     // TODO: Push to
     // navigation.navigate(routes.REGISTER);
     userLoginApi.request("jess@gmail.com", "Supervisor", "Supervisor!23");
-    // if (!result.ok) {
-    //   return alert("Could not login");
-    // }
     console.log(userLoginApi.data);
     console.log(userLoginApi.error);
     console.log(userLoginApi.loading);
