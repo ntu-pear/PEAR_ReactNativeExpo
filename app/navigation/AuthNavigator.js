@@ -6,10 +6,16 @@ import RegisterScreen from "../screens/RegisterScreen";
 // Import Constants from routes
 import routes from "./routes";
 
+// Refer to this: https://reactnavigation.org/docs/hello-react-navigation
 const Stack = createNativeStackNavigator();
 
+// Refer to this for configuration: https://reactnavigation.org/docs/native-stack-navigator#options
 const AuthNavigator = () => (
-  <Stack.Navigator>
+  <Stack.Navigator
+    screenOptions={{
+      headerShown: false,
+    }}
+  >
     <Stack.Screen
       name={routes.WELCOME}
       component={WelcomeScreen}

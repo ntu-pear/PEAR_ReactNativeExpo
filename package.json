@@ -12,6 +12,7 @@
   "dependencies": {
     "@native-base/icons": "0.0.11",
     "@react-native-community/hooks": "^2.8.1",
+    "@react-navigation/bottom-tabs": "^6.3.1",
     "@react-navigation/native": "^6.0.10",
     "@react-navigation/native-stack": "^6.6.2",
     "expo": "~45.0.0",
