@@ -17,19 +17,17 @@ import userApi from "../api/user";
 // Custom Hooks
 import useApi from "../hooks/useApi";
 
-
 function WelcomeScreen(props) {
-
   /*
-  * All States To Be Placed Here
-  */
+   * All States To Be Placed Here
+   */
   // React useState hook to manage select list item
   let [service, setService] = useState("");
   const userLoginApi = useApi(userApi.loginUser);
 
   /*
-  * Component Did Mount or useEffect() to be placed here
-  */
+   * Component Did Mount or useEffect() to be placed here
+   */
 
   /*
    * Deconstructor
@@ -38,8 +36,8 @@ function WelcomeScreen(props) {
   const { navigation } = props;
 
   /*
-  * All Functions To Be Placed Here
-  */
+   * All Functions To Be Placed Here
+   */
   const onPressLogin = async () => {
     // TODO: Auth on login here
     console.log("Clicking");
