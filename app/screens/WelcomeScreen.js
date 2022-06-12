@@ -2,22 +2,42 @@ import React, { useState } from "react";
 import { ImageBackground, View, StyleSheet, Image } from "react-native";
 
 // Custom Import from https://reactnativeelements.com/docs/
-import { Select,  Input } from "native-base";
+import { Select, Input } from "native-base";
 
 // Constant import
 import colors from "../config/colors";
+import routes from "../navigation/routes";
 
 // Import from components
 import AppText from "../components/AppText";
 import AppButton from "../components/AppButton";
 
 function WelcomeScreen(props) {
+
+  /*
+  * All States To Be Placed Here
+  */
   // React useState hook to manage select list item
   let [service, setService] = useState("");
 
+  /*
+  * Component Did Mount or useEffect() to be placed here
+  */
+
+  /*
+   * Deconstructor
+   * Note: Navigation is passed down as a prop from NativeStackNavigator
+   */
+  const { navigation } = props;
+
+  /*
+  * All Functions To Be Placed Here
+  */
   const onPressLogin = () => {
     // TODO: Auth on login here
     console.log("Clicking");
+    // TODO: Push to
+    // navigation.navigate(routes.REGISTER);
   };
 
   return (
@@ -33,7 +53,7 @@ function WelcomeScreen(props) {
         <AppText style={styles.tagLine}>Care</AppText> */}
       </View>
       <View style={styles.credentialsContainer}>
-        <Input placeholder="jess@gmail.com"/>
+        <Input placeholder="jess@gmail.com" />
         <Select
           style={styles.selectionList}
           selectedValue={service}
@@ -49,7 +69,7 @@ function WelcomeScreen(props) {
           <Select.Item label="Caregiver" value="caregiver" />
           <Select.Item label="Nurse" value="nurse" />
         </Select>
-        <Input placeholder="Password"/>
+        <Input placeholder="Password" />
       </View>
 
       <View style={styles.buttonsContainer}>
@@ -70,8 +90,8 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   credentialsContainer: {
-      width: "90%",
-      backgroundColor: colors.black,
+    width: "90%",
+    backgroundColor: colors.black,
   },
   logo: {
     width: 100,
@@ -89,9 +109,9 @@ const styles = StyleSheet.create({
     fontSize: 80,
   },
   selectionList: {
-      borderColor: "red",
-      color: colors.black
-  }
+    borderColor: "red",
+    color: colors.black,
+  },
 });
 
 export default WelcomeScreen;
