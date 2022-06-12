@@ -11,6 +11,8 @@ Note: File structure will continuously be updated
     │   │   
     │   ├── hooks      -- Custom Hooks location.Convention:use<Something>.js
     │   │
+    │   ├── navigation -- Routing and Navigation folders.
+    │   │
     │   ├── config     -- common constants to be stored here. 
     │   │   └── colors.js -- common color constants.
     │   └── screens    -- pages to be navigated to.
