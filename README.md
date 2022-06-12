@@ -9,6 +9,10 @@ Note: File structure will continuously be updated
     │   │   
     │   ├── components -- reusable code to be used in screens; buttons.
     │   │   
+    │   ├── hooks      -- Custom Hooks location.Convention:use<Something>.js
+    │   │
+    │   ├── navigation -- Routing and Navigation folders.
+    │   │
     │   ├── config     -- common constants to be stored here. 
     │   │   └── colors.js -- common color constants.
     │   └── screens    -- pages to be navigated to.
@@ -32,7 +36,7 @@ Note: File structure will continuously be updated
 
 ## External Resources Used
 1. https://reactnativeelements.com/ similar to react bootstrap
-2. 
+2. https://reactnavigation.org/  [For navigation/ Routing]
 
 
 ## Proper Conventions
