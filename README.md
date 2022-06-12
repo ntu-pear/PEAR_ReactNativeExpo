@@ -9,6 +9,8 @@ Note: File structure will continuously be updated
     │   │   
     │   ├── components -- reusable code to be used in screens; buttons.
     │   │   
+    │   ├── hooks      -- Custom Hooks location.Convention:use<Something>.js
+    │   │
     │   ├── config     -- common constants to be stored here. 
     │   │   └── colors.js -- common color constants.
     │   └── screens    -- pages to be navigated to.
