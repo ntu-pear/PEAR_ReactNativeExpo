@@ -23,6 +23,10 @@ function WelcomeScreen(props) {
    */
   // React useState hook to manage select list item
   let [service, setService] = useState("");
+
+  /*
+   * All Api to be place hered
+   */
   const userLoginApi = useApi(userApi.loginUser);
 
   /*
