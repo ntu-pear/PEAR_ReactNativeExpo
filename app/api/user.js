@@ -13,27 +13,22 @@ const userResetPassword = endpoint + "/ResetPassword";
 
 /*
 * List all functions here
+* Refer to this api doc: https://github.com/infinitered/apisauce
 */
 
 // GET REQUESTS
 
 
 // POST REQUESTS
-const loginUser = (email, role, password) => {
-    const data = new FormData();
-    data.append("Email", email);
-    data.append("Role", role);
-    data.append("Password", password);
+const loginUser = (Email, Role, Password) => {
+    var body = JSON.stringify({ Email, Role, Password });
 
-    console.log(data);
+    console.log(body);
     // Note: client.post accepts 3 parameters. (1) endpoint (2) data and (3) onUploadProgress -- this is optional
-    return client.post(userLogin, data)
+    return client.post(userLogin, body)
 }
 
 // UPDATE REQUESTS
-
-
-
 
 
 

@@ -6,11 +6,17 @@ import { Select, Input } from "native-base";
 
 // Constant import
 import colors from "../config/colors";
-import routes from "../navigation/routes";
 
 // Import from components
 import AppText from "../components/AppText";
 import AppButton from "../components/AppButton";
+
+// Import Api
+import userApi from "../api/user";
+
+// Custom Hooks
+import useApi from "../hooks/useApi";
+
 
 function WelcomeScreen(props) {
 
@@ -19,6 +25,7 @@ function WelcomeScreen(props) {
   */
   // React useState hook to manage select list item
   let [service, setService] = useState("");
+  const userLoginApi = useApi(userApi.loginUser);
 
   /*
   * Component Did Mount or useEffect() to be placed here
@@ -33,11 +40,19 @@ function WelcomeScreen(props) {
   /*
   * All Functions To Be Placed Here
   */
-  const onPressLogin = () => {
+  const onPressLogin = async () => {
     // TODO: Auth on login here
     console.log("Clicking");
     // TODO: Push to
     // navigation.navigate(routes.REGISTER);
+    // const result = await userApi.loginUser("jess@gmail.com", "Supervisor", "Supervisor!23");
+    userLoginApi.request("jess@gmail.com", "Supervisor", "Supervisor!23");
+    // if (!result.ok) {
+    //   return alert("Could not login");
+    // }
+    console.log(userLoginApi.data);
+    console.log(userLoginApi.error);
+    console.log(userLoginApi.loading);
   };
 
   return (
