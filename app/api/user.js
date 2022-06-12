@@ -22,7 +22,6 @@ const userResetPassword = endpoint + "/ResetPassword";
 const loginUser = (Email, Role, Password) => {
   var body = JSON.stringify({ Email, Role, Password });
 
-  console.log(body);
   // Note: client.post accepts 3 parameters. (1) endpoint (2) data and (3) onUploadProgress -- this is optional
   return client.post(userLogin, body);
 };
