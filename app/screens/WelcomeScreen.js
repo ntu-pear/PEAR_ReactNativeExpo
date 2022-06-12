@@ -25,7 +25,7 @@ function WelcomeScreen(props) {
   let [service, setService] = useState("");
 
   /*
-   * All Api to be place hered
+   * All Api to be place here
    */
   const userLoginApi = useApi(userApi.loginUser);
 
