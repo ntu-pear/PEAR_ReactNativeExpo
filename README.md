@@ -36,7 +36,7 @@ Note: File structure will continuously be updated
 
 ## External Resources Used
 1. https://reactnativeelements.com/ similar to react bootstrap
-2. 
+2. https://reactnavigation.org/  [For navigation/ Routing]
 
 
 ## Proper Conventions
