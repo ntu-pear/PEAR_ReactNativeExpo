@@ -43,7 +43,6 @@ function WelcomeScreen(props) {
     console.log("Clicking");
     // TODO: Push to
     // navigation.navigate(routes.REGISTER);
-    // const result = await userApi.loginUser("jess@gmail.com", "Supervisor", "Supervisor!23");
     userLoginApi.request("jess@gmail.com", "Supervisor", "Supervisor!23");
     // if (!result.ok) {
     //   return alert("Could not login");
