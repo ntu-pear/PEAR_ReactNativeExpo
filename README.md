@@ -9,6 +9,8 @@ Note: File structure will continuously be updated
     │   │   
     │   ├── components -- reusable code to be used in screens; buttons.
     │   │   
+    │   ├── api        -- API Layer [Single Responsibility Principle]
+    │   │   
     │   ├── hooks      -- Custom Hooks location.Convention:use<Something>.js
     │   │
     │   ├── navigation -- Routing and Navigation folders.
@@ -37,6 +39,11 @@ Note: File structure will continuously be updated
 ## External Resources Used
 1. https://reactnativeelements.com/ similar to react bootstrap
 2. https://reactnavigation.org/  [For navigation/ Routing]
+3. https://airbnb.design/lottie/ [Airbnb Animation Loader Design]
+4. https://github.com/infinitered/apisauce [Axios + standardized errors + request/response transforms.]
+
+## Setup Resources
+1. https://github.com/jhen0409/react-native-debugger [React-Native Debugger]
 
 
 ## Proper Conventions
