@@ -15,6 +15,8 @@ Note: File structure will continuously be updated
     │   │
     │   ├── navigation -- Routing and Navigation folders.
     │   │
+    │   ├── utility    -- contains cache layer and misc. 
+    │   │
     │   ├── config     -- common constants to be stored here. 
     │   │   └── colors.js -- common color constants.
     │   └── screens    -- pages to be navigated to.
@@ -41,6 +43,8 @@ Note: File structure will continuously be updated
 2. https://reactnavigation.org/  [For navigation/ Routing]
 3. https://airbnb.design/lottie/ [Airbnb Animation Loader Design]
 4. https://github.com/infinitered/apisauce [Axios + standardized errors + request/response transforms.]
+5. https://docs.expo.dev/versions/latest/sdk/async-storage/ [Asyncstorage - acts like cache]
+6. https://github.com/moment/moment [A JavaScript date library for parsing, validating, manipulating, and formatting dates.]
 
 ## Setup Resources
 1. https://github.com/jhen0409/react-native-debugger [React-Native Debugger]
