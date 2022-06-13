@@ -28,3 +28,30 @@ const isExpired = (item) => {
   const storedTime = moment(item.timestamp);
   return now.diff(storedTime, "minutes") > expiryInMinutes;
 };
+
+// Get data from cache
+const get = async (key) => {
+  try {
+    const value = await AsyncStorage.getItem(prefix + key);
+    const item = JSON.parse(value);
+
+    // No item found
+    if (!item) return null;
+
+    // If expired, perform cache eviction and return null value
+    if (isExpired(item)) {
+      await AsyncStorage.removeItem(prefix + key);
+      return null;
+    }
+
+    // returns value of item
+    return item.value;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export default {
+  store,
+  get,
+};
