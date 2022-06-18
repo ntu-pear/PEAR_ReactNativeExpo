@@ -10,17 +10,19 @@ import {
 } from "react-native";
 
 // Custom Import from https://reactnativeelements.com/docs/
-import { Select, Input, Center, Icon } from "native-base";
+import { Select, Input, Center, Icon, FormControl, Box } from "native-base";
 
 import { MaterialIcons } from "@expo/vector-icons";
 
 // Constant import
 import colors from "../config/colors";
 import typography from "../config/typography";
+import errors from "../config/errors";
 
 // Import from components
 import AppText from "../components/AppText";
 import AppButton from "../components/AppButton";
+import ErrorMessage from "../components/ErrorMessage";
 
 // Import Api
 import userApi from "../api/user";
@@ -37,6 +39,7 @@ function WelcomeScreen(props) {
   let [show, setShow] = useState(false);
   let [email, setEmail] = useState("");
   let [password, setPassword] = useState("");
+  let [loginFailed, setLoginFailed] = useState(true);
 
   /*
    * All Api to be place here
@@ -60,9 +63,9 @@ function WelcomeScreen(props) {
     console.log("Logging in...");
     //"Supervisor!23"
     email && role && password && userLoginApi.request(email, role, password);
+
+    if (userLoginApi.error) return setLoginFailed(true);
     console.log(userLoginApi.data);
-    console.log(userLoginApi.error);
-    console.log(userLoginApi.loading);
   };
 
   const handleEmail = (e) => {
@@ -88,6 +91,7 @@ function WelcomeScreen(props) {
             />
             <AppText style={styles.tagLine}>PEAR</AppText>
           </View>
+
           <Center flex={1}>
             <View style={styles.credentialsContainer}>
               <Input
@@ -174,6 +178,11 @@ function WelcomeScreen(props) {
                 type={show ? "text" : "password"}
               />
             </View>
+            <Box>
+              {loginFailed ? (
+                <ErrorMessage message={errors.loginError} />
+              ) : null}
+            </Box>
             <View style={styles.buttonsContainer}>
               <AppButton title="Login" color="green" onPress={onPressLogin} />
             </View>
