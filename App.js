@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View } from "react-native";
 
@@ -12,16 +13,21 @@ import OfflineNotice from "./app/components/OfflineNotice";
 import { NavigationContainer } from "@react-navigation/native";
 import AuthNavigator from "./app/navigation/AuthNavigator";
 import AppNavigator from "./app/navigation/AppNavigator";
+import AuthContext from "./app/auth/context";
 
 export default function App() {
+  const [user, setUser] = useState();
+
   return (
     // NativeBaseProvider is a component that makes the theme available throughout your app.
     <NativeBaseProvider>
-      <OfflineNotice/>
-      <NavigationContainer>
-        <AuthNavigator />
-        {/* <AppNavigator/> */}
-      </NavigationContainer>
+      <AuthContext.Provider value={{ user, setUser }}>
+        <OfflineNotice />
+        <NavigationContainer>
+          {user ? <AppNavigator /> : <AuthNavigator />}
+          {/* <AppNavigator/> */}
+        </NavigationContainer>
+      </AuthContext.Provider>
     </NativeBaseProvider>
   );
 }

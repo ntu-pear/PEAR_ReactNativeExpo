@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   ImageBackground,
   View,
@@ -27,16 +27,14 @@ import ErrorMessage from "../components/ErrorMessage";
 // Import Api
 import userApi from "../api/user";
 
-// Custom Hooks
-import useApi from "../hooks/useApi";
-
 import jwt_decode from "jwt-decode";
+import AuthContext from "../auth/context";
 
 function WelcomeScreen(props) {
   /*
    * All States To Be Placed Here
    */
-  // React useState hook to manage select list item
+  const authContext = useContext(AuthContext);
   let [role, setRole] = useState("");
   let [show, setShow] = useState(false);
   let [email, setEmail] = useState("");
@@ -68,10 +66,10 @@ function WelcomeScreen(props) {
     // userLoginApi.request(email, role, password);
     // if returned array is empty or error
     if (!result.ok) return setLoginFailed(true);
-    console.log(result.data);
     setLoginFailed(false);
-    var token = jwt_decode(result.data.accessToken)
-    console.log(token);
+    const user = jwt_decode(result.data.accessToken)
+    authContext.setUser(user)
+    console.log(user);
   };
 
   const handleEmail = (e) => {
