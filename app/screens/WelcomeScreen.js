@@ -74,7 +74,7 @@ function WelcomeScreen(props) {
         <View style={styles.credentialsContainer}>
           <Input
             placeholder="jess@gmail.com"
-            bg={colors.secondary}
+            bg={colors.gray}
             placeholderTextColor={colors.medium}
             color={colors.black}
             _focus={{
@@ -92,12 +92,13 @@ function WelcomeScreen(props) {
           />
           <Select
             selectedValue={service}
-            accessibilityLabel="Select Role"
+            accessibilityLaaabel="Select Role"
             placeholder="Supervisor"
             minWidth="full"
             minHeight="3%"
+            color={colors.black}
             onValueChange={(itemValue) => setService(itemValue)}
-            bg={colors.secondary}
+            bg={colors.gray}
             borderRadius="25"
             height="50"
             size="18"
@@ -113,11 +114,11 @@ function WelcomeScreen(props) {
           </Select>
           <Input
             placeholder="Password"
-            bg={colors.secondary}
+            bg={colors.gray}
             placeholderTextColor={colors.medium}
             color={colors.black}
             _focus={{
-              bg: `${colors.light_var1}`,
+              bg: `${colors.lighter}`,
               borderColor: `${colors.secondary}`,
             }}
             color={colors.black}
