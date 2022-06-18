@@ -110,8 +110,9 @@ function WelcomeScreen(props) {
               />
               <Select
                 selectedValue={service}
-                accessibilityLaaabel="Select Role"
+                accessibilityLabel="Select Role"
                 placeholder="Supervisor"
+                placeholderTextColor={colors.black}
                 minWidth="full"
                 minHeight="3%"
                 color={colors.black}
