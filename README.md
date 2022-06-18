@@ -11,6 +11,8 @@ Note: File structure will continuously be updated
     │   │   
     │   ├── api        -- API Layer [Single Responsibility Principle]
     │   │   
+    │   ├── auth        -- Authentication handling layer. e.g. login, logout
+    │   │   
     │   ├── hooks      -- Custom Hooks location.Convention:use<Something>.js
     │   │
     │   ├── navigation -- Routing and Navigation folders.
