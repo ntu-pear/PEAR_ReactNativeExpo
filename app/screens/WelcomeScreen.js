@@ -10,9 +10,11 @@ import {
 } from "react-native";
 
 // Custom Import from https://reactnativeelements.com/docs/
-import { Select, Input, Center, Icon, FormControl, Box } from "native-base";
-
+import { Select, Input, Center, Icon, Box } from "native-base";
 import { MaterialIcons } from "@expo/vector-icons";
+import jwt_decode from "jwt-decode";
+import AuthContext from "../auth/context";
+import authStorage from "../auth/authStorage";
 
 // Constant import
 import colors from "../config/colors";
@@ -27,8 +29,6 @@ import ErrorMessage from "../components/ErrorMessage";
 // Import Api
 import userApi from "../api/user";
 
-import jwt_decode from "jwt-decode";
-import AuthContext from "../auth/context";
 
 function WelcomeScreen(props) {
   /*
@@ -70,6 +70,7 @@ function WelcomeScreen(props) {
     const user = jwt_decode(result.data.accessToken)
     authContext.setUser(user)
     console.log(user);
+    authStorage.storeToken(result.data.accessToken);
   };
 
   const handleEmail = (e) => {
