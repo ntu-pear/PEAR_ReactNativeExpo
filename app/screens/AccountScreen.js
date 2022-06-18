@@ -5,10 +5,11 @@ import AppButton from "../components/AppButton";
 
 function AccountScreen() {
   const { user, setUser } = useContext(AuthContext);
+
   const onPressLogOut = () => {
-    console.log("Logging out")
     setUser(null);
   }
+  
   return (
     <View>
       <Text>This is my accountscreen</Text>
