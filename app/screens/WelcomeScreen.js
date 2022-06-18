@@ -91,24 +91,18 @@ function WelcomeScreen(props) {
           <Center flex={1}>
             <View style={styles.credentialsContainer}>
               <Input
-                onChangeText={handleEmail}
-                placeholder="jess@gmail.com"
-                autoCapitalize='none'
+                autoCapitalize="none"
                 bg={colors.gray}
-                placeholderTextColor={colors.medium}
+                borderRadius="25"
                 color={colors.black}
                 _focus={{
                   bg: `${colors.lighter}`,
                   borderColor: `${colors.secondary}`,
                 }}
-                color={colors.black}
-                borderRadius="25"
-                height="50"
-                size="18"
                 fontFamily={
                   Platform.OS === "ios" ? typography.ios : typography.android
                 }
-                marginBottom="5"
+                height="50"
                 InputLeftElement={
                   <Icon
                     as={<MaterialIcons name="person" />}
@@ -117,23 +111,28 @@ function WelcomeScreen(props) {
                     color={colors.black}
                   />
                 }
+                onChangeText={handleEmail}
+                placeholder="jess@gmail.com"
+                placeholderTextColor={colors.medium}
+                marginBottom="5"
+                size="18"
               />
               <Select
-                selectedValue={role}
                 accessibilityLabel="Select Role"
-                placeholder="Supervisor"
-                placeholderTextColor={colors.black}
-                minWidth="full"
-                minHeight="3%"
-                color={colors.black}
-                onValueChange={(itemValue) => setRole(itemValue)}
                 bg={colors.gray}
                 borderRadius="25"
-                height="50"
-                size="18"
+                color={colors.black}
                 fontFamily={
                   Platform.OS === "ios" ? typography.ios : typography.android
                 }
+                height="50"
+                minWidth="full"
+                minHeight="3%"
+                placeholder="Supervisor"
+                placeholderTextColor={colors.black}
+                onValueChange={(itemValue) => setRole(itemValue)}
+                selectedValue={role}
+                size="18"
               >
                 <Select.Item label="Supervisor" value="Supervisor" />
                 <Select.Item label="Guardian" value="Guardian" />
@@ -142,25 +141,18 @@ function WelcomeScreen(props) {
                 <Select.Item label="Nurse" value="Nurse" />
               </Select>
               <Input
-                onChangeText={handlePassword}
-                placeholder="Password"
-                autoCapitalize='none'
+                autoCapitalize="none"
                 bg={colors.gray}
-                placeholderTextColor={colors.medium}
+                borderRadius="25"
                 color={colors.black}
+                fontFamily={
+                  Platform.OS === "ios" ? typography.ios : typography.android
+                }
                 _focus={{
                   bg: `${colors.lighter}`,
                   borderColor: `${colors.secondary}`,
                 }}
-                color={colors.black}
-                borderRadius="25"
                 height="50"
-                size="18"
-                fontFamily={
-                  Platform.OS === "ios" ? typography.ios : typography.android
-                }
-                marginTop="5"
-                type={show ? "text" : "password"}
                 InputRightElement={
                   <Icon
                     as={
@@ -168,12 +160,18 @@ function WelcomeScreen(props) {
                         name={show ? "visibility" : "visibility-off"}
                       />
                     }
-                    size={5}
-                    mr="5"
                     color={colors.black}
+                    mr="5"
                     onPress={() => setShow(!show)}
+                    size={5}
                   />
                 }
+                onChangeText={handlePassword}
+                placeholder="Password"
+                placeholderTextColor={colors.medium}
+                marginTop="5"
+                size="18"
+                type={show ? "text" : "password"}
               />
             </View>
             <View style={styles.buttonsContainer}>
