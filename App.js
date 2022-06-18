@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet } from "react-native";
 
 // Custom import from https://docs.nativebase.io/
 import { NativeBaseProvider } from "native-base";
 
 // Import from Screens or Compponents
-import WelcomeScreen from "./app/screens/WelcomeScreen";
 import OfflineNotice from "./app/components/OfflineNotice";
 
 // Navigation or Routing related import
@@ -25,7 +23,6 @@ export default function App() {
         <OfflineNotice />
         <NavigationContainer>
           {user ? <AppNavigator /> : <AuthNavigator />}
-          {/* <AppNavigator/> */}
         </NavigationContainer>
       </AuthContext.Provider>
     </NativeBaseProvider>
