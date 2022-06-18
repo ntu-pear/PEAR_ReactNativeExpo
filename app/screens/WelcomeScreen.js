@@ -1,8 +1,14 @@
 import React, { useState } from "react";
-import { ImageBackground, View, StyleSheet, Image, Platform  } from "react-native";
+import {
+  ImageBackground,
+  View,
+  StyleSheet,
+  Image,
+  Platform,
+} from "react-native";
 
 // Custom Import from https://reactnativeelements.com/docs/
-import { Select, Input } from "native-base";
+import { Select, Input, Center } from "native-base";
 
 // Constant import
 import colors from "../config/colors";
@@ -64,58 +70,67 @@ function WelcomeScreen(props) {
         <Image source={require("../assets/pear_v2.png")} style={styles.logo} />
         <AppText style={styles.tagLine}>PEAR</AppText>
       </View>
-      <View style={styles.credentialsContainer}>
-        <Input
-          placeholder="jess@gmail.com"
-          bg={colors.secondary}
-          placeholderTextColor={colors.medium}
-          color={colors.black}
-          _focus={{
-            bg: `${colors.lighter}`,
-            borderColor: `${colors.secondary}`,
-          }}
-          color={colors.black}
-          borderRadius="25"
-          height="50"
-          size="18"
-          fontFamily={Platform.OS === "ios" ? typography.ios : typography.android}
-        />
-        <Select
-          selectedValue={service}
-          accessibilityLabel="Select Role"
-          placeholder="Supervisor"
-          minWidth="full"
-          minHeight="3%"
-          onValueChange={(itemValue) => setService(itemValue)}
-          bg={colors.secondary}
-          borderRadius="25"
-          height="50"
-          size="18"
-          fontFamily={Platform.OS === "ios" ? typography.ios : typography.android}
-        >
-          <Select.Item label="Supervisor" value="supervisor" />
-          <Select.Item label="Guardian" value="guardian" />
-          <Select.Item label="Doctor" value="doctor" />
-          <Select.Item label="Caregiver" value="caregiver" />
-          <Select.Item label="Nurse" value="nurse" />
-        </Select>
-        <Input
-          placeholder="Password"
-          bg={colors.secondary}
-          placeholderTextColor={colors.medium}
-          color={colors.black}
-          _focus={{
-            bg: `${colors.lighter}`,
-            borderColor: `${colors.secondary}`,
-          }}
-          color={colors.black}
-          borderRadius="25"
-          height="50"
-          size="18"
-          fontFamily={Platform.OS === "ios" ? typography.ios : typography.android}
-        />
-      </View>
-
+      <Center flex={1}>
+        <View style={styles.credentialsContainer}>
+          <Input
+            placeholder="jess@gmail.com"
+            bg={colors.secondary}
+            placeholderTextColor={colors.medium}
+            color={colors.black}
+            _focus={{
+              bg: `${colors.lighter}`,
+              borderColor: `${colors.secondary}`,
+            }}
+            color={colors.black}
+            borderRadius="25"
+            height="50"
+            size="18"
+            fontFamily={
+              Platform.OS === "ios" ? typography.ios : typography.android
+            }
+            marginBottom="5"
+          />
+          <Select
+            selectedValue={service}
+            accessibilityLabel="Select Role"
+            placeholder="Supervisor"
+            minWidth="full"
+            minHeight="3%"
+            onValueChange={(itemValue) => setService(itemValue)}
+            bg={colors.secondary}
+            borderRadius="25"
+            height="50"
+            size="18"
+            fontFamily={
+              Platform.OS === "ios" ? typography.ios : typography.android
+            }
+          >
+            <Select.Item label="Supervisor" value="supervisor" />
+            <Select.Item label="Guardian" value="guardian" />
+            <Select.Item label="Doctor" value="doctor" />
+            <Select.Item label="Caregiver" value="caregiver" />
+            <Select.Item label="Nurse" value="nurse" />
+          </Select>
+          <Input
+            placeholder="Password"
+            bg={colors.secondary}
+            placeholderTextColor={colors.medium}
+            color={colors.black}
+            _focus={{
+              bg: `${colors.light_var1}`,
+              borderColor: `${colors.secondary}`,
+            }}
+            color={colors.black}
+            borderRadius="25"
+            height="50"
+            size="18"
+            fontFamily={
+              Platform.OS === "ios" ? typography.ios : typography.android
+            }
+            marginTop="5"
+          />
+        </View>
+      </Center>
       <View style={styles.buttonsContainer}>
         <AppButton title="Login" color="green" onPress={onPressLogin} />
       </View>
@@ -150,7 +165,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     paddingVertical: 800,
     fontSize: 80,
-  }
+  },
 });
 
 export default WelcomeScreen;
