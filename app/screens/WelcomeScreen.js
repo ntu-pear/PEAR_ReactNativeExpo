@@ -4,7 +4,7 @@ import {
   View,
   StyleSheet,
   Image,
-  Platform,
+  Platform
 } from "react-native";
 
 // Custom Import from https://reactnativeelements.com/docs/
@@ -168,7 +168,6 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "flex-end",
   },
   buttonsContainer: {
     width: "100%",
