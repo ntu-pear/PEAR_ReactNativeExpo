@@ -4,7 +4,9 @@ import {
   View,
   StyleSheet,
   Image,
-  Platform
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 
 // Custom Import from https://reactnativeelements.com/docs/
@@ -69,97 +71,104 @@ function WelcomeScreen(props) {
       blurRadius={8}
       source={require("../assets/login_background.jpg")}
     >
-      <View style={styles.logoContainer}>
-        <Image source={require("../assets/pear_v2.png")} style={styles.logo} />
-        <AppText style={styles.tagLine}>PEAR</AppText>
-      </View>
-      <Center flex={1}>
-        <View style={styles.credentialsContainer}>
-          <Input
-            placeholder="jess@gmail.com"
-            bg={colors.gray}
-            placeholderTextColor={colors.medium}
-            color={colors.black}
-            _focus={{
-              bg: `${colors.lighter}`,
-              borderColor: `${colors.secondary}`,
-            }}
-            color={colors.black}
-            borderRadius="25"
-            height="50"
-            size="18"
-            fontFamily={
-              Platform.OS === "ios" ? typography.ios : typography.android
-            }
-            marginBottom="5"
-            InputLeftElement={
-              <Icon
-                as={<MaterialIcons name="person" />}
-                size={5}
-                ml="5"
+      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+        <View>
+          <View style={styles.logoContainer}>
+            <Image
+              source={require("../assets/pear_v2.png")}
+              style={styles.logo}
+            />
+            <AppText style={styles.tagLine}>PEAR</AppText>
+          </View>
+          <Center flex={1}>
+            <View style={styles.credentialsContainer}>
+              <Input
+                placeholder="jess@gmail.com"
+                bg={colors.gray}
+                placeholderTextColor={colors.medium}
                 color={colors.black}
-              />
-            }
-          />
-          <Select
-            selectedValue={service}
-            accessibilityLaaabel="Select Role"
-            placeholder="Supervisor"
-            minWidth="full"
-            minHeight="3%"
-            color={colors.black}
-            onValueChange={(itemValue) => setService(itemValue)}
-            bg={colors.gray}
-            borderRadius="25"
-            height="50"
-            size="18"
-            fontFamily={
-              Platform.OS === "ios" ? typography.ios : typography.android
-            }
-          >
-            <Select.Item label="Supervisor" value="supervisor" />
-            <Select.Item label="Guardian" value="guardian" />
-            <Select.Item label="Doctor" value="doctor" />
-            <Select.Item label="Caregiver" value="caregiver" />
-            <Select.Item label="Nurse" value="nurse" />
-          </Select>
-          <Input
-            placeholder="Password"
-            bg={colors.gray}
-            placeholderTextColor={colors.medium}
-            color={colors.black}
-            _focus={{
-              bg: `${colors.lighter}`,
-              borderColor: `${colors.secondary}`,
-            }}
-            color={colors.black}
-            borderRadius="25"
-            height="50"
-            size="18"
-            fontFamily={
-              Platform.OS === "ios" ? typography.ios : typography.android
-            }
-            marginTop="5"
-            type={show ? "text" : "password"}
-            InputRightElement={
-              <Icon
-                as={
-                  <MaterialIcons
-                    name={show ? "visibility" : "visibility-off"}
+                _focus={{
+                  bg: `${colors.lighter}`,
+                  borderColor: `${colors.secondary}`,
+                }}
+                color={colors.black}
+                borderRadius="25"
+                height="50"
+                size="18"
+                fontFamily={
+                  Platform.OS === "ios" ? typography.ios : typography.android
+                }
+                marginBottom="5"
+                InputLeftElement={
+                  <Icon
+                    as={<MaterialIcons name="person" />}
+                    size={5}
+                    ml="5"
+                    color={colors.black}
                   />
                 }
-                size={5}
-                mr="5"
-                color={colors.black}
-                onPress={() => setShow(!show)}
               />
-            }
-          />
+              <Select
+                selectedValue={service}
+                accessibilityLaaabel="Select Role"
+                placeholder="Supervisor"
+                minWidth="full"
+                minHeight="3%"
+                color={colors.black}
+                onValueChange={(itemValue) => setService(itemValue)}
+                bg={colors.gray}
+                borderRadius="25"
+                height="50"
+                size="18"
+                fontFamily={
+                  Platform.OS === "ios" ? typography.ios : typography.android
+                }
+              >
+                <Select.Item label="Supervisor" value="supervisor" />
+                <Select.Item label="Guardian" value="guardian" />
+                <Select.Item label="Doctor" value="doctor" />
+                <Select.Item label="Caregiver" value="caregiver" />
+                <Select.Item label="Nurse" value="nurse" />
+              </Select>
+              <Input
+                placeholder="Password"
+                bg={colors.gray}
+                placeholderTextColor={colors.medium}
+                color={colors.black}
+                _focus={{
+                  bg: `${colors.lighter}`,
+                  borderColor: `${colors.secondary}`,
+                }}
+                color={colors.black}
+                borderRadius="25"
+                height="50"
+                size="18"
+                fontFamily={
+                  Platform.OS === "ios" ? typography.ios : typography.android
+                }
+                marginTop="5"
+                type={show ? "text" : "password"}
+                InputRightElement={
+                  <Icon
+                    as={
+                      <MaterialIcons
+                        name={show ? "visibility" : "visibility-off"}
+                      />
+                    }
+                    size={5}
+                    mr="5"
+                    color={colors.black}
+                    onPress={() => setShow(!show)}
+                  />
+                }
+              />
+            </View>
+            <View style={styles.buttonsContainer}>
+              <AppButton title="Login" color="green" onPress={onPressLogin} />
+            </View>
+          </Center>
         </View>
-      </Center>
-      <View style={styles.buttonsContainer}>
-        <AppButton title="Login" color="green" onPress={onPressLogin} />
-      </View>
+      </TouchableWithoutFeedback>
     </ImageBackground>
   );
 }
@@ -183,7 +192,6 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     top: 100,
-    position: "absolute",
     alignItems: "center",
   },
   tagLine: {
