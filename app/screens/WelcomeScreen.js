@@ -8,7 +8,9 @@ import {
 } from "react-native";
 
 // Custom Import from https://reactnativeelements.com/docs/
-import { Select, Input, Center } from "native-base";
+import { Select, Input, Center, Icon } from "native-base";
+
+import { MaterialIcons } from "@expo/vector-icons";
 
 // Constant import
 import colors from "../config/colors";
@@ -30,6 +32,7 @@ function WelcomeScreen(props) {
    */
   // React useState hook to manage select list item
   let [service, setService] = useState("");
+  let [show, setShow] = useState(false);
 
   /*
    * All Api to be place here
@@ -89,6 +92,14 @@ function WelcomeScreen(props) {
               Platform.OS === "ios" ? typography.ios : typography.android
             }
             marginBottom="5"
+            InputLeftElement={
+              <Icon
+                as={<MaterialIcons name="person" />}
+                size={5}
+                ml="5"
+                color={colors.black}
+              />
+            }
           />
           <Select
             selectedValue={service}
@@ -129,6 +140,20 @@ function WelcomeScreen(props) {
               Platform.OS === "ios" ? typography.ios : typography.android
             }
             marginTop="5"
+            type={show ? "text" : "password"}
+            InputRightElement={
+              <Icon
+                as={
+                  <MaterialIcons
+                    name={show ? "visibility" : "visibility-off"}
+                  />
+                }
+                size={5}
+                mr="5"
+                color={colors.black}
+                onPress={() => setShow(!show)}
+              />
+            }
           />
         </View>
       </Center>
