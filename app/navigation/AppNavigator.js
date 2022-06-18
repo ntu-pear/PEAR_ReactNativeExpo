@@ -6,6 +6,7 @@ import DashboardNavigator from "./DashboardNavigator";
 import NotifcationsScreen from "../screens/NotifcationsScreen";
 import PatientsNavigator from "./PatientsNavigator";
 import ConfigNavigator from "./ConfigNavigator";
+import AccountScreen from "../screens/AccountScreen";
 
 // Refer to this doc: https://reactnavigation.org/docs/tab-based-navigation
 const Tab = createBottomTabNavigator();
@@ -17,6 +18,7 @@ const AppNavigator = () => (
     <Tab.Screen name={routes.NOTIFICATION} component={NotifcationsScreen} />
     <Tab.Screen name={routes.PATIENTS} component={PatientsNavigator} />
     <Tab.Screen name={routes.CONFIG} component={ConfigNavigator} />
+    <Tab.Screen name={routes.ACCOUNT} component={AccountScreen} />
   </Tab.Navigator>
 );
 
