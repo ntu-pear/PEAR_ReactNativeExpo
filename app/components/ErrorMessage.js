@@ -5,7 +5,9 @@ import { MaterialIcons } from "@expo/vector-icons";
 import colors from "../config/colors";
 
 function ErrorMessage(props) {
-  const { message } = props;
+  const { message, visible } = props;
+  if (!visible) return null;
+
   return (
     <FormControl isInvalid>
       <FormControl.ErrorMessage

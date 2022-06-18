@@ -30,6 +30,8 @@ import userApi from "../api/user";
 // Custom Hooks
 import useApi from "../hooks/useApi";
 
+import jwt_decode from "jwt-decode";
+
 function WelcomeScreen(props) {
   /*
    * All States To Be Placed Here
@@ -39,12 +41,12 @@ function WelcomeScreen(props) {
   let [show, setShow] = useState(false);
   let [email, setEmail] = useState("");
   let [password, setPassword] = useState("");
-  let [loginFailed, setLoginFailed] = useState(true);
+  let [loginFailed, setLoginFailed] = useState(false);
 
   /*
    * All Api to be place here
    */
-  const userLoginApi = useApi(userApi.loginUser);
+
 
   /*
    * Component Did Mount or useEffect() to be placed here
@@ -62,10 +64,14 @@ function WelcomeScreen(props) {
   const onPressLogin = async () => {
     console.log("Logging in...");
     //"Supervisor!23"
-    email && role && password && userLoginApi.request(email, role, password);
-
-    if (userLoginApi.error) return setLoginFailed(true);
-    console.log(userLoginApi.data);
+    const result = await userApi.loginUser(email, role, password);
+    // userLoginApi.request(email, role, password);
+    // if returned array is empty or error
+    if (!result.ok) return setLoginFailed(true);
+    console.log(result.data);
+    setLoginFailed(false);
+    var token = jwt_decode(result.data.accessToken)
+    console.log(token);
   };
 
   const handleEmail = (e) => {
@@ -179,9 +185,7 @@ function WelcomeScreen(props) {
               />
             </View>
             <Box>
-              {loginFailed ? (
-                <ErrorMessage message={errors.loginError} />
-              ) : null}
+              <ErrorMessage visible={loginFailed} message={errors.loginError} />
             </Box>
             <View style={styles.buttonsContainer}>
               <AppButton title="Login" color="green" onPress={onPressLogin} />
