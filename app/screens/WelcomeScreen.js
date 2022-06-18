@@ -33,8 +33,10 @@ function WelcomeScreen(props) {
    * All States To Be Placed Here
    */
   // React useState hook to manage select list item
-  let [service, setService] = useState("");
+  let [role, setRole] = useState("");
   let [show, setShow] = useState(false);
+  let [email, setEmail] = useState("");
+  let [password, setPassword] = useState("");
 
   /*
    * All Api to be place here
@@ -55,14 +57,20 @@ function WelcomeScreen(props) {
    * All Functions To Be Placed Here
    */
   const onPressLogin = async () => {
-    // TODO: Auth on login here
-    console.log("Clicking");
-    // TODO: Push to
-    // navigation.navigate(routes.REGISTER);
-    userLoginApi.request("jess@gmail.com", "Supervisor", "Supervisor!23");
+    console.log("Logging in...");
+    //"Supervisor!23"
+    email && role && password && userLoginApi.request(email, role, password);
     console.log(userLoginApi.data);
     console.log(userLoginApi.error);
     console.log(userLoginApi.loading);
+  };
+
+  const handleEmail = (e) => {
+    setEmail(e);
+  };
+
+  const handlePassword = (e) => {
+    setPassword(e);
   };
 
   return (
@@ -83,7 +91,9 @@ function WelcomeScreen(props) {
           <Center flex={1}>
             <View style={styles.credentialsContainer}>
               <Input
+                onChangeText={handleEmail}
                 placeholder="jess@gmail.com"
+                autoCapitalize='none'
                 bg={colors.gray}
                 placeholderTextColor={colors.medium}
                 color={colors.black}
@@ -109,14 +119,14 @@ function WelcomeScreen(props) {
                 }
               />
               <Select
-                selectedValue={service}
+                selectedValue={role}
                 accessibilityLabel="Select Role"
                 placeholder="Supervisor"
                 placeholderTextColor={colors.black}
                 minWidth="full"
                 minHeight="3%"
                 color={colors.black}
-                onValueChange={(itemValue) => setService(itemValue)}
+                onValueChange={(itemValue) => setRole(itemValue)}
                 bg={colors.gray}
                 borderRadius="25"
                 height="50"
@@ -125,14 +135,16 @@ function WelcomeScreen(props) {
                   Platform.OS === "ios" ? typography.ios : typography.android
                 }
               >
-                <Select.Item label="Supervisor" value="supervisor" />
-                <Select.Item label="Guardian" value="guardian" />
-                <Select.Item label="Doctor" value="doctor" />
-                <Select.Item label="Caregiver" value="caregiver" />
-                <Select.Item label="Nurse" value="nurse" />
+                <Select.Item label="Supervisor" value="Supervisor" />
+                <Select.Item label="Guardian" value="Guardian" />
+                <Select.Item label="Doctor" value="Doctor" />
+                <Select.Item label="Caregiver" value="Caregiver" />
+                <Select.Item label="Nurse" value="Nurse" />
               </Select>
               <Input
+                onChangeText={handlePassword}
                 placeholder="Password"
+                autoCapitalize='none'
                 bg={colors.gray}
                 placeholderTextColor={colors.medium}
                 color={colors.black}
