@@ -47,6 +47,7 @@ Note: File structure will continuously be updated
 6. https://github.com/moment/moment [A JavaScript date library for parsing, validating, manipulating, and formatting dates.]
 7. https://github.com/react-native-netinfo/react-native-netinfo [Netinfo used to check for internet connectivity]
 8. https://github.com/auth0/jwt-decode [For decoding jwt tokens - Auth]
+9. https://reactjs.org/docs/context.html [For exposing data to all components]
 
 ## Setup Resources
 1. https://github.com/jhen0409/react-native-debugger [React-Native Debugger]
