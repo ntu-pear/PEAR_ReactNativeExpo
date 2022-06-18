@@ -13,22 +13,20 @@ import AuthNavigator from "./app/navigation/AuthNavigator";
 import AppNavigator from "./app/navigation/AppNavigator";
 import AuthContext from "./app/auth/context";
 import authStorage from "./app/auth/authStorage";
-import jwt_decode from "jwt-decode";
 
 export default function App() {
   const [user, setUser] = useState();
 
   useEffect(() => {
-    restoreToken();
+    restoreUser();
   }, []);
 
   /*
-   * restoreToken is responsible for persisting user's auth token. e.g. when app reloads
+   * restoreUser is responsible for persisting user's auth token. e.g. when app reloads
    */
-  const restoreToken = async () => {
-    const token = await authStorage.getToken();
-    if (!token) return;
-    setUser(jwt_decode(token));
+  const restoreUser = async () => {
+    const user = await authStorage.getUser();
+    if (user) setUser(user);
   };
 
   return (
