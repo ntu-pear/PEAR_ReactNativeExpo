@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { ImageBackground, View, StyleSheet, Image } from "react-native";
+import { ImageBackground, View, StyleSheet, Image, Platform  } from "react-native";
 
 // Custom Import from https://reactnativeelements.com/docs/
 import { Select, Input } from "native-base";
 
 // Constant import
 import colors from "../config/colors";
+import typography from "../config/typography";
 
 // Import from components
 import AppText from "../components/AppText";
@@ -62,8 +63,6 @@ function WelcomeScreen(props) {
       <View style={styles.logoContainer}>
         <Image source={require("../assets/pear_v2.png")} style={styles.logo} />
         <AppText style={styles.tagLine}>PEAR</AppText>
-        {/* <AppText style={styles.tagLine}>Where We</AppText>
-        <AppText style={styles.tagLine}>Care</AppText> */}
       </View>
       <View style={styles.credentialsContainer}>
         <Input
@@ -76,9 +75,12 @@ function WelcomeScreen(props) {
             borderColor: `${colors.secondary}`,
           }}
           color={colors.black}
+          borderRadius="25"
+          height="50"
+          size="18"
+          fontFamily={Platform.OS === "ios" ? typography.ios : typography.android}
         />
         <Select
-          style={styles.selectionList}
           selectedValue={service}
           accessibilityLabel="Select Role"
           placeholder="Supervisor"
@@ -86,6 +88,10 @@ function WelcomeScreen(props) {
           minHeight="3%"
           onValueChange={(itemValue) => setService(itemValue)}
           bg={colors.secondary}
+          borderRadius="25"
+          height="50"
+          size="18"
+          fontFamily={Platform.OS === "ios" ? typography.ios : typography.android}
         >
           <Select.Item label="Supervisor" value="supervisor" />
           <Select.Item label="Guardian" value="guardian" />
@@ -103,6 +109,10 @@ function WelcomeScreen(props) {
             borderColor: `${colors.secondary}`,
           }}
           color={colors.black}
+          borderRadius="25"
+          height="50"
+          size="18"
+          fontFamily={Platform.OS === "ios" ? typography.ios : typography.android}
         />
       </View>
 
@@ -140,11 +150,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     paddingVertical: 800,
     fontSize: 80,
-  },
-  selectionList: {
-    borderColor: "red",
-    color: colors.black,
-  },
+  }
 });
 
 export default WelcomeScreen;
