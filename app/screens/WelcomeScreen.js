@@ -66,7 +66,17 @@ function WelcomeScreen(props) {
         <AppText style={styles.tagLine}>Care</AppText> */}
       </View>
       <View style={styles.credentialsContainer}>
-        <Input placeholder="jess@gmail.com" />
+        <Input
+          placeholder="jess@gmail.com"
+          bg={colors.secondary}
+          placeholderTextColor={colors.medium}
+          color={colors.black}
+          _focus={{
+            bg: `${colors.lighter}`,
+            borderColor: `${colors.secondary}`,
+          }}
+          color={colors.black}
+        />
         <Select
           style={styles.selectionList}
           selectedValue={service}
@@ -75,6 +85,7 @@ function WelcomeScreen(props) {
           minWidth="full"
           minHeight="3%"
           onValueChange={(itemValue) => setService(itemValue)}
+          bg={colors.secondary}
         >
           <Select.Item label="Supervisor" value="supervisor" />
           <Select.Item label="Guardian" value="guardian" />
@@ -82,7 +93,17 @@ function WelcomeScreen(props) {
           <Select.Item label="Caregiver" value="caregiver" />
           <Select.Item label="Nurse" value="nurse" />
         </Select>
-        <Input placeholder="Password" />
+        <Input
+          placeholder="Password"
+          bg={colors.secondary}
+          placeholderTextColor={colors.medium}
+          color={colors.black}
+          _focus={{
+            bg: `${colors.lighter}`,
+            borderColor: `${colors.secondary}`,
+          }}
+          color={colors.black}
+        />
       </View>
 
       <View style={styles.buttonsContainer}>
@@ -104,7 +125,6 @@ const styles = StyleSheet.create({
   },
   credentialsContainer: {
     width: "90%",
-    backgroundColor: colors.black,
   },
   logo: {
     width: 100,
