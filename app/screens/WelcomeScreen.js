@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   ImageBackground,
   View,
@@ -10,36 +10,41 @@ import {
 } from "react-native";
 
 // Custom Import from https://reactnativeelements.com/docs/
-import { Select, Input, Center, Icon } from "native-base";
-
+import { Select, Input, Center, Icon, Box } from "native-base";
 import { MaterialIcons } from "@expo/vector-icons";
+import jwt_decode from "jwt-decode";
+import AuthContext from "../auth/context";
+import authStorage from "../auth/authStorage";
 
 // Constant import
 import colors from "../config/colors";
 import typography from "../config/typography";
+import errors from "../config/errors";
 
 // Import from components
 import AppText from "../components/AppText";
 import AppButton from "../components/AppButton";
+import ErrorMessage from "../components/ErrorMessage";
 
 // Import Api
 import userApi from "../api/user";
 
-// Custom Hooks
-import useApi from "../hooks/useApi";
 
 function WelcomeScreen(props) {
   /*
    * All States To Be Placed Here
    */
-  // React useState hook to manage select list item
-  let [service, setService] = useState("");
+  const authContext = useContext(AuthContext);
+  let [role, setRole] = useState("");
   let [show, setShow] = useState(false);
+  let [email, setEmail] = useState("");
+  let [password, setPassword] = useState("");
+  let [loginFailed, setLoginFailed] = useState(false);
 
   /*
    * All Api to be place here
    */
-  const userLoginApi = useApi(userApi.loginUser);
+
 
   /*
    * Component Did Mount or useEffect() to be placed here
@@ -55,14 +60,25 @@ function WelcomeScreen(props) {
    * All Functions To Be Placed Here
    */
   const onPressLogin = async () => {
-    // TODO: Auth on login here
-    console.log("Clicking");
-    // TODO: Push to
-    // navigation.navigate(routes.REGISTER);
-    userLoginApi.request("jess@gmail.com", "Supervisor", "Supervisor!23");
-    console.log(userLoginApi.data);
-    console.log(userLoginApi.error);
-    console.log(userLoginApi.loading);
+    console.log("Logging in...");
+    //"Supervisor!23"
+    const result = await userApi.loginUser(email, role, password);
+    // userLoginApi.request(email, role, password);
+    // if returned array is empty or error
+    if (!result.ok) return setLoginFailed(true);
+    setLoginFailed(false);
+    const user = jwt_decode(result.data.accessToken)
+    authContext.setUser(user)
+    console.log(user);
+    authStorage.storeToken(result.data.accessToken);
+  };
+
+  const handleEmail = (e) => {
+    setEmail(e);
+  };
+
+  const handlePassword = (e) => {
+    setPassword(e);
   };
 
   return (
@@ -80,25 +96,22 @@ function WelcomeScreen(props) {
             />
             <AppText style={styles.tagLine}>PEAR</AppText>
           </View>
+
           <Center flex={1}>
             <View style={styles.credentialsContainer}>
               <Input
-                placeholder="jess@gmail.com"
+                autoCapitalize="none"
                 bg={colors.gray}
-                placeholderTextColor={colors.medium}
+                borderRadius="25"
                 color={colors.black}
                 _focus={{
                   bg: `${colors.lighter}`,
                   borderColor: `${colors.secondary}`,
                 }}
-                color={colors.black}
-                borderRadius="25"
-                height="50"
-                size="18"
                 fontFamily={
                   Platform.OS === "ios" ? typography.ios : typography.android
                 }
-                marginBottom="5"
+                height="50"
                 InputLeftElement={
                   <Icon
                     as={<MaterialIcons name="person" />}
@@ -107,48 +120,48 @@ function WelcomeScreen(props) {
                     color={colors.black}
                   />
                 }
+                onChangeText={handleEmail}
+                placeholder="jess@gmail.com"
+                placeholderTextColor={colors.medium}
+                marginBottom="5"
+                size="18"
               />
               <Select
-                selectedValue={service}
                 accessibilityLabel="Select Role"
-                placeholder="Supervisor"
-                placeholderTextColor={colors.black}
-                minWidth="full"
-                minHeight="3%"
-                color={colors.black}
-                onValueChange={(itemValue) => setService(itemValue)}
                 bg={colors.gray}
                 borderRadius="25"
-                height="50"
-                size="18"
+                color={colors.black}
                 fontFamily={
                   Platform.OS === "ios" ? typography.ios : typography.android
                 }
+                height="50"
+                minWidth="full"
+                minHeight="3%"
+                placeholder="Supervisor"
+                placeholderTextColor={colors.black}
+                onValueChange={(itemValue) => setRole(itemValue)}
+                selectedValue={role}
+                size="18"
               >
-                <Select.Item label="Supervisor" value="supervisor" />
-                <Select.Item label="Guardian" value="guardian" />
-                <Select.Item label="Doctor" value="doctor" />
-                <Select.Item label="Caregiver" value="caregiver" />
-                <Select.Item label="Nurse" value="nurse" />
+                <Select.Item label="Supervisor" value="Supervisor" />
+                <Select.Item label="Guardian" value="Guardian" />
+                <Select.Item label="Doctor" value="Doctor" />
+                <Select.Item label="Caregiver" value="Caregiver" />
+                <Select.Item label="Nurse" value="Nurse" />
               </Select>
               <Input
-                placeholder="Password"
+                autoCapitalize="none"
                 bg={colors.gray}
-                placeholderTextColor={colors.medium}
+                borderRadius="25"
                 color={colors.black}
+                fontFamily={
+                  Platform.OS === "ios" ? typography.ios : typography.android
+                }
                 _focus={{
                   bg: `${colors.lighter}`,
                   borderColor: `${colors.secondary}`,
                 }}
-                color={colors.black}
-                borderRadius="25"
                 height="50"
-                size="18"
-                fontFamily={
-                  Platform.OS === "ios" ? typography.ios : typography.android
-                }
-                marginTop="5"
-                type={show ? "text" : "password"}
                 InputRightElement={
                   <Icon
                     as={
@@ -156,14 +169,23 @@ function WelcomeScreen(props) {
                         name={show ? "visibility" : "visibility-off"}
                       />
                     }
-                    size={5}
-                    mr="5"
                     color={colors.black}
+                    mr="5"
                     onPress={() => setShow(!show)}
+                    size={5}
                   />
                 }
+                onChangeText={handlePassword}
+                placeholder="Password"
+                placeholderTextColor={colors.medium}
+                marginTop="5"
+                size="18"
+                type={show ? "text" : "password"}
               />
             </View>
+            <Box>
+              <ErrorMessage visible={loginFailed} message={errors.loginError} />
+            </Box>
             <View style={styles.buttonsContainer}>
               <AppButton title="Login" color="green" onPress={onPressLogin} />
             </View>
