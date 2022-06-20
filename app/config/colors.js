@@ -11,4 +11,8 @@ export default {
     red: "#FD4734",
     green: "#019192",
     light_gray: "#595959",
+    medium: "#6e6969", // place-holder text color
+    light: "#f8f4f4", 
+    light_var1: "#E8DCCC",
+    lighter: "#f2eee9"
 };
