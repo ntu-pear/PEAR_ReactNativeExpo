@@ -40,7 +40,7 @@ Branches should always have meaningful names which include the Trello item if an
 | Branch Name | Purpose |
 |-------------|---------|
 | `feature/Card-XXXX/meaningful-branch-name` | New features |
-| `bug/Card-XXXX/meaningful-branch-name` or `fix/sb-XXXX/meaningful-branch-name` | Bugs and fixes |
+| `bug/Card-XXXX/meaningful-branch-name` | Bugs and fixes |
 | `refactor/Card-XXXX/meaningful-branch-name` | Code refactoring |
 | `doc/Card-XXXX/meaningful-branch-name` | Documentation changes |
 | `hotfix/Card-xxxx/meaningful-branch-name` | If the branch is being used to create a PR where the base branch of the PR is a “release branch” |
