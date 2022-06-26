@@ -24,6 +24,8 @@ Note: File structure will continuously be updated
     │   └── screens    -- pages to be navigated to.
     │       
     ├── App.js         -- React Native Expo entry point
+    │       
+    ├── docs           -- Includes misc documentations.
     │
     ├── node_modules   -- Imported libraries from package.json
     │
@@ -38,7 +40,7 @@ Note: File structure will continuously be updated
 #### TODO: Set up documentation 
 
 ## PR Conventions
-#### TODO: Set up pr conventions
+Please refer to: [Our Contribution page](https://github.com/ntu-pear/PEAR_ReactNativeExpo/blob/main/docs/contribution.md)
 
 ## External Resources Used
 1. https://reactnativeelements.com/ similar to react bootstrap
@@ -57,4 +59,4 @@ Note: File structure will continuously be updated
 
 
 ## Proper Conventions
-#### TODO
+Please refer to: [Our Contribution page](https://github.com/ntu-pear/PEAR_ReactNativeExpo/blob/main/docs/contribution.md)
