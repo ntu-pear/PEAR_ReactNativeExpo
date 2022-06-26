@@ -14,6 +14,8 @@ Our project is currently managed in Trello (https://trello.com/b/i6t7NLzF/pear-f
 
 We use the GitHub flow with Pull Requests to contribute to our repository. Here are some PR tips that have worked great for us, and we try to follow as much as possible:
 
+* 1 Feature = 1 Branch.
+
 * [Not Implemented Yet] All PRs must pass all verification checks (lint, unit tests, etc...) and be code reviewed before merging to a maintained branch.
 
   * When a PR is ready to be reviewed, please tag it with the `Ready to Review` label.
