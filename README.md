@@ -110,3 +110,7 @@ Please refer to: [Our Contribution page](https://github.com/ntu-pear/PEAR_ReactN
 - If your function is too long, split them up. Remember [Single Responsibility](https://en.wikipedia.org/wiki/Single-responsibility_principle)
 - You are also very much encouraged to create `custom_hooks` to abstract certain logic. It helps!
 - Lastly, just enjoy the process of building this app with your friends!
+
+
+## Overall App Architecture
+#### TODO
