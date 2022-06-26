@@ -18,7 +18,7 @@ https://trello.com/b/i6t7NLzF/pear-fyp-sprint-board
 
 
 ####  Please complete the following checklist:
-[] I have read up on the naming convention for my PR from: [Our Contribution page](https://github.com/ntu-pear/PEAR_ReactNativeExpo/main/docs/contribution.md). (If you haven't please read it from README.md in root.)\
+[] I have read up on the naming convention for my PR from: [Our Contribution page](https://github.com/ntu-pear/PEAR_ReactNativeExpo/blob/main/docs/contribution.md). (If you haven't please read it from README.md in root.)\
 [] The feature/bug I have introduced will not disrupt the architecture of the platform.\
 [] I have run es-lint on all files to ensure the formatting is done right.\
 [] I have only committed the files I have changed in this PR.
