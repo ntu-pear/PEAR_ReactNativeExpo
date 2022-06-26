@@ -24,6 +24,8 @@ We use the GitHub flow with Pull Requests to contribute to our repository. Here 
 
 * There is no restriction to the number of PRs you create to merge changes into another PR. In fact, you are encouraged to do this, as it will keep code reviews small and merging more agile. Remember, there is a significant correlation between software quality and the size of a merge.
 
+* If possible, try to get your friends to review your code. It's always good to learn from mistakes or suggestions.
+
 * PR titles should have the format:
   * `[Card-nnn] Description` if they are associated with a Trello item in the MDK project.
   * `[BUG-nnn] Description` if they are associated with an Incident or bug.
