@@ -1,5 +1,6 @@
 import { create } from "apisauce";
 import cache from "../utility/cache";
+import authStorage from "../auth/authStorage";
 
 /*
  *   Purpose of this is create a layer of abstraction
@@ -23,4 +24,17 @@ apiClient.get = async (url, params, axiosConfig) => {
   const data = await cache.get(url);
   return data ? { ok: true, data } : response;
 };
+
+const setHeader = async () => {
+  const bearerToken = await authStorage.getToken();
+  bearerToken
+    ? apiClient.setHeaders({ 
+      Authorization: `Bearer ${bearerToken}`,
+  })
+    : null;
+};
+
+
+setHeader();
+
 export default apiClient;
