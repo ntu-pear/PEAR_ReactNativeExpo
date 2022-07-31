@@ -30,6 +30,7 @@ function PatientScreenCard(props) {
             <Image
               alt="patient_image"
               borderRadius="full"
+              // Note: This is a fall-back uri. Will only be used if source fails to render the image.
               fallbackSource={{
                 uri:
                   "https://res.cloudinary.com/dbpearfyp/image/upload/v1640487405/Patient/Alice_Lee_Sxxxx567D/ProfilePicture/zsw7dyprsvn0bjmatofg.jpg",
