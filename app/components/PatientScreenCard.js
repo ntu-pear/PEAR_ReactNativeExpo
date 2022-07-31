@@ -9,7 +9,7 @@ function PatientScreenCard(props) {
 
   const handleOnPress = () => {
     console.log("CLICKING");
-    console.log(props)
+    console.log(props);
     // TODO: Navigate to PatientProfile
   };
   return (
@@ -18,13 +18,14 @@ function PatientScreenCard(props) {
       underlayColor={colors.lighter_var2}
     >
       <Box
-      bg={colors.light_var1}
-      mt="5"
-      mb="5"
-      minW="90%"
-      overflow="hidden"
-      rounded="lg">
-        <VStack>
+        bg={colors.light_var1}
+        mt="5"
+        mb="5"
+        minW="90%"
+        overflow="hidden"
+        rounded="lg"
+      >
+        <VStack mb="2">
           <Center>
             <Image
               alt="patient_image"
@@ -34,12 +35,9 @@ function PatientScreenCard(props) {
                   "https://res.cloudinary.com/dbpearfyp/image/upload/v1640487405/Patient/Alice_Lee_Sxxxx567D/ProfilePicture/zsw7dyprsvn0bjmatofg.jpg",
               }}
               resizeMode={"contain"}
-              minW="30%"
-
-              size="xl"
+              size="2xl"
               source={{
-                uri:
-                  `${patientProfile.profilePicture}`,
+                uri: `${patientProfile.profilePicture}`,
               }}
             />
           </Center>
