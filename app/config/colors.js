@@ -14,5 +14,6 @@ export default {
     medium: "#6e6969", // place-holder text color
     light: "#f8f4f4", 
     light_var1: "#E8DCCC",
-    lighter: "#f2eee9"
+    lighter: "#f2eee9",
+    lighter_var2: "#f5f0e9",
 };
