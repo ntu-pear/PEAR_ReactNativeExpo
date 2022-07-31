@@ -5,10 +5,10 @@ import authStorage from "../auth/authStorage";
  * List all end points here
  */
 const endpoint = "/Patient";
-const patientAdd = endpoint + "add";
-const patientUpdate = endpoint + "update";
+const patientAdd = endpoint + "/add";
+const patientUpdate = endpoint + "/update";
 const privacyLevelUpdate = endpoint + "/UpdatePatient";
-const patientDelete = endpoint + "delete";
+const patientDelete = endpoint + "/delete";
 
 /*
  * List all functions here
