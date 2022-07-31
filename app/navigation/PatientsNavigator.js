@@ -12,15 +12,17 @@ const Stack = createNativeStackNavigator();
 
 // Refer to this for configuration: https://reactnavigation.org/docs/native-stack-navigator#options
 const PatientsNavigator = () => (
-  <Stack.Navigator
-  screenOptions={{
-    headerShown: false,
-  }}>
-    <Stack.Screen name={routes.PATIENTS_SCREEN} component={PatientsScreen} />
+  <Stack.Navigator>
+    <Stack.Screen name={routes.PATIENTS_SCREEN} component={PatientsScreen} 
+    options={{
+      headerShown: true,
+      title: "Patients"
+    }}/>
     <Stack.Screen name={routes.PATIENT_PROFILE} component={PatientProfile} 
     options={{
       headerShown: true,
-      headerBackTitleVisible: false
+      headerBackTitleVisible: false,
+      title: "Patient Profile"
     }}/>
   </Stack.Navigator>
 );

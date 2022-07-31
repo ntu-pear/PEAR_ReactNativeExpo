@@ -13,12 +13,28 @@ const Tab = createBottomTabNavigator();
 
 // Refer to this for configuration: https://reactnavigation.org/docs/bottom-tab-navigator
 const AppNavigator = () => (
-  <Tab.Navigator>
+  <Tab.Navigator
+    screenOptions={{
+      headerShown: false,
+    }}
+  >
     <Tab.Screen name={routes.DASHBOARD} component={DashboardNavigator} />
-    <Tab.Screen name={routes.NOTIFICATION} component={NotifcationsScreen} />
+    <Tab.Screen
+      name={routes.NOTIFICATION}
+      component={NotifcationsScreen}
+      options={{
+        headerShown: true,
+      }}
+    />
     <Tab.Screen name={routes.PATIENTS} component={PatientsNavigator} />
     <Tab.Screen name={routes.CONFIG} component={ConfigNavigator} />
-    <Tab.Screen name={routes.ACCOUNT} component={AccountScreen} />
+    <Tab.Screen
+      name={routes.ACCOUNT}
+      component={AccountScreen}
+      options={{
+        headerShown: true,
+      }}
+    />
   </Tab.Navigator>
 );
 
