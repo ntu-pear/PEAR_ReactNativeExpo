@@ -35,7 +35,7 @@ function PatientScreenCard(props) {
                 uri:
                   "https://res.cloudinary.com/dbpearfyp/image/upload/v1640487405/Patient/Alice_Lee_Sxxxx567D/ProfilePicture/zsw7dyprsvn0bjmatofg.jpg",
               }}
-              resizeMode={"contain"}
+              resizeMode={"cover"}
               size="2xl"
               source={{
                 uri: `${patientProfile.profilePicture}`,

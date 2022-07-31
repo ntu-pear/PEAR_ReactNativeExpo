@@ -56,6 +56,7 @@ function PatientsScreen() {
             color={colors.white}
             name="person-add-alt"
             size="lg"
+            placement="bottom-right"
           />
         }
         onPress={handleFabOnPress}
