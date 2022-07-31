@@ -40,6 +40,7 @@ const setHeader = async () => {
 // Reference: https://github.com/infinitered/apisauce/issues/206
 // Purpose: If token expired, performs a token refresh and replaces
 // existing token with the refreshed token
+// TODO: FIX RefreshToken Issue
 apiClient.addAsyncResponseTransform(async (response) => {
   console.log("TESTING FAILED NETWORK")
   console.log(response);
