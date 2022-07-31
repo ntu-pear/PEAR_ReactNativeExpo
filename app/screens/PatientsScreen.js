@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Center, Image, VStack, Box } from "native-base";
-import AppButton from "../components/AppButton";
 import patientApi from "../api/patient";
 import useCheckExpiredThenLogOut from "../hooks/useCheckExpiredThenLogOut";
 import PatientScreenCard from "../components/PatientScreenCard";
@@ -12,8 +11,14 @@ function PatientsScreen() {
   const checkExpiredLogOutHook = useCheckExpiredThenLogOut();
 
   useEffect(() => {
-    getListOfPatients();
+    // Reference https://stackoverflow.com/questions/21518381/proper-way-to-wait-for-one-function-to-finish-before-continuing
+    // Resolved the issue of `setListOfPatients` before successfully calling getPatient api.
+    const promiseFunction = async () => {
+      await getListOfPatients();
+    };
+    promiseFunction();
   }, []);
+
   const getListOfPatients = async () => {
     const response = await patientApi.getPatient(null, true, true);
     if (!response.ok) {
@@ -23,8 +28,6 @@ function PatientsScreen() {
     }
     // Save the PatientData
     setListOfPatients(response.data);
-    console.log("HELLO TESTING")
-    console.log(listOfPatients);
   };
 
   return (

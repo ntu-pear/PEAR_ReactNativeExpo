@@ -1,6 +1,4 @@
 import { create } from "apisauce";
-import { useContext } from "react";
-import AuthContext from "../auth/context";
 import cache from "../utility/cache";
 import authStorage from "../auth/authStorage";
 
