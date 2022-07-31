@@ -15,6 +15,7 @@ export default Object.freeze({
   NOTIFICATION: "Notification",
   PATIENTS: "Patient",
   PATIENTS_SCREEN: "PatientScreen",
+  PATIENT_PROFILE: "PatientProfile",
   REGISTER: "Register",
   WELCOME: "Welcome",
 });

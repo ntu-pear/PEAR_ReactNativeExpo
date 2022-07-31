@@ -4,13 +4,17 @@ import { StyleSheet, View, TouchableHighlight } from "react-native";
 import { Center, Image, Text, VStack, Box } from "native-base";
 import colors from "../config/colors";
 
+// Import Constants from routes
+import routes from "../navigation/routes";
+
 function PatientScreenCard(props) {
-  const { patientProfile } = props;
+  const { patientProfile, navigation} = props;
 
   const handleOnPress = () => {
     console.log("CLICKING");
     console.log(props);
-    // TODO: Navigate to PatientProfile
+    // Navigate to PatientProfileScreen
+    navigation.push(routes.PATIENT_PROFILE, {...patientProfile});
   };
   return (
     <TouchableHighlight

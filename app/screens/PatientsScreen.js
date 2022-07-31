@@ -7,9 +7,10 @@ import useCheckExpiredThenLogOut from "../hooks/useCheckExpiredThenLogOut";
 import PatientScreenCard from "../components/PatientScreenCard";
 import colors from "../config/colors";
 
-function PatientsScreen() {
+function PatientsScreen(props) {
   const [listOfPatients, setListOfPatients] = useState();
   const checkExpiredLogOutHook = useCheckExpiredThenLogOut();
+  const { navigation } = props;
 
   useEffect(() => {
     // Reference https://stackoverflow.com/questions/21518381/proper-way-to-wait-for-one-function-to-finish-before-continuing
@@ -42,7 +43,7 @@ function PatientsScreen() {
         <VStack>
           {listOfPatients ? (
             listOfPatients.map((item, index) => (
-              <PatientScreenCard patientProfile={item} key={index} />
+              <PatientScreenCard patientProfile={item} key={index} navigation={navigation}/>
             ))
           ) : (
             <Text> Loading... </Text>
