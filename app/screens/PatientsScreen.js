@@ -31,6 +31,11 @@ function PatientsScreen() {
     return response;
   };
 
+  const handleFabOnPress = () => {
+    // TODO: Include `Add Patient Feature`
+    console.log("Placeholder for fab on click");
+  };
+
   return (
     <Center>
       <ScrollView>
@@ -44,12 +49,20 @@ function PatientsScreen() {
           )}
         </VStack>
       </ScrollView>
-        <Fab
-          renderInPortal={false}
-          shadow={2}
-          size="sm"
-          icon={<Icon color={colors.white} as={MaterialIcons} name="person-add-alt" size="lg" />}
-        />
+      <Fab
+        icon={
+          <Icon
+            as={MaterialIcons}
+            color={colors.white}
+            name="person-add-alt"
+            size="lg"
+          />
+        }
+        onPress={handleFabOnPress}
+        renderInPortal={false}
+        shadow={2}
+        size="sm"
+      />
     </Center>
   );
 }
