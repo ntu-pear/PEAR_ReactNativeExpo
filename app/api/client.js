@@ -47,9 +47,9 @@ apiClient.addAsyncResponseTransform(async (response) => {
     });
     const res = data.data;
     if (!res.success) {
-      // if refreshToken invalid, logout
-      // setUser(null);
+      // if refreshToken invalid, remove token
       await authStorage.removeToken();
+      // TODO: Implement logout() here.
     } else {
       const bearerToken = res.accessToken;
       apiClient.setHeaders({
