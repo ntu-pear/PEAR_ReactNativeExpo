@@ -2,6 +2,7 @@ import { create } from "apisauce";
 import cache from "../utility/cache";
 import authStorage from "../auth/authStorage";
 
+const baseURL = "https://coremvc.fyp2017.com/api";
 const endpoint = "/User";
 const userRefreshToken = endpoint + "/RefereshToken";
 /*
@@ -40,16 +41,25 @@ const setHeader = async () => {
 // Purpose: If token expired, performs a token refresh and replaces
 // existing token with the refreshed token
 apiClient.addAsyncResponseTransform(async (response) => {
+  console.log("TESTING FAILED NETWORK")
+  console.log(response);
   // const { setUser } = useContext(AuthContext);
-  if (response.data.code === 401 || response.data.code === 403) {
-    const accessToken = await authStorage.get("userAuthToken");
-    const refreshToken = await authStorage.get("userRefreshToken");
+  if (response.status === 401 || response.status === 403) {
+    console.log("HELLO IM HERE")
+    const accessToken = await authStorage.getToken("userAuthToken");
+    const refreshToken = await authStorage.getToken("userRefreshToken");
+    console.log("this is access token")
+    console.log(accessToken)
+    console.log("this is refreshtoken")
+    console.log(refreshToken)
     const data = await apiClient.post(`${userRefreshToken}`, {
       accessToken: accessToken, 
       refreshToken: refreshToken,
     });
-    const res = data.data;
-    if (!res.success) {
+    console.log("THIS IS DATA")
+    console.log(data)
+    const res = data;
+    if (!res.ok) {
       // if refreshToken invalid, remove token
       await authStorage.removeToken();
       // TODO: Implement logout() here.
