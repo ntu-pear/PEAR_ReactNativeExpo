@@ -16,6 +16,7 @@ export default Object.freeze({
   PATIENTS: "Patient",
   PATIENTS_SCREEN: "PatientScreen",
   PATIENT_PROFILE: "PatientProfile",
+  PATIENT_INFORMATION: "PatientInformation",
   REGISTER: "Register",
   WELCOME: "Welcome",
 });

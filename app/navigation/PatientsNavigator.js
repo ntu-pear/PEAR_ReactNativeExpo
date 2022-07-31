@@ -2,10 +2,10 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import PatientsScreen from "../screens/PatientsScreen";
 import PatientProfile from "../screens/PatientProfileScreen";
+import PatientInformationScreen from "../screens/PatientInformationScreen";
 
 // Import Constants from routes
 import routes from "./routes";
-import { Button } from "native-base";
 
 // Refer to this: https://reactnavigation.org/docs/hello-react-navigation
 const Stack = createNativeStackNavigator();
@@ -23,6 +23,12 @@ const PatientsNavigator = () => (
       headerShown: true,
       headerBackTitleVisible: false,
       title: "Patient Profile"
+    }}/>
+    <Stack.Screen name={routes.PATIENT_INFORMATION} component={PatientInformationScreen} 
+    options={{
+      headerShown: true,
+      headerBackTitleVisible: false,
+      title: "Patient Information"
     }}/>
   </Stack.Navigator>
 );
