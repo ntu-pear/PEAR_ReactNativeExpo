@@ -36,6 +36,9 @@ const setHeader = async () => {
     : null;
 };
 
+// Reference: https://github.com/infinitered/apisauce/issues/206
+// Purpose: If token expired, performs a token refresh and replaces
+// existing token with the refreshed token
 apiClient.addAsyncResponseTransform(async (response) => {
   // const { setUser } = useContext(AuthContext);
   if (response.data.code === 401 || response.data.code === 403) {
