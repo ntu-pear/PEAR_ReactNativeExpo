@@ -39,6 +39,7 @@ function PatientInformationCard(props) {
         <VStack mb="2">
           <Center>
             <Image
+              mt="2"
               alt="patient_image"
               borderRadius="full"
               // Note: This is a fall-back uri. Will only be used if source fails to render the image.
@@ -77,40 +78,46 @@ function PatientInformationCard(props) {
           justifyContent="flex-start"
           flexWrap={"wrap"}
         >
-          <Center w="100%" flex={0}>
-            <Text italic fontSize="xl">
-              NRIC {`${patientProfile.nric}`}
+          <Center>
+            <Text bold fontSize="xl">
+              NRIC
             </Text>
-            <Center w="100%" flex={0}>
-              <Text italic fontSize="lg"></Text>
-            </Center>
           </Center>
-          <Center></Center>
+
+          <Center>
+            <Text italic fontSize="lg">{`${patientProfile.nric}`}</Text>
+          </Center>
+
           <Center>
             <Text bold italic fontSize="xl">
               Age
             </Text>
           </Center>
+
           <Center>
             <Text italic fontSize="lg">
               {`${calcAge(patientProfile.dob)}`}
             </Text>
           </Center>
+
           <Center>
             <Text bold italic fontSize="xl">
               D.O.B
             </Text>
           </Center>
+
           <Center>
             <Text italic fontSize="lg">
               {`${extractFullYear(patientProfile.dob)}`}
             </Text>
           </Center>
+
           <Center>
             <Text bold italic fontSize="xl">
               Language
             </Text>
           </Center>
+
           <Center>
             <Text italic fontSize="lg">
               {`${patientProfile.preferredLanguage}`}
