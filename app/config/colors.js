@@ -16,4 +16,5 @@ export default {
     light_var1: "#E8DCCC",
     lighter: "#f2eee9",
     lighter_var2: "#f5f0e9",
+    white: "#f3f6f4",
 };

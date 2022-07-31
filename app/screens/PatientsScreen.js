@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { Center, Image, VStack, Box, ScrollView } from "native-base";
+import { StyleSheet, Text } from "react-native";
+import { Center, VStack, ScrollView, Fab, Icon } from "native-base";
+import { MaterialIcons } from "@expo/vector-icons";
 import patientApi from "../api/patient";
 import useCheckExpiredThenLogOut from "../hooks/useCheckExpiredThenLogOut";
 import PatientScreenCard from "../components/PatientScreenCard";
+import colors from "../config/colors";
 
 function PatientsScreen() {
   const [listOfPatients, setListOfPatients] = useState();
@@ -42,6 +44,12 @@ function PatientsScreen() {
           )}
         </VStack>
       </ScrollView>
+        <Fab
+          renderInPortal={false}
+          shadow={2}
+          size="sm"
+          icon={<Icon color={colors.white} as={MaterialIcons} name="person-add-alt" size="lg" />}
+        />
     </Center>
   );
 }
