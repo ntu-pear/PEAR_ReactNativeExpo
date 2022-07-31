@@ -4,8 +4,6 @@ import { Center, Image, VStack, Box, ScrollView } from "native-base";
 import patientApi from "../api/patient";
 import useCheckExpiredThenLogOut from "../hooks/useCheckExpiredThenLogOut";
 import PatientScreenCard from "../components/PatientScreenCard";
-import colors from "../config/colors";
-import PatientProfile from "../components/PatientProfile";
 
 function PatientsScreen() {
   const [listOfPatients, setListOfPatients] = useState();
