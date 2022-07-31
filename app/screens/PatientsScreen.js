@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Center, Image, VStack, Box } from "native-base";
 import AppButton from "../components/AppButton";
@@ -8,25 +8,35 @@ import PatientScreenCard from "../components/PatientScreenCard";
 import colors from "../config/colors";
 
 function PatientsScreen() {
+  const [listOfPatients, setListOfPatients] = useState({});
   const checkExpiredLogOutHook = useCheckExpiredThenLogOut();
 
+  useEffect(() => {
+    getListOfPatients();
+  }, []);
   const getListOfPatients = async () => {
     const response = await patientApi.getPatient(null, true, true);
     if (!response.ok) {
       // Check if token has expired, if yes, proceed to log out
       checkExpiredLogOutHook.handleLogOut(response);
+      return;
     }
+    // Save the PatientData
+    setListOfPatients(response.data);
+    console.log("HELLO TESTING")
+    console.log(listOfPatients);
   };
 
   return (
     <Center>
       <VStack>
-        <Box 
-        bg={colors.light_var1} 
-        minW="90%"
-        minH="20%"
-        overflow="hidden"
-        rounded="lg">
+        <Box
+          bg={colors.light_var1}
+          minW="90%"
+          minH="20%"
+          overflow="hidden"
+          rounded="lg"
+        >
           <PatientScreenCard />
         </Box>
       </VStack>

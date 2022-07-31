@@ -1,7 +1,11 @@
 import { create } from "apisauce";
+import { useContext } from "react";
+import AuthContext from "../auth/context";
 import cache from "../utility/cache";
 import authStorage from "../auth/authStorage";
 
+const endpoint = "/User";
+const userRefreshToken = endpoint + "/RefereshToken";
 /*
  *   Purpose of this is create a layer of abstraction
  */
@@ -26,14 +30,40 @@ apiClient.get = async (url, params, axiosConfig) => {
 };
 
 const setHeader = async () => {
-  const bearerToken = await authStorage.getToken();
+  const bearerToken = await authStorage.getToken("userAuthToken");
   bearerToken
-    ? apiClient.setHeaders({ 
-      Authorization: `Bearer ${bearerToken}`,
-  })
+    ? apiClient.setHeaders({
+        Authorization: `Bearer ${bearerToken}`,
+      })
     : null;
 };
 
+apiClient.addAsyncResponseTransform(async (response) => {
+  // const { setUser } = useContext(AuthContext);
+  if (response.data.code === 401 || response.data.code === 403) {
+    const accessToken = await authStorage.get("userAuthToken");
+    const refreshToken = await authStorage.get("userRefreshToken");
+    const data = await apiClient.post(`${userRefreshToken}`, {
+      accessToken: accessToken, 
+      refreshToken: refreshToken,
+    });
+    const res = data.data;
+    if (!res.success) {
+      // if refreshToken invalid, logout
+      // setUser(null);
+      await authStorage.removeToken();
+    } else {
+      const bearerToken = res.data.token;
+      apiClient.setHeaders({
+        Authorization: `Bearer ${bearerToken}`,
+      })
+      // retry
+      const data = await apiClient.any(response.config);
+      // replace data
+      response.data = data.data;
+    }
+  }
+});
 
 setHeader();
 

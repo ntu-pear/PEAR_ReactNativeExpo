@@ -24,11 +24,11 @@ function PatientScreenCard(props) {
                 "https://res.cloudinary.com/dbpearfyp/image/upload/v1640487405/Patient/Alice_Lee_Sxxxx567D/ProfilePicture/zsw7dyprsvn0bjmatofg.jpg",
             }}
             resizeMode={"contain"}
+            size="xl"
             source={{
               uri:
                 "https://res.cloudinary.com/dbpearfyp/image/upload/v1640487405/Patient/Alice_Lee_Sxxxx567D/ProfilePicture/zsw7dyprsvn0bjmatofg.jpg",
             }}
-            size="xl"
           />
         </Center>
         <Center>
