@@ -53,10 +53,13 @@ apiClient.addAsyncResponseTransform(async (response) => {
       // setUser(null);
       await authStorage.removeToken();
     } else {
-      const bearerToken = res.data.token;
+      const bearerToken = res.accessToken;
       apiClient.setHeaders({
         Authorization: `Bearer ${bearerToken}`,
       })
+      await authStorage.removeToken();
+      authStorage.storeToken("userAuthToken", res.accessToken);
+      authStorage.storeToken("userRefreshToken", res.refreshToken);
       // retry
       const data = await apiClient.any(response.config);
       // replace data
