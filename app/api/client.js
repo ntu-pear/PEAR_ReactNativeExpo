@@ -2,6 +2,8 @@ import { create } from "apisauce";
 import cache from "../utility/cache";
 import authStorage from "../auth/authStorage";
 import WelcomeScreen from "../screens/WelcomeScreen";
+import { useContext } from "react";
+import AuthContext from "../auth/authStorage";
 
 const baseURL = "https://coremvc.fyp2017.com/api";
 const endpoint = "/User";
@@ -40,6 +42,7 @@ const setHeader = async () => {
 
 setHeader();
 
+
 // Reference: https://github.com/infinitered/apisauce/issues/206
 // Purpose: If token expired, performs a token refresh and replaces
 // existing token with the refreshed token
@@ -48,7 +51,6 @@ apiClient.addAsyncResponseTransform(async (response) => {
   // const navigation = useNavigation();
   console.log("TESTING FAILED NETWORK")
   console.log(response);
-  // const { setUser } = useContext(AuthContext);
   if (response && response.status && (response.status === 401 || response.status === 403 )) {
     console.log("HELLO IM HERE")
     const accessToken = await authStorage.getToken("userAuthToken");
@@ -62,17 +64,19 @@ apiClient.addAsyncResponseTransform(async (response) => {
     console.log(body)
     const data = await apiClient.post(`${baseURL}${userRefreshToken}`, body);
     console.log("THIS IS DATA")
-    console.log(data)
-    const res = data;
-    if (!res.ok) {
+    console.log(data.data);
+    console.log(JSON.stringify(data));
+    var tmp = JSON.stringify(data).data
+    console.log(tmp);
+    // const res = JSON.stringify(tmp)
+    if (!data.ok || !data.data.success) {
       // if refreshToken invalid, remove token
       // await authStorage.removeToken();
       // console.log("HELLO IM HERE")
       // // TODO: Implement logout() here.
       // navigation.navigate(routes.WELCOME);
-      return (
-        <WelcomeScreen />
-      )
+      console.log("running welcome screen")
+      return Promise.reject(data.data.title);
     } else {
       const bearerToken = res.accessToken;
       apiClient.setHeaders({
@@ -88,6 +92,7 @@ apiClient.addAsyncResponseTransform(async (response) => {
       // // replace data
       // response.data = data.data;
     }
+    return Promise.resolve();
   }
 });
 
