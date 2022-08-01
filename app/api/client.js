@@ -1,13 +1,11 @@
 import { create } from "apisauce";
 import cache from "../utility/cache";
 import authStorage from "../auth/authStorage";
-import { useNavigation } from "@react-navigation/native";
-import routes from "../navigation/routes";
 import WelcomeScreen from "../screens/WelcomeScreen";
 
 const baseURL = "https://coremvc.fyp2017.com/api";
 const endpoint = "/User";
-const userRefreshToken = endpoint + "/RefereshToken";
+const userRefreshToken = endpoint + "/RefreshToken";
 /*
  *   Purpose of this is create a layer of abstraction
  */
@@ -40,6 +38,8 @@ const setHeader = async () => {
     : null;
 };
 
+setHeader();
+
 // Reference: https://github.com/infinitered/apisauce/issues/206
 // Purpose: If token expired, performs a token refresh and replaces
 // existing token with the refreshed token
@@ -49,7 +49,7 @@ apiClient.addAsyncResponseTransform(async (response) => {
   console.log("TESTING FAILED NETWORK")
   console.log(response);
   // const { setUser } = useContext(AuthContext);
-  if (response && response.status && (response.status === 401 || response.status === 403)) {
+  if (response && response.status && (response.status === 401 || response.status === 403 )) {
     console.log("HELLO IM HERE")
     const accessToken = await authStorage.getToken("userAuthToken");
     const refreshToken = await authStorage.getToken("userRefreshToken");
@@ -81,6 +81,8 @@ apiClient.addAsyncResponseTransform(async (response) => {
       await authStorage.removeToken();
       authStorage.storeToken("userAuthToken", res.accessToken);
       authStorage.storeToken("userRefreshToken", res.refreshToken);
+      console.log("IT DIDNT WORK")
+      console.log(data)
       // // retry
       // const data = await apiClient.any(response.config);
       // // replace data
@@ -88,7 +90,5 @@ apiClient.addAsyncResponseTransform(async (response) => {
     }
   }
 });
-
-setHeader();
 
 export default apiClient;
