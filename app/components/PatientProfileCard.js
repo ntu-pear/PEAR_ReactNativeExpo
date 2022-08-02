@@ -1,10 +1,18 @@
 import React from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Box, Icon, Text } from "native-base";
 import colors from "../config/colors";
 
-function PatientProfileCard() {
+function PatientProfileCard(props) {
+  const {
+    iconTop,
+    iconRight,
+    iconSize,
+    vectorIconComponent,
+    textMarginTop,
+    textMarginLeft,
+    text,
+  } = props;
   return (
     <TouchableOpacity>
       <Box
@@ -17,14 +25,21 @@ function PatientProfileCard() {
       >
         <Box alignItems="center">
           <Icon
-            as={<MaterialCommunityIcons name="allergy" />}
-            top="4"
-            right="2"
+            //Reference: Passing component to child
+            //https://stackoverflow.com/questions/39652686/pass-react-component-as-props
+            as={{ ...vectorIconComponent }}
+            top={iconTop}
+            right={iconRight}
             color={colors.black_var1}
-            size="100"
+            size={iconSize}
           />
-          <Text fontSize="lg" mt="5" ml="1" color={colors.black_var1}>
-            Allergy
+          <Text
+            fontSize="lg"
+            mt={textMarginTop}
+            ml={textMarginLeft}
+            color={colors.black_var1}
+          >
+            {text}
           </Text>
         </Box>
       </Box>

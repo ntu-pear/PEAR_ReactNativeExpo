@@ -43,7 +43,11 @@ function PatientsScreen(props) {
         <VStack>
           {listOfPatients ? (
             listOfPatients.map((item, index) => (
-              <PatientScreenCard patientProfile={item} key={index} navigation={navigation}/>
+              <PatientScreenCard
+                patientProfile={item}
+                key={index}
+                navigation={navigation}
+              />
             ))
           ) : (
             <Text> Loading... </Text>
