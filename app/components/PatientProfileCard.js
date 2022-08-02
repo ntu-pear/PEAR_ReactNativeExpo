@@ -12,7 +12,9 @@ function PatientProfileCard(props) {
     textMarginTop,
     textMarginLeft,
     text,
+    navigation
   } = props;
+
   return (
     <TouchableOpacity>
       <Box
@@ -20,6 +22,7 @@ function PatientProfileCard(props) {
         rounded="lg"
         minW="40"
         minH="40"
+        mt="5"
         borderWidth="1"
         borderColor={colors.primary_gray}
       >
