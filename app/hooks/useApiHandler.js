@@ -8,7 +8,6 @@ export default useApiHandler = () => {
   const setHeaderIfEmpty = async () => {
     // Checks if headers['Authorization'] is present
     if (!client.headers.Authorization) {
-        console.log("RUNNING IN HEADERS AUTHORIZATION")
       const bearerToken = await authStorage.getToken("userAuthToken");
       bearerToken
         ? client.setHeaders({

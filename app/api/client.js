@@ -1,9 +1,6 @@
 import { create } from "apisauce";
 import cache from "../utility/cache";
 import authStorage from "../auth/authStorage";
-import WelcomeScreen from "../screens/WelcomeScreen";
-import { useContext } from "react";
-import AuthContext from "../auth/authStorage";
 
 const baseURL = "https://coremvc.fyp2017.com/api";
 const endpoint = "/User";
@@ -76,23 +73,26 @@ apiClient.addAsyncResponseTransform(async (response) => {
       // // TODO: Implement logout() here.
       // navigation.navigate(routes.WELCOME);
       console.log("running welcome screen")
-      return Promise.reject(data.data.title);
+      if (data.data.title){
+        return Promise.reject(data.data.title);
+      }
+      return Promise.reject(data.data.error);
     } else {
-      const bearerToken = res.accessToken;
+      const bearerToken = data.data.accessToken;
       apiClient.setHeaders({
         Authorization: `Bearer ${bearerToken}`,
       })
       await authStorage.removeToken();
-      authStorage.storeToken("userAuthToken", res.accessToken);
-      authStorage.storeToken("userRefreshToken", res.refreshToken);
+      authStorage.storeToken("userAuthToken", data.data.accessToken);
+      authStorage.storeToken("userRefreshToken", data.data.refreshToken);
       console.log("IT DIDNT WORK")
       console.log(data)
-      // // retry
-      // const data = await apiClient.any(response.config);
-      // // replace data
-      // response.data = data.data;
+      // retry
+      const data = await apiClient.any(data.config);
+      // replace data
+      response.data = data.data;
     }
-    return Promise.resolve();
+    // return Promise.resolve();
   }
 });
 
