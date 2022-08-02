@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, TouchableHighlight } from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import { Box, VStack, Center, Image, Text, HStack } from "native-base";
 import colors from "../config/colors";
 import patient from "../api/patient";
@@ -22,9 +22,8 @@ function PatientInformationCard(props) {
   };
 
   return (
-    <TouchableHighlight
+    <TouchableOpacity
       onPress={handleOnPress}
-      underlayColor={colors.lighter_var2}
     >
       <Box
         mt="5"
@@ -126,7 +125,7 @@ function PatientInformationCard(props) {
           </Center>
         </HStack>
       </Box>
-    </TouchableHighlight>
+    </TouchableOpacity>
   );
 }
 

@@ -62,9 +62,7 @@ apiClient.addAsyncResponseTransform(async (response) => {
     const data = await apiClient.post(`${baseURL}${userRefreshToken}`, body);
     console.log("THIS IS DATA")
     console.log(data.data);
-    console.log(JSON.stringify(data));
-    var tmp = JSON.stringify(data).data
-    console.log(tmp);
+    console.log(data);
     // const res = JSON.stringify(tmp)
     if (!data.ok || !data.data.success) {
       // if refreshToken invalid, remove token
@@ -82,7 +80,7 @@ apiClient.addAsyncResponseTransform(async (response) => {
       apiClient.setHeaders({
         Authorization: `Bearer ${bearerToken}`,
       })
-      await authStorage.removeToken();
+      // await authStorage.removeToken();
       authStorage.storeToken("userAuthToken", data.data.accessToken);
       authStorage.storeToken("userRefreshToken", data.data.refreshToken);
       console.log("IT DIDNT WORK")
