@@ -38,7 +38,7 @@ function PatientsScreen(props) {
   };
 
   return (
-    <Center>
+    <Center backgroundColor={colors.white_var1}>
       <ScrollView>
         <VStack>
           {listOfPatients ? (
@@ -51,6 +51,7 @@ function PatientsScreen(props) {
         </VStack>
       </ScrollView>
       <Fab
+        backgroundColor={colors.pink}
         icon={
           <Icon
             as={MaterialIcons}

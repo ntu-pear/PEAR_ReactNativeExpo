@@ -27,7 +27,6 @@ function PatientInformationCard(props) {
       underlayColor={colors.lighter_var2}
     >
       <Box
-        bg={colors.light_var1}
         mt="5"
         mb="5"
         ml="1"
@@ -35,6 +34,8 @@ function PatientInformationCard(props) {
         minW="90%"
         overflow="visible"
         rounded="lg"
+        borderColor={colors.primary_gray}
+        borderWidth="1"
       >
         <VStack mb="2">
           <Center>

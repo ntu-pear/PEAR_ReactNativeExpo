@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View, TouchableHighlight } from "react-native";
+import { StyleSheet, View, TouchableHighlight, TouchableOpacity } from "react-native";
 
 import { Center, Image, Text, VStack, Box } from "native-base";
 import colors from "../config/colors";
@@ -17,17 +17,16 @@ function PatientScreenCard(props) {
     navigation.push(routes.PATIENT_PROFILE, {...patientProfile});
   };
   return (
-    <TouchableHighlight
+    <TouchableOpacity
       onPress={handleOnPress}
-      underlayColor={colors.lighter_var2}
     >
       <Box
-        bg={colors.light_var1}
         mt="5"
         mb="5"
         minW="90%"
         overflow="hidden"
         rounded="lg"
+        shadow="2"
       >
         <VStack mb="2">
           <Center>
@@ -59,7 +58,7 @@ function PatientScreenCard(props) {
           </Center>
         </VStack>
       </Box>
-    </TouchableHighlight>
+    </TouchableOpacity>
   );
 }
 

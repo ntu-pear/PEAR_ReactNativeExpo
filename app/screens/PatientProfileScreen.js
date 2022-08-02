@@ -1,37 +1,39 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { Center, VStack, ScrollView, HStack, Box } from "native-base";
-import AppButton from "../components/AppButton";
+import { StyleSheet } from "react-native";
+import { Center, VStack, ScrollView, Stack, Box, Divider } from "native-base";
 import PatientInformationCard from "../components/PatientInformationCard";
+import colors from "../config/colors"
 
 function PatientProfileScreen(props) {
   const { navigation, route } = props;
   const patientProfile = route.params;
-  const handleProfileButton = () => {
-    console.log("tesitn profile");
-    console.log(patientProfile);
-  };
+  //   const handleProfileButton = () => {
+  //     console.log("tesitn profile");
+  //     console.log(patientProfile);
+  //   };
 
   return (
-    // <View>
-    //     <Text>
-    //         This is patient Profile screen.
-
-    //     </Text>
-    //     <AppButton title="test" color="red" onPress={handleProfileButton}/>
-    // </View>
-    <Center>
+    <Center 
+    minH="100%"
+    backgroundColor={colors.white_var1}>
       <ScrollView>
         <VStack>
-          <PatientInformationCard patientProfile={patientProfile} navigation={navigation}/>
+          <PatientInformationCard
+            patientProfile={patientProfile}
+            navigation={navigation}
+          />
         </VStack>
-        <HStack>
-          <Box>
-            <Center>
-              <Text>Hello</Text>
-            </Center>
-          </Box>
-        </HStack>
+        <Divider />
+        <VStack space="3" mt="4" px="8">
+          <Stack direction="row" mb="2.5" mt="1.5" space={3}>
+            <Box alignItems="center" rounded="lg" minW="40" minH="40" backgroundColor={colors.lighter_var2} shadow="2">
+                <Box>
+                    Test
+                </Box>
+            </Box>
+          </Stack>
+        </VStack>
+        <Divider />
       </ScrollView>
     </Center>
   );
