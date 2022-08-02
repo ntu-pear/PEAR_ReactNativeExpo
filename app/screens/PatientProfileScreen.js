@@ -28,8 +28,18 @@ function PatientProfileScreen(props) {
           />
         </VStack>
         <Divider />
-        <VStack space="3" mt="2" mb="4" px="8">
-          <Stack direction="row" mb="2.5" mt="1.5" space={5} flexWrap={"wrap"}>
+        <VStack
+          space="1"
+          ml={{
+            base: "10",
+            sm: "15",
+            md: "15",
+            lg: "15",
+          }}
+          mt="2"
+          mb="4"
+        >
+          <Stack direction="row" mb="2.5" mt="1.5" space={3} flexWrap={"wrap"}>
             <PatientProfileCard
               iconTop={"4"}
               iconRight={"2"}
