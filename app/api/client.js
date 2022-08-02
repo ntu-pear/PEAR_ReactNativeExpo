@@ -89,6 +89,8 @@ apiClient.addAsyncResponseTransform(async (response) => {
       authStorage.storeToken("userRefreshToken", data.data.refreshToken);
       console.log("IT DIDNT WORK")
       console.log(data)
+      console.log("Config data is here")
+      console.log(data.config);
       // retry
       // const data = await apiClient.any(data.config);
       // console.log("THIS IS THRE AWAIT DATA")

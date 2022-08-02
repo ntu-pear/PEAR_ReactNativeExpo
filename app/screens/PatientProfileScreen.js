@@ -30,6 +30,16 @@ function PatientProfileScreen(props) {
         <Divider />
         <VStack
           space="1"
+          /* Reponsive design: https://docs.nativebase.io/responsive
+          Note: These are the breakpoints
+          breakpoints = {
+            base: 0,
+            sm: 480,
+            md: 768,
+            lg: 992,
+            xl: 1280,
+            };
+          */
           ml={{
             base: "9",
             sm: "15",
