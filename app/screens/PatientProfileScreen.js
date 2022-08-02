@@ -4,6 +4,7 @@ import { Center, VStack, ScrollView, Stack, Divider } from "native-base";
 import PatientInformationCard from "../components/PatientInformationCard";
 import colors from "../config/colors";
 import PatientProfileCard from "../components/PatientProfileCard";
+import routes from "../navigation/routes";
 import {
   MaterialCommunityIcons,
   MaterialIcons,
@@ -59,6 +60,8 @@ function PatientProfileScreen(props) {
               textMarginLeft={"1"}
               text="Allergy"
               navigation={navigation}
+              routes={routes.PATIENT_ALLERGY}
+              patientProfile={patientProfile}
             />
             <PatientProfileCard
               iconTop={"4"}
@@ -69,6 +72,8 @@ function PatientProfileScreen(props) {
               textMarginLeft={"1"}
               text="Vital"
               navigation={navigation}
+              routes={routes.PATIENT_VITAL}
+              patientProfile={patientProfile}
             />
             <PatientProfileCard
               iconTop={"4"}
@@ -79,6 +84,8 @@ function PatientProfileScreen(props) {
               textMarginLeft={"1"}
               text="Patient Preference"
               navigation={navigation}
+              routes={routes.PATIENT_PREFERENCE}
+              patientProfile={patientProfile}
             />
             <PatientProfileCard
               iconTop={"4"}
@@ -89,6 +96,8 @@ function PatientProfileScreen(props) {
               textMarginLeft={"1"}
               text="Activity Preference"
               navigation={navigation}
+              routes={routes.PATIENT_ACTIVITY_PREFERENCE}
+              patientProfile={patientProfile}
             />
             <PatientProfileCard
               iconTop={"4"}
@@ -99,6 +108,8 @@ function PatientProfileScreen(props) {
               textMarginLeft={"1"}
               text="Routine"
               navigation={navigation}
+              routes={routes.PATIENT_ROUTINE}
+              patientProfile={patientProfile}
             />
             <PatientProfileCard
               iconTop={"4"}
@@ -109,6 +120,8 @@ function PatientProfileScreen(props) {
               textMarginLeft={"1"}
               text="Photo Album"
               navigation={navigation}
+              routes={routes.PATIENT_PHOTO_ALBUM}
+              patientProfile={patientProfile}
             />
             <PatientProfileCard
               iconTop={"4"}
@@ -119,6 +132,8 @@ function PatientProfileScreen(props) {
               textMarginLeft={"1"}
               text="Prescription"
               navigation={navigation}
+              routes={routes.PATIENT_PRESCRIPTION}
+              patientProfile={patientProfile}
             />
             <PatientProfileCard
               iconTop={"4"}
@@ -131,6 +146,8 @@ function PatientProfileScreen(props) {
               textMarginLeft={"1"}
               text="Holiday"
               navigation={navigation}
+              routes={routes.PATIENT_HOLIDAY}
+              patientProfile={patientProfile}
             />
             <PatientProfileCard
               iconTop={"4"}
@@ -143,6 +160,8 @@ function PatientProfileScreen(props) {
               textMarginLeft={"1"}
               text="Problem Log"
               navigation={navigation}
+              routes={routes.PATIENT_PROBLEM_LOG}
+              patientProfile={patientProfile}
             />
           </Stack>
         </VStack>

@@ -2,12 +2,13 @@ import React from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 import { Box, VStack, Center, Image, Text, HStack } from "native-base";
 import colors from "../config/colors";
-import patient from "../api/patient";
+import routes from "../navigation/routes";
 
 function PatientInformationCard(props) {
   const { patientProfile, navigation } = props;
   const handleOnPress = () => {
     console.log("Placeholder for touchablehighlight on press");
+    navigation.push(routes.PATIENT_INFORMATION, {...patientProfile});
   };
 
   const calcAge = (dob) => {

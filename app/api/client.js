@@ -84,7 +84,8 @@ apiClient.addAsyncResponseTransform(async (response) => {
       apiClient.setHeaders({
         Authorization: `Bearer ${bearerToken}`,
       })
-      // await authStorage.removeToken();
+      // remove existing token
+      await authStorage.removeToken();
       authStorage.storeToken("userAuthToken", data.data.accessToken);
       authStorage.storeToken("userRefreshToken", data.data.refreshToken);
       console.log("IT DIDNT WORK")

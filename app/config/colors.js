@@ -6,7 +6,6 @@ export default {
     secondary: "#F3ECE4",  // off-white
     black: "#373234",
     gray: "#ABABAB",
-    black_var1: "#484848",
     black_var2: "#3C4043",
     red: "#FD4734",
     green: "#019192",
@@ -19,5 +18,6 @@ export default {
     white: "#f3f6f4",
     white_var1: "#FFFFFF",
     pink: "#FF585D",
+    black_var1: "#484848",
     primary_gray: "#D4D4D4"
 };
