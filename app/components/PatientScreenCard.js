@@ -26,7 +26,6 @@ function PatientScreenCard(props) {
         minW="90%"
         overflow="hidden"
         rounded="lg"
-        shadow="2"
       >
         <VStack mb="2">
           <Center>

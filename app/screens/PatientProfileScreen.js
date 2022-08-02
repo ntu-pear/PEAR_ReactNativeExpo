@@ -31,7 +31,7 @@ function PatientProfileScreen(props) {
         <VStack
           space="1"
           ml={{
-            base: "10",
+            base: "9",
             sm: "15",
             md: "15",
             lg: "15",

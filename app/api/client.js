@@ -71,10 +71,14 @@ apiClient.addAsyncResponseTransform(async (response) => {
       // // TODO: Implement logout() here.
       // navigation.navigate(routes.WELCOME);
       console.log("running welcome screen")
+      
       if (data.data.title){
-        return Promise.reject(data.data.title);
+        // return Promise.reject(data.data.title);
+        console.log(data.data.title);
       }
-      return Promise.reject(data.data.error);
+      // return Promise.reject(data.data.error);
+      console.log(data.data.error)
+      return Promise.resolve();
     } else {
       const bearerToken = data.data.accessToken;
       apiClient.setHeaders({
@@ -86,11 +90,13 @@ apiClient.addAsyncResponseTransform(async (response) => {
       console.log("IT DIDNT WORK")
       console.log(data)
       // retry
-      const data = await apiClient.any(data.config);
-      // replace data
-      response.data = data.data;
+      // const data = await apiClient.any(data.config);
+      // console.log("THIS IS THRE AWAIT DATA")
+      // console.log(data);
+      // // replace data
+      // response.data = data.data;
     }
-    // return Promise.resolve();
+    return Promise.resolve();
   }
 });
 
