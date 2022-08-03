@@ -19,5 +19,6 @@ export default {
     white_var1: "#FFFFFF",
     pink: "#FF585D",
     black_var1: "#484848",
-    primary_gray: "#D4D4D4"
+    primary_gray: "#D4D4D4",
+    primary_overlay_color: "#00000080"
 };

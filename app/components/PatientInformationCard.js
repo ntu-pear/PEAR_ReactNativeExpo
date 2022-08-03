@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 import { Box, VStack, Center, Image, Text, HStack } from "native-base";
 import colors from "../config/colors";
@@ -6,9 +6,15 @@ import routes from "../navigation/routes";
 
 function PatientInformationCard(props) {
   const { patientProfile, navigation } = props;
+  const [displayPicUrl, setDisplayPicUrl] = useState(
+    `https://picsum.photos/400/400/?image=${Math.floor(Math.random() * 85)}`
+  );
   const handleOnPress = () => {
     console.log("Placeholder for touchablehighlight on press");
-    navigation.push(routes.PATIENT_INFORMATION, {...patientProfile});
+    navigation.push(routes.PATIENT_INFORMATION, {
+      displayPicUrl: `${displayPicUrl}`,
+      ...patientProfile,
+    });
   };
 
   const calcAge = (dob) => {
@@ -23,9 +29,7 @@ function PatientInformationCard(props) {
   };
 
   return (
-    <TouchableOpacity
-      onPress={handleOnPress}
-    >
+    <TouchableOpacity onPress={handleOnPress}>
       <Box
         mt="5"
         mb="5"
