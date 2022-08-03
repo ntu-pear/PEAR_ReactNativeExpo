@@ -96,6 +96,8 @@ apiClient.addAsyncResponseTransform(async (response) => {
         console.log(response);
         console.log("Config data is here");
         console.log(response.config);
+        // replace response.config.header's Authorization with the new Bearer token
+        response.config.headers ? response.config.headers.Authorization = `Bearer ${bearerToken}`: null;
         // retry;
         const res = await apiClient.any(response.config);
         console.log("THIS IS THRE AWAIT DATA");
