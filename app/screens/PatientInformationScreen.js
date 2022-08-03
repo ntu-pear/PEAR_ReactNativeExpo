@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { StyleSheet, View, TouchableOpacity } from "react-native";
 import {
   Center,
   VStack,
@@ -9,11 +9,12 @@ import {
   Box,
   AspectRatio,
   Image,
+  Text,
 } from "native-base";
 import colors from "../config/colors";
 
 function PatientInformationScreen(props) {
-  const { displayPicUrl } = props.route.params;
+  const { displayPicUrl, firstName, lastName } = props.route.params;
 
   const handleSomething = () => {
     console.log(props);
@@ -37,13 +38,31 @@ function PatientInformationScreen(props) {
               width="100%"
               height="100%"
             ></Center>
-            <Center
-              position="absolute"
-              _text={{
-                color: `${colors.white_var1}`,
-              }}
-            >
-              Your time
+            <Center position="absolute" px="5%" py="10%">
+              <VStack>
+                <Center
+                  alignItems="flext-start"
+                  _text={{
+                    color: `${colors.white_var1}`,
+                    fontFamily: "Helvetica",
+                    fontSize: "2xl",
+                    fontWeight: "500",
+                  }}
+                >
+                  You're caring for
+                </Center>
+                <Center
+                  alignItems="flext-start"
+                  _text={{
+                    color: `${colors.white_var1}`,
+                    fontFamily: "Helvetica",
+                    fontSize: "2xl",
+                    fontWeight: "500",
+                  }}
+                >
+                  {`${firstName} ${lastName}`}
+                </Center>
+              </VStack>
             </Center>
           </Box>
         </TouchableOpacity>
