@@ -228,7 +228,8 @@ function PersonalInformationCard(props) {
             isReadOnly={true}
             input="lg"
             ml="-2.5"
-            h="10"
+            minH="8%"
+            maxH="40%"
             variant="unstyled"
             value={address ? address : "Not available"}
             w="100%"
@@ -254,7 +255,8 @@ function PersonalInformationCard(props) {
             isReadOnly={true}
             input="lg"
             ml="-2.5"
-            h="10"
+            minH="8%"
+            maxH="40%"
             variant="unstyled"
             value={tempAddress ? tempAddress : "Not available"}
             w="100%"
@@ -264,7 +266,7 @@ function PersonalInformationCard(props) {
 
       <Center position="absolute" right="0" py="1.5">
         <Avatar
-          size="lg"
+          size="md"
           source={{
             uri: profilePicture,
           }}
