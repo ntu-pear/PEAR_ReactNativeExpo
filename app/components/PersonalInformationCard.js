@@ -1,15 +1,9 @@
 import React from "react";
-import { StyleSheet, View, TouchableOpacity } from "react-native";
+import { StyleSheet } from "react-native";
 import {
   Avatar,
   Center,
-  VStack,
-  ScrollView,
   Stack,
-  Divider,
-  Box,
-  AspectRatio,
-  Image,
   Text,
   Input,
   FormControl,
@@ -32,11 +26,6 @@ function PersonalInformationCard(props) {
     handphoneNo,
     tempAddress,
   } = patientInformation.route.params;
-  const handleThis = () => {
-    console.log("IM CLIKING");
-    console.log(patientInformation);
-    console.log(firstName);
-  };
 
   return (
     <Stack alignItems="flex-start">
