@@ -13,6 +13,9 @@ import colors from "../config/colors";
 import typography from "../config/typography";
 
 function PersonalSocialHistory() {
+  /*
+   *  *** All States Related To <Select> Component ***
+   */
   const [isEditMode, setIsEditMode] = useState(false);
   const [liveWithListId, setLiveWithListId] = useState(1);
   const [educationListId, setEducationListId] = useState(1);
@@ -38,6 +41,9 @@ function PersonalSocialHistory() {
   const [petDescription, setPetDescription] = useState("Bird");
   const [religionDescription, setReligionDescription] = useState("Atheist");
 
+  /*
+   *  *** All possible list of questionaires to map to ***
+   */
   const liveWithOptions = [
     {
       list_LiveWithID: 1,
