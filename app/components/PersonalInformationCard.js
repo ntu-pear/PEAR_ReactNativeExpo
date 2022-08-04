@@ -1,6 +1,7 @@
 import React from "react";
 import { StyleSheet, View, TouchableOpacity } from "react-native";
 import {
+  Avatar,
   Center,
   VStack,
   ScrollView,
@@ -45,7 +46,7 @@ function PersonalInformationCard(props) {
         fontSize="2xl"
         fontWeight="semibold"
       >
-        Your Patient information
+        Your Patient Information
       </Text>
       <FormControl>
         <HStack space={2}>
@@ -260,6 +261,18 @@ function PersonalInformationCard(props) {
           />
         </Stack>
       </FormControl>
+
+      <Center position="absolute" right="0" py="1.5">
+        <Avatar
+          size="lg"
+          source={{
+            uri: profilePicture,
+          }}
+        >
+          {/* Note this is a fall-back, in case image isn't rendered */}
+          {`${firstName.substring(0, 1)}${lastName.substring(0, 1)}`}
+        </Avatar>
+      </Center>
     </Stack>
   );
 }
