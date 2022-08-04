@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, TouchableOpacity } from "react-native";
+import { StyleSheet } from "react-native";
 import {
   Center,
   VStack,
@@ -9,13 +9,13 @@ import {
   Box,
   AspectRatio,
   Image,
-  Text,
 } from "native-base";
 import colors from "../config/colors";
 import PersonalInformationCard from "../components/PersonalInformationCard";
 import PersonalPreferenceCard from "../components/PersonalPreferenceCard";
 import PersonalDoctorCard from "../components/PersonalDoctorCard";
 import PersonalGuardianCard from "../components/PersonalGuardianCard";
+import PersonalSocialHistory from "../components/PersonalSocialHistory";
 
 function PatientInformationScreen(props) {
   const { displayPicUrl, firstName, lastName } = props.route.params;
@@ -79,6 +79,7 @@ function PatientInformationScreen(props) {
             <Divider />
             <PersonalGuardianCard />
             <Divider />
+            <PersonalSocialHistory />
           </Stack>
         </VStack>
       </ScrollView>
