@@ -13,6 +13,7 @@ import {
 } from "native-base";
 import colors from "../config/colors";
 import PersonalInformationCard from "../components/PersonalInformationCard";
+import PersonalPreferenceCard from "../components/PersonalPreferenceCard";
 
 function PatientInformationScreen(props) {
   const { displayPicUrl, firstName, lastName } = props.route.params;
@@ -25,7 +26,6 @@ function PatientInformationScreen(props) {
   return (
     <Center minH="100%" backgroundColor={colors.white_var1}>
       <ScrollView>
-        <TouchableOpacity onPress={handleSomething}>
           <Box alignItems="Center">
             <AspectRatio w="100%" ratio={16 / 9}>
               <Image
@@ -71,9 +71,9 @@ function PatientInformationScreen(props) {
               <Divider mt="2"/>
               <PersonalInformationCard patientInformation={props} />
               <Divider />
+              <PersonalPreferenceCard patientInformation={props} />
             </Stack>
           </VStack>
-        </TouchableOpacity>
       </ScrollView>
     </Center>
   );
