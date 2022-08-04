@@ -14,13 +14,36 @@ import typography from "../config/typography";
 
 function PersonalSocialHistory() {
   const [isEditMode, setIsEditMode] = useState(false);
-  let [service, setService] = useState("testhaha");
+  let [formLiveWith, setFormLiveWith] = useState("Alone");
+  let [formEducation, setFormEducation] = useState("Primary or lower");
+  let [formOccupation, setFormOccupation] = useState("Accountant");
+  let [formReligion, setFormReligion] = useState("Christian");
+  let [formPet, setFormPet] = useState("Bird");
+  let [formReligion, setFormReligion] = useState("Alone");
+  let [formDiet, setFormDiet] = useState("Yes");
+  let [formExercise, setFormExercise] = useState("Yes");
+  let [formSexuallyActive, setFormSexuallyActive] = useState("Yes");
+  let [formDrugUse, setFormDrugUse] = useState("Yes");
+  let [formFormCaffeine, setFormFormCaffeine] = useState("Yes");
+  let [formAlcohol, setFormAlcohol] = useState("Yes");
+  let [formTobacco, setFormTobacco] = useState("Yes");
+  let [formSecondHandSmoker, setFormSecondHandSmoker] = useState("Yes");
+
+  const liveWithOptions = [
+    "Alone",
+    "Children",
+    "Friend",
+    "Relative",
+    "Spouse",
+    "Family",
+    "Parents",
+  ];
 
   return (
     <Stack space={2}>
       <Text
         color={colors.black_var1}
-        fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
+        fontFamily={Platform.OS === "ios" ? "Helvetica" : typography.android}
         fontSize="2xl"
         fontWeight="semibold"
       >
@@ -28,7 +51,7 @@ function PersonalSocialHistory() {
       </Text>
       <Text
         color={colors.primary_overlay_color}
-        fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
+        fontFamily={Platform.OS === "ios" ? "Helvetica" : typography.android}
         fontSize="md"
         fontWeight="hairline"
       >
@@ -38,7 +61,9 @@ function PersonalSocialHistory() {
         <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
+              fontFamily: `${
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }`,
               fontSize: "lg",
               fontWeight: "thin",
             }}
@@ -47,19 +72,23 @@ function PersonalSocialHistory() {
           </FormControl.Label>
           {isEditMode ? (
             <Select
-              fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
               fontSize="lg"
               label="hello"
               minW="100%"
-              onValueChange={(itemValue) => setService(itemValue)}
-              placeholder={service}
-              selectedValue={service}
+              onValueChange={(itemValue) => setFormLiveWith(itemValue)}
+              placeholder={formLiveWith}
+              selectedValue={formLiveWith}
               variant="underlined"
               _selectedItem={{
                 endIcon: (
                   <CheckIcon
                     size={5}
-                    fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
+                    fontFamily={
+                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                    }
                     fontSize="lg"
                     color={colors.pink}
                   />
@@ -71,7 +100,9 @@ function PersonalSocialHistory() {
           ) : (
             <Input
               color={colors.black_var1}
-              fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
               fontSize="lg"
               isReadOnly={true}
               variant="unstyled"
@@ -83,7 +114,7 @@ function PersonalSocialHistory() {
       </FormControl>
       <Text
         color={colors.primary_overlay_color}
-        fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
+        fontFamily={Platform.OS === "ios" ? "Helvetica" : typography.android}
         fontSize="md"
         fontWeight="hairline"
         mt="5"
