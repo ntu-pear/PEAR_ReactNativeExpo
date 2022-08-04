@@ -16,7 +16,7 @@ function PersonalSocialHistory() {
   /*
    *  *** All States Related To <Select> Component ***
    */
-  const [isEditMode, setIsEditMode] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(true);
   const [liveWithListId, setLiveWithListId] = useState(1);
   const [educationListId, setEducationListId] = useState(1);
   const [occupationListId, setOccupationListId] = useState(1);
@@ -40,11 +40,10 @@ function PersonalSocialHistory() {
   );
   const [petDescription, setPetDescription] = useState("Bird");
   const [religionDescription, setReligionDescription] = useState("Atheist");
-
   /*
    *  *** All possible list of questionaires to map to ***
    */
-  const liveWithOptions = [
+  const [liveWithOptions, setliveWithOptions] = useState([
     {
       list_LiveWithID: 1,
       value: "Alone",
@@ -94,7 +93,12 @@ function PersonalSocialHistory() {
       createdDateTime: "2021-01-01T00:00:00",
       updatedDateTime: "2021-01-01T00:00:00",
     },
-  ];
+  ]);
+
+  const mapIndexToItem = (curIndex, obj) => {
+    var selectedItem = [...obj.slice(curIndex - 1, curIndex)];
+    return selectedItem[0];
+  };
 
   return (
     <Stack space={2}>
@@ -133,26 +137,37 @@ function PersonalSocialHistory() {
                 Platform.OS === "ios" ? "Helvetica" : typography.android
               }
               fontSize="lg"
-              label="hello"
               minW="100%"
-              onValueChange={(itemValue) => setLiveWithListId(itemValue)}
+              // Peforms setDescription and setId
+              onValueChange={(itemValue) => {
+                setLiveWithDescription(
+                  mapIndexToItem(itemValue, liveWithOptions).value
+                );
+                setLiveWithListId(itemValue);
+              }}
               placeholder={liveWithDescription}
               selectedValue={liveWithDescription}
-              variant="underlined"
               _selectedItem={{
                 endIcon: (
                   <CheckIcon
-                    size={5}
+                    size="5"
                     fontFamily={
                       Platform.OS === "ios" ? "Helvetica" : typography.android
                     }
                     fontSize="lg"
                     color={colors.pink}
                   />
-                ),
+                )
               }}
             >
-              <Select.Item label="test1" value="test1" />
+              {/* Map Issue Resolved Reference: https://github.com/GeekyAnts/NativeBase/issues/4543 */}
+              {liveWithOptions.map((item) => (
+                <Select.Item
+                  label={item.value}
+                  value={item.list_LiveWithID}
+                  key={item.list_LiveWithID}
+                />
+              ))}
             </Select>
           ) : (
             <Input
