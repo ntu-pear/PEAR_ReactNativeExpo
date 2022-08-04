@@ -72,6 +72,7 @@ function PatientInformationScreen(props) {
               <PersonalInformationCard patientInformation={props} />
               <Divider />
               <PersonalPreferenceCard patientInformation={props} />
+              <Divider />
             </Stack>
           </VStack>
       </ScrollView>
