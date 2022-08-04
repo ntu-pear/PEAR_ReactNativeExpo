@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, Platform } from "react-native";
 import {
   Stack,
   Text,
@@ -10,16 +10,17 @@ import {
   CheckIcon,
 } from "native-base";
 import colors from "../config/colors";
+import typography from "../config/typography";
 
 function PersonalSocialHistory() {
   const [isEditMode, setIsEditMode] = useState(false);
   let [service, setService] = useState("testhaha");
 
   return (
-    <Stack alignItems="flex-start">
+    <Stack space={2}>
       <Text
         color={colors.black_var1}
-        fontFamily="Helvetica"
+        fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
         fontSize="2xl"
         fontWeight="semibold"
       >
@@ -27,17 +28,17 @@ function PersonalSocialHistory() {
       </Text>
       <Text
         color={colors.primary_overlay_color}
-        fontFamily="Helvetica"
+        fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
         fontSize="md"
         fontWeight="hairline"
       >
         About
       </Text>
       <FormControl maxW="50%">
-        <HStack space={2}>
+        <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: "Helvetica",
+              fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
               fontSize: "lg",
               fontWeight: "thin",
             }}
@@ -46,7 +47,7 @@ function PersonalSocialHistory() {
           </FormControl.Label>
           {isEditMode ? (
             <Select
-              fontFamily="Helvetica"
+              fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
               fontSize="lg"
               label="hello"
               minW="100%"
@@ -58,7 +59,7 @@ function PersonalSocialHistory() {
                 endIcon: (
                   <CheckIcon
                     size={5}
-                    fontFamily="Helvetica"
+                    fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
                     fontSize="lg"
                     color={colors.pink}
                   />
@@ -70,7 +71,7 @@ function PersonalSocialHistory() {
           ) : (
             <Input
               color={colors.black_var1}
-              fontFamily="Helvetica"
+              fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
               fontSize="lg"
               isReadOnly={true}
               variant="unstyled"
@@ -82,7 +83,7 @@ function PersonalSocialHistory() {
       </FormControl>
       <Text
         color={colors.primary_overlay_color}
-        fontFamily="Helvetica"
+        fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
         fontSize="md"
         fontWeight="hairline"
         mt="5"

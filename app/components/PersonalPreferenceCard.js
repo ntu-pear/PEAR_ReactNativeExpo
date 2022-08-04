@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, Platform} from "react-native";
 import {
   Stack,
   Text,
@@ -8,26 +8,27 @@ import {
   HStack,
 } from "native-base";
 import colors from "../config/colors";
+import typography from "../config/typography";
 
 function PersonalPreferenceCard(props) {
     const { patientInformation } = props;
     const { preferredName, preferredLanguage } = patientInformation.route.params;
 
   return (
-    <Stack>
+    <Stack space={2}>
       <Text
         color={colors.black_var1}
-        fontFamily="Helvetica"
+        fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
         fontSize="2xl"
         fontWeight="semibold"
       >
         Preference
       </Text>
       <FormControl>
-        <HStack space={2}>
+        <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: "Helvetica",
+              fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
               fontSize: "lg",
               fontWeight: "thin",
             }}
@@ -37,7 +38,7 @@ function PersonalPreferenceCard(props) {
 
           <Input
             color={colors.black_var1}
-            fontFamily="Helvetica"
+            fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
             fontSize="lg"
             isReadOnly={true}
             variant="unstyled"
@@ -47,10 +48,10 @@ function PersonalPreferenceCard(props) {
         </HStack>
       </FormControl>
       <FormControl>
-        <HStack space={2}>
+        <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: "Helvetica",
+              fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
               fontSize: "lg",
               fontWeight: "thin",
             }}
@@ -60,7 +61,7 @@ function PersonalPreferenceCard(props) {
 
           <Input
             color={colors.black_var1}
-            fontFamily="Helvetica"
+            fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
             fontSize="lg"
             isReadOnly={true}
             variant="unstyled"

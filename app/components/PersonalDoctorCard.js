@@ -1,14 +1,15 @@
 import React from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, Platform } from "react-native";
 import { Stack, Text, FormControl, TextArea } from "native-base";
 import colors from "../config/colors";
+import typography from "../config/typography";
 
 function PersonalDoctorCard() {
   return (
-    <Stack>
+    <Stack space={2}>
       <Text
         color={colors.black_var1}
-        fontFamily="Helvetica"
+        fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
         fontSize="2xl"
         fontWeight="semibold"
       >
@@ -19,7 +20,7 @@ function PersonalDoctorCard() {
           <FormControl.Label
             width="100%"
             _text={{
-              fontFamily: "Helvetica",
+              fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
               fontSize: "lg",
               fontWeight: "thin",
             }}
@@ -28,13 +29,13 @@ function PersonalDoctorCard() {
           </FormControl.Label>
           <TextArea
             color={colors.black_var1}
-            fontFamily="Helvetica"
+            fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
             fontSize="lg"
             isReadOnly={true}
             input="lg"
             ml="-2.5"
-            minH="8%"
-            maxH="40%"
+            minH="30%"
+            maxH="50%"
             variant="unstyled"
             value={"test"}
             w="100%"

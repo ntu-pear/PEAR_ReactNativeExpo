@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, Platform} from "react-native";
 import {
   Center,
   VStack,
@@ -11,6 +11,7 @@ import {
   Image,
 } from "native-base";
 import colors from "../config/colors";
+import typography from "../config/typography";
 import PersonalInformationCard from "../components/PersonalInformationCard";
 import PersonalPreferenceCard from "../components/PersonalPreferenceCard";
 import PersonalDoctorCard from "../components/PersonalDoctorCard";
@@ -28,7 +29,7 @@ function PatientInformationScreen(props) {
   return (
     <Center minH="100%" backgroundColor={colors.white_var1}>
       <ScrollView>
-        <Box alignItems="Center">
+        <Box>
           <AspectRatio w="100%" ratio={16 / 9}>
             <Image
               source={{ uri: `${displayPicUrl}` }}
@@ -44,10 +45,9 @@ function PatientInformationScreen(props) {
           <Center position="absolute" px="5%" py="10%">
             <VStack>
               <Center
-                alignItems="flext-start"
                 _text={{
                   color: `${colors.white_var1}`,
-                  fontFamily: "Helvetica",
+                  fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
                   fontSize: "2xl",
                   fontWeight: "500",
                 }}
@@ -55,10 +55,9 @@ function PatientInformationScreen(props) {
                 You're caring for
               </Center>
               <Center
-                alignItems="flext-start"
                 _text={{
                   color: `${colors.white_var1}`,
-                  fontFamily: "Helvetica",
+                  fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
                   fontSize: "2xl",
                   fontWeight: "500",
                 }}
@@ -90,3 +89,6 @@ function PatientInformationScreen(props) {
 const styles = StyleSheet.create({});
 
 export default PatientInformationScreen;
+/*
+fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
+*/

@@ -1,24 +1,25 @@
 import React from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, Platform } from "react-native";
 import { Stack, Text, Input, FormControl, HStack } from "native-base";
 import colors from "../config/colors";
+import typography from "../config/typography";
 
 function PersonalGuardianCard() {
   return (
-    <Stack alignItems="flex-start">
+    <Stack>
       <Text
         color={colors.black_var1}
-        fontFamily="Helvetica"
+        fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
         fontSize="2xl"
         fontWeight="semibold"
       >
         Guardian(s)
       </Text>
       <FormControl>
-        <HStack space={2}>
+        <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: "Helvetica",
+              fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
               fontSize: "lg",
               fontWeight: "thin",
             }}
@@ -28,7 +29,7 @@ function PersonalGuardianCard() {
 
           <Input
             color={colors.black_var1}
-            fontFamily="Helvetica"
+            fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
             fontSize="lg"
             isReadOnly={true}
             variant="unstyled"
@@ -38,10 +39,10 @@ function PersonalGuardianCard() {
         </HStack>
       </FormControl>
       <FormControl>
-        <HStack space={2}>
+        <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: "Helvetica",
+              fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
               fontSize: "lg",
               fontWeight: "thin",
             }}
@@ -51,7 +52,7 @@ function PersonalGuardianCard() {
 
           <Input
             color={colors.black_var1}
-            fontFamily="Helvetica"
+            fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
             fontSize="lg"
             isReadOnly={true}
             variant="unstyled"
@@ -61,10 +62,10 @@ function PersonalGuardianCard() {
         </HStack>
       </FormControl>
       <FormControl>
-        <HStack space={2}>
+        <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: "Helvetica",
+              fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
               fontSize: "lg",
               fontWeight: "thin",
             }}
@@ -74,7 +75,7 @@ function PersonalGuardianCard() {
 
           <Input
             color={colors.black_var1}
-            fontFamily="Helvetica"
+            fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
             fontSize="lg"
             isReadOnly={true}
             variant="unstyled"
@@ -84,10 +85,10 @@ function PersonalGuardianCard() {
         </HStack>
       </FormControl>
       <FormControl>
-        <HStack space={2}>
+        <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: "Helvetica",
+              fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
               fontSize: "lg",
               fontWeight: "thin",
             }}
@@ -97,7 +98,7 @@ function PersonalGuardianCard() {
 
           <Input
             color={colors.black_var1}
-            fontFamily="Helvetica"
+            fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
             fontSize="lg"
             isReadOnly={true}
             variant="unstyled"
