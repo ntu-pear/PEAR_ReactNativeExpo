@@ -14,29 +14,80 @@ import typography from "../config/typography";
 
 function PersonalSocialHistory() {
   const [isEditMode, setIsEditMode] = useState(false);
-  let [formLiveWith, setFormLiveWith] = useState("Alone");
-  let [formEducation, setFormEducation] = useState("Primary or lower");
-  let [formOccupation, setFormOccupation] = useState("Accountant");
-  let [formReligion, setFormReligion] = useState("Christian");
-  let [formPet, setFormPet] = useState("Bird");
-  let [formReligion, setFormReligion] = useState("Alone");
-  let [formDiet, setFormDiet] = useState("Yes");
-  let [formExercise, setFormExercise] = useState("Yes");
-  let [formSexuallyActive, setFormSexuallyActive] = useState("Yes");
-  let [formDrugUse, setFormDrugUse] = useState("Yes");
-  let [formFormCaffeine, setFormFormCaffeine] = useState("Yes");
-  let [formAlcohol, setFormAlcohol] = useState("Yes");
-  let [formTobacco, setFormTobacco] = useState("Yes");
-  let [formSecondHandSmoker, setFormSecondHandSmoker] = useState("Yes");
+  const [liveWithListId, setLiveWithListId] = useState(1);
+  const [educationListId, setEducationListId] = useState(1);
+  const [occupationListId, setOccupationListId] = useState(1);
+  const [religionListId, setReligionListId] = useState(1);
+  const [petListId, setPetListId] = useState(1);
+  const [dietListId, setDietListId] = useState(1);
+  const [exercise, setExercise] = useState(1);
+  const [sexuallyActive, setSexuallyActive] = useState(1);
+  const [drugeUse, setDrugeUse] = useState(1);
+  const [caffeineUse, setCaffeineUse] = useState(1);
+  const [alocholUse, setAlocholUse] = useState(1);
+  const [tobaccoUse, settobaccoUse] = useState(1);
+  const [secondhandSmoker, setSecondhandSmoker] = useState(1);
+  const [dietDesciption, setDietDesciption] = useState("Diabetic");
+  const [educationDescription, setEducationDescription] = useState(
+    "Primary or lower"
+  );
+  const [liveWithDescription, setLiveWithDescription] = useState("Alone");
+  const [occupationDescription, setOccupationDescription] = useState(
+    "Accountant"
+  );
+  const [petDescription, setPetDescription] = useState("Bird");
+  const [religionDescription, setReligionDescription] = useState("Atheist");
 
   const liveWithOptions = [
-    "Alone",
-    "Children",
-    "Friend",
-    "Relative",
-    "Spouse",
-    "Family",
-    "Parents",
+    {
+      list_LiveWithID: 1,
+      value: "Alone",
+      isDeleted: false,
+      createdDateTime: "2021-01-01T00:00:00",
+      updatedDateTime: "2021-01-01T00:00:00",
+    },
+    {
+      list_LiveWithID: 2,
+      value: "Children",
+      isDeleted: false,
+      createdDateTime: "2021-01-01T00:00:00",
+      updatedDateTime: "2021-01-01T00:00:00",
+    },
+    {
+      list_LiveWithID: 3,
+      value: "Friend",
+      isDeleted: false,
+      createdDateTime: "2021-01-01T00:00:00",
+      updatedDateTime: "2021-01-01T00:00:00",
+    },
+    {
+      list_LiveWithID: 4,
+      value: "Relative",
+      isDeleted: false,
+      createdDateTime: "2021-01-01T00:00:00",
+      updatedDateTime: "2021-01-01T00:00:00",
+    },
+    {
+      list_LiveWithID: 5,
+      value: "Spouse",
+      isDeleted: false,
+      createdDateTime: "2021-01-01T00:00:00",
+      updatedDateTime: "2021-01-01T00:00:00",
+    },
+    {
+      list_LiveWithID: 6,
+      value: "Family",
+      isDeleted: false,
+      createdDateTime: "2021-01-01T00:00:00",
+      updatedDateTime: "2021-01-01T00:00:00",
+    },
+    {
+      list_LiveWithID: 7,
+      value: "Parents",
+      isDeleted: false,
+      createdDateTime: "2021-01-01T00:00:00",
+      updatedDateTime: "2021-01-01T00:00:00",
+    },
   ];
 
   return (
@@ -78,9 +129,9 @@ function PersonalSocialHistory() {
               fontSize="lg"
               label="hello"
               minW="100%"
-              onValueChange={(itemValue) => setFormLiveWith(itemValue)}
-              placeholder={formLiveWith}
-              selectedValue={formLiveWith}
+              onValueChange={(itemValue) => setLiveWithListId(itemValue)}
+              placeholder={liveWithDescription}
+              selectedValue={liveWithDescription}
               variant="underlined"
               _selectedItem={{
                 endIcon: (
@@ -106,7 +157,7 @@ function PersonalSocialHistory() {
               fontSize="lg"
               isReadOnly={true}
               variant="unstyled"
-              value={"test"}
+              value={liveWithDescription}
               w="100%"
             />
           )}
