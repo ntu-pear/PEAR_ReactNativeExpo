@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { StyleSheet, View, TouchableOpacity } from "react-native";
+import React from "react";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import {
   Center,
   VStack,
@@ -12,6 +12,7 @@ import {
   Text,
 } from "native-base";
 import colors from "../config/colors";
+import PersonalInformationCard from "../components/PersonalInformationCard";
 
 function PatientInformationScreen(props) {
   const { displayPicUrl, firstName, lastName } = props.route.params;
@@ -65,6 +66,12 @@ function PatientInformationScreen(props) {
               </VStack>
             </Center>
           </Box>
+          <VStack maxW="100%" mt="2.5">
+            <Stack ml="5" mr="5" space={3}>
+              <PersonalInformationCard patientInformation={props} />
+              <Divider />
+            </Stack>
+          </VStack>
         </TouchableOpacity>
       </ScrollView>
     </Center>
