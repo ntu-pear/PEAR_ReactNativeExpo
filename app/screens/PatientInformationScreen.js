@@ -15,6 +15,7 @@ import colors from "../config/colors";
 import PersonalInformationCard from "../components/PersonalInformationCard";
 import PersonalPreferenceCard from "../components/PersonalPreferenceCard";
 import PersonalDoctorCard from "../components/PersonalDoctorCard";
+import PersonalGuardianCard from "../components/PersonalGuardianCard";
 
 function PatientInformationScreen(props) {
   const { displayPicUrl, firstName, lastName } = props.route.params;
@@ -75,6 +76,8 @@ function PatientInformationScreen(props) {
             <PersonalPreferenceCard patientInformation={props} />
             <Divider />
             <PersonalDoctorCard />
+            <Divider />
+            <PersonalGuardianCard />
             <Divider />
           </Stack>
         </VStack>
