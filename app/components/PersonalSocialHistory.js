@@ -96,3 +96,22 @@ function PersonalSocialHistory() {
 
 const styles = StyleSheet.create({});
 export default PersonalSocialHistory;
+/*
+About Patient:
+- Live with 
+- Education
+- Occupation
+- Religion
+- Pet
+- Diet 
+
+LifeStyle:
+- Exercise
+- Sexually Active
+- Drug Use
+- Caffeine Use
+- Alcohol Use
+- Tobacco Use
+- Secondhand Smoker
+
+*/
