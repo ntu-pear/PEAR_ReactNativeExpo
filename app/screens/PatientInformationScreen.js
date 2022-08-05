@@ -9,7 +9,6 @@ import {
   Box,
   AspectRatio,
   Image,
-  useToast,
   Alert,
   CloseIcon,
   HStack,
@@ -24,7 +23,6 @@ import PersonalDoctorCard from "../components/PersonalDoctorCard";
 import PersonalGuardianCard from "../components/PersonalGuardianCard";
 import PersonalSocialHistory from "../components/PersonalSocialHistory";
 import ActivityIndicator from "../components/ActivityIndicator";
-import useCheckExpiredThenLogOut from "../hooks/useCheckExpiredThenLogOut";
 import doctorNoteApi from "../api/doctorNote";
 import guardianApi from "../api/guardian";
 import socialHistoryApi from "../api/socialHistory";
@@ -61,6 +59,8 @@ function PatientInformationScreen(props) {
         <ActivityIndicator visible={true} />
       ) : (
         <Center minH="100%" backgroundColor={colors.white_var1}>
+          {/* Note the immediate bunch of code will only be rendered
+          when one of the APIs has an error. Purpose: Error handling of API */}
           {(getDoctorNote.error ||
             getPatientGuardian.error ||
             getSocialHistory.error) && (
