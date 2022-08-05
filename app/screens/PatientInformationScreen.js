@@ -22,59 +22,23 @@ import ActivityIndicator from "../components/ActivityIndicator";
 import useCheckExpiredThenLogOut from "../hooks/useCheckExpiredThenLogOut";
 import doctorNoteApi from "../api/doctorNote";
 import guardianApi from "../api/guardian";
+import socialHistoryApi from "../api/socialHistory";
+import useApi from "../hooks/useApi";
 
 function PatientInformationScreen(props) {
   const { displayPicUrl, firstName, lastName, patientID } = props.route.params;
   const [isLoading, setIsLoading] = useState(false);
   const toast = useToast();
   const checkExpiredLogOutHook = useCheckExpiredThenLogOut();
-  const [doctorNote, setDoctorNote] = useState([]);
-  const [patientGuardian, setPatientGuardian] = useState([]);
+  const getDoctorNote = useApi(doctorNoteApi.getDoctorNote);
+  const getPatientGuardian = useApi(guardianApi.getPatientGuardian);
+  const getSocialHistory = useApi(socialHistoryApi.getSocialHistory);
 
   useEffect(() => {
-    const promiseFunction = async () => {
-      // TODO: Set Loading here
-      setIsLoading(true);
-      // TODO: Get Doctor's Notes
-      const doctorNotesResponse = await getDoctorNote();
-      setDoctorNote(doctorNotesResponse.data ? doctorNotesResponse.data : null);
-      // TODO: Get Guardian's Notes
-      const patientGuardianResponse = await getPatientGuardian();
-      setPatientGuardian(
-        patientGuardianResponse.data ? patientGuardianResponse.data : []
-      );
-      // TODO: GET Social History
-      // Unset Loading
-      setIsLoading(false);
-    };
-    promiseFunction();
-    // Run consoloditated promise functions
+    getDoctorNote.request((patientID));
+    getPatientGuardian.request((patientID));
+    getSocialHistory.request((patientID));
   }, []);
-
-  const getDoctorNote = async () => {
-    const response = await doctorNoteApi.getDoctorNote(patientID);
-    if (!response.ok) {
-      showToast(`${response.error}`, "top");
-      // Check if token has expired, if yes, proceed to log out
-      checkExpiredLogOutHook.handleLogOut(response);
-      setIsLoading(false);
-      return;
-    }
-    return response;
-  };
-
-  const getPatientGuardian = async () => {
-    const response = await guardianApi.getPatientGuardian(patientID);
-    if (!response.ok) {
-      showToast(`${response.error}`, "top");
-      // Check if token has expired, if yes, proceed to log out
-      checkExpiredLogOutHook.handleLogOut(response);
-
-      setIsLoading(false);
-      return;
-    }
-    return response;
-  };
 
   const showToast = (errorMsg, position) => {
     toast.show({
@@ -85,7 +49,7 @@ function PatientInformationScreen(props) {
 
   return (
     <>
-      {isLoading ? (
+      {getDoctorNote.loading || getPatientGuardian.loading || getSocialHistory.loading ? (
         <ActivityIndicator visible={true} />
       ) : (
         <Center minH="100%" backgroundColor={colors.white_var1}>
@@ -139,11 +103,13 @@ function PatientInformationScreen(props) {
                 <Divider />
                 <PersonalPreferenceCard patientInformation={props} />
                 <Divider />
-                <PersonalDoctorCard doctorNote={doctorNote} />
+                <PersonalDoctorCard doctorNote={getDoctorNote.data} />
                 <Divider />
-                <PersonalGuardianCard patientGuardian={patientGuardian}/>
+                <PersonalGuardianCard patientGuardian={getPatientGuardian.data} />
                 <Divider />
-                <PersonalSocialHistory />
+                <PersonalSocialHistory
+                  socialHistory={getSocialHistory.data}
+                />
               </Stack>
             </VStack>
           </ScrollView>

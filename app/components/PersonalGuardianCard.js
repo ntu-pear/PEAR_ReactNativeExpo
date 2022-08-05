@@ -35,7 +35,7 @@ function PersonalGuardianCard(props) {
             fontSize="lg"
             isReadOnly={true}
             variant="unstyled"
-            value={guardian.firstName ? guardian.firstName : "Not Available"}
+            value={guardian && guardian.firstName ? guardian.firstName : "Not Available"}
             w="100%"
           />
         </HStack>
@@ -58,7 +58,7 @@ function PersonalGuardianCard(props) {
             fontSize="lg"
             isReadOnly={true}
             variant="unstyled"
-            value={guardian.lastName ? guardian.lastName : "Not Available"}
+            value={guardian && guardian.lastName ? guardian.lastName : "Not Available"}
             w="100%"
           />
         </HStack>
@@ -81,7 +81,7 @@ function PersonalGuardianCard(props) {
             fontSize="lg"
             isReadOnly={true}
             variant="unstyled"
-            value={guardian.nric ? guardian.nric : "Not Available"}
+            value={guardian && guardian.nric ? guardian.nric : "Not Available"}
             w="100%"
           />
         </HStack>
@@ -104,7 +104,7 @@ function PersonalGuardianCard(props) {
             fontSize="lg"
             isReadOnly={true}
             variant="unstyled"
-            value={guardian.relationship ? guardian.relationship : "Not Available"}
+            value={guardian && guardian.relationship ? guardian.relationship : "Not Available"}
             w="100%"
           />
         </HStack>

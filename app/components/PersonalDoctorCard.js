@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import { StyleSheet, Platform } from "react-native";
 import { Stack, Text, FormControl, TextArea, Button } from "native-base";
 import colors from "../config/colors";
@@ -6,7 +6,8 @@ import typography from "../config/typography";
 
 function PersonalDoctorCard(props) {
 
-  const {date, doctorId, doctorName, doctorRemarks, patientId} = props.doctorNote[0];
+  // const {date, doctorId, doctorName, doctorRemarks, patientId} = props.doctorNote[0];
+  const { doctorNote} = props;
 
   return (
     <Stack space={2}>
@@ -40,7 +41,7 @@ function PersonalDoctorCard(props) {
             minH="30%"
             maxH="50%"
             variant="unstyled"
-            value={doctorRemarks ? doctorRemarks : "Not available"}
+            value={ doctorNote && doctorNote[0] && doctorNote[0].doctorRemarks ? doctorNote[0].doctorRemarks :"Not available" }
             w="100%"
           />
         </Stack>
