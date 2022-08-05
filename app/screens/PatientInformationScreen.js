@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, Platform } from "react-native";
 import {
   Center,
@@ -18,15 +18,41 @@ import PersonalDoctorCard from "../components/PersonalDoctorCard";
 import PersonalGuardianCard from "../components/PersonalGuardianCard";
 import PersonalSocialHistory from "../components/PersonalSocialHistory";
 import ActivityIndicator from "../components/ActivityIndicator";
+import doctorNoteApi from "../api/doctorNote";
+import useCheckExpiredThenLogOut from "../hooks/useCheckExpiredThenLogOut";
+
 
 function PatientInformationScreen(props) {
-  const { displayPicUrl, firstName, lastName } = props.route.params;
+  const { displayPicUrl, firstName, lastName, patientID } = props.route.params;
   const [isLoading, setIsLoading] = useState(false);
+  const checkExpiredLogOutHook = useCheckExpiredThenLogOut();
+  const [doctorNote, setDoctorNote] = useState([]);
 
-  const handleSomething = () => {
-    console.log(props);
-    console.log(displayPicUrl);
-  };
+  useEffect(() => {
+    const promiseFunction = async () => {
+      // TODO: Set Loading here
+      setIsLoading(true);
+      // TODO: Get Doctor's Notes
+      const doctorNotesResponse = await getDoctorNote();
+      setDoctorNote(doctorNotesResponse.data);
+      // TODO: Get Guardian's Notes
+      // TODO: GET Social History
+      // Unset Loading
+      setIsLoading(false);
+    };
+    promiseFunction();
+    // Run consoloditated promise functions
+  }, []);
+
+  const getDoctorNote = async () => {
+    const response = await doctorNoteApi.getDoctorNote(patientID);
+    if(!response.ok) {
+      // Check if token has expired, if yes, proceed to log out
+      checkExpiredLogOutHook.handleLogOut(response);
+      return;
+    }
+    return response;
+  }
 
   return (
     <>
@@ -84,7 +110,7 @@ function PatientInformationScreen(props) {
                 <Divider />
                 <PersonalPreferenceCard patientInformation={props} />
                 <Divider />
-                <PersonalDoctorCard />
+                <PersonalDoctorCard doctorNote={doctorNote}/>
                 <Divider />
                 <PersonalGuardianCard />
                 <Divider />

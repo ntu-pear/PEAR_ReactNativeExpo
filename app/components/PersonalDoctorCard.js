@@ -1,10 +1,12 @@
 import React from "react";
 import { StyleSheet, Platform } from "react-native";
-import { Stack, Text, FormControl, TextArea } from "native-base";
+import { Stack, Text, FormControl, TextArea, Button } from "native-base";
 import colors from "../config/colors";
 import typography from "../config/typography";
 
-function PersonalDoctorCard() {
+function PersonalDoctorCard(props) {
+  const {date, doctorId, doctorName, doctorRemarks, patientId} = props.doctorNote[0];
+
   return (
     <Stack space={2}>
       <Text
@@ -37,7 +39,7 @@ function PersonalDoctorCard() {
             minH="30%"
             maxH="50%"
             variant="unstyled"
-            value={"test"}
+            value={doctorRemarks ? doctorRemarks : "Not available"}
             w="100%"
           />
         </Stack>
