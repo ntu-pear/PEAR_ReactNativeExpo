@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Platform, View } from "react-native";
+import { StyleSheet, Platform } from "react-native";
 import {
   Center,
   VStack,
