@@ -36,7 +36,7 @@ function PatientInformationCard(props) {
         mb="5"
         ml="1"
         mr="1"
-        w="100%"
+        w="97%"
         overflow="visible"
         rounded="lg"
         borderColor={colors.primary_gray}
@@ -82,7 +82,7 @@ function PatientInformationCard(props) {
               NRIC
             </Text>
           </Box>
-          <Box>
+          <Box mr="2">
             <Text italic fontSize="xl">{`${patientProfile.nric}`}</Text>
           </Box>
 
@@ -98,7 +98,7 @@ function PatientInformationCard(props) {
           </Box>
         </HStack>
 
-        <HStack space={2} justifyContent="center" mt="1" mb="2">
+        <HStack space={2} justifyContent="center" mt="2" mb="2">
           <Box>
             <Text bold italic fontSize="xl">
               D.O.B
@@ -109,6 +109,8 @@ function PatientInformationCard(props) {
               {`${extractFullYear(patientProfile.dob)}`}
             </Text>
           </Box>
+        </HStack>
+        <HStack space={2} justifyContent="center" mt="1" mb="2">
           <Box>
             <Text bold italic fontSize="xl">
               Language
