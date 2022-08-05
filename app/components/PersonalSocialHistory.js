@@ -28,7 +28,7 @@ function PersonalSocialHistory() {
   const [drugeUse, setDrugeUse] = useState(1);
   const [caffeineUse, setCaffeineUse] = useState(1);
   const [alocholUse, setAlocholUse] = useState(1);
-  const [tobaccoUse, settobaccoUse] = useState(1);
+  const [tobaccoUse, setTobaccoUse] = useState(1);
   const [secondhandSmoker, setSecondhandSmoker] = useState(1);
   const [dietDesciption, setDietDesciption] = useState("Diabetic");
   const [educationDescription, setEducationDescription] = useState(
@@ -151,7 +151,7 @@ function PersonalSocialHistory() {
                 setLiveWithListId(itemValue);
               }}
               placeholder={liveWithDescription}
-              selectedValue={liveWithDescription}
+              selectedValue={liveWithListId}
               _selectedItem={{
                 endIcon: (
                   <CheckIcon
@@ -217,7 +217,7 @@ function PersonalSocialHistory() {
                 setEducationListId(itemValue);
               }}
               placeholder={educationDescription}
-              selectedValue={educationDescription}
+              selectedValue={educationListId}
               _selectedItem={{
                 endIcon: (
                   <CheckIcon
@@ -283,7 +283,7 @@ function PersonalSocialHistory() {
                 setOccupationListId(itemValue);
               }}
               placeholder={occupationDescription}
-              selectedValue={occupationDescription}
+              selectedValue={occupationListId}
               _selectedItem={{
                 endIcon: (
                   <CheckIcon
@@ -349,7 +349,7 @@ function PersonalSocialHistory() {
                 setReligionListId(itemValue);
               }}
               placeholder={religionDescription}
-              selectedValue={religionDescription}
+              selectedValue={religionListId}
               _selectedItem={{
                 endIcon: (
                   <CheckIcon
@@ -415,7 +415,7 @@ function PersonalSocialHistory() {
                 setPetListId(itemValue);
               }}
               placeholder={petDescription}
-              selectedValue={petDescription}
+              selectedValue={petListId}
               _selectedItem={{
                 endIcon: (
                   <CheckIcon
@@ -481,7 +481,7 @@ function PersonalSocialHistory() {
                 setDietListId(itemValue);
               }}
               placeholder={dietDesciption}
-              selectedValue={dietDesciption}
+              selectedValue={dietListId}
               _selectedItem={{
                 endIcon: (
                   <CheckIcon
@@ -528,6 +528,405 @@ function PersonalSocialHistory() {
       >
         Lifestyle
       </Text>
+      <FormControl maxW="50%">
+        <HStack space={2} alignItems="center">
+          <FormControl.Label
+            _text={{
+              fontFamily: `${
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }`,
+              fontSize: "lg",
+              fontWeight: "thin",
+            }}
+          >
+            Exercise
+          </FormControl.Label>
+          {isEditMode ? (
+            <Select
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
+              fontSize="lg"
+              minW="100%"
+              // Peforms setDescription and setId
+              onValueChange={(itemValue) => {
+               setExercise(itemValue);
+              }}
+              placeholder={exercise === 0 || exercise === "0"  ? "No" : "Yes"}
+              selectedValue={exercise}
+              _selectedItem={{
+                endIcon: (
+                  <CheckIcon
+                    size="5"
+                    fontFamily={
+                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                    }
+                    fontSize="lg"
+                    color={colors.pink}
+                  />
+                ),
+              }}
+            >
+              <Select.Item label="Yes" value="0"/>
+              <Select.Item label="No" value="1"/>
+            </Select>
+          ) : (
+            <Input
+              color={colors.black_var1}
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
+              fontSize="lg"
+              isReadOnly={true}
+              variant="unstyled"
+              value={exercise === 0 || exercise === "0"  ? "No" : "Yes"}
+              w="100%"
+            />
+          )}
+        </HStack>
+      </FormControl>
+      <FormControl maxW="50%">
+        <HStack space={2} alignItems="center">
+          <FormControl.Label
+            _text={{
+              fontFamily: `${
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }`,
+              fontSize: "lg",
+              fontWeight: "thin",
+            }}
+          >
+            Sexually Active
+          </FormControl.Label>
+          {isEditMode ? (
+            <Select
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
+              fontSize="lg"
+              minW="100%"
+              // Peforms setDescription and setId
+              onValueChange={(itemValue) => {
+               setSexuallyActive(itemValue);
+              }}
+              placeholder={sexuallyActive === 0 ||sexuallyActive === "0"  ? "No" : "Yes"}
+              selectedValue={sexuallyActive}
+              _selectedItem={{
+                endIcon: (
+                  <CheckIcon
+                    size="5"
+                    fontFamily={
+                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                    }
+                    fontSize="lg"
+                    color={colors.pink}
+                  />
+                ),
+              }}
+            >
+              <Select.Item label="Yes" value="0"/>
+              <Select.Item label="No" value="1"/>
+            </Select>
+          ) : (
+            <Input
+              color={colors.black_var1}
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
+              fontSize="lg"
+              isReadOnly={true}
+              variant="unstyled"
+              value={sexuallyActive === 0 ||sexuallyActive === "0"  ? "No" : "Yes"}
+              w="100%"
+            />
+          )}
+        </HStack>
+      </FormControl>
+      <FormControl maxW="50%">
+        <HStack space={2} alignItems="center">
+          <FormControl.Label
+            _text={{
+              fontFamily: `${
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }`,
+              fontSize: "lg",
+              fontWeight: "thin",
+            }}
+          >
+            Drug use
+          </FormControl.Label>
+          {isEditMode ? (
+            <Select
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
+              fontSize="lg"
+              minW="100%"
+              // Peforms setDescription and setId
+              onValueChange={(itemValue) => {
+               setDrugeUse(itemValue);
+              }}
+              placeholder={drugeUse === 0 ||drugeUse === "0"  ? "No" : "Yes"}
+              selectedValue={drugeUse}
+              _selectedItem={{
+                endIcon: (
+                  <CheckIcon
+                    size="5"
+                    fontFamily={
+                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                    }
+                    fontSize="lg"
+                    color={colors.pink}
+                  />
+                ),
+              }}
+            >
+              <Select.Item label="Yes" value="0"/>
+              <Select.Item label="No" value="1"/>
+            </Select>
+          ) : (
+            <Input
+              color={colors.black_var1}
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
+              fontSize="lg"
+              isReadOnly={true}
+              variant="unstyled"
+              value={drugeUse === 0 ||drugeUse === "0"  ? "No" : "Yes"}
+              w="100%"
+            />
+          )}
+        </HStack>
+      </FormControl>
+      <FormControl maxW="50%">
+        <HStack space={2} alignItems="center">
+          <FormControl.Label
+            _text={{
+              fontFamily: `${
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }`,
+              fontSize: "lg",
+              fontWeight: "thin",
+            }}
+          >
+            Caffeine use
+          </FormControl.Label>
+          {isEditMode ? (
+            <Select
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
+              fontSize="lg"
+              minW="100%"
+              // Peforms setDescription and setId
+              onValueChange={(itemValue) => {
+               setCaffeineUse(itemValue);
+              }}
+              placeholder={caffeineUse === 0 ||caffeineUse === "0"  ? "No" : "Yes"}
+              selectedValue={caffeineUse}
+              _selectedItem={{
+                endIcon: (
+                  <CheckIcon
+                    size="5"
+                    fontFamily={
+                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                    }
+                    fontSize="lg"
+                    color={colors.pink}
+                  />
+                ),
+              }}
+            >
+              <Select.Item label="Yes" value="0"/>
+              <Select.Item label="No" value="1"/>
+            </Select>
+          ) : (
+            <Input
+              color={colors.black_var1}
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
+              fontSize="lg"
+              isReadOnly={true}
+              variant="unstyled"
+              value={caffeineUse === 0 ||caffeineUse === "0"  ? "No" : "Yes"}
+              w="100%"
+            />
+          )}
+        </HStack>
+      </FormControl>
+      <FormControl maxW="50%">
+        <HStack space={2} alignItems="center">
+          <FormControl.Label
+            _text={{
+              fontFamily: `${
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }`,
+              fontSize: "lg",
+              fontWeight: "thin",
+            }}
+          >
+            Alcohol use
+          </FormControl.Label>
+          {isEditMode ? (
+            <Select
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
+              fontSize="lg"
+              minW="100%"
+              // Peforms setDescription and setId
+              onValueChange={(itemValue) => {
+               setAlocholUse(itemValue);
+              }}
+              placeholder={alocholUse === 0 ||alocholUse === "0"  ? "No" : "Yes"}
+              selectedValue={alocholUse}
+              _selectedItem={{
+                endIcon: (
+                  <CheckIcon
+                    size="5"
+                    fontFamily={
+                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                    }
+                    fontSize="lg"
+                    color={colors.pink}
+                  />
+                ),
+              }}
+            >
+              <Select.Item label="Yes" value="0"/>
+              <Select.Item label="No" value="1"/>
+            </Select>
+          ) : (
+            <Input
+              color={colors.black_var1}
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
+              fontSize="lg"
+              isReadOnly={true}
+              variant="unstyled"
+              value={alocholUse === 0 ||alocholUse === "0"  ? "No" : "Yes"}
+              w="100%"
+            />
+          )}
+        </HStack>
+      </FormControl>
+      <FormControl maxW="50%">
+        <HStack space={2} alignItems="center">
+          <FormControl.Label
+            _text={{
+              fontFamily: `${
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }`,
+              fontSize: "lg",
+              fontWeight: "thin",
+            }}
+          >
+            Tobacco use
+          </FormControl.Label>
+          {isEditMode ? (
+            <Select
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
+              fontSize="lg"
+              minW="100%"
+              // Peforms setDescription and setId
+              onValueChange={(itemValue) => {
+               setTobaccoUse(itemValue);
+              }}
+              placeholder={tobaccoUse === 0 ||tobaccoUse === "0"  ? "No" : "Yes"}
+              selectedValue={tobaccoUse}
+              _selectedItem={{
+                endIcon: (
+                  <CheckIcon
+                    size="5"
+                    fontFamily={
+                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                    }
+                    fontSize="lg"
+                    color={colors.pink}
+                  />
+                ),
+              }}
+            >
+              <Select.Item label="Yes" value="0"/>
+              <Select.Item label="No" value="1"/>
+            </Select>
+          ) : (
+            <Input
+              color={colors.black_var1}
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
+              fontSize="lg"
+              isReadOnly={true}
+              variant="unstyled"
+              value={tobaccoUse === 0 ||tobaccoUse === "0"  ? "No" : "Yes"}
+              w="100%"
+            />
+          )}
+        </HStack>
+      </FormControl>
+      <FormControl maxW="50%">
+        <HStack space={2} alignItems="center">
+          <FormControl.Label
+            _text={{
+              fontFamily: `${
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }`,
+              fontSize: "lg",
+              fontWeight: "thin",
+            }}
+          >
+            Secondhand smoker
+          </FormControl.Label>
+          {isEditMode ? (
+            <Select
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
+              fontSize="lg"
+              minW="100%"
+              // Peforms setDescription and setId
+              onValueChange={(itemValue) => {
+               setSecondhandSmoker(itemValue);
+              }}
+              placeholder={secondhandSmoker === 0 ||secondhandSmoker === "0"  ? "No" : "Yes"}
+              selectedValue={secondhandSmoker}
+              _selectedItem={{
+                endIcon: (
+                  <CheckIcon
+                    size="5"
+                    fontFamily={
+                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                    }
+                    fontSize="lg"
+                    color={colors.pink}
+                  />
+                ),
+              }}
+            >
+              <Select.Item label="Yes" value="0"/>
+              <Select.Item label="No" value="1"/>
+            </Select>
+          ) : (
+            <Input
+              color={colors.black_var1}
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
+              fontSize="lg"
+              isReadOnly={true}
+              variant="unstyled"
+              value={secondhandSmoker === 0 ||secondhandSmoker === "0"  ? "No" : "Yes"}
+              w="100%"
+            />
+          )}
+        </HStack>
+      </FormControl>
     </Stack>
   );
 }
