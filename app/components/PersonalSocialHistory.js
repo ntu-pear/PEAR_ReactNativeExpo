@@ -100,6 +100,11 @@ function PersonalSocialHistory() {
     },
   ]);
 
+  /*
+  * Common utility used to retrieve object of interest from list of Objects.
+  * e.g. liveWithOptions = [{},...,{}]; will return selectedItem = liveWithOptions.slice(index-1, index)
+  * Why index - 1? Refer to the mock data above, ID starts with `1`.
+  */
   const mapIndexToItem = (curIndex, obj) => {
     var selectedItem = [...obj.slice(curIndex - 1, curIndex)];
     return selectedItem[0];
