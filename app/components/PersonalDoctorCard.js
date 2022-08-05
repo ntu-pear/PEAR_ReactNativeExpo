@@ -5,6 +5,7 @@ import colors from "../config/colors";
 import typography from "../config/typography";
 
 function PersonalDoctorCard(props) {
+
   const {date, doctorId, doctorName, doctorRemarks, patientId} = props.doctorNote[0];
 
   return (

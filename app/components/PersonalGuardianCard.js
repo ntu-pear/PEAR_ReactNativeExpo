@@ -1,10 +1,12 @@
 import React from "react";
 import { StyleSheet, Platform } from "react-native";
-import { Stack, Text, Input, FormControl, HStack } from "native-base";
+import { Stack, Text, Input, FormControl, HStack, Button } from "native-base";
 import colors from "../config/colors";
 import typography from "../config/typography";
 
-function PersonalGuardianCard() {
+function PersonalGuardianCard(props) {
+  const { guardian, additionalGuardian } = props.patientGuardian; 
+
   return (
     <Stack>
       <Text
@@ -33,7 +35,7 @@ function PersonalGuardianCard() {
             fontSize="lg"
             isReadOnly={true}
             variant="unstyled"
-            value={"test"}
+            value={guardian.firstName ? guardian.firstName : "Not Available"}
             w="100%"
           />
         </HStack>
@@ -56,7 +58,7 @@ function PersonalGuardianCard() {
             fontSize="lg"
             isReadOnly={true}
             variant="unstyled"
-            value={"test"}
+            value={guardian.lastName ? guardian.lastName : "Not Available"}
             w="100%"
           />
         </HStack>
@@ -79,7 +81,7 @@ function PersonalGuardianCard() {
             fontSize="lg"
             isReadOnly={true}
             variant="unstyled"
-            value={"test"}
+            value={guardian.nric ? guardian.nric : "Not Available"}
             w="100%"
           />
         </HStack>
@@ -102,7 +104,7 @@ function PersonalGuardianCard() {
             fontSize="lg"
             isReadOnly={true}
             variant="unstyled"
-            value={"test"}
+            value={guardian.relationship ? guardian.relationship : "Not Available"}
             w="100%"
           />
         </HStack>
