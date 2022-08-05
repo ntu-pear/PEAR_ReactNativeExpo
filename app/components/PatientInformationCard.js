@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
-import { Box, VStack, Center, Image, Text, HStack } from "native-base";
+import { Box, VStack, Center, Image, Text, HStack, Icon } from "native-base";
 import colors from "../config/colors";
 import routes from "../navigation/routes";
+import { MaterialIcons } from "@expo/vector-icons";
 
 function PatientInformationCard(props) {
   const { patientProfile, navigation } = props;
@@ -41,7 +42,7 @@ function PatientInformationCard(props) {
         borderColor={colors.primary_gray}
         borderWidth="1"
       >
-        <VStack mb="2">
+        <VStack mb="2" mt="2">
           <Center>
             <Image
               mt="2"
@@ -58,24 +59,24 @@ function PatientInformationCard(props) {
                 uri: `${patientProfile.profilePicture}`,
               }}
             />
-            <Center>
+            <Center mt="1">
               <Text bold fontSize="2xl">
                 {`${patientProfile.firstName} ${patientProfile.lastName}`}
               </Text>
             </Center>
-            <Center>
+            <Center mt="1">
               <Text italic fontSize="2xl">
                 {`${patientProfile.preferredName}`}
               </Text>
             </Center>
-            <Center>
+            <Center mt="1">
               <Text italic fontSize="2xl">
                 {patientProfile.gender === "F" ? "Female" : "Male"}
               </Text>
             </Center>
           </Center>
         </VStack>
-        <HStack space={2} justifyContent="center">
+        <HStack space={2} justifyContent="center" mt="1">
           <Box>
             <Text bold fontSize="xl">
               NRIC
@@ -97,7 +98,7 @@ function PatientInformationCard(props) {
           </Box>
         </HStack>
 
-        <HStack space={2} justifyContent="center">
+        <HStack space={2} justifyContent="center" mt="1" mb="2">
           <Box>
             <Text bold italic fontSize="xl">
               D.O.B
@@ -119,6 +120,9 @@ function PatientInformationCard(props) {
             </Text>
           </Box>
         </HStack>
+        <Center position="absolute" right="0" marginY="31%">
+          <Icon as={MaterialIcons} color={colors.black} name="chevron-right" size="5xl"/>
+        </Center>
       </Box>
     </TouchableOpacity>
   );
