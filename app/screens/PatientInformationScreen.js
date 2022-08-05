@@ -67,7 +67,7 @@ function PatientInformationScreen(props) {
             </VStack>
           </Center>
         </Box>
-        <VStack maxW="100%" mt="2.5">
+        <VStack maxW="100%" mt="2.5" mb="8">
           <Stack ml="5" mr="5" space={5}>
             <Divider mt="2" />
             <PersonalInformationCard patientInformation={props} />
