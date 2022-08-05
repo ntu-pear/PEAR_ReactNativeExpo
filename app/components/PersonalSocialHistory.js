@@ -8,7 +8,6 @@ import {
   HStack,
   Select,
   CheckIcon,
-  Button
 } from "native-base";
 import colors from "../config/colors";
 import typography from "../config/typography";
