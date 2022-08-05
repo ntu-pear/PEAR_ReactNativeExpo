@@ -567,7 +567,7 @@ function PersonalSocialHistory( {socialHistory} ) {
               onValueChange={(itemValue) => {
                 setExercise(itemValue);
               }}
-              placeholder={socialHistory && praseInt(socialHistory.exercise) === 0 || praseInt(exercise) === 0 ? "No" : "Yes"}
+              placeholder={exercise === 0 || exercise === "0" ? "No" : "Yes"}
               selectedValue={exercise}
               _selectedItem={{
                 endIcon: (
