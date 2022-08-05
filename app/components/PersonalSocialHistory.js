@@ -16,6 +16,7 @@ function PersonalSocialHistory() {
   /*
    *  *** All States Related To <Select> Component ***
    */
+  // Note: isEditMode is used to toggle between `Read-only` and `Write&Read` mode.
   const [isEditMode, setIsEditMode] = useState(false);
   const [liveWithListId, setLiveWithListId] = useState(1);
   const [educationListId, setEducationListId] = useState(1);
