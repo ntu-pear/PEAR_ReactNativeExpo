@@ -34,8 +34,6 @@ import AppButton from "../components/AppButton";
 function PatientInformationScreen(props) {
   const { displayPicUrl, firstName, lastName, patientID } = props.route.params;
   const [isLoading, setIsLoading] = useState(false);
-  const toast = useToast();
-  const checkExpiredLogOutHook = useCheckExpiredThenLogOut();
   const getDoctorNote = useApi(doctorNoteApi.getDoctorNote);
   const getPatientGuardian = useApi(guardianApi.getPatientGuardian);
   const getSocialHistory = useApi(socialHistoryApi.getSocialHistory);
