@@ -1,5 +1,5 @@
-import React from "react";
-import { StyleSheet, Platform} from "react-native";
+import React, { useState } from "react";
+import { StyleSheet, Platform } from "react-native";
 import {
   Center,
   VStack,
@@ -17,9 +17,11 @@ import PersonalPreferenceCard from "../components/PersonalPreferenceCard";
 import PersonalDoctorCard from "../components/PersonalDoctorCard";
 import PersonalGuardianCard from "../components/PersonalGuardianCard";
 import PersonalSocialHistory from "../components/PersonalSocialHistory";
+import ActivityIndicator from "../components/ActivityIndicator";
 
 function PatientInformationScreen(props) {
   const { displayPicUrl, firstName, lastName } = props.route.params;
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSomething = () => {
     console.log(props);
@@ -27,62 +29,72 @@ function PatientInformationScreen(props) {
   };
 
   return (
-    <Center minH="100%" backgroundColor={colors.white_var1}>
-      <ScrollView>
-        <Box>
-          <AspectRatio w="100%" ratio={16 / 9}>
-            <Image
-              source={{ uri: `${displayPicUrl}` }}
-              alt="patientInformationImage"
-            />
-          </AspectRatio>
-          <Center
-            position="absolute"
-            bg={colors.primary_overlay_color}
-            width="100%"
-            height="100%"
-          ></Center>
-          <Center position="absolute" px="5%" py="10%">
-            <VStack>
+    <>
+      {isLoading ? (
+        <ActivityIndicator visible={true} />
+      ) : (
+        <Center minH="100%" backgroundColor={colors.white_var1}>
+          <ScrollView>
+            <Box>
+              <AspectRatio w="100%" ratio={16 / 9}>
+                <Image
+                  source={{ uri: `${displayPicUrl}` }}
+                  alt="patientInformationImage"
+                />
+              </AspectRatio>
               <Center
-                _text={{
-                  color: `${colors.white_var1}`,
-                  fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
-                  fontSize: "2xl",
-                  fontWeight: "500",
-                }}
-              >
-                You're caring for
+                position="absolute"
+                bg={colors.primary_overlay_color}
+                width="100%"
+                height="100%"
+              ></Center>
+              <Center position="absolute" px="5%" py="10%">
+                <VStack>
+                  <Center
+                    _text={{
+                      color: `${colors.white_var1}`,
+                      fontFamily: `${
+                        Platform.OS === "ios" ? "Helvetica" : typography.android
+                      }`,
+                      fontSize: "2xl",
+                      fontWeight: "500",
+                    }}
+                  >
+                    You're caring for
+                  </Center>
+                  <Center
+                    _text={{
+                      color: `${colors.white_var1}`,
+                      fontFamily: `${
+                        Platform.OS === "ios" ? "Helvetica" : typography.android
+                      }`,
+                      fontSize: "2xl",
+                      fontWeight: "500",
+                    }}
+                  >
+                    {`${firstName} ${lastName}`}
+                  </Center>
+                </VStack>
               </Center>
-              <Center
-                _text={{
-                  color: `${colors.white_var1}`,
-                  fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
-                  fontSize: "2xl",
-                  fontWeight: "500",
-                }}
-              >
-                {`${firstName} ${lastName}`}
-              </Center>
+            </Box>
+            <VStack maxW="100%" mt="2.5" mb="8">
+              <Stack ml="5" mr="5" space={5}>
+                <Divider mt="2" />
+                <PersonalInformationCard patientInformation={props} />
+                <Divider />
+                <PersonalPreferenceCard patientInformation={props} />
+                <Divider />
+                <PersonalDoctorCard />
+                <Divider />
+                <PersonalGuardianCard />
+                <Divider />
+                <PersonalSocialHistory />
+              </Stack>
             </VStack>
-          </Center>
-        </Box>
-        <VStack maxW="100%" mt="2.5" mb="8">
-          <Stack ml="5" mr="5" space={5}>
-            <Divider mt="2" />
-            <PersonalInformationCard patientInformation={props} />
-            <Divider />
-            <PersonalPreferenceCard patientInformation={props} />
-            <Divider />
-            <PersonalDoctorCard />
-            <Divider />
-            <PersonalGuardianCard />
-            <Divider />
-            <PersonalSocialHistory />
-          </Stack>
-        </VStack>
-      </ScrollView>
-    </Center>
+          </ScrollView>
+        </Center>
+      )}
+    </>
   );
 }
 
