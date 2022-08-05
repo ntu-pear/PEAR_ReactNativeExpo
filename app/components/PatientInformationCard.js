@@ -35,7 +35,7 @@ function PatientInformationCard(props) {
         mb="5"
         ml="1"
         mr="1"
-        minW="90%"
+        w="100%"
         overflow="visible"
         rounded="lg"
         borderColor={colors.primary_gray}
@@ -75,59 +75,49 @@ function PatientInformationCard(props) {
             </Center>
           </Center>
         </VStack>
-        <HStack
-          ml="5"
-          mt="3"
-          w="90%"
-          space={3}
-          justifyContent="flex-start"
-          flexWrap={"wrap"}
-        >
-          <Center>
+        <HStack space={2} justifyContent="center">
+          <Box>
             <Text bold fontSize="xl">
               NRIC
             </Text>
-          </Center>
+          </Box>
+          <Box>
+            <Text italic fontSize="xl">{`${patientProfile.nric}`}</Text>
+          </Box>
 
-          <Center>
-            <Text italic fontSize="lg">{`${patientProfile.nric}`}</Text>
-          </Center>
-
-          <Center>
+          <Box>
             <Text bold italic fontSize="xl">
               Age
             </Text>
-          </Center>
-
-          <Center>
-            <Text italic fontSize="lg">
+          </Box>
+          <Box>
+            <Text italic fontSize="xl">
               {`${calcAge(patientProfile.dob)}`}
             </Text>
-          </Center>
+          </Box>
+        </HStack>
 
-          <Center>
+        <HStack space={2} justifyContent="center">
+          <Box>
             <Text bold italic fontSize="xl">
               D.O.B
             </Text>
-          </Center>
-
-          <Center>
-            <Text italic fontSize="lg">
+          </Box>
+          <Box>
+            <Text italic fontSize="xl">
               {`${extractFullYear(patientProfile.dob)}`}
             </Text>
-          </Center>
-
-          <Center>
+          </Box>
+          <Box>
             <Text bold italic fontSize="xl">
               Language
             </Text>
-          </Center>
-
-          <Center>
-            <Text italic fontSize="lg">
+          </Box>
+          <Box>
+            <Text italic fontSize="xl">
               {`${patientProfile.preferredLanguage}`}
             </Text>
-          </Center>
+          </Box>
         </HStack>
       </Box>
     </TouchableOpacity>

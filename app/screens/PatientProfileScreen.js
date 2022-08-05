@@ -22,12 +22,12 @@ function PatientProfileScreen(props) {
   return (
     <Center minH="100%" backgroundColor={colors.white_var1}>
       <ScrollView>
-        <VStack>
+        <VStack ml="5" mr="5">
           <PatientInformationCard
             patientProfile={patientProfile}
             navigation={navigation}
           />
-        </VStack>
+        
         <Divider />
         <VStack
           space="1"
@@ -166,6 +166,7 @@ function PatientProfileScreen(props) {
           </Stack>
         </VStack>
         <Divider />
+        </VStack>
       </ScrollView>
     </Center>
   );
