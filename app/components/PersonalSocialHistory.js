@@ -409,9 +409,7 @@ function PersonalSocialHistory() {
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
-                setPetDescription(
-                  mapIndexToItem(itemValue, petOptions).value
-                );
+                setPetDescription(mapIndexToItem(itemValue, petOptions).value);
                 setPetListId(itemValue);
               }}
               placeholder={petDescription}
@@ -475,9 +473,7 @@ function PersonalSocialHistory() {
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
-                setDietDesciption(
-                  mapIndexToItem(itemValue, dietOptions).value
-                );
+                setDietDesciption(mapIndexToItem(itemValue, dietOptions).value);
                 setDietListId(itemValue);
               }}
               placeholder={dietDesciption}
@@ -550,9 +546,9 @@ function PersonalSocialHistory() {
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
-               setExercise(itemValue);
+                setExercise(itemValue);
               }}
-              placeholder={exercise === 0 || exercise === "0"  ? "No" : "Yes"}
+              placeholder={exercise === 0 || exercise === "0" ? "No" : "Yes"}
               selectedValue={exercise}
               _selectedItem={{
                 endIcon: (
@@ -567,8 +563,8 @@ function PersonalSocialHistory() {
                 ),
               }}
             >
-              <Select.Item label="Yes" value="0"/>
-              <Select.Item label="No" value="1"/>
+              <Select.Item label="Yes" value="0" />
+              <Select.Item label="No" value="1" />
             </Select>
           ) : (
             <Input
@@ -579,7 +575,7 @@ function PersonalSocialHistory() {
               fontSize="lg"
               isReadOnly={true}
               variant="unstyled"
-              value={exercise === 0 || exercise === "0"  ? "No" : "Yes"}
+              value={exercise === 0 || exercise === "0" ? "No" : "Yes"}
               w="100%"
             />
           )}
@@ -607,9 +603,11 @@ function PersonalSocialHistory() {
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
-               setSexuallyActive(itemValue);
+                setSexuallyActive(itemValue);
               }}
-              placeholder={sexuallyActive === 0 ||sexuallyActive === "0"  ? "No" : "Yes"}
+              placeholder={
+                sexuallyActive === 0 || sexuallyActive === "0" ? "No" : "Yes"
+              }
               selectedValue={sexuallyActive}
               _selectedItem={{
                 endIcon: (
@@ -624,8 +622,8 @@ function PersonalSocialHistory() {
                 ),
               }}
             >
-              <Select.Item label="Yes" value="0"/>
-              <Select.Item label="No" value="1"/>
+              <Select.Item label="Yes" value="0" />
+              <Select.Item label="No" value="1" />
             </Select>
           ) : (
             <Input
@@ -636,7 +634,9 @@ function PersonalSocialHistory() {
               fontSize="lg"
               isReadOnly={true}
               variant="unstyled"
-              value={sexuallyActive === 0 ||sexuallyActive === "0"  ? "No" : "Yes"}
+              value={
+                sexuallyActive === 0 || sexuallyActive === "0" ? "No" : "Yes"
+              }
               w="100%"
             />
           )}
@@ -664,9 +664,9 @@ function PersonalSocialHistory() {
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
-               setDrugeUse(itemValue);
+                setDrugeUse(itemValue);
               }}
-              placeholder={drugeUse === 0 ||drugeUse === "0"  ? "No" : "Yes"}
+              placeholder={drugeUse === 0 || drugeUse === "0" ? "No" : "Yes"}
               selectedValue={drugeUse}
               _selectedItem={{
                 endIcon: (
@@ -681,8 +681,8 @@ function PersonalSocialHistory() {
                 ),
               }}
             >
-              <Select.Item label="Yes" value="0"/>
-              <Select.Item label="No" value="1"/>
+              <Select.Item label="Yes" value="0" />
+              <Select.Item label="No" value="1" />
             </Select>
           ) : (
             <Input
@@ -693,7 +693,7 @@ function PersonalSocialHistory() {
               fontSize="lg"
               isReadOnly={true}
               variant="unstyled"
-              value={drugeUse === 0 ||drugeUse === "0"  ? "No" : "Yes"}
+              value={drugeUse === 0 || drugeUse === "0" ? "No" : "Yes"}
               w="100%"
             />
           )}
@@ -721,9 +721,11 @@ function PersonalSocialHistory() {
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
-               setCaffeineUse(itemValue);
+                setCaffeineUse(itemValue);
               }}
-              placeholder={caffeineUse === 0 ||caffeineUse === "0"  ? "No" : "Yes"}
+              placeholder={
+                caffeineUse === 0 || caffeineUse === "0" ? "No" : "Yes"
+              }
               selectedValue={caffeineUse}
               _selectedItem={{
                 endIcon: (
@@ -738,8 +740,8 @@ function PersonalSocialHistory() {
                 ),
               }}
             >
-              <Select.Item label="Yes" value="0"/>
-              <Select.Item label="No" value="1"/>
+              <Select.Item label="Yes" value="0" />
+              <Select.Item label="No" value="1" />
             </Select>
           ) : (
             <Input
@@ -750,7 +752,7 @@ function PersonalSocialHistory() {
               fontSize="lg"
               isReadOnly={true}
               variant="unstyled"
-              value={caffeineUse === 0 ||caffeineUse === "0"  ? "No" : "Yes"}
+              value={caffeineUse === 0 || caffeineUse === "0" ? "No" : "Yes"}
               w="100%"
             />
           )}
@@ -778,9 +780,11 @@ function PersonalSocialHistory() {
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
-               setAlocholUse(itemValue);
+                setAlocholUse(itemValue);
               }}
-              placeholder={alocholUse === 0 ||alocholUse === "0"  ? "No" : "Yes"}
+              placeholder={
+                alocholUse === 0 || alocholUse === "0" ? "No" : "Yes"
+              }
               selectedValue={alocholUse}
               _selectedItem={{
                 endIcon: (
@@ -795,8 +799,8 @@ function PersonalSocialHistory() {
                 ),
               }}
             >
-              <Select.Item label="Yes" value="0"/>
-              <Select.Item label="No" value="1"/>
+              <Select.Item label="Yes" value="0" />
+              <Select.Item label="No" value="1" />
             </Select>
           ) : (
             <Input
@@ -807,7 +811,7 @@ function PersonalSocialHistory() {
               fontSize="lg"
               isReadOnly={true}
               variant="unstyled"
-              value={alocholUse === 0 ||alocholUse === "0"  ? "No" : "Yes"}
+              value={alocholUse === 0 || alocholUse === "0" ? "No" : "Yes"}
               w="100%"
             />
           )}
@@ -835,9 +839,11 @@ function PersonalSocialHistory() {
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
-               setTobaccoUse(itemValue);
+                setTobaccoUse(itemValue);
               }}
-              placeholder={tobaccoUse === 0 ||tobaccoUse === "0"  ? "No" : "Yes"}
+              placeholder={
+                tobaccoUse === 0 || tobaccoUse === "0" ? "No" : "Yes"
+              }
               selectedValue={tobaccoUse}
               _selectedItem={{
                 endIcon: (
@@ -852,8 +858,8 @@ function PersonalSocialHistory() {
                 ),
               }}
             >
-              <Select.Item label="Yes" value="0"/>
-              <Select.Item label="No" value="1"/>
+              <Select.Item label="Yes" value="0" />
+              <Select.Item label="No" value="1" />
             </Select>
           ) : (
             <Input
@@ -864,7 +870,7 @@ function PersonalSocialHistory() {
               fontSize="lg"
               isReadOnly={true}
               variant="unstyled"
-              value={tobaccoUse === 0 ||tobaccoUse === "0"  ? "No" : "Yes"}
+              value={tobaccoUse === 0 || tobaccoUse === "0" ? "No" : "Yes"}
               w="100%"
             />
           )}
@@ -892,9 +898,13 @@ function PersonalSocialHistory() {
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
-               setSecondhandSmoker(itemValue);
+                setSecondhandSmoker(itemValue);
               }}
-              placeholder={secondhandSmoker === 0 ||secondhandSmoker === "0"  ? "No" : "Yes"}
+              placeholder={
+                secondhandSmoker === 0 || secondhandSmoker === "0"
+                  ? "No"
+                  : "Yes"
+              }
               selectedValue={secondhandSmoker}
               _selectedItem={{
                 endIcon: (
@@ -909,8 +919,8 @@ function PersonalSocialHistory() {
                 ),
               }}
             >
-              <Select.Item label="Yes" value="0"/>
-              <Select.Item label="No" value="1"/>
+              <Select.Item label="Yes" value="0" />
+              <Select.Item label="No" value="1" />
             </Select>
           ) : (
             <Input
@@ -921,7 +931,11 @@ function PersonalSocialHistory() {
               fontSize="lg"
               isReadOnly={true}
               variant="unstyled"
-              value={secondhandSmoker === 0 ||secondhandSmoker === "0"  ? "No" : "Yes"}
+              value={
+                secondhandSmoker === 0 || secondhandSmoker === "0"
+                  ? "No"
+                  : "Yes"
+              }
               w="100%"
             />
           )}
