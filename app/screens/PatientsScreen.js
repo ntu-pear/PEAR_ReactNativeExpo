@@ -49,7 +49,7 @@ function PatientsScreen(props) {
         <ActivityIndicator visible={true} />
       ) : (
         <Center backgroundColor={colors.white_var1}>
-          <ScrollView>
+          <ScrollView w="100%">
             <VStack>
               {listOfPatients ? listOfPatients.map((item, index) => (
                 <PatientScreenCard
