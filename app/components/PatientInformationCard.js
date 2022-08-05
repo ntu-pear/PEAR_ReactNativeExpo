@@ -121,7 +121,7 @@ function PatientInformationCard(props) {
           </Box>
         </HStack>
         <Center position="absolute" right="0" marginY="31%">
-          <Icon as={MaterialIcons} color={colors.black} name="chevron-right" size="5xl"/>
+          <Icon as={MaterialIcons} color={colors.black_var1} name="chevron-right" size="5xl"/>
         </Center>
       </Box>
     </TouchableOpacity>
