@@ -16,7 +16,7 @@ function PersonalSocialHistory() {
   /*
    *  *** All States Related To <Select> Component ***
    */
-  const [isEditMode, setIsEditMode] = useState(true);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [liveWithListId, setLiveWithListId] = useState(1);
   const [educationListId, setEducationListId] = useState(1);
   const [occupationListId, setOccupationListId] = useState(1);
@@ -43,6 +43,11 @@ function PersonalSocialHistory() {
   /*
    *  *** All possible list of questionaires to map to ***
    */
+  const [educationOptions, setEducationOptions] = useState([]);
+  const [occupationOptions, setOccupationOptions] = useState([]);
+  const [petOptions, setPetOptions] = useState([]);
+  const [dietOptions, setDietOptions] = useState([]);
+  const [religionOptions, setReligionOptions] = useState([]);
   const [liveWithOptions, setliveWithOptions] = useState([
     {
       list_LiveWithID: 1,
@@ -129,7 +134,7 @@ function PersonalSocialHistory() {
               fontWeight: "thin",
             }}
           >
-            Living with
+            Live with
           </FormControl.Label>
           {isEditMode ? (
             <Select
@@ -157,7 +162,7 @@ function PersonalSocialHistory() {
                     fontSize="lg"
                     color={colors.pink}
                   />
-                )
+                ),
               }}
             >
               {/* Map Issue Resolved Reference: https://github.com/GeekyAnts/NativeBase/issues/4543 */}
@@ -179,6 +184,336 @@ function PersonalSocialHistory() {
               isReadOnly={true}
               variant="unstyled"
               value={liveWithDescription}
+              w="100%"
+            />
+          )}
+        </HStack>
+      </FormControl>
+      <FormControl maxW="50%">
+        <HStack space={2} alignItems="center">
+          <FormControl.Label
+            _text={{
+              fontFamily: `${
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }`,
+              fontSize: "lg",
+              fontWeight: "thin",
+            }}
+          >
+            Education
+          </FormControl.Label>
+          {isEditMode ? (
+            <Select
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
+              fontSize="lg"
+              minW="100%"
+              // Peforms setDescription and setId
+              onValueChange={(itemValue) => {
+                setEducationDescription(
+                  mapIndexToItem(itemValue, educationOptions).value
+                );
+                setEducationListId(itemValue);
+              }}
+              placeholder={educationDescription}
+              selectedValue={educationDescription}
+              _selectedItem={{
+                endIcon: (
+                  <CheckIcon
+                    size="5"
+                    fontFamily={
+                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                    }
+                    fontSize="lg"
+                    color={colors.pink}
+                  />
+                ),
+              }}
+            >
+              {/* Map Issue Resolved Reference: https://github.com/GeekyAnts/NativeBase/issues/4543 */}
+              {educationOptions.map((item) => (
+                <Select.Item
+                  label={item.value}
+                  value={item.list_EducationID}
+                  key={item.list_EducationID}
+                />
+              ))}
+            </Select>
+          ) : (
+            <Input
+              color={colors.black_var1}
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
+              fontSize="lg"
+              isReadOnly={true}
+              variant="unstyled"
+              value={educationDescription}
+              w="100%"
+            />
+          )}
+        </HStack>
+      </FormControl>
+      <FormControl maxW="50%">
+        <HStack space={2} alignItems="center">
+          <FormControl.Label
+            _text={{
+              fontFamily: `${
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }`,
+              fontSize: "lg",
+              fontWeight: "thin",
+            }}
+          >
+            Occupation
+          </FormControl.Label>
+          {isEditMode ? (
+            <Select
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
+              fontSize="lg"
+              minW="100%"
+              // Peforms setDescription and setId
+              onValueChange={(itemValue) => {
+                setOccupationDescription(
+                  mapIndexToItem(itemValue, occupationOptions).value
+                );
+                setOccupationListId(itemValue);
+              }}
+              placeholder={occupationDescription}
+              selectedValue={occupationDescription}
+              _selectedItem={{
+                endIcon: (
+                  <CheckIcon
+                    size="5"
+                    fontFamily={
+                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                    }
+                    fontSize="lg"
+                    color={colors.pink}
+                  />
+                ),
+              }}
+            >
+              {/* Map Issue Resolved Reference: https://github.com/GeekyAnts/NativeBase/issues/4543 */}
+              {occupationOptions.map((item) => (
+                <Select.Item
+                  label={item.value}
+                  value={item.list_OccupationID}
+                  key={item.list_OccupationID}
+                />
+              ))}
+            </Select>
+          ) : (
+            <Input
+              color={colors.black_var1}
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
+              fontSize="lg"
+              isReadOnly={true}
+              variant="unstyled"
+              value={occupationDescription}
+              w="100%"
+            />
+          )}
+        </HStack>
+      </FormControl>
+      <FormControl maxW="50%">
+        <HStack space={2} alignItems="center">
+          <FormControl.Label
+            _text={{
+              fontFamily: `${
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }`,
+              fontSize: "lg",
+              fontWeight: "thin",
+            }}
+          >
+            Religion
+          </FormControl.Label>
+          {isEditMode ? (
+            <Select
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
+              fontSize="lg"
+              minW="100%"
+              // Peforms setDescription and setId
+              onValueChange={(itemValue) => {
+                setReligionDescription(
+                  mapIndexToItem(itemValue, religionOptions).value
+                );
+                setReligionListId(itemValue);
+              }}
+              placeholder={religionDescription}
+              selectedValue={religionDescription}
+              _selectedItem={{
+                endIcon: (
+                  <CheckIcon
+                    size="5"
+                    fontFamily={
+                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                    }
+                    fontSize="lg"
+                    color={colors.pink}
+                  />
+                ),
+              }}
+            >
+              {/* Map Issue Resolved Reference: https://github.com/GeekyAnts/NativeBase/issues/4543 */}
+              {religionOptions.map((item) => (
+                <Select.Item
+                  label={item.value}
+                  value={item.list_ReligionID}
+                  key={item.list_ReligionID}
+                />
+              ))}
+            </Select>
+          ) : (
+            <Input
+              color={colors.black_var1}
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
+              fontSize="lg"
+              isReadOnly={true}
+              variant="unstyled"
+              value={religionDescription}
+              w="100%"
+            />
+          )}
+        </HStack>
+      </FormControl>
+      <FormControl maxW="50%">
+        <HStack space={2} alignItems="center">
+          <FormControl.Label
+            _text={{
+              fontFamily: `${
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }`,
+              fontSize: "lg",
+              fontWeight: "thin",
+            }}
+          >
+            Pet
+          </FormControl.Label>
+          {isEditMode ? (
+            <Select
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
+              fontSize="lg"
+              minW="100%"
+              // Peforms setDescription and setId
+              onValueChange={(itemValue) => {
+                setPetDescription(
+                  mapIndexToItem(itemValue, petOptions).value
+                );
+                setPetListId(itemValue);
+              }}
+              placeholder={petDescription}
+              selectedValue={petDescription}
+              _selectedItem={{
+                endIcon: (
+                  <CheckIcon
+                    size="5"
+                    fontFamily={
+                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                    }
+                    fontSize="lg"
+                    color={colors.pink}
+                  />
+                ),
+              }}
+            >
+              {/* Map Issue Resolved Reference: https://github.com/GeekyAnts/NativeBase/issues/4543 */}
+              {petOptions.map((item) => (
+                <Select.Item
+                  label={item.value}
+                  value={item.list_PetID}
+                  key={item.list_PetID}
+                />
+              ))}
+            </Select>
+          ) : (
+            <Input
+              color={colors.black_var1}
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
+              fontSize="lg"
+              isReadOnly={true}
+              variant="unstyled"
+              value={petDescription}
+              w="100%"
+            />
+          )}
+        </HStack>
+      </FormControl>
+      <FormControl maxW="50%">
+        <HStack space={2} alignItems="center">
+          <FormControl.Label
+            _text={{
+              fontFamily: `${
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }`,
+              fontSize: "lg",
+              fontWeight: "thin",
+            }}
+          >
+            Diet
+          </FormControl.Label>
+          {isEditMode ? (
+            <Select
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
+              fontSize="lg"
+              minW="100%"
+              // Peforms setDescription and setId
+              onValueChange={(itemValue) => {
+                setDietDesciption(
+                  mapIndexToItem(itemValue, dietOptions).value
+                );
+                setDietListId(itemValue);
+              }}
+              placeholder={dietDesciption}
+              selectedValue={dietDesciption}
+              _selectedItem={{
+                endIcon: (
+                  <CheckIcon
+                    size="5"
+                    fontFamily={
+                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                    }
+                    fontSize="lg"
+                    color={colors.pink}
+                  />
+                ),
+              }}
+            >
+              {/* Map Issue Resolved Reference: https://github.com/GeekyAnts/NativeBase/issues/4543 */}
+              {dietOptions.map((item) => (
+                <Select.Item
+                  label={item.value}
+                  value={item.list_DietID}
+                  key={item.list_DietID}
+                />
+              ))}
+            </Select>
+          ) : (
+            <Input
+              color={colors.black_var1}
+              fontFamily={
+                Platform.OS === "ios" ? "Helvetica" : typography.android
+              }
+              fontSize="lg"
+              isReadOnly={true}
+              variant="unstyled"
+              value={dietDesciption}
               w="100%"
             />
           )}
