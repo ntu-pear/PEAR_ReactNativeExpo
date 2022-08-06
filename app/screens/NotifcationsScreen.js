@@ -145,10 +145,10 @@ function NotifcationsScreen(props) {
           data={notificationData}
           extraData={selectedId}
           renderItem={({ item }) => (
-          /*
-          * Issue resolved -- cannot swipe on Android. Soln: Wrap with <GestureHandlerRootView>
-          * Ref: https://stackoverflow.com/questions/70545275/react-native-swipeable-gesture-not-working-on-android
-          */
+            /*
+             * Issue resolved -- cannot swipe on Android. Soln: Wrap with <GestureHandlerRootView>
+             * Ref: https://stackoverflow.com/questions/70545275/react-native-swipeable-gesture-not-working-on-android
+             */
             <GestureHandlerRootView>
               <Swipeable
                 renderLeftActions={leftSwipeActions}
