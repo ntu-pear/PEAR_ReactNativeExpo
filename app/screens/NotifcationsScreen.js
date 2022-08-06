@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { StyleSheet, Platform, TouchableOpacity } from "react-native";
 import AuthContext from "../auth/context";
-import { Text, Box, FlatList, VStack, HStack, Avatar } from "native-base";
+import { Text, Box, FlatList, VStack, CheckIcon, CloseIcon } from "native-base";
 import colors from "../config/colors";
 import typography from "../config/typography";
 import Swipeable from "react-native-gesture-handler/Swipeable";
@@ -70,8 +70,20 @@ function NotifcationsScreen(props) {
    */
   const leftSwipeActions = () => {
     return (
-      <VStack w="40%" backgroundColor={colors.pink} justifyContent="center">
-        <Text bold> Reject </Text>
+      <VStack
+        w="40%"
+        backgroundColor={colors.pink_lighter}
+        justifyContent="center"
+      >
+        <CloseIcon color={colors.white} size="2xl" alignSelf="center" />
+        <Text
+          alignSelf="center"
+          bold
+          fontFamily={Platform.OS === "ios" ? "Helvetica" : typography.android}
+          color={colors.white}
+        >
+          Reject
+        </Text>
       </VStack>
     );
   };
@@ -81,8 +93,20 @@ function NotifcationsScreen(props) {
    */
   const rightSwipeActions = () => {
     return (
-      <VStack w="40%" backgroundColor={colors.green} justifyContent="center">
-        <Text> Accept </Text>
+      <VStack
+        w="40%"
+        backgroundColor={colors.green_lighter}
+        justifyContent="center"
+      >
+        <CheckIcon color={colors.white} size="2xl" alignSelf="center" />
+        <Text
+          alignSelf="center"
+          bold
+          fontFamily={Platform.OS === "ios" ? "Helvetica" : typography.android}
+          color={colors.white}
+        >
+          Accept
+        </Text>
       </VStack>
     );
   };
@@ -91,14 +115,14 @@ function NotifcationsScreen(props) {
    *   *** Peforms action when Left boundary is opened ***
    */
   const swipeFromLeftOpen = () => {
-    // filterAndRerender();
+    filterAndRerender();
   };
 
   /*
    *   *** Peforms action when Right boundary is opened ***
    */
   const swipeFromRightOpen = () => {
-    // filterAndRerender();
+    filterAndRerender();
   };
 
   const filterAndRerender = () => {
