@@ -70,8 +70,8 @@ function NotifcationsScreen(props) {
    */
   const leftSwipeActions = () => {
     return (
-      <VStack w="20" backgroundColor={colors.pink} justifyContent="center">
-        <Text> Hello</Text>
+      <VStack w="40%" backgroundColor={colors.pink} justifyContent="center">
+        <Text bold> Reject </Text>
       </VStack>
     );
   };
@@ -81,9 +81,9 @@ function NotifcationsScreen(props) {
    */
   const rightSwipeActions = () => {
     return (
-      <Box>
-        <Text>hey</Text>
-      </Box>
+      <VStack w="40%" backgroundColor={colors.green} justifyContent="center">
+        <Text> Accept </Text>
+      </VStack>
     );
   };
 
@@ -91,21 +91,23 @@ function NotifcationsScreen(props) {
    *   *** Peforms action when Left boundary is opened ***
    */
   const swipeFromLeftOpen = () => {
-    console.log("swipe from left");
-    console.log(selectedId);
-    // Filter Data
-    const filteredData = notificationData.filter(
-      (item) => item.notificationID !== selectedId
-    );
-    // Update Notification Data with the newly filtered data; to re-render flat list.
-    setNotificationData(filteredData);
+    // filterAndRerender();
   };
 
   /*
    *   *** Peforms action when Right boundary is opened ***
    */
   const swipeFromRightOpen = () => {
-    console.log("swipe from right");
+    // filterAndRerender();
+  };
+
+  const filterAndRerender = () => {
+    // Filter Data
+    const filteredData = notificationData.filter(
+      (item) => item.notificationID !== selectedId
+    );
+    // Update Notification Data with the newly filtered data; to re-render flat list.
+    setNotificationData(filteredData);
   };
 
   return (

@@ -27,6 +27,7 @@ const NotificationNavigator = () => {
         tabBarLabelStyle: {
           fontFamily: Platform.OS === "ios" ? "Helvetica" : typography.android,
         },
+        swipeEnabled: "false"
       }}
     >
       <Tab.Screen
