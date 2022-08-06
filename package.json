@@ -35,7 +35,8 @@
     "react-native-svg": "12.3.0",
     "react-native-tab-view": "^3.1.1",
     "react-native-web": "0.17.7",
-    "react-native-pager-view": "5.4.15"
+    "react-native-pager-view": "5.4.15",
+    "react-native-gesture-handler": "~2.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9"
