@@ -57,18 +57,17 @@ function NotifcationsScreen(props) {
     },
   ]);
 
-  // const onViewableItemsChanged = ({viewableItems, changed })=> {console.log(viewableItems);
-  //   console.log(changed);}
-
-  // TODO: Create a handleSwipe 'accept' or 'reject' method
-  // Peform (1) re-set current list with the updated data
-  // (2) Calls a `put` api to set as `accepted` and `read`
-  /*
-   * Reference: (1) https://docs.swmansion.com/react-native-gesture-handler/docs/quickstart/quickstart
+  /*  *** React Native Hande Gesture ***
+   *
+   * Reference(s):
+   * (1) https://docs.swmansion.com/react-native-gesture-handler/docs/quickstart/quickstart
    * (2) https://blog.logrocket.com/react-native-gesture-handler-swipe-long-press-and-more/
-   *  (3) https://reactnative-examples.com/remove-selected-item-from-flatlist-in-react-native/
+   * (3) https://reactnative-examples.com/remove-selected-item-from-flatlist-in-react-native/
    */
 
+  /*
+   *   *** Renders view when swiped to left ***
+   */
   const leftSwipeActions = () => {
     return (
       <VStack w="20" backgroundColor={colors.pink} justifyContent="center">
@@ -77,6 +76,9 @@ function NotifcationsScreen(props) {
     );
   };
 
+  /*
+   *   *** Renders view when swiped to right ***
+   */
   const rightSwipeActions = () => {
     return (
       <Box>
@@ -85,17 +87,23 @@ function NotifcationsScreen(props) {
     );
   };
 
+  /*
+   *   *** Peforms action when Left boundary is opened ***
+   */
   const swipeFromLeftOpen = () => {
     console.log("swipe from left");
     console.log(selectedId);
-    // filters data
+    // Filter Data
     const filteredData = notificationData.filter(
       (item) => item.notificationID !== selectedId
     );
     // Update Notification Data with the newly filtered data; to re-render flat list.
     setNotificationData(filteredData);
-    // console.log(selectedId);
   };
+
+  /*
+   *   *** Peforms action when Right boundary is opened ***
+   */
   const swipeFromRightOpen = () => {
     console.log("swipe from right");
   };
