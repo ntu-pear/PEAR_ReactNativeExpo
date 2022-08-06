@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
-import { StyleSheet, Platform, TouchableOpacity } from "react-native";
+import { StyleSheet, Platform } from "react-native";
 import AuthContext from "../auth/context";
-import { Text, Box, FlatList, VStack, CheckIcon, CloseIcon } from "native-base";
+import { Text, FlatList, VStack, CheckIcon, CloseIcon } from "native-base";
 import colors from "../config/colors";
 import typography from "../config/typography";
 import Swipeable from "react-native-gesture-handler/Swipeable";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import NotificationCard from "../components/NotificationCard";
 
 function NotifcationsScreen(props) {
@@ -144,18 +145,24 @@ function NotifcationsScreen(props) {
           data={notificationData}
           extraData={selectedId}
           renderItem={({ item }) => (
-            <Swipeable
-              renderLeftActions={leftSwipeActions}
-              renderRightActions={rightSwipeActions}
-              onSwipeableLeftWillOpen={swipeFromLeftOpen}
-              onSwipeableRightWillOpen={swipeFromRightOpen}
-            >
-              <NotificationCard
-                item={item}
-                user={user}
-                setSelectedId={setSelectedId}
-              />
-            </Swipeable>
+          /*
+          * Issue resolved -- cannot swipe on Android. Soln: Wrap with <GestureHandlerRootView>
+          * Ref: https://stackoverflow.com/questions/70545275/react-native-swipeable-gesture-not-working-on-android
+          */
+            <GestureHandlerRootView>
+              <Swipeable
+                renderLeftActions={leftSwipeActions}
+                renderRightActions={rightSwipeActions}
+                onSwipeableLeftWillOpen={swipeFromLeftOpen}
+                onSwipeableRightWillOpen={swipeFromRightOpen}
+              >
+                <NotificationCard
+                  item={item}
+                  user={user}
+                  setSelectedId={setSelectedId}
+                />
+              </Swipeable>
+            </GestureHandlerRootView>
           )}
           keyExtractor={(item) => item.notificationID}
         />
