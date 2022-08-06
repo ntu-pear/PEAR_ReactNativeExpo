@@ -5,6 +5,7 @@ import { Text, Box, FlatList, VStack, HStack, Avatar } from "native-base";
 import colors from "../config/colors";
 import typography from "../config/typography";
 import Swipeable from "react-native-gesture-handler/Swipeable";
+import NotificationCard from "../components/NotificationCard";
 
 function NotifcationsScreen(props) {
   const { user } = useContext(AuthContext);
@@ -65,6 +66,7 @@ function NotifcationsScreen(props) {
   /*
    * Reference: (1) https://docs.swmansion.com/react-native-gesture-handler/docs/quickstart/quickstart
    * (2) https://blog.logrocket.com/react-native-gesture-handler-swipe-long-press-and-more/
+   *  (3) https://reactnative-examples.com/remove-selected-item-from-flatlist-in-react-native/
    */
 
   const leftSwipeActions = () => {
@@ -83,9 +85,15 @@ function NotifcationsScreen(props) {
     );
   };
 
-  const swipeFromLeftOpen = (index) => {
+  const swipeFromLeftOpen = () => {
     console.log("swipe from left");
     console.log(selectedId);
+    // filters data
+    const filteredData = notificationData.filter(
+      (item) => item.notificationID !== selectedId
+    );
+    // Update Notification Data with the newly filtered data; to re-render flat list.
+    setNotificationData(filteredData);
     // console.log(selectedId);
   };
   const swipeFromRightOpen = () => {
@@ -99,75 +107,18 @@ function NotifcationsScreen(props) {
           // onViewableItemsChanged={onViewableItemsChanged}
           data={notificationData}
           extraData={selectedId}
-          renderItem={({ item, index}) => (
+          renderItem={({ item }) => (
             <Swipeable
               renderLeftActions={leftSwipeActions}
               renderRightActions={rightSwipeActions}
               onSwipeableLeftWillOpen={swipeFromLeftOpen}
               onSwipeableRightWillOpen={swipeFromRightOpen}
             >
-              {}
-              <TouchableOpacity onPressIn={() => setSelectedId(index)}>
-                <Box
-                  borderBottomWidth="1"
-                  borderColor={colors.primary_gray}
-                  py="2"
-                  mt="1"
-                >
-                  <VStack w="100%" space={2} flexWrap={"wrap"}>
-                    <HStack space={5} alignItems="center">
-                      <Avatar size="sm" bg={colors.pink} marginY="auto">
-                        {" "}
-                        {user && user.sub && user.sub.substring(0, 1)
-                          ? user.sub.substring(0, 1)
-                          : `--`}{" "}
-                      </Avatar>
-                      <Text
-                        color={colors.black_var1}
-                        fontFamily={
-                          Platform.OS === "ios"
-                            ? "Helvetica"
-                            : typography.android
-                        }
-                      >
-                        {item && item.title ? item.title : "Not Available"}
-                      </Text>
-                    </HStack>
-                    <HStack>
-                      <Text
-                        alignSelf="flex-start"
-                        color={colors.black_var1}
-                        fontFamily={
-                          Platform.OS === "ios"
-                            ? "Helvetica"
-                            : typography.android
-                        }
-                      >
-                        {item && item.message ? item.message : "Not Available"}
-                      </Text>
-                    </HStack>
-                    <HStack justifyContent="flex-start">
-                      <Text
-                        alignSelf="flex-start"
-                        color={colors.primary_overlay_color}
-                        fontFamily={
-                          Platform.OS === "ios"
-                            ? "Helvetica"
-                            : typography.android
-                        }
-                      >
-                        {" "}
-                        {item && item.createdDateTime
-                          ? `${item.createdDateTime.substring(
-                              0,
-                              10
-                            )}   ${item.createdDateTime.substring(12, 19)} HRS`
-                          : "Not Available"}{" "}
-                      </Text>
-                    </HStack>
-                  </VStack>
-                </Box>
-              </TouchableOpacity>
+              <NotificationCard
+                item={item}
+                user={user}
+                setSelectedId={setSelectedId}
+              />
             </Swipeable>
           )}
           keyExtractor={(item) => item.notificationID}
