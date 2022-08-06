@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useContext } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, Platform } from "react-native";
 import AuthContext from "../auth/context";
 import { Text, Box, FlatList, VStack, HStack, Avatar } from "native-base";
 import colors from "../config/colors";
+import typography from "../config/typography";
 
 function NotifcationsScreen(props) {
   const { user } = useContext(AuthContext);
@@ -76,17 +77,34 @@ function NotifcationsScreen(props) {
                       ? user.sub.substring(0, 1)
                       : `--`}{" "}
                   </Avatar>
-                  <Text>
+                  <Text
+                    color={colors.black_var1}
+                    fontFamily={
+                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                    }
+                  >
                     {item && item.title ? item.title : "Not Available"}
                   </Text>
                 </HStack>
                 <HStack>
-                  <Text alignSelf="flex-start">
+                  <Text
+                    alignSelf="flex-start"
+                    color={colors.black_var1}
+                    fontFamily={
+                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                    }
+                  >
                     {item && item.message ? item.message : "Not Available"}
                   </Text>
                 </HStack>
-                <HStack justifyContent="flex-end">
-                  <Text alignSelf="flex-start">
+                <HStack justifyContent="flex-start">
+                  <Text
+                    alignSelf="flex-start"
+                    color={colors.primary_overlay_color}
+                    fontFamily={
+                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                    }
+                  >
                     {" "}
                     {item && item.createdDateTime
                       ? `${item.createdDateTime.substring(
