@@ -116,6 +116,7 @@ function NotifcationsScreen(props) {
    */
   const swipeFromLeftOpen = () => {
     filterAndRerender();
+    // TODO: Call Reject Notificaiton API
   };
 
   /*
@@ -123,6 +124,7 @@ function NotifcationsScreen(props) {
    */
   const swipeFromRightOpen = () => {
     filterAndRerender();
+    // TODO: Call Accept Notification API
   };
 
   const filterAndRerender = () => {
