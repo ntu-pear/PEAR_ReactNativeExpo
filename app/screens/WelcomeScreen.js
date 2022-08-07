@@ -20,6 +20,7 @@ import authStorage from "../auth/authStorage";
 import colors from "../config/colors";
 import typography from "../config/typography";
 import errors from "../config/errors";
+import useApiHandler from "../hooks/useApiHandler";
 
 // Import from components
 import AppText from "../components/AppText";
@@ -28,7 +29,6 @@ import ErrorMessage from "../components/ErrorMessage";
 
 // Import Api
 import userApi from "../api/user";
-
 
 function WelcomeScreen(props) {
   /*
@@ -40,11 +40,11 @@ function WelcomeScreen(props) {
   let [email, setEmail] = useState("");
   let [password, setPassword] = useState("");
   let [loginFailed, setLoginFailed] = useState(false);
+  const apiHandlerHook = useApiHandler();
 
   /*
    * All Api to be place here
    */
-
 
   /*
    * Component Did Mount or useEffect() to be placed here
@@ -67,10 +67,13 @@ function WelcomeScreen(props) {
     // if returned array is empty or error
     if (!result.ok) return setLoginFailed(true);
     setLoginFailed(false);
-    const user = jwt_decode(result.data.accessToken)
-    authContext.setUser(user)
+    const user = jwt_decode(result.data.accessToken);
+    authContext.setUser(user);
     console.log(user);
-    authStorage.storeToken(result.data.accessToken);
+    authStorage.storeToken("userAuthToken", result.data.accessToken);
+    authStorage.storeToken("userRefreshToken", result.data.refreshToken);
+    // set api header if empty
+    apiHandlerHook.setHeaderIfEmpty();
   };
 
   const handleEmail = (e) => {

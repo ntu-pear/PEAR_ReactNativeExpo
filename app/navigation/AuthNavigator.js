@@ -11,11 +11,7 @@ const Stack = createNativeStackNavigator();
 
 // Refer to this for configuration: https://reactnavigation.org/docs/native-stack-navigator#options
 const AuthNavigator = () => (
-  <Stack.Navigator
-    screenOptions={{
-      headerShown: false,
-    }}
-  >
+  <Stack.Navigator>
     <Stack.Screen
       name={routes.WELCOME}
       component={WelcomeScreen}
