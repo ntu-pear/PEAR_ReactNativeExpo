@@ -12,11 +12,20 @@ function PatientProfileCard(props) {
     textMarginTop,
     textMarginLeft,
     text,
-    navigation
+    navigation,
+    routes,
+    patientProfile
   } = props;
 
+  const handleOnPressToNextScreen = () => {
+      console.log("Moving to next screen from profile card");
+      navigation.push(routes, {...patientProfile})
+
+  }
+
   return (
-    <TouchableOpacity>
+    <TouchableOpacity
+    onPress={handleOnPressToNextScreen}>
       <Box
         alignItems="center"
         rounded="lg"
