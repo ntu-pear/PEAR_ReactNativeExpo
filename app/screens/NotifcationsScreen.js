@@ -15,6 +15,7 @@ function NotifcationsScreen(props) {
   const { user } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   // used to manage flatlist
   const [selectedId, setSelectedId] = useState(null);
 
@@ -80,8 +81,17 @@ function NotifcationsScreen(props) {
     setNotificationData(filteredData);
   };
 
+  // Purpose: When api fails, perform another fetch
   const handleErrorWhenApiFails = async () => {
     await getAllNotificationOfUser();
+  };
+
+  // Purpose: pull to refresh for flat list
+  // Reference: https://thewebdev.info/2022/02/19///how-to-implement-pull-to-refresh-flatlist-with-react-native/
+  const handlePullToRefresh = async () => {
+    setIsRefreshing(true);
+    await getAllNotificationOfUser();
+    setIsRefreshing(false);
   };
 
   /*  *** React Native Hande Gesture ***
@@ -177,6 +187,9 @@ function NotifcationsScreen(props) {
               // onViewableItemsChanged={onViewableItemsChanged}
               data={notificationData}
               extraData={selectedId}
+              keyExtractor={(item) => item.notificationID}
+              onRefresh={handlePullToRefresh}
+              refreshing={isRefreshing}
               renderItem={({ item }) => (
                 /*
                  * Issue resolved -- cannot swipe on Android. Soln: Wrap with <GestureHandlerRootView>
@@ -197,7 +210,6 @@ function NotifcationsScreen(props) {
                   </Swipeable>
                 </GestureHandlerRootView>
               )}
-              keyExtractor={(item) => item.notificationID}
             />
           </VStack>
         </VStack>
