@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
-import { Box, VStack, Center, Image, Text, HStack } from "native-base";
+import { Box, VStack, Center, Image, Text, HStack, Icon } from "native-base";
 import colors from "../config/colors";
 import routes from "../navigation/routes";
+import { MaterialIcons } from "@expo/vector-icons";
 
 function PatientInformationCard(props) {
   const { patientProfile, navigation } = props;
@@ -35,13 +36,13 @@ function PatientInformationCard(props) {
         mb="5"
         ml="1"
         mr="1"
-        minW="90%"
+        w="97%"
         overflow="visible"
         rounded="lg"
         borderColor={colors.primary_gray}
         borderWidth="1"
       >
-        <VStack mb="2">
+        <VStack mb="2" mt="2">
           <Center>
             <Image
               mt="2"
@@ -58,77 +59,72 @@ function PatientInformationCard(props) {
                 uri: `${patientProfile.profilePicture}`,
               }}
             />
-            <Center>
+            <Center mt="1">
               <Text bold fontSize="2xl">
                 {`${patientProfile.firstName} ${patientProfile.lastName}`}
               </Text>
             </Center>
-            <Center>
+            <Center mt="1">
               <Text italic fontSize="2xl">
                 {`${patientProfile.preferredName}`}
               </Text>
             </Center>
-            <Center>
+            <Center mt="1">
               <Text italic fontSize="2xl">
                 {patientProfile.gender === "F" ? "Female" : "Male"}
               </Text>
             </Center>
           </Center>
         </VStack>
-        <HStack
-          ml="5"
-          mt="3"
-          w="90%"
-          space={3}
-          justifyContent="flex-start"
-          flexWrap={"wrap"}
-        >
-          <Center>
+        <HStack space={2} justifyContent="center" mt="1">
+          <Box>
             <Text bold fontSize="xl">
               NRIC
             </Text>
-          </Center>
+          </Box>
+          <Box mr="2">
+            <Text italic fontSize="xl">{`${patientProfile.nric}`}</Text>
+          </Box>
 
-          <Center>
-            <Text italic fontSize="lg">{`${patientProfile.nric}`}</Text>
-          </Center>
-
-          <Center>
+          <Box>
             <Text bold italic fontSize="xl">
               Age
             </Text>
-          </Center>
-
-          <Center>
-            <Text italic fontSize="lg">
+          </Box>
+          <Box>
+            <Text italic fontSize="xl">
               {`${calcAge(patientProfile.dob)}`}
             </Text>
-          </Center>
+          </Box>
+        </HStack>
 
-          <Center>
+        <HStack space={2} justifyContent="center" mt="2" mb="2">
+          <Box>
             <Text bold italic fontSize="xl">
               D.O.B
             </Text>
-          </Center>
-
-          <Center>
-            <Text italic fontSize="lg">
+          </Box>
+          <Box>
+            <Text italic fontSize="xl">
               {`${extractFullYear(patientProfile.dob)}`}
             </Text>
-          </Center>
-
-          <Center>
+          </Box>
+        </HStack>
+        <HStack space={2} justifyContent="center" mt="1" mb="2">
+          <Box>
             <Text bold italic fontSize="xl">
               Language
             </Text>
-          </Center>
-
-          <Center>
-            <Text italic fontSize="lg">
+          </Box>
+          <Box>
+            <Text italic fontSize="xl">
               {`${patientProfile.preferredLanguage}`}
             </Text>
-          </Center>
+          </Box>
         </HStack>
+        <Center position="absolute" right="0" marginY="31%">
+          <Icon as={MaterialIcons} color={colors.black_var1} name="chevron-right" size="5xl"/>
+        </Center>
       </Box>
     </TouchableOpacity>
   );
