@@ -20,6 +20,7 @@ import authStorage from "../auth/authStorage";
 import colors from "../config/colors";
 import typography from "../config/typography";
 import errors from "../config/errors";
+import useApiHandler from "../hooks/useApiHandler";
 
 // Import from components
 import AppText from "../components/AppText";
@@ -39,6 +40,7 @@ function WelcomeScreen(props) {
   let [email, setEmail] = useState("");
   let [password, setPassword] = useState("");
   let [loginFailed, setLoginFailed] = useState(false);
+  const apiHandlerHook = useApiHandler();
 
   /*
    * All Api to be place here
@@ -70,6 +72,8 @@ function WelcomeScreen(props) {
     console.log(user);
     authStorage.storeToken("userAuthToken", result.data.accessToken);
     authStorage.storeToken("userRefreshToken", result.data.refreshToken);
+    // set api header if empty
+    apiHandlerHook.setHeaderIfEmpty();
   };
 
   const handleEmail = (e) => {

@@ -1,15 +1,13 @@
 import React from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 
-function PatientProfile(props) {
+function PatientHolidayScreen() {
     return (
         <View>
-            <Text></Text>
+            <Text>This is PatientHolidayScreen</Text>
         </View>
     )
 }
 
 const styles = StyleSheet.create({})
-
-
-export default PatientProfile;
+export default PatientHolidayScreen;
