@@ -12,35 +12,47 @@ import {
 import colors from "../config/colors";
 import typography from "../config/typography";
 
-function PersonalSocialHistory() {
+function PersonalSocialHistory( {socialHistory} ) {
   /*
    *  *** All States Related To <Select> Component ***
    */
   // Note: isEditMode is used to toggle between `Read-only` and `Write&Read` mode.
   const [isEditMode, setIsEditMode] = useState(false);
-  const [liveWithListId, setLiveWithListId] = useState(1);
-  const [educationListId, setEducationListId] = useState(1);
-  const [occupationListId, setOccupationListId] = useState(1);
-  const [religionListId, setReligionListId] = useState(1);
-  const [petListId, setPetListId] = useState(1);
-  const [dietListId, setDietListId] = useState(1);
-  const [exercise, setExercise] = useState(1);
-  const [sexuallyActive, setSexuallyActive] = useState(1);
-  const [drugeUse, setDrugeUse] = useState(1);
-  const [caffeineUse, setCaffeineUse] = useState(1);
-  const [alocholUse, setAlocholUse] = useState(1);
-  const [tobaccoUse, setTobaccoUse] = useState(1);
-  const [secondhandSmoker, setSecondhandSmoker] = useState(1);
-  const [dietDesciption, setDietDesciption] = useState("Diabetic");
+  const [liveWithListId, setLiveWithListId] = useState(socialHistory ? socialHistory.liveWithListId : null);
+  const [educationListId, setEducationListId] = useState(
+    socialHistory ?  socialHistory.educationListId : null
+  );
+  const [occupationListId, setOccupationListId] = useState(
+    socialHistory ? socialHistory.occupationListId : null
+  );
+  const [religionListId, setReligionListId] = useState(
+    socialHistory ? socialHistory.religionListId : null
+  );
+  const [petListId, setPetListId] = useState(socialHistory ? socialHistory.petListId : null);
+  const [dietListId, setDietListId] = useState(socialHistory ? socialHistory.dietListId: null);
+  const [exercise, setExercise] = useState(socialHistory ? socialHistory.exercise: null);
+  const [sexuallyActive, setSexuallyActive] = useState(
+    socialHistory? socialHistory.sexuallyActive : null
+  );
+  const [drugeUse, setDrugeUse] = useState(socialHistory ? socialHistory.drugeUse : null);
+  const [caffeineUse, setCaffeineUse] = useState(socialHistory ? socialHistory.caffeineUse : null);
+  const [alocholUse, setAlocholUse] = useState(socialHistory ? socialHistory.alocholUse : null);
+  const [tobaccoUse, setTobaccoUse] = useState(socialHistory ? socialHistory.tobaccoUse : null);
+  const [secondhandSmoker, setSecondhandSmoker] = useState(
+    socialHistory ? socialHistory.secondhandSmoker : null
+  );
+  const [dietDesciption, setDietDesciption] = useState(
+    socialHistory ? socialHistory.dietDescription : null
+  );
   const [educationDescription, setEducationDescription] = useState(
-    "Primary or lower"
+    socialHistory ? socialHistory.educationDescription : null
   );
-  const [liveWithDescription, setLiveWithDescription] = useState("Alone");
+  const [liveWithDescription, setLiveWithDescription] = useState(socialHistory ? socialHistory.liveWithDescription : null);
   const [occupationDescription, setOccupationDescription] = useState(
-    "Accountant"
+    socialHistory ? socialHistory.occupationDescription : null
   );
-  const [petDescription, setPetDescription] = useState("Bird");
-  const [religionDescription, setReligionDescription] = useState("Atheist");
+  const [petDescription, setPetDescription] = useState(socialHistory ? socialHistory.petDescription : null);
+  const [religionDescription, setReligionDescription] = useState(socialHistory ? socialHistory.religionDescription : null);
   /*
    *  *** All possible list of questionaires to map to ***
    */
@@ -102,10 +114,10 @@ function PersonalSocialHistory() {
   ]);
 
   /*
-  * Common utility used to retrieve object of interest from list of Objects.
-  * e.g. liveWithOptions = [{},...,{}]; will return selectedItem = liveWithOptions.slice(index-1, index)
-  * Why index - 1? Refer to the mock data above, ID starts with `1`.
-  */
+   * Common utility used to retrieve object of interest from list of Objects.
+   * e.g. liveWithOptions = [{},...,{}]; will return selectedItem = liveWithOptions.slice(index-1, index)
+   * Why index - 1? Refer to the mock data above, ID starts with `1`.
+   */
   const mapIndexToItem = (curIndex, obj) => {
     var selectedItem = [...obj.slice(curIndex - 1, curIndex)];
     return selectedItem[0];
@@ -189,7 +201,7 @@ function PersonalSocialHistory() {
               fontSize="lg"
               isReadOnly={true}
               variant="unstyled"
-              value={liveWithDescription}
+              value={socialHistory ? socialHistory.liveWithDescription : liveWithDescription}
               w="100%"
             />
           )}
@@ -255,7 +267,7 @@ function PersonalSocialHistory() {
               fontSize="lg"
               isReadOnly={true}
               variant="unstyled"
-              value={educationDescription}
+              value={socialHistory ? socialHistory.educationDescription : educationDescription}
               w="100%"
             />
           )}
@@ -321,7 +333,7 @@ function PersonalSocialHistory() {
               fontSize="lg"
               isReadOnly={true}
               variant="unstyled"
-              value={occupationDescription}
+              value={socialHistory ? socialHistory.occupationDescription : occupationDescription}
               w="100%"
             />
           )}
@@ -387,7 +399,7 @@ function PersonalSocialHistory() {
               fontSize="lg"
               isReadOnly={true}
               variant="unstyled"
-              value={religionDescription}
+              value={socialHistory ? socialHistory.religionDescription : religionDescription}
               w="100%"
             />
           )}
@@ -451,7 +463,7 @@ function PersonalSocialHistory() {
               fontSize="lg"
               isReadOnly={true}
               variant="unstyled"
-              value={petDescription}
+              value={socialHistory ? socialHistory.petDescription : petDescription}
               w="100%"
             />
           )}
@@ -515,7 +527,7 @@ function PersonalSocialHistory() {
               fontSize="lg"
               isReadOnly={true}
               variant="unstyled"
-              value={dietDesciption}
+              value={socialHistory ? socialHistory.dietDescription : dietDesciption}
               w="100%"
             />
           )}
@@ -581,7 +593,7 @@ function PersonalSocialHistory() {
               fontSize="lg"
               isReadOnly={true}
               variant="unstyled"
-              value={exercise === 0 || exercise === "0" ? "No" : "Yes"}
+              value={socialHistory && parseInt(socialHistory.exercise) === 0 || exercise === "0" ? "No" : "Yes"}
               w="100%"
             />
           )}
@@ -641,7 +653,7 @@ function PersonalSocialHistory() {
               isReadOnly={true}
               variant="unstyled"
               value={
-                sexuallyActive === 0 || sexuallyActive === "0" ? "No" : "Yes"
+                socialHistory && parseInt(socialHistory.sexuallyActive) === 0 || parseInt(sexuallyActive) === 0 ? "No" : "Yes"
               }
               w="100%"
             />
