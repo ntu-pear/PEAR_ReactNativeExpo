@@ -1,18 +1,23 @@
 import React, { useState, useEffect, useContext } from "react";
 import { StyleSheet, Platform } from "react-native";
 import AuthContext from "../auth/context";
-import { Text, Box, FlatList, VStack, HStack, Avatar } from "native-base";
+import { Text, FlatList, VStack, CheckIcon, CloseIcon } from "native-base";
 import colors from "../config/colors";
 import typography from "../config/typography";
+import Swipeable from "react-native-gesture-handler/Swipeable";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import NotificationCard from "../components/NotificationCard";
+import notificationApi from "../api/notification";
+import ActivityIndicator from "../components/ActivityIndicator";
+import ErrorRetryApiCard from "../components/ErrorRetryApiCard";
 
 function NotifcationsScreen(props) {
   const { user } = useContext(AuthContext);
-  // TODO: Create API to retrieve data to puplate flat list
-  // (1) Retrieves Data
-  // (2) try out setParams() to filter `read` / `unread` / `accepted` / `rejected`
-  useEffect(() => {
-    console.log(user);
-  }, []);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  // used to manage flatlist
+  const [selectedId, setSelectedId] = useState(null);
 
   /*
    * Mock Data to populate flat list
@@ -53,74 +58,163 @@ function NotifcationsScreen(props) {
     },
   ]);
 
-  // TODO: Create a handleSwipe 'accept' or 'reject' method
-  // Peform (1) re-set current list with the updated data
-  // (2) Calls a `put` api to set as `accepted` and `read`
+  useEffect(() => {
+    // Fetches data from notification api
+    getAllNotificationOfUser();
+  }, []);
+
+  const getAllNotificationOfUser = async () => {
+    setIsLoading(true);
+    const response = await notificationApi.getNotificationOfUser();
+    console.log(response);
+    if (!response.ok) {
+      // return error block
+      setIsLoading(false);
+      setIsError(true);
+      return;
+    }
+    setIsLoading(false);
+    // Filters for data only with readStatus === true
+    const filteredData = response.data.filter(
+      (item) => item.readStatus === false
+    );
+    setNotificationData(filteredData);
+  };
+
+  // Purpose: When api fails, perform another fetch
+  const handleErrorWhenApiFails = async () => {
+    await getAllNotificationOfUser();
+  };
+
+  // Purpose: pull to refresh for flat list
+  // Reference: https://thewebdev.info/2022/02/19///how-to-implement-pull-to-refresh-flatlist-with-react-native/
+  const handlePullToRefresh = async () => {
+    setIsRefreshing(true);
+    await getAllNotificationOfUser();
+    setIsRefreshing(false);
+  };
+
+  /*  *** React Native Hande Gesture ***
+   *
+   * Reference(s):
+   * (1) https://docs.swmansion.com/react-native-gesture-handler/docs/quickstart/quickstart
+   * (2) https://blog.logrocket.com/react-native-gesture-handler-swipe-long-press-and-more/
+   * (3) https://reactnative-examples.com/remove-selected-item-from-flatlist-in-react-native/
+   */
+
+  /*
+   *   *** Renders view when swiped to left ***
+   */
+  const leftSwipeActions = () => {
+    return (
+      <VStack
+        w="40%"
+        backgroundColor={colors.pink_lighter}
+        justifyContent="center"
+      >
+        <CloseIcon color={colors.white} size="2xl" alignSelf="center" />
+        <Text
+          alignSelf="center"
+          bold
+          fontFamily={Platform.OS === "ios" ? "Helvetica" : typography.android}
+          color={colors.white}
+        >
+          Reject
+        </Text>
+      </VStack>
+    );
+  };
+
+  /*
+   *   *** Renders view when swiped to right ***
+   */
+  const rightSwipeActions = () => {
+    return (
+      <VStack
+        w="40%"
+        backgroundColor={colors.green_lighter}
+        justifyContent="center"
+      >
+        <CheckIcon color={colors.white} size="2xl" alignSelf="center" />
+        <Text
+          alignSelf="center"
+          bold
+          fontFamily={Platform.OS === "ios" ? "Helvetica" : typography.android}
+          color={colors.white}
+        >
+          Accept
+        </Text>
+      </VStack>
+    );
+  };
+
+  /*
+   *   *** Peforms action when Left boundary is opened ***
+   */
+  const swipeFromLeftOpen = () => {
+    filterAndRerender();
+    // TODO: Call Reject Notificaiton API
+  };
+
+  /*
+   *   *** Peforms action when Right boundary is opened ***
+   */
+  const swipeFromRightOpen = () => {
+    filterAndRerender();
+    // TODO: Call Accept Notification API
+  };
+
+  const filterAndRerender = () => {
+    // Filter Data
+    const filteredData = notificationData.filter(
+      (item) => item.notificationID !== selectedId
+    );
+    // Update Notification Data with the newly filtered data; to re-render flat list.
+    setNotificationData(filteredData);
+  };
 
   return (
-    <VStack w="100%" h="100%" alignItems="center">
-      <VStack w="90%">
-        <FlatList
-          data={notificationData}
-          renderItem={({ item }) => (
-            <Box
-              borderBottomWidth="1"
-              borderColor={colors.primary_gray}
-              py="2"
-              mt="1"
-            >
-              <VStack w="100%" space={2} flexWrap={"wrap"}>
-                <HStack space={5} alignItems="center">
-                  <Avatar size="sm" bg={colors.pink} marginY="auto">
-                    {" "}
-                    {user && user.sub && user.sub.substring(0, 1)
-                      ? user.sub.substring(0, 1)
-                      : `--`}{" "}
-                  </Avatar>
-                  <Text
-                    color={colors.black_var1}
-                    fontFamily={
-                      Platform.OS === "ios" ? "Helvetica" : typography.android
-                    }
-                  >
-                    {item && item.title ? item.title : "Not Available"}
-                  </Text>
-                </HStack>
-                <HStack>
-                  <Text
-                    alignSelf="flex-start"
-                    color={colors.black_var1}
-                    fontFamily={
-                      Platform.OS === "ios" ? "Helvetica" : typography.android
-                    }
-                  >
-                    {item && item.message ? item.message : "Not Available"}
-                  </Text>
-                </HStack>
-                <HStack justifyContent="flex-start">
-                  <Text
-                    alignSelf="flex-start"
-                    color={colors.primary_overlay_color}
-                    fontFamily={
-                      Platform.OS === "ios" ? "Helvetica" : typography.android
-                    }
-                  >
-                    {" "}
-                    {item && item.createdDateTime
-                      ? `${item.createdDateTime.substring(
-                          0,
-                          10
-                        )}   ${item.createdDateTime.substring(12, 19)} HRS`
-                      : "Not Available"}{" "}
-                  </Text>
-                </HStack>
-              </VStack>
-            </Box>
+    <>
+      {isLoading ? (
+        <ActivityIndicator visible={true} />
+      ) : (
+        <VStack w="100%" h="100%" alignItems="center">
+          {isError && (
+            <ErrorRetryApiCard handleError={handleErrorWhenApiFails} />
           )}
-          keyExtractor={(item) => item.notificationID}
-        />
-      </VStack>
-    </VStack>
+          <VStack w="90%">
+            <FlatList
+              // onViewableItemsChanged={onViewableItemsChanged}
+              data={notificationData}
+              extraData={selectedId}
+              keyExtractor={(item) => item.notificationID}
+              onRefresh={handlePullToRefresh}
+              refreshing={isRefreshing}
+              renderItem={({ item }) => (
+                /*
+                 * Issue resolved -- cannot swipe on Android. Soln: Wrap with <GestureHandlerRootView>
+                 * Ref: https://stackoverflow.com/questions/70545275/react-native-swipeable-gesture-not-working-on-android
+                 */
+                <GestureHandlerRootView>
+                  <Swipeable
+                    renderLeftActions={leftSwipeActions}
+                    renderRightActions={rightSwipeActions}
+                    onSwipeableLeftWillOpen={swipeFromLeftOpen}
+                    onSwipeableRightWillOpen={swipeFromRightOpen}
+                  >
+                    <NotificationCard
+                      item={item}
+                      user={user}
+                      setSelectedId={setSelectedId}
+                    />
+                  </Swipeable>
+                </GestureHandlerRootView>
+              )}
+            />
+          </VStack>
+        </VStack>
+      )}
+    </>
   );
 }
 
