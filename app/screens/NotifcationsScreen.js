@@ -7,17 +7,17 @@ import typography from "../config/typography";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import NotificationCard from "../components/NotificationCard";
+import notificationApi from "../api/notification";
+import ActivityIndicator from "../components/ActivityIndicator";
+import ErrorRetryApiCard from "../components/ErrorRetryApiCard";
 
 function NotifcationsScreen(props) {
   const { user } = useContext(AuthContext);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   // used to manage flatlist
   const [selectedId, setSelectedId] = useState(null);
-  // TODO: Create API to retrieve data to puplate flat list
-  // (1) Retrieves Data
-  // (2) try out setParams() to filter `read` / `unread` / `accepted` / `rejected`
-  useEffect(() => {
-    // console.log(user);
-  }, []);
 
   /*
    * Mock Data to populate flat list
@@ -57,6 +57,42 @@ function NotifcationsScreen(props) {
       readStatus: false,
     },
   ]);
+
+  useEffect(() => {
+    // Fetches data from notification api
+    getAllNotificationOfUser();
+  }, []);
+
+  const getAllNotificationOfUser = async () => {
+    setIsLoading(true);
+    const response = await notificationApi.getNotificationOfUser();
+    console.log(response);
+    if (!response.ok) {
+      // return error block
+      setIsLoading(false);
+      setIsError(true);
+      return;
+    }
+    setIsLoading(false);
+    // Filters for data only with readStatus === true
+    const filteredData = response.data.filter(
+      (item) => item.readStatus === false
+    );
+    setNotificationData(filteredData);
+  };
+
+  // Purpose: When api fails, perform another fetch
+  const handleErrorWhenApiFails = async () => {
+    await getAllNotificationOfUser();
+  };
+
+  // Purpose: pull to refresh for flat list
+  // Reference: https://thewebdev.info/2022/02/19///how-to-implement-pull-to-refresh-flatlist-with-react-native/
+  const handlePullToRefresh = async () => {
+    setIsRefreshing(true);
+    await getAllNotificationOfUser();
+    setIsRefreshing(false);
+  };
 
   /*  *** React Native Hande Gesture ***
    *
@@ -138,36 +174,47 @@ function NotifcationsScreen(props) {
   };
 
   return (
-    <VStack w="100%" h="100%" alignItems="center">
-      <VStack w="90%">
-        <FlatList
-          // onViewableItemsChanged={onViewableItemsChanged}
-          data={notificationData}
-          extraData={selectedId}
-          renderItem={({ item }) => (
-            /*
-             * Issue resolved -- cannot swipe on Android. Soln: Wrap with <GestureHandlerRootView>
-             * Ref: https://stackoverflow.com/questions/70545275/react-native-swipeable-gesture-not-working-on-android
-             */
-            <GestureHandlerRootView>
-              <Swipeable
-                renderLeftActions={leftSwipeActions}
-                renderRightActions={rightSwipeActions}
-                onSwipeableLeftWillOpen={swipeFromLeftOpen}
-                onSwipeableRightWillOpen={swipeFromRightOpen}
-              >
-                <NotificationCard
-                  item={item}
-                  user={user}
-                  setSelectedId={setSelectedId}
-                />
-              </Swipeable>
-            </GestureHandlerRootView>
+    <>
+      {isLoading ? (
+        <ActivityIndicator visible={true} />
+      ) : (
+        <VStack w="100%" h="100%" alignItems="center">
+          {isError && (
+            <ErrorRetryApiCard handleError={handleErrorWhenApiFails} />
           )}
-          keyExtractor={(item) => item.notificationID}
-        />
-      </VStack>
-    </VStack>
+          <VStack w="90%">
+            <FlatList
+              // onViewableItemsChanged={onViewableItemsChanged}
+              data={notificationData}
+              extraData={selectedId}
+              keyExtractor={(item) => item.notificationID}
+              onRefresh={handlePullToRefresh}
+              refreshing={isRefreshing}
+              renderItem={({ item }) => (
+                /*
+                 * Issue resolved -- cannot swipe on Android. Soln: Wrap with <GestureHandlerRootView>
+                 * Ref: https://stackoverflow.com/questions/70545275/react-native-swipeable-gesture-not-working-on-android
+                 */
+                <GestureHandlerRootView>
+                  <Swipeable
+                    renderLeftActions={leftSwipeActions}
+                    renderRightActions={rightSwipeActions}
+                    onSwipeableLeftWillOpen={swipeFromLeftOpen}
+                    onSwipeableRightWillOpen={swipeFromRightOpen}
+                  >
+                    <NotificationCard
+                      item={item}
+                      user={user}
+                      setSelectedId={setSelectedId}
+                    />
+                  </Swipeable>
+                </GestureHandlerRootView>
+              )}
+            />
+          </VStack>
+        </VStack>
+      )}
+    </>
   );
 }
 
