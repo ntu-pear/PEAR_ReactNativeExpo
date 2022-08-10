@@ -10,7 +10,9 @@
     "eject": "expo eject",
     "prettier": "prettier --check ./app",
     "prettier-fix": "prettier --write ./app",
-    "lint": "eslint app --color"
+    "lint": "eslint app --color",
+    "prepare": "husky install",
+    "prepush": "npm run lint && npm run test"
   },
   "lint-staged": {
     "app/**/*.{ts,tsx,js,jsx}": [
