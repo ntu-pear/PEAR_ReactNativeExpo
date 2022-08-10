@@ -13,8 +13,8 @@
     "lint": "eslint app --color"
   },
   "lint-staged": {
-    "src/**/*.{ts,tsx}": [
-      "eslint --ext .tsx --ext .ts ./src --fix"
+    "app/**/*.{ts,tsx}": [
+      "eslint --ext .tsx --ext .ts ./app --fix"
     ],
     "./src/**": [
       "prettier --write ./app"
