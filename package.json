@@ -16,7 +16,7 @@
     "app/**/*.{ts,tsx}": [
       "eslint --ext .tsx --ext .ts ./app --fix"
     ],
-    "./src/**": [
+    "./app/**": [
       "prettier --write ./app"
     ]
   },
