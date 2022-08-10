@@ -1,15 +1,16 @@
-import client from "./client";
+/*eslint eslint-comments/no-unlimited-disable: error */
+import client from './client';
 
 /*
  * List all end points here
  */
-const endpoint = "/User";
-const userLogin = endpoint + "/Login";
-const userUpdate = endpoint + "/Update";
-const userDelete = endpoint + "/delete";
-const userRefreshToken = endpoint + "/RefereshToken";
-const userLogout = endpoint + "/Logout";
-const userResetPassword = endpoint + "/ResetPassword";
+const endpoint = '/User';
+const userLogin = `${endpoint}/Login`;
+const userUpdate = `${endpoint}/Update`; //eslint-disable-line no-unused-vars
+const userDelete = `${endpoint}/delete`; //eslint-disable-line no-unused-vars
+const userRefreshToken = `${endpoint}/RefereshToken`; //eslint-disable-line no-unused-vars
+const userLogout = `${endpoint}/Logout`; //eslint-disable-line no-unused-vars
+const userResetPassword = `${endpoint}/ResetPassword`; //eslint-disable-line no-unused-vars
 
 /*
  * List all functions here
@@ -20,7 +21,7 @@ const userResetPassword = endpoint + "/ResetPassword";
 
 // **********************  POST REQUESTS *************************
 const loginUser = (Email, Role, Password) => {
-  var body = JSON.stringify({ Email, Role, Password });
+  const body = JSON.stringify({ Email, Role, Password });
 
   // Note: client.post accepts 3 parameters. (1) endpoint (2) data and (3) onUploadProgress -- this is optional
   return client.post(userLogin, body);

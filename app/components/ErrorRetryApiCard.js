@@ -1,7 +1,14 @@
-import React from "react";
-import { StyleSheet } from "react-native";
-import { Text, HStack, VStack, IconButton, Alert, Box, CloseIcon } from "native-base";
-import AppButton from "./AppButton";
+import React from 'react';
+import {
+  Text,
+  HStack,
+  VStack,
+  IconButton,
+  Alert,
+  Box,
+  CloseIcon,
+} from 'native-base';
+import AppButton from './AppButton';
 
 /* Note the immediate bunch of code will only be rendered
  * when one of the APIs has an error. Purpose: Error handling of API
@@ -16,7 +23,7 @@ function ErrorRetryApiCard({ handleError }) {
             <HStack space={2} flexShrink={1}>
               <Alert.Icon mt="1" />
               <Text fontSize="md" color="coolGray.800">
-                {`Unable to retrieve api data. Try again? Or Relogin`}
+                Unable to retrieve api data. Try again? Or Relogin
               </Text>
             </HStack>
             <IconButton
@@ -26,7 +33,7 @@ function ErrorRetryApiCard({ handleError }) {
               }}
               icon={<CloseIcon size="3" />}
               _icon={{
-                color: "coolGray.600",
+                color: 'coolGray.600',
               }}
             />
           </HStack>
@@ -34,11 +41,9 @@ function ErrorRetryApiCard({ handleError }) {
       </Alert>
       <Box position="fixed" my="50%" w="60%" mx="auto">
         {/* Take not to pass in handleError from parent component */}
-        <AppButton title="Try Again" color={"red"} onPress={handleError} />
+        <AppButton title="Try Again" color="red" onPress={handleError} />
       </Box>
     </Box>
   );
 }
-
-const styles = StyleSheet.create({});
 export default ErrorRetryApiCard;

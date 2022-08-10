@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext } from 'react';
 import {
   ImageBackground,
   View,
@@ -7,39 +7,39 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-} from "react-native";
+} from 'react-native';
 
 // Custom Import from https://reactnativeelements.com/docs/
-import { Select, Input, Center, Icon, Box } from "native-base";
-import { MaterialIcons } from "@expo/vector-icons";
-import jwt_decode from "jwt-decode";
-import AuthContext from "../auth/context";
-import authStorage from "../auth/authStorage";
+import { Select, Input, Center, Icon, Box } from 'native-base';
+import { MaterialIcons } from '@expo/vector-icons';
+import jwt_decode from 'jwt-decode';
+import AuthContext from '../auth/context';
+import authStorage from '../auth/authStorage';
 
 // Constant import
-import colors from "../config/colors";
-import typography from "../config/typography";
-import errors from "../config/errors";
-import useApiHandler from "../hooks/useApiHandler";
+import colors from '../config/colors';
+import typography from '../config/typography';
+import errors from '../config/errors';
+import useApiHandler from '../hooks/useApiHandler';
 
 // Import from components
-import AppText from "../components/AppText";
-import AppButton from "../components/AppButton";
-import ErrorMessage from "../components/ErrorMessage";
+import AppText from '../components/AppText';
+import AppButton from '../components/AppButton';
+import ErrorMessage from '../components/ErrorMessage';
 
 // Import Api
-import userApi from "../api/user";
+import userApi from '../api/user';
 
 function WelcomeScreen(props) {
   /*
    * All States To Be Placed Here
    */
   const authContext = useContext(AuthContext);
-  let [role, setRole] = useState("");
-  let [show, setShow] = useState(false);
-  let [email, setEmail] = useState("");
-  let [password, setPassword] = useState("");
-  let [loginFailed, setLoginFailed] = useState(false);
+  const [role, setRole] = useState('');
+  const [show, setShow] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loginFailed, setLoginFailed] = useState(false);
   const apiHandlerHook = useApiHandler();
 
   /*
@@ -54,24 +54,26 @@ function WelcomeScreen(props) {
    * Deconstructor
    * Note: Navigation is passed down as a prop from NativeStackNavigator
    */
-  const { navigation } = props;
+  // const { navigation } = props;
 
   /*
    * All Functions To Be Placed Here
    */
   const onPressLogin = async () => {
-    console.log("Logging in...");
-    //"Supervisor!23"
+    console.log('Logging in...');
+    // "Supervisor!23"
     const result = await userApi.loginUser(email, role, password);
     // userLoginApi.request(email, role, password);
     // if returned array is empty or error
-    if (!result.ok) return setLoginFailed(true);
+    if (!result.ok) {
+      return setLoginFailed(true);
+    }
     setLoginFailed(false);
     const user = jwt_decode(result.data.accessToken);
     authContext.setUser(user);
     console.log(user);
-    authStorage.storeToken("userAuthToken", result.data.accessToken);
-    authStorage.storeToken("userRefreshToken", result.data.refreshToken);
+    authStorage.storeToken('userAuthToken', result.data.accessToken);
+    authStorage.storeToken('userRefreshToken', result.data.refreshToken);
     // set api header if empty
     apiHandlerHook.setHeaderIfEmpty();
   };
@@ -88,13 +90,13 @@ function WelcomeScreen(props) {
     <ImageBackground
       style={styles.background}
       blurRadius={8}
-      source={require("../assets/login_background.jpg")}
+      source={require('../assets/login_background.jpg')}
     >
       <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
         <View>
           <View style={styles.logoContainer}>
             <Image
-              source={require("../assets/pear_v2.png")}
+              source={require('../assets/pear_v2.png')}
               style={styles.logo}
             />
             <AppText style={styles.tagLine}>PEAR</AppText>
@@ -112,7 +114,7 @@ function WelcomeScreen(props) {
                   borderColor: `${colors.secondary}`,
                 }}
                 fontFamily={
-                  Platform.OS === "ios" ? typography.ios : typography.android
+                  Platform.OS === 'ios' ? typography.ios : typography.android
                 }
                 height="50"
                 InputLeftElement={
@@ -135,7 +137,7 @@ function WelcomeScreen(props) {
                 borderRadius="25"
                 color={colors.black}
                 fontFamily={
-                  Platform.OS === "ios" ? typography.ios : typography.android
+                  Platform.OS === 'ios' ? typography.ios : typography.android
                 }
                 height="50"
                 minWidth="full"
@@ -158,7 +160,7 @@ function WelcomeScreen(props) {
                 borderRadius="25"
                 color={colors.black}
                 fontFamily={
-                  Platform.OS === "ios" ? typography.ios : typography.android
+                  Platform.OS === 'ios' ? typography.ios : typography.android
                 }
                 _focus={{
                   bg: `${colors.lighter}`,
@@ -169,7 +171,7 @@ function WelcomeScreen(props) {
                   <Icon
                     as={
                       <MaterialIcons
-                        name={show ? "visibility" : "visibility-off"}
+                        name={show ? 'visibility' : 'visibility-off'}
                       />
                     }
                     color={colors.black}
@@ -183,7 +185,7 @@ function WelcomeScreen(props) {
                 placeholderTextColor={colors.medium}
                 marginTop="5"
                 size="18"
-                type={show ? "text" : "password"}
+                type={show ? 'text' : 'password'}
               />
             </View>
             <Box>
@@ -202,14 +204,14 @@ function WelcomeScreen(props) {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    alignItems: "center",
+    alignItems: 'center',
   },
   buttonsContainer: {
-    width: "100%",
+    width: '100%',
     padding: 20,
   },
   credentialsContainer: {
-    width: "90%",
+    width: '90%',
   },
   logo: {
     width: 100,
@@ -218,10 +220,10 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     top: 100,
-    alignItems: "center",
+    alignItems: 'center',
   },
   tagLine: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
     paddingVertical: 800,
     fontSize: 80,
   },

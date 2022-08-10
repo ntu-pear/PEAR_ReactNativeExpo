@@ -1,5 +1,5 @@
 /*
-This is an example of how to create a custom hook. 
+This is an example of how to create a custom hook.
 This is especially useful when we need to repetiviely use the same hook.
 
 Naming Convention: use<Insert meaningful name>

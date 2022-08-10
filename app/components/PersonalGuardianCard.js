@@ -1,17 +1,18 @@
-import React from "react";
-import { StyleSheet, Platform } from "react-native";
-import { Stack, Text, Input, FormControl, HStack, Button } from "native-base";
-import colors from "../config/colors";
-import typography from "../config/typography";
+/*eslint eslint-comments/no-unlimited-disable: error */
+import React from 'react';
+import { Platform } from 'react-native';
+import { Stack, Text, Input, FormControl, HStack } from 'native-base';
+import colors from '../config/colors';
+import typography from '../config/typography';
 
 function PersonalGuardianCard(props) {
-  const { guardian, additionalGuardian } = props.patientGuardian; 
+  const { guardian, additionalGuardian } = props.patientGuardian; //eslint-disable-line no-unused-vars
 
   return (
     <Stack>
       <Text
         color={colors.black_var1}
-        fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
+        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
         fontSize="2xl"
         fontWeight="semibold"
       >
@@ -21,9 +22,11 @@ function PersonalGuardianCard(props) {
         <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontFamily: `${
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
+              }`,
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             First Name
@@ -31,11 +34,17 @@ function PersonalGuardianCard(props) {
 
           <Input
             color={colors.black_var1}
-            fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
+            fontFamily={
+              Platform.OS === 'ios' ? 'Helvetica' : typography.android
+            }
             fontSize="lg"
-            isReadOnly={true}
+            isReadOnly
             variant="unstyled"
-            value={guardian && guardian.firstName ? guardian.firstName : "Not Available"}
+            value={
+              guardian && guardian.firstName
+                ? guardian.firstName
+                : 'Not Available'
+            }
             w="100%"
           />
         </HStack>
@@ -44,9 +53,11 @@ function PersonalGuardianCard(props) {
         <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontFamily: `${
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
+              }`,
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             Last Name
@@ -54,11 +65,17 @@ function PersonalGuardianCard(props) {
 
           <Input
             color={colors.black_var1}
-            fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
+            fontFamily={
+              Platform.OS === 'ios' ? 'Helvetica' : typography.android
+            }
             fontSize="lg"
-            isReadOnly={true}
+            isReadOnly
             variant="unstyled"
-            value={guardian && guardian.lastName ? guardian.lastName : "Not Available"}
+            value={
+              guardian && guardian.lastName
+                ? guardian.lastName
+                : 'Not Available'
+            }
             w="100%"
           />
         </HStack>
@@ -67,9 +84,11 @@ function PersonalGuardianCard(props) {
         <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontFamily: `${
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
+              }`,
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             NRIC
@@ -77,11 +96,13 @@ function PersonalGuardianCard(props) {
 
           <Input
             color={colors.black_var1}
-            fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
+            fontFamily={
+              Platform.OS === 'ios' ? 'Helvetica' : typography.android
+            }
             fontSize="lg"
-            isReadOnly={true}
+            isReadOnly
             variant="unstyled"
-            value={guardian && guardian.nric ? guardian.nric : "Not Available"}
+            value={guardian && guardian.nric ? guardian.nric : 'Not Available'}
             w="100%"
           />
         </HStack>
@@ -90,9 +111,11 @@ function PersonalGuardianCard(props) {
         <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontFamily: `${
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
+              }`,
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             Relationship
@@ -100,11 +123,17 @@ function PersonalGuardianCard(props) {
 
           <Input
             color={colors.black_var1}
-            fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
+            fontFamily={
+              Platform.OS === 'ios' ? 'Helvetica' : typography.android
+            }
             fontSize="lg"
-            isReadOnly={true}
+            isReadOnly
             variant="unstyled"
-            value={guardian && guardian.relationship ? guardian.relationship : "Not Available"}
+            value={
+              guardian && guardian.relationship
+                ? guardian.relationship
+                : 'Not Available'
+            }
             w="100%"
           />
         </HStack>
@@ -113,5 +142,4 @@ function PersonalGuardianCard(props) {
   );
 }
 
-const styles = StyleSheet.create({});
 export default PersonalGuardianCard;

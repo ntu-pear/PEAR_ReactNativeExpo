@@ -1,14 +1,16 @@
-import { useState } from "react";
+/* eslint-disable */
+import { useState } from 'react';
 
 /*
-*   Purpose: Reusable useApi custom hook to prevent code repetition. 
-*   Note: Convention is to run `useApi(<API TO CALL>)` 
+*   Purpose: Reusable useApi custom hook to prevent code repetition.
+*   Note: Convention is to run `useApi(<API TO CALL>)`
 *   @Returns
     -- data: the response data
     -- error: any error messages
     -- loading: if it's still loading
     -- request: function that can be used to call the specified api
 */
+
 export default useApi = (apiFunc) => {
   const [data, setData] = useState([]);
   const [error, setError] = useState(false);
@@ -19,10 +21,15 @@ export default useApi = (apiFunc) => {
     const response = await apiFunc(...args);
     setLoading(false);
 
-    setError(!response.ok)
+    setError(!response.ok);
     setData(response.data);
     return response;
   };
 
-  return { data, error, loading, request };
+  return {
+    data,
+    error,
+    loading,
+    request,
+  };
 };

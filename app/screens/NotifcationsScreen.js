@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useContext } from "react";
-import { StyleSheet, Platform } from "react-native";
-import AuthContext from "../auth/context";
-import { Text, FlatList, VStack, CheckIcon, CloseIcon } from "native-base";
-import colors from "../config/colors";
-import typography from "../config/typography";
-import Swipeable from "react-native-gesture-handler/Swipeable";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import NotificationCard from "../components/NotificationCard";
-import notificationApi from "../api/notification";
-import ActivityIndicator from "../components/ActivityIndicator";
-import ErrorRetryApiCard from "../components/ErrorRetryApiCard";
+import React, { useState, useEffect, useContext } from 'react';
+import { Platform } from 'react-native';
+import { Text, FlatList, VStack, CheckIcon, CloseIcon } from 'native-base';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import AuthContext from '../auth/context';
+import colors from '../config/colors';
+import typography from '../config/typography';
+import NotificationCard from '../components/NotificationCard';
+import notificationApi from '../api/notification';
+import ActivityIndicator from '../components/ActivityIndicator';
+import ErrorRetryApiCard from '../components/ErrorRetryApiCard';
 
 function NotifcationsScreen(props) {
   const { user } = useContext(AuthContext);
@@ -25,35 +25,35 @@ function NotifcationsScreen(props) {
   const [notificationData, setNotificationData] = useState([
     {
       notificationID: 446,
-      title: "Approval request (Delete LikeDislike)",
-      createdDateTime: "2022-05-08T20:16:29.8150851",
+      title: 'Approval request (Delete LikeDislike)',
+      createdDateTime: '2022-05-08T20:16:29.8150851',
       logID: 3535,
       approvalRequestID: 437,
-      receiverUserID: "B22698B8-42A2-4115-9631-1C2D1E2AC5F4",
+      receiverUserID: 'B22698B8-42A2-4115-9631-1C2D1E2AC5F4',
       message:
-        "Caregiver Adeline Tan has requested to delete a LikeDislike item for Patient Alice Lee.",
+        'Caregiver Adeline Tan has requested to delete a LikeDislike item for Patient Alice Lee.',
       readStatus: false,
     },
     {
       notificationID: 445,
-      title: "Approval request (Update LikeDislike)",
-      createdDateTime: "2022-05-08T20:16:10.9527239",
+      title: 'Approval request (Update LikeDislike)',
+      createdDateTime: '2022-05-08T20:16:10.9527239',
       logID: 3534,
       approvalRequestID: 436,
-      receiverUserID: "B22698B8-42A2-4115-9631-1C2D1E2AC5F4",
+      receiverUserID: 'B22698B8-42A2-4115-9631-1C2D1E2AC5F4',
       message:
-        "Caregiver Adeline Tan has requested to update a LikeDislike item.",
+        'Caregiver Adeline Tan has requested to update a LikeDislike item.',
       readStatus: false,
     },
     {
       notificationID: 444,
-      title: "Approval request (Add LikeDislike)",
-      createdDateTime: "2022-05-08T20:15:50.3813064",
+      title: 'Approval request (Add LikeDislike)',
+      createdDateTime: '2022-05-08T20:15:50.3813064',
       logID: 3533,
       approvalRequestID: 435,
-      receiverUserID: "B22698B8-42A2-4115-9631-1C2D1E2AC5F4",
+      receiverUserID: 'B22698B8-42A2-4115-9631-1C2D1E2AC5F4',
       message:
-        "Caregiver Adeline Tan has requested to add a LikeDislike item for Patient Alice Lee.",
+        'Caregiver Adeline Tan has requested to add a LikeDislike item for Patient Alice Lee.',
       readStatus: false,
     },
   ]);
@@ -66,7 +66,6 @@ function NotifcationsScreen(props) {
   const getAllNotificationOfUser = async () => {
     setIsLoading(true);
     const response = await notificationApi.getNotificationOfUser();
-    console.log(response);
     if (!response.ok) {
       // return error block
       setIsLoading(false);
@@ -76,7 +75,7 @@ function NotifcationsScreen(props) {
     setIsLoading(false);
     // Filters for data only with readStatus === true
     const filteredData = response.data.filter(
-      (item) => item.readStatus === false
+      (item) => item.readStatus === false,
     );
     setNotificationData(filteredData);
   };
@@ -105,48 +104,44 @@ function NotifcationsScreen(props) {
   /*
    *   *** Renders view when swiped to left ***
    */
-  const leftSwipeActions = () => {
-    return (
-      <VStack
-        w="40%"
-        backgroundColor={colors.pink_lighter}
-        justifyContent="center"
+  const leftSwipeActions = () => (
+    <VStack
+      w="40%"
+      backgroundColor={colors.pink_lighter}
+      justifyContent="center"
+    >
+      <CloseIcon color={colors.white} size="2xl" alignSelf="center" />
+      <Text
+        alignSelf="center"
+        bold
+        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
+        color={colors.white}
       >
-        <CloseIcon color={colors.white} size="2xl" alignSelf="center" />
-        <Text
-          alignSelf="center"
-          bold
-          fontFamily={Platform.OS === "ios" ? "Helvetica" : typography.android}
-          color={colors.white}
-        >
-          Reject
-        </Text>
-      </VStack>
-    );
-  };
+        Reject
+      </Text>
+    </VStack>
+  );
 
   /*
    *   *** Renders view when swiped to right ***
    */
-  const rightSwipeActions = () => {
-    return (
-      <VStack
-        w="40%"
-        backgroundColor={colors.green_lighter}
-        justifyContent="center"
+  const rightSwipeActions = () => (
+    <VStack
+      w="40%"
+      backgroundColor={colors.green_lighter}
+      justifyContent="center"
+    >
+      <CheckIcon color={colors.white} size="2xl" alignSelf="center" />
+      <Text
+        alignSelf="center"
+        bold
+        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
+        color={colors.white}
       >
-        <CheckIcon color={colors.white} size="2xl" alignSelf="center" />
-        <Text
-          alignSelf="center"
-          bold
-          fontFamily={Platform.OS === "ios" ? "Helvetica" : typography.android}
-          color={colors.white}
-        >
-          Accept
-        </Text>
-      </VStack>
-    );
-  };
+        Accept
+      </Text>
+    </VStack>
+  );
 
   /*
    *   *** Peforms action when Left boundary is opened ***
@@ -167,7 +162,7 @@ function NotifcationsScreen(props) {
   const filterAndRerender = () => {
     // Filter Data
     const filteredData = notificationData.filter(
-      (item) => item.notificationID !== selectedId
+      (item) => item.notificationID !== selectedId,
     );
     // Update Notification Data with the newly filtered data; to re-render flat list.
     setNotificationData(filteredData);
@@ -176,7 +171,7 @@ function NotifcationsScreen(props) {
   return (
     <>
       {isLoading ? (
-        <ActivityIndicator visible={true} />
+        <ActivityIndicator visible />
       ) : (
         <VStack w="100%" h="100%" alignItems="center">
           {isError && (
@@ -217,7 +212,5 @@ function NotifcationsScreen(props) {
     </>
   );
 }
-
-const styles = StyleSheet.create({});
 
 export default NotifcationsScreen;

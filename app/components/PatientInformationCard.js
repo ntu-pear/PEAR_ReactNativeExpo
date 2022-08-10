@@ -1,17 +1,19 @@
-import React, { useState } from "react";
-import { StyleSheet, TouchableOpacity } from "react-native";
-import { Box, VStack, Center, Image, Text, HStack, Icon } from "native-base";
-import colors from "../config/colors";
-import routes from "../navigation/routes";
-import { MaterialIcons } from "@expo/vector-icons";
+/*eslint eslint-comments/no-unlimited-disable: error */
+import React, { useState } from 'react';
+import { TouchableOpacity } from 'react-native';
+import { Box, VStack, Center, Image, Text, HStack, Icon } from 'native-base';
+import { MaterialIcons } from '@expo/vector-icons';
+import colors from '../config/colors';
+import routes from '../navigation/routes';
 
 function PatientInformationCard(props) {
   const { patientProfile, navigation } = props;
-  const [displayPicUrl, setDisplayPicUrl] = useState(
-    `https://picsum.photos/400/400/?image=${Math.floor(Math.random() * 85)}`
-  );
+
+  const [displayPicUrl, setDisplayPicUrl] = //eslint-disable-line no-unused-vars
+    useState(
+      `https://picsum.photos/400/400/?image=${Math.floor(Math.random() * 85)}`,
+    );
   const handleOnPress = () => {
-    console.log("Placeholder for touchablehighlight on press");
     navigation.push(routes.PATIENT_INFORMATION, {
       displayPicUrl: `${displayPicUrl}`,
       ...patientProfile,
@@ -19,14 +21,14 @@ function PatientInformationCard(props) {
   };
 
   const calcAge = (dob) => {
-    let today = new Date().getFullYear();
-    let _dob = new Date(dob).getFullYear();
+    const today = new Date().getFullYear();
+    const _dob = new Date(dob).getFullYear();
     return today - _dob;
   };
 
   const extractFullYear = (dob) => {
-    var _date = new Date(dob);
-    return _date.getDate() + "-" + _date.getMonth() + "-" + _date.getFullYear();
+    const _date = new Date(dob);
+    return `${_date.getDate()}-${_date.getMonth()}-${_date.getFullYear()}`;
   };
 
   return (
@@ -50,10 +52,9 @@ function PatientInformationCard(props) {
               borderRadius="full"
               // Note: This is a fall-back uri. Will only be used if source fails to render the image.
               fallbackSource={{
-                uri:
-                  "https://res.cloudinary.com/dbpearfyp/image/upload/v1640487405/Patient/Alice_Lee_Sxxxx567D/ProfilePicture/zsw7dyprsvn0bjmatofg.jpg",
+                uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1640487405/Patient/Alice_Lee_Sxxxx567D/ProfilePicture/zsw7dyprsvn0bjmatofg.jpg',
               }}
-              resizeMode={"cover"}
+              resizeMode="cover"
               size="2xl"
               source={{
                 uri: `${patientProfile.profilePicture}`,
@@ -71,7 +72,7 @@ function PatientInformationCard(props) {
             </Center>
             <Center mt="1">
               <Text italic fontSize="2xl">
-                {patientProfile.gender === "F" ? "Female" : "Male"}
+                {patientProfile.gender === 'F' ? 'Female' : 'Male'}
               </Text>
             </Center>
           </Center>
@@ -123,13 +124,16 @@ function PatientInformationCard(props) {
           </Box>
         </HStack>
         <Center position="absolute" right="0" marginY="31%">
-          <Icon as={MaterialIcons} color={colors.black_var1} name="chevron-right" size="5xl"/>
+          <Icon
+            as={MaterialIcons}
+            color={colors.black_var1}
+            name="chevron-right"
+            size="5xl"
+          />
         </Center>
       </Box>
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({});
 
 export default PatientInformationCard;

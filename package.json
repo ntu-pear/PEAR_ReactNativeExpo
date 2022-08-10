@@ -8,24 +8,11 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "eject": "expo eject",
-    "prettier": "prettier --check ./app",
+    "prettier-check": "prettier --check ./app",
     "prettier-fix": "prettier --write ./app",
     "lint": "eslint app --fix --color",
     "prepare": "husky install",
     "prepush": "npm run lint && npm run test"
-  },
-  "lint-staged": {
-    "app/**/*.{js,jsx,ts,tsx}": [
-      "eslint --ext .js --ext .jsx --ext .tsx --ext .ts app/ --fix --color"
-    ],
-    "./app/**": [
-      "prettier --write ./app"
-    ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
   },
   "dependencies": {
     "@expo/vector-icons": "^13.0.0",
@@ -61,13 +48,9 @@
   "devDependencies": {
     "@babel/core": "^7.12.9",
     "eslint": "^8.21.0",
-    "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-jsx-a11y": "^6.5.1",
-    "eslint-plugin-react": "^7.30.1",
-    "eslint-plugin-react-hooks": "^4.3.0",
-    "eslint-plugin-react-native": "^4.0.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
     "husky": "^8.0.1",
     "lint-staged": "^13.0.3",
     "prettier": "2.7.1"

@@ -1,32 +1,21 @@
-import React from "react";
-import { StyleSheet, View, TouchableHighlight, TouchableOpacity } from "react-native";
+import React from 'react';
+import { TouchableOpacity } from 'react-native';
 
-import { Center, Image, Text, VStack, Box } from "native-base";
-import colors from "../config/colors";
+import { Center, Image, Text, VStack, Box } from 'native-base';
 
 // Import Constants from routes
-import routes from "../navigation/routes";
+import routes from '../navigation/routes';
 
 function PatientScreenCard(props) {
-  const { patientProfile, navigation} = props;
+  const { patientProfile, navigation } = props;
 
   const handleOnPress = () => {
-    console.log("CLICKING");
-    console.log(props);
     // Navigate to PatientProfileScreen
-    navigation.push(routes.PATIENT_PROFILE, {...patientProfile});
+    navigation.push(routes.PATIENT_PROFILE, { ...patientProfile });
   };
   return (
-    <TouchableOpacity
-      onPress={handleOnPress}
-    >
-      <Box
-        mt="5"
-        mb="5"
-        minW="90%"
-        overflow="hidden"
-        rounded="lg"
-      >
+    <TouchableOpacity onPress={handleOnPress}>
+      <Box mt="5" mb="5" minW="90%" overflow="hidden" rounded="lg">
         <VStack mb="2">
           <Center>
             <Image
@@ -34,10 +23,9 @@ function PatientScreenCard(props) {
               borderRadius="full"
               // Note: This is a fall-back uri. Will only be used if source fails to render the image.
               fallbackSource={{
-                uri:
-                  "https://res.cloudinary.com/dbpearfyp/image/upload/v1640487405/Patient/Alice_Lee_Sxxxx567D/ProfilePicture/zsw7dyprsvn0bjmatofg.jpg",
+                uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1640487405/Patient/Alice_Lee_Sxxxx567D/ProfilePicture/zsw7dyprsvn0bjmatofg.jpg',
               }}
-              resizeMode={"cover"}
+              resizeMode="cover"
               size="2xl"
               source={{
                 uri: `${patientProfile.profilePicture}`,
@@ -60,7 +48,5 @@ function PatientScreenCard(props) {
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({});
 
 export default PatientScreenCard;
