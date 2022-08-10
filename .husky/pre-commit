@@ -4,3 +4,4 @@
 echo "testing 123"
 
 npm test
+npm test
