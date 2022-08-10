@@ -16,7 +16,7 @@
   },
   "lint-staged": {
     "app/**/*.{js,jsx,ts,tsx}": [
-      "eslint --ext .js --ext .jsx --ext .tsx --ext .ts src/ --fix --color"
+      "eslint --ext .js --ext .jsx --ext .tsx --ext .ts app/ --fix --color"
     ],
     "./app/**": [
       "prettier --write ./app"
