@@ -11,8 +11,7 @@
     "prettier-check": "prettier --check ./app",
     "prettier-fix": "prettier --write ./app",
     "lint": "eslint app --fix --color",
-    "prepare": "husky install",
-    "prepush": "npm run lint && npm run test"
+    "prepare": "husky install"
   },
   "dependencies": {
     "@expo/vector-icons": "^13.0.0",
