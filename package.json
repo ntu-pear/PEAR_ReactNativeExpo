@@ -4,6 +4,7 @@
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
+    "prepush": "npm run lint && npm run test",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
@@ -39,7 +40,10 @@
     "react-native-gesture-handler": "~2.2.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.9"
+    "@babel/core": "^7.12.9",
+    "husky": "^8.0.1",
+    "lint-staged": "^13.0.3",
+    "prettier": "^2.7.1"
   },
   "private": true
 }
