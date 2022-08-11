@@ -18,9 +18,6 @@ function NotifcationsScreen(props) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   // used to manage flatlist
   const [selectedId, setSelectedId] = useState(null);
-  var something = 'hello';
-  console.log('HAHAH');
-  something;
 
   /*
    * Mock Data to populate flat list

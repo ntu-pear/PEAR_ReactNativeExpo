@@ -18,7 +18,7 @@ const notificationReadAll = `${endPoint}/ReadAll`; //eslint-disable-line no-unus
 
 // Purpose: Get all notifications of user (specified by userID in JWT token)
 // based on specified read status
-const getNotificationOfUser = () => client.get(notificationUser);
+const getNotificationOfUser = async () => client.get(notificationUser);
 
 // **********************  POST REQUESTS *************************
 
