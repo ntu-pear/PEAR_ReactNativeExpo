@@ -13,6 +13,12 @@
     "lint": "eslint app --fix --color",
     "prepare": "husky install"
   },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
   "dependencies": {
     "@expo/vector-icons": "^13.0.0",
     "@native-base/icons": "0.0.11",

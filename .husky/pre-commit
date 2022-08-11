@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-npm run lint && npm run prettier-fix
+# npm run lint && npm run prettier-fix
 # npx run lint-staged
+echo "test"
+# npx lint-staged
