@@ -7,6 +7,7 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  ActivityIndicator,
 } from 'react-native';
 
 // Custom Import from https://reactnativeelements.com/docs/
@@ -35,11 +36,12 @@ function WelcomeScreen(props) {
    * All States To Be Placed Here
    */
   const authContext = useContext(AuthContext);
-  const [role, setRole] = useState('');
+  const [role, setRole] = useState('Supervisor');
   const [show, setShow] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginFailed, setLoginFailed] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const apiHandlerHook = useApiHandler();
 
   /*
@@ -60,14 +62,16 @@ function WelcomeScreen(props) {
    * All Functions To Be Placed Here
    */
   const onPressLogin = async () => {
-    console.log('Logging in...');
     // "Supervisor!23"
+    setIsLoading(true);
     const result = await userApi.loginUser(email, role, password);
     // userLoginApi.request(email, role, password);
     // if returned array is empty or error
     if (!result.ok) {
+      setIsLoading(false);
       return setLoginFailed(true);
     }
+    setIsLoading(false);
     setLoginFailed(false);
     const user = jwt_decode(result.data.accessToken);
     authContext.setUser(user);
@@ -192,7 +196,11 @@ function WelcomeScreen(props) {
               <ErrorMessage visible={loginFailed} message={errors.loginError} />
             </Box>
             <View style={styles.buttonsContainer}>
-              <AppButton title="Login" color="green" onPress={onPressLogin} />
+              {isLoading ? (
+                <ActivityIndicator color={colors.primary_overlay_color} />
+              ) : (
+                <AppButton title="Login" color="green" onPress={onPressLogin} />
+              )}
             </View>
           </Center>
         </View>
