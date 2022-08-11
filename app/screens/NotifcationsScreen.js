@@ -65,6 +65,7 @@ function NotifcationsScreen(props) {
 
   const getAllNotificationOfUser = async () => {
     setIsLoading(true);
+    console.log("HELLO IM HERE")
     const response = await notificationApi.getNotificationOfUser();
     if (!response.ok) {
       // return error block

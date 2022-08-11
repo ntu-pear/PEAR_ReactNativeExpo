@@ -19,6 +19,11 @@
       "prettier --write"
     ]
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged -r"
+    }
+  },
   "dependencies": {
     "@expo/vector-icons": "^13.0.0",
     "@native-base/icons": "0.0.11",
