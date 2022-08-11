@@ -85,12 +85,12 @@ function NotifcationsScreen(props) {
 
   useEffect(() => {
     // Fetches data from notification api
-    getAllNotificationOfUser();
+    getAllNotificationOfUser(false);
   }, []);
 
-  const getAllNotificationOfUser = async () => {
+  const getAllNotificationOfUser = async (readStatus) => {
     setIsLoading(true);
-    const response = await notificationApi.getNotificationOfUser();
+    const response = await notificationApi.getNotificationOfUser(readStatus);
     if (!response.ok) {
       // return error block
       setIsLoading(false);
@@ -103,14 +103,14 @@ function NotifcationsScreen(props) {
 
   // Purpose: When api fails, perform another fetch
   const handleErrorWhenApiFails = async () => {
-    await getAllNotificationOfUser();
+    await getAllNotificationOfUser(false);
   };
 
   // Purpose: pull to refresh for flat list
   // Reference: https://thewebdev.info/2022/02/19///how-to-implement-pull-to-refresh-flatlist-with-react-native/
   const handlePullToRefresh = async () => {
     setIsRefreshing(true);
-    await getAllNotificationOfUser();
+    await getAllNotificationOfUser(false);
     setIsRefreshing(false);
   };
 
