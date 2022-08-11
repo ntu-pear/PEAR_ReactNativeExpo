@@ -1,7 +1,7 @@
-import React from "react";
-import { StyleSheet, TouchableOpacity } from "react-native";
-import { Box, Icon, Text } from "native-base";
-import colors from "../config/colors";
+import React from 'react';
+import { TouchableOpacity } from 'react-native';
+import { Box, Icon, Text } from 'native-base';
+import colors from '../config/colors';
 
 function PatientProfileCard(props) {
   const {
@@ -14,18 +14,15 @@ function PatientProfileCard(props) {
     text,
     navigation,
     routes,
-    patientProfile
+    patientProfile,
   } = props;
 
   const handleOnPressToNextScreen = () => {
-      console.log("Moving to next screen from profile card");
-      navigation.push(routes, {...patientProfile})
-
-  }
+    navigation.push(routes, { ...patientProfile });
+  };
 
   return (
-    <TouchableOpacity
-    onPress={handleOnPressToNextScreen}>
+    <TouchableOpacity onPress={handleOnPressToNextScreen}>
       <Box
         alignItems="center"
         rounded="lg"
@@ -37,8 +34,8 @@ function PatientProfileCard(props) {
       >
         <Box alignItems="center">
           <Icon
-            //Reference: Passing component to child
-            //https://stackoverflow.com/questions/39652686/pass-react-component-as-props
+            // Reference: Passing component to child
+            // https://stackoverflow.com/questions/39652686/pass-react-component-as-props
             as={{ ...vectorIconComponent }}
             top={iconTop}
             right={iconRight}
@@ -59,5 +56,4 @@ function PatientProfileCard(props) {
   );
 }
 
-const styles = StyleSheet.create({});
 export default PatientProfileCard;

@@ -1,13 +1,14 @@
-import client from "./client";
+/*eslint eslint-comments/no-unlimited-disable: error */
+import client from './client';
 
 /*
  * List all end points here
  */
-const endPoint = "/Guardian";
-const guardianPatientGuardian = endPoint + "/PatientGuardian";
-const guardianAdd = endPoint + "/add";
-const guardianUpdate = endPoint + "/update";
-const guaridanDelete = endPoint + "/delete";
+const endPoint = '/Guardian';
+const guardianPatientGuardian = `${endPoint}/PatientGuardian`;
+const guardianAdd = `${endPoint}/add`; //eslint-disable-line no-unused-vars
+const guardianUpdate = `${endPoint}/update`; //eslint-disable-line no-unused-vars
+const guaridanDelete = `${endPoint}/delete`; //eslint-disable-line no-unused-vars
 
 /*
  * List all functions here
@@ -20,7 +21,7 @@ const guaridanDelete = endPoint + "/delete";
 // purpose: retrieve's guardian tagged to the patient by patient's ID.
 const getPatientGuardian = (patientID) => {
   const params = {
-    patientID: patientID,
+    patientID,
   };
   return client.get(guardianPatientGuardian, params);
 };

@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { Center, VStack, ScrollView, Fab, Icon } from "native-base";
-import { MaterialIcons } from "@expo/vector-icons";
-import patientApi from "../api/patient";
-import useCheckExpiredThenLogOut from "../hooks/useCheckExpiredThenLogOut";
-import PatientScreenCard from "../components/PatientScreenCard";
-import colors from "../config/colors";
-import ActivityIndicator from "../components/ActivityIndicator";
+import React, { useState, useEffect } from 'react';
+import { Center, VStack, ScrollView, Fab, Icon } from 'native-base';
+import { MaterialIcons } from '@expo/vector-icons';
+import patientApi from '../api/patient';
+import useCheckExpiredThenLogOut from '../hooks/useCheckExpiredThenLogOut';
+import PatientScreenCard from '../components/PatientScreenCard';
+import colors from '../config/colors';
+import ActivityIndicator from '../components/ActivityIndicator';
 
 function PatientsScreen(props) {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,10 +19,11 @@ function PatientsScreen(props) {
     setIsLoading(true);
     const promiseFunction = async () => {
       const response = await getListOfPatients();
-      
+
       setListOfPatients(response.data);
     };
     promiseFunction();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getListOfPatients = async () => {
@@ -39,25 +39,27 @@ function PatientsScreen(props) {
 
   const handleFabOnPress = () => {
     // TODO: Include `Add Patient Feature`
-    console.log("Placeholder for fab on click");
+    // console.log('Placeholder for fab on click');
   };
 
   return (
     // <ActivityIndicator visible={true}/>
     <>
       {isLoading ? (
-        <ActivityIndicator visible={true} />
+        <ActivityIndicator visible />
       ) : (
         <Center backgroundColor={colors.white_var1}>
           <ScrollView w="100%">
             <VStack>
-              {listOfPatients ? listOfPatients.map((item, index) => (
-                <PatientScreenCard
-                  patientProfile={item}
-                  key={index}
-                  navigation={navigation}
-                />
-              )) : null}
+              {listOfPatients
+                ? listOfPatients.map((item, index) => (
+                    <PatientScreenCard
+                      patientProfile={item}
+                      key={index}
+                      navigation={navigation}
+                    />
+                  ))
+                : null}
             </VStack>
           </ScrollView>
           <Fab
@@ -75,13 +77,11 @@ function PatientsScreen(props) {
             renderInPortal={false}
             shadow={2}
             size="sm"
-          />{" "}
+          />{' '}
         </Center>
       )}
     </>
   );
 }
-
-const styles = StyleSheet.create({});
 
 export default PatientsScreen;

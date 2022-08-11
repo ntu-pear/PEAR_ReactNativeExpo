@@ -1,14 +1,14 @@
-import client from "./client";
-import authStorage from "../auth/authStorage";
+/*eslint eslint-comments/no-unlimited-disable: error */
+import client from './client';
 
 /*
  * List all end points here
  */
-const endpoint = "/Patient";
-const patientAdd = endpoint + "/add";
-const patientUpdate = endpoint + "/update";
-const privacyLevelUpdate = endpoint + "/UpdatePatient";
-const patientDelete = endpoint + "/delete";
+const endpoint = '/Patient';
+const patientAdd = `${endpoint}/add`; //eslint-disable-line no-unused-vars
+const patientUpdate = `${endpoint}/update`; //eslint-disable-line no-unused-vars
+const privacyLevelUpdate = `${endpoint}/UpdatePatient`; //eslint-disable-line no-unused-vars
+const patientDelete = `${endpoint}/delete`; //eslint-disable-line no-unused-vars
 
 /*
  * List all functions here
@@ -26,18 +26,18 @@ const getPatient = async (patientID, isActive, maskNRIC) => {
    *   Build Params
    */
   // if patientId is specified
-  var params;
+  let params;
   if (patientID !== null) {
     params = {
-      patientID: patientID,
-      maskNRIC: maskNRIC,
+      patientID,
+      maskNRIC,
     };
   }
   // if patientId is not specified
   else {
     params = {
-      isActive: isActive,
-      maskNRIC: maskNRIC,
+      isActive,
+      maskNRIC,
     };
   }
 

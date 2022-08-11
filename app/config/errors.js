@@ -1,3 +1,3 @@
 export default {
-    loginError: "Invalid email and/or password",
+  loginError: 'Invalid email and/or password',
 };

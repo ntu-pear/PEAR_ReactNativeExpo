@@ -1,12 +1,13 @@
-import client from "./client";
+/*eslint eslint-comments/no-unlimited-disable: error */
+import client from './client';
 
 /*
  * List all end points here
  */
-const endPoint = "/SocialHistory";
-const socialHistoryAdd = endPoint + "/add";
-const socialHistoryUpdate = endPoint + "/update";
-const socialHistoryDelete = endPoint + "/delete";
+const endPoint = '/SocialHistory';
+const socialHistoryAdd = `${endPoint}/add`; //eslint-disable-line no-unused-vars
+const socialHistoryUpdate = `${endPoint}/update`; //eslint-disable-line no-unused-vars
+const socialHistoryDelete = `${endPoint}/delete`; //eslint-disable-line no-unused-vars
 
 /*
  * List all functions here
@@ -18,7 +19,7 @@ const socialHistoryDelete = endPoint + "/delete";
 // params: patientID
 // purpose: get the social history of specific patient
 const getSocialHistory = (patientID) => {
-  var params = {
+  const params = {
     patientId: patientID,
   };
   return client.get(endPoint, params);

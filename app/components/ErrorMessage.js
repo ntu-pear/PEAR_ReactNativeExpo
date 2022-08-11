@@ -1,12 +1,14 @@
-import React from "react";
-import { StyleSheet } from "react-native";
-import { FormControl } from "native-base";
-import { MaterialIcons } from "@expo/vector-icons";
-import colors from "../config/colors";
+import React from 'react';
+import { StyleSheet } from 'react-native';
+import { FormControl } from 'native-base';
+import { MaterialIcons } from '@expo/vector-icons';
+import colors from '../config/colors';
 
 function ErrorMessage(props) {
   const { message, visible } = props;
-  if (!visible) return null;
+  if (!visible) {
+    return null;
+  }
 
   return (
     <FormControl isInvalid>

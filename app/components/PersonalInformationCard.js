@@ -1,5 +1,6 @@
-import React from "react";
-import { StyleSheet, Platform } from "react-native";
+/*eslint eslint-comments/no-unlimited-disable: error */
+import React from 'react';
+import { Platform } from 'react-native';
 import {
   Avatar,
   Center,
@@ -9,9 +10,9 @@ import {
   FormControl,
   HStack,
   TextArea,
-} from "native-base";
-import typography from "../config/typography";
-import colors from "../config/colors";
+} from 'native-base';
+import typography from '../config/typography';
+import colors from '../config/colors';
 
 function PersonalInformationCard(props) {
   const { patientInformation } = props;
@@ -32,7 +33,7 @@ function PersonalInformationCard(props) {
     <Stack>
       <Text
         color={colors.black_var1}
-        fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
+        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
         fontSize="2xl"
         fontWeight="semibold"
       >
@@ -42,9 +43,11 @@ function PersonalInformationCard(props) {
         <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontFamily: `${
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
+              }`,
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             First Name
@@ -52,9 +55,11 @@ function PersonalInformationCard(props) {
 
           <Input
             color={colors.black_var1}
-            fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
+            fontFamily={
+              Platform.OS === 'ios' ? 'Helvetica' : typography.android
+            }
             fontSize="lg"
-            isReadOnly={true}
+            isReadOnly
             variant="unstyled"
             value={firstName}
             w="100%"
@@ -65,9 +70,11 @@ function PersonalInformationCard(props) {
         <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontFamily: `${
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
+              }`,
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             Last Name
@@ -75,9 +82,11 @@ function PersonalInformationCard(props) {
 
           <Input
             color={colors.black_var1}
-            fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
+            fontFamily={
+              Platform.OS === 'ios' ? 'Helvetica' : typography.android
+            }
             fontSize="lg"
-            isReadOnly={true}
+            isReadOnly
             variant="unstyled"
             value={lastName}
             w="100%"
@@ -88,9 +97,11 @@ function PersonalInformationCard(props) {
         <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontFamily: `${
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
+              }`,
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             NRIC
@@ -98,9 +109,11 @@ function PersonalInformationCard(props) {
 
           <Input
             color={colors.black_var1}
-            fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
+            fontFamily={
+              Platform.OS === 'ios' ? 'Helvetica' : typography.android
+            }
             fontSize="lg"
-            isReadOnly={true}
+            isReadOnly
             variant="unstyled"
             value={nric}
             w="100%"
@@ -111,9 +124,11 @@ function PersonalInformationCard(props) {
         <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontFamily: `${
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
+              }`,
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             Gender
@@ -121,11 +136,13 @@ function PersonalInformationCard(props) {
 
           <Input
             color={colors.black_var1}
-            fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
+            fontFamily={
+              Platform.OS === 'ios' ? 'Helvetica' : typography.android
+            }
             fontSize="lg"
-            isReadOnly={true}
+            isReadOnly
             variant="unstyled"
-            value={gender === "F" ? "Female" : "Male"}
+            value={gender === 'F' ? 'Female' : 'Male'}
             w="100%"
           />
         </HStack>
@@ -134,9 +151,11 @@ function PersonalInformationCard(props) {
         <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontFamily: `${
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
+              }`,
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             DOB
@@ -144,9 +163,11 @@ function PersonalInformationCard(props) {
 
           <Input
             color={colors.black_var1}
-            fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
+            fontFamily={
+              Platform.OS === 'ios' ? 'Helvetica' : typography.android
+            }
             fontSize="lg"
-            isReadOnly={true}
+            isReadOnly
             variant="unstyled"
             value={dob.substring(0, 10)}
             w="100%"
@@ -157,9 +178,11 @@ function PersonalInformationCard(props) {
         <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontFamily: `${
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
+              }`,
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             Home Number
@@ -167,9 +190,11 @@ function PersonalInformationCard(props) {
 
           <Input
             color={colors.black_var1}
-            fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
+            fontFamily={
+              Platform.OS === 'ios' ? 'Helvetica' : typography.android
+            }
             fontSize="lg"
-            isReadOnly={true}
+            isReadOnly
             variant="unstyled"
             value={homeNo}
             w="100%"
@@ -180,9 +205,11 @@ function PersonalInformationCard(props) {
         <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontFamily: `${
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
+              }`,
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             Mobile Number
@@ -190,9 +217,11 @@ function PersonalInformationCard(props) {
 
           <Input
             color={colors.black_var1}
-            fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
+            fontFamily={
+              Platform.OS === 'ios' ? 'Helvetica' : typography.android
+            }
             fontSize="lg"
-            isReadOnly={true}
+            isReadOnly
             variant="unstyled"
             value={handphoneNo}
             w="100%"
@@ -200,55 +229,63 @@ function PersonalInformationCard(props) {
         </HStack>
       </FormControl>
       <FormControl>
-        <Stack space={0} alignItems="flex-start" flexWrap={"wrap"}>
+        <Stack space={0} alignItems="flex-start" flexWrap="wrap">
           <FormControl.Label
             width="100%"
             _text={{
-              fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontFamily: `${
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
+              }`,
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             Address
           </FormControl.Label>
           <TextArea
             color={colors.black_var1}
-            fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
+            fontFamily={
+              Platform.OS === 'ios' ? 'Helvetica' : typography.android
+            }
             fontSize="lg"
-            isReadOnly={true}
+            isReadOnly
             input="lg"
             ml="-2.5"
             minH="30%"
             maxH="50%"
             variant="unstyled"
-            value={address ? address : "Not available"}
+            value={address || 'Not available'}
             w="100%"
           />
         </Stack>
       </FormControl>
       <FormControl>
-        <Stack space={0} alignItems="flex-start" flexWrap={"wrap"}>
+        <Stack space={0} alignItems="flex-start" flexWrap="wrap">
           <FormControl.Label
             width="100%"
             _text={{
-              fontFamily: `${Platform.OS === "ios" ? "Helvetica" : typography.android}`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontFamily: `${
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
+              }`,
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             Temporary Address
           </FormControl.Label>
           <TextArea
             color={colors.black_var1}
-            fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
+            fontFamily={
+              Platform.OS === 'ios' ? 'Helvetica' : typography.android
+            }
             fontSize="lg"
-            isReadOnly={true}
+            isReadOnly
             input="lg"
             ml="-2.5"
             minH="30%"
             maxH="50%"
             variant="unstyled"
-            value={tempAddress ? tempAddress : "Not available"}
+            value={tempAddress || 'Not available'}
             w="100%"
           />
         </Stack>
@@ -269,7 +306,6 @@ function PersonalInformationCard(props) {
   );
 }
 
-const styles = StyleSheet.create({});
 export default PersonalInformationCard;
 /*
 firstName

@@ -1,34 +1,50 @@
-import React from "react";
-import { StyleSheet, Platform, TouchableOpacity } from "react-native";
-import colors from "../config/colors";
-import typography from "../config/typography";
-import { Text, Box, VStack, HStack, Avatar } from "native-base";
+import React from 'react';
+import { Platform, TouchableOpacity } from 'react-native';
+import { Text, Box, VStack, HStack, Avatar } from 'native-base';
+import colors from '../config/colors';
+import typography from '../config/typography';
 
+function NotificationCard({ item, user, setSelectedId, setRequiresAction }) {
+  /*
+   * 1. Removes `\n` char w regex 3. trim empty spaces
+   */
+  const handleString = (message) => {
+    return message.replace(/\n/g, '').trim();
+  };
 
-function NotificationCard({item, user, setSelectedId}) {
+  // setRequiresAction and setSelectedID required to handle flatlist
+  // in notificationScreen.
+  const handlePressIn = () => {
+    setSelectedId(item.notificationID);
+    item && item.requiresAction
+      ? setRequiresAction(item.requiresAction)
+      : setRequiresAction(false);
+  };
+
   return (
-    <TouchableOpacity onPressIn={() => setSelectedId(item.notificationID)}>
+    <TouchableOpacity onPressIn={handlePressIn}>
       <Box
         borderBottomWidth="1"
         borderColor={colors.primary_gray}
         py="2"
         mt="1"
       >
-        <VStack w="100%" space={2} flexWrap={"wrap"}>
+        <VStack w="100%" space={4} flexWrap="wrap" mb="1">
           <HStack space={5} alignItems="center">
             <Avatar size="sm" bg={colors.pink} marginY="auto">
-              {" "}
+              {' '}
               {user && user.sub && user.sub.substring(0, 1)
                 ? user.sub.substring(0, 1)
-                : `--`}{" "}
+                : '--'}{' '}
             </Avatar>
             <Text
+              bold
               color={colors.black_var1}
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
             >
-              {item && item.title ? item.title : "Not Available"}
+              {item && item.requiresAction ? 'Action Required' : ''}
             </Text>
           </HStack>
           <HStack>
@@ -36,34 +52,35 @@ function NotificationCard({item, user, setSelectedId}) {
               alignSelf="flex-start"
               color={colors.black_var1}
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
             >
-              {item && item.message ? item.message : "Not Available"}
+              {item && item.message
+                ? handleString(item.message)
+                : 'Not Available'}
             </Text>
           </HStack>
-          <HStack justifyContent="flex-start">
+          {/* <HStack justifyContent="flex-start">
             <Text
               alignSelf="flex-start"
               color={colors.primary_overlay_color}
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
             >
-              {" "}
+              {' '}
               {item && item.createdDateTime
                 ? `${item.createdDateTime.substring(
                     0,
-                    10
+                    10,
                   )}   ${item.createdDateTime.substring(12, 19)} HRS`
-                : "Not Available"}{" "}
+                : 'Not Available'}{' '}
             </Text>
-          </HStack>
+          </HStack> */}
         </VStack>
       </Box>
     </TouchableOpacity>
   );
 }
 
-const styles = StyleSheet.create({});
 export default NotificationCard;

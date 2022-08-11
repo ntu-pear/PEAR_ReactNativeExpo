@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { StyleSheet, Platform } from "react-native";
+/*eslint eslint-comments/no-unlimited-disable: error */
+import React, { useState } from 'react';
+import { Platform } from 'react-native';
 import {
   Stack,
   Text,
@@ -8,110 +9,133 @@ import {
   HStack,
   Select,
   CheckIcon,
-} from "native-base";
-import colors from "../config/colors";
-import typography from "../config/typography";
+} from 'native-base';
+import colors from '../config/colors';
+import typography from '../config/typography';
 
-function PersonalSocialHistory( {socialHistory} ) {
+function PersonalSocialHistory({ socialHistory }) {
   /*
    *  *** All States Related To <Select> Component ***
    */
   // Note: isEditMode is used to toggle between `Read-only` and `Write&Read` mode.
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [liveWithListId, setLiveWithListId] = useState(socialHistory ? socialHistory.liveWithListId : null);
+  const [isEditMode, setIsEditMode] = useState(false); //eslint-disable-line no-unused-vars
+  const [liveWithListId, setLiveWithListId] = useState(
+    socialHistory ? socialHistory.liveWithListId : null,
+  );
   const [educationListId, setEducationListId] = useState(
-    socialHistory ?  socialHistory.educationListId : null
+    socialHistory ? socialHistory.educationListId : null,
   );
   const [occupationListId, setOccupationListId] = useState(
-    socialHistory ? socialHistory.occupationListId : null
+    socialHistory ? socialHistory.occupationListId : null,
   );
   const [religionListId, setReligionListId] = useState(
-    socialHistory ? socialHistory.religionListId : null
+    socialHistory ? socialHistory.religionListId : null,
   );
-  const [petListId, setPetListId] = useState(socialHistory ? socialHistory.petListId : null);
-  const [dietListId, setDietListId] = useState(socialHistory ? socialHistory.dietListId: null);
-  const [exercise, setExercise] = useState(socialHistory ? socialHistory.exercise: null);
+  const [petListId, setPetListId] = useState(
+    socialHistory ? socialHistory.petListId : null,
+  );
+  const [dietListId, setDietListId] = useState(
+    socialHistory ? socialHistory.dietListId : null,
+  );
+  const [exercise, setExercise] = useState(
+    socialHistory ? socialHistory.exercise : null,
+  );
   const [sexuallyActive, setSexuallyActive] = useState(
-    socialHistory? socialHistory.sexuallyActive : null
+    socialHistory ? socialHistory.sexuallyActive : null,
   );
-  const [drugeUse, setDrugeUse] = useState(socialHistory ? socialHistory.drugeUse : null);
-  const [caffeineUse, setCaffeineUse] = useState(socialHistory ? socialHistory.caffeineUse : null);
-  const [alocholUse, setAlocholUse] = useState(socialHistory ? socialHistory.alocholUse : null);
-  const [tobaccoUse, setTobaccoUse] = useState(socialHistory ? socialHistory.tobaccoUse : null);
+  const [drugeUse, setDrugeUse] = useState(
+    socialHistory ? socialHistory.drugeUse : null,
+  );
+  const [caffeineUse, setCaffeineUse] = useState(
+    socialHistory ? socialHistory.caffeineUse : null,
+  );
+  const [alocholUse, setAlocholUse] = useState(
+    socialHistory ? socialHistory.alocholUse : null,
+  );
+  const [tobaccoUse, setTobaccoUse] = useState(
+    socialHistory ? socialHistory.tobaccoUse : null,
+  );
   const [secondhandSmoker, setSecondhandSmoker] = useState(
-    socialHistory ? socialHistory.secondhandSmoker : null
+    socialHistory ? socialHistory.secondhandSmoker : null,
   );
   const [dietDesciption, setDietDesciption] = useState(
-    socialHistory ? socialHistory.dietDescription : null
+    socialHistory ? socialHistory.dietDescription : null,
   );
   const [educationDescription, setEducationDescription] = useState(
-    socialHistory ? socialHistory.educationDescription : null
+    socialHistory ? socialHistory.educationDescription : null,
   );
-  const [liveWithDescription, setLiveWithDescription] = useState(socialHistory ? socialHistory.liveWithDescription : null);
+  const [liveWithDescription, setLiveWithDescription] = useState(
+    socialHistory ? socialHistory.liveWithDescription : null,
+  );
   const [occupationDescription, setOccupationDescription] = useState(
-    socialHistory ? socialHistory.occupationDescription : null
+    socialHistory ? socialHistory.occupationDescription : null,
   );
-  const [petDescription, setPetDescription] = useState(socialHistory ? socialHistory.petDescription : null);
-  const [religionDescription, setReligionDescription] = useState(socialHistory ? socialHistory.religionDescription : null);
+  const [petDescription, setPetDescription] = useState(
+    socialHistory ? socialHistory.petDescription : null,
+  );
+  const [religionDescription, setReligionDescription] = useState(
+    socialHistory ? socialHistory.religionDescription : null,
+  );
   /*
    *  *** All possible list of questionaires to map to ***
    */
-  const [educationOptions, setEducationOptions] = useState([]);
-  const [occupationOptions, setOccupationOptions] = useState([]);
-  const [petOptions, setPetOptions] = useState([]);
-  const [dietOptions, setDietOptions] = useState([]);
-  const [religionOptions, setReligionOptions] = useState([]);
-  const [liveWithOptions, setliveWithOptions] = useState([
-    {
-      list_LiveWithID: 1,
-      value: "Alone",
-      isDeleted: false,
-      createdDateTime: "2021-01-01T00:00:00",
-      updatedDateTime: "2021-01-01T00:00:00",
-    },
-    {
-      list_LiveWithID: 2,
-      value: "Children",
-      isDeleted: false,
-      createdDateTime: "2021-01-01T00:00:00",
-      updatedDateTime: "2021-01-01T00:00:00",
-    },
-    {
-      list_LiveWithID: 3,
-      value: "Friend",
-      isDeleted: false,
-      createdDateTime: "2021-01-01T00:00:00",
-      updatedDateTime: "2021-01-01T00:00:00",
-    },
-    {
-      list_LiveWithID: 4,
-      value: "Relative",
-      isDeleted: false,
-      createdDateTime: "2021-01-01T00:00:00",
-      updatedDateTime: "2021-01-01T00:00:00",
-    },
-    {
-      list_LiveWithID: 5,
-      value: "Spouse",
-      isDeleted: false,
-      createdDateTime: "2021-01-01T00:00:00",
-      updatedDateTime: "2021-01-01T00:00:00",
-    },
-    {
-      list_LiveWithID: 6,
-      value: "Family",
-      isDeleted: false,
-      createdDateTime: "2021-01-01T00:00:00",
-      updatedDateTime: "2021-01-01T00:00:00",
-    },
-    {
-      list_LiveWithID: 7,
-      value: "Parents",
-      isDeleted: false,
-      createdDateTime: "2021-01-01T00:00:00",
-      updatedDateTime: "2021-01-01T00:00:00",
-    },
-  ]);
+  const [educationOptions, setEducationOptions] = useState([]); //eslint-disable-line no-unused-vars
+  const [occupationOptions, setOccupationOptions] = useState([]); //eslint-disable-line no-unused-vars
+  const [petOptions, setPetOptions] = useState([]); //eslint-disable-line no-unused-vars
+  const [dietOptions, setDietOptions] = useState([]); //eslint-disable-line no-unused-vars
+  const [religionOptions, setReligionOptions] = useState([]); //eslint-disable-line no-unused-vars
+  const [liveWithOptions, setliveWithOptions] = //eslint-disable-line no-unused-vars
+    useState([
+      {
+        list_LiveWithID: 1,
+        value: 'Alone',
+        isDeleted: false,
+        createdDateTime: '2021-01-01T00:00:00',
+        updatedDateTime: '2021-01-01T00:00:00',
+      },
+      {
+        list_LiveWithID: 2,
+        value: 'Children',
+        isDeleted: false,
+        createdDateTime: '2021-01-01T00:00:00',
+        updatedDateTime: '2021-01-01T00:00:00',
+      },
+      {
+        list_LiveWithID: 3,
+        value: 'Friend',
+        isDeleted: false,
+        createdDateTime: '2021-01-01T00:00:00',
+        updatedDateTime: '2021-01-01T00:00:00',
+      },
+      {
+        list_LiveWithID: 4,
+        value: 'Relative',
+        isDeleted: false,
+        createdDateTime: '2021-01-01T00:00:00',
+        updatedDateTime: '2021-01-01T00:00:00',
+      },
+      {
+        list_LiveWithID: 5,
+        value: 'Spouse',
+        isDeleted: false,
+        createdDateTime: '2021-01-01T00:00:00',
+        updatedDateTime: '2021-01-01T00:00:00',
+      },
+      {
+        list_LiveWithID: 6,
+        value: 'Family',
+        isDeleted: false,
+        createdDateTime: '2021-01-01T00:00:00',
+        updatedDateTime: '2021-01-01T00:00:00',
+      },
+      {
+        list_LiveWithID: 7,
+        value: 'Parents',
+        isDeleted: false,
+        createdDateTime: '2021-01-01T00:00:00',
+        updatedDateTime: '2021-01-01T00:00:00',
+      },
+    ]);
 
   /*
    * Common utility used to retrieve object of interest from list of Objects.
@@ -119,7 +143,7 @@ function PersonalSocialHistory( {socialHistory} ) {
    * Why index - 1? Refer to the mock data above, ID starts with `1`.
    */
   const mapIndexToItem = (curIndex, obj) => {
-    var selectedItem = [...obj.slice(curIndex - 1, curIndex)];
+    const selectedItem = [...obj.slice(curIndex - 1, curIndex)];
     return selectedItem[0];
   };
 
@@ -127,7 +151,7 @@ function PersonalSocialHistory( {socialHistory} ) {
     <Stack space={2}>
       <Text
         color={colors.black_var1}
-        fontFamily={Platform.OS === "ios" ? "Helvetica" : typography.android}
+        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
         fontSize="2xl"
         fontWeight="semibold"
       >
@@ -135,7 +159,7 @@ function PersonalSocialHistory( {socialHistory} ) {
       </Text>
       <Text
         color={colors.primary_overlay_color}
-        fontFamily={Platform.OS === "ios" ? "Helvetica" : typography.android}
+        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
         fontSize="md"
         fontWeight="hairline"
       >
@@ -146,10 +170,10 @@ function PersonalSocialHistory( {socialHistory} ) {
           <FormControl.Label
             _text={{
               fontFamily: `${
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             Live with
@@ -157,14 +181,14 @@ function PersonalSocialHistory( {socialHistory} ) {
           {isEditMode ? (
             <Select
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
                 setLiveWithDescription(
-                  mapIndexToItem(itemValue, liveWithOptions).value
+                  mapIndexToItem(itemValue, liveWithOptions).value,
                 );
                 setLiveWithListId(itemValue);
               }}
@@ -175,7 +199,7 @@ function PersonalSocialHistory( {socialHistory} ) {
                   <CheckIcon
                     size="5"
                     fontFamily={
-                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
                     }
                     fontSize="lg"
                     color={colors.pink}
@@ -196,12 +220,16 @@ function PersonalSocialHistory( {socialHistory} ) {
             <Input
               color={colors.black_var1}
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
-              isReadOnly={true}
+              isReadOnly
               variant="unstyled"
-              value={socialHistory ? socialHistory.liveWithDescription : liveWithDescription}
+              value={
+                socialHistory
+                  ? socialHistory.liveWithDescription
+                  : liveWithDescription
+              }
               w="100%"
             />
           )}
@@ -212,10 +240,10 @@ function PersonalSocialHistory( {socialHistory} ) {
           <FormControl.Label
             _text={{
               fontFamily: `${
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             Education
@@ -223,14 +251,14 @@ function PersonalSocialHistory( {socialHistory} ) {
           {isEditMode ? (
             <Select
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
                 setEducationDescription(
-                  mapIndexToItem(itemValue, educationOptions).value
+                  mapIndexToItem(itemValue, educationOptions).value,
                 );
                 setEducationListId(itemValue);
               }}
@@ -241,7 +269,7 @@ function PersonalSocialHistory( {socialHistory} ) {
                   <CheckIcon
                     size="5"
                     fontFamily={
-                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
                     }
                     fontSize="lg"
                     color={colors.pink}
@@ -262,12 +290,16 @@ function PersonalSocialHistory( {socialHistory} ) {
             <Input
               color={colors.black_var1}
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
-              isReadOnly={true}
+              isReadOnly
               variant="unstyled"
-              value={socialHistory ? socialHistory.educationDescription : educationDescription}
+              value={
+                socialHistory
+                  ? socialHistory.educationDescription
+                  : educationDescription
+              }
               w="100%"
             />
           )}
@@ -278,10 +310,10 @@ function PersonalSocialHistory( {socialHistory} ) {
           <FormControl.Label
             _text={{
               fontFamily: `${
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             Occupation
@@ -289,14 +321,14 @@ function PersonalSocialHistory( {socialHistory} ) {
           {isEditMode ? (
             <Select
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
                 setOccupationDescription(
-                  mapIndexToItem(itemValue, occupationOptions).value
+                  mapIndexToItem(itemValue, occupationOptions).value,
                 );
                 setOccupationListId(itemValue);
               }}
@@ -307,7 +339,7 @@ function PersonalSocialHistory( {socialHistory} ) {
                   <CheckIcon
                     size="5"
                     fontFamily={
-                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
                     }
                     fontSize="lg"
                     color={colors.pink}
@@ -328,12 +360,16 @@ function PersonalSocialHistory( {socialHistory} ) {
             <Input
               color={colors.black_var1}
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
-              isReadOnly={true}
+              isReadOnly
               variant="unstyled"
-              value={socialHistory ? socialHistory.occupationDescription : occupationDescription}
+              value={
+                socialHistory
+                  ? socialHistory.occupationDescription
+                  : occupationDescription
+              }
               w="100%"
             />
           )}
@@ -344,10 +380,10 @@ function PersonalSocialHistory( {socialHistory} ) {
           <FormControl.Label
             _text={{
               fontFamily: `${
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             Religion
@@ -355,14 +391,14 @@ function PersonalSocialHistory( {socialHistory} ) {
           {isEditMode ? (
             <Select
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
                 setReligionDescription(
-                  mapIndexToItem(itemValue, religionOptions).value
+                  mapIndexToItem(itemValue, religionOptions).value,
                 );
                 setReligionListId(itemValue);
               }}
@@ -373,7 +409,7 @@ function PersonalSocialHistory( {socialHistory} ) {
                   <CheckIcon
                     size="5"
                     fontFamily={
-                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
                     }
                     fontSize="lg"
                     color={colors.pink}
@@ -394,12 +430,16 @@ function PersonalSocialHistory( {socialHistory} ) {
             <Input
               color={colors.black_var1}
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
-              isReadOnly={true}
+              isReadOnly
               variant="unstyled"
-              value={socialHistory ? socialHistory.religionDescription : religionDescription}
+              value={
+                socialHistory
+                  ? socialHistory.religionDescription
+                  : religionDescription
+              }
               w="100%"
             />
           )}
@@ -410,10 +450,10 @@ function PersonalSocialHistory( {socialHistory} ) {
           <FormControl.Label
             _text={{
               fontFamily: `${
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             Pet
@@ -421,7 +461,7 @@ function PersonalSocialHistory( {socialHistory} ) {
           {isEditMode ? (
             <Select
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
               minW="100%"
@@ -437,7 +477,7 @@ function PersonalSocialHistory( {socialHistory} ) {
                   <CheckIcon
                     size="5"
                     fontFamily={
-                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
                     }
                     fontSize="lg"
                     color={colors.pink}
@@ -458,12 +498,14 @@ function PersonalSocialHistory( {socialHistory} ) {
             <Input
               color={colors.black_var1}
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
-              isReadOnly={true}
+              isReadOnly
               variant="unstyled"
-              value={socialHistory ? socialHistory.petDescription : petDescription}
+              value={
+                socialHistory ? socialHistory.petDescription : petDescription
+              }
               w="100%"
             />
           )}
@@ -474,10 +516,10 @@ function PersonalSocialHistory( {socialHistory} ) {
           <FormControl.Label
             _text={{
               fontFamily: `${
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             Diet
@@ -485,7 +527,7 @@ function PersonalSocialHistory( {socialHistory} ) {
           {isEditMode ? (
             <Select
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
               minW="100%"
@@ -501,7 +543,7 @@ function PersonalSocialHistory( {socialHistory} ) {
                   <CheckIcon
                     size="5"
                     fontFamily={
-                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
                     }
                     fontSize="lg"
                     color={colors.pink}
@@ -522,12 +564,14 @@ function PersonalSocialHistory( {socialHistory} ) {
             <Input
               color={colors.black_var1}
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
-              isReadOnly={true}
+              isReadOnly
               variant="unstyled"
-              value={socialHistory ? socialHistory.dietDescription : dietDesciption}
+              value={
+                socialHistory ? socialHistory.dietDescription : dietDesciption
+              }
               w="100%"
             />
           )}
@@ -535,7 +579,7 @@ function PersonalSocialHistory( {socialHistory} ) {
       </FormControl>
       <Text
         color={colors.primary_overlay_color}
-        fontFamily={Platform.OS === "ios" ? "Helvetica" : typography.android}
+        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
         fontSize="md"
         fontWeight="hairline"
         mt="5"
@@ -547,10 +591,10 @@ function PersonalSocialHistory( {socialHistory} ) {
           <FormControl.Label
             _text={{
               fontFamily: `${
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             Exercise
@@ -558,7 +602,7 @@ function PersonalSocialHistory( {socialHistory} ) {
           {isEditMode ? (
             <Select
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
               minW="100%"
@@ -566,14 +610,14 @@ function PersonalSocialHistory( {socialHistory} ) {
               onValueChange={(itemValue) => {
                 setExercise(itemValue);
               }}
-              placeholder={exercise === 0 || exercise === "0" ? "No" : "Yes"}
+              placeholder={exercise === 0 || exercise === '0' ? 'No' : 'Yes'}
               selectedValue={exercise}
               _selectedItem={{
                 endIcon: (
                   <CheckIcon
                     size="5"
                     fontFamily={
-                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
                     }
                     fontSize="lg"
                     color={colors.pink}
@@ -588,12 +632,17 @@ function PersonalSocialHistory( {socialHistory} ) {
             <Input
               color={colors.black_var1}
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
-              isReadOnly={true}
+              isReadOnly
               variant="unstyled"
-              value={socialHistory && parseInt(socialHistory.exercise) === 0 || exercise === "0" ? "No" : "Yes"}
+              value={
+                (socialHistory && parseInt(socialHistory.exercise) === 0) ||
+                exercise === '0'
+                  ? 'No'
+                  : 'Yes'
+              }
               w="100%"
             />
           )}
@@ -604,10 +653,10 @@ function PersonalSocialHistory( {socialHistory} ) {
           <FormControl.Label
             _text={{
               fontFamily: `${
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             Sexually Active
@@ -615,7 +664,7 @@ function PersonalSocialHistory( {socialHistory} ) {
           {isEditMode ? (
             <Select
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
               minW="100%"
@@ -624,7 +673,7 @@ function PersonalSocialHistory( {socialHistory} ) {
                 setSexuallyActive(itemValue);
               }}
               placeholder={
-                sexuallyActive === 0 || sexuallyActive === "0" ? "No" : "Yes"
+                sexuallyActive === 0 || sexuallyActive === '0' ? 'No' : 'Yes'
               }
               selectedValue={sexuallyActive}
               _selectedItem={{
@@ -632,7 +681,7 @@ function PersonalSocialHistory( {socialHistory} ) {
                   <CheckIcon
                     size="5"
                     fontFamily={
-                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
                     }
                     fontSize="lg"
                     color={colors.pink}
@@ -647,13 +696,17 @@ function PersonalSocialHistory( {socialHistory} ) {
             <Input
               color={colors.black_var1}
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
-              isReadOnly={true}
+              isReadOnly
               variant="unstyled"
               value={
-                socialHistory && parseInt(socialHistory.sexuallyActive) === 0 || parseInt(sexuallyActive) === 0 ? "No" : "Yes"
+                (socialHistory &&
+                  parseInt(socialHistory.sexuallyActive) === 0) ||
+                parseInt(sexuallyActive) === 0
+                  ? 'No'
+                  : 'Yes'
               }
               w="100%"
             />
@@ -665,10 +718,10 @@ function PersonalSocialHistory( {socialHistory} ) {
           <FormControl.Label
             _text={{
               fontFamily: `${
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             Drug use
@@ -676,7 +729,7 @@ function PersonalSocialHistory( {socialHistory} ) {
           {isEditMode ? (
             <Select
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
               minW="100%"
@@ -684,14 +737,14 @@ function PersonalSocialHistory( {socialHistory} ) {
               onValueChange={(itemValue) => {
                 setDrugeUse(itemValue);
               }}
-              placeholder={drugeUse === 0 || drugeUse === "0" ? "No" : "Yes"}
+              placeholder={drugeUse === 0 || drugeUse === '0' ? 'No' : 'Yes'}
               selectedValue={drugeUse}
               _selectedItem={{
                 endIcon: (
                   <CheckIcon
                     size="5"
                     fontFamily={
-                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
                     }
                     fontSize="lg"
                     color={colors.pink}
@@ -706,12 +759,12 @@ function PersonalSocialHistory( {socialHistory} ) {
             <Input
               color={colors.black_var1}
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
-              isReadOnly={true}
+              isReadOnly
               variant="unstyled"
-              value={drugeUse === 0 || drugeUse === "0" ? "No" : "Yes"}
+              value={drugeUse === 0 || drugeUse === '0' ? 'No' : 'Yes'}
               w="100%"
             />
           )}
@@ -722,10 +775,10 @@ function PersonalSocialHistory( {socialHistory} ) {
           <FormControl.Label
             _text={{
               fontFamily: `${
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             Caffeine use
@@ -733,7 +786,7 @@ function PersonalSocialHistory( {socialHistory} ) {
           {isEditMode ? (
             <Select
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
               minW="100%"
@@ -742,7 +795,7 @@ function PersonalSocialHistory( {socialHistory} ) {
                 setCaffeineUse(itemValue);
               }}
               placeholder={
-                caffeineUse === 0 || caffeineUse === "0" ? "No" : "Yes"
+                caffeineUse === 0 || caffeineUse === '0' ? 'No' : 'Yes'
               }
               selectedValue={caffeineUse}
               _selectedItem={{
@@ -750,7 +803,7 @@ function PersonalSocialHistory( {socialHistory} ) {
                   <CheckIcon
                     size="5"
                     fontFamily={
-                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
                     }
                     fontSize="lg"
                     color={colors.pink}
@@ -765,12 +818,12 @@ function PersonalSocialHistory( {socialHistory} ) {
             <Input
               color={colors.black_var1}
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
-              isReadOnly={true}
+              isReadOnly
               variant="unstyled"
-              value={caffeineUse === 0 || caffeineUse === "0" ? "No" : "Yes"}
+              value={caffeineUse === 0 || caffeineUse === '0' ? 'No' : 'Yes'}
               w="100%"
             />
           )}
@@ -781,10 +834,10 @@ function PersonalSocialHistory( {socialHistory} ) {
           <FormControl.Label
             _text={{
               fontFamily: `${
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             Alcohol use
@@ -792,7 +845,7 @@ function PersonalSocialHistory( {socialHistory} ) {
           {isEditMode ? (
             <Select
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
               minW="100%"
@@ -801,7 +854,7 @@ function PersonalSocialHistory( {socialHistory} ) {
                 setAlocholUse(itemValue);
               }}
               placeholder={
-                alocholUse === 0 || alocholUse === "0" ? "No" : "Yes"
+                alocholUse === 0 || alocholUse === '0' ? 'No' : 'Yes'
               }
               selectedValue={alocholUse}
               _selectedItem={{
@@ -809,7 +862,7 @@ function PersonalSocialHistory( {socialHistory} ) {
                   <CheckIcon
                     size="5"
                     fontFamily={
-                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
                     }
                     fontSize="lg"
                     color={colors.pink}
@@ -824,12 +877,12 @@ function PersonalSocialHistory( {socialHistory} ) {
             <Input
               color={colors.black_var1}
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
-              isReadOnly={true}
+              isReadOnly
               variant="unstyled"
-              value={alocholUse === 0 || alocholUse === "0" ? "No" : "Yes"}
+              value={alocholUse === 0 || alocholUse === '0' ? 'No' : 'Yes'}
               w="100%"
             />
           )}
@@ -840,10 +893,10 @@ function PersonalSocialHistory( {socialHistory} ) {
           <FormControl.Label
             _text={{
               fontFamily: `${
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             Tobacco use
@@ -851,7 +904,7 @@ function PersonalSocialHistory( {socialHistory} ) {
           {isEditMode ? (
             <Select
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
               minW="100%"
@@ -860,7 +913,7 @@ function PersonalSocialHistory( {socialHistory} ) {
                 setTobaccoUse(itemValue);
               }}
               placeholder={
-                tobaccoUse === 0 || tobaccoUse === "0" ? "No" : "Yes"
+                tobaccoUse === 0 || tobaccoUse === '0' ? 'No' : 'Yes'
               }
               selectedValue={tobaccoUse}
               _selectedItem={{
@@ -868,7 +921,7 @@ function PersonalSocialHistory( {socialHistory} ) {
                   <CheckIcon
                     size="5"
                     fontFamily={
-                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
                     }
                     fontSize="lg"
                     color={colors.pink}
@@ -883,12 +936,12 @@ function PersonalSocialHistory( {socialHistory} ) {
             <Input
               color={colors.black_var1}
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
-              isReadOnly={true}
+              isReadOnly
               variant="unstyled"
-              value={tobaccoUse === 0 || tobaccoUse === "0" ? "No" : "Yes"}
+              value={tobaccoUse === 0 || tobaccoUse === '0' ? 'No' : 'Yes'}
               w="100%"
             />
           )}
@@ -899,10 +952,10 @@ function PersonalSocialHistory( {socialHistory} ) {
           <FormControl.Label
             _text={{
               fontFamily: `${
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }`,
-              fontSize: "lg",
-              fontWeight: "thin",
+              fontSize: 'lg',
+              fontWeight: 'thin',
             }}
           >
             Secondhand smoker
@@ -910,7 +963,7 @@ function PersonalSocialHistory( {socialHistory} ) {
           {isEditMode ? (
             <Select
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
               minW="100%"
@@ -919,9 +972,9 @@ function PersonalSocialHistory( {socialHistory} ) {
                 setSecondhandSmoker(itemValue);
               }}
               placeholder={
-                secondhandSmoker === 0 || secondhandSmoker === "0"
-                  ? "No"
-                  : "Yes"
+                secondhandSmoker === 0 || secondhandSmoker === '0'
+                  ? 'No'
+                  : 'Yes'
               }
               selectedValue={secondhandSmoker}
               _selectedItem={{
@@ -929,7 +982,7 @@ function PersonalSocialHistory( {socialHistory} ) {
                   <CheckIcon
                     size="5"
                     fontFamily={
-                      Platform.OS === "ios" ? "Helvetica" : typography.android
+                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
                     }
                     fontSize="lg"
                     color={colors.pink}
@@ -944,15 +997,15 @@ function PersonalSocialHistory( {socialHistory} ) {
             <Input
               color={colors.black_var1}
               fontFamily={
-                Platform.OS === "ios" ? "Helvetica" : typography.android
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
-              isReadOnly={true}
+              isReadOnly
               variant="unstyled"
               value={
-                secondhandSmoker === 0 || secondhandSmoker === "0"
-                  ? "No"
-                  : "Yes"
+                secondhandSmoker === 0 || secondhandSmoker === '0'
+                  ? 'No'
+                  : 'Yes'
               }
               w="100%"
             />
@@ -963,16 +1016,15 @@ function PersonalSocialHistory( {socialHistory} ) {
   );
 }
 
-const styles = StyleSheet.create({});
 export default PersonalSocialHistory;
 /*
 About Patient:
-- Live with 
+- Live with
 - Education
 - Occupation
 - Religion
 - Pet
-- Diet 
+- Diet
 
 LifeStyle:
 - Exercise

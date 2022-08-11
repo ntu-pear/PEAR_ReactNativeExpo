@@ -1,11 +1,11 @@
-import { AsyncStorage } from "react-native";
-import moment from "moment";
+import { AsyncStorage } from 'react-native';
+import moment from 'moment';
 /*
  *  Purpose of this cache.js: Provide an abstraction to get and store data in a cache layer. This will be important when app is offline.
  *  Documentation to read: https://react-native-async-storage.github.io/async-storage/docs/usage/
  */
 
-const prefix = "cache";
+const prefix = 'cache';
 const expiryInMinutes = 5;
 
 // Store data in cache method
@@ -26,7 +26,7 @@ const store = async (key, value) => {
 const isExpired = (item) => {
   const now = moment(Date.now());
   const storedTime = moment(item.timestamp);
-  return now.diff(storedTime, "minutes") > expiryInMinutes;
+  return now.diff(storedTime, 'minutes') > expiryInMinutes;
 };
 
 // Get data from cache
@@ -36,7 +36,9 @@ const get = async (key) => {
     const item = JSON.parse(value);
 
     // No item found
-    if (!item) return null;
+    if (!item) {
+      return null;
+    }
 
     // If expired, perform cache eviction and return null value
     if (isExpired(item)) {

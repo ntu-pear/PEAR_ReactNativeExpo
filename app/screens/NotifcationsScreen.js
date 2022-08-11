@@ -1,15 +1,22 @@
-import React, { useState, useEffect, useContext } from "react";
-import { StyleSheet, Platform } from "react-native";
-import AuthContext from "../auth/context";
-import { Text, FlatList, VStack, CheckIcon, CloseIcon } from "native-base";
-import colors from "../config/colors";
-import typography from "../config/typography";
-import Swipeable from "react-native-gesture-handler/Swipeable";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import NotificationCard from "../components/NotificationCard";
-import notificationApi from "../api/notification";
-import ActivityIndicator from "../components/ActivityIndicator";
-import ErrorRetryApiCard from "../components/ErrorRetryApiCard";
+import React, { useState, useEffect, useContext } from 'react';
+import { Platform } from 'react-native';
+import {
+  Text,
+  FlatList,
+  VStack,
+  CheckIcon,
+  CloseIcon,
+  DeleteIcon,
+} from 'native-base';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import AuthContext from '../auth/context';
+import colors from '../config/colors';
+import typography from '../config/typography';
+import NotificationCard from '../components/NotificationCard';
+import notificationApi from '../api/notification';
+import ActivityIndicator from '../components/ActivityIndicator';
+import ErrorRetryApiCard from '../components/ErrorRetryApiCard';
 
 function NotifcationsScreen(props) {
   const { user } = useContext(AuthContext);
@@ -18,43 +25,61 @@ function NotifcationsScreen(props) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   // used to manage flatlist
   const [selectedId, setSelectedId] = useState(null);
+  // used to manage flatlist
+  const [requiresAction, setRequiresAction] = useState(false);
 
   /*
    * Mock Data to populate flat list
    */
   const [notificationData, setNotificationData] = useState([
     {
-      notificationID: 446,
-      title: "Approval request (Delete LikeDislike)",
-      createdDateTime: "2022-05-08T20:16:29.8150851",
-      logID: 3535,
-      approvalRequestID: 437,
-      receiverUserID: "B22698B8-42A2-4115-9631-1C2D1E2AC5F4",
+      requiresAction: true,
+      responseNotifications: {
+        approve: {
+          requiresAction: false,
+          actions: ['clear', 'deliver'],
+          notificationID: 0,
+          logID: 0,
+          message:
+            'Your request to update patient information of patient Alice has been approved',
+          initiatorUID: 'B22698B8-42A2-4115-9631-1C2D1E2AC5F2',
+          type: 'StandardNotification',
+          recipientKey: 'initialRequestor',
+          recipientUIDs: ['B22698B8-42A2-4115-9631-1C2D1E2AC5F2'],
+        },
+        reject: {
+          requiresAction: false,
+          actions: ['clear', 'deliver'],
+          notificationID: 0,
+          logID: 0,
+          message:
+            'Your request to update patient information of patient Alice has been approved',
+          initiatorUID: 'B22698B8-42A2-4115-9631-1C2D1E2AC5F2',
+          type: 'StandardNotification',
+          recipientKey: 'initialRequestor',
+          recipientUIDs: ['B22698B8-42A2-4115-9631-1C2D1E2AC5F2'],
+        },
+      },
+      actions: ['clear', 'deliver', 'approve', 'reject'],
+      notificationID: 1,
+      logID: 3620,
       message:
-        "Caregiver Adeline Tan has requested to delete a LikeDislike item for Patient Alice Lee.",
-      readStatus: false,
+        'Adeline has requested to update \nNric: S1234560D\n\n for patient Alice',
+      initiatorUID: 'B22698B8-42A2-4115-9631-1C2D1E2AC5F2',
+      type: 'ApprovalRequestNotification',
+      recipientKey: 'supervisorInCharge',
+      recipientUIDs: null,
     },
     {
-      notificationID: 445,
-      title: "Approval request (Update LikeDislike)",
-      createdDateTime: "2022-05-08T20:16:10.9527239",
-      logID: 3534,
-      approvalRequestID: 436,
-      receiverUserID: "B22698B8-42A2-4115-9631-1C2D1E2AC5F4",
-      message:
-        "Caregiver Adeline Tan has requested to update a LikeDislike item.",
-      readStatus: false,
-    },
-    {
-      notificationID: 444,
-      title: "Approval request (Add LikeDislike)",
-      createdDateTime: "2022-05-08T20:15:50.3813064",
-      logID: 3533,
-      approvalRequestID: 435,
-      receiverUserID: "B22698B8-42A2-4115-9631-1C2D1E2AC5F4",
-      message:
-        "Caregiver Adeline Tan has requested to add a LikeDislike item for Patient Alice Lee.",
-      readStatus: false,
+      requiresAction: false,
+      actions: ['clear', 'deliver'],
+      notificationID: 2,
+      logID: 3621,
+      message: 'FYI: Adeline has updated information for patient Alice:\n\n',
+      initiatorUID: 'B22698B8-42A2-4115-9631-1C2D1E2AC5F2',
+      type: 'StandardNotification',
+      recipientKey: 'supervisorInCharge',
+      recipientUIDs: null,
     },
   ]);
 
@@ -66,7 +91,6 @@ function NotifcationsScreen(props) {
   const getAllNotificationOfUser = async () => {
     setIsLoading(true);
     const response = await notificationApi.getNotificationOfUser();
-    console.log(response);
     if (!response.ok) {
       // return error block
       setIsLoading(false);
@@ -74,11 +98,7 @@ function NotifcationsScreen(props) {
       return;
     }
     setIsLoading(false);
-    // Filters for data only with readStatus === true
-    const filteredData = response.data.filter(
-      (item) => item.readStatus === false
-    );
-    setNotificationData(filteredData);
+    setNotificationData(response.data);
   };
 
   // Purpose: When api fails, perform another fetch
@@ -105,48 +125,77 @@ function NotifcationsScreen(props) {
   /*
    *   *** Renders view when swiped to left ***
    */
-  const leftSwipeActions = () => {
-    return (
-      <VStack
-        w="40%"
-        backgroundColor={colors.pink_lighter}
-        justifyContent="center"
-      >
-        <CloseIcon color={colors.white} size="2xl" alignSelf="center" />
-        <Text
-          alignSelf="center"
-          bold
-          fontFamily={Platform.OS === "ios" ? "Helvetica" : typography.android}
-          color={colors.white}
+  const leftSwipeActions = () => (
+    <>
+      {requiresAction ? (
+        <VStack
+          w="40%"
+          backgroundColor={colors.pink_lighter}
+          justifyContent="center"
         >
-          Reject
-        </Text>
-      </VStack>
-    );
-  };
+          <CloseIcon color={colors.white} size="2xl" alignSelf="center" />
+          <Text
+            alignSelf="center"
+            bold
+            fontFamily={
+              Platform.OS === 'ios' ? 'Helvetica' : typography.android
+            }
+            color={colors.white}
+          >
+            Reject
+          </Text>
+        </VStack>
+      ) : (
+        <VStack
+          w="40%"
+          backgroundColor={colors.pink_lighter}
+          justifyContent="center"
+        >
+          <DeleteIcon color={colors.white} size="2xl" alignSelf="center" />
+          <Text
+            alignSelf="center"
+            bold
+            fontFamily={
+              Platform.OS === 'ios' ? 'Helvetica' : typography.android
+            }
+            color={colors.white}
+          >
+            Clear
+          </Text>
+        </VStack>
+      )}
+    </>
+  );
 
   /*
    *   *** Renders view when swiped to right ***
    */
-  const rightSwipeActions = () => {
-    return (
-      <VStack
-        w="40%"
-        backgroundColor={colors.green_lighter}
-        justifyContent="center"
-      >
-        <CheckIcon color={colors.white} size="2xl" alignSelf="center" />
-        <Text
-          alignSelf="center"
-          bold
-          fontFamily={Platform.OS === "ios" ? "Helvetica" : typography.android}
-          color={colors.white}
+  const rightSwipeActions = () => (
+    <>
+      {requiresAction ? (
+        <VStack
+          w="40%"
+          backgroundColor={colors.green_lighter}
+          justifyContent="center"
         >
-          Accept
-        </Text>
-      </VStack>
-    );
-  };
+          <CheckIcon color={colors.white} size="2xl" alignSelf="center" />
+          <Text
+            alignSelf="center"
+            bold
+            fontFamily={
+              Platform.OS === 'ios' ? 'Helvetica' : typography.android
+            }
+            color={colors.white}
+          >
+            Accept
+          </Text>
+        </VStack>
+      ) : (
+        // Don't show anything if no action required
+        <VStack w="5%" />
+      )}
+    </>
+  );
 
   /*
    *   *** Peforms action when Left boundary is opened ***
@@ -160,14 +209,14 @@ function NotifcationsScreen(props) {
    *   *** Peforms action when Right boundary is opened ***
    */
   const swipeFromRightOpen = () => {
-    filterAndRerender();
+    requiresAction ? filterAndRerender() : null;
     // TODO: Call Accept Notification API
   };
 
   const filterAndRerender = () => {
     // Filter Data
     const filteredData = notificationData.filter(
-      (item) => item.notificationID !== selectedId
+      (item) => item.notificationID !== selectedId,
     );
     // Update Notification Data with the newly filtered data; to re-render flat list.
     setNotificationData(filteredData);
@@ -176,7 +225,7 @@ function NotifcationsScreen(props) {
   return (
     <>
       {isLoading ? (
-        <ActivityIndicator visible={true} />
+        <ActivityIndicator visible />
       ) : (
         <VStack w="100%" h="100%" alignItems="center">
           {isError && (
@@ -206,6 +255,7 @@ function NotifcationsScreen(props) {
                       item={item}
                       user={user}
                       setSelectedId={setSelectedId}
+                      setRequiresAction={setRequiresAction}
                     />
                   </Swipeable>
                 </GestureHandlerRootView>
@@ -217,7 +267,5 @@ function NotifcationsScreen(props) {
     </>
   );
 }
-
-const styles = StyleSheet.create({});
 
 export default NotifcationsScreen;

@@ -1,12 +1,13 @@
-import client from "./client";
+/*eslint eslint-comments/no-unlimited-disable: error */
+import client from './client';
 
 /*
  * List all end points here
  */
-const endPoint = "/Notification";
-const notificationUser = endPoint + "/User";
-const notificationRead = endPoint + "/Read";
-const notificationReadAll = endPoint + "/ReadAll";
+const endPoint = '/Notification';
+const notificationUser = `${endPoint}/User`;
+const notificationRead = `${endPoint}/Read`; //eslint-disable-line no-unused-vars
+const notificationReadAll = `${endPoint}/ReadAll`; //eslint-disable-line no-unused-vars
 
 /*
  * List all functions here
@@ -17,9 +18,7 @@ const notificationReadAll = endPoint + "/ReadAll";
 
 // Purpose: Get all notifications of user (specified by userID in JWT token)
 // based on specified read status
-const getNotificationOfUser = () => {
-  return client.get(notificationUser);
-};
+const getNotificationOfUser = async () => client.get(notificationUser);
 
 // **********************  POST REQUESTS *************************
 

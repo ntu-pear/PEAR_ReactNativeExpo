@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { StyleSheet, Platform } from "react-native";
+/*eslint eslint-comments/no-unlimited-disable: error */
+import React, { useState, useEffect } from 'react';
+import { Platform } from 'react-native';
 import {
   Center,
   VStack,
@@ -14,24 +15,24 @@ import {
   HStack,
   Text,
   IconButton,
-} from "native-base";
-import colors from "../config/colors";
-import typography from "../config/typography";
-import PersonalInformationCard from "../components/PersonalInformationCard";
-import PersonalPreferenceCard from "../components/PersonalPreferenceCard";
-import PersonalDoctorCard from "../components/PersonalDoctorCard";
-import PersonalGuardianCard from "../components/PersonalGuardianCard";
-import PersonalSocialHistory from "../components/PersonalSocialHistory";
-import ActivityIndicator from "../components/ActivityIndicator";
-import doctorNoteApi from "../api/doctorNote";
-import guardianApi from "../api/guardian";
-import socialHistoryApi from "../api/socialHistory";
-import useApi from "../hooks/useApi";
-import AppButton from "../components/AppButton";
+} from 'native-base';
+import colors from '../config/colors';
+import typography from '../config/typography';
+import PersonalInformationCard from '../components/PersonalInformationCard';
+import PersonalPreferenceCard from '../components/PersonalPreferenceCard';
+import PersonalDoctorCard from '../components/PersonalDoctorCard';
+import PersonalGuardianCard from '../components/PersonalGuardianCard';
+import PersonalSocialHistory from '../components/PersonalSocialHistory';
+import ActivityIndicator from '../components/ActivityIndicator';
+import doctorNoteApi from '../api/doctorNote';
+import guardianApi from '../api/guardian';
+import socialHistoryApi from '../api/socialHistory';
+import useApi from '../hooks/useApi';
+import AppButton from '../components/AppButton';
 
 function PatientInformationScreen(props) {
   const { displayPicUrl, firstName, lastName, patientID } = props.route.params;
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); //eslint-disable-line no-unused-vars
   const getDoctorNote = useApi(doctorNoteApi.getDoctorNote);
   const getPatientGuardian = useApi(guardianApi.getPatientGuardian);
   const getSocialHistory = useApi(socialHistoryApi.getSocialHistory);
@@ -40,15 +41,23 @@ function PatientInformationScreen(props) {
     getDoctorNote.request(patientID);
     getPatientGuardian.request(patientID);
     getSocialHistory.request(patientID);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /*
    * Purpose: Handle API error if fetch fails
    */
   const handleError = () => {
-    if (getDoctorNote.error) getDoctorNote.request(patientID);
-    if (getPatientGuardian.error) getPatientGuardian.request(patientID);
-    if (getSocialHistory.error) getSocialHistory.request(patientID);
+    if (getDoctorNote.error) {
+      getDoctorNote.request(patientID);
+    }
+    if (getPatientGuardian.error) {
+      getPatientGuardian.request(patientID);
+    }
+    if (getSocialHistory.error) {
+      getSocialHistory.request(patientID);
+    }
   };
 
   return (
@@ -56,7 +65,7 @@ function PatientInformationScreen(props) {
       {getDoctorNote.loading ||
       getPatientGuardian.loading ||
       getSocialHistory.loading ? (
-        <ActivityIndicator visible={true} />
+        <ActivityIndicator visible />
       ) : (
         <Center minH="100%" backgroundColor={colors.white_var1}>
           {/* Note the immediate bunch of code will only be rendered
@@ -75,7 +84,7 @@ function PatientInformationScreen(props) {
                     <HStack space={2} flexShrink={1}>
                       <Alert.Icon mt="1" />
                       <Text fontSize="md" color="coolGray.800">
-                        {`Unable to retrieve api data. Try again? Or Relogin`}
+                        Unable to retrieve api data. Try again? Or Relogin
                       </Text>
                     </HStack>
                     <IconButton
@@ -85,7 +94,7 @@ function PatientInformationScreen(props) {
                       }}
                       icon={<CloseIcon size="3" />}
                       _icon={{
-                        color: "coolGray.600",
+                        color: 'coolGray.600',
                       }}
                     />
                   </HStack>
@@ -94,7 +103,7 @@ function PatientInformationScreen(props) {
               <Box position="fixed" my="50%" w="60%" mx="auto">
                 <AppButton
                   title="Try Again"
-                  color={"red"}
+                  color="red"
                   onPress={handleError}
                 />
               </Box>
@@ -113,17 +122,17 @@ function PatientInformationScreen(props) {
                 bg={colors.primary_overlay_color}
                 width="100%"
                 height="100%"
-              ></Center>
+              />
               <Center position="absolute" px="5%" py="10%">
                 <VStack>
                   <Center
                     _text={{
                       color: `${colors.white_var1}`,
                       fontFamily: `${
-                        Platform.OS === "ios" ? "Helvetica" : typography.android
+                        Platform.OS === 'ios' ? 'Helvetica' : typography.android
                       }`,
-                      fontSize: "2xl",
-                      fontWeight: "500",
+                      fontSize: '2xl',
+                      fontWeight: '500',
                     }}
                   >
                     You're caring for
@@ -132,10 +141,10 @@ function PatientInformationScreen(props) {
                     _text={{
                       color: `${colors.white_var1}`,
                       fontFamily: `${
-                        Platform.OS === "ios" ? "Helvetica" : typography.android
+                        Platform.OS === 'ios' ? 'Helvetica' : typography.android
                       }`,
-                      fontSize: "2xl",
-                      fontWeight: "500",
+                      fontSize: '2xl',
+                      fontWeight: '500',
                     }}
                   >
                     {`${firstName} ${lastName}`}
@@ -165,8 +174,6 @@ function PatientInformationScreen(props) {
     </>
   );
 }
-
-const styles = StyleSheet.create({});
 
 export default PatientInformationScreen;
 /*

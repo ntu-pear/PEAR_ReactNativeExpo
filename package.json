@@ -7,11 +7,17 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "eject": "expo eject"
+    "eject": "expo eject",
+    "prettier-check": "prettier --check ./app",
+    "prettier-fix": "prettier --write ./app",
+    "lint": "eslint app --fix --color",
+    "prepare": "husky install"
   },
   "dependencies": {
+    "@expo/vector-icons": "^13.0.0",
     "@native-base/icons": "0.0.11",
     "@react-native-async-storage/async-storage": "~1.17.3",
+    "@react-native-community/eslint-config": "^3.1.0",
     "@react-native-community/hooks": "^2.8.1",
     "@react-native-community/netinfo": "~8.2.0",
     "@react-navigation/bottom-tabs": "^6.3.1",
@@ -30,16 +36,28 @@
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-native": "0.68.2",
+    "react-native-gesture-handler": "~2.2.1",
+    "react-native-pager-view": "5.4.15",
     "react-native-safe-area-context": "4.2.4",
     "react-native-screens": "~3.11.1",
     "react-native-svg": "12.3.0",
     "react-native-tab-view": "^3.1.1",
-    "react-native-web": "0.17.7",
-    "react-native-pager-view": "5.4.15",
-    "react-native-gesture-handler": "~2.2.1"
+    "react-native-web": "0.17.7"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.9"
+    "@babel/core": "^7.12.9",
+    "eslint": "^8.21.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "husky": "^8.0.1",
+    "lint-staged": "^12.5.0",
+    "prettier": "2.7.1"
   },
-  "private": true
+  "lint-staged": {
+    "app/**/*.js": [
+      "prettier --write",
+      "eslint --fix --color --config .eslintrc.js --resolve-plugins-relative-to ."
+    ]
+  }
 }
