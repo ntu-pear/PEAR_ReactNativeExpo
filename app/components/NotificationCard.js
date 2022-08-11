@@ -4,16 +4,32 @@ import { Text, Box, VStack, HStack, Avatar } from 'native-base';
 import colors from '../config/colors';
 import typography from '../config/typography';
 
-function NotificationCard({ item, user, setSelectedId }) {
+function NotificationCard({ item, user, setSelectedId, setRequiresAction }) {
+  /*
+   * 1. Removes `\n` char w regex 3. trim empty spaces
+   */
+  const handleString = (message) => {
+    return message.replace(/\n/g, '').trim();
+  };
+
+  // setRequiresAction and setSelectedID required to handle flatlist
+  // in notificationScreen.
+  const handlePressIn = () => {
+    setSelectedId(item.notificationID);
+    item && item.requiresAction
+      ? setRequiresAction(item.requiresAction)
+      : setRequiresAction(false);
+  };
+
   return (
-    <TouchableOpacity onPressIn={() => setSelectedId(item.notificationID)}>
+    <TouchableOpacity onPressIn={handlePressIn}>
       <Box
         borderBottomWidth="1"
         borderColor={colors.primary_gray}
         py="2"
         mt="1"
       >
-        <VStack w="100%" space={2} flexWrap="wrap">
+        <VStack w="100%" space={4} flexWrap="wrap" mb="1">
           <HStack space={5} alignItems="center">
             <Avatar size="sm" bg={colors.pink} marginY="auto">
               {' '}
@@ -22,12 +38,13 @@ function NotificationCard({ item, user, setSelectedId }) {
                 : '--'}{' '}
             </Avatar>
             <Text
+              bold
               color={colors.black_var1}
               fontFamily={
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
             >
-              {item && item.title ? item.title : 'Not Available'}
+              {item && item.requiresAction ? 'Action Required' : ''}
             </Text>
           </HStack>
           <HStack>
@@ -38,10 +55,12 @@ function NotificationCard({ item, user, setSelectedId }) {
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
             >
-              {item && item.message ? item.message : 'Not Available'}
+              {item && item.message
+                ? handleString(item.message)
+                : 'Not Available'}
             </Text>
           </HStack>
-          <HStack justifyContent="flex-start">
+          {/* <HStack justifyContent="flex-start">
             <Text
               alignSelf="flex-start"
               color={colors.primary_overlay_color}
@@ -57,7 +76,7 @@ function NotificationCard({ item, user, setSelectedId }) {
                   )}   ${item.createdDateTime.substring(12, 19)} HRS`
                 : 'Not Available'}{' '}
             </Text>
-          </HStack>
+          </HStack> */}
         </VStack>
       </Box>
     </TouchableOpacity>
