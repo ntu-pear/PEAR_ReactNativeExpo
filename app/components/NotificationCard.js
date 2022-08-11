@@ -4,7 +4,13 @@ import { Text, Box, VStack, HStack, Avatar } from 'native-base';
 import colors from '../config/colors';
 import typography from '../config/typography';
 
-function NotificationCard({ item, user, setSelectedId, setRequiresAction }) {
+function NotificationCard({
+  item,
+  user,
+  setSelectedId,
+  setRequiresAction,
+  readStatus,
+}) {
   /*
    * 1. Removes `\n` char w regex 3. trim empty spaces
    */
@@ -22,7 +28,8 @@ function NotificationCard({ item, user, setSelectedId, setRequiresAction }) {
   };
 
   return (
-    <TouchableOpacity onPressIn={handlePressIn}>
+    // if readStatus is false, proceed to set the 1. ID and 2. requiredAction
+    <TouchableOpacity onPressIn={readStatus ? null : handlePressIn}>
       <Box
         borderBottomWidth="1"
         borderColor={colors.primary_gray}

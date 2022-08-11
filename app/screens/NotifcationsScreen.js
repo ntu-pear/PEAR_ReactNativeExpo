@@ -256,6 +256,7 @@ function NotifcationsScreen(props) {
                       user={user}
                       setSelectedId={setSelectedId}
                       setRequiresAction={setRequiresAction}
+                      readStatus={false}
                     />
                   </Swipeable>
                 </GestureHandlerRootView>
