@@ -18,6 +18,9 @@ function NotifcationsScreen(props) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   // used to manage flatlist
   const [selectedId, setSelectedId] = useState(null);
+  var something = 'hello';
+  console.log('HAHAH');
+  something;
 
   /*
    * Mock Data to populate flat list
@@ -65,7 +68,6 @@ function NotifcationsScreen(props) {
 
   const getAllNotificationOfUser = async () => {
     setIsLoading(true);
-    console.log("HELLO IM HERE")
     const response = await notificationApi.getNotificationOfUser();
     if (!response.ok) {
       // return error block
