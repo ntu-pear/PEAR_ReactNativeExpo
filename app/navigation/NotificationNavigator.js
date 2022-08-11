@@ -5,6 +5,7 @@ import routes from './routes';
 import NotifcationsScreen from '../screens/NotifcationsScreen';
 import NotificationsRejectScreen from '../screens/NotificationsRejectScreen';
 import NotificationsAcceptScreen from '../screens/NotificationsAcceptScreen';
+import NotificationsReadScreen from '../screens/NotificationsReadScreen';
 import colors from '../config/colors';
 import typography from '../config/typography';
 
@@ -39,6 +40,13 @@ function NotificationNavigator() {
         }}
       />
       <Tab.Screen
+        component={NotificationsReadScreen}
+        name={routes.NOTIFICATION_READ}
+        options={{
+          title: 'Read',
+        }}
+      />
+      <Tab.Screen
         component={NotificationsAcceptScreen}
         name={routes.NOTIFICATION_ACCEPT}
         options={{
@@ -47,7 +55,7 @@ function NotificationNavigator() {
       />
       <Tab.Screen
         component={NotificationsRejectScreen}
-        name={routes.NOTIFICATION_READ}
+        name={routes.NOTIFICATION_REJECT}
         options={{
           title: 'Rejected',
         }}
