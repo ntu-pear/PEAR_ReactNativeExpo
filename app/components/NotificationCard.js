@@ -62,8 +62,8 @@ function NotificationCard({
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
             >
-              {item && item.message
-                ? handleString(item.message)
+              {item && item.shortMessage
+                ? handleString(item.shortMessage)
                 : 'Not Available'}
             </Text>
           </HStack>

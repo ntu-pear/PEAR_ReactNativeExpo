@@ -1,13 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Platform } from 'react-native';
-import {
-  Text,
-  FlatList,
-  VStack,
-  CheckIcon,
-  CloseIcon,
-  DeleteIcon,
-} from 'native-base';
+import { Text, FlatList, VStack, DeleteIcon } from 'native-base';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import AuthContext from '../auth/context';
@@ -19,6 +12,7 @@ import ActivityIndicator from '../components/ActivityIndicator';
 import ErrorRetryApiCard from '../components/ErrorRetryApiCard';
 
 function NotifcationsScreen(props) {
+  const { navigation } = props;
   const { user } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -34,84 +28,153 @@ function NotifcationsScreen(props) {
   const [notificationData, setNotificationData] = useState([
     {
       requiresAction: true,
-      responseNotifications: {
-        approve: {
-          requiresAction: false,
-          actions: ['clear', 'deliver'],
-          notificationID: 0,
-          logID: 0,
-          message:
-            'Your request to update patient information of patient Alice has been approved',
-          initiatorUID: 'B22698B8-42A2-4115-9631-1C2D1E2AC5F2',
-          type: 'StandardNotification',
-          recipientKey: 'initialRequestor',
-          recipientUIDs: ['B22698B8-42A2-4115-9631-1C2D1E2AC5F2'],
-        },
-        reject: {
-          requiresAction: false,
-          actions: ['clear', 'deliver'],
-          notificationID: 0,
-          logID: 0,
-          message:
-            'Your request to update patient information of patient Alice has been approved',
-          initiatorUID: 'B22698B8-42A2-4115-9631-1C2D1E2AC5F2',
-          type: 'StandardNotification',
-          recipientKey: 'initialRequestor',
-          recipientUIDs: ['B22698B8-42A2-4115-9631-1C2D1E2AC5F2'],
-        },
-      },
       actions: ['clear', 'deliver', 'approve', 'reject'],
-      notificationID: 1,
-      logID: 3620,
+      notificationID: 15,
+      logID: 3637,
+      shortMessage: 'Adeline1 has requested for approval',
       message:
-        'Adeline has requested to update \nNric: S1234560D\n\n for patient Alice',
-      initiatorUID: 'B22698B8-42A2-4115-9631-1C2D1E2AC5F2',
+        'Adeline has requested to update Nric: S1231234F, for patient Alice',
       type: 'ApprovalRequestNotification',
-      recipientKey: 'supervisorInCharge',
-      recipientUIDs: null,
+      createdDateTime: '2022-08-12T10:41:09.4266658',
+      senderName: 'Adeline Tan',
+      senderPicUrl:
+        'https://res.cloudinary.com/dbpearfyp/image/upload/v1634523641/User/Adeline_Tan_Sxxxx515G/ProfilePicture/ffo5oc4jhurmtjjhqcib.jpg',
+    },
+    {
+      requiresAction: true,
+      actions: ['clear', 'deliver', 'approve', 'reject'],
+      notificationID: 14,
+      logID: 3638,
+      shortMessage: 'Adeline2 has requested for approval',
+      message:
+        'Adeline has requested to update Nric: S1231233F, for patient Alice',
+      type: 'ApprovalRequestNotification',
+      createdDateTime: '2022-08-12T10:41:17.7333058',
+      senderName: 'Adeline Tan',
+      senderPicUrl:
+        'https://res.cloudinary.com/dbpearfyp/image/upload/v1634523641/User/Adeline_Tan_Sxxxx515G/ProfilePicture/ffo5oc4jhurmtjjhqcib.jpg',
+    },
+    {
+      requiresAction: true,
+      actions: ['clear', 'deliver', 'approve', 'reject'],
+      notificationID: 13,
+      logID: 3639,
+      shortMessage: 'Adeline3 has requested for approval',
+      message:
+        'Adeline has requested to update Nric: S1231231F, for patient Alice',
+      type: 'ApprovalRequestNotification',
+      createdDateTime: '2022-08-12T10:41:22.8725344',
+      senderName: 'Adeline Tan',
+      senderPicUrl:
+        'https://res.cloudinary.com/dbpearfyp/image/upload/v1634523641/User/Adeline_Tan_Sxxxx515G/ProfilePicture/ffo5oc4jhurmtjjhqcib.jpg',
+    },
+    {
+      requiresAction: true,
+      actions: ['clear', 'deliver'],
+      notificationID: 11,
+      logID: 3641,
+      shortMessage: 'Adeline4 has requested for approval',
+      message: 'FYI: Adeline has updated information for patient Alice.',
+      type: 'StandardNotification',
+      createdDateTime: '2022-08-12T10:49:59.6130118',
+      senderName: 'Adeline Tan',
+      senderPicUrl:
+        'https://res.cloudinary.com/dbpearfyp/image/upload/v1634523641/User/Adeline_Tan_Sxxxx515G/ProfilePicture/ffo5oc4jhurmtjjhqcib.jpg',
     },
     {
       requiresAction: false,
-      actions: ['clear', 'deliver'],
-      notificationID: 2,
-      logID: 3621,
-      message: 'FYI: Adeline has updated information for patient Alice:\n\n',
-      initiatorUID: 'B22698B8-42A2-4115-9631-1C2D1E2AC5F2',
-      type: 'StandardNotification',
-      recipientKey: 'supervisorInCharge',
-      recipientUIDs: null,
+      actions: ['clear', 'deliver', 'approve', 'reject'],
+      notificationID: 7,
+      logID: 3637,
+      shortMessage: 'FYI: James1 has accepted this request',
+      message:
+        'Adeline has requested to update Nric: S1231234F, for patient Alice',
+      type: 'ApprovalRequestNotification',
+      createdDateTime: '2022-08-12T10:41:09.4266658',
+      senderName: 'Adeline Tan',
+      senderPicUrl:
+        'https://res.cloudinary.com/dbpearfyp/image/upload/v1634523641/User/Adeline_Tan_Sxxxx515G/ProfilePicture/ffo5oc4jhurmtjjhqcib.jpg',
+    },
+    {
+      requiresAction: false,
+      actions: ['clear', 'deliver', 'approve', 'reject'],
+      notificationID: 8,
+      logID: 3637,
+      shortMessage: 'FYI: James2 has accepted this request',
+      message:
+        'Adeline has requested to update Nric: S1231234F, for patient Alice',
+      type: 'ApprovalRequestNotification',
+      createdDateTime: '2022-08-12T10:41:09.4266658',
+      senderName: 'Adeline Tan',
+      senderPicUrl:
+        'https://res.cloudinary.com/dbpearfyp/image/upload/v1634523641/User/Adeline_Tan_Sxxxx515G/ProfilePicture/ffo5oc4jhurmtjjhqcib.jpg',
+    },
+    {
+      requiresAction: false,
+      actions: ['clear', 'deliver', 'approve', 'reject'],
+      notificationID: 9,
+      logID: 3637,
+      shortMessage: 'FYI: James3 has accepted this request.',
+      message:
+        'Adeline has requested to update Nric: S1231234F, for patient Alice',
+      type: 'ApprovalRequestNotification',
+      createdDateTime: '2022-08-12T10:41:09.4266658',
+      senderName: 'Adeline Tan',
+      senderPicUrl:
+        'https://res.cloudinary.com/dbpearfyp/image/upload/v1634523641/User/Adeline_Tan_Sxxxx515G/ProfilePicture/ffo5oc4jhurmtjjhqcib.jpg',
+    },
+    {
+      requiresAction: false,
+      actions: ['clear', 'deliver', 'approve', 'reject'],
+      notificationID: 10,
+      logID: 3637,
+      shortMessage: 'FYI: James4 has accepted this request.',
+      message:
+        'Adeline has requested to update Nric: S1231234F, for patient Alice',
+      type: 'ApprovalRequestNotification',
+      createdDateTime: '2022-08-12T10:41:09.4266658',
+      senderName: 'Adeline Tan',
+      senderPicUrl:
+        'https://res.cloudinary.com/dbpearfyp/image/upload/v1634523641/User/Adeline_Tan_Sxxxx515G/ProfilePicture/ffo5oc4jhurmtjjhqcib.jpg',
     },
   ]);
 
   useEffect(() => {
+    // TODO: Uncomment when api has been integegrated
     // Fetches data from notification api
-    getAllNotificationOfUser(false);
+    // getAllNotificationOfUser(false);
   }, []);
 
   const getAllNotificationOfUser = async (readStatus) => {
-    setIsLoading(true);
-    const response = await notificationApi.getNotificationOfUser(readStatus);
-    if (!response.ok) {
-      // return error block
-      setIsLoading(false);
-      setIsError(true);
-      return;
-    }
-    setIsLoading(false);
-    setNotificationData(response.data);
+    return;
+    // TODO: Uncomment when api has been integegrated
+    // setIsLoading(true);
+    // const response = await notificationApi.getNotificationOfUser(readStatus);
+    // if (!response.ok) {
+    //   // return error block
+    //   setIsLoading(false);
+    //   setIsError(true);
+    //   return;
+    // }
+    // setIsLoading(false);
+    // setNotificationData(response.data);
   };
 
   // Purpose: When api fails, perform another fetch
   const handleErrorWhenApiFails = async () => {
-    await getAllNotificationOfUser(false);
+    return;
+    // TODO: Uncomment when api has been integegrated
+    // await getAllNotificationOfUser(false);
   };
 
   // Purpose: pull to refresh for flat list
   // Reference: https://thewebdev.info/2022/02/19///how-to-implement-pull-to-refresh-flatlist-with-react-native/
   const handlePullToRefresh = async () => {
-    setIsRefreshing(true);
-    await getAllNotificationOfUser(false);
-    setIsRefreshing(false);
+    return;
+    // TODO: Uncomment when api has been integrated
+    // setIsRefreshing(true);
+    // await getAllNotificationOfUser(false);
+    // setIsRefreshing(false);
   };
 
   /*  *** React Native Hande Gesture ***
@@ -128,23 +191,7 @@ function NotifcationsScreen(props) {
   const leftSwipeActions = () => (
     <>
       {requiresAction ? (
-        <VStack
-          w="40%"
-          backgroundColor={colors.pink_lighter}
-          justifyContent="center"
-        >
-          <CloseIcon color={colors.white} size="2xl" alignSelf="center" />
-          <Text
-            alignSelf="center"
-            bold
-            fontFamily={
-              Platform.OS === 'ios' ? 'Helvetica' : typography.android
-            }
-            color={colors.white}
-          >
-            Reject
-          </Text>
-        </VStack>
+        <VStack w="5%" />
       ) : (
         <VStack
           w="40%"
@@ -170,38 +217,13 @@ function NotifcationsScreen(props) {
   /*
    *   *** Renders view when swiped to right ***
    */
-  const rightSwipeActions = () => (
-    <>
-      {requiresAction ? (
-        <VStack
-          w="40%"
-          backgroundColor={colors.green_lighter}
-          justifyContent="center"
-        >
-          <CheckIcon color={colors.white} size="2xl" alignSelf="center" />
-          <Text
-            alignSelf="center"
-            bold
-            fontFamily={
-              Platform.OS === 'ios' ? 'Helvetica' : typography.android
-            }
-            color={colors.white}
-          >
-            Accept
-          </Text>
-        </VStack>
-      ) : (
-        // Don't show anything if no action required
-        <VStack w="5%" />
-      )}
-    </>
-  );
+  const rightSwipeActions = () => <VStack w="5%" />;
 
   /*
    *   *** Peforms action when Left boundary is opened ***
    */
   const swipeFromLeftOpen = () => {
-    filterAndRerender();
+    requiresAction ? null : filterAndRerender();
     // TODO: Call Reject Notificaiton API
   };
 
@@ -209,7 +231,8 @@ function NotifcationsScreen(props) {
    *   *** Peforms action when Right boundary is opened ***
    */
   const swipeFromRightOpen = () => {
-    requiresAction ? filterAndRerender() : null;
+    // requiresAction ? filterAndRerender() : null;
+    null;
     // TODO: Call Accept Notification API
   };
 
