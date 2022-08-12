@@ -264,6 +264,7 @@ function NotifcationsScreen(props) {
           )}
           <VStack w="90%">
             <FlatList
+              showsVerticalScrollIndicator={false}
               // onViewableItemsChanged={onViewableItemsChanged}
               data={notificationData}
               extraData={selectedId}
