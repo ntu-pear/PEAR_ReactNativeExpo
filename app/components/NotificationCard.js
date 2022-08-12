@@ -4,13 +4,10 @@ import { Text, Box, VStack, HStack, Avatar } from 'native-base';
 import colors from '../config/colors';
 import typography from '../config/typography';
 
-function NotificationCard({
-  item,
-  user,
-  setSelectedId,
-  setRequiresAction,
-  readStatus,
-}) {
+function NotificationCard(
+  { item, user, setSelectedId, setRequiresAction, readStatus, navigation },
+  props,
+) {
   /*
    * 1. Removes `\n` char w regex 3. trim empty spaces
    */
@@ -21,6 +18,8 @@ function NotificationCard({
   // setRequiresAction and setSelectedID required to handle flatlist
   // in notificationScreen.
   const handlePressIn = () => {
+    console.log('testing navigation');
+    console.log(props);
     setSelectedId(item.notificationID);
     item && item.requiresAction
       ? setRequiresAction(item.requiresAction)

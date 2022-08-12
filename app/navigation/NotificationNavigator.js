@@ -1,5 +1,6 @@
 /* eslint-disable */
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Platform } from 'react-native';
 import routes from './routes';
 import NotifcationsScreen from '../screens/NotifcationsScreen';
@@ -8,8 +9,10 @@ import NotificationsAcceptScreen from '../screens/NotificationsAcceptScreen';
 import NotificationsReadScreen from '../screens/NotificationsReadScreen';
 import colors from '../config/colors';
 import typography from '../config/typography';
+import NotificationsApprovalRequestScreen from '../screens/NotificationsApprovalRequestScreen';
 
 const Tab = createMaterialTopTabNavigator();
+const Stack = createNativeStackNavigator();
 
 /*
  * Reference: https://reactnavigation.org/docs/material-top-tab-navigator/
@@ -19,7 +22,7 @@ const Tab = createMaterialTopTabNavigator();
 // https://stackoverflow.com/questions/60439210/how-to-pass-props-to-screen-component-with-a-tab-navigator
 // https://reactnavigation.org/docs/navigation-prop/#setparams
 // https://www.reddit.com/r/reactnative/comments/td6ifk/passing_props_through_tab_navigator/
-function NotificationNavigator() {
+function NotificationTabNavigator() {
   return (
     <Tab.Navigator
       screenOptions={{
@@ -61,6 +64,25 @@ function NotificationNavigator() {
         }}
       />
     </Tab.Navigator>
+  );
+}
+// Note: NotificationNavigator is an example of nested navigator
+// Purpose: To allow tab components to navigate to `NotificationApprovalRequestScreen`.
+// Reference: https://reactnavigation.org/docs/nesting-navigators/#each-navigator-keeps-its-own-navigation-history
+function NotificationNavigator() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name={routes.NOTIFICATION_TAB}
+        component={NotificationTabNavigator}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name={routes.NOTIFICATION_APPROVAL_REQUEST}
+        component={NotificationsApprovalRequestScreen}
+        options={{ headerShown: false }}
+      />
+    </Stack.Navigator>
   );
 }
 
