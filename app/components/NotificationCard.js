@@ -29,15 +29,22 @@ function NotificationCard(
     item && item.requiresAction
       ? setRequiresAction(item.requiresAction)
       : setRequiresAction(false);
+  };
 
+  const handleNavigation = () => {
     item && item.requiresAction
       ? navigateToNotificationsApprovalRequestScreen()
       : null;
   };
 
   return (
-    // if readStatus is false, proceed to set the 1. ID and 2. requiredAction
-    <TouchableOpacity onPressIn={readStatus ? null : handlePressIn}>
+    // (1) if readStatus is false, proceed to set the 1. ID and 2. requiredAction
+    // (2) handleNavigation is set in onPress -- to register the press only after
+    // pressIn && pressOut. This is to allow `ActionRequired` cards to be scrollable.
+    <TouchableOpacity
+      onPressIn={readStatus ? null : handlePressIn}
+      onPress={handleNavigation}
+    >
       <Box
         borderBottomWidth="1"
         borderColor={colors.primary_gray}
