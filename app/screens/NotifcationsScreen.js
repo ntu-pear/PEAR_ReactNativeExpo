@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Platform } from 'react-native';
-import { Text, FlatList, VStack, DeleteIcon } from 'native-base';
+import { Platform, SafeAreaView, View } from 'react-native';
+import { Text, FlatList, VStack, DeleteIcon, Box } from 'native-base';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import AuthContext from '../auth/context';
@@ -10,6 +10,8 @@ import NotificationCard from '../components/NotificationCard';
 import notificationApi from '../api/notification';
 import ActivityIndicator from '../components/ActivityIndicator';
 import ErrorRetryApiCard from '../components/ErrorRetryApiCard';
+import routes from '../navigation/routes';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 function NotifcationsScreen(props) {
   const { navigation } = props;
@@ -21,6 +23,7 @@ function NotifcationsScreen(props) {
   const [selectedId, setSelectedId] = useState(null);
   // used to manage flatlist
   const [requiresAction, setRequiresAction] = useState(false);
+  const insets = useSafeAreaInsets();
 
   /*
    * Mock Data to populate flat list
@@ -144,6 +147,10 @@ function NotifcationsScreen(props) {
     // Fetches data from notification api
     // getAllNotificationOfUser(false);
   }, []);
+
+  const navigateToNotificationsApprovalRequestScreen = () => {
+    navigation.navigate(routes.NOTIFICATION_APPROVAL_REQUEST);
+  };
 
   const getAllNotificationOfUser = async (readStatus) => {
     return;
@@ -281,6 +288,9 @@ function NotifcationsScreen(props) {
                       setSelectedId={setSelectedId}
                       setRequiresAction={setRequiresAction}
                       readStatus={false}
+                      navigateToNotificationsApprovalRequestScreen={
+                        navigateToNotificationsApprovalRequestScreen
+                      }
                     />
                   </Swipeable>
                 </GestureHandlerRootView>

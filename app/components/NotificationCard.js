@@ -5,7 +5,14 @@ import colors from '../config/colors';
 import typography from '../config/typography';
 
 function NotificationCard(
-  { item, user, setSelectedId, setRequiresAction, readStatus, navigation },
+  {
+    item,
+    user,
+    setSelectedId,
+    setRequiresAction,
+    readStatus,
+    navigateToNotificationsApprovalRequestScreen,
+  },
   props,
 ) {
   /*
@@ -18,12 +25,14 @@ function NotificationCard(
   // setRequiresAction and setSelectedID required to handle flatlist
   // in notificationScreen.
   const handlePressIn = () => {
-    console.log('testing navigation');
-    console.log(props);
     setSelectedId(item.notificationID);
     item && item.requiresAction
       ? setRequiresAction(item.requiresAction)
       : setRequiresAction(false);
+
+    item && item.requiresAction
+      ? navigateToNotificationsApprovalRequestScreen()
+      : null;
   };
 
   return (

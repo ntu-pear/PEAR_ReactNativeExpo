@@ -1,13 +1,18 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { View } from 'react-native';
+import { Text, Button, Box } from 'native-base';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-function NotificationsApprovalRequestScreen() {
+function NotificationsApprovalRequestScreen(props) {
+  const { navigation } = props;
+  const insets = useSafeAreaInsets();
+
   return (
-    <View>
+    <Box safeAreaTop="20">
       <Text>This is NotificationsApprovalRequestScreen</Text>
-    </View>
+      <Button onPress={() => navigation.goBack()}> Go Back </Button>
+    </Box>
   );
 }
 
-const styles = StyleSheet.create({});
 export default NotificationsApprovalRequestScreen;

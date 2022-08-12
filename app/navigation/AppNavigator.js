@@ -41,7 +41,7 @@ function AppNavigator() {
         name={routes.NOTIFICATION}
         component={NotificationNavigator}
         options={{
-          headerShown: true,
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
               name="bell-outline"
