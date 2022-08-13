@@ -32,8 +32,9 @@ function NotificationCard(
   };
 
   const handleNavigation = () => {
+    setSelectedId(item.notificationID);
     item && item.requiresAction
-      ? navigateToNotificationsApprovalRequestScreen()
+      ? navigateToNotificationsApprovalRequestScreen(item)
       : null;
   };
 

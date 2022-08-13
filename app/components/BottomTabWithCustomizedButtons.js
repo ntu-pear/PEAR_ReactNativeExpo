@@ -10,13 +10,6 @@ function BottomTabWithCustomizedButtons({
   leftBtnFn,
   rightBtnFn,
 }) {
-  const onLeftButtonClick = () => {
-    console.log('left clicked');
-  };
-
-  const onRightButtonClick = () => {
-    console.log('right clicked');
-  };
   return (
     <Center
       bg={colors.white_var1}
@@ -34,7 +27,7 @@ function BottomTabWithCustomizedButtons({
       >
         {leftButtonText ? (
           <Button
-            onPress={onLeftButtonClick}
+            onPress={() => leftBtnFn()}
             w="25%"
             size="md"
             bg={colors.green}
@@ -50,7 +43,7 @@ function BottomTabWithCustomizedButtons({
         ) : null}
         {rightButtonText ? (
           <Button
-            onPress={onRightButtonClick}
+            onPress={() => rightBtnFn()}
             w="25%"
             size="md"
             bg={colors.pink}

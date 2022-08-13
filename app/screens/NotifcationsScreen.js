@@ -11,11 +11,11 @@ import notificationApi from '../api/notification';
 import ActivityIndicator from '../components/ActivityIndicator';
 import ErrorRetryApiCard from '../components/ErrorRetryApiCard';
 import routes from '../navigation/routes';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 function NotifcationsScreen(props) {
   const { navigation } = props;
   const { user } = useContext(AuthContext);
+  const { acceptRejectNotifID } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -23,7 +23,6 @@ function NotifcationsScreen(props) {
   const [selectedId, setSelectedId] = useState(null);
   // used to manage flatlist
   const [requiresAction, setRequiresAction] = useState(false);
-  const insets = useSafeAreaInsets();
 
   /*
    * Mock Data to populate flat list
@@ -144,15 +143,15 @@ function NotifcationsScreen(props) {
 
   useEffect(() => {
     // TODO: Uncomment when api has been integegrated
-    // Fetches data from notification api
+    // Fetches data from notification api (Once)
     // getAllNotificationOfUser(false);
-  }, []);
+    // If selecteID from NotificationCard === the Accepted/Rejected notification ID
+    // from NotificationApprovalRequestScreen, then proceed to update flatList
+    selectedId === acceptRejectNotifID ? filterAndRerender() : null; // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [acceptRejectNotifID]);
 
-  const navigateToNotificationsApprovalRequestScreen = () => {
-    navigation.navigate(
-      routes.NOTIFICATION_APPROVAL_REQUEST,
-      ...notificationData,
-    );
+  const navigateToNotificationsApprovalRequestScreen = (item) => {
+    navigation.navigate(routes.NOTIFICATION_APPROVAL_REQUEST, item);
   };
 
   const getAllNotificationOfUser = async (readStatus) => {
@@ -259,7 +258,7 @@ function NotifcationsScreen(props) {
   return (
     <>
       {isLoading ? (
-        <ActivityIndicator visible />
+        <ActivityIndicator visible={true} />
       ) : (
         <VStack w="100%" h="100%" alignItems="center">
           {isError && (
@@ -292,9 +291,9 @@ function NotifcationsScreen(props) {
                       setSelectedId={setSelectedId}
                       setRequiresAction={setRequiresAction}
                       readStatus={false}
-                      navigateToNotificationsApprovalRequestScreen={
-                        navigateToNotificationsApprovalRequestScreen
-                      }
+                      navigateToNotificationsApprovalRequestScreen={navigateToNotificationsApprovalRequestScreen(
+                        item,
+                      )}
                     />
                   </Swipeable>
                 </GestureHandlerRootView>
