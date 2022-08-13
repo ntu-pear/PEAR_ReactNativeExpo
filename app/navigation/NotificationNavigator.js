@@ -63,14 +63,14 @@ function NotificationTabNavigator() {
           component={NotificationsAcceptScreen}
           name={routes.NOTIFICATION_ACCEPT}
           options={{
-            title: 'Accepted',
+            title: 'Accept',
           }}
         />
         <Tab.Screen
           component={NotificationsRejectScreen}
           name={routes.NOTIFICATION_REJECT}
           options={{
-            title: 'Rejected',
+            title: 'Reject',
           }}
         />
       </Tab.Navigator>
