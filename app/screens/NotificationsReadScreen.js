@@ -1,11 +1,82 @@
-import React from 'react';
-import { Text, View } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { FlatList, VStack } from 'native-base';
+import AuthContext from '../auth/context';
+import ActivityIndicator from '../components/ActivityIndicator';
+import NotificationCard from '../components/NotificationCard';
+import ErrorRetryApiCard from '../components/ErrorRetryApiCard';
+import notificationApi from '../api/notification';
 
-function NotificationsReadScreen() {
+function NotificationsReadScreen(props) {
+  const { user } = useContext(AuthContext);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [notificationReadData, setNotificationReadData] = useState([
+    {
+      requiresAction: false,
+      actions: ['clear', 'deliver'],
+      notificationID: 2,
+      logID: 3621,
+      message: 'FYI: Adeline has updated information for patient Alice:\n\n',
+      initiatorUID: 'B22698B8-42A2-4115-9631-1C2D1E2AC5F2',
+      type: 'StandardNotification',
+      recipientKey: 'supervisorInCharge',
+      recipientUIDs: null,
+    },
+  ]);
+
+  useEffect(() => {
+    // TODO: Uncomment this when api is up
+    // getAllNotificationReadData(true)
+  }, []);
+
+  const handlePullToRefresh = () => {
+    // TODO: Uncomment this when api is up
+    // getAllNotificationReadData(true)
+  };
+
+  const getAllNotificationReadData = async (readStatus) => {
+    setIsLoading(true);
+    const response = await notificationApi.getNotificationOfUser(readStatus);
+    if (!response.ok) {
+      // return error block
+      setIsLoading(false);
+      setIsError(true);
+      return;
+    }
+    setIsLoading(false);
+    setNotificationReadData(response.data);
+  };
+
+  const handleErrorWhenApiFails = () => {
+    // TODO: Uncomment this when api is up
+    // getAllNotificationAcceptedData(true)
+  };
+
   return (
-    <View>
-      <Text>This is NotificationsReadScreen</Text>
-    </View>
+    <>
+      {isLoading ? (
+        <ActivityIndicator visible={true} />
+      ) : (
+        <VStack w="100%" h="100%" alignItems="center">
+          {isError && (
+            <ErrorRetryApiCard handleError={handleErrorWhenApiFails} />
+          )}
+          <VStack w="90%">
+            <FlatList
+              // onViewableItemsChanged={onViewableItemsChanged}
+              data={notificationReadData}
+              keyExtractor={(item) => item.notificationID}
+              onRefresh={handlePullToRefresh}
+              refreshing={isRefreshing}
+              renderItem={({ item }) => (
+                <NotificationCard item={item} user={user} readStatus={true} />
+              )}
+            />
+          </VStack>
+        </VStack>
+      )}
+    </>
   );
 }
 
