@@ -17,7 +17,10 @@ function NotificationsApprovalRequestScreen(props) {
         </VStack>
       </Box>
 
-      <BottomTabWithCustomizedButtons />
+      <BottomTabWithCustomizedButtons
+        leftButtonText="Accept"
+        rightButtonText="Reject"
+      />
     </Box>
   );
 }
