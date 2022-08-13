@@ -4,7 +4,12 @@ import { Button, Center, HStack, Divider } from 'native-base';
 import colors from '../config/colors';
 import typography from '../config/typography';
 
-function BottomTabWithCustomizedButtons({ leftButtonText, rightButtonText }) {
+function BottomTabWithCustomizedButtons({
+  leftButtonText,
+  rightButtonText,
+  leftBtnFn,
+  rightBtnFn,
+}) {
   const onLeftButtonClick = () => {
     console.log('left clicked');
   };
@@ -17,9 +22,8 @@ function BottomTabWithCustomizedButtons({ leftButtonText, rightButtonText }) {
       bg={colors.white_var1}
       position="absolute"
       bottom="0"
-      height="8%"
       w="100%"
-      safeAreaBottom
+      safeAreaBottom="10"
     >
       <Divider mb="4" />
       <HStack

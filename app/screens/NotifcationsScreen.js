@@ -149,7 +149,10 @@ function NotifcationsScreen(props) {
   }, []);
 
   const navigateToNotificationsApprovalRequestScreen = () => {
-    navigation.navigate(routes.NOTIFICATION_APPROVAL_REQUEST);
+    navigation.navigate(
+      routes.NOTIFICATION_APPROVAL_REQUEST,
+      ...notificationData,
+    );
   };
 
   const getAllNotificationOfUser = async (readStatus) => {
