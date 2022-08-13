@@ -17,23 +17,23 @@ function NotificationsApprovalRequestScreen(props) {
   const leftBtnFn = () => {
     // setLoading
     setIsLoading(true);
-    // (1) API Call to accept this LogID
+    // (1) TODO: API Call to accept this LogID
     // (2) Update parent screen
     setAcceptRejectNotifID(notificationID);
     // unSetLoading
     setIsLoading(false);
-    // (3) go back to parent screen
+    // (3) Navigate back to parent screen
     navigation.goBack();
   };
   const rightBtnFn = () => {
     // setLoading
     setIsLoading(true);
-    // (1) API Call to reject this LogID
+    // (1) TODO: API Call to reject this LogID
     // (2) Update parent screen
     setAcceptRejectNotifID(notificationID);
     // unSetLoading
     setIsLoading(false);
-    // (3) go back to parent screen
+    // (3) Navigate back to parent screen
     navigation.goBack();
   };
 
