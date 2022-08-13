@@ -10,9 +10,25 @@ import PatientsNavigator from './PatientsNavigator';
 import ConfigNavigator from './ConfigNavigator';
 import AccountScreen from '../screens/AccountScreen';
 import NotificationNavigator from './NotificationNavigator';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
 // Refer to this doc: https://reactnavigation.org/docs/tab-based-navigation
 const Tab = createBottomTabNavigator();
+
+/*
+ * Purpose: Hides bottom tab on specific route
+ * Reference:
+ * (1) https://reactnavigation.org/docs/screen-options-resolution/#setting-parent-screen-options-based-on-child-navigators-state
+ * (2) https://medium.com/@mspviraj/hide-bottom-tab-bar-on-a-specific-screen-in-react-navigation-6-0-26d31625d339
+ */
+function hideBottomTabOnSpecificRoute(route) {
+  const routeName = getFocusedRouteNameFromRoute(route) ?? '';
+  if (routeName === routes.NOTIFICATION_APPROVAL_REQUEST) {
+    return { display: 'none' };
+  }
+  // Continue to include other routes here if hiding bottom tab is required
+  return;
+}
 
 // Refer to this for configuration: https://reactnavigation.org/docs/bottom-tab-navigator
 function AppNavigator() {
@@ -40,8 +56,9 @@ function AppNavigator() {
       <Tab.Screen
         name={routes.NOTIFICATION}
         component={NotificationNavigator}
-        options={{
-          headerShown: true,
+        options={({ route }) => ({
+          tabBarStyle: hideBottomTabOnSpecificRoute(route),
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
               name="bell-outline"
@@ -49,7 +66,7 @@ function AppNavigator() {
               size={size}
             />
           ),
-        }}
+        })}
       />
       <Tab.Screen
         name={routes.PATIENTS}

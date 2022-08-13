@@ -17,6 +17,7 @@ import authStorage from "./app/auth/authStorage";
 
 export default function App() {
   const [user, setUser] = useState();
+  const [acceptRejectNotifID, setAcceptRejectNotifID] = useState(-1);
 
   // Reference on fixing theme issue
   // https://stackoverflow.com/questions/48253357/react-navigation-default-background-color
@@ -43,7 +44,7 @@ export default function App() {
   return (
     // NativeBaseProvider is a component that makes the theme available throughout your app.
     <NativeBaseProvider>
-      <AuthContext.Provider value={{ user, setUser }}>
+      <AuthContext.Provider value={{ user, setUser, acceptRejectNotifID, setAcceptRejectNotifID }}>
         <OfflineNotice />
         <NavigationContainer theme={MyTheme}>
           {user ? <AppNavigator /> : <AuthNavigator />}
