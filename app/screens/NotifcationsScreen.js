@@ -291,9 +291,9 @@ function NotifcationsScreen(props) {
                       setSelectedId={setSelectedId}
                       setRequiresAction={setRequiresAction}
                       readStatus={false}
-                      navigateToNotificationsApprovalRequestScreen={navigateToNotificationsApprovalRequestScreen(
-                        item,
-                      )}
+                      navigateToNotificationsApprovalRequestScreen={
+                        navigateToNotificationsApprovalRequestScreen
+                      }
                     />
                   </Swipeable>
                 </GestureHandlerRootView>
