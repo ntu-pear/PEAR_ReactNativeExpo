@@ -21,8 +21,10 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.pear.reactnative.expo",
+      "versionCode": 1,
       "adaptiveIcon": {
-        "foregroundImage": "./app/assets/adaptive-icon.png",
+        "foregroundImage": "./app/assets/pear_v2.png",
         "backgroundColor": "#FFFFFF"
       }
     },
