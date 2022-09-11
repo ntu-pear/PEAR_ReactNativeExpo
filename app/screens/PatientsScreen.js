@@ -42,6 +42,8 @@ function PatientsScreen(props) {
   };
 
   const handleFabOnPress = () => {
+    // TODO: Include `Add Patient Feature`
+    // console.log('Placeholder for fab on click');
     navigation.navigate(routes.PATIENT_ADD_PATIENT);
   };
 
