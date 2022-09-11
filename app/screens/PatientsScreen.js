@@ -6,6 +6,7 @@ import useCheckExpiredThenLogOut from 'app/hooks/useCheckExpiredThenLogOut';
 import PatientScreenCard from 'app/components/PatientScreenCard';
 import colors from 'app/config/colors';
 import ActivityIndicator from 'app/components/ActivityIndicator';
+import routes from 'app/navigation/routes';
 
 function PatientsScreen(props) {
   const [isLoading, setIsLoading] = useState(false);
@@ -40,6 +41,7 @@ function PatientsScreen(props) {
   const handleFabOnPress = () => {
     // TODO: Include `Add Patient Feature`
     // console.log('Placeholder for fab on click');
+    navigation.navigate(routes.PATIENT_ADD_PATIENT);
   };
 
   return (
