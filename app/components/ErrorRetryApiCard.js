@@ -1,14 +1,14 @@
-import React from 'react';
+import AppButton from 'app/components/AppButton';
 import {
-  Text,
-  HStack,
-  VStack,
-  IconButton,
   Alert,
   Box,
   CloseIcon,
+  HStack,
+  IconButton,
+  Text,
+  VStack,
 } from 'native-base';
-import AppButton from './AppButton';
+import React from 'react';
 
 /* Note the immediate bunch of code will only be rendered
  * when one of the APIs has an error. Purpose: Error handling of API

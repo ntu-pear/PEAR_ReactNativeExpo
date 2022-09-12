@@ -5,10 +5,10 @@ import {
   MaterialIcons,
   FontAwesome5,
 } from '@expo/vector-icons';
-import PatientInformationCard from '../components/PatientInformationCard';
-import colors from '../config/colors';
-import PatientProfileCard from '../components/PatientProfileCard';
-import routes from '../navigation/routes';
+import PatientInformationCard from 'app/components/PatientInformationCard';
+import colors from 'app/config/colors';
+import PatientProfileCard from 'app/components/PatientProfileCard';
+import routes from 'app/navigation/routes';
 
 function PatientProfileScreen(props) {
   const { navigation, route } = props;

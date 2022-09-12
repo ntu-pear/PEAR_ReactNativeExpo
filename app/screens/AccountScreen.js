@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
 import { Text, View } from 'react-native';
-import AuthContext from '../auth/context';
-import AppButton from '../components/AppButton';
-import authStorage from '../auth/authStorage';
+import AuthContext from 'app/auth/context';
+import AppButton from 'app/components/AppButton';
+import authStorage from 'app/auth/authStorage';
 
 function AccountScreen() {
   const { user, setUser } = useContext(AuthContext);

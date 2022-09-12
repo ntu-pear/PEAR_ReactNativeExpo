@@ -1,6 +1,6 @@
 import { create } from 'apisauce';
-import cache from '../utility/cache';
-import authStorage from '../auth/authStorage';
+import cache from 'app/utility/cache';
+import authStorage from 'app/auth/authStorage';
 
 const baseURL = 'https://coremvc.fyp2017.com/api';
 const endpoint = '/User';

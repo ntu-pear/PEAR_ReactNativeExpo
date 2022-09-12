@@ -1,10 +1,10 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import WelcomeScreen from '../screens/WelcomeScreen';
-import LoginScreen from '../screens/LoginScreen';
-import RegisterScreen from '../screens/RegisterScreen';
+import WelcomeScreen from 'app/screens/WelcomeScreen';
+import LoginScreen from 'app/screens/LoginScreen';
+import RegisterScreen from 'app/screens/RegisterScreen';
 // Import Constants from routes
-import routes from './routes';
+import routes from 'app/navigation/routes';
 
 // Refer to this: https://reactnavigation.org/docs/hello-react-navigation
 const Stack = createNativeStackNavigator();

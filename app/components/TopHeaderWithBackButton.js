@@ -2,8 +2,8 @@ import React from 'react';
 import { Platform } from 'react-native';
 import { IconButton, Box, HStack, Text, Center, Divider } from 'native-base';
 import { MaterialIcons } from '@expo/vector-icons';
-import colors from '../config/colors';
-import typography from '../config/typography';
+import colors from 'app/config/colors';
+import typography from 'app/config/typography';
 
 function TopHeaderWithBackButton({ navigation, title }) {
   return (

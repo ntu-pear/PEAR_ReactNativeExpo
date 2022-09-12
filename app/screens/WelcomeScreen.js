@@ -14,22 +14,22 @@ import {
 import { Select, Input, Center, Icon, Box } from 'native-base';
 import { MaterialIcons } from '@expo/vector-icons';
 import jwt_decode from 'jwt-decode';
-import AuthContext from '../auth/context';
-import authStorage from '../auth/authStorage';
+import AuthContext from 'app/auth/context';
+import authStorage from 'app/auth/authStorage';
 
 // Constant import
-import colors from '../config/colors';
-import typography from '../config/typography';
-import errors from '../config/errors';
-import useApiHandler from '../hooks/useApiHandler';
+import colors from 'app/config/colors';
+import typography from 'app/config/typography';
+import errors from 'app/config/errors';
+import useApiHandler from 'app/hooks/useApiHandler';
 
 // Import from components
-import AppText from '../components/AppText';
-import AppButton from '../components/AppButton';
-import ErrorMessage from '../components/ErrorMessage';
+import AppText from 'app/components/AppText';
+import AppButton from 'app/components/AppButton';
+import ErrorMessage from 'app/components/ErrorMessage';
 
 // Import Api
-import userApi from '../api/user';
+import userApi from 'app/api/user';
 
 function WelcomeScreen(props) {
   /*

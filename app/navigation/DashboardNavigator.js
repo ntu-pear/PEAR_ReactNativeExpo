@@ -1,9 +1,9 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import DashboardScreen from '../screens/DashboardScreen';
+import DashboardScreen from 'app/screens/DashboardScreen';
 
 // Import Constants from Routes
-import routes from './routes';
+import routes from 'app/navigation/routes';
 
 // Refer to this: https://reactnavigation.org/docs/hello-react-navigation
 const Stack = createNativeStackNavigator();

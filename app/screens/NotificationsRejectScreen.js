@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useContext } from 'react';
+import notificationApi from 'app/api/notification';
+import AuthContext from 'app/auth/context';
+import ActivityIndicator from 'app/components/ActivityIndicator';
+import ErrorRetryApiCard from 'app/components/ErrorRetryApiCard';
+import NotificationCard from 'app/components/NotificationCard';
 import { FlatList, VStack } from 'native-base';
-import AuthContext from '../auth/context';
-import ActivityIndicator from '../components/ActivityIndicator';
-import NotificationCard from '../components/NotificationCard';
-import ErrorRetryApiCard from '../components/ErrorRetryApiCard';
-import notificationApi from '../api/notification';
+import React, { useContext, useEffect, useState } from 'react';
 
 function NotificationsRejectScreen(props) {
   const { user } = useContext(AuthContext);

@@ -2,8 +2,8 @@
 import React from 'react';
 import { Platform } from 'react-native';
 import { Stack, Text, Input, FormControl, HStack } from 'native-base';
-import colors from '../config/colors';
-import typography from '../config/typography';
+import colors from 'app/config/colors';
+import typography from 'app/config/typography';
 
 function PersonalGuardianCard(props) {
   const { guardian, additionalGuardian } = props.patientGuardian; //eslint-disable-line no-unused-vars

@@ -11,8 +11,8 @@ import {
   HStack,
   TextArea,
 } from 'native-base';
-import typography from '../config/typography';
-import colors from '../config/colors';
+import typography from 'app/config/typography';
+import colors from 'app/config/colors';
 
 function PersonalInformationCard(props) {
   const { patientInformation } = props;

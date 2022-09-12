@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import { FormControl } from 'native-base';
 import { MaterialIcons } from '@expo/vector-icons';
-import colors from '../config/colors';
+import colors from 'app/config/colors';
 
 function ErrorMessage(props) {
   const { message, visible } = props;

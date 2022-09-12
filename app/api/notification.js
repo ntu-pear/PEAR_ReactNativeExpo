@@ -1,5 +1,5 @@
 /*eslint eslint-comments/no-unlimited-disable: error */
-import client from './client';
+import client from 'app/api/client';
 
 /*
  * List all end points here
