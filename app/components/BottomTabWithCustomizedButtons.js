@@ -1,8 +1,8 @@
 import React from 'react';
 import { Platform } from 'react-native';
 import { Button, Center, HStack, Divider } from 'native-base';
-import colors from '../config/colors';
-import typography from '../config/typography';
+import colors from 'app/config/colors';
+import typography from 'app/config/typography';
 
 function BottomTabWithCustomizedButtons({
   leftButtonText,

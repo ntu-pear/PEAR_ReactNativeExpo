@@ -4,7 +4,7 @@ import { TouchableOpacity } from 'react-native';
 import { Center, Image, Text, VStack, Box } from 'native-base';
 
 // Import Constants from routes
-import routes from '../navigation/routes';
+import routes from 'app/navigation/routes';
 
 function PatientScreenCard(props) {
   const { patientProfile, navigation } = props;

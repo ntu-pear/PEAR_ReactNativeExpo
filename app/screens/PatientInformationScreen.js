@@ -1,34 +1,34 @@
 /*eslint eslint-comments/no-unlimited-disable: error */
-import React, { useState, useEffect } from 'react';
-import { Platform } from 'react-native';
+import doctorNoteApi from 'app/api/doctorNote';
+import guardianApi from 'app/api/guardian';
+import socialHistoryApi from 'app/api/socialHistory';
+import ActivityIndicator from 'app/components/ActivityIndicator';
+import AppButton from 'app/components/AppButton';
+import PersonalDoctorCard from 'app/components/PersonalDoctorCard';
+import PersonalGuardianCard from 'app/components/PersonalGuardianCard';
+import PersonalInformationCard from 'app/components/PersonalInformationCard';
+import PersonalPreferenceCard from 'app/components/PersonalPreferenceCard';
+import PersonalSocialHistory from 'app/components/PersonalSocialHistory';
+import colors from 'app/config/colors';
+import typography from 'app/config/typography';
+import useApi from 'app/hooks/useApi';
 import {
+  Alert,
+  AspectRatio,
+  Box,
   Center,
-  VStack,
+  CloseIcon,
+  Divider,
+  HStack,
+  IconButton,
+  Image,
   ScrollView,
   Stack,
-  Divider,
-  Box,
-  AspectRatio,
-  Image,
-  Alert,
-  CloseIcon,
-  HStack,
   Text,
-  IconButton,
+  VStack,
 } from 'native-base';
-import colors from '../config/colors';
-import typography from '../config/typography';
-import PersonalInformationCard from '../components/PersonalInformationCard';
-import PersonalPreferenceCard from '../components/PersonalPreferenceCard';
-import PersonalDoctorCard from '../components/PersonalDoctorCard';
-import PersonalGuardianCard from '../components/PersonalGuardianCard';
-import PersonalSocialHistory from '../components/PersonalSocialHistory';
-import ActivityIndicator from '../components/ActivityIndicator';
-import doctorNoteApi from '../api/doctorNote';
-import guardianApi from '../api/guardian';
-import socialHistoryApi from '../api/socialHistory';
-import useApi from '../hooks/useApi';
-import AppButton from '../components/AppButton';
+import React, { useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 
 function PatientInformationScreen(props) {
   const { displayPicUrl, firstName, lastName, patientID } = props.route.params;

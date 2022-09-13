@@ -1,8 +1,8 @@
 import React from 'react';
 import { Platform, TouchableOpacity } from 'react-native';
 import { Text, Box, VStack, HStack, Avatar } from 'native-base';
-import colors from '../config/colors';
-import typography from '../config/typography';
+import colors from 'app/config/colors';
+import typography from 'app/config/typography';
 
 function NotificationCard(
   {

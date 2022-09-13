@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Center, VStack, ScrollView, Fab, Icon } from 'native-base';
 import { MaterialIcons } from '@expo/vector-icons';
-import patientApi from '../api/patient';
-import useCheckExpiredThenLogOut from '../hooks/useCheckExpiredThenLogOut';
-import PatientScreenCard from '../components/PatientScreenCard';
-import colors from '../config/colors';
-import ActivityIndicator from '../components/ActivityIndicator';
+import patientApi from 'app/api/patient';
+import useCheckExpiredThenLogOut from 'app/hooks/useCheckExpiredThenLogOut';
+import PatientScreenCard from 'app/components/PatientScreenCard';
+import colors from 'app/config/colors';
+import ActivityIndicator from 'app/components/ActivityIndicator';
 
 function PatientsScreen(props) {
   const [isLoading, setIsLoading] = useState(false);

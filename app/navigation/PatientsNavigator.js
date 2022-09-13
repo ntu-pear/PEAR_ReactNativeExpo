@@ -1,20 +1,20 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import PatientsScreen from '../screens/PatientsScreen';
-import PatientProfile from '../screens/PatientProfileScreen';
-import PatientInformationScreen from '../screens/PatientInformationScreen';
+import PatientsScreen from 'app/screens/PatientsScreen';
+import PatientProfile from 'app/screens/PatientProfileScreen';
+import PatientInformationScreen from 'app/screens/PatientInformationScreen';
 
 // Import Constants from routes
-import routes from './routes';
-import PatientActivityPreferenceScreen from '../screens/PatientActivityPreferenceScreen';
-import PatientAllergyScreen from '../screens/PatientAllergyScreen';
-import PatientHolidayScreen from '../screens/PatientHolidayScreen';
-import PatientPhotoAlbumScreen from '../screens/PatientPhotoAlbumScreen';
-import PatientPreferenceScreen from '../screens/PatientPreferenceScreen';
-import PatientPrescriptionScreen from '../screens/PatientPrescriptionScreen';
-import PatientProblemLog from '../screens/PatientProblemLog';
-import PatientVitalScreen from '../screens/PatientVitalScreen';
-import PatientRoutineScreen from '../screens/PatientRoutineScreen';
+import routes from 'app/navigation/routes';
+import PatientActivityPreferenceScreen from 'app/screens/PatientActivityPreferenceScreen';
+import PatientAllergyScreen from 'app/screens/PatientAllergyScreen';
+import PatientHolidayScreen from 'app/screens/PatientHolidayScreen';
+import PatientPhotoAlbumScreen from 'app/screens/PatientPhotoAlbumScreen';
+import PatientPreferenceScreen from 'app/screens/PatientPreferenceScreen';
+import PatientPrescriptionScreen from 'app/screens/PatientPrescriptionScreen';
+import PatientProblemLog from 'app/screens/PatientProblemLog';
+import PatientVitalScreen from 'app/screens/PatientVitalScreen';
+import PatientRoutineScreen from 'app/screens/PatientRoutineScreen';
 
 // Refer to this: https://reactnavigation.org/docs/hello-react-navigation
 const Stack = createNativeStackNavigator();

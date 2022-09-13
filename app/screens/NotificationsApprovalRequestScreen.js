@@ -1,12 +1,12 @@
 import React, { useContext, useState } from 'react';
 import { Platform } from 'react-native';
 import { Text, Box, VStack, ScrollView, Avatar, HStack } from 'native-base';
-import TopHeaderWithBackButton from '../components/TopHeaderWithBackButton';
-import BottomTabWithCustomizedButtons from '../components/BottomTabWithCustomizedButtons';
-import colors from '../config/colors';
-import typography from '../config/typography';
-import AuthContext from '../auth/context';
-import ActivityIndicator from '../components/ActivityIndicator';
+import TopHeaderWithBackButton from 'app/components/TopHeaderWithBackButton';
+import BottomTabWithCustomizedButtons from 'app/components/BottomTabWithCustomizedButtons';
+import colors from 'app/config/colors';
+import typography from 'app/config/typography';
+import AuthContext from 'app/auth/context';
+import ActivityIndicator from 'app/components/ActivityIndicator';
 
 function NotificationsApprovalRequestScreen(props) {
   const { navigation, route } = props;

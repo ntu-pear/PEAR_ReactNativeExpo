@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { TouchableOpacity } from 'react-native';
 import { Box, VStack, Center, Image, Text, HStack, Icon } from 'native-base';
 import { MaterialIcons } from '@expo/vector-icons';
-import colors from '../config/colors';
-import routes from '../navigation/routes';
+import colors from 'app/config/colors';
+import routes from 'app/navigation/routes';
 
 function PatientInformationCard(props) {
   const { patientProfile, navigation } = props;

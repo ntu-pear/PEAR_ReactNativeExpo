@@ -10,8 +10,8 @@ import {
   Select,
   CheckIcon,
 } from 'native-base';
-import colors from '../config/colors';
-import typography from '../config/typography';
+import colors from 'app/config/colors';
+import typography from 'app/config/typography';
 
 function PersonalSocialHistory({ socialHistory }) {
   /*

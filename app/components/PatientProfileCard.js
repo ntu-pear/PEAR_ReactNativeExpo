@@ -1,7 +1,7 @@
 import React from 'react';
 import { TouchableOpacity } from 'react-native';
 import { Box, Icon, Text } from 'native-base';
-import colors from '../config/colors';
+import colors from 'app/config/colors';
 
 function PatientProfileCard(props) {
   const {

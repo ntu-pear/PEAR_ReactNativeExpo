@@ -3,14 +3,14 @@ import { Platform, SafeAreaView, View } from 'react-native';
 import { Text, FlatList, VStack, DeleteIcon, Box } from 'native-base';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import AuthContext from '../auth/context';
-import colors from '../config/colors';
-import typography from '../config/typography';
-import NotificationCard from '../components/NotificationCard';
-import notificationApi from '../api/notification';
-import ActivityIndicator from '../components/ActivityIndicator';
-import ErrorRetryApiCard from '../components/ErrorRetryApiCard';
-import routes from '../navigation/routes';
+import AuthContext from 'app/auth/context';
+import colors from 'app/config/colors';
+import typography from 'app/config/typography';
+import NotificationCard from 'app/components/NotificationCard';
+import notificationApi from 'app/api/notification';
+import ActivityIndicator from 'app/components/ActivityIndicator';
+import ErrorRetryApiCard from 'app/components/ErrorRetryApiCard';
+import routes from 'app/navigation/routes';
 
 function NotifcationsScreen(props) {
   const { navigation } = props;
