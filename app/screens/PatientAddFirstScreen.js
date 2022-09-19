@@ -40,7 +40,7 @@ export function PatientAddFirstScreen(props) {
           </FormControl>
 
           <FormControl>
-            <FormControl.Label>Preferred Name (Optional)</FormControl.Label>
+            <FormControl.Label>Preferred Name</FormControl.Label>
             <Input placeholder="Preferred Name" />
           </FormControl>
 
@@ -60,13 +60,13 @@ export function PatientAddFirstScreen(props) {
           </FormControl>
 
           <FormControl>
-            <FormControl.Label>Home No. </FormControl.Label>
-            <Input placeholder="Home Number" />
+            <FormControl.Label>Home Telephone No.</FormControl.Label>
+            <Input placeholder="Home Telephone Number (Optional)" />
           </FormControl>
 
           <FormControl>
-            <FormControl.Label>Handphone No. </FormControl.Label>
-            <Input placeholder="Handphone Number" />
+            <FormControl.Label>Handphone No.</FormControl.Label>
+            <Input placeholder="Handphone Number (Optional)" />
           </FormControl>
 
           <FormControl>
