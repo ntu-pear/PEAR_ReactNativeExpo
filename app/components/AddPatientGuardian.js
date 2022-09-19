@@ -8,7 +8,13 @@ function AddPatientGuardian({ title }) {
     <Box>
       {title == 1 ? null : <Divider mt={10} />}
 
-      <Text textAlign="center" marginTop={6} bold fontSize="2xl">
+      <Text
+        textAlign="center"
+        marginTop={6}
+        bold
+        fontSize="2xl"
+        color={colors.green}
+      >
         Guardian Information {title}
       </Text>
 
