@@ -2,30 +2,34 @@ import React, { useState } from 'react';
 import {
   Box,
   Input,
-  Icon,
   FormControl,
   Text,
   Button,
-  Progress,
   Radio,
   HStack,
-  Image,
 } from 'native-base';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 import { ScrollView } from 'react-native';
+import AddPatientProgress from 'app/components/AddPatientProgress';
+import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
+import colors from 'app/config/colors';
 
-export function PatientAddFirstScreen(props) {
+export function PatientAddPatientInfoScreen(props) {
   const { nextQuestionHandler } = props;
 
   return (
     <ScrollView>
       <Box alignItems="center">
         <Box w="75%">
-          <Box marginTop={10}>
-            <Progress colorScheme="primary" value={25} />
-          </Box>
-          <Text textAlign="center" marginTop={6} bold fontSize="2xl">
+          <AddPatientProgress value={25} />
+          <Text
+            textAlign="center"
+            marginTop={6}
+            bold
+            fontSize="2xl"
+            color={colors.green}
+          >
             Patient Information
           </Text>
 
@@ -103,9 +107,7 @@ export function PatientAddFirstScreen(props) {
             <DateTimePicker value={new Date()} />
           </FormControl>
         </Box>
-        <Button dark w="20" margin="10" onPress={nextQuestionHandler}>
-          Next
-        </Button>
+        <AddPatientBottomButtons nextQuestionHandler={nextQuestionHandler} />
       </Box>
     </ScrollView>
   );
