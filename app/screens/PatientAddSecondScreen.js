@@ -9,13 +9,24 @@ import {
   HStack,
   ScrollView,
   Progress,
-  Radio,
+  Divider,
   Select,
+  VStack,
 } from 'native-base';
+import AddPatientGuardian from 'app/components/AddPatientGuardian';
 
 export function PatientAddSecondScreen(props) {
   const { nextQuestionHandler, prevQuestionHandler } = props;
+  const [addGuardianList, setGuardianList] = useState([{ title: '' }]);
+  const addNewGuardianComponent = () => {
+    setGuardianList([...addGuardianList, { title: '' }]);
+  };
 
+  const removeGuardianComponent = (index) => {
+    const list = [...addGuardianList];
+    list.splice(index, 1);
+    setGuardianList(list);
+  };
   return (
     <ScrollView>
       <Box alignItems="center">
@@ -23,40 +34,52 @@ export function PatientAddSecondScreen(props) {
           <Box marginTop={10}>
             <Progress colorScheme="primary" value={50} />
           </Box>
-          <Text textAlign="center" marginTop={6} bold fontSize="2xl">
-            Guardian Information
-          </Text>
-
-          <FormControl marginTop={4}>
-            <FormControl.Label>Guardian Name</FormControl.Label>
-            <Input placeholder="Guardian Name" />
-          </FormControl>
-
-          <FormControl>
-            <FormControl.Label>Guardian NRIC</FormControl.Label>
-            <Input placeholder="Guardian NRIC" />
-          </FormControl>
-
-          <FormControl>
-            <FormControl.Label>Relation to Patient</FormControl.Label>
-            <Select placeholder="Select">
-              <Select.Item label="Parent" value="parent" />
-              <Select.Item label="Child" value="child" />
-            </Select>
-          </FormControl>
-
-          <FormControl>
-            <FormControl.Label>Guardian Contact </FormControl.Label>
-            <Input placeholder="Guardian Contact" />
-          </FormControl>
-
-          <FormControl>
-            <FormControl.Label>Guardian Email </FormControl.Label>
-            <Input placeholder="Guardian Email" />
-          </FormControl>
+          {addGuardianList
+            ? addGuardianList.map((item, index) => (
+                <Box>
+                  <AddPatientGuardian title={index + 1} />
+                </Box>
+              ))
+            : null}
         </Box>
 
-        <Box margin="10">
+        {addGuardianList.length === 1 ? (
+          <Button
+            mt={2}
+            width={10}
+            variant="outline"
+            colorScheme="success"
+            borderRadius="full"
+            onPress={addNewGuardianComponent}
+          >
+            +
+          </Button>
+        ) : (
+          <Box mt={2}>
+            <HStack mt={4} space={4}>
+              <Button
+                width={10}
+                variant="outline"
+                colorScheme="success"
+                borderRadius="full"
+                onPress={addNewGuardianComponent}
+              >
+                +
+              </Button>
+              <Button
+                width={10}
+                variant="outline"
+                colorScheme="secondary"
+                borderRadius="full"
+                onPress={removeGuardianComponent}
+              >
+                -
+              </Button>
+            </HStack>
+          </Box>
+        )}
+
+        <Box mt={2}>
           <HStack space={4}>
             <Button w="20" onPress={prevQuestionHandler}>
               Previous
