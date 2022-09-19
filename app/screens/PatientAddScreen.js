@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { Box, Input, Icon, FormControl, Text } from 'native-base';
 
 import { MaterialIcons } from '@expo/vector-icons';
-import colors from '../config/colors';
-import typography from '../config/typography';
-import errors from '../config/errors';
-import useApiHandler from '../hooks/useApiHandler';
+import colors from 'app/config/colors';
+import typography from 'app/config/typography';
+import errors from 'app/config/errors';
+import useApiHandler from 'app/hooks/useApiHandler';
 
-import { PatientAddFirstScreen } from './PatientAddFirstScreen';
-import { PatientAddSecondScreen } from './PatientAddSecondScreen';
-import { PatientAddThirdScreen } from './PatientAddThirdScreen';
+import { PatientAddPatientInfoScreen } from 'app/screens/PatientAddPatientInfoScreen';
+import { PatientAddGuardianScreen } from 'app/screens/PatientAddGuardianScreen';
+import { PatientAddAllergyScreen } from 'app/screens/PatientAddAllergyScreen';
 
 export function PatientAddScreen(props) {
   console.log(props);
@@ -29,20 +29,20 @@ export function PatientAddScreen(props) {
     <Box>
       {console.log(qnNo)}
       {qnNo === 1 ? (
-        <PatientAddFirstScreen
+        <PatientAddPatientInfoScreen
           key={1}
           nextQuestionHandler={nextQuestionHandler}
         />
       ) : (
         [
           qnNo === 2 ? (
-            <PatientAddSecondScreen
+            <PatientAddGuardianScreen
               key={2}
               nextQuestionHandler={nextQuestionHandler}
               prevQuestionHandler={prevQuestionHandler}
             />
           ) : qnNo === 3 ? (
-            <PatientAddThirdScreen
+            <PatientAddAllergyScreen
               key={3}
               nextQuestionHandler={nextQuestionHandler}
               prevQuestionHandler={prevQuestionHandler}
