@@ -20,7 +20,7 @@ export function PatientAddAllergyScreen(props) {
     <ScrollView>
       <Box alignItems="center">
         <Box w="75%">
-          <AddPatientProgress value={100} />
+          <AddPatientProgress value={60} />
           {allergyList
             ? allergyList.map((item, index) => (
                 <Box>
@@ -32,11 +32,10 @@ export function PatientAddAllergyScreen(props) {
 
         <AddPatientBottomButtons
           list={allergyList}
-          // nextQuestionHandler={nextQuestionHandler}
+          nextQuestionHandler={nextQuestionHandler}
           prevQuestionHandler={prevQuestionHandler}
           addComponent={addNewAllergyComponent}
           removeComponent={removeAllergyComponent}
-          submit={true}
         />
       </Box>
     </ScrollView>
