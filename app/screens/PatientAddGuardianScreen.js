@@ -10,13 +10,13 @@ import AddPatientProgress from 'app/components/AddPatientProgress';
 
 export function PatientAddGuardianScreen(props) {
   const { nextQuestionHandler, prevQuestionHandler } = props;
-  const [addGuardianList, setGuardianList] = useState([{ title: '' }]);
+  const [guardianList, setGuardianList] = useState([{ title: '' }]);
   const addNewGuardianComponent = () => {
-    setGuardianList([...addGuardianList, { title: '' }]);
+    setGuardianList([...guardianList, { title: '' }]);
   };
 
   const removeGuardianComponent = (index) => {
-    const list = [...addGuardianList];
+    const list = [...guardianList];
     list.splice(index, 1);
     setGuardianList(list);
   };
@@ -25,16 +25,20 @@ export function PatientAddGuardianScreen(props) {
       <Box alignItems="center">
         <Box w="75%">
           <AddPatientProgress value={50} />
-          {addGuardianList
-            ? addGuardianList.map((item, index) => (
+          {guardianList
+            ? guardianList.map((item, index) => (
                 <Box>
-                  <AddPatientGuardian key={item} title={index + 1} />
+                  <AddPatientGuardian
+                    key={index}
+                    val={item}
+                    title={index + 1}
+                  />
                 </Box>
               ))
             : null}
         </Box>
         <AddPatientBottomButtons
-          list={addGuardianList}
+          list={guardianList}
           nextQuestionHandler={nextQuestionHandler}
           prevQuestionHandler={prevQuestionHandler}
           addComponent={addNewGuardianComponent}

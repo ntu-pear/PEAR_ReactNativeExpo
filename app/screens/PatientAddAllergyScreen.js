@@ -6,13 +6,13 @@ import AddPatientProgress from 'app/components/AddPatientProgress';
 
 export function PatientAddAllergyScreen(props) {
   const { nextQuestionHandler, prevQuestionHandler } = props;
-  const [addAllergyList, setAllergyList] = useState([{ title: '' }]);
+  const [allergyList, setAllergyList] = useState([{ title: '' }]);
   const addNewAllergyComponent = () => {
-    setAllergyList([...addAllergyList, { title: '' }]);
+    setAllergyList([...allergyList, { title: '' }]);
   };
 
   const removeAllergyComponent = (index) => {
-    const list = [...addAllergyList];
+    const list = [...allergyList];
     list.splice(index, 1);
     setAllergyList(list);
   };
@@ -21,17 +21,17 @@ export function PatientAddAllergyScreen(props) {
       <Box alignItems="center">
         <Box w="75%">
           <AddPatientProgress value={100} />
-          {addAllergyList
-            ? addAllergyList.map((item, index) => (
+          {allergyList
+            ? allergyList.map((item, index) => (
                 <Box>
-                  <AddPatientAllergy key={item} title={index + 1} />
+                  <AddPatientAllergy key={index} val={item} title={index + 1} />
                 </Box>
               ))
             : null}
         </Box>
 
         <AddPatientBottomButtons
-          list={addAllergyList}
+          list={allergyList}
           // nextQuestionHandler={nextQuestionHandler}
           prevQuestionHandler={prevQuestionHandler}
           addComponent={addNewAllergyComponent}
