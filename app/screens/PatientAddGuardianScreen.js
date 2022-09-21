@@ -24,7 +24,7 @@ export function PatientAddGuardianScreen(props) {
     <ScrollView>
       <Box alignItems="center">
         <Box w="75%">
-          <AddPatientProgress value={50} />
+          <AddPatientProgress value={40} />
           {guardianList
             ? guardianList.map((item, index) => (
                 <Box>
