@@ -154,9 +154,8 @@ function NotifcationsScreen(props) {
   };
 
   const getAllNotificationOfUser = async (readStatus) => {
-    // return;
-    // TODO: Uncomment when api has been integegrated
     setIsLoading(true);
+    // Get all `unread` notification of user
     const response = await notificationApi.getNotificationOfUser(readStatus);
     if (!response.ok) {
       // return error block
