@@ -54,6 +54,7 @@ function NotificationsApprovalRequestScreen(props) {
     // (3) Navigate back to parent screen
     navigation.goBack();
   };
+
   const rightBtnFn = () => {
     setAlertDialogIsOpen(!alertDialogIsOpen);
   };
@@ -102,9 +103,11 @@ function NotificationsApprovalRequestScreen(props) {
   const handleError = () => {
     setIsError(false);
     if (functionToCallAgain === 'leftBtnFn') {
+      setFunctionToCallAgain(null);
       leftBtnFn();
     }
     if (functionToCallAgain === 'handleAddRejectComment') {
+      setFunctionToCallAgain(null);
       handleAddRejectComment();
     }
   };
