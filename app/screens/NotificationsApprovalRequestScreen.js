@@ -18,6 +18,8 @@ import colors from 'app/config/colors';
 import typography from 'app/config/typography';
 import AuthContext from 'app/auth/context';
 import ActivityIndicator from 'app/components/ActivityIndicator';
+import notificationApi from 'app/api/notification';
+import ErrorRetryApiCard from 'app/components/ErrorRetryApiCard';
 
 function NotificationsApprovalRequestScreen(props) {
   const { navigation, route } = props;
@@ -27,12 +29,25 @@ function NotificationsApprovalRequestScreen(props) {
   const [alertDialogIsOpen, setAlertDialogIsOpen] = useState(false);
   const [isInvalidErrorMessage, setIsInvalidErrorMessage] = useState(false);
   const [reasonTextAreaValue, setReasonTextAreaValue] = useState('');
+  const [functionToCallAgain, setFunctionToCallAgain] = useState(null);
+  const [isError, setIsError] = useState(false);
   const cancelRef = useRef(null);
 
-  const leftBtnFn = () => {
+  const leftBtnFn = async () => {
     // setLoading
     setIsLoading(true);
-    // (1) TODO: API Call to accept this LogID
+    // (1) API Call to set current Notification ID as `read`, and type of action
+    const response = await notificationApi.setNotificationAction(
+      notificationID,
+      'approve',
+    );
+    console.log(response);
+    if (!response.ok) {
+      setIsLoading(false);
+      setFunctionToCallAgain('leftBtnFn');
+      setIsError(true);
+      return;
+    }
     // (2) Update parent screen
     setAcceptRejectNotifID(notificationID);
     // unSetLoading
@@ -44,7 +59,7 @@ function NotificationsApprovalRequestScreen(props) {
     setAlertDialogIsOpen(!alertDialogIsOpen);
   };
 
-  const handleAddRejectComment = () => {
+  const handleAddRejectComment = async () => {
     // TODO: Further form invalidations to be included here
     // e.g. Sanitization
     // Form validation [Guard]
@@ -59,8 +74,18 @@ function NotificationsApprovalRequestScreen(props) {
     setIsInvalidErrorMessage(false);
     // (1) Set Loading
     setIsLoading(true);
-    // (2) API - Notification Action API Call -- to add comments
-    // (3) API - Set Notification as Read
+    // (2) API Call to set current Notification ID as `read`, type of action, and comment
+    const response = await notificationApi.setNotificationAction(
+      notificationID,
+      'reject',
+      reasonTextAreaValue,
+    );
+    if (!response.ok) {
+      setIsLoading(false);
+      setFunctionToCallAgain('handleAddRejectComment');
+      setIsError(true);
+      return;
+    }
     // (4) Update parent screen
     setAcceptRejectNotifID(notificationID);
     // (4) unSet Loading
@@ -74,6 +99,17 @@ function NotificationsApprovalRequestScreen(props) {
     setAlertDialogIsOpen(!alertDialogIsOpen);
   };
 
+  // Purpose: Error-handling. If any API fails, prompt user to re-run function.
+  const handleError = () => {
+    setIsError(false);
+    if (functionToCallAgain === 'leftBtnFn') {
+      leftBtnFn();
+    }
+    if (functionToCallAgain === 'handleAddRejectComment') {
+      handleAddRejectComment();
+    }
+  };
+
   return (
     <>
       {isLoading ? (
@@ -83,45 +119,51 @@ function NotificationsApprovalRequestScreen(props) {
           <TopHeaderWithBackButton navigation={navigation} />
           <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
             <Box w="90%" ml="5" mr="5" mt="5">
-              <VStack space={5}>
-                <HStack justifyContent="space-between" alignItems="center">
-                  <Text
-                    color={colors.black_var1}
-                    fontFamily={
-                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                    }
-                    fontWeight="bold"
-                    fontSize="md"
-                  >
-                    {senderName} has requested for an update
-                  </Text>
-                  <Avatar
-                    size="md"
-                    bg={colors.pink}
-                    source={{
-                      uri: senderPicUrl
-                        ? senderPicUrl
-                        : 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80',
-                    }}
-                  >
-                    --
-                  </Avatar>
-                </HStack>
-                <ScrollView h="100%" w="100%">
-                  <Box>
+              {isError ? (
+                <ErrorRetryApiCard handleError={handleError} />
+              ) : (
+                <VStack space={5}>
+                  <HStack justifyContent="space-between" alignItems="center">
                     <Text
                       color={colors.black_var1}
                       fontFamily={
                         Platform.OS === 'ios' ? 'Helvetica' : typography.android
                       }
-                      fontWeight="hairline"
+                      fontWeight="bold"
                       fontSize="md"
                     >
-                      {message}
+                      {senderName} has requested for an update
                     </Text>
-                  </Box>
-                </ScrollView>
-              </VStack>
+                    <Avatar
+                      size="md"
+                      bg={colors.pink}
+                      source={{
+                        uri: senderPicUrl
+                          ? senderPicUrl
+                          : 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80',
+                      }}
+                    >
+                      --
+                    </Avatar>
+                  </HStack>
+                  <ScrollView h="100%" w="100%">
+                    <Box>
+                      <Text
+                        color={colors.black_var1}
+                        fontFamily={
+                          Platform.OS === 'ios'
+                            ? 'Helvetica'
+                            : typography.android
+                        }
+                        fontWeight="hairline"
+                        fontSize="md"
+                      >
+                        {message}
+                      </Text>
+                    </Box>
+                  </ScrollView>
+                </VStack>
+              )}
             </Box>
           </TouchableWithoutFeedback>
 
