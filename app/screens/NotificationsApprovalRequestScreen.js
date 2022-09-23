@@ -41,7 +41,6 @@ function NotificationsApprovalRequestScreen(props) {
       notificationID,
       'approve',
     );
-    console.log(response);
     if (!response.ok) {
       setIsLoading(false);
       setFunctionToCallAgain('leftBtnFn');
