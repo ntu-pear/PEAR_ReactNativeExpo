@@ -45,7 +45,7 @@ function NotificationsAcceptScreen(props) {
       return;
     }
     const filteredNotificationItemsWithApproveAction = response.data.filter(
-      (notification) => notification.actions.includes('approve'),
+      (notification) => notification.status === 'approve',
     );
     setIsLoading(false);
     setNotificationAcceptedData(filteredNotificationItemsWithApproveAction);

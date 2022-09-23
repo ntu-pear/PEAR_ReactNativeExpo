@@ -45,7 +45,7 @@ function NotificationsRejectScreen(props) {
       return;
     }
     const filteredNotificationItemsWithRejectAction = response.data.filter(
-      (notification) => notification.actions.includes('reject'),
+      (notification) => notification.status === 'reject',
     );
     setIsLoading(false);
     setNotificationRejectedData(filteredNotificationItemsWithRejectAction);
