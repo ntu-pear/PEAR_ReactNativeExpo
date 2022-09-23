@@ -26,13 +26,15 @@ function NotificationsReadScreen(props) {
   ]);
 
   useEffect(() => {
-    // TODO: Uncomment this when api is up
-    // getAllNotificationReadData(true)
+    //  Get all `read` notification of user
+    getAllNotificationReadData(true);
   }, []);
 
-  const handlePullToRefresh = () => {
-    // TODO: Uncomment this when api is up
-    // getAllNotificationReadData(true)
+  const handlePullToRefresh = async () => {
+    //  Get all `read` notification of user
+    setIsRefreshing(true);
+    await getAllNotificationReadData(true);
+    setIsRefreshing(false);
   };
 
   const getAllNotificationReadData = async (readStatus) => {
@@ -49,8 +51,8 @@ function NotificationsReadScreen(props) {
   };
 
   const handleErrorWhenApiFails = () => {
-    // TODO: Uncomment this when api is up
-    // getAllNotificationAcceptedData(true)
+    //  Get all `read` notification of user
+    getAllNotificationReadData(true);
   };
 
   return (
@@ -64,7 +66,7 @@ function NotificationsReadScreen(props) {
           )}
           <VStack w="90%">
             <FlatList
-              // onViewableItemsChanged={onViewableItemsChanged}
+              showsVerticalScrollIndicator={false}
               data={notificationReadData}
               keyExtractor={(item) => item.notificationID}
               onRefresh={handlePullToRefresh}

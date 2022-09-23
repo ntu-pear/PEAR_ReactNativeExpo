@@ -45,6 +45,7 @@ function NotificationCard(
     <TouchableOpacity
       onPressIn={readStatus ? null : handlePressIn}
       onPress={handleNavigation}
+      disabled={readStatus}
     >
       <Box
         borderBottomWidth="1"
@@ -80,7 +81,7 @@ function NotificationCard(
             >
               {item && item.shortMessage
                 ? handleString(item.shortMessage)
-                : 'Not Available'}
+                : item.message}
             </Text>
           </HStack>
           {/* <HStack justifyContent="flex-start">

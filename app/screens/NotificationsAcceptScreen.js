@@ -26,16 +26,17 @@ function NotificationsAcceptScreen(props) {
   ]);
 
   useEffect(() => {
-    // TODO: Uncomment this when api is up
-    // getAllNotificationAcceptedData(true)
+    getAllNotificationApprovedData(true);
   }, []);
 
-  const handlePullToRefresh = () => {
-    // TODO: Uncomment this when api is up
-    // getAllNotificationAcceptedData(true)
+  const handlePullToRefresh = async () => {
+    setIsRefreshing(true);
+    await getAllNotificationApprovedData(true);
+    setIsRefreshing(false);
   };
 
-  const getAllNotificationAcceptedData = async (readStatus) => {
+  // Purpose: Get all notification items that has been `approved`.
+  const getAllNotificationApprovedData = async (readStatus) => {
     setIsLoading(true);
     const response = await notificationApi.getNotificationOfUser(readStatus);
     if (!response.ok) {
@@ -44,13 +45,16 @@ function NotificationsAcceptScreen(props) {
       setIsError(true);
       return;
     }
+    const filteredNotificationItemsWithApproveAction = response.data.filter(
+      (notification) => notification.actions.includes('approve'),
+    );
     setIsLoading(false);
-    setNotificationAcceptedData(response.data);
+    setNotificationAcceptedData(filteredNotificationItemsWithApproveAction);
   };
 
   const handleErrorWhenApiFails = () => {
-    // TODO: Uncomment this when api is up
-    // getAllNotificationAcceptedData(true)
+    setIsError(false);
+    getAllNotificationApprovedData(true);
   };
 
   return (
@@ -64,7 +68,7 @@ function NotificationsAcceptScreen(props) {
           )}
           <VStack w="90%">
             <FlatList
-              // onViewableItemsChanged={onViewableItemsChanged}
+              showsVerticalScrollIndicator={false}
               data={notificationAcceptedData}
               keyExtractor={(item) => item.notificationID}
               onRefresh={handlePullToRefresh}
