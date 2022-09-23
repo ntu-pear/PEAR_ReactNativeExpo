@@ -1,6 +1,5 @@
 /*eslint eslint-comments/no-unlimited-disable: error */
 import client from 'app/api/client';
-import { NONE } from 'apisauce';
 
 /*
  * List all end points here
