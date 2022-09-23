@@ -25,6 +25,8 @@ function NotificationsApprovalRequestScreen(props) {
   const { setAcceptRejectNotifID } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
   const [alertDialogIsOpen, setAlertDialogIsOpen] = useState(false);
+  const [isInvalidErrorMessage, setIsInvalidErrorMessage] = useState(false);
+  const [reasonTextAreaValue, setReasonTextAreaValue] = useState('');
   const cancelRef = useRef(null);
 
   const leftBtnFn = () => {
@@ -52,13 +54,31 @@ function NotificationsApprovalRequestScreen(props) {
   };
 
   const handleAddRejectComment = () => {
+    // TODO: Further form invalidations to be included here
+    // e.g. Sanitization
+    // Form validation [Guard]
+    if (reasonTextAreaValue.trim().length < 6) {
+      // Set error message for form
+      setIsInvalidErrorMessage(true);
+      // Immediate return
+      return null;
+    }
+    // Re-set error message for form to `False` before proceeding
+    // with subsequent commands
+    setIsInvalidErrorMessage(false);
     // (1) Set Loading
+    setIsLoading(true);
     // (2) API - Notification Action API Call -- to add comments
     // (3) API - Set Notification as Read
+    // (4) Update parent screen
+    setAcceptRejectNotifID(notificationID);
     // (4) unSet Loading
+    setIsLoading(false);
     // (5) Navigate back to parent screen
+    navigation.goBack();
   };
 
+  // Handles closing of Alert Dialog
   const onClose = () => {
     setAlertDialogIsOpen(!alertDialogIsOpen);
   };
@@ -118,12 +138,13 @@ function NotificationsApprovalRequestScreen(props) {
             leastDestructiveRef={cancelRef}
             isOpen={alertDialogIsOpen}
             onClose={onClose}
+            bottom="10%"
           >
             <AlertDialog.Content>
               <AlertDialog.CloseButton />
               <AlertDialog.Header>Add Reason For Rejection</AlertDialog.Header>
               <AlertDialog.Body>
-                <FormControl>
+                <FormControl isInvalid={isInvalidErrorMessage}>
                   <FormControl.Label
                     _text={{
                       fontSize: 'md',
@@ -132,14 +153,22 @@ function NotificationsApprovalRequestScreen(props) {
                   >
                     Reasons
                   </FormControl.Label>
-                  <TextArea numberOfLines={6} />
+                  <TextArea
+                    aria-label="t1Disabled"
+                    numberOfLines={6}
+                    onChangeText={(text) => setReasonTextAreaValue(text)}
+                  />
+                  <FormControl.ErrorMessage>
+                    Please include a reason with minimum length of 5 characters.
+                  </FormControl.ErrorMessage>
                 </FormControl>
               </AlertDialog.Body>
               <AlertDialog.Footer>
                 <Button
-                  w="30%"
-                  size="md"
                   bg={colors.pink}
+                  onPress={handleAddRejectComment}
+                  size="md"
+                  w="30%"
                   _text={{
                     color: `${colors.white_var1}`,
                     fontFamily:

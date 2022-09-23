@@ -48,6 +48,7 @@
     "@babel/core": "^7.12.9",
     "eslint": "^8.21.0",
     "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-absolute-imports": "^0.0.3",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "husky": "^8.0.1",
