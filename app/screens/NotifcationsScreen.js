@@ -142,9 +142,8 @@ function NotifcationsScreen(props) {
   ]);
 
   useEffect(() => {
-    // TODO: Uncomment when api has been integegrated
     // Fetches data from notification api (Once)
-    // getAllNotificationOfUser(false);
+    getAllNotificationOfUser(false);
     // If selecteID from NotificationCard === the Accepted/Rejected notification ID
     // from NotificationApprovalRequestScreen, then proceed to update flatList
     selectedId === acceptRejectNotifID ? filterAndRerender() : null; // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -155,36 +154,31 @@ function NotifcationsScreen(props) {
   };
 
   const getAllNotificationOfUser = async (readStatus) => {
-    return;
+    // return;
     // TODO: Uncomment when api has been integegrated
-    // setIsLoading(true);
-    // const response = await notificationApi.getNotificationOfUser(readStatus);
-    // if (!response.ok) {
-    //   // return error block
-    //   setIsLoading(false);
-    //   setIsError(true);
-    //   return;
-    // }
-    // setIsLoading(false);
-    // setNotificationData(response.data);
+    setIsLoading(true);
+    const response = await notificationApi.getNotificationOfUser(readStatus);
+    if (!response.ok) {
+      // return error block
+      setIsLoading(false);
+      setIsError(true);
+      return;
+    }
+    setIsLoading(false);
+    setNotificationData(response.data);
   };
 
   // Purpose: When api fails, perform another fetch
   const handleErrorWhenApiFails = async () => {
-    return;
-    // TODO: Uncomment when api has been integegrated
-    // await getAllNotificationOfUser(false);
+    await getAllNotificationOfUser(false);
   };
 
   // Purpose: pull to refresh for flat list
   // Reference: https://thewebdev.info/2022/02/19///how-to-implement-pull-to-refresh-flatlist-with-react-native/
   const handlePullToRefresh = async () => {
-    console.log(navigation);
-    return;
-    // TODO: Uncomment when api has been integrated
-    // setIsRefreshing(true);
-    // await getAllNotificationOfUser(false);
-    // setIsRefreshing(false);
+    setIsRefreshing(true);
+    await getAllNotificationOfUser(false);
+    setIsRefreshing(false);
   };
 
   /*  *** React Native Hande Gesture ***
