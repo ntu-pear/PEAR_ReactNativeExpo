@@ -40,7 +40,6 @@ function NotificationsAcceptScreen(props) {
     setIsLoading(true);
     const response = await notificationApi.getNotificationOfUser(readStatus);
     if (!response.ok) {
-      // return error block
       setIsLoading(false);
       setIsError(true);
       return;
