@@ -7,6 +7,7 @@ import {
   Button,
   Radio,
   HStack,
+  Select,
 } from 'native-base';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
@@ -50,7 +51,12 @@ export function PatientAddPatientInfoScreen(props) {
 
           <FormControl>
             <FormControl.Label>Preferred Language</FormControl.Label>
-            <Input placeholder="Preferred Language" />
+            <Select placeholder="Select Language">
+              <Select.Item label="English" value="1" />
+              <Select.Item label="Chinese" value="2" />
+              <Select.Item label="Malay" value="3" />
+              <Select.Item label="Tamil" value="3" />
+            </Select>
           </FormControl>
 
           <FormControl>
