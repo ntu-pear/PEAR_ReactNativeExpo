@@ -225,9 +225,14 @@ function NotifcationsScreen(props) {
   /*
    *   *** Peforms action when Left boundary is opened ***
    */
-  const swipeFromLeftOpen = () => {
-    requiresAction ? null : filterAndRerender();
-    // TODO: Call Reject Notificaiton API
+  const swipeFromLeftOpen = async () => {
+    // If action is required, do not allow allow filterAndRerender
+    if (requiresAction) {
+      return;
+    }
+    filterAndRerender();
+    // (1) API Call to set current Notification ID as `read`, and type of action
+    await notificationApi.setNotificationAction(selectedId, 'clear');
   };
 
   /*
