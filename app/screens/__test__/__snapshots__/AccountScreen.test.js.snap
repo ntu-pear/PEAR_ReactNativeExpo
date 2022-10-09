@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Testing Account Screen Should match snapshot 1`] = `
+<View>
+  <Text>
+    This is my accountscreen
+  </Text>
+  <Text>
+    Jessica Sim
+  </Text>
+  <View
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    onClick={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      Object {
+        "alignItems": "center",
+        "backgroundColor": "#FD4734",
+        "borderRadius": 25,
+        "justifyContent": "center",
+        "opacity": 1,
+        "padding": 15,
+        "widht": "100%",
+      }
+    }
+  >
+    <Text
+      style={
+        Object {
+          "color": "#F3ECE4",
+          "fontSize": 18,
+          "fontWeight": "bold",
+          "textTransform": "uppercase",
+        }
+      }
+    >
+      Logout
+    </Text>
+  </View>
+</View>
+`;
