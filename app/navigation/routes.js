@@ -5,8 +5,11 @@
 // Note: Freeze is to ensure we do not make changes to these constants
 // accidentally.
 export default Object.freeze({
-  ACCOUNT: 'Account',
-  ACCOUNT_SCREEN: 'AccountScreen',
+  ACCOUNT: 'AccountScreen',
+  ACCOUNT_DETAIL: 'AccountDetailScreen',
+  ABOUT: 'About',
+  SETTINGS: 'Settings',
+
   CONFIG: 'Config',
   CONFIG_SCREEN: 'ConfigScreen',
   DASHBOARD: 'Dashboard',

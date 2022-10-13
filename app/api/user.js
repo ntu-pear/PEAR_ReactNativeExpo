@@ -19,6 +19,14 @@ const userResetPassword = `${endpoint}/ResetPassword`;
 
 // **********************  GET REQUESTS *************************
 
+const getUser = async (userID, role) => {
+  const params = {
+    userId: userID,
+    role: role,
+  };
+  return client.get(endpoint, params);
+};
+
 // **********************  POST REQUESTS *************************
 const loginUser = (Email, Role, Password) => {
   const body = JSON.stringify({ Email, Role, Password });
@@ -42,4 +50,5 @@ const resetPassword = (Email, Role) => {
 export default {
   loginUser,
   resetPassword,
+  getUser,
 };
