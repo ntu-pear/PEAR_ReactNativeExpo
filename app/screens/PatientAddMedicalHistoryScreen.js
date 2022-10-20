@@ -5,29 +5,65 @@ import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import AddPatientProgress from 'app/components/AddPatientProgress';
 
 export function PatientAddMedicalHistoryScreen(props) {
-  const { nextQuestionHandler, prevQuestionHandler } = props;
-  const [medicalHistoryList, setMedicalHistoryList] = useState([{ title: '' }]);
+  const {
+    nextQuestionHandler,
+    prevQuestionHandler,
+    formData,
+    setFormData,
+    handleFormData,
+  } = props;
+  const [medicalHistoryListDisplay, setMedicalHistoryListDisplay] = useState([
+    {},
+  ]);
+
+  const concatFormData = () => {
+    var medicalList = formData.medicalList.concat({
+      medicalDetails: '',
+      medicalInfo: '',
+      medicalNotes: '',
+      medicalDate: new Date(),
+    });
+    setFormData((prevState) => ({
+      ...prevState,
+      medicalList,
+    }));
+  };
+
+  const removeFormData = () => {
+    var medicalList = [...formData.medicalList];
+    medicalList.pop();
+    setFormData((prevState) => ({
+      ...prevState,
+      medicalList,
+    }));
+  };
+
   const addNewMedicalHistoryComponent = () => {
-    setMedicalHistoryList([...medicalHistoryList, { title: '' }]);
+    setMedicalHistoryListDisplay([...medicalHistoryListDisplay, {}]);
+    concatFormData();
   };
 
   const removeMedicalHistoryComponent = (index) => {
-    const list = [...medicalHistoryList];
+    const list = [...medicalHistoryListDisplay];
     list.splice(index, 1);
-    setMedicalHistoryList(list);
+    setMedicalHistoryListDisplay(list);
+    removeFormData();
   };
+
   return (
     <ScrollView>
       <Box alignItems="center">
         <Box w="75%">
           <AddPatientProgress value={100} />
-          {medicalHistoryList
-            ? medicalHistoryList.map((item, index) => (
+          {medicalHistoryListDisplay
+            ? medicalHistoryListDisplay.map((item, index) => (
                 <Box>
                   <AddPatientMedicalHistory
-                    key={index}
                     val={item}
+                    i={index}
                     title={index + 1}
+                    formData={formData}
+                    handleFormData={handleFormData}
                   />
                 </Box>
               ))
@@ -35,7 +71,7 @@ export function PatientAddMedicalHistoryScreen(props) {
         </Box>
 
         <AddPatientBottomButtons
-          list={medicalHistoryList}
+          list={medicalHistoryListDisplay}
           // nextQuestionHandler={nextQuestionHandler}
           prevQuestionHandler={prevQuestionHandler}
           addComponent={addNewMedicalHistoryComponent}
