@@ -47,6 +47,16 @@ export function PatientAddPatientInfoScreen(props) {
     { list_LanguageID: 13, value: 'Korean' },
   ];
 
+  //   // checking if value of first name and last name is empty show error else take to step 2
+  //   if (
+  //     validator.isEmpty(values.firstName) ||
+  //     validator.isEmpty(values.lastName)
+  //   ) {
+  //     setError(true);
+  //   } else {
+  //     nextQuestionHandler();
+  //   }
+  // };
   return (
     <ScrollView>
       <Box alignItems="center">
