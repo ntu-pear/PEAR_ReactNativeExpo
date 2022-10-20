@@ -9,36 +9,72 @@ import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import AddPatientProgress from 'app/components/AddPatientProgress';
 
 export function PatientAddGuardianScreen(props) {
-  const { nextQuestionHandler, prevQuestionHandler } = props;
-  const [guardianList, setGuardianList] = useState([{ title: '' }]);
+  const {
+    nextQuestionHandler,
+    prevQuestionHandler,
+    formData,
+    setFormData,
+    handleFormData,
+  } = props;
+
+  const concatFormData = () => {
+    var guardianList = formData.guardianList.concat({
+      guardianName: '',
+      guardianNric: '',
+      guardianPatient: '',
+      guardianHandphone: '',
+      guardianHomeTel: '',
+      guardianEmail: '',
+    });
+    setFormData((prevState) => ({
+      ...prevState,
+      guardianList,
+    }));
+  };
+
+  const removeFormData = () => {
+    var guardianList = [...formData.guardianList];
+    guardianList.pop();
+    setFormData((prevState) => ({
+      ...prevState,
+      guardianList,
+    }));
+  };
+
+  const [guardianListDisplay, setGuardianListDisplay] = useState([{}]);
   const addNewGuardianComponent = () => {
-    setGuardianList([...guardianList, { title: '' }]);
+    setGuardianListDisplay([...guardianListDisplay, {}]);
+    concatFormData();
   };
 
   const removeGuardianComponent = (index) => {
-    const list = [...guardianList];
+    const list = [...guardianListDisplay];
     list.splice(index, 1);
-    setGuardianList(list);
+    setGuardianListDisplay(list);
+    removeFormData();
   };
+
   return (
     <ScrollView>
       <Box alignItems="center">
         <Box w="75%">
           <AddPatientProgress value={40} />
-          {guardianList
-            ? guardianList.map((item, index) => (
+          {guardianListDisplay
+            ? guardianListDisplay.map((item, index) => (
                 <Box>
                   <AddPatientGuardian
-                    key={index}
                     val={item}
+                    i={index}
                     title={index + 1}
+                    formData={formData}
+                    handleFormData={handleFormData}
                   />
                 </Box>
               ))
             : null}
         </Box>
         <AddPatientBottomButtons
-          list={guardianList}
+          list={guardianListDisplay}
           nextQuestionHandler={nextQuestionHandler}
           prevQuestionHandler={prevQuestionHandler}
           addComponent={addNewGuardianComponent}
