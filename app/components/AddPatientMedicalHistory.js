@@ -14,7 +14,12 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import colors from 'app/config/colors';
 import typography from 'app/config/typography';
 
-function AddPatientMedicalHistory({ title }) {
+function AddPatientMedicalHistory({ i, title, formData, handleFormData }) {
+  // console.log('MEDICAL HISTORY', formData);
+
+  const page = 'medicalList';
+  const medical = formData.medicalList[i];
+
   return (
     <Box>
       {title == 1 ? null : <Divider mt={10} />}
@@ -31,7 +36,11 @@ function AddPatientMedicalHistory({ title }) {
 
       <FormControl marginTop={4}>
         <FormControl.Label>Medical Details</FormControl.Label>
-        <Select placeholder="Select Medical Detail">
+        <Select
+          placeholder="Select Medical Detail"
+          selectedValue={medical.medicalDetails}
+          onValueChange={handleFormData(page, 'medicalDetails', i)}
+        >
           <Select.Item label="Medical Detail 1" value="1" />
           <Select.Item label="Medical Detail 2" value="2" />
           <Select.Item label="To be updated" value="3" />
@@ -40,18 +49,29 @@ function AddPatientMedicalHistory({ title }) {
 
       <FormControl>
         <FormControl.Label>Source of Information</FormControl.Label>
-        <Input placeholder="Source of Information" />
+        <Input
+          placeholder="Source of Information"
+          value={medical.medicalInfo}
+          onChangeText={handleFormData(page, 'medicalInfo', i)}
+        />
       </FormControl>
 
       <FormControl>
         <FormControl.Label>Medical Notes</FormControl.Label>
-        <TextArea placeholder="Medical Notes (optional)" />
+        <TextArea
+          placeholder="Medical Notes (optional)"
+          value={medical.medicalNotes}
+          onChangeText={handleFormData(page, 'medicalNotes', i)}
+        />
       </FormControl>
 
       <FormControl>
         <HStack />
         <FormControl.Label>Date of Medical Record </FormControl.Label>
-        <DateTimePicker value={new Date()} />
+        <DateTimePicker
+          value={medical.medicalDate}
+          onChange={handleFormData(page, 'medicalDate', i)}
+        />
       </FormControl>
     </Box>
   );

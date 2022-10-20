@@ -5,33 +5,70 @@ import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import AddPatientProgress from 'app/components/AddPatientProgress';
 
 export function PatientAddAllergyScreen(props) {
-  const { nextQuestionHandler, prevQuestionHandler } = props;
-  const [allergyList, setAllergyList] = useState([{ title: '' }]);
+  const {
+    nextQuestionHandler,
+    prevQuestionHandler,
+    formData,
+    setFormData,
+    handleFormData,
+  } = props;
+  const [allergyListDisplay, setAllergyListDisplay] = useState([{}]);
+
+  const concatFormData = () => {
+    var allergyList = formData.allergyList.concat({
+      allergyName: '',
+      allergyReaction: '',
+      allergyNotes: '',
+    });
+    setFormData((prevState) => ({
+      ...prevState,
+      allergyList,
+    }));
+  };
+
+  const removeFormData = () => {
+    var allergyList = [...formData.allergyList];
+    allergyList.pop();
+    setFormData((prevState) => ({
+      ...prevState,
+      allergyList,
+    }));
+  };
+
   const addNewAllergyComponent = () => {
-    setAllergyList([...allergyList, { title: '' }]);
+    setAllergyListDisplay([...allergyListDisplay, {}]);
+    concatFormData();
   };
 
   const removeAllergyComponent = (index) => {
-    const list = [...allergyList];
+    const list = [...allergyListDisplay];
     list.splice(index, 1);
-    setAllergyList(list);
+    setAllergyListDisplay(list);
+    removeFormData();
   };
+
   return (
     <ScrollView>
       <Box alignItems="center">
         <Box w="75%">
           <AddPatientProgress value={60} />
-          {allergyList
-            ? allergyList.map((item, index) => (
+          {allergyListDisplay
+            ? allergyListDisplay.map((item, index) => (
                 <Box>
-                  <AddPatientAllergy key={index} val={item} title={index + 1} />
+                  <AddPatientAllergy
+                    val={item}
+                    i={index}
+                    title={index + 1}
+                    formData={formData}
+                    handleFormData={handleFormData}
+                  />
                 </Box>
               ))
             : null}
         </Box>
 
         <AddPatientBottomButtons
-          list={allergyList}
+          list={allergyListDisplay}
           nextQuestionHandler={nextQuestionHandler}
           prevQuestionHandler={prevQuestionHandler}
           addComponent={addNewAllergyComponent}
