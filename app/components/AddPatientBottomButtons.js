@@ -59,6 +59,7 @@ function AddPatientBottomButtons({
             leftIcon={
               <Icon as={<MaterialIcons name="chevron-left" />} color="white" />
             }
+            list={list}
           />
         )}
         <Spacer />
