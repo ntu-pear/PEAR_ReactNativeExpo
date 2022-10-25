@@ -11,8 +11,11 @@ export function PatientAddAllergyScreen(props) {
     formData,
     setFormData,
     handleFormData,
+    componentList,
   } = props;
-  const [allergyListDisplay, setAllergyListDisplay] = useState([{}]);
+  const [allergyListDisplay, setAllergyListDisplay] = useState(
+    componentList.allergy,
+  );
 
   const concatFormData = () => {
     var allergyList = formData.allergyList.concat({
@@ -69,8 +72,12 @@ export function PatientAddAllergyScreen(props) {
 
         <AddPatientBottomButtons
           list={allergyListDisplay}
-          nextQuestionHandler={nextQuestionHandler}
-          prevQuestionHandler={prevQuestionHandler}
+          nextQuestionHandler={() =>
+            nextQuestionHandler('allergy', allergyListDisplay)
+          }
+          prevQuestionHandler={() =>
+            prevQuestionHandler('allergy', allergyListDisplay)
+          }
           addComponent={addNewAllergyComponent}
           removeComponent={removeAllergyComponent}
         />

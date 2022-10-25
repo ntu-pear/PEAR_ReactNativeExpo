@@ -15,8 +15,6 @@ import colors from 'app/config/colors';
 import typography from 'app/config/typography';
 
 function AddPatientMedicalHistory({ i, title, formData, handleFormData }) {
-  // console.log('MEDICAL HISTORY', formData);
-
   const page = 'medicalList';
   const medical = formData.medicalList[i];
 
