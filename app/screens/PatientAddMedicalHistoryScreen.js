@@ -11,10 +11,11 @@ export function PatientAddMedicalHistoryScreen(props) {
     formData,
     setFormData,
     handleFormData,
+    componentList,
   } = props;
-  const [medicalHistoryListDisplay, setMedicalHistoryListDisplay] = useState([
-    {},
-  ]);
+  const [medicalHistoryListDisplay, setMedicalHistoryListDisplay] = useState(
+    componentList.medical,
+  );
 
   const concatFormData = () => {
     var medicalList = formData.medicalList.concat({
@@ -73,7 +74,9 @@ export function PatientAddMedicalHistoryScreen(props) {
         <AddPatientBottomButtons
           list={medicalHistoryListDisplay}
           // nextQuestionHandler={nextQuestionHandler}
-          prevQuestionHandler={prevQuestionHandler}
+          prevQuestionHandler={() =>
+            prevQuestionHandler('medical', medicalHistoryListDisplay)
+          }
           addComponent={addNewMedicalHistoryComponent}
           removeComponent={removeMedicalHistoryComponent}
           submit={true}
