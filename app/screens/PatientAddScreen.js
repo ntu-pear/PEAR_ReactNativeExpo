@@ -10,6 +10,13 @@ export function PatientAddScreen(props) {
   // state for steps
   const [step, setStep] = useState(1);
 
+  // state for components
+  const [componentList, setComponentList] = useState({
+    guardian: [{}],
+    allergy: [{}],
+    medical: [{}],
+  });
+
   const newDate = new Date();
 
   // state for form data
@@ -42,7 +49,7 @@ export function PatientAddScreen(props) {
       {
         allergyName: '', // allergyList[0].allergyName
         allergyReaction: '',
-        allergyNotes: '',
+        allergyNotes: 'x',
       },
     ],
 
@@ -56,13 +63,27 @@ export function PatientAddScreen(props) {
     ],
   });
 
+  const componentHandler = (page = '', list = []) => {
+    if (list) {
+      setComponentList((prevState) => ({
+        // eg. componentList: { guardian: [{..}, {..}]}
+        ...prevState,
+        [page]: list,
+      }));
+    }
+  };
+
   // function for going to next step by increasing step state by 1
-  const nextQuestionHandler = () => {
+  // and to set component list
+  const nextQuestionHandler = (page = '', list = []) => {
+    componentHandler(page, list);
     setStep(step + 1);
   };
 
   // function for going to previous step by decreasing step state by 1
-  const prevQuestionHandler = () => {
+  // and to set component list
+  const prevQuestionHandler = (page = '', list = []) => {
+    componentHandler(page, list);
     setStep(step - 1);
   };
 
@@ -99,6 +120,7 @@ export function PatientAddScreen(props) {
           nextQuestionHandler={nextQuestionHandler}
           handleFormData={handleFormData}
           formData={formData}
+          componentList={componentList}
         />
       );
     case 2:
@@ -110,6 +132,7 @@ export function PatientAddScreen(props) {
           handleFormData={handleFormData}
           formData={formData}
           setFormData={setFormData}
+          componentList={componentList}
         />
       );
     case 3:
@@ -121,17 +144,19 @@ export function PatientAddScreen(props) {
           handleFormData={handleFormData}
           formData={formData}
           setFormData={setFormData}
+          componentList={componentList}
         />
       );
     case 4:
       return (
         <PatientAddMedicalHistoryScreen
           key={4}
-          nnextQuestionHandler={nextQuestionHandler}
+          nextQuestionHandler={nextQuestionHandler}
           prevQuestionHandler={prevQuestionHandler}
           handleFormData={handleFormData}
           formData={formData}
           setFormData={setFormData}
+          componentList={componentList}
         />
       );
     default:

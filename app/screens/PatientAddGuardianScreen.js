@@ -15,6 +15,7 @@ export function PatientAddGuardianScreen(props) {
     formData,
     setFormData,
     handleFormData,
+    componentList,
   } = props;
 
   const concatFormData = () => {
@@ -41,7 +42,9 @@ export function PatientAddGuardianScreen(props) {
     }));
   };
 
-  const [guardianListDisplay, setGuardianListDisplay] = useState([{}]);
+  const [guardianListDisplay, setGuardianListDisplay] = useState(
+    componentList.guardian,
+  );
   const addNewGuardianComponent = () => {
     setGuardianListDisplay([...guardianListDisplay, {}]);
     concatFormData();
@@ -75,8 +78,12 @@ export function PatientAddGuardianScreen(props) {
         </Box>
         <AddPatientBottomButtons
           list={guardianListDisplay}
-          nextQuestionHandler={nextQuestionHandler}
-          prevQuestionHandler={prevQuestionHandler}
+          nextQuestionHandler={() =>
+            nextQuestionHandler('guardian', guardianListDisplay)
+          }
+          prevQuestionHandler={() =>
+            prevQuestionHandler('guardian', guardianListDisplay)
+          }
           addComponent={addNewGuardianComponent}
           removeComponent={removeGuardianComponent}
         />
