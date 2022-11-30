@@ -1,4 +1,4 @@
-import { AsyncStorage } from 'react-native';
+import { AsyncStorage } from '@react-native-community/async-storage';
 import moment from 'moment';
 /*
  *  Purpose of this cache.js: Provide an abstraction to get and store data in a cache layer. This will be important when app is offline.
