@@ -5,7 +5,7 @@ import authStorage from '../auth/authStorage';
 /*
  * If token is expired, proceed to log out.
  */
-export default useCheckExpiredThenLogOut = () => {
+export default function useCheckExpiredThenLogOut() {
   const { setUser } = useContext(AuthContext);
   const [bearerError, setBearerError] = useState('');
   const [errorDescription, setErrorDescription] = useState('');
@@ -27,4 +27,4 @@ export default useCheckExpiredThenLogOut = () => {
     }
   };
   return { bearerError, errorDescription, handleLogOut };
-};
+}

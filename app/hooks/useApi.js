@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { useState } from 'react';
 
 /*
@@ -11,7 +10,7 @@ import { useState } from 'react';
     -- request: function that can be used to call the specified api
 */
 
-export default useApi = (apiFunc) => {
+export default function useApi(apiFunc) {
   const [data, setData] = useState([]);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -32,4 +31,4 @@ export default useApi = (apiFunc) => {
     loading,
     request,
   };
-};
+}
