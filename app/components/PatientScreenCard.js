@@ -1,7 +1,7 @@
 import React from 'react';
 import { TouchableOpacity } from 'react-native';
 
-import { Center, Image, Text, VStack, Box } from 'native-base';
+import { Center, Image, Text, HStack, VStack, Box } from 'native-base';
 
 // Import Constants from routes
 import routes from 'app/navigation/routes';
@@ -15,8 +15,8 @@ function PatientScreenCard(props) {
   };
   return (
     <TouchableOpacity onPress={handleOnPress}>
-      <Box mt="5" mb="5" minW="90%" overflow="hidden" rounded="lg">
-        <VStack mb="2">
+      <Box mt="3.5" mb="3.5" minW="90%" overflow="hidden" rounded="lg">
+        <HStack pl="5">
           <Center>
             <Image
               alt="patient_image"
@@ -26,24 +26,25 @@ function PatientScreenCard(props) {
                 uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1640487405/Patient/Alice_Lee_Sxxxx567D/ProfilePicture/zsw7dyprsvn0bjmatofg.jpg',
               }}
               resizeMode="cover"
-              size="2xl"
+              size="sm"
               source={{
                 uri: `${patientProfile.profilePicture}`,
               }}
             />
           </Center>
-          <Center>
-            <Text bold fontSize="md">
-              {`${patientProfile.firstName} ${patientProfile.lastName}`}
-            </Text>
-          </Center>
-          <Center>
-            <Text>{`${patientProfile.preferredName}`}</Text>
-          </Center>
-          <Center>
-            <Text>{`${patientProfile.nric}`}</Text>
-          </Center>
-        </VStack>
+          <VStack>
+            <Center>
+              <Text bold fontSize="lg" alignSelf={true} pl="2" pt="2">
+                {`${patientProfile.preferredName}`}
+              </Text>
+            </Center>
+            <Center>
+              <Text alignSelf={true} pl="2">
+                {`${patientProfile.firstName} ${patientProfile.lastName}`}
+              </Text>
+            </Center>
+          </VStack>
+        </HStack>
       </Box>
     </TouchableOpacity>
   );
