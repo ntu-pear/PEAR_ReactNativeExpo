@@ -170,6 +170,7 @@ function NotifcationsScreen(props) {
 
   // Purpose: When api fails, perform another fetch
   const handleErrorWhenApiFails = async () => {
+    // Note: `false` refers to readStatus = `false`
     await getAllNotificationOfUser(false);
   };
 
