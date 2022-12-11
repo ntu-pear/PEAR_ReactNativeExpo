@@ -85,7 +85,8 @@ const setNotificationAction = async (notificationID, action, comment) => {
 
   // Reference: Including params in `.put`
   // https://github.com/infinitered/apisauce/issues/191
-  return client.put(notificationAction, {}, { params: params });
+  // [Note] params == params:params; AKA shorthand object notation, refer to this https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer
+  return client.put(notificationAction, {}, { params });
 };
 
 /*
