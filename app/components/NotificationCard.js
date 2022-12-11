@@ -26,14 +26,14 @@ function NotificationCard(
   // in notificationScreen.
   const handlePressIn = () => {
     setSelectedId(item.notificationID);
-    item && item.requiresAction
+    item?.requiresAction
       ? setRequiresAction(item.requiresAction)
       : setRequiresAction(false);
   };
 
   const handleNavigation = () => {
     setSelectedId(item.notificationID);
-    item && item.requiresAction
+    item?.requiresAction
       ? navigateToNotificationsApprovalRequestScreen(item)
       : null;
   };
@@ -68,7 +68,7 @@ function NotificationCard(
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
             >
-              {item && item.requiresAction ? 'Action Required' : ''}
+              {item?.requiresAction ? 'Action Required' : ''}
             </Text>
           </HStack>
           <HStack>
@@ -79,7 +79,7 @@ function NotificationCard(
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
             >
-              {item && item.shortMessage
+              {item?.shortMessage
                 ? handleString(item.shortMessage)
                 : item.message}
             </Text>
