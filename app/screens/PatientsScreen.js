@@ -16,7 +16,7 @@ function PatientsScreen(props) {
   useEffect(() => {
     // Reference https://stackoverflow.com/questions/21518381/proper-way-to-wait-for-one-function-to-finish-before-continuing
     // Resolved the issue of `setListOfPatients` before successfully calling getPatient api.
-    setIsLoading(true);
+    setIsLoading(false);
     const promiseFunction = async () => {
       const response = await getListOfPatients();
 
@@ -49,7 +49,7 @@ function PatientsScreen(props) {
         <ActivityIndicator visible />
       ) : (
         <Center backgroundColor={colors.white_var1}>
-          <ScrollView w="100%">
+          <ScrollView w="100%" height="100%">
             <VStack>
               {listOfPatients
                 ? listOfPatients.map((item, index) => (
@@ -62,22 +62,24 @@ function PatientsScreen(props) {
                 : null}
             </VStack>
           </ScrollView>
-          <Fab
-            backgroundColor={colors.pink}
-            icon={
-              <Icon
-                as={MaterialIcons}
-                color={colors.white}
-                name="person-add-alt"
-                size="lg"
-                placement="bottom-right"
-              />
-            }
-            onPress={handleFabOnPress}
-            renderInPortal={false}
-            shadow={2}
-            size="sm"
-          />{' '}
+          <Center position="absolute" bottom="0" right="1">
+            <Fab
+              backgroundColor={colors.pink}
+              icon={
+                <Icon
+                  as={MaterialIcons}
+                  color={colors.white}
+                  name="person-add-alt"
+                  size="lg"
+                  placement="bottom-right"
+                />
+              }
+              onPress={handleFabOnPress}
+              renderInPortal={false}
+              shadow={2}
+              size="sm"
+            />
+          </Center>{' '}
         </Center>
       )}
     </>
