@@ -20,7 +20,7 @@ const notificationAction = `${endPoint}/Action`;
 // based on specified read status
 // 1 Parameter: (1) readStatus: Boolean [optional]
 const getNotificationOfUser = async (readStatus) => {
-  if (readStatus === null) {
+  if (readStatus == null) {
     return client.get(notificationUser);
   }
   const params = {
@@ -38,7 +38,7 @@ const getNotificationOfUser = async (readStatus) => {
 // (3) comment [optional]
 const setNotificationAction = async (notificationID, action, comment) => {
   // [Guard] check if notificationID is specified
-  if (notificationID === null) {
+  if (notificationID == null) {
     return {
       ok: false,
       ErrorMessage: 'Improper notificationID parameter',
@@ -61,7 +61,7 @@ const setNotificationAction = async (notificationID, action, comment) => {
   // Manage params with checks on whether comment is specified, since it's optional
   var params;
 
-  if (comment === null) {
+  if (comment == null) {
     params = {
       notificationID,
       action,
