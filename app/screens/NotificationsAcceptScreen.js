@@ -5,6 +5,7 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 import NotificationCard from 'app/components/NotificationCard';
 import ErrorRetryApiCard from 'app/components/ErrorRetryApiCard';
 import notificationApi from 'app/api/notification';
+import NotificationActions from 'app/config/notificationActions';
 
 function NotificationsAcceptScreen(props) {
   const { user } = useContext(AuthContext);
@@ -47,7 +48,7 @@ function NotificationsAcceptScreen(props) {
       return;
     }
     const filteredNotificationItemsWithApproveAction = response?.data.filter(
-      (notification) => notification.status === 'approve',
+      (notification) => notification.status === NotificationActions.Approve,
     );
     setIsLoading(false);
     setNotificationAcceptedData(filteredNotificationItemsWithApproveAction);

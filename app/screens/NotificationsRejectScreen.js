@@ -5,6 +5,7 @@ import ErrorRetryApiCard from 'app/components/ErrorRetryApiCard';
 import NotificationCard from 'app/components/NotificationCard';
 import { FlatList, VStack } from 'native-base';
 import React, { useContext, useEffect, useState } from 'react';
+import NotificationActions from 'app/config/notificationActions';
 
 function NotificationsRejectScreen(props) {
   const { user } = useContext(AuthContext);
@@ -47,7 +48,7 @@ function NotificationsRejectScreen(props) {
       return;
     }
     const filteredNotificationItemsWithRejectAction = response?.data.filter(
-      (notification) => notification.status === 'reject',
+      (notification) => notification.status === NotificationActions.Reject,
     );
     setIsLoading(false);
     setNotificationRejectedData(filteredNotificationItemsWithRejectAction);

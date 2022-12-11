@@ -20,6 +20,7 @@ import AuthContext from 'app/auth/context';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import notificationApi from 'app/api/notification';
 import ErrorRetryApiCard from 'app/components/ErrorRetryApiCard';
+import NotificationActions from 'app/config/notificationActions';
 
 function NotificationsApprovalRequestScreen(props) {
   const { navigation, route } = props;
@@ -39,7 +40,7 @@ function NotificationsApprovalRequestScreen(props) {
     // (1) API Call to set current Notification ID as `read`, and type of action
     const response = await notificationApi.setNotificationAction(
       notificationID,
-      'approve',
+      NotificationActions.Approve,
     );
     if (!response.ok) {
       setIsLoading(false);
@@ -77,7 +78,7 @@ function NotificationsApprovalRequestScreen(props) {
     // (2) API Call to set current Notification ID as `read`, type of action, and comment
     const response = await notificationApi.setNotificationAction(
       notificationID,
-      'reject',
+      NotificationActions.Reject,
       reasonTextAreaValue,
     );
     if (!response.ok) {
