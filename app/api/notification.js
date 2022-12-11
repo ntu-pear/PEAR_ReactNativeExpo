@@ -45,12 +45,20 @@ const setNotificationAction = async (notificationID, action, comment) => {
     };
   }
 
+  // Enums for actions
+  const Actions = {
+    Approve: 'approve',
+    Reject: 'reject',
+    Clear: 'clear',
+    Endorse: 'endorse',
+  };
+
   // [Guard] check if actions are specified correctly
   if (
-    action !== 'approve' &&
-    action !== 'reject' &&
-    action !== 'clear' &&
-    action !== 'endorse'
+    action !== Actions.Approve &&
+    action !== Actions.Reject &&
+    action !== Actions.Clear &&
+    action !== Actions.Endorse
   ) {
     return {
       ok: false,
