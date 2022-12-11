@@ -100,6 +100,7 @@ function NotificationsApprovalRequestScreen(props) {
     setAlertDialogIsOpen(!alertDialogIsOpen);
   };
 
+  // Note: Can consider removing this, handleError is used only in the presence of network failure
   // Purpose: Error-handling. If any API fails, prompt user to re-run function.
   const handleError = () => {
     setIsError(false);
