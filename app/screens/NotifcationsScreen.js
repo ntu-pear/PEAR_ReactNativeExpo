@@ -178,6 +178,7 @@ function NotifcationsScreen(props) {
   // Reference: https://thewebdev.info/2022/02/19///how-to-implement-pull-to-refresh-flatlist-with-react-native/
   const handlePullToRefresh = async () => {
     setIsRefreshing(true);
+    // Note: `false` refers to readStatus = `false`
     await getAllNotificationOfUser(false);
     setIsRefreshing(false);
   };
