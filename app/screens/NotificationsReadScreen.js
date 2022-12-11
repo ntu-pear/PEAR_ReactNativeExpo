@@ -34,6 +34,7 @@ function NotificationsReadScreen(props) {
   const handlePullToRefresh = async () => {
     //  Get all `read` notification of user
     setIsRefreshing(true);
+    // Note: `true` refers to readStatus = true
     await getAllNotificationReadData(true);
     setIsRefreshing(false);
   };
@@ -52,7 +53,8 @@ function NotificationsReadScreen(props) {
   };
 
   const handleErrorWhenApiFails = () => {
-    //  Get all `read` notification of user
+    //  Get all `read` notification of user;
+    //  Note: `true` refers to readStatus = true
     getAllNotificationReadData(true);
   };
 

@@ -33,6 +33,7 @@ function NotificationsRejectScreen(props) {
   const handlePullToRefresh = async () => {
     // TODO: Uncomment this when api is up
     setIsRefreshing(true);
+    // Note: `true` refers to readStatus = `true`
     await getAllNotificationRejectedData(true);
     setIsRefreshing(false);
   };
@@ -54,6 +55,7 @@ function NotificationsRejectScreen(props) {
 
   const handleErrorWhenApiFails = () => {
     setIsError(false);
+    // Note: `true` refers to readStatus = `true`
     getAllNotificationRejectedData(true);
   };
 

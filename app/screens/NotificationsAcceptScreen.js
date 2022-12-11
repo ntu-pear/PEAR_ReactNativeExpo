@@ -32,6 +32,7 @@ function NotificationsAcceptScreen(props) {
 
   const handlePullToRefresh = async () => {
     setIsRefreshing(true);
+    // Note: `true` refers to readStatus = `true`
     await getAllNotificationApprovedData(true);
     setIsRefreshing(false);
   };
@@ -54,6 +55,7 @@ function NotificationsAcceptScreen(props) {
 
   const handleErrorWhenApiFails = () => {
     setIsError(false);
+    // Note: `true` refers to readStatus = `true`
     getAllNotificationApprovedData(true);
   };
 
