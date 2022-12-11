@@ -26,6 +26,7 @@ function NotificationsAcceptScreen(props) {
   ]);
 
   useEffect(() => {
+    // Note: `true` refers to readStatus = `true`
     getAllNotificationApprovedData(true);
   }, []);
 

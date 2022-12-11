@@ -26,6 +26,7 @@ function NotificationsRejectScreen(props) {
   ]);
 
   useEffect(() => {
+    // Note: `true` refers to readStatus = `true`
     getAllNotificationRejectedData(true);
   }, []);
 

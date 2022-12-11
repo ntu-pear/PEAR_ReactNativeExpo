@@ -27,6 +27,7 @@ function NotificationsReadScreen(props) {
 
   useEffect(() => {
     //  Get all `read` notification of user
+    // Note: `true` refers to readStatus = true
     getAllNotificationReadData(true);
   }, []);
 

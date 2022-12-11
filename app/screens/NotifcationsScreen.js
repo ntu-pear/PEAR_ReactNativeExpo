@@ -143,6 +143,7 @@ function NotifcationsScreen(props) {
 
   useEffect(() => {
     // Fetches data from notification api (Once)
+    // Note: `false` refers readStatus = `false`
     getAllNotificationOfUser(false);
     // If selecteID from NotificationCard === the Accepted/Rejected notification ID
     // from NotificationApprovalRequestScreen, then proceed to update flatList
