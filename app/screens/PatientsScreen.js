@@ -23,6 +23,7 @@ function PatientsScreen(props) {
       setListOfPatients(response.data);
     };
     promiseFunction();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getListOfPatients = async () => {

@@ -5,6 +5,7 @@ import ErrorRetryApiCard from 'app/components/ErrorRetryApiCard';
 import NotificationCard from 'app/components/NotificationCard';
 import { FlatList, VStack } from 'native-base';
 import React, { useContext, useEffect, useState } from 'react';
+import NotificationActions from 'app/config/notificationActions';
 
 function NotificationsRejectScreen(props) {
   const { user } = useContext(AuthContext);
@@ -26,30 +27,37 @@ function NotificationsRejectScreen(props) {
   ]);
 
   useEffect(() => {
-    // TODO: Uncomment this when api is up
-    // getAllNotificationAcceptedData(true)
+    // Note: `true` refers to readStatus = `true`
+    getAllNotificationRejectedData(true);
   }, []);
 
-  const handlePullToRefresh = () => {
+  const handlePullToRefresh = async () => {
     // TODO: Uncomment this when api is up
-    // getAllNotificationAcceptedData(true)
+    setIsRefreshing(true);
+    // Note: `true` refers to readStatus = `true`
+    await getAllNotificationRejectedData(true);
+    setIsRefreshing(false);
   };
+  // Purpose: Get all notification items that has been `rejected`.
   const getAllNotificationRejectedData = async (readStatus) => {
     setIsLoading(true);
     const response = await notificationApi.getNotificationOfUser(readStatus);
     if (!response.ok) {
-      // return error block
       setIsLoading(false);
       setIsError(true);
       return;
     }
+    const filteredNotificationItemsWithRejectAction = response?.data.filter(
+      (notification) => notification.status === NotificationActions.Reject,
+    );
     setIsLoading(false);
-    setNotificationRejectedData(response.data);
+    setNotificationRejectedData(filteredNotificationItemsWithRejectAction);
   };
 
   const handleErrorWhenApiFails = () => {
-    // TODO: Uncomment this when api is up
-    // getAllNotificationAcceptedData(true)
+    setIsError(false);
+    // Note: `true` refers to readStatus = `true`
+    getAllNotificationRejectedData(true);
   };
 
   return (
@@ -63,7 +71,7 @@ function NotificationsRejectScreen(props) {
           )}
           <VStack w="90%">
             <FlatList
-              // onViewableItemsChanged={onViewableItemsChanged}
+              showsVerticalScrollIndicator={false}
               data={notificationRejectedData}
               keyExtractor={(item) => item.notificationID}
               onRefresh={handlePullToRefresh}

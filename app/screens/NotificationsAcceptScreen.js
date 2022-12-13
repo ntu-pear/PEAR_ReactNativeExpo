@@ -5,6 +5,7 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 import NotificationCard from 'app/components/NotificationCard';
 import ErrorRetryApiCard from 'app/components/ErrorRetryApiCard';
 import notificationApi from 'app/api/notification';
+import NotificationActions from 'app/config/notificationActions';
 
 function NotificationsAcceptScreen(props) {
   const { user } = useContext(AuthContext);
@@ -26,31 +27,37 @@ function NotificationsAcceptScreen(props) {
   ]);
 
   useEffect(() => {
-    // TODO: Uncomment this when api is up
-    // getAllNotificationAcceptedData(true)
+    // Note: `true` refers to readStatus = `true`
+    getAllNotificationApprovedData(true);
   }, []);
 
-  const handlePullToRefresh = () => {
-    // TODO: Uncomment this when api is up
-    // getAllNotificationAcceptedData(true)
+  const handlePullToRefresh = async () => {
+    setIsRefreshing(true);
+    // Note: `true` refers to readStatus = `true`
+    await getAllNotificationApprovedData(true);
+    setIsRefreshing(false);
   };
 
-  const getAllNotificationAcceptedData = async (readStatus) => {
+  // Purpose: Get all notification items that has been `approved`.
+  const getAllNotificationApprovedData = async (readStatus) => {
     setIsLoading(true);
     const response = await notificationApi.getNotificationOfUser(readStatus);
     if (!response.ok) {
-      // return error block
       setIsLoading(false);
       setIsError(true);
       return;
     }
+    const filteredNotificationItemsWithApproveAction = response?.data.filter(
+      (notification) => notification.status === NotificationActions.Approve,
+    );
     setIsLoading(false);
-    setNotificationAcceptedData(response.data);
+    setNotificationAcceptedData(filteredNotificationItemsWithApproveAction);
   };
 
   const handleErrorWhenApiFails = () => {
-    // TODO: Uncomment this when api is up
-    // getAllNotificationAcceptedData(true)
+    setIsError(false);
+    // Note: `true` refers to readStatus = `true`
+    getAllNotificationApprovedData(true);
   };
 
   return (
@@ -64,7 +71,7 @@ function NotificationsAcceptScreen(props) {
           )}
           <VStack w="90%">
             <FlatList
-              // onViewableItemsChanged={onViewableItemsChanged}
+              showsVerticalScrollIndicator={false}
               data={notificationAcceptedData}
               keyExtractor={(item) => item.notificationID}
               onRefresh={handlePullToRefresh}
