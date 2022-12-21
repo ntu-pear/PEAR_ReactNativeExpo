@@ -60,7 +60,7 @@ export function PatientAddMedicalHistoryScreen(props) {
             ? medicalHistoryListDisplay.map((item, index) => (
                 <Box>
                   <AddPatientMedicalHistory
-                    val={item}
+                    key={item}
                     i={index}
                     title={index + 1}
                     formData={formData}
@@ -80,6 +80,7 @@ export function PatientAddMedicalHistoryScreen(props) {
           addComponent={addNewMedicalHistoryComponent}
           removeComponent={removeMedicalHistoryComponent}
           submit={true}
+          formData={formData}
         />
       </Box>
     </ScrollView>

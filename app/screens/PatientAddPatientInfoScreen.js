@@ -36,6 +36,7 @@ export function PatientAddPatientInfoScreen(props) {
   //     nextQuestionHandler();
   //   }
   // };
+
   return (
     <ScrollView>
       <Box alignItems="center">
@@ -55,8 +56,8 @@ export function PatientAddPatientInfoScreen(props) {
             <FormControl.Label>First Name</FormControl.Label>
             <Input
               placeholder="First Name"
-              value={formData.firstName}
-              onChangeText={handleFormData(page, 'firstName')}
+              value={formData.FirstName}
+              onChangeText={handleFormData(page, 'FirstName')}
             />
           </FormControl>
 
@@ -64,8 +65,8 @@ export function PatientAddPatientInfoScreen(props) {
             <FormControl.Label>Last Name</FormControl.Label>
             <Input
               placeholder="Last Name"
-              value={formData.lastName}
-              onChangeText={handleFormData(page, 'lastName')}
+              value={formData.LastName}
+              onChangeText={handleFormData(page, 'LastName')}
             />
           </FormControl>
 
@@ -73,8 +74,8 @@ export function PatientAddPatientInfoScreen(props) {
             <FormControl.Label>Preferred Name</FormControl.Label>
             <Input
               placeholder="Preferred Name"
-              value={formData.preferredName}
-              onChangeText={handleFormData(page, 'preferredName')}
+              value={formData.PreferredName}
+              onChangeText={handleFormData(page, 'PreferredName')}
             />
           </FormControl>
 
@@ -82,13 +83,13 @@ export function PatientAddPatientInfoScreen(props) {
             <FormControl.Label>Preferred Language</FormControl.Label>
             <Select
               placeholder="Select Language"
-              selectedValue={formData.preferredLanguage}
-              onValueChange={handleFormData(page, 'preferredLanguage')}
+              selectedValue={formData.PreferredLanguageListID}
+              onValueChange={handleFormData(page, 'PreferredLanguageListID')}
             >
-              <Select.Item label="English" value="English" />
-              <Select.Item label="Chinese" value="Chinese" />
-              <Select.Item label="Malay" value="Malay" />
-              <Select.Item label="Tamil" value="Tamil" />
+              <Select.Item label="English" value={1} />
+              <Select.Item label="Chinese" value={2} />
+              <Select.Item label="Malay" value={3} />
+              <Select.Item label="Tamil" value={4} />
             </Select>
           </FormControl>
 
@@ -96,8 +97,8 @@ export function PatientAddPatientInfoScreen(props) {
             <FormControl.Label>NRIC</FormControl.Label>
             <Input
               placeholder="NRIC"
-              value={formData.nric}
-              onChangeText={handleFormData(page, 'nric')}
+              value={formData.NRIC}
+              onChangeText={handleFormData(page, 'NRIC')}
             />
           </FormControl>
 
@@ -105,8 +106,8 @@ export function PatientAddPatientInfoScreen(props) {
             <FormControl.Label>Address</FormControl.Label>
             <Input
               placeholder="Address"
-              value={formData.address}
-              onChangeText={handleFormData(page, 'address')}
+              value={formData.Address}
+              onChangeText={handleFormData(page, 'Address')}
             />
           </FormControl>
 
@@ -114,8 +115,8 @@ export function PatientAddPatientInfoScreen(props) {
             <FormControl.Label>Home Telephone No.</FormControl.Label>
             <Input
               placeholder="Home Telephone Number (Optional)"
-              value={formData.homeTel}
-              onChangeText={handleFormData(page, 'homeTel')}
+              value={formData.HomeNo}
+              onChangeText={handleFormData(page, 'HomeNo')}
             />
           </FormControl>
 
@@ -123,22 +124,22 @@ export function PatientAddPatientInfoScreen(props) {
             <FormControl.Label>Handphone No.</FormControl.Label>
             <Input
               placeholder="Handphone Number (Optional)"
-              value={formData.handphone}
-              onChangeText={handleFormData(page, 'handphone')}
+              value={formData.HandphoneNo}
+              onChangeText={handleFormData(page, 'HandphoneNo')}
             />
           </FormControl>
 
           <FormControl>
             <FormControl.Label>Gender </FormControl.Label>
             <Radio.Group
-              value={formData.gender}
-              onChange={handleFormData(page, 'gender')}
+              value={formData.Gender}
+              onChange={handleFormData(page, 'Gender')}
             >
               <HStack space={4}>
-                <Radio value="1" size="sm">
+                <Radio value="M" size="sm">
                   Male
                 </Radio>
-                <Radio value="2" size="sm">
+                <Radio value="F" size="sm">
                   Female
                 </Radio>
               </HStack>
@@ -151,8 +152,8 @@ export function PatientAddPatientInfoScreen(props) {
             <HStack />
             <FormControl.Label>Date of Birth </FormControl.Label>
             <DateTimePicker
-              value={formData.dob}
-              onChange={handleFormData(page, 'dob')}
+              value={formData.DOB}
+              onChange={handleFormData(page, 'DOB')}
             />
           </FormControl>
 
@@ -160,8 +161,8 @@ export function PatientAddPatientInfoScreen(props) {
             <HStack />
             <FormControl.Label>Date of Joining </FormControl.Label>
             <DateTimePicker
-              value={formData.doj}
-              onChange={handleFormData(page, 'doj')}
+              value={formData.StartDate}
+              onChange={handleFormData(page, 'StartDate')}
             />
           </FormControl>
 
@@ -169,8 +170,8 @@ export function PatientAddPatientInfoScreen(props) {
             <HStack />
             <FormControl.Label>Date of Leaving (Optional) </FormControl.Label>
             <DateTimePicker
-              value={formData.dol}
-              onChange={handleFormData(page, 'dol')}
+              value={formData.DOL}
+              onChange={handleFormData(page, 'DOL')}
             />
           </FormControl>
         </Box>
