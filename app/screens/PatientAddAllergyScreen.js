@@ -59,7 +59,7 @@ export function PatientAddAllergyScreen(props) {
             ? allergyListDisplay.map((item, index) => (
                 <Box>
                   <AddPatientAllergy
-                    val={item}
+                    key={item}
                     i={index}
                     title={index + 1}
                     formData={formData}
