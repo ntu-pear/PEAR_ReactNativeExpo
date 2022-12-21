@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Button, Flex, Spacer, Icon, HStack } from 'native-base';
 import colors from 'app/config/colors';
 import { MaterialIcons } from '@expo/vector-icons';
+import patientApi from 'app/api/patient';
 
 function AddPatientBottomButtons({
   list = null,
@@ -10,7 +11,13 @@ function AddPatientBottomButtons({
   addComponent = null,
   removeComponent = null,
   submit = false,
+  formData = null,
 }) {
+  const onPressSubmit = async () => {
+    const result = await patientApi.addPatient(formData);
+    console.log(result);
+  };
+
   return (
     <Box mt={8} mb={8}>
       <Flex w="75%" direction="row">
@@ -93,7 +100,7 @@ function AddPatientBottomButtons({
         <Box alignItems="center">
           <Button
             colorScheme="success"
-            //   onPress={nextQuestionHandler}
+            onPress={onPressSubmit}
             mt={8}
             w={20}
             h={10}
