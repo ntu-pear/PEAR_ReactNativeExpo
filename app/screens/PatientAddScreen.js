@@ -21,18 +21,28 @@ export function PatientAddScreen(props) {
 
   // state for form data
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    preferredName: '',
-    preferredLanguage: '',
-    nric: '',
-    address: '',
-    homeTel: '',
-    handphone: '',
-    gender: '1',
-    dob: newDate,
-    doj: newDate,
-    dol: newDate,
+    FirstName: '',
+    LastName: '',
+    PreferredName: '',
+    PreferredLanguageListID: 1,
+    NRIC: 'T1234567J',
+    Address: '',
+    HomeNo: '',
+    HandphoneNo: '',
+    Gender: 'M',
+    DOB: newDate,
+    StartDate: newDate,
+    DOL: newDate,
+    PrivacyLevel: 1,
+    UpdateBit: true,
+    AutoGame: true,
+    IsActive: true,
+    IsRespiteCare: false,
+    TempAddress: '',
+    TerminationReason: '',
+    InactiveReason: '',
+    ProfilePicture: '',
+    UploadProfilePicture: '',
 
     guardianList: [
       {
@@ -49,7 +59,7 @@ export function PatientAddScreen(props) {
       {
         allergyName: '', // allergyList[0].allergyName
         allergyReaction: '',
-        allergyNotes: 'x',
+        allergyNotes: '',
       },
     ],
 

@@ -57,6 +57,7 @@ export function PatientAddGuardianScreen(props) {
     removeFormData();
   };
 
+  console.log(formData);
   return (
     <ScrollView>
       <Box alignItems="center">
@@ -66,7 +67,7 @@ export function PatientAddGuardianScreen(props) {
             ? guardianListDisplay.map((item, index) => (
                 <Box>
                   <AddPatientGuardian
-                    val={item}
+                    key={item}
                     i={index}
                     title={index + 1}
                     formData={formData}
