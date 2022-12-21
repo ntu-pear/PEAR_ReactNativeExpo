@@ -57,6 +57,7 @@ export function PatientAddPatientInfoScreen(props) {
   //     nextQuestionHandler();
   //   }
   // };
+
   return (
     <ScrollView>
       <Box alignItems="center">
