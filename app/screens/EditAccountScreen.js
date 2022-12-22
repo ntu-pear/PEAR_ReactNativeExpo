@@ -43,7 +43,7 @@ function EditAccountScreen(props) {
       }));
     };
 
-  // TODO: pass info & call api
+  // TODO: call api successfully
   const handleOnPressToSave = async () => {
     const result = await userApi.updateUser(formData, newProfilePicture);
     console.log(result);
@@ -101,6 +101,7 @@ function EditAccountScreen(props) {
             <Center>
               <TouchableOpacity onPress={handleOnPressToImagePicker}>
                 <AspectRatio w="80%" ratio={1} mb="2" alignSelf="center">
+                  {/*TODO: update profile pic displayed in real time */}
                   <Image
                     borderRadius="full"
                     source={{ uri: `${userProfile.profilePicture}` }}
