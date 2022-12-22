@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
-import { Platform } from 'react-native';
+import { Platform, Alert } from 'react-native';
 import {
   Image,
   VStack,
@@ -10,24 +10,88 @@ import {
   Stack,
   TextArea,
   AspectRatio,
-  IconButton,
   Center,
   ScrollView,
+  Text,
+  Button,
 } from 'native-base';
-// Import Constants from routes
-import routes from 'app/navigation/routes';
 import typography from 'app/config/typography';
 import colors from 'app/config/colors';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { TouchableOpacity } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import userApi from 'app/api/user';
 
-function AccountDetailScreen(props) {
+function EditAccountScreen(props) {
   const { navigation, route } = props;
   const userProfile = route.params;
+  const [formData, setFormData] = useState({
+    preferredName: '',
+    contactNo: '',
+  });
+  const [newProfilePicture, setProfilePicture] = useState({
+    uploadProfilePicture: '',
+  });
 
-  // TODO: go to edit screen???
-  const handleOnPress = () => {
-    navigation.push(routes.ACCOUNT_EDIT, { ...userProfile });
+  const handleFormData =
+    (input = null) =>
+    (e, date = null) => {
+      const newData = formData;
+      date ? (newData[input] = date) : (newData[input] = e);
+      setFormData(() => ({
+        preferredName: newData.preferredName,
+        contactNo: newData.contactNo,
+      }));
+    };
+
+  // TODO: pass info & call api
+  const handleOnPressToSave = async () => {
+    const result = await userApi.updateUser(formData, newProfilePicture);
+    console.log(result);
+
+    // Alert.alert("Successfully updated.")
+    // navigation.goBack();
   };
+
+  const handleOnPressToCancel = () => {
+    navigation.goBack();
+  };
+
+  const handleOnPressToImagePicker = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status == 'granted') {
+      let data = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
+
+      setProfilePicture(() => ({
+        uploadProfilePicture: data.uri,
+      }));
+
+      // if (!data.cancelled) {
+      //   let newFile = { uri: data.uri, type: 'test\${data.uri.split(".")[1]}', name: 'test\${data.uri.split(".")[1]}' };
+      //   handleUpload(newFile);
+      // }
+    } else {
+      Alert.alert('Please enable permissions to pick from image gallery.');
+    }
+  };
+
+  // TODO: upload pic to cloudinary?
+  // const handleUpload = (image) => {
+  //   const data = new FormData();
+  //   data.append('file', image);
+  //   data.append('upload_preset', 'pearApp');
+  //   data.append('cloudname', 'dbpearfyp');
+
+  //   fetch("https://api.cloudinary.com/v1_1/dbpearfyp/image/upload", {
+  //     method: "post",
+  //     body: "data"
+  //   }).then(res=>res.json())
+  //   .then(data=>{console.log(data)})
+  // }
 
   return (
     <ScrollView>
@@ -35,24 +99,16 @@ function AccountDetailScreen(props) {
         <Center>
           <HStack>
             <Center>
-              <AspectRatio w="80%" ratio={1} mb="2" alignSelf="center">
-                <Image
-                  borderRadius="full"
-                  source={{ uri: `${userProfile.profilePicture}` }}
-                  alt="user_image"
-                />
-              </AspectRatio>
+              <TouchableOpacity onPress={handleOnPressToImagePicker}>
+                <AspectRatio w="80%" ratio={1} mb="2" alignSelf="center">
+                  <Image
+                    borderRadius="full"
+                    source={{ uri: `${userProfile.profilePicture}` }}
+                    alt="user_image"
+                  />
+                </AspectRatio>
+              </TouchableOpacity>
             </Center>
-
-            <IconButton
-              alignSelf="right"
-              _icon={{
-                as: MaterialCommunityIcons,
-                name: 'pencil',
-              }}
-              size="lg"
-              onPress={handleOnPress}
-            />
           </HStack>
         </Center>
 
@@ -140,7 +196,7 @@ function AccountDetailScreen(props) {
           </HStack>
         </FormControl>
 
-        <FormControl>
+        <FormControl maxW="60%">
           <HStack space={2} alignItems="center">
             <FormControl.Label
               _text={{
@@ -160,15 +216,17 @@ function AccountDetailScreen(props) {
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
-              isReadOnly
-              variant="unstyled"
-              value={userProfile.preferredName}
+              variant="filled"
+              placeholder={userProfile.preferredName}
+              defaultValue={userProfile.preferredName}
+              onChangeText={handleFormData('preferredName')}
+              value={formData.preferredName}
               w="100%"
             />
           </HStack>
         </FormControl>
 
-        <FormControl>
+        <FormControl maxW="60%">
           <HStack space={2} alignItems="center">
             <FormControl.Label
               _text={{
@@ -188,9 +246,12 @@ function AccountDetailScreen(props) {
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
-              isReadOnly
-              variant="unstyled"
-              value={userProfile.contactNo}
+              variant="filled"
+              placeholder={userProfile.contactNo}
+              defaultValue={userProfile.contactNo}
+              onChangeText={handleFormData('contactNo')}
+              value={formData.contactNo}
+              type="number"
               w="100%"
             />
           </HStack>
@@ -339,9 +400,56 @@ function AccountDetailScreen(props) {
             />
           </Stack>
         </FormControl>
+
+        <Text
+          mb="4"
+          color={colors.red}
+          fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
+        >
+          {' '}
+          Note: To edit other information, please contact system administrator.
+        </Text>
+        {/* edit info note style */}
+
+        <HStack
+          w="100%"
+          space="0"
+          alignItems="center"
+          justifyContent="space-around"
+        >
+          <Button
+            onPress={() => handleOnPressToSave()}
+            w="25%"
+            size="md"
+            bg={colors.green}
+            _text={{
+              color: `${colors.white_var1}`,
+              fontFamily:
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android,
+              fontSize: 'sm',
+            }}
+          >
+            Save
+          </Button>
+
+          <Button
+            onPress={() => handleOnPressToCancel()}
+            w="25%"
+            size="md"
+            bg={colors.pink}
+            _text={{
+              color: `${colors.white_var1}`,
+              fontFamily:
+                Platform.OS === 'ios' ? 'Helvetica' : typography.android,
+              fontSize: 'sm',
+            }}
+          >
+            Cancel
+          </Button>
+        </HStack>
       </VStack>
     </ScrollView>
   );
 }
 
-export default AccountDetailScreen;
+export default EditAccountScreen;

@@ -6,7 +6,7 @@ import client from 'app/api/client';
  */
 const endpoint = '/User';
 const userLogin = `${endpoint}/Login`;
-const userUpdate = `${endpoint}/Update`; //eslint-disable-line no-unused-vars
+const userUpdate = `${endpoint}/Update`;
 const userDelete = `${endpoint}/delete`; //eslint-disable-line no-unused-vars
 const userRefreshToken = `${endpoint}/RefereshToken`; //eslint-disable-line no-unused-vars
 const userLogout = `${endpoint}/Logout`; //eslint-disable-line no-unused-vars
@@ -43,6 +43,29 @@ const resetPassword = (Email, Role) => {
 };
 
 // ************************* UPDATE REQUESTS *************************
+const updateUser = (formData, newProfilePicture) => {
+  const params = {
+    PreferredName: formData.preferredName,
+    ContactNo: formData.contactNo,
+    UploadProfilePicture: newProfilePicture.uploadProfilePicture,
+  };
+
+  console.log('params', params);
+
+  const body = JSON.stringify(params);
+
+  return client.post(
+    userUpdate,
+    body,
+    // formData,
+    //   , {
+    //   headers: {
+    //     Accept: 'multipart/form-data',
+    //     'Content-Type': undefined,
+    //   },
+    // }
+  );
+};
 
 /*
  * Expose your end points here
@@ -51,4 +74,5 @@ export default {
   loginUser,
   resetPassword,
   getUser,
+  updateUser,
 };

@@ -17,6 +17,7 @@ function AccountDetailCard(props) {
       <Box
         minW="90%"
         mb="5"
+        mt="5"
         overflow="visible"
         rounded="lg"
         borderColor={colors.primary_gray}
