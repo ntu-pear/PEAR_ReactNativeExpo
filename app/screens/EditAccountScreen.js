@@ -20,6 +20,7 @@ import colors from 'app/config/colors';
 import { TouchableOpacity } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import userApi from 'app/api/user';
+import routes from 'app/navigation/routes';
 
 function EditAccountScreen(props) {
   const { navigation, route } = props;
@@ -43,13 +44,21 @@ function EditAccountScreen(props) {
       }));
     };
 
-  // TODO: call api successfully
   const handleOnPressToSave = async () => {
     const result = await userApi.updateUser(formData, newProfilePicture);
-    console.log(result);
-
-    // Alert.alert("Successfully updated.")
-    // navigation.goBack();
+    // console.log(result);
+    if (result.status == '200') {
+      // response is successful but not updating db??
+      console.log(result.data);
+      Alert.alert('Successfully updated.');
+      navigation.push(routes.ACCOUNT);
+    } else {
+      Alert.alert(
+        'Update failed. \
+      Request failed with status code ' +
+          result.status,
+      );
+    }
   };
 
   const handleOnPressToCancel = () => {
@@ -100,7 +109,7 @@ function EditAccountScreen(props) {
           <HStack>
             <Center>
               <TouchableOpacity onPress={handleOnPressToImagePicker}>
-                <AspectRatio w="80%" ratio={1} mb="2" alignSelf="center">
+                <AspectRatio w="70%" ratio={1} mb="2" alignSelf="center">
                   {/*TODO: update profile pic displayed in real time */}
                   <Image
                     borderRadius="full"

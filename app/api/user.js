@@ -52,19 +52,7 @@ const updateUser = (formData, newProfilePicture) => {
 
   console.log('params', params);
 
-  const body = JSON.stringify(params);
-
-  return client.post(
-    userUpdate,
-    body,
-    // formData,
-    //   , {
-    //   headers: {
-    //     Accept: 'multipart/form-data',
-    //     'Content-Type': undefined,
-    //   },
-    // }
-  );
+  return client.put(userUpdate, {}, { params: params });
 };
 
 /*
