@@ -13,8 +13,7 @@ import useCheckExpiredThenLogOut from 'app/hooks/useCheckExpiredThenLogOut';
 
 function AccountScreen(props) {
   const [isLoading, setIsLoading] = useState(false);
-  const [currentUser, setCurrentUser] = useState([]);
-  const { setUser } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
   const checkExpiredLogOutHook = useCheckExpiredThenLogOut();
   const { navigation } = props;
 
@@ -28,15 +27,15 @@ function AccountScreen(props) {
     const promiseFunction = async () => {
       const response = await getCurrentUser();
 
-      setCurrentUser(response.data);
+      setUser(response.data.data);
     };
     promiseFunction();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getCurrentUser = async () => {
-    const user = await authStorage.getUser();
-    const response = await userApi.getUser(user.userID);
+    const currentUser = await authStorage.getUser();
+    const response = await userApi.getUser(currentUser.userID);
     if (!response.ok) {
       // Check if token has expired, if yes, proceed to log out
       checkExpiredLogOutHook.handleLogOut(response);
@@ -52,10 +51,7 @@ function AccountScreen(props) {
         <View />
       ) : (
         <VStack w="100%" h="100%" alignItems="center">
-          <AccountDetailCard
-            userProfile={currentUser}
-            navigation={navigation}
-          />
+          <AccountDetailCard userProfile={user} navigation={navigation} />
 
           <VStack w="90%" flexWrap="wrap" mb="1" alignItems="left">
             <AccountCard

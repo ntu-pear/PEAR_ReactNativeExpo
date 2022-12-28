@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { useState } from 'react';
 import { Platform, Alert } from 'react-native';
 import {
@@ -47,18 +47,20 @@ function EditAccountScreen(props) {
   const handleOnPressToSave = async () => {
     const result = await userApi.updateUser(formData, newProfilePicture);
     // console.log(result);
-    if (result.status == '200') {
-      // response is successful but not updating db??
-      console.log(result.data);
-      Alert.alert('Successfully updated.');
-      navigation.push(routes.ACCOUNT);
-    } else {
+
+    if (!result.ok) {
       Alert.alert(
         'Update failed. \
       Request failed with status code ' +
           result.status,
       );
     }
+
+    // response is successful but not updating db??
+    console.log(result.data.data);
+    Alert.alert('Successfully updated.');
+    navigation.pop();
+    navigation.navigate(routes.ACCOUNT);
   };
 
   const handleOnPressToCancel = () => {
