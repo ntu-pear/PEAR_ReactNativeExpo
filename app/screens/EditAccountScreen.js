@@ -56,7 +56,7 @@ function EditAccountScreen(props) {
       );
     }
 
-    // response is successful but not updating db??
+    // TODO: response is successful but not updating db??
     console.log(result.data.data);
     Alert.alert('Successfully updated.');
     navigation.pop();
@@ -80,29 +80,10 @@ function EditAccountScreen(props) {
       setProfilePicture(() => ({
         uploadProfilePicture: data.uri,
       }));
-
-      // if (!data.cancelled) {
-      //   let newFile = { uri: data.uri, type: 'test\${data.uri.split(".")[1]}', name: 'test\${data.uri.split(".")[1]}' };
-      //   handleUpload(newFile);
-      // }
     } else {
       Alert.alert('Please enable permissions to pick from image gallery.');
     }
   };
-
-  // TODO: upload pic to cloudinary?
-  // const handleUpload = (image) => {
-  //   const data = new FormData();
-  //   data.append('file', image);
-  //   data.append('upload_preset', 'pearApp');
-  //   data.append('cloudname', 'dbpearfyp');
-
-  //   fetch("https://api.cloudinary.com/v1_1/dbpearfyp/image/upload", {
-  //     method: "post",
-  //     body: "data"
-  //   }).then(res=>res.json())
-  //   .then(data=>{console.log(data)})
-  // }
 
   return (
     <ScrollView>
