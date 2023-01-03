@@ -30,11 +30,11 @@ function PatientsScreen(props) {
     const response = await patientApi.getPatientList(null, true, true);
     if (!response.ok) {
       // Check if token has expired, if yes, proceed to log out
-      checkExpiredLogOutHook.handleLogOut(response);
+      checkExpiredLogOutHook.handleLogOut(response.data);
       return;
     }
     setIsLoading(false);
-    return response;
+    return response.data;
   };
 
   const handleFabOnPress = () => {
