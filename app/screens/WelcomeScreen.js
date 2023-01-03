@@ -73,7 +73,6 @@ function WelcomeScreen(props) {
     }
     setIsLoading(false);
     setLoginFailed(false);
-    // const user = jwt_decode(result.data.accessToken);
     const user = jwt_decode(result.data.data.accessToken);
     authContext.setUser(user);
     console.log(user);
