@@ -5,6 +5,7 @@ import client from 'app/api/client';
  * List all end points here
  */
 const endpoint = '/Patient';
+const patientList = `${endpoint}/patientList`;
 const patientAdd = `${endpoint}/add`;
 const patientUpdate = `${endpoint}/update`; //eslint-disable-line no-unused-vars
 const privacyLevelUpdate = `${endpoint}/UpdatePatient`; //eslint-disable-line no-unused-vars
@@ -17,31 +18,38 @@ const patientDelete = `${endpoint}/delete`; //eslint-disable-line no-unused-vars
 
 // **********************  GET REQUESTS *************************
 
-const getPatient = async (patientID, isActive, maskNRIC) => {
+// const getPatient = async (patientID, isActive, maskNRIC) => {
+//   // Error Handling
+//   isActive ? (isActive = true) : (isActive = false);
+//   maskNRIC ? (maskNRIC = true) : (maskNRIC = false);
+
+//   /*
+//    *   Build Params
+//    */
+//   // if patientId is specified
+//   let params;
+//   if (patientID !== null) {
+//     params = {
+//       patientID,
+//       maskNRIC,
+//     };
+//   }
+//   // if patientId is not specified
+//   else {
+//     params = {
+//       isActive,
+//       maskNRIC,
+//     };
+//   }
+
+//   return client.get(endpoint, params);
+// };
+
+const getPatientList = async (maskNRIC) => {
   // Error Handling
-  isActive ? (isActive = true) : (isActive = false);
   maskNRIC ? (maskNRIC = true) : (maskNRIC = false);
 
-  /*
-   *   Build Params
-   */
-  // if patientId is specified
-  let params;
-  if (patientID !== null) {
-    params = {
-      patientID,
-      maskNRIC,
-    };
-  }
-  // if patientId is not specified
-  else {
-    params = {
-      isActive,
-      maskNRIC,
-    };
-  }
-
-  return client.get(endpoint, params);
+  return client.get(patientList, maskNRIC);
 };
 
 // **********************  POST REQUESTS *************************
@@ -101,6 +109,7 @@ const addPatient = (formData) => {
  * Expose your end points here
  */
 export default {
-  getPatient,
+  // getPatient,
+  getPatientList,
   addPatient,
 };
