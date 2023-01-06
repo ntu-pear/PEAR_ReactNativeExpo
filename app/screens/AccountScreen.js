@@ -26,8 +26,9 @@ function AccountScreen(props) {
     setIsLoading(true);
     const promiseFunction = async () => {
       const response = await getCurrentUser();
+      console.log(response);
 
-      setUser(response.data.data);
+      setUser(response.data);
     };
     promiseFunction();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -38,11 +39,11 @@ function AccountScreen(props) {
     const response = await userApi.getUser(currentUser.userID);
     if (!response.ok) {
       // Check if token has expired, if yes, proceed to log out
-      checkExpiredLogOutHook.handleLogOut(response);
+      // checkExpiredLogOutHook.handleLogOut(response.data);
       return;
     }
     setIsLoading(false);
-    return response;
+    return response.data;
   };
 
   return (

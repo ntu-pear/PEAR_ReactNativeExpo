@@ -19,12 +19,8 @@ const userResetPassword = `${endpoint}/ResetPassword`;
 
 // **********************  GET REQUESTS *************************
 
-const getUser = async (userID, role) => {
-  const params = {
-    userId: userID,
-    role: role,
-  };
-  return client.get(endpoint, params);
+const getUser = async (userID) => {
+  return client.get(endpoint, userID);
 };
 
 // **********************  POST REQUESTS *************************
@@ -43,12 +39,24 @@ const resetPassword = (Email, Role) => {
 };
 
 // ************************* UPDATE REQUESTS *************************
-const updateUser = (formData, newProfilePicture) => {
+const updateUser = (formData) => {
+  console.log('formData', formData);
   const params = {
     PreferredName: formData.preferredName,
     ContactNo: formData.contactNo,
-    UploadProfilePicture: newProfilePicture.uploadProfilePicture,
+    UploadProfilePicture: formData.uploadProfilePicture,
   };
+
+  //   fetch('http://192.168.10.38:8080/api/auth/register',{
+  //  method: 'post',
+  //  headers: {
+  //    'Content-Type': 'multipart/form-data',
+  //   },
+  //  body: formdata
+  //  }).then(response => {
+  //     console.log("success")
+  //  }).catch(err => {
+  //     console.log(err)
 
   console.log('params', params);
 
