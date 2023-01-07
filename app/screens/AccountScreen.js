@@ -26,7 +26,7 @@ function AccountScreen(props) {
     setIsLoading(true);
     const promiseFunction = async () => {
       const response = await getCurrentUser();
-      console.log(response);
+      // console.log(response);
 
       setUser(response.data);
     };
@@ -37,9 +37,10 @@ function AccountScreen(props) {
   const getCurrentUser = async () => {
     const currentUser = await authStorage.getUser();
     const response = await userApi.getUser(currentUser.userID);
+    console.log(response);
     if (!response.ok) {
       // Check if token has expired, if yes, proceed to log out
-      // checkExpiredLogOutHook.handleLogOut(response.data);
+      checkExpiredLogOutHook.handleLogOut(response.data);
       return;
     }
     setIsLoading(false);
