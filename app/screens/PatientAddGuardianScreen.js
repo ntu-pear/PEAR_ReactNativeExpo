@@ -19,41 +19,43 @@ export function PatientAddGuardianScreen(props) {
   } = props;
 
   const concatFormData = () => {
-    var guardianList = formData.guardianList.concat({
-      guardianName: '',
-      guardianNric: '',
-      guardianPatient: '',
-      guardianHandphone: '',
-      guardianHomeTel: '',
-      guardianEmail: '',
+    var guardianInfo = formData.guardianInfo.concat({
+      FirstName: '',
+      LastName: '',
+      ContactNo: '',
+      NRIC: '',
+      Email: '',
+      RelationshipID: 0,
+      IsActive: true,
+      IsAdditionalGuardian: true,
     });
     setFormData((prevState) => ({
       ...prevState,
-      guardianList,
+      guardianInfo,
     }));
   };
 
   const removeFormData = () => {
-    var guardianList = [...formData.guardianList];
-    guardianList.pop();
+    var guardianInfo = [...formData.guardianInfo];
+    guardianInfo.pop();
     setFormData((prevState) => ({
       ...prevState,
-      guardianList,
+      guardianInfo,
     }));
   };
 
-  const [guardianListDisplay, setGuardianListDisplay] = useState(
+  const [guardianInfoDisplay, setGuardianInfoDisplay] = useState(
     componentList.guardian,
   );
   const addNewGuardianComponent = () => {
-    setGuardianListDisplay([...guardianListDisplay, {}]);
+    setGuardianInfoDisplay([...guardianInfoDisplay, {}]);
     concatFormData();
   };
 
   const removeGuardianComponent = (index) => {
-    const list = [...guardianListDisplay];
+    const list = [...guardianInfoDisplay];
     list.splice(index, 1);
-    setGuardianListDisplay(list);
+    setGuardianInfoDisplay(list);
     removeFormData();
   };
 
@@ -63,8 +65,8 @@ export function PatientAddGuardianScreen(props) {
       <Box alignItems="center">
         <Box w="75%">
           <AddPatientProgress value={40} />
-          {guardianListDisplay
-            ? guardianListDisplay.map((item, index) => (
+          {guardianInfoDisplay
+            ? guardianInfoDisplay.map((item, index) => (
                 <Box>
                   <AddPatientGuardian
                     key={item}
@@ -78,12 +80,12 @@ export function PatientAddGuardianScreen(props) {
             : null}
         </Box>
         <AddPatientBottomButtons
-          list={guardianListDisplay}
+          list={guardianInfoDisplay}
           nextQuestionHandler={() =>
-            nextQuestionHandler('guardian', guardianListDisplay)
+            nextQuestionHandler('guardian', guardianInfoDisplay)
           }
           prevQuestionHandler={() =>
-            prevQuestionHandler('guardian', guardianListDisplay)
+            prevQuestionHandler('guardian', guardianInfoDisplay)
           }
           addComponent={addNewGuardianComponent}
           removeComponent={removeGuardianComponent}
