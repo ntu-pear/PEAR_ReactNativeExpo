@@ -127,6 +127,30 @@ export function PatientAddScreen(props) {
     }
   };
   // handling form input data by taking onchange value and updating our previous form data state
+  // const handleFormData =
+  //   (page = '', input, index = null) =>
+  //   (e, date = null) => {
+  //     if (page === 'patientInfo') {
+  //       date
+  //         ? setFormData((prevState) => ({
+  //             ...prevState,
+  //             [input]: date,
+  //           }))
+  //         : setFormData((prevState) => ({
+  //             ...prevState,
+  //             [input]: e,
+  //           }));
+  //     } else {
+  //       const newData = formData[page].slice();
+  //       date ? (newData[index][input] = date) : (newData[index][input] = e); // eg. guardianInfo[0].guardianName = e
+
+  //       setFormData((prevState) => ({
+  //         ...prevState,
+  //         [page]: newData,
+  //       }));
+  //     }
+  //   };
+
   const handleFormData =
     (page = '', input, index = null) =>
     (e, date = null) => {
