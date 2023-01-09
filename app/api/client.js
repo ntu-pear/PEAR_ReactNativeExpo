@@ -85,14 +85,14 @@ apiClient.addAsyncResponseTransform(async (response) => {
       // console.log(data.data.error);
       return Promise.resolve();
     }
-    const bearerToken = data.data.accessToken;
+    const bearerToken = data.data.data.accessToken;
     apiClient.setHeaders({
       Authorization: `Bearer ${bearerToken}`,
     });
     // remove existing token
     await authStorage.removeToken();
-    authStorage.storeToken('userAuthToken', data.data.accessToken);
-    authStorage.storeToken('userRefreshToken', data.data.refreshToken);
+    authStorage.storeToken('userAuthToken', data.data.data.accessToken);
+    authStorage.storeToken('userRefreshToken', data.data.data.refreshToken);
     if (response && response.config) {
       // replace response.config.header's Authorization with the new Bearer token
       response.config.headers
