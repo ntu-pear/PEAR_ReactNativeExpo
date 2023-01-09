@@ -26,7 +26,6 @@ function AddPatientGuardian({ i, title, formData, handleFormData }) {
   return (
     <Box>
       {title == 1 ? null : <Divider mt={10} />}
-
       <Text
         textAlign="center"
         marginTop={6}
@@ -36,7 +35,6 @@ function AddPatientGuardian({ i, title, formData, handleFormData }) {
       >
         Guardian Information {title}
       </Text>
-
       <FormControl marginTop={4}>
         <FormControl.Label>Guardian First Name</FormControl.Label>
         <Input
@@ -45,7 +43,6 @@ function AddPatientGuardian({ i, title, formData, handleFormData }) {
           onChangeText={handleFormData(page, 'FirstName', i)}
         />
       </FormControl>
-
       <FormControl>
         <FormControl.Label>Guardian Last Name</FormControl.Label>
         <Input
@@ -54,7 +51,6 @@ function AddPatientGuardian({ i, title, formData, handleFormData }) {
           onChangeText={handleFormData(page, 'LastName', i)}
         />
       </FormControl>
-
       <FormControl>
         <FormControl.Label>Guardian NRIC</FormControl.Label>
         <Input
@@ -63,7 +59,6 @@ function AddPatientGuardian({ i, title, formData, handleFormData }) {
           onChangeText={handleFormData(page, 'NRIC', i)}
         />
       </FormControl>
-
       <FormControl>
         <FormControl.Label>Guardian is Patient's</FormControl.Label>
         <Select
@@ -76,7 +71,6 @@ function AddPatientGuardian({ i, title, formData, handleFormData }) {
           ))}
         </Select>
       </FormControl>
-
       <FormControl>
         <FormControl.Label>Guardian's Handphone No.</FormControl.Label>
         <Input
@@ -84,8 +78,8 @@ function AddPatientGuardian({ i, title, formData, handleFormData }) {
           value={guardian.ContactNo}
           onChangeText={handleFormData(page, 'ContactNo', i)}
         />
-      </FormControl>
-
+      </FormControl>{' '}
+      */}
       <FormControl>
         <FormControl.Label>Guardian Email </FormControl.Label>
         <Input
