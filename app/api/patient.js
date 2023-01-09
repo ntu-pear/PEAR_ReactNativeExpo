@@ -54,54 +54,31 @@ const getPatientList = async (maskNRIC) => {
 
 // **********************  POST REQUESTS *************************
 const addPatient = (formData) => {
-  const params = {
-    FirstName: formData.FirstName,
-    LastName: formData.LastName,
-    PreferredName: formData.PreferredName,
-    PreferredLanguageListID: formData.PreferredLanguageListID,
-    NRIC: formData.NRIC,
-    Address: formData.Address,
-    HomeNo: formData.HomeNo,
-    HandphoneNo: formData.HandphoneNo,
-    Gender: formData.Gender,
-    DOB: formData.DOB,
-    StartDate: formData.StartDate,
-    DOL: formData.DOL,
-    PrivacyLevel: formData.PrivacyLevel,
-    UpdateBit: formData.UpdateBit,
-    AutoGame: formData.AutoGame,
-    IsActive: formData.IsActive,
-    IsRespiteCare: formData.IsRespiteCare,
-    TempAddress: formData.TempAddress,
-    TerminationReason: formData.TerminationReason,
-    InactiveReason: formData.InactiveReason,
-    ProfilePicture: formData.ProfilePicture,
-    UploadProfilePicture: formData.UploadProfilePicture,
-  };
+  var patientData = new FormData();
 
-  const body = JSON.stringify(params);
+  for (const key in formData.patientInfo) {
+    var value = formData.patientInfo[key];
+    if (value instanceof Date) {
+      value = value.toISOString().split('T')[0];
+    }
+    const param = 'PatientAddDTO.' + key;
+    patientData.append(param, value);
+  }
 
-  // var formData = new FormData();
+  for (const item in formData.guardianInfo) {
+    const value = formData.guardianInfo[item];
 
-  // formData.append(
-  //   'items',
-  //   new Blob([body], {
-  //     type: 'multipart/form-data',
-  //   }),
-  // );
+    for (const key in value) {
+      const val = value[key];
+      const param = `GuardianAddDto[${item}].${key}`;
+      patientData.append(param, val);
+    }
+  }
+
+  const headers = { 'Content-Type': 'multipart/form-data' };
 
   // Note: client.post accepts 3 parameters. (1) endpoint (2) data and (3) onUploadProgress -- this is optional
-  return client.post(
-    patientAdd,
-    body,
-    // formData,
-    //   , {
-    //   headers: {
-    //     Accept: 'multipart/form-data',
-    //     'Content-Type': undefined,
-    //   },
-    // }
-  );
+  return client.post(patientAdd, patientData, { headers });
 };
 // ************************* UPDATE REQUESTS *************************
 

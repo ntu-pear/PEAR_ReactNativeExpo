@@ -12,8 +12,8 @@ import colors from 'app/config/colors';
 import typography from 'app/config/typography';
 
 function AddPatientAllergy({ i, title, formData, handleFormData }) {
-  const page = 'allergyList';
-  const allergy = formData.allergyList[i]; //allergyList[0].allergyName
+  const page = 'allergyInfo';
+  const allergy = formData.allergyInfo[i]; //allergyList[0].allergyName
 
   return (
     <Box>
