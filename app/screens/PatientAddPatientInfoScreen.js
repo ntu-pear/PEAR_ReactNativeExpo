@@ -20,7 +20,9 @@ export function PatientAddPatientInfoScreen(props) {
   const { nextQuestionHandler, handleFormData, formData } = props;
   // console.log('PATIENT', formData);
 
-  const page = 'patientList';
+  const page = 'patientInfo';
+  const patient = formData.patientInfo; //guardianInfo[0].firstName
+
   // const [error, setError] = useState(false);
 
   // const submitFormData = (e) => {
@@ -56,7 +58,7 @@ export function PatientAddPatientInfoScreen(props) {
             <FormControl.Label>First Name</FormControl.Label>
             <Input
               placeholder="First Name"
-              value={formData.FirstName}
+              value={patient.FirstName}
               onChangeText={handleFormData(page, 'FirstName')}
             />
           </FormControl>
@@ -65,7 +67,7 @@ export function PatientAddPatientInfoScreen(props) {
             <FormControl.Label>Last Name</FormControl.Label>
             <Input
               placeholder="Last Name"
-              value={formData.LastName}
+              value={patient.LastName}
               onChangeText={handleFormData(page, 'LastName')}
             />
           </FormControl>
@@ -74,7 +76,7 @@ export function PatientAddPatientInfoScreen(props) {
             <FormControl.Label>Preferred Name</FormControl.Label>
             <Input
               placeholder="Preferred Name"
-              value={formData.PreferredName}
+              value={patient.PreferredName}
               onChangeText={handleFormData(page, 'PreferredName')}
             />
           </FormControl>
@@ -83,7 +85,7 @@ export function PatientAddPatientInfoScreen(props) {
             <FormControl.Label>Preferred Language</FormControl.Label>
             <Select
               placeholder="Select Language"
-              selectedValue={formData.PreferredLanguageListID}
+              selectedValue={patient.PreferredLanguageListID}
               onValueChange={handleFormData(page, 'PreferredLanguageListID')}
             >
               <Select.Item label="English" value={1} />
@@ -97,7 +99,7 @@ export function PatientAddPatientInfoScreen(props) {
             <FormControl.Label>NRIC</FormControl.Label>
             <Input
               placeholder="NRIC"
-              value={formData.NRIC}
+              value={patient.NRIC}
               onChangeText={handleFormData(page, 'NRIC')}
             />
           </FormControl>
@@ -106,7 +108,7 @@ export function PatientAddPatientInfoScreen(props) {
             <FormControl.Label>Address</FormControl.Label>
             <Input
               placeholder="Address"
-              value={formData.Address}
+              value={patient.Address}
               onChangeText={handleFormData(page, 'Address')}
             />
           </FormControl>
@@ -115,7 +117,7 @@ export function PatientAddPatientInfoScreen(props) {
             <FormControl.Label>Home Telephone No.</FormControl.Label>
             <Input
               placeholder="Home Telephone Number (Optional)"
-              value={formData.HomeNo}
+              value={patient.HomeNo}
               onChangeText={handleFormData(page, 'HomeNo')}
             />
           </FormControl>
@@ -124,7 +126,7 @@ export function PatientAddPatientInfoScreen(props) {
             <FormControl.Label>Handphone No.</FormControl.Label>
             <Input
               placeholder="Handphone Number (Optional)"
-              value={formData.HandphoneNo}
+              value={patient.HandphoneNo}
               onChangeText={handleFormData(page, 'HandphoneNo')}
             />
           </FormControl>
@@ -132,7 +134,7 @@ export function PatientAddPatientInfoScreen(props) {
           <FormControl>
             <FormControl.Label>Gender </FormControl.Label>
             <Radio.Group
-              value={formData.Gender}
+              value={patient.Gender}
               onChange={handleFormData(page, 'Gender')}
             >
               <HStack space={4}>
@@ -152,7 +154,7 @@ export function PatientAddPatientInfoScreen(props) {
             <HStack />
             <FormControl.Label>Date of Birth </FormControl.Label>
             <DateTimePicker
-              value={formData.DOB}
+              value={patient.DOB}
               onChange={handleFormData(page, 'DOB')}
             />
           </FormControl>
@@ -161,7 +163,7 @@ export function PatientAddPatientInfoScreen(props) {
             <HStack />
             <FormControl.Label>Date of Joining </FormControl.Label>
             <DateTimePicker
-              value={formData.StartDate}
+              value={patient.StartDate}
               onChange={handleFormData(page, 'StartDate')}
             />
           </FormControl>
@@ -170,8 +172,8 @@ export function PatientAddPatientInfoScreen(props) {
             <HStack />
             <FormControl.Label>Date of Leaving (Optional) </FormControl.Label>
             <DateTimePicker
-              value={formData.DOL}
-              onChange={handleFormData(page, 'DOL')}
+              value={patient.EndDate}
+              onChange={handleFormData(page, 'EndDate')}
             />
           </FormControl>
         </Box>
