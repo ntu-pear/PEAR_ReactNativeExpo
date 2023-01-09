@@ -6,8 +6,8 @@ import typography from 'app/config/typography';
 function AddPatientGuardian({ i, title, formData, handleFormData }) {
   // console.log('GUARDIAN', formData);
 
-  const page = 'guardianList';
-  const guardian = formData.guardianList[i]; //guardianList[0].guardianName
+  const page = 'guardianInfo';
+  const guardian = formData.guardianInfo[i]; //guardianInfo[0].firstName
 
   return (
     <Box>
@@ -24,11 +24,20 @@ function AddPatientGuardian({ i, title, formData, handleFormData }) {
       </Text>
 
       <FormControl marginTop={4}>
-        <FormControl.Label>Guardian Name</FormControl.Label>
+        <FormControl.Label>Guardian First Name</FormControl.Label>
         <Input
-          placeholder="Guardian Name"
-          value={guardian.guardianName}
-          onChangeText={handleFormData(page, 'guardianName', i)}
+          placeholder="Guardian First Name"
+          value={guardian.FirstName}
+          onChangeText={handleFormData(page, 'FirstName', i)}
+        />
+      </FormControl>
+
+      <FormControl>
+        <FormControl.Label>Guardian Last Name</FormControl.Label>
+        <Input
+          placeholder="Guardian Last Name"
+          value={guardian.LastName}
+          onChangeText={handleFormData(page, 'LastName', i)}
         />
       </FormControl>
 
@@ -36,8 +45,8 @@ function AddPatientGuardian({ i, title, formData, handleFormData }) {
         <FormControl.Label>Guardian NRIC</FormControl.Label>
         <Input
           placeholder="Guardian NRIC"
-          value={guardian.guardianNric}
-          onChangeText={handleFormData(page, 'guardianNric', i)}
+          value={guardian.NRIC}
+          onChangeText={handleFormData(page, 'NRIC', i)}
         />
       </FormControl>
 
@@ -45,11 +54,11 @@ function AddPatientGuardian({ i, title, formData, handleFormData }) {
         <FormControl.Label>Guardian is Patient's</FormControl.Label>
         <Select
           placeholder="Select"
-          selectedValue={guardian.guardianPatient}
-          onValueChange={handleFormData(page, 'guardianPatient', i)}
+          selectedValue={guardian.RelationshipID}
+          onValueChange={handleFormData(page, 'RelationshipID', i)}
         >
-          <Select.Item label="Parent" value="parent" />
-          <Select.Item label="Child" value="child" />
+          <Select.Item label="Parent" value={0} />
+          <Select.Item label="Child" value={1} />
         </Select>
       </FormControl>
 
@@ -57,26 +66,26 @@ function AddPatientGuardian({ i, title, formData, handleFormData }) {
         <FormControl.Label>Guardian's Handphone No.</FormControl.Label>
         <Input
           placeholder="Guardian's Handphone Number"
-          value={guardian.guardianHandphone}
-          onChangeText={handleFormData(page, 'guardianHandphone', i)}
+          value={guardian.ContactNo}
+          onChangeText={handleFormData(page, 'ContactNo', i)}
         />
       </FormControl>
 
-      <FormControl>
+      {/* <FormControl>
         <FormControl.Label>Guardian's Home Telephone No.</FormControl.Label>
         <Input
           placeholder="Guardian's Home Telephone Number (Optional)"
           value={guardian.guardianHomeTel}
           onChangeText={handleFormData(page, 'guardianHomeTel', i)}
         />
-      </FormControl>
+      </FormControl> */}
 
       <FormControl>
         <FormControl.Label>Guardian Email </FormControl.Label>
         <Input
           placeholder="Guardian Email"
-          value={guardian.guardianEmail}
-          onChangeText={handleFormData(page, 'guardianEmail', i)}
+          value={guardian.Email}
+          onChangeText={handleFormData(page, 'Email', i)}
         />
       </FormControl>
     </Box>
