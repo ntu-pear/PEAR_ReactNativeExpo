@@ -19,18 +19,17 @@ export function PatientAddScreen(props) {
 
   const patientData = {
     patientInfo: {
-      FirstName: '',
-      LastName: 'TestLastName',
-      PreferredName: 'Test',
+      FirstName: 'First',
+      LastName: 'Last',
+      PreferredName: 'PName',
       PreferredLanguageListID: 1,
-      NRIC: 'S9991231Z',
+      NRIC: 'S0948274A',
       Address: 'MyHome',
       HomeNo: '61236123',
       HandphoneNo: '61236123',
       Gender: 'M',
       DOB: newDate,
       StartDate: newDate,
-      // convert date object to str
       EndDate: newDate,
       PrivacyLevel: '2',
       UpdateBit: true,
@@ -46,27 +45,13 @@ export function PatientAddScreen(props) {
 
     guardianInfo: [
       {
-        // guardianName: '', // guardianInfo[0].guardianName
-        // guardianNric: '',
-        // guardianPatient: '',
-        // guardianHandphone: '',
-        // guardianHomeTel: '',
-        // guardianEmail: '',
-        // firstName: 'guar',
-        // lastName: 'dian',
-        // contactNo: '92939203',
-        // nric: 'T3992930L',
-        // email: 'hello@gmail.com',
-        // relationshipID: 0,
-        // isActive: true,
-        FirstName: 'guardi',
-        LastName: 'an',
-        NRIC: 'S9658526Z',
-        Email: 'test@gmail.com',
-        RelationshipID: 0,
+        FirstName: 'gFirst',
+        LastName: 'gLast',
+        NRIC: 'S9658567Z',
+        Email: 'gg@gmail.com',
+        RelationshipID: 1,
         IsActive: true,
         ContactNo: '95655856',
-        IsAdditionalGuardian: false,
       },
     ],
 
@@ -89,60 +74,6 @@ export function PatientAddScreen(props) {
   };
 
   const [formData, setFormData] = useState(patientData);
-
-  // state for form data
-  // const [formData, setFormData] = useState({
-  //   FirstName: '',
-  //   LastName: '',
-  //   PreferredName: '',
-  //   PreferredLanguageListID: 1,
-  //   NRIC: 'T1234567J',
-  //   Address: '',
-  //   HomeNo: '',
-  //   HandphoneNo: '',
-  //   Gender: 'M',
-  //   DOB: newDate,
-  //   StartDate: newDate,
-  //   DOL: newDate,
-  //   PrivacyLevel: 1,
-  //   UpdateBit: true,
-  //   AutoGame: true,
-  //   IsActive: true,
-  //   IsRespiteCare: false,
-  //   TempAddress: '',
-  //   TerminationReason: '',
-  //   InactiveReason: '',
-  //   ProfilePicture: '',
-  //   UploadProfilePicture: '',
-
-  //   guardianInfo: [
-  //     {
-  //       guardianName: '', // guardianInfo[0].guardianName
-  //       guardianNric: '',
-  //       guardianPatient: '',
-  //       guardianHandphone: '',
-  //       guardianHomeTel: '',
-  //       guardianEmail: '',
-  //     },
-  //   ],
-
-  //   allergyList: [
-  //     {
-  //       allergyName: '', // allergyList[0].allergyName
-  //       allergyReaction: '',
-  //       allergyNotes: '',
-  //     },
-  //   ],
-
-  //   medicalList: [
-  //     {
-  //       medicalDetails: '',
-  //       medicalInfo: '',
-  //       medicalNotes: '',
-  //       medicalDate: newDate,
-  //     },
-  //   ],
-  // });
 
   const componentHandler = (page = '', list = []) => {
     if (list) {
@@ -169,44 +100,20 @@ export function PatientAddScreen(props) {
   };
 
   // handling form input data by taking onchange value and updating our previous form data state
-  // const handleFormData =
-  //   (page = '', input, index = null) =>
-  //   (e, date = null) => {
-  //     if (page === 'patientInfo') {
-  //       date
-  //         ? setFormData((prevState) => ({
-  //             ...prevState,
-  //             [input]: date,
-  //           }))
-  //         : setFormData((prevState) => ({
-  //             ...prevState,
-  //             [input]: e,
-  //           }));
-  //     } else {
-  //       const newData = formData[page].slice();
-  //       date ? (newData[index][input] = date) : (newData[index][input] = e); // eg. guardianInfo[0].guardianName = e
-
-  //       setFormData((prevState) => ({
-  //         ...prevState,
-  //         [page]: newData,
-  //       }));
-  //     }
-  //   };
-
   const handleFormData =
     (page = '', input, index = null) =>
     (e, date = null) => {
       if (page === 'patientInfo') {
         const newData = formData[page];
 
-        date ? (newData[input] = date) : (newData[input] = e); // eg. guardianInfo[0].firstName = e
+        date ? (newData[input] = date) : (newData[input] = e); // eg. guardianInfo[0].FirstName = e
         setFormData((prevState) => ({
           ...prevState,
           [page]: newData,
         }));
       } else {
         const newData = formData[page].slice();
-        date ? (newData[index][input] = date) : (newData[index][input] = e); // eg. guardianInfo[0].firstName = e
+        date ? (newData[index][input] = date) : (newData[index][input] = e); // eg. guardianInfo[0].FirstName = e
 
         setFormData((prevState) => ({
           ...prevState,
