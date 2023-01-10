@@ -20,8 +20,7 @@ function PatientsScreen(props) {
     setIsLoading(false);
     const promiseFunction = async () => {
       const response = await getListOfPatients();
-
-      setListOfPatients(response.data);
+      setListOfPatients(response.data.data);
     };
     promiseFunction();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -31,16 +30,14 @@ function PatientsScreen(props) {
     const response = await patientApi.getPatientList(null, true, true);
     if (!response.ok) {
       // Check if token has expired, if yes, proceed to log out
-      checkExpiredLogOutHook.handleLogOut(response.data);
+      checkExpiredLogOutHook.handleLogOut(response);
       return;
     }
     setIsLoading(false);
-    return response.data;
+    return response;
   };
 
   const handleFabOnPress = () => {
-    // TODO: Include `Add Patient Feature`
-    // console.log('Placeholder for fab on click');
     navigation.navigate(routes.PATIENT_ADD_PATIENT);
   };
 

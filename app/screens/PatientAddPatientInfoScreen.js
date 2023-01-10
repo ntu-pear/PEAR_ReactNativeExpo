@@ -4,21 +4,21 @@ import {
   Input,
   FormControl,
   Text,
-  Button,
+  Center,
+  Image,
   Radio,
   HStack,
   Select,
+  Pressable,
 } from 'native-base';
 import DateTimePicker from '@react-native-community/datetimepicker';
-
 import { ScrollView } from 'react-native';
 import AddPatientProgress from 'app/components/AddPatientProgress';
 import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import colors from 'app/config/colors';
 
 export function PatientAddPatientInfoScreen(props) {
-  const { nextQuestionHandler, handleFormData, formData } = props;
-  // console.log('PATIENT', formData);
+  const { nextQuestionHandler, handleFormData, formData, pickImage } = props;
 
   const page = 'patientInfo';
   const patient = formData.patientInfo;
@@ -54,7 +54,29 @@ export function PatientAddPatientInfoScreen(props) {
             Patient Information
           </Text>
 
-          <FormControl marginTop={4}>
+          <Box mt="3.5" mb="3.5" overflow="hidden" rounded="lg">
+            <Center>
+              <Pressable onPress={pickImage(page, 'ProfilePicture')}>
+                <Image
+                  alt="patient_image"
+                  borderRadius="full"
+                  // Note: This is a fall-back uri. Will only be used if source fails to render the image.
+                  fallbackSource={{
+                    uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1673348736/Assets/bvtnichzakwtzwu2zqt5.jpg',
+                  }}
+                  resizeMode="cover"
+                  size="xl"
+                  source={{
+                    uri: patient.ProfilePicture
+                      ? `${patient.ProfilePicture}`
+                      : 'https://res.cloudinary.com/dbpearfyp/image/upload/v1673348736/Assets/bvtnichzakwtzwu2zqt5.jpg',
+                  }}
+                />
+              </Pressable>
+            </Center>
+          </Box>
+
+          <FormControl>
             <FormControl.Label>First Name</FormControl.Label>
             <Input
               placeholder="First Name"
@@ -62,7 +84,6 @@ export function PatientAddPatientInfoScreen(props) {
               onChangeText={handleFormData(page, 'FirstName')}
             />
           </FormControl>
-
           <FormControl>
             <FormControl.Label>Last Name</FormControl.Label>
             <Input
@@ -80,7 +101,6 @@ export function PatientAddPatientInfoScreen(props) {
               onChangeText={handleFormData(page, 'PreferredName')}
             />
           </FormControl>
-
           <FormControl>
             <FormControl.Label>Preferred Language</FormControl.Label>
             <Select
@@ -103,7 +123,6 @@ export function PatientAddPatientInfoScreen(props) {
               <Select.Item label="Korean" value={13} />
             </Select>
           </FormControl>
-
           <FormControl>
             <FormControl.Label>NRIC</FormControl.Label>
             <Input
@@ -112,7 +131,6 @@ export function PatientAddPatientInfoScreen(props) {
               onChangeText={handleFormData(page, 'NRIC')}
             />
           </FormControl>
-
           <FormControl>
             <FormControl.Label>Address</FormControl.Label>
             <Input
@@ -121,7 +139,6 @@ export function PatientAddPatientInfoScreen(props) {
               onChangeText={handleFormData(page, 'Address')}
             />
           </FormControl>
-
           <FormControl>
             <FormControl.Label>Home Telephone No.</FormControl.Label>
             <Input
@@ -130,7 +147,6 @@ export function PatientAddPatientInfoScreen(props) {
               onChangeText={handleFormData(page, 'HomeNo')}
             />
           </FormControl>
-
           <FormControl>
             <FormControl.Label>Handphone No.</FormControl.Label>
             <Input
@@ -139,7 +155,6 @@ export function PatientAddPatientInfoScreen(props) {
               onChangeText={handleFormData(page, 'HandphoneNo')}
             />
           </FormControl>
-
           <FormControl>
             <FormControl.Label>Gender </FormControl.Label>
             <Radio.Group
@@ -156,7 +171,6 @@ export function PatientAddPatientInfoScreen(props) {
               </HStack>
             </Radio.Group>
           </FormControl>
-
           {/* Reference: https://github.com/react-native-datetimepicker/datetimepicker
           TODO: Align to the left*/}
           <FormControl>
@@ -167,7 +181,6 @@ export function PatientAddPatientInfoScreen(props) {
               onChange={handleFormData(page, 'DOB')}
             />
           </FormControl>
-
           <FormControl>
             <HStack />
             <FormControl.Label>Date of Joining </FormControl.Label>
@@ -176,7 +189,6 @@ export function PatientAddPatientInfoScreen(props) {
               onChange={handleFormData(page, 'StartDate')}
             />
           </FormControl>
-
           <FormControl>
             <HStack />
             <FormControl.Label>Date of Leaving (Optional) </FormControl.Label>
