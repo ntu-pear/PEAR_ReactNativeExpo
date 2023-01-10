@@ -8,11 +8,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container: node:14.20
     steps:
-      - uses: actions/checkout@v2
-        with:
-          node-version: '14.x'
-      - name: Install modules
-        run: npm i
+      - uses: actions/checkout@v3
+      - name: Check directory
+        run: pwd && ls -la
+      - name: Install node modules
+        run: npm i -g npm@latest && npm i
       - name: Run tests
-        run: npm test
+        run: npm run clear-cache && npm test

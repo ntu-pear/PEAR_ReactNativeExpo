@@ -75,7 +75,6 @@ function WelcomeScreen(props) {
     setLoginFailed(false);
     const user = jwt_decode(result.data.accessToken);
     authContext.setUser(user);
-    console.log(user);
     authStorage.storeToken('userAuthToken', result.data.accessToken);
     authStorage.storeToken('userRefreshToken', result.data.refreshToken);
     // set api header if empty
@@ -134,6 +133,7 @@ function WelcomeScreen(props) {
                 placeholderTextColor={colors.medium}
                 marginBottom="5"
                 size="18"
+                value={email}
               />
               <Select
                 accessibilityLabel="Select Role"
@@ -189,6 +189,7 @@ function WelcomeScreen(props) {
                 placeholderTextColor={colors.medium}
                 marginTop="5"
                 size="18"
+                value={password}
                 type={show ? 'text' : 'password'}
               />
             </View>
