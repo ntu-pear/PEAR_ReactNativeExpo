@@ -27,7 +27,6 @@ export function PatientAddGuardianScreen(props) {
       Email: '',
       RelationshipID: 0,
       IsActive: true,
-      IsAdditionalGuardian: true,
     });
     setFormData((prevState) => ({
       ...prevState,

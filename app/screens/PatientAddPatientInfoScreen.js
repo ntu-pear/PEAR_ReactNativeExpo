@@ -18,26 +18,26 @@ import colors from 'app/config/colors';
 
 export function PatientAddPatientInfoScreen(props) {
   const { nextQuestionHandler, handleFormData, formData } = props;
-  // console.log('PATIENT', formData);
 
   const page = 'patientInfo';
   const patient = formData.patientInfo; //guardianInfo[0].firstName
 
-  // const [error, setError] = useState(false);
-
-  // const submitFormData = (e) => {
-  //   e.preventDefault();
-
-  //   // checking if value of first name and last name is empty show error else take to step 2
-  //   if (
-  //     validator.isEmpty(values.firstName) ||
-  //     validator.isEmpty(values.lastName)
-  //   ) {
-  //     setError(true);
-  //   } else {
-  //     nextQuestionHandler();
-  //   }
-  // };
+  // constant values for languages
+  const listOfLanguages = [
+    { list_LanguageID: 1, value: 'Cantonese' },
+    { list_LanguageID: 2, value: 'English' },
+    { list_LanguageID: 3, value: 'Hainanese' },
+    { list_LanguageID: 4, value: 'Hakka' },
+    { list_LanguageID: 5, value: 'Hindi' },
+    { list_LanguageID: 6, value: 'Hokkien' },
+    { list_LanguageID: 7, value: 'Malay' },
+    { list_LanguageID: 8, value: 'Mandarin' },
+    { list_LanguageID: 9, value: 'Tamil' },
+    { list_LanguageID: 10, value: 'Teochew' },
+    { list_LanguageID: 11, value: 'Japanese' },
+    { list_LanguageID: 12, value: 'Spanish' },
+    { list_LanguageID: 13, value: 'Korean' },
+  ];
 
   return (
     <ScrollView>

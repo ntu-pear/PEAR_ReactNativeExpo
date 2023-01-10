@@ -57,8 +57,18 @@ function AddPatientGuardian({ i, title, formData, handleFormData }) {
           selectedValue={guardian.RelationshipID}
           onValueChange={handleFormData(page, 'RelationshipID', i)}
         >
-          <Select.Item label="Parent" value={0} />
-          <Select.Item label="Child" value={1} />
+          <Select.Item label="Husband" value={1} />
+          <Select.Item label="Wife" value={2} />
+          <Select.Item label="Child" value={3} />
+          <Select.Item label="Parent" value={4} />
+          <Select.Item label="Sibling" value={5} />
+          <Select.Item label="Grandchild" value={6} />
+          <Select.Item label="Friend" value={7} />
+          <Select.Item label="Nephew" value={8} />
+          <Select.Item label="Niece" value={9} />
+          <Select.Item label="Aunt" value={10} />
+          <Select.Item label="Uncle" value={11} />
+          <Select.Item label="Grandparent" value={12} />
         </Select>
       </FormControl>
 
