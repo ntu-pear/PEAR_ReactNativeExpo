@@ -1,12 +1,7 @@
 /**
  * @jest-environment node
  */
-import {
-  cleanup,
-  render,
-  screen,
-  fireEvent,
-} from '@testing-library/react-native';
+import { render, screen, fireEvent } from '@testing-library/react-native';
 import { NativeBaseProvider } from 'native-base';
 import WelcomeScreen from 'app/screens/WelcomeScreen';
 import '@testing-library/jest-native/extend-expect';
@@ -20,7 +15,6 @@ const inset = {
   frame: { x: 0, y: 0, width: 0, height: 0 },
   insets: { top: 0, left: 0, right: 0, bottom: 0 },
 };
-afterEach(cleanup);
 describe('Test Login', () => {
   test('Wrong credentials', async () => {
     const welcomeScreen = render(
