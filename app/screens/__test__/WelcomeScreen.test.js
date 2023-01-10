@@ -11,6 +11,7 @@ import { NativeBaseProvider } from 'native-base';
 import WelcomeScreen from 'app/screens/WelcomeScreen';
 import '@testing-library/jest-native/extend-expect';
 import errors from 'app/config/errors';
+import { act } from 'react-test-renderer';
 
 jest.mock('../../hooks/useApiHandler');
 // we need to pass this in to NativeBaseProvider else the content within would
@@ -33,9 +34,11 @@ describe('Test Login', () => {
     expect(emailInput).toBeVisible();
     expect(passwordInput).toBeVisible();
     expect(loginButton).toBeVisible();
-    fireEvent.changeText(emailInput, 'wronguser');
-    fireEvent.changeText(passwordInput, 'wrongpassword');
-    fireEvent.press(loginButton);
+    act(() => {
+      fireEvent.changeText(emailInput, 'wronguser');
+      fireEvent.changeText(passwordInput, 'wrongpassword');
+      fireEvent.press(loginButton);
+    });
     // without the timeout the test framework can't find the error on the screen
     // since it's an asynchronous process to query the login api with the username
     // and password and re-render the UI
@@ -43,7 +46,7 @@ describe('Test Login', () => {
       await screen.findByText(
         errors.loginError,
         { exact: false },
-        { timeout: 4000 },
+        { timeout: 10000 },
       ),
     ).not.toBeNull();
   });

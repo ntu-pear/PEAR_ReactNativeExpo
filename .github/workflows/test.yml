@@ -16,4 +16,4 @@ jobs:
       - name: Install node modules
         run: npm i -g npm@latest && npm i
       - name: Run tests
-        run: npm run clear-cache && npm test
+        run: npm test
