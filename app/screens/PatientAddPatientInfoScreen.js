@@ -21,7 +21,7 @@ export function PatientAddPatientInfoScreen(props) {
   // console.log('PATIENT', formData);
 
   const page = 'patientInfo';
-  const patient = formData.patientInfo; //guardianInfo[0].firstName
+  const patient = formData.patientInfo;
 
   // const [error, setError] = useState(false);
 
@@ -88,10 +88,19 @@ export function PatientAddPatientInfoScreen(props) {
               selectedValue={patient.PreferredLanguageListID}
               onValueChange={handleFormData(page, 'PreferredLanguageListID')}
             >
-              <Select.Item label="English" value={1} />
-              <Select.Item label="Chinese" value={2} />
-              <Select.Item label="Malay" value={3} />
-              <Select.Item label="Tamil" value={4} />
+              <Select.Item label="Cantonese" value={1} />
+              <Select.Item label="English" value={2} />
+              <Select.Item label="Hainanese" value={3} />
+              <Select.Item label="Hakka" value={4} />
+              <Select.Item label="Hindi" value={5} />
+              <Select.Item label="Hokkien" value={6} />
+              <Select.Item label="Malay" value={7} />
+              <Select.Item label="Mandarin" value={8} />
+              <Select.Item label="Tamil" value={9} />
+              <Select.Item label="Teochew" value={10} />
+              <Select.Item label="Japanese" value={11} />
+              <Select.Item label="Spanish" value={12} />
+              <Select.Item label="Korean" value={13} />
             </Select>
           </FormControl>
 
