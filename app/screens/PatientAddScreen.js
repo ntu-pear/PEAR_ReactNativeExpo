@@ -3,6 +3,7 @@ import { PatientAddPatientInfoScreen } from 'app/screens/PatientAddPatientInfoSc
 import { PatientAddGuardianScreen } from 'app/screens/PatientAddGuardianScreen';
 import { PatientAddAllergyScreen } from 'app/screens/PatientAddAllergyScreen';
 import { PatientAddMedicalHistoryScreen } from 'app/screens/PatientAddMedicalHistoryScreen';
+import * as ImagePicker from 'expo-image-picker';
 
 export function PatientAddScreen(props) {
   // state for steps
@@ -99,14 +100,36 @@ export function PatientAddScreen(props) {
     setStep(step - 1);
   };
 
+  const pickImage = (page, input) => async () => {
+    console.log('picking image');
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    console.log(result);
+
+    if (!result.cancelled) {
+      var img = formData[page];
+      img[input] = result.uri;
+
+      setFormData((prevState) => ({
+        ...prevState,
+        [page]: img,
+      }));
+    }
+  };
   // handling form input data by taking onchange value and updating our previous form data state
   const handleFormData =
     (page = '', input, index = null) =>
     (e, date = null) => {
       if (page === 'patientInfo') {
         const newData = formData[page];
-
         date ? (newData[input] = date) : (newData[input] = e); // eg. guardianInfo[0].FirstName = e
+
         setFormData((prevState) => ({
           ...prevState,
           [page]: newData,
@@ -131,6 +154,7 @@ export function PatientAddScreen(props) {
           handleFormData={handleFormData}
           formData={formData}
           componentList={componentList}
+          pickImage={pickImage}
         />
       );
     case 2:
