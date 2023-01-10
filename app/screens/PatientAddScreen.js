@@ -3,6 +3,7 @@ import { PatientAddPatientInfoScreen } from 'app/screens/PatientAddPatientInfoSc
 import { PatientAddGuardianScreen } from 'app/screens/PatientAddGuardianScreen';
 import { PatientAddAllergyScreen } from 'app/screens/PatientAddAllergyScreen';
 import { PatientAddMedicalHistoryScreen } from 'app/screens/PatientAddMedicalHistoryScreen';
+import * as ImagePicker from 'expo-image-picker';
 
 export function PatientAddScreen(props) {
   // state for steps
@@ -254,8 +255,8 @@ export function PatientAddScreen(props) {
     (e, date = null) => {
       if (page === 'patientInfo') {
         const newData = formData[page];
-
         date ? (newData[input] = date) : (newData[input] = e); // eg. guardianInfo[0].FirstName = e
+
         setFormData((prevState) => ({
           ...prevState,
           [page]: newData,
@@ -290,6 +291,7 @@ export function PatientAddScreen(props) {
           handleFormData={handleFormData}
           formData={formData}
           componentList={componentList}
+          pickImage={pickImage}
         />
       );
     case 2:

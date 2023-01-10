@@ -38,12 +38,10 @@ function PatientsScreen(props) {
       return;
     }
     setIsLoading(false);
-    return response.data;
+    return response;
   };
 
   const handleFabOnPress = () => {
-    // TODO: Include `Add Patient Feature`
-    // console.log('Placeholder for fab on click');
     navigation.navigate(routes.PATIENT_ADD_PATIENT);
   };
 
