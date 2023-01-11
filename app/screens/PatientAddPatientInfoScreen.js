@@ -43,7 +43,7 @@ export function PatientAddPatientInfoScreen(props) {
     <ScrollView>
       <Box alignItems="center">
         <Box w="75%">
-          <AddPatientProgress value={20} />
+          <AddPatientProgress value={30} />
           <Text
             textAlign="center"
             marginTop={6}
