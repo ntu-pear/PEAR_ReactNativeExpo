@@ -13,7 +13,6 @@ export function PatientAddScreen(props) {
   const [componentList, setComponentList] = useState({
     guardian: [{}],
     allergy: [{}],
-    medical: [{}],
   });
 
   const newDate = new Date();
@@ -58,18 +57,9 @@ export function PatientAddScreen(props) {
 
     allergyInfo: [
       {
-        allergyName: '', // allergyList[0].allergyName
+        allergyName: 1, // allergyList[0].allergyName
         allergyReaction: '',
         allergyNotes: '',
-      },
-    ],
-
-    medicalInfo: [
-      {
-        medicalDetails: '',
-        medicalInfo: '',
-        medicalNotes: '',
-        medicalDate: newDate,
       },
     ],
   };
@@ -171,18 +161,6 @@ export function PatientAddScreen(props) {
       return (
         <PatientAddAllergyScreen
           key={3}
-          nextQuestionHandler={nextQuestionHandler}
-          prevQuestionHandler={prevQuestionHandler}
-          handleFormData={handleFormData}
-          formData={formData}
-          setFormData={setFormData}
-          componentList={componentList}
-        />
-      );
-    case 4:
-      return (
-        <PatientAddMedicalHistoryScreen
-          key={4}
           nextQuestionHandler={nextQuestionHandler}
           prevQuestionHandler={prevQuestionHandler}
           handleFormData={handleFormData}
