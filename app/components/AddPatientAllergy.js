@@ -14,7 +14,6 @@ import typography from 'app/config/typography';
 function AddPatientAllergy({ i, title, formData, handleFormData }) {
   const page = 'allergyInfo';
   const allergy = formData.allergyInfo[i]; //allergyInfo[0].allergyName
-  console.log(allergy);
 
   return (
     <Box>
