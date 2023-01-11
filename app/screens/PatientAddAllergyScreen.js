@@ -53,7 +53,7 @@ export function PatientAddAllergyScreen(props) {
     <ScrollView>
       <Box alignItems="center">
         <Box w="75%">
-          <AddPatientProgress value={60} />
+          <AddPatientProgress value={100} />
           {allergyInfoDisplay
             ? allergyInfoDisplay.map((item, index) => (
                 <Box>
