@@ -33,16 +33,12 @@ function PatientScreenCard(props) {
             />
           </Center>
           <VStack>
-            <Center>
-              <Text bold fontSize="lg" alignSelf={true} pl="2" pt="2">
-                {`${patientProfile.preferredName}`}
-              </Text>
-            </Center>
-            <Center>
-              <Text alignSelf={true} pl="2">
-                {`${patientProfile.firstName} ${patientProfile.lastName}`}
-              </Text>
-            </Center>
+            <Text bold fontSize="lg" pl="2" pt="2">
+              {`${patientProfile.preferredName}`}
+            </Text>
+            <Text pl="2">
+              {`${patientProfile.firstName} ${patientProfile.lastName}`}
+            </Text>
           </VStack>
         </HStack>
       </Box>
