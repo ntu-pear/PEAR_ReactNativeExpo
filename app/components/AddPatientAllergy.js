@@ -13,7 +13,8 @@ import typography from 'app/config/typography';
 
 function AddPatientAllergy({ i, title, formData, handleFormData }) {
   const page = 'allergyInfo';
-  const allergy = formData.allergyInfo[i]; //allergyList[0].allergyName
+  const allergy = formData.allergyInfo[i]; //allergyInfo[0].allergyName
+  console.log(allergy);
 
   return (
     <Box>
@@ -36,19 +37,19 @@ function AddPatientAllergy({ i, title, formData, handleFormData }) {
           selectedValue={allergy.allergyName}
           onValueChange={handleFormData(page, 'allergyName', i)}
         >
-          <Select.Item label="To Be Updated" value="1" />
-          <Select.Item label="None" value="2" />
-          <Select.Item label="Corn" value="3" />
-          <Select.Item label="Eggs" value="4" />
-          <Select.Item label="Fish" value="5" />
-          <Select.Item label="Meat" value="6" />
-          <Select.Item label="Milk" value="7" />
-          <Select.Item label="Peanuts" value="8" />
-          <Select.Item label="Tree nuts" value="9" />
-          <Select.Item label="Shellfish" value="10" />
-          <Select.Item label="Soy" value="11" />
-          <Select.Item label="Wheat" value="12" />
-          <Select.Item label="Seafood" value="13" />
+          <Select.Item label="To Be Updated" value={1} />
+          <Select.Item label="None" value={2} />
+          <Select.Item label="Corn" value={3} />
+          <Select.Item label="Eggs" value={4} />
+          <Select.Item label="Fish" value={5} />
+          <Select.Item label="Meat" value={6} />
+          <Select.Item label="Milk" value={7} />
+          <Select.Item label="Peanuts" value={8} />
+          <Select.Item label="Tree nuts" value={9} />
+          <Select.Item label="Shellfish" value={10} />
+          <Select.Item label="Soy" value={11} />
+          <Select.Item label="Wheat" value={12} />
+          <Select.Item label="Seafood" value={13} />
         </Select>
       </FormControl>
 

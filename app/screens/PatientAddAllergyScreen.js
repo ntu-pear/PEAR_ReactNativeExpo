@@ -6,47 +6,46 @@ import AddPatientProgress from 'app/components/AddPatientProgress';
 
 export function PatientAddAllergyScreen(props) {
   const {
-    nextQuestionHandler,
     prevQuestionHandler,
     formData,
     setFormData,
     handleFormData,
     componentList,
   } = props;
-  const [allergyListDisplay, setAllergyListDisplay] = useState(
+  const [allergyInfoDisplay, setAllergyInfoDisplay] = useState(
     componentList.allergy,
   );
 
   const concatFormData = () => {
-    var allergyList = formData.allergyList.concat({
-      allergyName: '',
+    var allergyInfo = formData.allergyInfo.concat({
+      allergyName: 1,
       allergyReaction: '',
       allergyNotes: '',
     });
     setFormData((prevState) => ({
       ...prevState,
-      allergyList,
+      allergyInfo,
     }));
   };
 
   const removeFormData = () => {
-    var allergyList = [...formData.allergyList];
-    allergyList.pop();
+    var allergyInfo = [...formData.allergyInfo];
+    allergyInfo.pop();
     setFormData((prevState) => ({
       ...prevState,
-      allergyList,
+      allergyInfo,
     }));
   };
 
   const addNewAllergyComponent = () => {
-    setAllergyListDisplay([...allergyListDisplay, {}]);
+    setAllergyInfoDisplay([...allergyInfoDisplay, {}]);
     concatFormData();
   };
 
   const removeAllergyComponent = (index) => {
-    const list = [...allergyListDisplay];
+    const list = [...allergyInfoDisplay];
     list.splice(index, 1);
-    setAllergyListDisplay(list);
+    setAllergyInfoDisplay(list);
     removeFormData();
   };
 
@@ -55,8 +54,8 @@ export function PatientAddAllergyScreen(props) {
       <Box alignItems="center">
         <Box w="75%">
           <AddPatientProgress value={60} />
-          {allergyListDisplay
-            ? allergyListDisplay.map((item, index) => (
+          {allergyInfoDisplay
+            ? allergyInfoDisplay.map((item, index) => (
                 <Box>
                   <AddPatientAllergy
                     key={item}
@@ -69,17 +68,15 @@ export function PatientAddAllergyScreen(props) {
               ))
             : null}
         </Box>
-
         <AddPatientBottomButtons
-          list={allergyListDisplay}
-          nextQuestionHandler={() =>
-            nextQuestionHandler('allergy', allergyListDisplay)
-          }
+          list={allergyInfoDisplay}
           prevQuestionHandler={() =>
-            prevQuestionHandler('allergy', allergyListDisplay)
+            prevQuestionHandler('allergy', allergyInfoDisplay)
           }
           addComponent={addNewAllergyComponent}
           removeComponent={removeAllergyComponent}
+          submit={true}
+          formData={formData}
         />
       </Box>
     </ScrollView>
