@@ -100,8 +100,8 @@ export function PatientAddScreen(props) {
     setStep(step - 1);
   };
 
+  // Reference: https://docs.expo.dev/versions/latest/sdk/imagepicker/
   const pickImage = (page, input) => async () => {
-    console.log('picking image');
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -109,8 +109,6 @@ export function PatientAddScreen(props) {
       aspect: [4, 3],
       quality: 1,
     });
-
-    console.log(result);
 
     if (!result.cancelled) {
       var img = formData[page];
