@@ -34,7 +34,9 @@ function AccountDetailCard(props) {
             resizeMode="cover"
             size="lg"
             source={{
-              uri: `${userProfile.profilePicture}`,
+              uri: userProfile.ProfilePicture
+                ? `${userProfile.ProfilePicture}`
+                : 'https://res.cloudinary.com/dbpearfyp/image/upload/v1640484552/User/Jessica_Sim_Sxxxx781F/ProfilePicture/l0czagb5s6jxbymwddnr.jpg',
             }}
           />
           <VStack mt="4">

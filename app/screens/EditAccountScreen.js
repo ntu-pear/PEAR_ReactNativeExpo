@@ -29,9 +29,9 @@ function EditAccountScreen(props) {
     preferredName: '',
     contactNo: '',
   });
-  const [newProfilePicture, setProfilePicture] = useState({
-    uploadProfilePicture: '',
-  });
+  const [profilePicture, setProfilePicture] = useState(
+    userProfile.profilePicture,
+  );
 
   const handleFormData =
     (input = null) =>
@@ -45,8 +45,8 @@ function EditAccountScreen(props) {
     };
 
   const handleOnPressToSave = async () => {
-    const result = await userApi.updateUser(formData, newProfilePicture);
-    console.log("Edit acc screen", result);
+    const result = await userApi.updateUser(formData, profilePicture);
+    console.log('Edit acc screen', result);
 
     if (!result.ok) {
       Alert.alert(
@@ -69,16 +69,16 @@ function EditAccountScreen(props) {
   const handleOnPressToImagePicker = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status == 'granted') {
-      let data = await ImagePicker.launchImageLibraryAsync({
+      let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
         quality: 1,
       });
 
-      setProfilePicture(() => ({
-        uploadProfilePicture: data.uri,
-      }));
+      if (!result.canceled) {
+        setProfilePicture(result.uri);
+      }
     } else {
       Alert.alert('Please enable permissions to pick from image gallery.');
     }
@@ -94,7 +94,7 @@ function EditAccountScreen(props) {
                 <AspectRatio w="70%" ratio={1} mb="2" alignSelf="center">
                   <Image
                     borderRadius="full"
-                    source={{ uri: `${userProfile.profilePicture}` }}
+                    source={{ uri: `${profilePicture}` }}
                     alt="user_image"
                   />
                 </AspectRatio>
