@@ -42,18 +42,20 @@ const resetPassword = (Email, Role) => {
 };
 
 // ************************* UPDATE REQUESTS *************************
-const updateUser = async (data, newProfilePicture) => {
+const updateUser = async (data, profilePicture) => {
   const formData = new FormData();
-  formData.append('PreferredName', data.preferredName);
-  formData.append('ContactNo', data.contactNo);
-  formData.append(
-    'UploadProfilePicture',
-    newProfilePicture.uploadProfilePicture,
-  );
+
+  for (const key in data) {
+    var value = data[key];
+    formData.append(key, value);
+  }
+
+  // TODO: unable to update profile pic
+  formData.append('uploadProfilePicture', profilePicture);
 
   const headers = { 'Content-Type': 'multipart/form-data' };
 
-  // console.log('formData', formData);
+  console.log('formData', formData);
 
   return client.put(userUpdate, formData, { headers });
 };
