@@ -46,7 +46,7 @@ function EditAccountScreen(props) {
 
   const handleOnPressToSave = async () => {
     const result = await userApi.updateUser(formData, newProfilePicture);
-    // console.log(result);
+    console.log("Edit acc screen", result);
 
     if (!result.ok) {
       Alert.alert(
@@ -56,7 +56,6 @@ function EditAccountScreen(props) {
       );
     }
 
-    // TODO: response is successful but not updating db??
     console.log(result.data.data);
     Alert.alert('Successfully updated.');
     navigation.pop();
@@ -93,7 +92,6 @@ function EditAccountScreen(props) {
             <Center>
               <TouchableOpacity onPress={handleOnPressToImagePicker}>
                 <AspectRatio w="70%" ratio={1} mb="2" alignSelf="center">
-                  {/*TODO: update profile pic displayed in real time */}
                   <Image
                     borderRadius="full"
                     source={{ uri: `${userProfile.profilePicture}` }}

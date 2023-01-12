@@ -42,17 +42,20 @@ const resetPassword = (Email, Role) => {
 };
 
 // ************************* UPDATE REQUESTS *************************
-const updateUser = (formData, newProfilePicture) => {
-  console.log('formData', formData);
-  const params = {
-    PreferredName: formData.preferredName,
-    ContactNo: formData.contactNo,
-    UploadProfilePicture: newProfilePicture.uploadProfilePicture,
-  };
+const updateUser = async (data, newProfilePicture) => {
+  const formData = new FormData();
+  formData.append('PreferredName', data.preferredName);
+  formData.append('ContactNo', data.contactNo);
+  formData.append(
+    'UploadProfilePicture',
+    newProfilePicture.uploadProfilePicture,
+  );
 
-  console.log('params', params);
+  const headers = { 'Content-Type': 'multipart/form-data' };
 
-  return client.put(userUpdate, {}, { params: params });
+  // console.log('formData', formData);
+
+  return client.put(userUpdate, formData, { headers });
 };
 
 /*
