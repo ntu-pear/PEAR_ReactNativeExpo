@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity } from 'react-native';
+import { TouchableOpacity, Platform } from 'react-native';
 
 import { Center, Image, Text, VStack, Box } from 'native-base';
 
@@ -7,14 +7,14 @@ import { Center, Image, Text, VStack, Box } from 'native-base';
 import routes from 'app/navigation/routes';
 
 function PatientScreenCard(props) {
-  const { patientProfile, navigation } = props;
+  const { patientProfile, navigation, onClick } = props;
 
   const handleOnPress = () => {
     // Navigate to PatientProfileScreen
     navigation.push(routes.PATIENT_PROFILE, { ...patientProfile });
   };
   return (
-    <TouchableOpacity onPress={handleOnPress}>
+    <TouchableOpacity onPress={Platform.OS === 'web' ? onClick : handleOnPress}>
       <Box mt="5" mb="5" minW="90%" overflow="hidden" rounded="lg">
         <VStack mb="2">
           <Center>
@@ -26,7 +26,7 @@ function PatientScreenCard(props) {
                 uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1640487405/Patient/Alice_Lee_Sxxxx567D/ProfilePicture/zsw7dyprsvn0bjmatofg.jpg',
               }}
               resizeMode="cover"
-              size="2xl"
+              size={Platform.OS === 'web' ? 'xl' : '2xl'}
               source={{
                 uri: `${patientProfile.profilePicture}`,
               }}
