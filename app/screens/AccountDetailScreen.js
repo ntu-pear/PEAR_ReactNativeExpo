@@ -45,7 +45,7 @@ function AccountDetailScreen(props) {
             </Center>
 
             <IconButton
-              alignSelf="right"
+              alignSelf="flex-start"
               _icon={{
                 as: MaterialCommunityIcons,
                 name: 'pencil',

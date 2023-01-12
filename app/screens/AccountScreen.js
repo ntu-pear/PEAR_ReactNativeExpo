@@ -37,7 +37,7 @@ function AccountScreen(props) {
   const getCurrentUser = async () => {
     const currentUser = await authStorage.getUser();
     const response = await userApi.getUser(currentUser.userID);
-    console.log(response);
+    // console.log(response);
     if (!response.ok) {
       // Check if token has expired, if yes, proceed to log out
       checkExpiredLogOutHook.handleLogOut(response.data);
@@ -55,7 +55,7 @@ function AccountScreen(props) {
         <VStack w="100%" h="100%" alignItems="center">
           <AccountDetailCard userProfile={user} navigation={navigation} />
 
-          <VStack w="90%" flexWrap="wrap" mb="1" alignItems="left">
+          <VStack w="90%" flexWrap="wrap" mb="1">
             <AccountCard
               iconTop="3"
               iconLeft="2"
