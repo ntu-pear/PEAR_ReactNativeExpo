@@ -26,8 +26,8 @@ function EditAccountScreen(props) {
   const { navigation, route } = props;
   const userProfile = route.params;
   const [formData, setFormData] = useState({
-    preferredName: '',
-    contactNo: '',
+    preferredName: userProfile.preferredName,
+    contactNo: userProfile.contactNo,
   });
   const [profilePicture, setProfilePicture] = useState(
     userProfile.profilePicture,
@@ -94,7 +94,15 @@ function EditAccountScreen(props) {
                 <AspectRatio w="70%" ratio={1} mb="2" alignSelf="center">
                   <Image
                     borderRadius="full"
-                    source={{ uri: `${profilePicture}` }}
+                    fallbackSource={{
+                      uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1640484552/User/Jessica_Sim_Sxxxx781F/ProfilePicture/l0czagb5s6jxbymwddnr.jpg',
+                    }}
+                    resizeMode="cover"
+                    source={{
+                      uri: profilePicture
+                        ? `${profilePicture}`
+                        : 'https://res.cloudinary.com/dbpearfyp/image/upload/v1640484552/User/Jessica_Sim_Sxxxx781F/ProfilePicture/l0czagb5s6jxbymwddnr.jpg',
+                    }}
                     alt="user_image"
                   />
                 </AspectRatio>
