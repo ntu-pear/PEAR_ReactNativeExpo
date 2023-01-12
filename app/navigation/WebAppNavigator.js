@@ -36,28 +36,35 @@ import {
   Pressable,
   Divider,
   Menu,
+  Popover,
 } from 'native-base';
+import { NavigationContainer } from '@react-navigation/native';
 
 import { MaterialIcons } from '@expo/vector-icons';
 
-import AuthContext from 'app/auth/context';
-import authStorage from 'app/auth/authStorage';
+import AuthContext from '../auth/context';
+import authStorage from '../auth/authStorage';
 
-import NotificationNavigator from 'app\navigationNotificationNavigator';
+import NotificationNavigator from './NotificationNavigator';
+import AccountScreen from '../screens/AccountScreen';
+import PatientsScreenWeb from '../screens/web/PatientsScreenWeb';
+import PatientInformationScreenWeb from 'app/screens/web/PatientInformationScreenWeb';
 
-function Home() {
+import routes from './routes';
+
+function Example() {
   return (
     <div style={{ padding: 20 }}>
-      <h2>Home View</h2>
+      <h2>Example View</h2>
       <p>Lorem ipsum dolor sit amet, consectetur adip.</p>
     </div>
   );
 }
 
-function About() {
+function Example2() {
   return (
     <div style={{ padding: 20 }}>
-      <h2>About View</h2>
+      <h2>Example 2 View</h2>
       <p>Lorem ipsum dolor sit amet, consectetur adip.</p>
     </div>
   );
@@ -112,17 +119,46 @@ function WebAppNavigator() {
             />
           </HStack>
           <HStack>
-            <IconButton
-              icon={
-                <Icon
-                  as={MaterialIcons}
-                  name="notifications"
-                  size="2xl"
-                  color="black"
-                  m="3"
-                />
-              }
-            />
+            <Popover
+              trigger={(triggerProps) => {
+                return (
+                  <IconButton
+                    {...triggerProps}
+                    icon={
+                      <Icon
+                        as={MaterialIcons}
+                        name="notifications"
+                        size="2xl"
+                        color="black"
+                        m="3"
+                      />
+                    }
+                  />
+                );
+              }}
+            >
+              <Popover.Content
+                accessibilityLabel="Notifications"
+                w="500"
+                h="400"
+              >
+                <Popover.Header>Notifications</Popover.Header>
+                <Popover.Body>
+                  {/* <NavigationContainer>
+                    <NotificationNavigator />
+                  </NavigationContainer> */}
+                </Popover.Body>
+                {/* <Popover.Footer justifyContent="flex-end">
+                  <Button.Group space={2}>
+                    <Button colorScheme="coolGray" variant="ghost">
+                      Cancel
+                    </Button>
+                    <Button colorScheme="danger">Delete</Button>
+                  </Button.Group>
+                </Popover.Footer> */}
+              </Popover.Content>
+            </Popover>
+
             <Menu
               w="190"
               trigger={(triggerProps) => {
@@ -156,7 +192,7 @@ function WebAppNavigator() {
 
       {/* TODO: (yapsiang) implements routes for the different pages  */}
       <Router>
-        <HStack>
+        <HStack alignContent="center">
           {sidebar ? (
             // <Pressable onPress={showSidebar}>
             <Pressable>
@@ -165,16 +201,18 @@ function WebAppNavigator() {
                 pt="2"
                 px="3"
                 borderRightWidth="1"
-                height="100vh"
+                borderBottomWidth="1"
+                h="100vh"
+                w="15vw"
               >
                 <Text bold fontSize="18px">
                   PATIENTS
                 </Text>
-                <Link to="/" style={linkStyle}>
+                <Link to={routes.PATIENTS} style={linkStyle}>
                   <Icon as={MaterialIcons} name="apartment" size="md" m="2" />
                   View Patient
                 </Link>
-                <Link to="/home" style={linkStyle}>
+                <Link to="/example" style={linkStyle}>
                   <Icon
                     as={MaterialIcons}
                     name="switch-account"
@@ -183,7 +221,7 @@ function WebAppNavigator() {
                   />
                   Manage Preference
                 </Link>
-                <Link to="/about" style={linkStyle}>
+                <Link to="/example2" style={linkStyle}>
                   <Icon
                     as={MaterialIcons}
                     name="medical-services"
@@ -197,7 +235,7 @@ function WebAppNavigator() {
                 <Text bold fontSize="18px">
                   ACTIVITIES
                 </Text>
-                <Link to="/" style={linkStyle}>
+                <Link to={routes.ACCOUNT} style={linkStyle}>
                   <Icon as={MaterialIcons} name="list-alt" size="md" m="2" />
                   Manage Activities
                 </Link>
@@ -206,7 +244,7 @@ function WebAppNavigator() {
                 <Text bold fontSize="18px">
                   ATTENDANCE
                 </Text>
-                <Link to="/about" style={linkStyle}>
+                <Link to={routes.NOTIFICATION} style={linkStyle}>
                   <Icon
                     as={MaterialIcons}
                     name="assignment-ind"
@@ -220,7 +258,7 @@ function WebAppNavigator() {
                 <Text bold fontSize="18px">
                   ADHOC
                 </Text>
-                <Link to="/about" style={linkStyle}>
+                <Link to="/" style={linkStyle}>
                   <Icon as={MaterialIcons} name="note" size="md" m="2" />
                   Manage Adhoc
                 </Link>
@@ -229,11 +267,11 @@ function WebAppNavigator() {
                 <Text bold fontSize="18px">
                   SCHEDULE
                 </Text>
-                <Link to="/about" style={linkStyle}>
+                <Link to="/" style={linkStyle}>
                   <Icon as={MaterialIcons} name="loop" size="md" m="2" />
                   Generate Schedule
                 </Link>
-                <Link to="/about" style={linkStyle}>
+                <Link to="/" style={linkStyle}>
                   <Icon
                     as={MaterialIcons}
                     name="file-download"
@@ -273,7 +311,7 @@ function WebAppNavigator() {
                   <Icon as={MaterialIcons} name="security" size="md" m="2" />
                   View Privacy Settings
                 </Link>
-                <Link to="/noti" style={linkStyle}>
+                <Link to="/" style={linkStyle}>
                   <Icon as={MaterialIcons} name="view-list" size="md" m="2" />
                   Manage List Items
                 </Link>
@@ -281,13 +319,25 @@ function WebAppNavigator() {
               </VStack>
             </Pressable>
           ) : null}
-
           <Routes>
-            <Route path="" element={<Home />} />
-            <Route path="/home" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/noti" element={<NotificationNavigator />} />
+            <Route path="" element={<Example />} />
+            <Route path="/example" element={<Example />} />
+            <Route path="/example2" element={<Example2 />} />
+            <Route path={routes.ACCOUNT} element={<AccountScreen />} />
+            <Route
+              path={routes.NOTIFICATION}
+              element={<NotificationNavigator />}
+            />
+            <Route
+              path={routes.PATIENTS}
+              element={<PatientsScreenWeb sidebar={sidebar} />}
+            />
+            <Route
+              path={routes.PATIENT_INFORMATION}
+              element={<PatientInformationScreenWeb sidebar={sidebar} />}
+            />
           </Routes>
+          {/* <NotificationNavigator /> */}
         </HStack>
       </Router>
     </>

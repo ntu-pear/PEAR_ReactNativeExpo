@@ -27,7 +27,10 @@ function PersonalInformationCard(props) {
     homeNo,
     handphoneNo,
     tempAddress,
-  } = patientInformation.route.params;
+  } =
+    Platform.OS === 'web'
+      ? patientInformation
+      : patientInformation.route.params;
 
   return (
     <Stack>
@@ -293,7 +296,7 @@ function PersonalInformationCard(props) {
 
       <Center position="absolute" right="0" py="1.5">
         <Avatar
-          size="md"
+          size={Platform.OS === 'web' ? '2xl' : 'md'}
           source={{
             uri: profilePicture,
           }}
