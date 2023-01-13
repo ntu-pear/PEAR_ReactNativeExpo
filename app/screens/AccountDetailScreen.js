@@ -24,7 +24,6 @@ function AccountDetailScreen(props) {
   const { navigation, route } = props;
   const userProfile = route.params;
 
-  // TODO: go to edit screen???
   const handleOnPress = () => {
     navigation.push(routes.ACCOUNT_EDIT, { ...userProfile });
   };

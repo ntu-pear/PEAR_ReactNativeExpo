@@ -50,8 +50,14 @@ const updateUser = async (data, profilePicture) => {
     formData.append(key, value);
   }
 
-  // TODO: unable to update profile pic
-  formData.append('uploadProfilePicture', profilePicture);
+  const fileName = profilePicture.split('/').pop();
+  const fileType = fileName.split('.').pop();
+
+  formData.append('uploadProfilePicture', {
+    uri: profilePicture,
+    name: fileName,
+    type: `image/${fileType}`,
+  });
 
   const headers = { 'Content-Type': 'multipart/form-data' };
 
