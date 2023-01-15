@@ -49,17 +49,26 @@ function EditAccountScreen(props) {
     console.log('Edit acc screen', result);
 
     if (!result.ok) {
-      Alert.alert(
-        'Update failed. \
-      Request failed with status code ' +
-          result.status,
-      );
-    }
+      if (result.data.errors) {
+        Alert.alert(
+          'Update failed. \n' +
+            JSON.stringify(result.data.errors).split('[').pop().slice(0, -2),
+        );
+      } else {
+        Alert.alert(
+          'Update failed. \
+        Request failed with status code ' +
+            result.status,
+        );
+      }
+    } else {
+      // console.log(result.data.data);
+      Alert.alert('Successfully updated.');
 
-    console.log(result.data.data);
-    Alert.alert('Successfully updated.');
-    navigation.pop();
-    navigation.navigate(routes.ACCOUNT);
+      // TODO: display updated info on app
+      navigation.pop();
+      navigation.navigate(routes.ACCOUNT);
+    }
   };
 
   const handleOnPressToCancel = () => {

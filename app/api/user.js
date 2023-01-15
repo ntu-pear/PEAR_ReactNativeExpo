@@ -61,7 +61,7 @@ const updateUser = async (data, profilePicture) => {
 
   const headers = { 'Content-Type': 'multipart/form-data' };
 
-  console.log('formData', formData);
+  // console.log('formData', formData);
 
   return client.put(userUpdate, formData, { headers });
 };
