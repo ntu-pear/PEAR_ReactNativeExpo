@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
+import { Platform } from 'react-native';
+
 import { PatientAddPatientInfoScreen } from 'app/screens/PatientAddPatientInfoScreen';
 import { PatientAddGuardianScreen } from 'app/screens/PatientAddGuardianScreen';
 import { PatientAddAllergyScreen } from 'app/screens/PatientAddAllergyScreen';
-import { PatientAddMedicalHistoryScreen } from 'app/screens/PatientAddMedicalHistoryScreen';
 import * as ImagePicker from 'expo-image-picker';
 
 export function PatientAddScreen(props) {
   // state for steps
   const [step, setStep] = useState(1);
+
+  // state for datepicker
+  const [show, setShow] = useState({
+    DOB: false,
+    StartDate: false,
+    EndDate: false,
+  });
 
   // state for components
   const [componentList, setComponentList] = useState({
@@ -114,6 +122,13 @@ export function PatientAddScreen(props) {
   const handleFormData =
     (page = '', input, index = null) =>
     (e, date = null) => {
+      // set show as false when date is selected on datepicker
+      if (Platform.OS === 'android') {
+        setShow((prevState) => ({
+          ...prevState,
+          [input]: false,
+        }));
+      }
       if (page === 'patientInfo') {
         const newData = formData[page];
         date ? (newData[input] = date) : (newData[input] = e); // eg. guardianInfo[0].FirstName = e
@@ -143,6 +158,8 @@ export function PatientAddScreen(props) {
           formData={formData}
           componentList={componentList}
           pickImage={pickImage}
+          show={show}
+          setShow={setShow}
         />
       );
     case 2:
