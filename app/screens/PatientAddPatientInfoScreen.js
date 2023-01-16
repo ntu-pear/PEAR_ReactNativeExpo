@@ -180,6 +180,7 @@ export function PatientAddPatientInfoScreen(props) {
               </HStack>
             </Radio.Group>
           </FormControl>
+
           {/* Reference: https://github.com/react-native-datetimepicker/datetimepicker
           TODO: Align to the left*/}
           <DatePickerComponent
