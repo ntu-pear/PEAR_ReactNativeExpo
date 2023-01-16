@@ -11,17 +11,26 @@ import {
   Select,
   Pressable,
 } from 'native-base';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { ScrollView } from 'react-native';
 import AddPatientProgress from 'app/components/AddPatientProgress';
 import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import colors from 'app/config/colors';
+import DatePickerComponent from 'app/components/DatePickerComponent';
 
 export function PatientAddPatientInfoScreen(props) {
-  const { nextQuestionHandler, handleFormData, formData, pickImage } = props;
+  const {
+    nextQuestionHandler,
+    handleFormData,
+    formData,
+    pickImage,
+    show,
+    setShow,
+  } = props;
 
   const page = 'patientInfo';
   const patient = formData.patientInfo;
+
+  // console.log(patient);
 
   // const [error, setError] = useState(false);
 
@@ -171,32 +180,36 @@ export function PatientAddPatientInfoScreen(props) {
               </HStack>
             </Radio.Group>
           </FormControl>
+
           {/* Reference: https://github.com/react-native-datetimepicker/datetimepicker
           TODO: Align to the left*/}
-          <FormControl>
-            <HStack />
-            <FormControl.Label>Date of Birth </FormControl.Label>
-            <DateTimePicker
-              value={patient.DOB}
-              onChange={handleFormData(page, 'DOB')}
-            />
-          </FormControl>
-          <FormControl>
-            <HStack />
-            <FormControl.Label>Date of Joining </FormControl.Label>
-            <DateTimePicker
-              value={patient.StartDate}
-              onChange={handleFormData(page, 'StartDate')}
-            />
-          </FormControl>
-          <FormControl>
-            <HStack />
-            <FormControl.Label>Date of Leaving (Optional) </FormControl.Label>
-            <DateTimePicker
-              value={patient.EndDate}
-              onChange={handleFormData(page, 'EndDate')}
-            />
-          </FormControl>
+          <DatePickerComponent
+            label={'Date of Birth'}
+            value={patient.DOB}
+            page={page}
+            field="DOB"
+            handleFormData={handleFormData}
+            show={show}
+            setShow={setShow}
+          />
+          <DatePickerComponent
+            label={'Date of Joining'}
+            value={patient.StartDate}
+            page={page}
+            field="StartDate"
+            handleFormData={handleFormData}
+            show={show}
+            setShow={setShow}
+          />
+          <DatePickerComponent
+            label={'Date of Leaving (Optional)'}
+            value={patient.EndDate}
+            page={page}
+            field="EndDate"
+            handleFormData={handleFormData}
+            show={show}
+            setShow={setShow}
+          />
         </Box>
         <AddPatientBottomButtons nextQuestionHandler={nextQuestionHandler} />
       </Box>
