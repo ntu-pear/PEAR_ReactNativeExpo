@@ -5,6 +5,7 @@ import LoginScreen from 'app/screens/LoginScreen';
 import RegisterScreen from 'app/screens/RegisterScreen';
 // Import Constants from routes
 import routes from 'app/navigation/routes';
+import ResetPasswordScreen from 'app/screens/ResetPasswordScreen';
 
 // Refer to this: https://reactnavigation.org/docs/hello-react-navigation
 const Stack = createNativeStackNavigator();
@@ -22,6 +23,10 @@ function AuthNavigator() {
       />
       <Stack.Screen name={routes.LOGIN} component={LoginScreen} />
       <Stack.Screen name={routes.REGISTER} component={RegisterScreen} />
+      <Stack.Screen
+        name={routes.RESET_PASSWORD}
+        component={ResetPasswordScreen}
+      />
     </Stack.Navigator>
   );
 }

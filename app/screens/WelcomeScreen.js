@@ -8,6 +8,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ActivityIndicator,
+  Text,
 } from 'react-native';
 
 // Custom Import from https://reactnativeelements.com/docs/
@@ -22,6 +23,7 @@ import colors from 'app/config/colors';
 import typography from 'app/config/typography';
 import errors from 'app/config/errors';
 import useApiHandler from 'app/hooks/useApiHandler';
+import routes from 'app/navigation/routes';
 
 // Import from components
 import AppText from 'app/components/AppText';
@@ -56,7 +58,7 @@ function WelcomeScreen(props) {
    * Deconstructor
    * Note: Navigation is passed down as a prop from NativeStackNavigator
    */
-  // const { navigation } = props;
+  const { navigation } = props;
 
   /*
    * All Functions To Be Placed Here
@@ -73,12 +75,16 @@ function WelcomeScreen(props) {
     }
     setIsLoading(false);
     setLoginFailed(false);
-    const user = jwt_decode(result.data.accessToken);
+    const user = jwt_decode(result.data.data.accessToken);
     authContext.setUser(user);
-    authStorage.storeToken('userAuthToken', result.data.accessToken);
-    authStorage.storeToken('userRefreshToken', result.data.refreshToken);
+    authStorage.storeToken('userAuthToken', result.data.data.accessToken);
+    authStorage.storeToken('userRefreshToken', result.data.data.refreshToken);
     // set api header if empty
     apiHandlerHook.setHeaderIfEmpty();
+  };
+
+  const navigateToResetPasswordScreen = () => {
+    navigation.navigate(routes.RESET_PASSWORD);
   };
 
   const handleEmail = (e) => {
@@ -203,6 +209,14 @@ function WelcomeScreen(props) {
                 <AppButton title="Login" color="green" onPress={onPressLogin} />
               )}
             </View>
+            <View>
+              <Text
+                style={styles.underline}
+                onPress={navigateToResetPasswordScreen}
+              >
+                Forgot Password?
+              </Text>
+            </View>
           </Center>
         </View>
       </TouchableWithoutFeedback>
@@ -235,6 +249,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     paddingVertical: 800,
     fontSize: 80,
+  },
+  underline: {
+    textDecorationLine: 'underline',
   },
 });
 
