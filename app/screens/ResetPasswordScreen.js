@@ -30,6 +30,7 @@ function ResetPasswordScreen(props) {
   };
 
   const onPressReset = async () => {
+    // TODO: check if it works?
     const result = await userApi.resetPassword(email, role);
     // console.log(result)
     if (!result.ok) {
