@@ -11,6 +11,7 @@ const userDelete = `${endpoint}/delete`; //eslint-disable-line no-unused-vars
 const userRefreshToken = `${endpoint}/RefereshToken`; //eslint-disable-line no-unused-vars
 const userLogout = `${endpoint}/Logout`; //eslint-disable-line no-unused-vars
 const userResetPassword = `${endpoint}/ResetPassword`;
+const userChangePassword = `${endpoint}/ChangePassword`;
 
 /*
  * List all functions here
@@ -39,6 +40,13 @@ const resetPassword = (Email, Role) => {
 
   // Note: client.post accepts 3 parameters. (1) endpoint (2) data and (3) onUploadProgress -- this is optional
   return client.post(userResetPassword, body);
+};
+
+const changePassword = (Email, OldPassword, NewPassword) => {
+  const body = JSON.stringify({ Email, OldPassword, NewPassword });
+
+  // Note: client.post accepts 3 parameters. (1) endpoint (2) data and (3) onUploadProgress -- this is optional
+  return client.post(userChangePassword, body);
 };
 
 // ************************* UPDATE REQUESTS *************************
@@ -74,4 +82,5 @@ export default {
   resetPassword,
   getUser,
   updateUser,
+  changePassword,
 };
