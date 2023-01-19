@@ -30,6 +30,7 @@ function ResetPasswordScreen(props) {
   };
 
   const onPressReset = async () => {
+    // console.log(email, role)
     // TODO: check if it works?
     const result = await userApi.resetPassword(email, role);
     // console.log(result)
@@ -45,74 +46,72 @@ function ResetPasswordScreen(props) {
   return (
     <View>
       <VStack>
-        <FormControl maxW="60%" mt="5" ml="5">
-          <HStack space={2} alignItems="center">
-            <FormControl.Label
-              _text={{
-                fontFamily: `${
+        <Center>
+          <FormControl maxW="80%" mt="5">
+            <VStack alignItems="flex-start">
+              <FormControl.Label
+                _text={{
+                  fontFamily: `${
+                    Platform.OS === 'ios' ? 'Helvetica' : typography.android
+                  }`,
+                  fontWeight: 'bold',
+                }}
+              >
+                Email
+              </FormControl.Label>
+
+              <Input
+                color={colors.black_var1}
+                borderRadius="25"
+                height="50"
+                fontFamily={
                   Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                }`,
-                fontSize: 'lg',
-                fontWeight: 'bold',
-              }}
-            >
-              Email
-            </FormControl.Label>
+                }
+                onChangeText={handleEmail}
+                placeholder="Enter valid email address"
+                size="18"
+                w="100%"
+              />
+            </VStack>
+          </FormControl>
 
-            <Input
-              color={colors.black_var1}
-              borderRadius="25"
-              height="50"
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              onChangeText={handleEmail}
-              placeholder="Email address"
-              size="18"
-              w="100%"
-              marginLeft="4"
-            />
-          </HStack>
-        </FormControl>
+          <FormControl maxW="80%" mt="5">
+            <VStack alignItems="flex-start">
+              <FormControl.Label
+                _text={{
+                  fontFamily: `${
+                    Platform.OS === 'ios' ? 'Helvetica' : typography.android
+                  }`,
+                  fontWeight: 'bold',
+                }}
+              >
+                Role
+              </FormControl.Label>
 
-        <FormControl maxW="60%" mt="5" ml="5">
-          <HStack space={2} alignItems="center">
-            <FormControl.Label
-              _text={{
-                fontFamily: `${
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                }`,
-                fontSize: 'lg',
-                fontWeight: 'bold',
-              }}
-            >
-              Role
-            </FormControl.Label>
-
-            <Select
-              accessibilityLabel="Select Role"
-              borderRadius="25"
-              fontFamily={
-                Platform.OS === 'ios' ? typography.ios : typography.android
-              }
-              height="50"
-              minWidth="full"
-              minHeight="3%"
-              placeholder="Select role"
-              placeholderTextColor={colors.medium}
-              onValueChange={(itemValue) => setRole(itemValue)}
-              selectedValue={role}
-              size="18"
-              marginLeft="3"
-            >
-              <Select.Item label="Supervisor" value="Supervisor" />
-              <Select.Item label="Guardian" value="Guardian" />
-              <Select.Item label="Doctor" value="Doctor" />
-              <Select.Item label="Caregiver" value="Caregiver" />
-              <Select.Item label="Nurse" value="Nurse" />
-            </Select>
-          </HStack>
-        </FormControl>
+              <Select
+                accessibilityLabel="Select Role"
+                borderRadius="25"
+                fontFamily={
+                  Platform.OS === 'ios' ? typography.ios : typography.android
+                }
+                height="50"
+                minWidth="full"
+                minHeight="3%"
+                placeholder="Select role"
+                placeholderTextColor={colors.medium}
+                onValueChange={(itemValue) => setRole(itemValue)}
+                selectedValue={role}
+                size="18"
+              >
+                <Select.Item label="Supervisor" value="Supervisor" />
+                <Select.Item label="Guardian" value="Guardian" />
+                <Select.Item label="Doctor" value="Doctor" />
+                <Select.Item label="Caregiver" value="Caregiver" />
+                <Select.Item label="Nurse" value="Nurse" />
+              </Select>
+            </VStack>
+          </FormControl>
+        </Center>
 
         <Center>
           <Box>
