@@ -123,11 +123,7 @@ function ResetPasswordScreen(props) {
         </Center>
 
         <View style={styles.buttonsContainer}>
-          <AppButton
-            title="Send reset instructions"
-            color="green"
-            onPress={onPressReset}
-          />
+          <AppButton title="Reset" color="green" onPress={onPressReset} />
         </View>
       </VStack>
     </View>
@@ -136,9 +132,9 @@ function ResetPasswordScreen(props) {
 
 const styles = StyleSheet.create({
   buttonsContainer: {
-    width: '100%',
+    width: '50%',
     padding: 30,
-    alignSelf: 'center',
+    alignSelf: 'flex-left',
   },
 });
 
