@@ -57,7 +57,7 @@ function ChangePasswordScreen(props) {
       <VStack>
         <Center>
           <FormControl maxW="80%" mt="5">
-            <VStack space={2} alignItems="flex-start">
+            <VStack alignItems="flex-start">
               <FormControl.Label
                 _text={{
                   fontFamily: `${
@@ -85,7 +85,7 @@ function ChangePasswordScreen(props) {
           </FormControl>
 
           <FormControl maxW="80%" mt="5">
-            <VStack space={2} alignItems="flex-start">
+            <VStack alignItems="flex-start">
               <FormControl.Label
                 _text={{
                   fontFamily: `${
