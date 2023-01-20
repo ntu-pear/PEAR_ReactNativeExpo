@@ -37,7 +37,7 @@ function ChangePasswordScreen(props) {
     setNewPassword(e);
   };
 
-  const onPressChangePassword = async () => {
+  const onPressConfirm = async () => {
     // TODO: check if it works?
     // const result = await userApi.changePassword(email, oldPassword, newPassword);
     // console.log(result)
@@ -123,11 +123,7 @@ function ChangePasswordScreen(props) {
         </Center>
 
         <View style={styles.buttonsContainer}>
-          <AppButton
-            title="Change Password"
-            color="green"
-            onPress={onPressChangePassword}
-          />
+          <AppButton title="Confirm" color="green" onPress={onPressConfirm} />
         </View>
       </VStack>
     </View>
@@ -136,9 +132,9 @@ function ChangePasswordScreen(props) {
 
 const styles = StyleSheet.create({
   buttonsContainer: {
-    width: '100%',
+    width: '50%',
     padding: 30,
-    alignSelf: 'center',
+    alignSelf: 'flex-left',
   },
 });
 
