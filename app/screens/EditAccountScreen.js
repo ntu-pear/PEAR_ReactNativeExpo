@@ -64,8 +64,6 @@ function EditAccountScreen(props) {
     } else {
       // console.log(result.data.data);
       Alert.alert('Successfully updated.');
-
-      // TODO: display updated info on app
       navigation.pop();
       navigation.navigate(routes.ACCOUNT);
     }

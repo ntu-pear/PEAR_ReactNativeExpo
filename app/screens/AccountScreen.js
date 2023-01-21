@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import React, { useContext } from 'react';
 import { VStack, View, Box } from 'native-base';
 import AuthContext from 'app/auth/context';
@@ -10,6 +10,7 @@ import routes from 'app/navigation/routes';
 import AccountDetailCard from 'app/components/AccountDetailCard';
 import userApi from 'app/api/user';
 import useCheckExpiredThenLogOut from 'app/hooks/useCheckExpiredThenLogOut';
+import { useFocusEffect } from '@react-navigation/native';
 
 function AccountScreen(props) {
   const [isLoading, setIsLoading] = useState(false);
@@ -22,22 +23,24 @@ function AccountScreen(props) {
     await authStorage.removeToken();
   };
 
-  useEffect(() => {
-    setIsLoading(true);
-    const promiseFunction = async () => {
-      const response = await getCurrentUser();
-      // console.log(response);
+  useFocusEffect(
+    useCallback(() => {
+      setIsLoading(true);
+      const promiseFunction = async () => {
+        const response = await getCurrentUser();
+        // console.log(response);
 
-      setUser(response.data);
-    };
-    promiseFunction();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+        setUser(response.data);
+      };
+      promiseFunction();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []),
+  );
 
   const getCurrentUser = async () => {
     const currentUser = await authStorage.getUser();
     const response = await userApi.getUser(currentUser.userID);
-    // console.log(response);
+    console.log('getCurrentUser', response);
     if (!response.ok) {
       // Check if token has expired, if yes, proceed to log out
       checkExpiredLogOutHook.handleLogOut(response.data);
