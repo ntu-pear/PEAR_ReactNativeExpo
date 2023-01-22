@@ -21,7 +21,7 @@ import ErrorMessage from 'app/components/ErrorMessage';
 
 function ResetPasswordScreen(props) {
   const { navigation, route } = props;
-  const [role, setRole] = useState(' ');
+  const [role, setRole] = useState('Supervisor');
   const [email, setEmail] = useState('');
   const [resetFailed, setResetFailed] = useState(false);
 
@@ -68,7 +68,7 @@ function ResetPasswordScreen(props) {
                   Platform.OS === 'ios' ? 'Helvetica' : typography.android
                 }
                 onChangeText={handleEmail}
-                placeholder="Enter valid email address"
+                placeholder="jess@gmail.com"
                 size="18"
                 w="100%"
               />
