@@ -222,9 +222,8 @@ function EditAccountScreen(props) {
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
-              variant="filled"
+              borderRadius="25"
               placeholder={userProfile.preferredName}
-              defaultValue={userProfile.preferredName}
               onChangeText={handleFormData('preferredName')}
               value={formData.preferredName}
               w="100%"
@@ -252,13 +251,13 @@ function EditAccountScreen(props) {
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
               fontSize="lg"
-              variant="filled"
+              borderRadius="25"
               placeholder={userProfile.contactNo}
-              defaultValue={userProfile.contactNo}
               onChangeText={handleFormData('contactNo')}
               value={formData.contactNo}
               type="number"
               w="100%"
+              mt="1"
             />
           </HStack>
         </FormControl>
