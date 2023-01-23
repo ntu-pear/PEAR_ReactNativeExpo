@@ -12,6 +12,7 @@ function AddPatientBottomButtons({
   removeComponent = null,
   submit = false,
   formData = null,
+  max = null,
 }) {
   const onPressSubmit = async () => {
     const result = await patientApi.addPatient(formData);
@@ -39,6 +40,7 @@ function AddPatientBottomButtons({
           />
         )}
         <Spacer />
+
         {list ? (
           list.length === 1 ? (
             <Button
@@ -50,6 +52,20 @@ function AddPatientBottomButtons({
             >
               +
             </Button>
+          ) : list.length === max ? (
+            <Box>
+              <HStack space={4}>
+                <Button
+                  width={10}
+                  variant="outline"
+                  colorScheme="secondary"
+                  borderRadius="full"
+                  onPress={removeComponent}
+                >
+                  -
+                </Button>
+              </HStack>
+            </Box>
           ) : (
             <Box>
               <HStack space={4}>
