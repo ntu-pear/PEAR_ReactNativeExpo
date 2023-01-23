@@ -11,9 +11,23 @@ jobs:
     container: node:14.20
     steps:
       - uses: actions/checkout@v3
-      - name: Check directory
-        run: pwd && ls -la
+
+      - name: Install latest npm
+        run: npm i -g npm@latest
+
+      - name: Cache node modules
+        id: cache-npm
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+
       - name: Install node modules
-        run: npm i -g npm@latest && npm i
+        # --ignore-scripts ignore pre-install scripts (I want to avoid installing husky with 'npm prepare')
+        # npm ci is used for installing in CI environments: https://docs.npmjs.com/cli/v9/commands/npm-ci
+        run: npm ci --omit=dev --ignore-scripts
+
       - name: Run tests
         run: npm test
