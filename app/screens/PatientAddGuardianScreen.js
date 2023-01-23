@@ -89,6 +89,7 @@ export function PatientAddGuardianScreen(props) {
           }
           addComponent={addNewGuardianComponent}
           removeComponent={removeGuardianComponent}
+          max={2}
         />
       </Box>
     </ScrollView>
