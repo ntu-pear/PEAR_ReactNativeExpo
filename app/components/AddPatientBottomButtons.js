@@ -62,6 +62,7 @@ function AddPatientBottomButtons({
           />
         )}
         <Spacer />
+
         {list ? (
           list.length === 1 ? (
             <Button
