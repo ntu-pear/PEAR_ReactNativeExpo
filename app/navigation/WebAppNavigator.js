@@ -42,15 +42,15 @@ import { NavigationContainer } from '@react-navigation/native';
 
 import { MaterialIcons } from '@expo/vector-icons';
 
-import AuthContext from 'appauthcontext';
-import authStorage from 'appauthauthStorage';
+import AuthContext from 'app/auth/context';
+import authStorage from 'app/auth/authStorage';
 
-import NotificationNavigator from 'app\navigationNotificationNavigator';
-import AccountScreen from 'appscreensAccountScreen';
-import PatientsScreenWeb from 'appscreenswebPatientsScreenWeb';
+import NotificationNavigator from 'app/navigation/NotificationNavigator';
+import AccountScreen from 'app/screens/AccountScreen';
+import PatientsScreenWeb from 'app/screens/web/PatientsScreenWeb';
 import PatientInformationScreenWeb from 'app/screens/web/PatientInformationScreenWeb';
 
-import routes from 'app\navigation\routes';
+import routes from 'app/navigation/routes';
 
 function Example() {
   return (
