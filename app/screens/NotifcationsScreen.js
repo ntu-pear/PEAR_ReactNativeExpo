@@ -158,6 +158,7 @@ function NotifcationsScreen(props) {
     setIsLoading(true);
     // Get all `unread` notification of user
     const response = await notificationApi.getNotificationOfUser(readStatus);
+    console.log(response);
     if (!response.ok) {
       // return error block
       setIsLoading(false);
@@ -165,7 +166,6 @@ function NotifcationsScreen(props) {
       return;
     }
     setIsLoading(false);
-    setNotificationData(response.data);
   };
 
   // Purpose: When api fails, perform another fetch
@@ -255,6 +255,9 @@ function NotifcationsScreen(props) {
     // Update Notification Data with the newly filtered data; to re-render flat list.
     setNotificationData(filteredData);
   };
+  const fetchNextPage = () => {
+    console.log('fetch more data');
+  };
 
   return (
     <>
@@ -272,6 +275,7 @@ function NotifcationsScreen(props) {
               data={notificationData}
               extraData={selectedId}
               keyExtractor={(item) => item.notificationID}
+              onEndReached={fetchNextPage}
               onRefresh={handlePullToRefresh}
               refreshing={isRefreshing}
               renderItem={({ item }) => (

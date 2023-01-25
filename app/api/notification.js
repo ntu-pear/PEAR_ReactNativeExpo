@@ -19,12 +19,18 @@ const notificationAction = `${endPoint}/Action`;
 // Purpose: Get all notifications of user (specified by userID in JWT token)
 // based on specified read status
 // 1 Parameter: (1) readStatus: Boolean [optional]
-const getNotificationOfUser = async (readStatus) => {
+const getNotificationOfUser = async (
+  readStatus,
+  start = null,
+  limit = null,
+) => {
   if (readStatus == null) {
     return client.get(notificationUser);
   }
   const params = {
     readStatus,
+    start,
+    limit,
   };
   return client.get(notificationUser, params);
 };
