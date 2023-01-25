@@ -5,7 +5,9 @@ import { Platform } from 'react-native';
 
 const baseURL = 'https://coremvc.fyp2017.com/api';
 // for CORS error
-const baseURLWeb = 'http://localhost:5383/api';
+// const baseURLWeb = 'http://localhost:5383/api';
+// API for BE staging stage 
+const baseURLWeb = 'https://ntu-fyp-pear-core.azurewebsites.net/api';
 const endpoint = '/User';
 const userRefreshToken = `${endpoint}/RefreshToken`;
 /*
