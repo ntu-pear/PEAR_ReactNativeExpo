@@ -485,7 +485,7 @@ function PatientsScreenWeb(props) {
           <ActivityIndicator visible />
         ) : (
           <Center backgroundColor={colors.white_var1}>
-            <ScrollView h="100vh">
+            <ScrollView h="110vh">
               <VStack paddingRight="10">
                 {listOfPatients
                   ? listOfPatients.map((item, index) => (
