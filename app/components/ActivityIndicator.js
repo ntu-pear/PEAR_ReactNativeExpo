@@ -9,7 +9,7 @@ function ActivityIndicator({ visible = false }) {
     return null;
   }
 
-  return Platform.OS == 'web' ? (
+  return Platform.OS === 'web' ? (
     <View
       style={{
         display: 'flex',

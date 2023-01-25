@@ -42,15 +42,15 @@ import { NavigationContainer } from '@react-navigation/native';
 
 import { MaterialIcons } from '@expo/vector-icons';
 
-import AuthContext from '../auth/context';
-import authStorage from '../auth/authStorage';
+import AuthContext from 'appauthcontext';
+import authStorage from 'appauthauthStorage';
 
-import NotificationNavigator from './NotificationNavigator';
-import AccountScreen from '../screens/AccountScreen';
-import PatientsScreenWeb from '../screens/web/PatientsScreenWeb';
+import NotificationNavigator from 'app\navigationNotificationNavigator';
+import AccountScreen from 'appscreensAccountScreen';
+import PatientsScreenWeb from 'appscreenswebPatientsScreenWeb';
 import PatientInformationScreenWeb from 'app/screens/web/PatientInformationScreenWeb';
 
-import routes from './routes';
+import routes from 'app\navigation\routes';
 
 function Example() {
   return (
@@ -337,7 +337,6 @@ function WebAppNavigator() {
               element={<PatientInformationScreenWeb sidebar={sidebar} />}
             />
           </Routes>
-          {/* <NotificationNavigator /> */}
         </HStack>
       </Router>
     </>
