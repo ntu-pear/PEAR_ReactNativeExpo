@@ -31,6 +31,8 @@
     "@react-navigation/material-top-tabs": "^6.2.2",
     "@react-navigation/native": "^6.1.1",
     "@react-navigation/native-stack": "^6.6.2",
+    "@testing-library/jest-native": "^5.3.2",
+    "@testing-library/react-native": "^11.5.0",
     "apisauce": "^2.1.5",
     "expo": "~45.0.0",
     "expo-font": "~10.1.0",
@@ -55,11 +57,10 @@
     "react-native-svg": "12.3.0",
     "react-native-tab-view": "^3.3.2",
     "react-native-web": "0.17.7",
+    "react-native-web-lottie": "^1.4.4",
     "react-router-dom": "^6.6.1",
     "react-scripts": "^5.0.0",
-    "react-test-renderer": "^17.0.2",
-    "@testing-library/jest-native": "^5.3.2",
-    "@testing-library/react-native": "^11.5.0"
+    "react-test-renderer": "^17.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",

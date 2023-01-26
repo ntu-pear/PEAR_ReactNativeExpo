@@ -52,8 +52,9 @@ const getUser = async () => {
  */
 const removeToken = async () => {
   try {
-    await AsyncStorage.removeItem(authKey);
-    await AsyncStorage.removeItem(refreshKey);
+    // await AsyncStorage.removeItem(authKey);
+    // await AsyncStorage.removeItem(refreshKey);
+    await Promise.all([AsyncStorage.removeItem(authKey), AsyncStorage.removeItem(refreshKey)])
   } catch (error) {
     console.log('Error removing the auth token', error);
   }

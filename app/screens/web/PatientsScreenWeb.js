@@ -475,31 +475,42 @@ function PatientsScreenWeb(props) {
   };
 
   return (
-    <HStack
-      w={sidebar ? '83%' : '100%'}
-      style={{ display: 'flex', flexDirection: 'row' }}
-    >
-      {/* PatientScreen */}
-      <View style={{ flex: 1 }}>
-        {isLoading ? (
+    <>
+      {isLoading ? (
+        <View
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100vh',
+            width: sidebar ? '83vw' : '100vw',
+          }}
+        >
           <ActivityIndicator visible />
-        ) : (
-          <Center backgroundColor={colors.white_var1}>
-            <ScrollView h="110vh">
-              <VStack paddingRight="10">
-                {listOfPatients
-                  ? listOfPatients.map((item, index) => (
-                      <PatientScreenCard
-                        patientProfile={item}
-                        key={index}
-                        navigation={navigation}
-                        onClick={(e) => handlePatientScreenCardClick(item, e)}
-                      />
-                    ))
-                  : null}
-              </VStack>
-            </ScrollView>
-            {/* <Fab
+        </View>
+      ) : (
+        <HStack
+          w={sidebar ? '83vw' : '98vw'}
+          style={{ display: 'flex', flexDirection: 'row' }}
+        >
+          {/* PatientScreen */}
+          <View style={{ flex: 1 }}>
+            <Center backgroundColor={colors.white_var1}>
+              <ScrollView h="110vh">
+                <VStack paddingRight="10">
+                  {listOfPatients
+                    ? listOfPatients.map((item, index) => (
+                        <PatientScreenCard
+                          patientProfile={item}
+                          key={index}
+                          navigation={navigation}
+                          onClick={(e) => handlePatientScreenCardClick(item, e)}
+                        />
+                      ))
+                    : null}
+                </VStack>
+              </ScrollView>
+              {/* <Fab
             backgroundColor={colors.pink}
             icon={
               <Icon
@@ -515,19 +526,18 @@ function PatientsScreenWeb(props) {
             shadow={2}
             size="sm"
           />{' '} */}
-          </Center>
-        )}
-      </View>
+            </Center>
+          </View>
 
-      {/* PatientProfileScreen */}
-      <View backgroundColor={colors.white_var1} style={{ flex: 4 }}>
-        <PatientInformationCard
-          patientProfile={clickedPatientProfile}
-          navigation={navigation}
-        />
-        <Divider />
-        <VStack
-        /* Reponsive design: https://docs.nativebase.io/responsive
+          {/* PatientProfileScreen */}
+          <View backgroundColor={colors.white_var1} style={{ flex: 4 }}>
+            <PatientInformationCard
+              patientProfile={clickedPatientProfile}
+              navigation={navigation}
+            />
+            <Divider />
+            <VStack
+            /* Reponsive design: https://docs.nativebase.io/responsive
           Note: These are the breakpoints
           breakpoints = {
             base: 0,
@@ -537,133 +547,143 @@ function PatientsScreenWeb(props) {
             xl: 1280,
             };
           */
-        // ml={{
-        //   base: '3',
-        //   sm: '15',
-        //   md: '15',
-        //   lg: '15',
-        // }}
-        // mt="2"
-        // mb="4"
-        >
-          <Stack direction="row" mb="2.5" mt="1.5" space={4} flexWrap="wrap">
-            <PatientProfileCard
-              iconTop="4"
-              iconRight="2"
-              iconSize="100"
-              vectorIconComponent={<MaterialCommunityIcons name="allergy" />}
-              textMarginTop="5"
-              textMarginLeft="1"
-              text="Allergy"
-              navigation={navigation}
-              routes={routes.PATIENT_ALLERGY}
-              patientProfile={clickedPatientProfile}
-            />
-            <PatientProfileCard
-              iconTop="4"
-              iconRight="0"
-              iconSize="100"
-              vectorIconComponent={<FontAwesome5 name="heartbeat" />}
-              textMarginTop="5"
-              textMarginLeft="1"
-              text="Vital"
-              navigation={navigation}
-              routes={routes.PATIENT_VITAL}
-              patientProfile={clickedPatientProfile}
-            />
-            <PatientProfileCard
-              iconTop="4"
-              iconRight="0"
-              iconSize="100"
-              vectorIconComponent={<FontAwesome5 name="smile-beam" />}
-              textMarginTop="5"
-              textMarginLeft="1"
-              text="Patient Preference"
-              navigation={navigation}
-              routes={routes.PATIENT_PREFERENCE}
-              patientProfile={clickedPatientProfile}
-            />
-            <PatientProfileCard
-              iconTop="4"
-              iconRight="-15"
-              iconSize="100"
-              vectorIconComponent={<FontAwesome5 name="clipboard-check" />}
-              textMarginTop="5"
-              textMarginLeft="1"
-              text="Activity Preference"
-              navigation={navigation}
-              routes={routes.PATIENT_ACTIVITY_PREFERENCE}
-              patientProfile={clickedPatientProfile}
-            />
-            <PatientProfileCard
-              iconTop="4"
-              iconRight="-10"
-              iconSize="100"
-              vectorIconComponent={<FontAwesome5 name="calendar-day" />}
-              textMarginTop="5"
-              textMarginLeft="1"
-              text="Routine"
-              navigation={navigation}
-              routes={routes.PATIENT_ROUTINE}
-              patientProfile={clickedPatientProfile}
-            />
-            <PatientProfileCard
-              iconTop="4"
-              iconRight="-0"
-              iconSize="100"
-              vectorIconComponent={<MaterialIcons name="insert-photo" />}
-              textMarginTop="5"
-              textMarginLeft="1"
-              text="Photo Album"
-              navigation={navigation}
-              routes={routes.PATIENT_PHOTO_ALBUM}
-              patientProfile={clickedPatientProfile}
-            />
-            <PatientProfileCard
-              iconTop="4"
-              iconRight="-2"
-              iconSize="100"
-              vectorIconComponent={<MaterialCommunityIcons name="pill" />}
-              textMarginTop="5"
-              textMarginLeft="1"
-              text="Prescription"
-              navigation={navigation}
-              routes={routes.PATIENT_PRESCRIPTION}
-              patientProfile={clickedPatientProfile}
-            />
-            <PatientProfileCard
-              iconTop="4"
-              iconRight="1"
-              iconSize="100"
-              vectorIconComponent={
-                <MaterialCommunityIcons name="umbrella-beach" />
-              }
-              textMarginTop="5"
-              textMarginLeft="1"
-              text="Holiday"
-              navigation={navigation}
-              routes={routes.PATIENT_HOLIDAY}
-              patientProfile={clickedPatientProfile}
-            />
-            <PatientProfileCard
-              iconTop="4"
-              iconRight="-2"
-              iconSize="100"
-              vectorIconComponent={
-                <MaterialCommunityIcons name="note-text-outline" />
-              }
-              textMarginTop="5"
-              textMarginLeft="1"
-              text="Problem Log"
-              navigation={navigation}
-              routes={routes.PATIENT_PROBLEM_LOG}
-              patientProfile={clickedPatientProfile}
-            />
-          </Stack>
-        </VStack>
-        {/* <Divider /> */}
-      </View>
-    </HStack>
+            // ml={{
+            //   base: '3',
+            //   sm: '15',
+            //   md: '15',
+            //   lg: '15',
+            // }}
+            // mt="2"
+            // mb="4"
+            >
+              <Stack
+                direction="row"
+                mb="2.5"
+                mt="1.5"
+                space={4}
+                flexWrap="wrap"
+              >
+                <PatientProfileCard
+                  iconTop="4"
+                  iconRight="2"
+                  iconSize="100"
+                  vectorIconComponent={
+                    <MaterialCommunityIcons name="allergy" />
+                  }
+                  textMarginTop="5"
+                  textMarginLeft="1"
+                  text="Allergy"
+                  navigation={navigation}
+                  routes={routes.PATIENT_ALLERGY}
+                  patientProfile={clickedPatientProfile}
+                />
+                <PatientProfileCard
+                  iconTop="4"
+                  iconRight="0"
+                  iconSize="100"
+                  vectorIconComponent={<FontAwesome5 name="heartbeat" />}
+                  textMarginTop="5"
+                  textMarginLeft="1"
+                  text="Vital"
+                  navigation={navigation}
+                  routes={routes.PATIENT_VITAL}
+                  patientProfile={clickedPatientProfile}
+                />
+                <PatientProfileCard
+                  iconTop="4"
+                  iconRight="0"
+                  iconSize="100"
+                  vectorIconComponent={<FontAwesome5 name="smile-beam" />}
+                  textMarginTop="5"
+                  textMarginLeft="1"
+                  text="Patient Preference"
+                  navigation={navigation}
+                  routes={routes.PATIENT_PREFERENCE}
+                  patientProfile={clickedPatientProfile}
+                />
+                <PatientProfileCard
+                  iconTop="4"
+                  iconRight="-15"
+                  iconSize="100"
+                  vectorIconComponent={<FontAwesome5 name="clipboard-check" />}
+                  textMarginTop="5"
+                  textMarginLeft="1"
+                  text="Activity Preference"
+                  navigation={navigation}
+                  routes={routes.PATIENT_ACTIVITY_PREFERENCE}
+                  patientProfile={clickedPatientProfile}
+                />
+                <PatientProfileCard
+                  iconTop="4"
+                  iconRight="-10"
+                  iconSize="100"
+                  vectorIconComponent={<FontAwesome5 name="calendar-day" />}
+                  textMarginTop="5"
+                  textMarginLeft="1"
+                  text="Routine"
+                  navigation={navigation}
+                  routes={routes.PATIENT_ROUTINE}
+                  patientProfile={clickedPatientProfile}
+                />
+                <PatientProfileCard
+                  iconTop="4"
+                  iconRight="-0"
+                  iconSize="100"
+                  vectorIconComponent={<MaterialIcons name="insert-photo" />}
+                  textMarginTop="5"
+                  textMarginLeft="1"
+                  text="Photo Album"
+                  navigation={navigation}
+                  routes={routes.PATIENT_PHOTO_ALBUM}
+                  patientProfile={clickedPatientProfile}
+                />
+                <PatientProfileCard
+                  iconTop="4"
+                  iconRight="-2"
+                  iconSize="100"
+                  vectorIconComponent={<MaterialCommunityIcons name="pill" />}
+                  textMarginTop="5"
+                  textMarginLeft="1"
+                  text="Prescription"
+                  navigation={navigation}
+                  routes={routes.PATIENT_PRESCRIPTION}
+                  patientProfile={clickedPatientProfile}
+                />
+                <PatientProfileCard
+                  iconTop="4"
+                  iconRight="1"
+                  iconSize="100"
+                  vectorIconComponent={
+                    <MaterialCommunityIcons name="umbrella-beach" />
+                  }
+                  textMarginTop="5"
+                  textMarginLeft="1"
+                  text="Holiday"
+                  navigation={navigation}
+                  routes={routes.PATIENT_HOLIDAY}
+                  patientProfile={clickedPatientProfile}
+                />
+                <PatientProfileCard
+                  iconTop="4"
+                  iconRight="-2"
+                  iconSize="100"
+                  vectorIconComponent={
+                    <MaterialCommunityIcons name="note-text-outline" />
+                  }
+                  textMarginTop="5"
+                  textMarginLeft="1"
+                  text="Problem Log"
+                  navigation={navigation}
+                  routes={routes.PATIENT_PROBLEM_LOG}
+                  patientProfile={clickedPatientProfile}
+                />
+              </Stack>
+            </VStack>
+            {/* <Divider /> */}
+          </View>
+        </HStack>
+      )}
+    </>
   );
 }
 
