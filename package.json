@@ -18,10 +18,13 @@
     "clear-cache": "jest --clearCache",
     "test": "jest --no-cache --verbose true --detectOpenHandles",
     "test-watch": "jest --watch",
-    "updateSnapshots": "jest -u --coverage=false"
+    "updateSnapshots": "jest -u --coverage=false",
+    "predeploy": "expo build:web",
+    "deploy-hosting": "npm run predeploy && firebase deploy --only hosting"
   },
   "dependencies": {
     "@expo/vector-icons": "^13.0.0",
+    "@expo/webpack-config": "^0.17.4",
     "@native-base/icons": "0.0.11",
     "@react-native-async-storage/async-storage": "^1.17.3",
     "@react-native-community/eslint-config": "^3.1.0",
@@ -51,7 +54,7 @@
     "react-native": "0.68.2",
     "react-native-gesture-handler": "~2.2.1",
     "react-native-pager-view": "5.4.15",
-    "react-native-reanimated": "^2.13.0",
+    "react-native-reanimated": "~2.8.0",
     "react-native-safe-area-context": "4.2.4",
     "react-native-screens": "~3.11.1",
     "react-native-svg": "12.3.0",
