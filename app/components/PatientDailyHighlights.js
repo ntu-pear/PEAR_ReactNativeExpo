@@ -8,6 +8,7 @@ import { FlatList } from 'native-base';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import HighlightsCard from 'app/components/HighlightsCard';
 import highlightApi from 'app/api/highlight';
+import ActivityIndicator from 'app/components/ActivityIndicator';
 
 function PatientDailyHighlights(props) {
   // Destructure props
@@ -213,6 +214,20 @@ function PatientDailyHighlights(props) {
     setFilteredData(data);
   }, [highlightsData, searchValue, filterValue]);
 
+  const handlePullToRefresh = async () => {
+    setIsRefreshing(true);
+    await getAllHighlights();
+    setIsRefreshing(false);
+
+    return;
+  };
+
+  const noDataMessage = () => {
+    return (
+      <Text style={styles.modalText}>No patient changes found today.</Text>
+    );
+  };
+
   return (
     <Modal
       animationType="slide"
@@ -290,19 +305,14 @@ function PatientDailyHighlights(props) {
               />
             </View>
           </View>
-          {/* TODO */}
-          {filteredData.length == 0 && highlightsData.length == 0 && (
-            <Text style={styles.modalText}>
-              No patient changes found today.
-            </Text>
-          )}
           <FlatList
             w="100%"
             showsVerticalScrollIndicator={true}
             data={filteredData}
             keyExtractor={(item) => item.patientID}
-            // onRefresh={handlePullToRefresh}
-            // refreshing={isRefreshing}
+            onRefresh={handlePullToRefresh}
+            refreshing={isLoading}
+            ListEmptyComponent={noDataMessage}
             renderItem={({ item }) => (
               /*
                * Issue resolved -- cannot swipe on Android. Soln: Wrap with <GestureHandlerRootView>
