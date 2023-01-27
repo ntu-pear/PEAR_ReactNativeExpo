@@ -17,9 +17,9 @@ function PatientDailyHighlights(props) {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [searchValue, setSearchValue] = useState('');
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(['all']);
-  const [items, setItems] = useState([
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [filterValue, setFilterValue] = useState([]);
+  const [dropdownItems, setDropdownItems] = useState([
     {
       label: 'New Prescription',
       value: 'newPrescription',
@@ -164,11 +164,11 @@ function PatientDailyHighlights(props) {
     },
   ]);
 
-  // useEffect(() => {
-  //   // Fetches data from highlights api
-  //   console.log("Calling API")
-  //   getAllHighlights();
-  // }, []);
+  useEffect(() => {
+    // Fetches data from highlights api
+    console.log('Calling API');
+    getAllHighlights();
+  }, []);
 
   const getAllHighlights = async () => {
     setIsLoading(true);
@@ -185,27 +185,33 @@ function PatientDailyHighlights(props) {
     console.log(response);
   };
 
-  const searchAndRerender = (text) => {
-    setSearchValue(text);
-    console.log(text);
-    // Filter Data
-    const data = highlightsData.filter((item) =>
-      item.patientName.includes(text),
-    );
-    // Update Highlights Data with the newly filtered data; to re-render flat list.
-    setFilteredData(data);
-  };
+  // Filter data when either searchValue or filterValue changes
+  useEffect(() => {
+    console.log(searchValue, filterValue);
 
-  const filterAndRerender = (values) => {
-    setValue(values);
-    console.log(values);
-    // Filter Data
-    const data = highlightsData.filter((item) =>
-      item.highlights.some((h) => values.includes(h.highlightType)),
+    // Search by searchValue
+    // .toLowerCase() ensures that the search is not case sensitive
+    const dataAfterSearch = highlightsData.filter((item) =>
+      item.patientName.toLowerCase().includes(searchValue.toLowerCase()),
     );
+
+    // Filter by filterValue (highlight types)
+    let dataAfterFilter = highlightsData;
+    if (Array.isArray(filterValue) && filterValue.length) {
+      console.log('filterValue != []');
+      dataAfterFilter = highlightsData.filter((item) =>
+        item.highlights.some((h) => filterValue.includes(h.highlightType)),
+      );
+    }
+
+    // Find intersection of dataAfterSearch and dataAfterFilter
+    const data = dataAfterSearch.filter((value) =>
+      dataAfterFilter.includes(value),
+    );
+
     // Update Highlights Data with the newly filtered data; to re-render flat list.
     setFilteredData(data);
-  };
+  }, [highlightsData, searchValue, filterValue]);
 
   return (
     <Modal
@@ -233,7 +239,7 @@ function PatientDailyHighlights(props) {
                 lightTheme={true}
                 // round={true}
                 value={searchValue}
-                onChangeText={(text) => searchAndRerender(text)}
+                onChangeText={setSearchValue}
                 autoCorrect={false}
                 containerStyle={styles.searchBarContainer}
                 inputContainerStyle={{
@@ -246,16 +252,16 @@ function PatientDailyHighlights(props) {
             </View>
             <View style={{ flex: 1, zIndex: 1 }}>
               <DropDownPicker
-                open={open}
-                value={value}
-                items={items}
-                setOpen={setOpen}
-                setValue={setValue}
-                onChangeValue={(text) => filterAndRerender(text)}
-                setItems={setItems}
+                open={dropdownOpen}
+                value={filterValue}
+                items={dropdownItems}
+                setOpen={setDropdownOpen}
+                setValue={setFilterValue}
+                // onChangeValue={setFilterValue}
+                setItems={setDropdownItems}
+                mode="BADGE"
                 theme="LIGHT"
                 multiple={true}
-                mode="BADGE"
                 badgeDotColors={[
                   colors.pink,
                   colors.pink_lighter,
@@ -293,13 +299,7 @@ function PatientDailyHighlights(props) {
           <FlatList
             w="100%"
             showsVerticalScrollIndicator={true}
-            data={
-              filteredData && filteredData.length > 0
-                ? filteredData
-                : searchValue.length > 0
-                ? []
-                : highlightsData
-            }
+            data={filteredData}
             keyExtractor={(item) => item.patientID}
             // onRefresh={handlePullToRefresh}
             // refreshing={isRefreshing}
