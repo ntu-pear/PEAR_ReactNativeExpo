@@ -61,7 +61,7 @@ const addPatient = (formData) => {
     if (value instanceof Date) {
       value = value.toISOString().split('T')[0];
     }
-    const param = `patientAddDTO[${key}]`;
+    const param = `patientAddDTO.${key}`;
     patientData.append(param, value);
   }
 
@@ -70,7 +70,7 @@ const addPatient = (formData) => {
 
     for (const key in value) {
       const val = value[key];
-      const param = `GuardianAddDto[${item}][${key}]`;
+      const param = `GuardianAddDto[${item}].${key}`;
       patientData.append(param, val);
     }
   }
