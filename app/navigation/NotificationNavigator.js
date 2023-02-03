@@ -3,13 +3,13 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Platform, View } from 'react-native';
 import routes from './routes';
-import NotificationsScreen from '../screens/NotificationsScreen';
-import NotificationsRejectScreen from '../screens/NotificationsRejectScreen';
-import NotificationsAcceptScreen from '../screens/NotificationsAcceptScreen';
-import NotificationsReadScreen from '../screens/NotificationsReadScreen';
+import NotificationsScreen from 'app/screens/notifications/NotificationsScreen';
+import NotificationsRejectScreen from 'app/screens/notifications/NotificationsRejectScreen';
+import NotificationsAcceptScreen from 'app/screens/notifications/NotificationsAcceptScreen';
+import NotificationsReadScreen from 'app/screens/notifications/NotificationsReadScreen';
+import NotificationsApprovalRequestScreen from 'app/screens/notifications/NotificationsApprovalRequestScreen';
 import colors from '../config/colors';
 import typography from '../config/typography';
-import NotificationsApprovalRequestScreen from '../screens/NotificationsApprovalRequestScreen';
 import { useSafeArea } from 'react-native-safe-area-context';
 
 const Tab = createMaterialTopTabNavigator();
