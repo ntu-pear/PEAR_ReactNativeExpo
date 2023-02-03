@@ -3,7 +3,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Platform, View } from 'react-native';
 import routes from './routes';
-import NotifcationsScreen from '../screens/NotifcationsScreen';
+import NotificationsScreen from '../screens/NotificationsScreen';
 import NotificationsRejectScreen from '../screens/NotificationsRejectScreen';
 import NotificationsAcceptScreen from '../screens/NotificationsAcceptScreen';
 import NotificationsReadScreen from '../screens/NotificationsReadScreen';
@@ -46,7 +46,7 @@ function NotificationTabNavigator() {
         }}
       >
         <Tab.Screen
-          component={NotifcationsScreen}
+          component={NotificationsScreen}
           name={routes.NOTIFICATION}
           options={{
             title: 'Unread',
