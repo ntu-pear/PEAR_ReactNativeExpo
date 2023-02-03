@@ -2,6 +2,8 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches: [main]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -26,4 +28,4 @@ jobs:
         run: npm ci
 
       - name: 🚀 Build app
-        run: eas build --non-interactive
+        run: eas build --non-interactive --platform android
