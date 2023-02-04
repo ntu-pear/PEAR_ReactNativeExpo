@@ -1,15 +1,20 @@
 import { create } from 'apisauce';
 import cache from 'app/utility/cache';
 import authStorage from 'app/auth/authStorage';
+import { Platform } from 'react-native';
 
 const baseURL = 'https://coremvc.fyp2017.com/api';
+// for CORS error
+// const baseURLWeb = 'http://localhost:5383/api';
+// API for BE staging stage 
+const baseURLWeb = 'https://ntu-fyp-pear-core.azurewebsites.net/api';
 const endpoint = '/User';
 const userRefreshToken = `${endpoint}/RefreshToken`;
 /*
  *   Purpose of this is create a layer of abstraction
  */
 const apiClient = create({
-  baseURL: 'https://coremvc.fyp2017.com/api',
+  baseURL: Platform.OS === 'web' ? baseURLWeb : baseURL,
 });
 
 // Method override on apiClient.get()

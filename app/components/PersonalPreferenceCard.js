@@ -6,7 +6,7 @@ import typography from 'app/config/typography';
 
 function PersonalPreferenceCard(props) {
   const { patientInformation } = props;
-  const { preferredName, preferredLanguage } = patientInformation.route.params;
+  const { preferredName, preferredLanguage } = Platform.OS === 'web' ? patientInformation: patientInformation.route.params;
 
   return (
     <Stack space={2}>

@@ -4,7 +4,7 @@ import client from '../api/client';
 import AuthContext from '../auth/context';
 import authStorage from '../auth/authStorage';
 
-export default useApiHandler = () => {
+export default function useApiHandler() {
   const { setUser } = useContext(AuthContext);
   const setHeaderIfEmpty = async () => {
     // Checks if headers['Authorization'] is present
@@ -19,4 +19,4 @@ export default useApiHandler = () => {
   };
 
   return { setHeaderIfEmpty };
-};
+}

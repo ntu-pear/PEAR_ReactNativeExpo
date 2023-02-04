@@ -73,10 +73,15 @@ function WelcomeScreen(props) {
     }
     setIsLoading(false);
     setLoginFailed(false);
-    const user = jwt_decode(result.data.accessToken);
+    // const user = jwt_decode(result.data.accessToken);
+    const user = jwt_decode(result.data.data.accessToken);
     authContext.setUser(user);
-    authStorage.storeToken('userAuthToken', result.data.accessToken);
-    authStorage.storeToken('userRefreshToken', result.data.refreshToken);
+    console.log(user);
+    // authStorage.storeToken('userAuthToken', result.data.accessToken);
+    authStorage.storeToken('userAuthToken', result.data.data.accessToken);
+    // authStorage.storeToken('userRefreshToken', result.data.refreshToken);
+    authStorage.storeToken('userRefreshToken', result.data.data.refreshToken);
+
     // set api header if empty
     apiHandlerHook.setHeaderIfEmpty();
   };
@@ -95,7 +100,14 @@ function WelcomeScreen(props) {
       blurRadius={8}
       source={require('../assets/login_background.jpg')}
     >
-      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <TouchableWithoutFeedback
+        onPress={() => {
+          // Prevent keyboard dismiss for web
+          if (Platform.OS !== 'web') {
+            Keyboard.dismiss();
+          }
+        }}
+      >
         <View>
           <View style={styles.logoContainer}>
             <Image
@@ -106,7 +118,13 @@ function WelcomeScreen(props) {
           </View>
 
           <Center flex={1}>
-            <View style={styles.credentialsContainer}>
+            <View
+              style={
+                Platform.OS === 'web'
+                  ? styles.credentialsContainerWeb
+                  : styles.credentialsContainer
+              }
+            >
               <Input
                 autoCapitalize="none"
                 bg={colors.gray}
@@ -193,10 +211,18 @@ function WelcomeScreen(props) {
                 type={show ? 'text' : 'password'}
               />
             </View>
-            <Box>
+            <Box
+              style={Platform.OS === 'web' ? styles.errorsContainerWeb : null}
+            >
               <ErrorMessage visible={loginFailed} message={errors.loginError} />
             </Box>
-            <View style={styles.buttonsContainer}>
+            <View
+              style={
+                Platform.OS === 'web'
+                  ? styles.buttonsContainerWeb
+                  : styles.buttonsContainer
+              }
+            >
               {isLoading ? (
                 <ActivityIndicator color={colors.primary_overlay_color} />
               ) : (
@@ -219,8 +245,20 @@ const styles = StyleSheet.create({
     width: '100%',
     padding: 20,
   },
+  buttonsContainerWeb: {
+    top: 130,
+    width: '100%',
+    padding: 20,
+  },
   credentialsContainer: {
     width: '90%',
+  },
+  credentialsContainerWeb: {
+    top: 130,
+    width: '90%',
+  },
+  errorsContainerWeb: {
+    top: 130,
   },
   logo: {
     width: 100,

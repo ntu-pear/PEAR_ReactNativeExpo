@@ -1,7 +1,8 @@
 import React from 'react';
-import { TouchableOpacity } from 'react-native';
+import { TouchableOpacity, Platform } from 'react-native';
 import { Box, Icon, Text } from 'native-base';
 import colors from 'app/config/colors';
+import { useNavigate } from 'react-router-dom';
 
 function PatientProfileCard(props) {
   const {
@@ -17,8 +18,17 @@ function PatientProfileCard(props) {
     patientProfile,
   } = props;
 
+  // useNavigate() hook cannot work on mobile
+  const navigate = Platform.OS === 'web' ? useNavigate() : null;
+
   const handleOnPressToNextScreen = () => {
-    navigation.push(routes, { ...patientProfile });
+    if (Platform.OS === 'web') {
+      // TODO: (yapsiang) link to next screen via routes
+      console.log('route to: ' + '/' + routes);
+      // navigate('/' + routes, { state: { ...patientProfile }});
+    } else {
+      navigation.push(routes, { ...patientProfile });
+    }
   };
 
   return (
