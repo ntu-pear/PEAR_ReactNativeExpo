@@ -16,6 +16,18 @@ const patientDelete = `${endpoint}/delete`; //eslint-disable-line no-unused-vars
  * Refer to this api doc: https://github.com/infinitered/apisauce
  */
 
+const addPatientForm = (arr, str, patientData) => {
+  for (const item in arr) {
+    const value = arr[item];
+
+    for (const key in value) {
+      const val = value[key];
+      const param = `${str}[${item}].${key}`;
+      patientData.append(param, val);
+    }
+  }
+  return patientData;
+};
 // **********************  GET REQUESTS *************************
 
 // const getPatient = async (patientID, isActive, maskNRIC) => {
@@ -65,15 +77,8 @@ const addPatient = (formData) => {
     patientData.append(param, value);
   }
 
-  for (const item in formData.guardianInfo) {
-    const value = formData.guardianInfo[item];
-
-    for (const key in value) {
-      const val = value[key];
-      const param = `GuardianAddDto[${item}].${key}`;
-      patientData.append(param, val);
-    }
-  }
+  addPatientForm(formData.guardianInfo, 'GuardianAddDto', patientData);
+  addPatientForm(formData.allergyInfo, 'AllergyAddDto', patientData);
 
   const headers = { 'Content-Type': 'multipart/form-data' };
 
