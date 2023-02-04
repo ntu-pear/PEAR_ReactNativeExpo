@@ -3,6 +3,9 @@ import { Box, Button, Flex, Spacer, Icon, HStack } from 'native-base';
 import colors from 'app/config/colors';
 import { MaterialIcons } from '@expo/vector-icons';
 import patientApi from 'app/api/patient';
+import { useNavigation } from '@react-navigation/native';
+import routes from 'app/navigation/routes';
+import { Alert } from 'react-native';
 
 function AddPatientBottomButtons({
   list = null,
@@ -14,9 +17,28 @@ function AddPatientBottomButtons({
   formData = null,
   max = null,
 }) {
+  const { navigate } = useNavigation();
+
   const onPressSubmit = async () => {
     const result = await patientApi.addPatient(formData);
     console.log(result);
+
+    if (result.ok) {
+      Alert.alert(
+        'Successfully added Patient.',
+        'Patient has been allocated to a supervisor.',
+      );
+      navigate(routes.PATIENTS_SCREEN, () => {
+        window.location.reload(); // TODO: refresh page after navigation
+      });
+    } else {
+      const errors = result.data.errors;
+      var str = '';
+      for (const error in errors) {
+        str += errors[error] + '.\n';
+      }
+      Alert.alert('Error in Adding Patient', `${str}Please try again.`);
+    }
   };
 
   return (
