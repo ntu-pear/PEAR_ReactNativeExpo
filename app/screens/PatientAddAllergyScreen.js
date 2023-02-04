@@ -18,9 +18,9 @@ export function PatientAddAllergyScreen(props) {
 
   const concatFormData = () => {
     var allergyInfo = formData.allergyInfo.concat({
-      allergyName: 1,
-      allergyReaction: '',
-      allergyNotes: '',
+      AllergyListID: 1,
+      AllergyReactionListID: 1,
+      AllergyRemarks: '',
     });
     setFormData((prevState) => ({
       ...prevState,

@@ -27,9 +27,9 @@ export function PatientAddScreen(props) {
 
   const patientData = {
     patientInfo: {
-      FirstName: 'First',
-      LastName: 'Last',
-      PreferredName: 'PName',
+      FirstName: '',
+      LastName: '',
+      PreferredName: '',
       PreferredLanguageListID: 1,
       NRIC: 'S0948274A',
       Address: 'MyHome',
@@ -65,9 +65,9 @@ export function PatientAddScreen(props) {
 
     allergyInfo: [
       {
-        allergyName: 1, // allergyList[0].allergyName
-        allergyReaction: '',
-        allergyNotes: '',
+        AllergyListID: 3,
+        AllergyReactionListID: 3,
+        AllergyRemarks: 'gg',
       },
     ],
   };

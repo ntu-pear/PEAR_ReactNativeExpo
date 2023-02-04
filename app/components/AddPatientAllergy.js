@@ -33,8 +33,8 @@ function AddPatientAllergy({ i, title, formData, handleFormData }) {
         <FormControl.Label>Allergy</FormControl.Label>
         <Select
           placeholder="Select Allergy"
-          selectedValue={allergy.allergyName}
-          onValueChange={handleFormData(page, 'allergyName', i)}
+          selectedValue={allergy.AllergyListID}
+          onValueChange={handleFormData(page, 'AllergyListID', i)}
         >
           <Select.Item label="To Be Updated" value={1} />
           <Select.Item label="None" value={2} />
@@ -54,19 +54,31 @@ function AddPatientAllergy({ i, title, formData, handleFormData }) {
 
       <FormControl>
         <FormControl.Label>Reaction</FormControl.Label>
-        <Input
-          placeholder="Allergy Reaction"
-          value={allergy.allergyReaction}
-          onChangeText={handleFormData(page, 'allergyReaction', i)}
-        />
+        <Select
+          placeholder="Select Allergy Reaction"
+          selectedValue={allergy.AllergyReactionListID}
+          onValueChange={handleFormData(page, 'AllergyReactionListID', i)}
+        >
+          <Select.Item label="Rashes" value={1} />
+          <Select.Item label="Sneezing" value={2} />
+          <Select.Item label="Vomitting" value={3} />
+          <Select.Item label="Nausea" value={4} />
+          <Select.Item label="Swelling" value={5} />
+          <Select.Item label="Difficulty Breathing" value={6} />
+          <Select.Item label="Diarrhea" value={7} />
+          <Select.Item label="Abdominal cramp or pain" value={8} />
+          <Select.Item label="Nasal Congestion" value={9} />
+          <Select.Item label="Itching" value={10} />
+          <Select.Item label="Hives" value={11} />
+        </Select>
       </FormControl>
 
       <FormControl>
-        <FormControl.Label>Notes</FormControl.Label>
+        <FormControl.Label>Remarks</FormControl.Label>
         <TextArea
-          placeholder="Notes (optional)"
-          value={allergy.allergyNotes}
-          onChangeText={handleFormData(page, 'allergyNotes', i)}
+          placeholder="Remarks (optional)"
+          value={allergy.AllergyRemarks}
+          onChangeText={handleFormData(page, 'AllergyRemarks', i)}
         />
       </FormControl>
     </Box>
