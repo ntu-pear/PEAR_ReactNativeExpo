@@ -19,7 +19,7 @@
     "test": "jest --no-cache --verbose true --detectOpenHandles",
     "test-watch": "jest --watch",
     "updateSnapshots": "jest -u --coverage=false",
-    "predeploy": "expo build:web",
+    "predeploy": "npm i -g expo-cli && expo build:web",
     "deploy-hosting": "npm run predeploy && firebase deploy --only hosting"
   },
   "dependencies": {
