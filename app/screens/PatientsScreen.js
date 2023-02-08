@@ -17,7 +17,7 @@ function PatientsScreen(props) {
   useEffect(() => {
     // Reference https://stackoverflow.com/questions/21518381/proper-way-to-wait-for-one-function-to-finish-before-continuing
     // Resolved the issue of `setListOfPatients` before successfully calling getPatient api.
-    setIsLoading(false);
+    setIsLoading(true);
     const promiseFunction = async () => {
       const response = await getListOfPatients();
       setListOfPatients(response.data.data);
