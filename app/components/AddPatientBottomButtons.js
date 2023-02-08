@@ -17,7 +17,7 @@ function AddPatientBottomButtons({
   formData = null,
   max = null,
 }) {
-  const { navigate } = useNavigation();
+  const navigation = useNavigation();
 
   const onPressSubmit = async () => {
     const result = await patientApi.addPatient(formData);
@@ -28,9 +28,7 @@ function AddPatientBottomButtons({
         'Successfully added Patient.',
         'Patient has been allocated to a supervisor.',
       );
-      navigate(routes.PATIENTS_SCREEN, () => {
-        window.location.reload(); // TODO: refresh page after navigation
-      });
+      navigation.navigate(routes.PATIENTS_SCREEN);
     } else {
       const errors = result.data.errors;
       var str = '';
