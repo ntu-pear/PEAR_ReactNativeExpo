@@ -1,13 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Input, FormControl, Text, Select, Divider } from 'native-base';
 import colors from 'app/config/colors';
 import typography from 'app/config/typography';
+import listApi from 'app/api/lists';
 
 function AddPatientGuardian({ i, title, formData, handleFormData }) {
-  // console.log('GUARDIAN', formData);
+  const [listOfRelationships, setListOfRelationships] = useState([]);
 
   const page = 'guardianInfo';
-  const guardian = formData.guardianInfo[i]; //guardianInfo[0].firstName
+  const guardian = formData.guardianInfo[i]; //guardianInfo[0].FirstName
+
+  // Get List of Relationships from List API
+  const getRelationshipList = async () => {
+    const response = await listApi.getRelationshipList();
+    if (!response.ok) {
+      console.log(
+        'An error occured when getting list of relationships',
+        response,
+      );
+      return;
+    }
+    setListOfRelationships(response.data);
+  };
+
+  useEffect(() => {
+    console.log('Calling API');
+    getRelationshipList();
+  }, []);
 
   return (
     <Box>
@@ -57,18 +76,9 @@ function AddPatientGuardian({ i, title, formData, handleFormData }) {
           selectedValue={guardian.RelationshipID}
           onValueChange={handleFormData(page, 'RelationshipID', i)}
         >
-          <Select.Item label="Husband" value={1} />
-          <Select.Item label="Wife" value={2} />
-          <Select.Item label="Child" value={3} />
-          <Select.Item label="Parent" value={4} />
-          <Select.Item label="Sibling" value={5} />
-          <Select.Item label="Grandchild" value={6} />
-          <Select.Item label="Friend" value={7} />
-          <Select.Item label="Nephew" value={8} />
-          <Select.Item label="Niece" value={9} />
-          <Select.Item label="Aunt" value={10} />
-          <Select.Item label="Uncle" value={11} />
-          <Select.Item label="Grandparent" value={12} />
+          {listOfRelationships.map((item) => (
+            <Select.Item label={item.value} value={item.list_RelationshipID} />
+          ))}
         </Select>
       </FormControl>
 
