@@ -19,6 +19,7 @@ function AddPatientAllergy({ i, title, formData, handleFormData }) {
   const page = 'allergyInfo';
   const allergy = formData.allergyInfo[i]; //allergyInfo[0].allergyName
 
+  // Get List of Allergies from List API
   const getAllergyList = async () => {
     const response = await listApi.getAllergyList();
     if (!response.ok) {
@@ -28,6 +29,7 @@ function AddPatientAllergy({ i, title, formData, handleFormData }) {
     setListOfAllergies(response.data);
   };
 
+  // Get List of Allergy Reactions from List API
   const getAllergyReactionList = async () => {
     const response = await listApi.getAllergyReactionList();
     if (!response.ok) {
@@ -37,13 +39,11 @@ function AddPatientAllergy({ i, title, formData, handleFormData }) {
       );
       return;
     }
-    console.log(response.data);
     setListOfAllergyReactions(response.data);
   };
 
   useEffect(() => {
-    // Fetches data from highlights api
-    console.log('Calling API');
+    // Fetches data from Lists api
     getAllergyList();
     getAllergyReactionList();
   }, []);
