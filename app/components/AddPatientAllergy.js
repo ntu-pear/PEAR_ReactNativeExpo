@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Input,
@@ -10,10 +10,43 @@ import {
 } from 'native-base';
 import colors from 'app/config/colors';
 import typography from 'app/config/typography';
+import listApi from 'app/api/lists';
 
 function AddPatientAllergy({ i, title, formData, handleFormData }) {
+  const [listOfAllergies, setListOfAllergies] = useState([]);
+  const [listOfAllergyReactions, setListOfAllergyReactions] = useState([]);
+
   const page = 'allergyInfo';
   const allergy = formData.allergyInfo[i]; //allergyInfo[0].allergyName
+
+  const getAllergyList = async () => {
+    const response = await listApi.getAllergyList();
+    if (!response.ok) {
+      console.log('An error occured when getting list of allergies', response);
+      return;
+    }
+    setListOfAllergies(response.data);
+  };
+
+  const getAllergyReactionList = async () => {
+    const response = await listApi.getAllergyReactionList();
+    if (!response.ok) {
+      console.log(
+        'An error occured when getting list of allergy reactions',
+        response,
+      );
+      return;
+    }
+    console.log(response.data);
+    setListOfAllergyReactions(response.data);
+  };
+
+  useEffect(() => {
+    // Fetches data from highlights api
+    console.log('Calling API');
+    getAllergyList();
+    getAllergyReactionList();
+  }, []);
 
   return (
     <Box>
@@ -36,19 +69,9 @@ function AddPatientAllergy({ i, title, formData, handleFormData }) {
           selectedValue={allergy.AllergyListID}
           onValueChange={handleFormData(page, 'AllergyListID', i)}
         >
-          <Select.Item label="To Be Updated" value={1} />
-          <Select.Item label="None" value={2} />
-          <Select.Item label="Corn" value={3} />
-          <Select.Item label="Eggs" value={4} />
-          <Select.Item label="Fish" value={5} />
-          <Select.Item label="Meat" value={6} />
-          <Select.Item label="Milk" value={7} />
-          <Select.Item label="Peanuts" value={8} />
-          <Select.Item label="Tree nuts" value={9} />
-          <Select.Item label="Shellfish" value={10} />
-          <Select.Item label="Soy" value={11} />
-          <Select.Item label="Wheat" value={12} />
-          <Select.Item label="Seafood" value={13} />
+          {listOfAllergies.map((item) => (
+            <Select.Item label={item.value} value={item.list_AllergyID} />
+          ))}
         </Select>
       </FormControl>
 
@@ -59,17 +82,12 @@ function AddPatientAllergy({ i, title, formData, handleFormData }) {
           selectedValue={allergy.AllergyReactionListID}
           onValueChange={handleFormData(page, 'AllergyReactionListID', i)}
         >
-          <Select.Item label="Rashes" value={1} />
-          <Select.Item label="Sneezing" value={2} />
-          <Select.Item label="Vomitting" value={3} />
-          <Select.Item label="Nausea" value={4} />
-          <Select.Item label="Swelling" value={5} />
-          <Select.Item label="Difficulty Breathing" value={6} />
-          <Select.Item label="Diarrhea" value={7} />
-          <Select.Item label="Abdominal cramp or pain" value={8} />
-          <Select.Item label="Nasal Congestion" value={9} />
-          <Select.Item label="Itching" value={10} />
-          <Select.Item label="Hives" value={11} />
+          {listOfAllergyReactions.map((item) => (
+            <Select.Item
+              label={item.value}
+              value={item.list_AllergyReactionID}
+            />
+          ))}
         </Select>
       </FormControl>
 
