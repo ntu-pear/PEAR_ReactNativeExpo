@@ -15,10 +15,11 @@ function PatientsScreen(props) {
   const checkExpiredLogOutHook = useCheckExpiredThenLogOut();
   const { navigation } = props;
 
+  // Refreshes every time the user navigates to PatientsScreen
   useFocusEffect(
     React.useCallback(() => {
       // Reference https://stackoverflow.com/questions/21518381/proper-way-to-wait-for-one-function-to-finish-before-continuing
-      //   // Resolved the issue of `setListOfPatients` before successfully calling getPatient api.
+      // Resolved the issue of `setListOfPatients` before successfully calling getPatient api.
       setIsLoading(true);
       const promiseFunction = async () => {
         const response = await getListOfPatients();
@@ -45,7 +46,6 @@ function PatientsScreen(props) {
   };
 
   return (
-    // <ActivityIndicator visible={true}/>
     <>
       {isLoading ? (
         <ActivityIndicator visible />
