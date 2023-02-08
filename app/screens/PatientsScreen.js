@@ -7,6 +7,7 @@ import PatientScreenCard from 'app/components/PatientScreenCard';
 import colors from 'app/config/colors';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import routes from 'app/navigation/routes';
+import { useFocusEffect } from '@react-navigation/native';
 
 function PatientsScreen(props) {
   const [isLoading, setIsLoading] = useState(false);
@@ -14,17 +15,19 @@ function PatientsScreen(props) {
   const checkExpiredLogOutHook = useCheckExpiredThenLogOut();
   const { navigation } = props;
 
-  useEffect(() => {
-    // Reference https://stackoverflow.com/questions/21518381/proper-way-to-wait-for-one-function-to-finish-before-continuing
-    // Resolved the issue of `setListOfPatients` before successfully calling getPatient api.
-    setIsLoading(true);
-    const promiseFunction = async () => {
-      const response = await getListOfPatients();
-      setListOfPatients(response.data.data);
-    };
-    promiseFunction();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      // Reference https://stackoverflow.com/questions/21518381/proper-way-to-wait-for-one-function-to-finish-before-continuing
+      //   // Resolved the issue of `setListOfPatients` before successfully calling getPatient api.
+      setIsLoading(true);
+      const promiseFunction = async () => {
+        const response = await getListOfPatients();
+        setListOfPatients(response.data.data);
+      };
+      promiseFunction();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []),
+  );
 
   const getListOfPatients = async () => {
     const response = await patientApi.getPatientList(null, true, true);
