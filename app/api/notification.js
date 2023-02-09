@@ -20,13 +20,10 @@ const notificationAction = `${endPoint}/Action`;
 // based on specified read status
 // 1 Parameter: (1) readStatus: Boolean [optional]
 const getNotificationOfUser = async (
-  readStatus,
+  readStatus = null,
   start = null,
   limit = null,
 ) => {
-  if (readStatus == null) {
-    return client.get(notificationUser);
-  }
   const params = {
     readStatus,
     start,
