@@ -8,7 +8,7 @@ import notificationApi from 'app/api/notification';
 
 const defaultPaginationLimit = 20;
 const paginationStartingParam = {
-  start: 0,
+  offset: 0,
   limit: defaultPaginationLimit,
 };
 function NotificationsReadScreen(props) {
@@ -51,14 +51,14 @@ function NotificationsReadScreen(props) {
   };
 
   const getAllNotificationReadData = async (readStatus) => {
-    const { start, limit } = paginationParams.current;
-    if (start === -1) {
+    const { offset, limit } = paginationParams.current;
+    if (offset === -1) {
       return;
     }
     setIsLoading(true);
     const response = await notificationApi.getNotificationOfUser(
       readStatus,
-      start,
+      offset,
       limit,
     );
     setIsLoading(false);
@@ -67,10 +67,10 @@ function NotificationsReadScreen(props) {
       setIsError(true);
       return;
     }
-    paginationParams.current.start = response.data.next_start;
+    paginationParams.current.offset = response.data.next_offset;
     paginationParams.current.limit =
       response.data.next_limit === -1 ? null : response.data.next_limit;
-    setNotificationReadData(response.data.notifications);
+    setNotificationReadData((data) => data.concat(response.data.results));
   };
 
   const handleErrorWhenApiFails = () => {
@@ -99,9 +99,6 @@ function NotificationsReadScreen(props) {
               showsVerticalScrollIndicator={false}
               data={notificationReadData}
               keyExtractor={(item) => item.notificationID}
-              ListFooterComponent={
-                isFetchingMoreNotifications && <ActivityIndicator visible />
-              }
               onEndReached={getMoreNotifications}
               onRefresh={handlePullToRefresh}
               refreshing={isRefreshing}

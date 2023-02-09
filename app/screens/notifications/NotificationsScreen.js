@@ -1,6 +1,15 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { Platform, SafeAreaView, View } from 'react-native';
-import { Text, FlatList, VStack, DeleteIcon, Box } from 'native-base';
+import {
+  Text,
+  FlatList,
+  VStack,
+  DeleteIcon,
+  Box,
+  Spinner,
+  Heading,
+  HStack,
+} from 'native-base';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import AuthContext from 'app/auth/context';
@@ -14,7 +23,7 @@ import routes from 'app/navigation/routes';
 
 const defaultPaginationLimit = 20;
 const paginationStartingParam = {
-  start: 0,
+  offset: 0,
   limit: defaultPaginationLimit,
 };
 function NotificationsScreen(props) {
@@ -168,13 +177,13 @@ function NotificationsScreen(props) {
 
   const getAllNotificationOfUser = async (readStatus) => {
     // Get all `unread` notification of user
-    const { start, limit } = paginationParams.current;
-    if (start == -1) {
+    const { offset, limit } = paginationParams.current;
+    if (offset == -1) {
       return;
     }
     const response = await notificationApi.getNotificationOfUser(
       readStatus,
-      start,
+      offset,
       limit,
     );
     if (!response.ok) {
@@ -182,10 +191,10 @@ function NotificationsScreen(props) {
       setIsError(true);
       return;
     }
-    paginationParams.current.start = response.data.next_start;
+    paginationParams.current.offset = response.data.next_offset;
     paginationParams.current.limit =
       response.data.next_limit == -1 ? null : response.data.next_limit;
-    setNotificationData((data) => data.concat(response.data.notifications));
+    setNotificationData((data) => data.concat(response.data.results));
   };
 
   // Purpose: pull to refresh for flat list
@@ -291,9 +300,16 @@ function NotificationsScreen(props) {
               // onViewableItemsChanged={onViewableItemsChanged}
               data={notificationData}
               extraData={selectedId}
-              keyExtractor={(item) => item.notificationID}
+              keyExtractor={(item) => item?.notificationID}
               ListFooterComponent={
-                isFetchingMoreNotifications && <ActivityIndicator visible />
+                isFetchingMoreNotifications && (
+                  <HStack mx="auto" space={2} justifyContent="center">
+                    <Spinner accessibilityLabel="Loading posts" size="lg" />
+                    <Heading color="red" fontSize="md">
+                      Loading
+                    </Heading>
+                  </HStack>
+                )
               }
               onEndReached={getMoreNotifications}
               onRefresh={handlePullToRefresh}

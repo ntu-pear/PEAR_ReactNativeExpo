@@ -9,7 +9,7 @@ import NotificationActions from 'app/config/notificationActions';
 
 const defaultPaginationLimit = 20;
 const paginationStartingParam = {
-  start: 0,
+  offset: 0,
   limit: defaultPaginationLimit,
 };
 function NotificationsAcceptScreen(props) {
@@ -51,14 +51,14 @@ function NotificationsAcceptScreen(props) {
 
   // Purpose: Get all notification items that has been `approved`.
   const getAllNotificationApprovedData = async (readStatus) => {
-    const { start, limit } = paginationParams.current;
-    if (start === -1) {
+    const { offset, limit } = paginationParams.current;
+    if (offset === -1) {
       return;
     }
     setIsLoading(true);
     const response = await notificationApi.getNotificationOfUser(
       readStatus,
-      start,
+      offset,
       limit,
     );
     if (!response.ok) {
@@ -66,13 +66,15 @@ function NotificationsAcceptScreen(props) {
       setIsError(true);
       return;
     }
-    paginationParams.current.start = response.data.next_start;
+    paginationParams.current.offset = response.data.next_offset;
     paginationParams.current.limit =
       response.data.next_limit === -1 ? null : response.data.next_limit;
     const filteredNotificationItemsWithApproveAction =
-      response?.data.notifications.filter(
+      response?.data.results.filter(
         (notification) => notification.status === NotificationActions.Approve,
       );
+    console.log(response.data.results);
+    console.log(filteredNotificationItemsWithApproveAction);
     setIsLoading(false);
     setNotificationAcceptedData(filteredNotificationItemsWithApproveAction);
   };
@@ -103,9 +105,6 @@ function NotificationsAcceptScreen(props) {
               showsVerticalScrollIndicator={false}
               data={notificationAcceptedData}
               keyExtractor={(item) => item.notificationID}
-              ListFooterComponent={
-                isFetchingMoreNotifications && <ActivityIndicator visible />
-              }
               onEndReached={getMoreNotifications}
               onRefresh={handlePullToRefresh}
               refreshing={isRefreshing}

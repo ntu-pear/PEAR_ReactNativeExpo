@@ -9,7 +9,7 @@ import NotificationActions from 'app/config/notificationActions';
 
 const defaultPaginationLimit = 20;
 const paginationStartingParam = {
-  start: 0,
+  offset: 0,
   limit: defaultPaginationLimit,
 };
 function NotificationsRejectScreen(props) {
@@ -51,14 +51,14 @@ function NotificationsRejectScreen(props) {
   };
   // Purpose: Get all notification items that has been `rejected`.
   const getAllNotificationRejectedData = async (readStatus) => {
-    const { start, limit } = paginationParams.current;
-    if (start === -1) {
+    const { offset, limit } = paginationParams.current;
+    if (offset === -1) {
       return;
     }
     setIsLoading(true);
     const response = await notificationApi.getNotificationOfUser(
       readStatus,
-      start,
+      offset,
       limit,
     );
     if (!response.ok) {
@@ -67,10 +67,10 @@ function NotificationsRejectScreen(props) {
       return;
     }
     const filteredNotificationItemsWithRejectAction =
-      response?.data.notifications.filter(
+      response?.data.results.filter(
         (notification) => notification.status === NotificationActions.Reject,
       );
-    paginationParams.current.start = response.data.next_start;
+    paginationParams.current.offset = response.data.next_offset;
     paginationParams.current.limit =
       response.data.next_limit === -1 ? null : response.data.next_limit;
     setIsLoading(false);
@@ -103,9 +103,6 @@ function NotificationsRejectScreen(props) {
               showsVerticalScrollIndicator={false}
               data={notificationRejectedData}
               keyExtractor={(item) => item.notificationID}
-              ListFooterComponent={
-                isFetchingMoreNotifications && <ActivityIndicator visible />
-              }
               onEndReached={getMoreNotifications}
               onRefresh={handlePullToRefresh}
               refreshing={isRefreshing}
