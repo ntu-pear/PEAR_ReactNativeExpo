@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   Box,
   Input,
@@ -10,43 +10,42 @@ import {
 } from 'native-base';
 import colors from 'app/config/colors';
 import typography from 'app/config/typography';
-import listApi from 'app/api/lists';
 
 function AddPatientAllergy({ i, title, formData, handleFormData }) {
-  const [listOfAllergies, setListOfAllergies] = useState([]);
-  const [listOfAllergyReactions, setListOfAllergyReactions] = useState([]);
-
   const page = 'allergyInfo';
   const allergy = formData.allergyInfo[i]; //allergyInfo[0].allergyName
 
-  // Get List of Allergies from List API
-  const getAllergyList = async () => {
-    const response = await listApi.getAllergyList();
-    if (!response.ok) {
-      console.log('An error occured when getting list of allergies', response);
-      return;
-    }
-    setListOfAllergies(response.data);
-  };
+  // constant values for list of allergies
+  const listOfAllergies = [
+    // { list_AllergyID: 1, value: 'To Be Updated' },
+    { list_AllergyID: 2, value: 'None' },
+    { list_AllergyID: 3, value: 'Corn' },
+    { list_AllergyID: 4, value: 'Eggs' },
+    { list_AllergyID: 5, value: 'Fish' },
+    { list_AllergyID: 6, value: 'Meat' },
+    { list_AllergyID: 7, value: 'Milk' },
+    { list_AllergyID: 8, value: 'Peanuts' },
+    { list_AllergyID: 9, value: 'Tree nuts' },
+    { list_AllergyID: 10, value: 'Shellfish' },
+    { list_AllergyID: 11, value: 'Soy' },
+    { list_AllergyID: 12, value: 'Wheat' },
+    { list_AllergyID: 13, value: 'Seafood' },
+  ];
 
-  // Get List of Allergy Reactions from List API
-  const getAllergyReactionList = async () => {
-    const response = await listApi.getAllergyReactionList();
-    if (!response.ok) {
-      console.log(
-        'An error occured when getting list of allergy reactions',
-        response,
-      );
-      return;
-    }
-    setListOfAllergyReactions(response.data);
-  };
-
-  useEffect(() => {
-    // Fetches data from Lists api
-    getAllergyList();
-    getAllergyReactionList();
-  }, []);
+  // constant values for list of allergy reactions
+  const listOfAllergyReactions = [
+    { list_AllergyReactionID: 1, value: 'Rashes' },
+    { list_AllergyReactionID: 2, value: 'Sneezing' },
+    { list_AllergyReactionID: 3, value: 'Vomitting' },
+    { list_AllergyReactionID: 4, value: 'Nausea' },
+    { list_AllergyReactionID: 5, value: 'Swelling' },
+    { list_AllergyReactionID: 6, value: 'Difficulty Breathing' },
+    { list_AllergyReactionID: 7, value: 'Diarrhea' },
+    { list_AllergyReactionID: 8, value: 'Abdominal cramp or pain' },
+    { list_AllergyReactionID: 9, value: 'Nasal Congestion' },
+    { list_AllergyReactionID: 10, value: 'Itching' },
+    { list_AllergyReactionID: 11, value: 'Hives' },
+  ];
 
   return (
     <Box>

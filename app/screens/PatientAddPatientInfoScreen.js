@@ -16,7 +16,6 @@ import AddPatientProgress from 'app/components/AddPatientProgress';
 import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import colors from 'app/config/colors';
 import DatePickerComponent from 'app/components/DatePickerComponent';
-import listApi from 'app/api/lists';
 
 export function PatientAddPatientInfoScreen(props) {
   const {
@@ -28,26 +27,25 @@ export function PatientAddPatientInfoScreen(props) {
     setShow,
   } = props;
 
-  const [listOfLanguages, setListOfLanguagess] = useState([]);
-
   const page = 'patientInfo';
   const patient = formData.patientInfo;
 
-  // Get List of Relationships from List API
-  const getLanguageList = async () => {
-    const response = await listApi.getLanguageList();
-    if (!response.ok) {
-      console.log('An error occured when getting list of languages', response);
-      return;
-    }
-    console.log(response.data);
-    setListOfLanguagess(response.data);
-  };
-
-  useEffect(() => {
-    // Fetches data from Lists api
-    getLanguageList();
-  }, []);
+  // constant values for languages
+  const listOfLanguages = [
+    { list_LanguageID: 1, value: 'Cantonese' },
+    { list_LanguageID: 2, value: 'English' },
+    { list_LanguageID: 3, value: 'Hainanese' },
+    { list_LanguageID: 4, value: 'Hakka' },
+    { list_LanguageID: 5, value: 'Hindi' },
+    { list_LanguageID: 6, value: 'Hokkien' },
+    { list_LanguageID: 7, value: 'Malay' },
+    { list_LanguageID: 8, value: 'Mandarin' },
+    { list_LanguageID: 9, value: 'Tamil' },
+    { list_LanguageID: 10, value: 'Teochew' },
+    { list_LanguageID: 11, value: 'Japanese' },
+    { list_LanguageID: 12, value: 'Spanish' },
+    { list_LanguageID: 13, value: 'Korean' },
+  ];
 
   return (
     <ScrollView>
