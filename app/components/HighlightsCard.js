@@ -106,7 +106,7 @@ function HighlightsCard({ item }) {
   };
 
   return (
-    <TouchableOpacity>
+    <TouchableOpacity testID="highlightsCard">
       <Box
         w="100%"
         borderWidth="1"

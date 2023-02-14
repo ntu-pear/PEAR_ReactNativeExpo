@@ -27,6 +27,7 @@ function PatientDailyHighlights(props) {
       icon: () => (
         <FontAwesome5 name="pills" size={16} color={colors.black_var1} />
       ),
+      testID: 'newPrescriptionDropdownItem',
     },
     {
       label: 'New Allergy',
@@ -38,6 +39,7 @@ function PatientDailyHighlights(props) {
           color={colors.black_var1}
         />
       ),
+      testID: 'newAllergyDropdownItem',
     },
     {
       label: 'New Activity Exclusion',
@@ -45,6 +47,7 @@ function PatientDailyHighlights(props) {
       icon: () => (
         <FontAwesome5 name="ban" size={18} color={colors.black_var1} />
       ),
+      testID: 'newActivityExclusionDropdownItem',
     },
     {
       label: 'Abnormal Vital',
@@ -56,6 +59,7 @@ function PatientDailyHighlights(props) {
           color={colors.black_var1}
         />
       ),
+      testID: 'abnormalVitalDropdownItem',
     },
     {
       label: 'Problem',
@@ -273,6 +277,7 @@ function PatientDailyHighlights(props) {
                 setOpen={setDropdownOpen}
                 setValue={setFilterValue}
                 // onChangeValue={setFilterValue}
+                onPress={setDropdownOpen}
                 setItems={setDropdownItems}
                 mode="BADGE"
                 theme="LIGHT"
@@ -302,6 +307,7 @@ function PatientDailyHighlights(props) {
                 placeholderStyle={{
                   color: colors.primary_overlay_color,
                 }}
+                testID="dropdownPicker"
               />
             </View>
           </View>
@@ -322,6 +328,7 @@ function PatientDailyHighlights(props) {
                 <HighlightsCard item={item} />
               </GestureHandlerRootView>
             )}
+            testID="flatList"
           />
         </View>
       </View>
