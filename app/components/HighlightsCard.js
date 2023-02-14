@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Platform, TouchableOpacity, View } from 'react-native';
+import { Platform, TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { Text, Box, VStack, HStack, Avatar } from 'native-base';
 import colors from 'app/config/colors';

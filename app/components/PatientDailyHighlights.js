@@ -249,7 +249,7 @@ function PatientDailyHighlights(props) {
             style={[styles.button, styles.buttonClose]}
             onPress={() => setModalVisible(!modalVisible)}
           >
-            <MaterialCommunityIcons name="close" size="20" />
+            <MaterialCommunityIcons name="close" size={20} />
           </Pressable>
           <View style={{ flexDirection: 'row', width: '100%', zIndex: 1 }}>
             <View style={{ flex: 1 }}>
@@ -361,9 +361,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   button: {
-    borderRadius: 10,
     padding: 10,
-    elevation: 2,
   },
   buttonClose: {
     alignSelf: 'flex-end',
@@ -384,7 +382,6 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     width: '50%',
-    // alignItems: "left",
     justifyContent: 'flex-start',
   },
   dropDown: {
