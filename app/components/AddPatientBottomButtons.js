@@ -5,7 +5,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import patientApi from 'app/api/patient';
 import { useNavigation } from '@react-navigation/native';
 import routes from 'app/navigation/routes';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
+import { useNavigate } from 'react-router-dom';
 
 function AddPatientBottomButtons({
   list = null,
@@ -19,29 +20,40 @@ function AddPatientBottomButtons({
 }) {
   const navigation = useNavigation();
 
+  // useNavigate() hook cannot work on mobile
+  const navigate = Platform.OS === 'web' ? useNavigate() : null;
+
   const onPressSubmit = async () => {
     const result = await patientApi.addPatient(formData);
-    console.log(result);
+    console.log('resulttsssss', result);
 
+    let alertTxt = '';
     if (result.ok) {
-      Alert.alert(
-        'Successfully added Patient.',
-        'Patient has been allocated to a supervisor.',
-      );
-      navigation.navigate(routes.PATIENTS_SCREEN);
+      // Alert.alert(
+      //   'Successfully added Patient.',
+      //   'Patient has been allocated to a supervisor.',
+      // );
+      alertTxt =
+        'Successfully added Patient. \nPatient has been allocated to a supervisor.';
+      Platform.OS === 'web'
+        ? navigate('/' + routes.PATIENTS)
+        : navigation.navigate(routes.PATIENTS_SCREEN);
     } else {
       const errors = result.data.errors;
       var str = '';
       for (const error in errors) {
         str += errors[error] + '.\n';
       }
-      Alert.alert('Error in Adding Patient', `${str}Please try again.`);
+      console.log(str);
+      // Alert.alert('Error in Adding Patient', `${str}Please try again.`);
+      alertTxt = `Error in Adding Patient \n${str}Please try again.`;
     }
+    Platform.OS === 'web' ? alert(alertTxt) : Alert.alert(alertTxt);
   };
 
   return (
     <Box mt={8} mb={8}>
-      <Flex w="75%" direction="row">
+      <Flex w={Platform.OS === 'web' ? 40 : '75%'} direction="row">
         {prevQuestionHandler == null ? (
           <Button
             bg={colors.green}
