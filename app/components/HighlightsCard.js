@@ -122,12 +122,14 @@ function HighlightsCard({ item }) {
               bg={colors.pink}
               marginY="auto"
               source={{
-                uri: `${item.profilePicture}`,
+                uri: `${item.patientInfo.patientPhoto}`,
               }}
             >
               {' '}
-              {item && item.patientName && item.patientName.substring(0, 1)
-                ? item.patientName.substring(0, 1)
+              {item &&
+              item.patientInfo.patientName &&
+              item.patientInfo.patientName.substring(0, 1)
+                ? item.patientInfo.patientName.substring(0, 1)
                 : '--'}{' '}
             </Avatar>
 
@@ -138,7 +140,7 @@ function HighlightsCard({ item }) {
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
             >
-              {item.patientName}
+              {item.patientInfo.patientName}
             </Text>
           </VStack>
           <VStack w="68%" space={2}>

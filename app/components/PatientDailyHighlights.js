@@ -47,7 +47,6 @@ function PatientDailyHighlights(props) {
       icon: () => (
         <FontAwesome5 name="ban" size={18} color={colors.black_var1} />
       ),
-      testID: 'newActivityExclusionDropdownItem',
     },
     {
       label: 'Abnormal Vital',
@@ -71,6 +70,7 @@ function PatientDailyHighlights(props) {
           color={colors.black_var1}
         />
       ),
+      testID: 'problemDropdownItem',
     },
     {
       label: 'Medical History',
@@ -89,10 +89,12 @@ function PatientDailyHighlights(props) {
   // const [highlightsData, setHighlightsData] = useState([]);
   const [highlightsData, setHighlightsData] = useState([
     {
-      patientName: 'Alice Lee',
-      profilePicture:
-        'https://res.cloudinary.com/dbpearfyp/image/upload/v1640487405/Patient/Alice_Lee_Sxxxx567D/ProfilePicture/zsw7dyprsvn0bjmatofg.jpg',
-      patientID: 1,
+      patientInfo: {
+        patientId: 1,
+        patientName: 'Alice Lee',
+        patientPhoto:
+          'https://res.cloudinary.com/dbpearfyp/image/upload/v1640487405/Patient/Alice_Lee_Sxxxx567D/ProfilePicture/zsw7dyprsvn0bjmatofg.jpg',
+      },
       highlights: [
         {
           highlightID: 1,
@@ -119,10 +121,12 @@ function PatientDailyHighlights(props) {
       ],
     },
     {
-      patientName: 'Bi Gong',
-      profilePicture:
-        'https://res.cloudinary.com/dbpearfyp/image/upload/v1634522583/Patient/Bi_Gong_Sxxxx443F/ProfilePicture/dwo0axohyhur5mp16lep.jpg',
-      patientID: 4,
+      patientInfo: {
+        patientId: 4,
+        patientName: 'Bi Gong',
+        patientPhoto:
+          'https://res.cloudinary.com/dbpearfyp/image/upload/v1634522583/Patient/Bi_Gong_Sxxxx443F/ProfilePicture/dwo0axohyhur5mp16lep.jpg',
+      },
       highlights: [
         {
           highlightID: 3,
@@ -149,10 +153,12 @@ function PatientDailyHighlights(props) {
       ],
     },
     {
-      patientName: 'Yan Yi',
-      profilePicture:
-        'https://res.cloudinary.com/dbpearfyp/image/upload/v1634521792/Patient/Yan_Yi_Sxxxx148C/ProfilePicture/g5gnecfsoc8igp56dwnb.jpg',
-      patientID: 2,
+      patientInfo: {
+        patientId: 2,
+        patientName: 'Yan Yi',
+        patientPhoto:
+          'https://res.cloudinary.com/dbpearfyp/image/upload/v1634521792/Patient/Yan_Yi_Sxxxx148C/ProfilePicture/g5gnecfsoc8igp56dwnb.jpg',
+      },
       highlights: [
         {
           highlightID: 5,
@@ -161,6 +167,26 @@ function PatientDailyHighlights(props) {
           highlightJson: {
             id: 40,
             value: 'Blood pressure lower than usual.',
+          },
+          startDate: '2022-12-28T08:21:54.639Z',
+          endDate: '2022-12-28T08:21:54.639Z',
+        },
+      ],
+    },
+    {
+      patientInfo: {
+        patientId: 5,
+        patientName: 'Hui Wen',
+        patientPhoto: null,
+      },
+      highlights: [
+        {
+          highlightID: 5,
+          highlightTypeID: 3,
+          highlightType: 'newActivityExclusion',
+          highlightJson: {
+            id: 40,
+            value: 'Should not do jumping activities.',
           },
           startDate: '2022-12-28T08:21:54.639Z',
           endDate: '2022-12-28T08:21:54.639Z',
@@ -197,7 +223,9 @@ function PatientDailyHighlights(props) {
     // Search by searchValue
     // .toLowerCase() ensures that the search is not case sensitive
     const dataAfterSearch = highlightsData.filter((item) =>
-      item.patientName.toLowerCase().includes(searchValue.toLowerCase()),
+      item.patientInfo.patientName
+        .toLowerCase()
+        .includes(searchValue.toLowerCase()),
     );
 
     // Filter by filterValue (highlight types)
