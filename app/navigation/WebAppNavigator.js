@@ -49,6 +49,7 @@ import NotificationNavigator from 'app/navigation/NotificationNavigator';
 import AccountScreen from 'app/screens/AccountScreen';
 import PatientsScreenWeb from 'app/screens/web/PatientsScreenWeb';
 import PatientInformationScreenWeb from 'app/screens/web/PatientInformationScreenWeb';
+import PatientAddScreen from 'app/screens/PatientAddScreen';
 
 import routes from 'app/navigation/routes';
 
@@ -56,15 +57,6 @@ function Example() {
   return (
     <div style={{ padding: 20 }}>
       <h2>Example View</h2>
-      <p>Lorem ipsum dolor sit amet, consectetur adip.</p>
-    </div>
-  );
-}
-
-function Example2() {
-  return (
-    <div style={{ padding: 20 }}>
-      <h2>Example 2 View</h2>
       <p>Lorem ipsum dolor sit amet, consectetur adip.</p>
     </div>
   );
@@ -212,7 +204,16 @@ function WebAppNavigator() {
                   <Icon as={MaterialIcons} name="apartment" size="md" m="2" />
                   View Patient
                 </Link>
-                <Link to="/example" style={linkStyle}>
+                <Link to={routes.PATIENT_ADD_PATIENT} style={linkStyle}>
+                  <Icon
+                    as={MaterialIcons}
+                    name="switch-account"
+                    size="md"
+                    m="2"
+                  />
+                  Add Patient
+                </Link>
+                <Link to={routes.NOTIFICATION} style={linkStyle}>
                   <Icon
                     as={MaterialIcons}
                     name="switch-account"
@@ -221,7 +222,7 @@ function WebAppNavigator() {
                   />
                   Manage Preference
                 </Link>
-                <Link to="/example2" style={linkStyle}>
+                <Link to={routes.ACCOUNT} style={linkStyle}>
                   <Icon
                     as={MaterialIcons}
                     name="medical-services"
@@ -235,7 +236,7 @@ function WebAppNavigator() {
                 <Text bold fontSize="18px">
                   ACTIVITIES
                 </Text>
-                <Link to={routes.ACCOUNT} style={linkStyle}>
+                <Link to="/example" style={linkStyle}>
                   <Icon as={MaterialIcons} name="list-alt" size="md" m="2" />
                   Manage Activities
                 </Link>
@@ -244,7 +245,7 @@ function WebAppNavigator() {
                 <Text bold fontSize="18px">
                   ATTENDANCE
                 </Text>
-                <Link to={routes.NOTIFICATION} style={linkStyle}>
+                <Link to="/" style={linkStyle}>
                   <Icon
                     as={MaterialIcons}
                     name="assignment-ind"
@@ -322,7 +323,6 @@ function WebAppNavigator() {
           <Routes>
             <Route path="" element={<Example />} />
             <Route path="/example" element={<Example />} />
-            <Route path="/example2" element={<Example2 />} />
             <Route path={routes.ACCOUNT} element={<AccountScreen />} />
             <Route
               path={routes.NOTIFICATION}
@@ -335,6 +335,10 @@ function WebAppNavigator() {
             <Route
               path={routes.PATIENT_INFORMATION}
               element={<PatientInformationScreenWeb sidebar={sidebar} />}
+            />
+            <Route
+              path={routes.PATIENT_ADD_PATIENT}
+              element={<PatientAddScreen sidebar={sidebar} />}
             />
           </Routes>
         </HStack>

@@ -69,7 +69,11 @@ function AddPatientAllergy({ i, title, formData, handleFormData }) {
           onValueChange={handleFormData(page, 'AllergyListID', i)}
         >
           {listOfAllergies.map((item) => (
-            <Select.Item label={item.value} value={item.list_AllergyID} />
+            <Select.Item
+              label={item.value}
+              value={item.list_AllergyID}
+              key={item.list_AllergyID}
+            />
           ))}
         </Select>
       </FormControl>
@@ -85,6 +89,7 @@ function AddPatientAllergy({ i, title, formData, handleFormData }) {
             <Select.Item
               label={item.value}
               value={item.list_AllergyReactionID}
+              key={item.list_AllergyReactionID}
             />
           ))}
         </Select>

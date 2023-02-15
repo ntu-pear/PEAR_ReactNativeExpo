@@ -67,7 +67,7 @@ export function PatientAddGuardianScreen(props) {
           <AddPatientProgress value={60} />
           {guardianInfoDisplay
             ? guardianInfoDisplay.map((item, index) => (
-                <Box>
+                <Box key={index}>
                   <AddPatientGuardian
                     key={item}
                     i={index}

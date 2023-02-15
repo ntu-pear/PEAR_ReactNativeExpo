@@ -117,7 +117,11 @@ export function PatientAddPatientInfoScreen(props) {
               onValueChange={handleFormData(page, 'PreferredLanguageListID')}
             >
               {listOfLanguages.map((item) => (
-                <Select.Item label={item.value} value={item.list_LanguageID} />
+                <Select.Item
+                  label={item.value}
+                  value={item.list_LanguageID}
+                  key={item.list_LanguageID}
+                />
               ))}
             </Select>
           </FormControl>

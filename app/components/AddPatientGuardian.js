@@ -72,7 +72,11 @@ function AddPatientGuardian({ i, title, formData, handleFormData }) {
           onValueChange={handleFormData(page, 'RelationshipID', i)}
         >
           {listOfRelationships.map((item) => (
-            <Select.Item label={item.value} value={item.list_RelationshipID} />
+            <Select.Item
+              label={item.value}
+              value={item.list_RelationshipID}
+              key={item.list_RelationshipID}
+            />
           ))}
         </Select>
       </FormControl>
