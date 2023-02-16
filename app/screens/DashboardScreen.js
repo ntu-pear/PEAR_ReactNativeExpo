@@ -14,6 +14,7 @@ function DashboardScreen() {
       <Pressable
         style={[styles.button, styles.buttonOpen]}
         onPress={() => setModalVisible(true)}
+        testID="highlightsButton"
       >
         <Text style={styles.textStyle}>See Patients Daily Highlights</Text>
       </Pressable>

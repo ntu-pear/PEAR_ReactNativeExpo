@@ -13,6 +13,7 @@ import PatientDailyHighlights from 'app/components/PatientDailyHighlights';
 import '@testing-library/jest-native/extend-expect';
 import errors from 'app/config/errors';
 import { getHighlight } from 'app/api/highlight';
+import { act } from 'react-test-renderer';
 
 const MockEmptyHighlights = [];
 
@@ -558,5 +559,60 @@ describe('Test PatientDailyHighlights', () => {
     expect(patientDailyHighlights.getAllByTestId('highlightsCard').length).toBe(
       1,
     );
+  });
+
+  test('Pull to refresh calls the API again', async () => {
+    getHighlight.mockReturnValueOnce({
+      ok: true,
+      data: { data: MockFilledHighlights },
+    });
+    const patientDailyHighlights = render(
+      <NativeBaseProvider initialWindowMetrics={inset}>
+        <PatientDailyHighlights />
+      </NativeBaseProvider>,
+    );
+
+    const searchBar = patientDailyHighlights.getByPlaceholderText('Search');
+    const dropdownPicker = patientDailyHighlights.getByTestId('dropdownPicker');
+    expect(searchBar).toBeVisible();
+    expect(dropdownPicker).toBeVisible();
+
+    await waitFor(() => {
+      expect(getHighlight).toBeCalledTimes(1);
+
+      const flatList = patientDailyHighlights.getByTestId('flatList');
+      expect(flatList).toBeVisible();
+      expect(patientDailyHighlights.getAllByTestId('flatList').length).toBe(1);
+      expect(
+        patientDailyHighlights.getAllByTestId('highlightsCard').length,
+      ).toBe(MockFilledHighlights.length);
+    });
+
+    getHighlight.mockReturnValueOnce({
+      ok: true,
+      data: { data: MockFilledHighlights },
+    });
+
+    await waitFor(() => {
+      expect(getHighlight).toBeCalledTimes(1);
+    });
+
+    const flatList = patientDailyHighlights.getByTestId('flatList');
+    expect(flatList).toBeVisible();
+    expect(flatList).toBeDefined();
+    expect(patientDailyHighlights.getAllByTestId('flatList').length).toBe(1);
+    expect(patientDailyHighlights.getAllByTestId('highlightsCard').length).toBe(
+      MockFilledHighlights.length,
+    );
+
+    // referencing https://github.com/callstack/react-native-testing-library/issues/809
+    const { refreshControl } = flatList.props;
+    await act(async () => {
+      refreshControl.props.onRefresh();
+    });
+
+    await waitFor(() => {
+      expect(getHighlight).toBeCalledTimes(2);
+    });
   });
 });

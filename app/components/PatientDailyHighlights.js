@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Alert, Modal, StyleSheet, Text, Pressable, View } from 'react-native';
+import { Modal, StyleSheet, Text, Pressable, View } from 'react-native';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { ListItem, SearchBar } from 'react-native-elements';
 import DropDownPicker from 'react-native-dropdown-picker';
@@ -266,9 +266,9 @@ function PatientDailyHighlights(props) {
       transparent={true}
       visible={modalVisible}
       onRequestClose={() => {
-        Alert.alert('Modal has been closed.');
         setModalVisible(!modalVisible);
       }}
+      testID="highlightsModal"
     >
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
@@ -276,6 +276,7 @@ function PatientDailyHighlights(props) {
           <Pressable
             style={[styles.button, styles.buttonClose]}
             onPress={() => setModalVisible(!modalVisible)}
+            testID="highlightsCloseButton"
           >
             <MaterialCommunityIcons name="close" size={20} />
           </Pressable>
