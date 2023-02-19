@@ -4,16 +4,15 @@
 import {
   cleanup,
   render,
-  screen,
   fireEvent,
   waitFor,
 } from '@testing-library/react-native';
-import { NativeBaseProvider, FlatList } from 'native-base';
-import PatientDailyHighlights from 'app/components/PatientDailyHighlights';
+import { NativeBaseProvider } from 'native-base';
+import { NavigationContext } from '@react-navigation/native';
 import '@testing-library/jest-native/extend-expect';
-import errors from 'app/config/errors';
-import { getHighlight } from 'app/api/highlight';
 import { act } from 'react-test-renderer';
+import PatientDailyHighlights from 'app/components/PatientDailyHighlights';
+import { getHighlight } from 'app/api/highlight';
 
 const MockEmptyHighlights = [];
 
@@ -138,6 +137,14 @@ const inset = {
   insets: { top: 0, left: 0, right: 0, bottom: 0 },
 };
 
+// fake NavigationContext value data
+// allows useFocusEffect to determine if component has been focused
+const navContext = {
+  isFocused: () => true,
+  // addListener returns an unscubscribe function.
+  addListener: jest.fn(() => jest.fn()),
+};
+
 afterEach(() => {
   cleanup();
   jest.clearAllMocks();
@@ -151,7 +158,9 @@ describe('Test PatientDailyHighlights', () => {
     });
     const patientDailyHighlights = render(
       <NativeBaseProvider initialWindowMetrics={inset}>
-        <PatientDailyHighlights />
+        <NavigationContext.Provider value={navContext}>
+          <PatientDailyHighlights />
+        </NavigationContext.Provider>
       </NativeBaseProvider>,
     );
 
@@ -176,7 +185,9 @@ describe('Test PatientDailyHighlights', () => {
     });
     const patientDailyHighlights = render(
       <NativeBaseProvider initialWindowMetrics={inset}>
-        <PatientDailyHighlights />
+        <NavigationContext.Provider value={navContext}>
+          <PatientDailyHighlights />
+        </NavigationContext.Provider>
       </NativeBaseProvider>,
     );
 
@@ -204,7 +215,9 @@ describe('Test PatientDailyHighlights', () => {
     });
     const patientDailyHighlights = render(
       <NativeBaseProvider initialWindowMetrics={inset}>
-        <PatientDailyHighlights />
+        <NavigationContext.Provider value={navContext}>
+          <PatientDailyHighlights />
+        </NavigationContext.Provider>
       </NativeBaseProvider>,
     );
 
@@ -237,7 +250,9 @@ describe('Test PatientDailyHighlights', () => {
     });
     const patientDailyHighlights = render(
       <NativeBaseProvider initialWindowMetrics={inset}>
-        <PatientDailyHighlights />
+        <NavigationContext.Provider value={navContext}>
+          <PatientDailyHighlights />
+        </NavigationContext.Provider>
       </NativeBaseProvider>,
     );
 
@@ -275,7 +290,9 @@ describe('Test PatientDailyHighlights', () => {
     });
     const patientDailyHighlights = render(
       <NativeBaseProvider initialWindowMetrics={inset}>
-        <PatientDailyHighlights />
+        <NavigationContext.Provider value={navContext}>
+          <PatientDailyHighlights />
+        </NavigationContext.Provider>
       </NativeBaseProvider>,
     );
 
@@ -313,7 +330,9 @@ describe('Test PatientDailyHighlights', () => {
     });
     const patientDailyHighlights = render(
       <NativeBaseProvider initialWindowMetrics={inset}>
-        <PatientDailyHighlights />
+        <NavigationContext.Provider value={navContext}>
+          <PatientDailyHighlights />
+        </NavigationContext.Provider>
       </NativeBaseProvider>,
     );
 
@@ -332,6 +351,7 @@ describe('Test PatientDailyHighlights', () => {
         patientDailyHighlights.getAllByTestId('highlightsCard').length,
       ).toBe(MockFilledHighlights.length);
     });
+    // press on dropdownPicker to open it
     // referencing https://github.com/hossein-zare/react-native-dropdown-picker/issues/618
     fireEvent.press(dropdownPicker);
 
@@ -352,7 +372,9 @@ describe('Test PatientDailyHighlights', () => {
     });
     const patientDailyHighlights = render(
       <NativeBaseProvider initialWindowMetrics={inset}>
-        <PatientDailyHighlights />
+        <NavigationContext.Provider value={navContext}>
+          <PatientDailyHighlights />
+        </NavigationContext.Provider>
       </NativeBaseProvider>,
     );
 
@@ -390,7 +412,9 @@ describe('Test PatientDailyHighlights', () => {
     });
     const patientDailyHighlights = render(
       <NativeBaseProvider initialWindowMetrics={inset}>
-        <PatientDailyHighlights />
+        <NavigationContext.Provider value={navContext}>
+          <PatientDailyHighlights />
+        </NavigationContext.Provider>
       </NativeBaseProvider>,
     );
 
@@ -433,7 +457,9 @@ describe('Test PatientDailyHighlights', () => {
     });
     const patientDailyHighlights = render(
       <NativeBaseProvider initialWindowMetrics={inset}>
-        <PatientDailyHighlights />
+        <NavigationContext.Provider value={navContext}>
+          <PatientDailyHighlights />
+        </NavigationContext.Provider>
       </NativeBaseProvider>,
     );
 
@@ -478,7 +504,9 @@ describe('Test PatientDailyHighlights', () => {
     });
     const patientDailyHighlights = render(
       <NativeBaseProvider initialWindowMetrics={inset}>
-        <PatientDailyHighlights />
+        <NavigationContext.Provider value={navContext}>
+          <PatientDailyHighlights />
+        </NavigationContext.Provider>
       </NativeBaseProvider>,
     );
 
@@ -524,7 +552,9 @@ describe('Test PatientDailyHighlights', () => {
     });
     const patientDailyHighlights = render(
       <NativeBaseProvider initialWindowMetrics={inset}>
-        <PatientDailyHighlights />
+        <NavigationContext.Provider value={navContext}>
+          <PatientDailyHighlights />
+        </NavigationContext.Provider>
       </NativeBaseProvider>,
     );
 
@@ -568,7 +598,9 @@ describe('Test PatientDailyHighlights', () => {
     });
     const patientDailyHighlights = render(
       <NativeBaseProvider initialWindowMetrics={inset}>
-        <PatientDailyHighlights />
+        <NavigationContext.Provider value={navContext}>
+          <PatientDailyHighlights />
+        </NavigationContext.Provider>
       </NativeBaseProvider>,
     );
 

@@ -15,27 +15,6 @@ const highlightList = `${endpoint}/list`;
 // **********************  GET REQUESTS *************************
 
 const getHighlight = async () => {
-  /*
-   *   Build Params
-   */
-  /*
-  // if patientId is specified
-  let params;
-  if (patientID !== null) {
-    params = {
-      patientID,
-      maskNRIC,
-    };
-  }
-  // if patientId is not specified
-  else {
-    params = {
-      isActive,
-      maskNRIC,
-    };
-  }
-	*/
-
   return client.get(highlightList);
 };
 

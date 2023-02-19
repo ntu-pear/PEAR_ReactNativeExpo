@@ -116,14 +116,17 @@ function HighlightsCard({ item }) {
         mt="3"
       >
         <HStack w="100%" space={3} flexWrap="wrap" mb="1">
-          <VStack w="28%" space={1} alignItems="center">
+          <VStack w="28%" space={1} alignItems="center" justifyContent="center">
             <Avatar
               size="lg"
               bg={colors.pink}
-              marginY="auto"
-              source={{
-                uri: `${item.patientInfo.patientPhoto}`,
-              }}
+              source={
+                item.patientInfo.patientPhoto
+                  ? {
+                      uri: `${item.patientInfo.patientPhoto}`,
+                    }
+                  : null
+              }
             >
               {' '}
               {item &&
@@ -151,8 +154,5 @@ function HighlightsCard({ item }) {
     </TouchableOpacity>
   );
 }
-
-// const styles = StyleSheet.create({
-// });
 
 export default HighlightsCard;

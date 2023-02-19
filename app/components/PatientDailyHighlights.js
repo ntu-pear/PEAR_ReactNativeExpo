@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, StyleSheet, Text, Pressable, View } from 'react-native';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
-import { ListItem, SearchBar } from 'react-native-elements';
+import { SearchBar } from 'react-native-elements';
 import DropDownPicker from 'react-native-dropdown-picker';
-import colors from 'app/config/colors';
 import { FlatList } from 'native-base';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useFocusEffect } from '@react-navigation/native';
 import HighlightsCard from 'app/components/HighlightsCard';
 import highlightApi from 'app/api/highlight';
-import ActivityIndicator from 'app/components/ActivityIndicator';
+import colors from 'app/config/colors';
 
 function PatientDailyHighlights(props) {
   // Destructure props
@@ -17,8 +16,12 @@ function PatientDailyHighlights(props) {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [statusCode, setStatusCode] = useState();
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
+  // highlightsData is all data pulled from backend, filteredData is data displayed
+  const [highlightsData, setHighlightsData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+
+  // searchValue for SearchBar, filterValue for DropDownPicker
   const [searchValue, setSearchValue] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [filterValue, setFilterValue] = useState([]);
@@ -87,120 +90,13 @@ function PatientDailyHighlights(props) {
     },
   ]);
 
-  const [filteredData, setFilteredData] = useState([]);
-  const [highlightsData, setHighlightsData] = useState([]);
-  // const [highlightsData, setHighlightsData] = useState([
-  //   {
-  //     patientInfo: {
-  //       patientId: 1,
-  //       patientName: 'Alice Lee',
-  //       patientPhoto:
-  //         'https://res.cloudinary.com/dbpearfyp/image/upload/v1640487405/Patient/Alice_Lee_Sxxxx567D/ProfilePicture/zsw7dyprsvn0bjmatofg.jpg',
-  //     },
-  //     highlights: [
-  //       {
-  //         highlightID: 1,
-  //         highlightTypeID: 2,
-  //         highlightType: 'newAllergy',
-  //         highlightJson: {
-  //           id: 36,
-  //           value: 'New allergy to prawn.',
-  //         },
-  //         startDate: '2022-12-28T08:21:54.639Z',
-  //         endDate: '2022-12-28T08:21:54.639Z',
-  //       },
-  //       {
-  //         highlightID: 2,
-  //         highlightTypeID: 4,
-  //         highlightType: 'abnormalVital',
-  //         highlightJson: {
-  //           id: 37,
-  //           value: 'Heartbeat faster than usual.',
-  //         },
-  //         startDate: '2022-12-28T08:21:54.639Z',
-  //         endDate: '2022-12-28T08:21:54.639Z',
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     patientInfo: {
-  //       patientId: 4,
-  //       patientName: 'Bi Gong',
-  //       patientPhoto:
-  //         'https://res.cloudinary.com/dbpearfyp/image/upload/v1634522583/Patient/Bi_Gong_Sxxxx443F/ProfilePicture/dwo0axohyhur5mp16lep.jpg',
-  //     },
-  //     highlights: [
-  //       {
-  //         highlightID: 3,
-  //         highlightTypeID: 1,
-  //         highlightType: 'newPrescription',
-  //         highlightJson: {
-  //           id: 38,
-  //           value: 'New prescription for blood pressure.',
-  //         },
-  //         startDate: '2022-12-28T08:21:54.639Z',
-  //         endDate: '2022-12-28T08:21:54.639Z',
-  //       },
-  //       {
-  //         highlightID: 4,
-  //         highlightTypeID: 6,
-  //         highlightType: 'medicalHistory',
-  //         highlightJson: {
-  //           id: 39,
-  //           value: 'New diagnosis for dementia.',
-  //         },
-  //         startDate: '2022-12-28T08:21:54.639Z',
-  //         endDate: '2022-12-28T08:21:54.639Z',
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     patientInfo: {
-  //       patientId: 2,
-  //       patientName: 'Yan Yi',
-  //       patientPhoto:
-  //         'https://res.cloudinary.com/dbpearfyp/image/upload/v1634521792/Patient/Yan_Yi_Sxxxx148C/ProfilePicture/g5gnecfsoc8igp56dwnb.jpg',
-  //     },
-  //     highlights: [
-  //       {
-  //         highlightID: 5,
-  //         highlightTypeID: 4,
-  //         highlightType: 'abnormalVital',
-  //         highlightJson: {
-  //           id: 40,
-  //           value: 'Blood pressure lower than usual.',
-  //         },
-  //         startDate: '2022-12-28T08:21:54.639Z',
-  //         endDate: '2022-12-28T08:21:54.639Z',
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     patientInfo: {
-  //       patientId: 5,
-  //       patientName: 'Hui Wen',
-  //       patientPhoto: null,
-  //     },
-  //     highlights: [
-  //       {
-  //         highlightID: 5,
-  //         highlightTypeID: 3,
-  //         highlightType: 'newActivityExclusion',
-  //         highlightJson: {
-  //           id: 40,
-  //           value: 'Should not do jumping activities.',
-  //         },
-  //         startDate: '2022-12-28T08:21:54.639Z',
-  //         endDate: '2022-12-28T08:21:54.639Z',
-  //       },
-  //     ],
-  //   },
-  // ]);
-
+  // useFocusEffect runs when user navigates to PatientDailyHighlights from another page
+  // referencing: https://reactnavigation.org/docs/use-focus-effect/
   useFocusEffect(
     React.useCallback(() => {
-      // Fetches data from highlights api
+      // Fetch data from highlights api
       getAllHighlights();
+      // Reset searchValue and filterValue when user navigates away
       setSearchValue('');
       setFilterValue([]);
     }, []),
@@ -211,8 +107,7 @@ function PatientDailyHighlights(props) {
     setIsError(false);
     const response = await highlightApi.getHighlight();
     if (!response.ok) {
-      // return error block
-      console.log('Error occurred', response);
+      console.log('Request failed with status code: ', response.status);
       setIsLoading(false);
       setIsError(true);
       setStatusCode(response.status);
@@ -221,13 +116,11 @@ function PatientDailyHighlights(props) {
     setIsLoading(false);
     setStatusCode(response.status);
     setHighlightsData(response.data.data);
-    console.log(response);
+    console.log('Request successful with response: ', response);
   };
 
   // Filter data when either searchValue or filterValue changes
   useEffect(() => {
-    console.log(searchValue, filterValue);
-
     // Search by searchValue
     // .toLowerCase() ensures that the search is not case sensitive
     const dataAfterSearch = highlightsData.filter((item) =>
@@ -238,8 +131,9 @@ function PatientDailyHighlights(props) {
 
     // Filter by filterValue (highlight types)
     let dataAfterFilter = highlightsData;
+    // Check if a highlight type is chosen
+    // If no highlight type chosen, all patients should be displayed
     if (Array.isArray(filterValue) && filterValue.length) {
-      console.log('filterValue != []');
       dataAfterFilter = highlightsData.filter((item) =>
         item.highlights.some((h) => filterValue.includes(h.highlightType)),
       );
@@ -255,14 +149,12 @@ function PatientDailyHighlights(props) {
   }, [highlightsData, searchValue, filterValue]);
 
   const handlePullToRefresh = async () => {
-    setIsRefreshing(true);
     await getAllHighlights();
-    setIsRefreshing(false);
-
     return;
   };
 
   const noDataMessage = () => {
+    // Display error message if API request fails
     if (isError) {
       if (statusCode == 401) {
         return (
@@ -284,6 +176,7 @@ function PatientDailyHighlights(props) {
       );
     }
 
+    // Display message when there are no new highlights
     return (
       <Text style={styles.modalText}>No patient changes found today.</Text>
     );
@@ -373,7 +266,7 @@ function PatientDailyHighlights(props) {
             w="100%"
             showsVerticalScrollIndicator={true}
             data={filteredData}
-            keyExtractor={(item) => item.patientID}
+            keyExtractor={(item) => item.patientInfo.patientId}
             onRefresh={handlePullToRefresh}
             refreshing={isLoading}
             ListEmptyComponent={noDataMessage}

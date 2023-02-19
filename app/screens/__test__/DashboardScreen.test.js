@@ -1,16 +1,11 @@
 /**
  * @jest-environment node
  */
-import {
-  cleanup,
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-} from '@testing-library/react-native';
+import { cleanup, render, fireEvent } from '@testing-library/react-native';
 import { NativeBaseProvider } from 'native-base';
-import DashboardScreen from 'app/screens/DashboardScreen';
+import { NavigationContext } from '@react-navigation/native';
 import '@testing-library/jest-native/extend-expect';
+import DashboardScreen from 'app/screens/DashboardScreen';
 import { getHighlight } from 'app/api/highlight';
 
 const MockEmptyHighlights = [];
@@ -26,6 +21,19 @@ const inset = {
   insets: { top: 0, left: 0, right: 0, bottom: 0 },
 };
 
+// fake NavigationContext value data
+// allows useFocusEffect to determine if component has been focused
+const navContext = {
+  isFocused: () => true,
+  // addListener returns an unscubscribe function.
+  addListener: jest.fn(() => jest.fn()),
+};
+
+afterEach(() => {
+  cleanup();
+  jest.clearAllMocks();
+});
+
 describe('Test DashboardScreen', () => {
   test('Should open highlights popup when button is pressed', async () => {
     getHighlight.mockReturnValueOnce({
@@ -34,7 +42,9 @@ describe('Test DashboardScreen', () => {
     });
     const dashboardScreen = render(
       <NativeBaseProvider initialWindowMetrics={inset}>
-        <DashboardScreen />
+        <NavigationContext.Provider value={navContext}>
+          <DashboardScreen />
+        </NavigationContext.Provider>
       </NativeBaseProvider>,
     );
     const highlightsButton = dashboardScreen.getByTestId('highlightsButton');
@@ -54,7 +64,9 @@ describe('Test DashboardScreen', () => {
     });
     const dashboardScreen = render(
       <NativeBaseProvider initialWindowMetrics={inset}>
-        <DashboardScreen />
+        <NavigationContext.Provider value={navContext}>
+          <DashboardScreen />
+        </NavigationContext.Provider>
       </NativeBaseProvider>,
     );
     const highlightsButton = dashboardScreen.getByTestId('highlightsButton');
