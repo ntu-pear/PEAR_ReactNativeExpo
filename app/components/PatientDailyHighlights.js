@@ -6,6 +6,7 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import colors from 'app/config/colors';
 import { FlatList } from 'native-base';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useFocusEffect } from '@react-navigation/native';
 import HighlightsCard from 'app/components/HighlightsCard';
 import highlightApi from 'app/api/highlight';
 import ActivityIndicator from 'app/components/ActivityIndicator';
@@ -196,11 +197,12 @@ function PatientDailyHighlights(props) {
   //   },
   // ]);
 
-  useEffect(() => {
-    // Fetches data from highlights api
-    console.log('Calling API');
-    getAllHighlights();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      // Fetches data from highlights api
+      getAllHighlights();
+    }, []),
+  );
 
   const getAllHighlights = async () => {
     setIsLoading(true);
