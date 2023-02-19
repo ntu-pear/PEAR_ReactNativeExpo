@@ -24,18 +24,25 @@ function AddPatientBottomButtons({
     console.log(result);
 
     if (result.ok) {
+      const allocations = result.data.data.patientAllocationDTO;
+      const caregiver = allocations.caregiverName;
+      const doctor = allocations.doctorName;
+      const gameTherapist = allocations.gameTherapistName;
+
       Alert.alert(
-        'Successfully added Patient.',
-        'Patient has been allocated to a supervisor.',
+        'Successfully added Patient',
+        `Patient has been allocated to\nCaregiver: ${caregiver}\nDoctor: ${doctor}\nGame Therapist: ${gameTherapist}`,
       );
       navigation.navigate(routes.PATIENTS_SCREEN);
     } else {
-      const errors = result.data.errors;
-      var str = '';
-      for (const error in errors) {
-        str += errors[error] + '.\n';
-      }
-      Alert.alert('Error in Adding Patient', `${str}Please try again.`);
+      const errors = result.data.message;
+      // for (const error in errors) {
+      //   str += errors[error] + '.\n';
+      // }
+      Alert.alert(
+        'Error in Adding Patient',
+        `\n${errors}.\n\nPlease try again.`,
+      );
     }
   };
 
