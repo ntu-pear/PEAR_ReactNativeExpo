@@ -15,7 +15,7 @@ function PatientDailyHighlights(props) {
   const { modalVisible, setModalVisible } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
-  const [errorStatusCode, setErrorStatusCode] = useState();
+  const [statusCode, setStatusCode] = useState();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [searchValue, setSearchValue] = useState('');
@@ -204,16 +204,18 @@ function PatientDailyHighlights(props) {
 
   const getAllHighlights = async () => {
     setIsLoading(true);
+    setIsError(false);
     const response = await highlightApi.getHighlight();
     if (!response.ok) {
       // return error block
       console.log('Error occurred', response);
       setIsLoading(false);
       setIsError(true);
-      setErrorStatusCode(response.status);
+      setStatusCode(response.status);
       return;
     }
     setIsLoading(false);
+    setStatusCode(response.status);
     setHighlightsData(response.data.data);
     console.log(response);
   };
@@ -258,13 +260,13 @@ function PatientDailyHighlights(props) {
 
   const noDataMessage = () => {
     if (isError) {
-      if (errorStatusCode == 401) {
+      if (statusCode == 401) {
         return (
           <Text style={[styles.modalText, styles.modalErrorText]}>
             Error: User is not authenticated.
           </Text>
         );
-      } else if (errorStatusCode >= 500) {
+      } else if (statusCode >= 500) {
         return (
           <Text style={[styles.modalText, styles.modalErrorText]}>
             Error: Server is down. Please try again later.
@@ -273,7 +275,7 @@ function PatientDailyHighlights(props) {
       }
       return (
         <Text style={[styles.modalText, styles.modalErrorText]}>
-          {errorStatusCode} error has occurred.
+          {statusCode} error has occurred.
         </Text>
       );
     }
