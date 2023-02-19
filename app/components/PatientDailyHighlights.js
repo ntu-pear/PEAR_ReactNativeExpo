@@ -201,6 +201,8 @@ function PatientDailyHighlights(props) {
     React.useCallback(() => {
       // Fetches data from highlights api
       getAllHighlights();
+      setSearchValue('');
+      setFilterValue([]);
     }, []),
   );
 
