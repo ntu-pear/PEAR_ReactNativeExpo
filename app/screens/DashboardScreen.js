@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, Pressable, View } from 'react-native';
 import PatientDailyHighlights from 'app/components/PatientDailyHighlights';
 
-function DashboardScreen() {
+function DashboardScreen(props) {
   const [modalVisible, setModalVisible] = useState(true);
+  const { navigation } = props;
 
   return (
     <View style={styles.centeredView}>
