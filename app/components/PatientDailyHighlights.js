@@ -15,6 +15,7 @@ function PatientDailyHighlights(props) {
   const { modalVisible, setModalVisible } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [errorStatusCode, setErrorStatusCode] = useState();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [searchValue, setSearchValue] = useState('');
@@ -86,114 +87,114 @@ function PatientDailyHighlights(props) {
   ]);
 
   const [filteredData, setFilteredData] = useState([]);
-  // const [highlightsData, setHighlightsData] = useState([]);
-  const [highlightsData, setHighlightsData] = useState([
-    {
-      patientInfo: {
-        patientId: 1,
-        patientName: 'Alice Lee',
-        patientPhoto:
-          'https://res.cloudinary.com/dbpearfyp/image/upload/v1640487405/Patient/Alice_Lee_Sxxxx567D/ProfilePicture/zsw7dyprsvn0bjmatofg.jpg',
-      },
-      highlights: [
-        {
-          highlightID: 1,
-          highlightTypeID: 2,
-          highlightType: 'newAllergy',
-          highlightJson: {
-            id: 36,
-            value: 'New allergy to prawn.',
-          },
-          startDate: '2022-12-28T08:21:54.639Z',
-          endDate: '2022-12-28T08:21:54.639Z',
-        },
-        {
-          highlightID: 2,
-          highlightTypeID: 4,
-          highlightType: 'abnormalVital',
-          highlightJson: {
-            id: 37,
-            value: 'Heartbeat faster than usual.',
-          },
-          startDate: '2022-12-28T08:21:54.639Z',
-          endDate: '2022-12-28T08:21:54.639Z',
-        },
-      ],
-    },
-    {
-      patientInfo: {
-        patientId: 4,
-        patientName: 'Bi Gong',
-        patientPhoto:
-          'https://res.cloudinary.com/dbpearfyp/image/upload/v1634522583/Patient/Bi_Gong_Sxxxx443F/ProfilePicture/dwo0axohyhur5mp16lep.jpg',
-      },
-      highlights: [
-        {
-          highlightID: 3,
-          highlightTypeID: 1,
-          highlightType: 'newPrescription',
-          highlightJson: {
-            id: 38,
-            value: 'New prescription for blood pressure.',
-          },
-          startDate: '2022-12-28T08:21:54.639Z',
-          endDate: '2022-12-28T08:21:54.639Z',
-        },
-        {
-          highlightID: 4,
-          highlightTypeID: 6,
-          highlightType: 'medicalHistory',
-          highlightJson: {
-            id: 39,
-            value: 'New diagnosis for dementia.',
-          },
-          startDate: '2022-12-28T08:21:54.639Z',
-          endDate: '2022-12-28T08:21:54.639Z',
-        },
-      ],
-    },
-    {
-      patientInfo: {
-        patientId: 2,
-        patientName: 'Yan Yi',
-        patientPhoto:
-          'https://res.cloudinary.com/dbpearfyp/image/upload/v1634521792/Patient/Yan_Yi_Sxxxx148C/ProfilePicture/g5gnecfsoc8igp56dwnb.jpg',
-      },
-      highlights: [
-        {
-          highlightID: 5,
-          highlightTypeID: 4,
-          highlightType: 'abnormalVital',
-          highlightJson: {
-            id: 40,
-            value: 'Blood pressure lower than usual.',
-          },
-          startDate: '2022-12-28T08:21:54.639Z',
-          endDate: '2022-12-28T08:21:54.639Z',
-        },
-      ],
-    },
-    {
-      patientInfo: {
-        patientId: 5,
-        patientName: 'Hui Wen',
-        patientPhoto: null,
-      },
-      highlights: [
-        {
-          highlightID: 5,
-          highlightTypeID: 3,
-          highlightType: 'newActivityExclusion',
-          highlightJson: {
-            id: 40,
-            value: 'Should not do jumping activities.',
-          },
-          startDate: '2022-12-28T08:21:54.639Z',
-          endDate: '2022-12-28T08:21:54.639Z',
-        },
-      ],
-    },
-  ]);
+  const [highlightsData, setHighlightsData] = useState([]);
+  // const [highlightsData, setHighlightsData] = useState([
+  //   {
+  //     patientInfo: {
+  //       patientId: 1,
+  //       patientName: 'Alice Lee',
+  //       patientPhoto:
+  //         'https://res.cloudinary.com/dbpearfyp/image/upload/v1640487405/Patient/Alice_Lee_Sxxxx567D/ProfilePicture/zsw7dyprsvn0bjmatofg.jpg',
+  //     },
+  //     highlights: [
+  //       {
+  //         highlightID: 1,
+  //         highlightTypeID: 2,
+  //         highlightType: 'newAllergy',
+  //         highlightJson: {
+  //           id: 36,
+  //           value: 'New allergy to prawn.',
+  //         },
+  //         startDate: '2022-12-28T08:21:54.639Z',
+  //         endDate: '2022-12-28T08:21:54.639Z',
+  //       },
+  //       {
+  //         highlightID: 2,
+  //         highlightTypeID: 4,
+  //         highlightType: 'abnormalVital',
+  //         highlightJson: {
+  //           id: 37,
+  //           value: 'Heartbeat faster than usual.',
+  //         },
+  //         startDate: '2022-12-28T08:21:54.639Z',
+  //         endDate: '2022-12-28T08:21:54.639Z',
+  //       },
+  //     ],
+  //   },
+  //   {
+  //     patientInfo: {
+  //       patientId: 4,
+  //       patientName: 'Bi Gong',
+  //       patientPhoto:
+  //         'https://res.cloudinary.com/dbpearfyp/image/upload/v1634522583/Patient/Bi_Gong_Sxxxx443F/ProfilePicture/dwo0axohyhur5mp16lep.jpg',
+  //     },
+  //     highlights: [
+  //       {
+  //         highlightID: 3,
+  //         highlightTypeID: 1,
+  //         highlightType: 'newPrescription',
+  //         highlightJson: {
+  //           id: 38,
+  //           value: 'New prescription for blood pressure.',
+  //         },
+  //         startDate: '2022-12-28T08:21:54.639Z',
+  //         endDate: '2022-12-28T08:21:54.639Z',
+  //       },
+  //       {
+  //         highlightID: 4,
+  //         highlightTypeID: 6,
+  //         highlightType: 'medicalHistory',
+  //         highlightJson: {
+  //           id: 39,
+  //           value: 'New diagnosis for dementia.',
+  //         },
+  //         startDate: '2022-12-28T08:21:54.639Z',
+  //         endDate: '2022-12-28T08:21:54.639Z',
+  //       },
+  //     ],
+  //   },
+  //   {
+  //     patientInfo: {
+  //       patientId: 2,
+  //       patientName: 'Yan Yi',
+  //       patientPhoto:
+  //         'https://res.cloudinary.com/dbpearfyp/image/upload/v1634521792/Patient/Yan_Yi_Sxxxx148C/ProfilePicture/g5gnecfsoc8igp56dwnb.jpg',
+  //     },
+  //     highlights: [
+  //       {
+  //         highlightID: 5,
+  //         highlightTypeID: 4,
+  //         highlightType: 'abnormalVital',
+  //         highlightJson: {
+  //           id: 40,
+  //           value: 'Blood pressure lower than usual.',
+  //         },
+  //         startDate: '2022-12-28T08:21:54.639Z',
+  //         endDate: '2022-12-28T08:21:54.639Z',
+  //       },
+  //     ],
+  //   },
+  //   {
+  //     patientInfo: {
+  //       patientId: 5,
+  //       patientName: 'Hui Wen',
+  //       patientPhoto: null,
+  //     },
+  //     highlights: [
+  //       {
+  //         highlightID: 5,
+  //         highlightTypeID: 3,
+  //         highlightType: 'newActivityExclusion',
+  //         highlightJson: {
+  //           id: 40,
+  //           value: 'Should not do jumping activities.',
+  //         },
+  //         startDate: '2022-12-28T08:21:54.639Z',
+  //         endDate: '2022-12-28T08:21:54.639Z',
+  //       },
+  //     ],
+  //   },
+  // ]);
 
   useEffect(() => {
     // Fetches data from highlights api
@@ -209,6 +210,7 @@ function PatientDailyHighlights(props) {
       console.log('Error occurred', response);
       setIsLoading(false);
       setIsError(true);
+      setErrorStatusCode(response.status);
       return;
     }
     setIsLoading(false);
@@ -255,6 +257,27 @@ function PatientDailyHighlights(props) {
   };
 
   const noDataMessage = () => {
+    if (isError) {
+      if (errorStatusCode == 401) {
+        return (
+          <Text style={[styles.modalText, styles.modalErrorText]}>
+            Error: User is not authenticated.
+          </Text>
+        );
+      } else if (errorStatusCode >= 500) {
+        return (
+          <Text style={[styles.modalText, styles.modalErrorText]}>
+            Error: Server is down. Please try again later.
+          </Text>
+        );
+      }
+      return (
+        <Text style={[styles.modalText, styles.modalErrorText]}>
+          {errorStatusCode} error has occurred.
+        </Text>
+      );
+    }
+
     return (
       <Text style={styles.modalText}>No patient changes found today.</Text>
     );
@@ -403,6 +426,10 @@ const styles = StyleSheet.create({
   },
   modalText: {
     marginTop: 15,
+    marginLeft: 10,
+  },
+  modalErrorText: {
+    color: 'red',
   },
   searchBarContainer: {
     backgroundColor: 'white',
