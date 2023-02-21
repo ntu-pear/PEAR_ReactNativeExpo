@@ -27,14 +27,14 @@ export function PatientAddScreen(props) {
 
   const patientData = {
     patientInfo: {
-      FirstName: '',
+      FirstName: 'Patient',
       LastName: '',
-      PreferredName: '',
+      PreferredName: 'Patient',
       PreferredLanguageListID: 1,
       NRIC: 'S0948274A',
       Address: 'MyHome',
       HomeNo: '61236123',
-      HandphoneNo: '61236123',
+      HandphoneNo: '91236123',
       Gender: 'M',
       DOB: newDate,
       StartDate: newDate,
@@ -88,14 +88,14 @@ export function PatientAddScreen(props) {
   // and to set component list
   const nextQuestionHandler = (page = '', list = []) => {
     componentHandler(page, list);
-    setStep(step + 1);
+    setStep((prevStep) => prevStep + 1);
   };
 
   // function for going to previous step by decreasing step state by 1
   // and to set component list
   const prevQuestionHandler = (page = '', list = []) => {
     componentHandler(page, list);
-    setStep(step - 1);
+    setStep((prevStep) => prevStep - 1);
   };
 
   // Reference: https://docs.expo.dev/versions/latest/sdk/imagepicker/

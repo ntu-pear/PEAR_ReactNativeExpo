@@ -57,9 +57,9 @@ const addPatientForm = (arr, str, patientData) => {
 //   return client.get(endpoint, params);
 // };
 
-const getPatientList = async (maskNRIC) => {
+const getPatientList = async (maskNRIC = true) => {
   // Error Handling
-  maskNRIC ? (maskNRIC = true) : (maskNRIC = false);
+  // maskNRIC ? (maskNRIC = true) : (maskNRIC = false);
 
   return client.get(patientList, maskNRIC);
 };

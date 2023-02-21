@@ -1,32 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Box, Input, FormControl, Text, Select, Divider } from 'native-base';
 import colors from 'app/config/colors';
 import typography from 'app/config/typography';
-import listApi from 'app/api/lists';
 
 function AddPatientGuardian({ i, title, formData, handleFormData }) {
-  const [listOfRelationships, setListOfRelationships] = useState([]);
-
   const page = 'guardianInfo';
   const guardian = formData.guardianInfo[i]; //guardianInfo[0].FirstName
 
-  // Get List of Relationships from List API
-  const getRelationshipList = async () => {
-    const response = await listApi.getRelationshipList();
-    if (!response.ok) {
-      console.log(
-        'An error occured when getting list of relationships',
-        response,
-      );
-      return;
-    }
-    setListOfRelationships(response.data);
-  };
-
-  useEffect(() => {
-    console.log('Calling API');
-    getRelationshipList();
-  }, []);
+  // constant values for relationships
+  const listOfRelationships = [
+    { list_RelationshipID: 1, value: 'Husband' },
+    { list_RelationshipID: 2, value: 'Wife' },
+    { list_RelationshipID: 3, value: 'Child' },
+    { list_RelationshipID: 4, value: 'Parent' },
+    { list_RelationshipID: 5, value: 'Sibling' },
+    { list_RelationshipID: 6, value: 'Grandchild' },
+    { list_RelationshipID: 7, value: 'Friend' },
+    { list_RelationshipID: 8, value: 'Nephew' },
+    { list_RelationshipID: 9, value: 'Niece' },
+    { list_RelationshipID: 10, value: 'Aunt' },
+    { list_RelationshipID: 11, value: 'Uncle' },
+    { list_RelationshipID: 12, value: 'Grandparent' },
+  ];
 
   return (
     <Box>
@@ -90,15 +85,6 @@ function AddPatientGuardian({ i, title, formData, handleFormData }) {
           onChangeText={handleFormData(page, 'ContactNo', i)}
         />
       </FormControl>
-
-      {/* <FormControl>
-        <FormControl.Label>Guardian's Home Telephone No.</FormControl.Label>
-        <Input
-          placeholder="Guardian's Home Telephone Number (Optional)"
-          value={guardian.guardianHomeTel}
-          onChangeText={handleFormData(page, 'guardianHomeTel', i)}
-        />
-      </FormControl> */}
 
       <FormControl>
         <FormControl.Label>Guardian Email </FormControl.Label>
