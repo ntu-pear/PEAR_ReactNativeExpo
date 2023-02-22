@@ -21,40 +21,37 @@ function AddPatientBottomButtons({
   const navigation = useNavigation();
 
   // useNavigate() hook cannot work on mobile
+  // eslint-disable-next-line
   const navigate = Platform.OS === 'web' ? useNavigate() : null;
 
   const onPressSubmit = async () => {
     const result = await patientApi.addPatient(formData);
-    console.log('resulttsssss', result);
 
     let alertTxt = '';
+    let alertTitle = '';
+    let alertDetails = '';
+
     if (result.ok) {
       const allocations = result.data.data.patientAllocationDTO;
       const caregiver = allocations.caregiverName;
       const doctor = allocations.doctorName;
       const gameTherapist = allocations.gameTherapistName;
 
-      // Alert.alert(
-      //   'Successfully added Patient',
-      //   `Patient has been allocated to\nCaregiver: ${caregiver}\nDoctor: ${doctor}\nGame Therapist: ${gameTherapist}`,
-      // );
-      // navigation.navigate(routes.PATIENTS_SCREEN);
-      alertTxt = `Successfully added Patient\nPatient has been allocated to\nCaregiver: ${caregiver}\nDoctor: ${doctor}\nGame Therapist: ${gameTherapist}`;
+      alertTitle = 'Successfully added Patient';
+      alertDetails = `Patient has been allocated to\nCaregiver: ${caregiver}\nDoctor: ${doctor}\nGame Therapist: ${gameTherapist}`;
+      alertTxt = alertTitle + alertDetails;
       Platform.OS === 'web'
         ? navigate('/' + routes.PATIENTS)
         : navigation.navigate(routes.PATIENTS_SCREEN);
     } else {
       const errors = result.data.message;
-      // for (const error in errors) {
-      //   str += errors[error] + '.\n';
-      // }
-      // Alert.alert(
-      //   'Error in Adding Patient',
-      //   `\n${errors}.\n\nPlease try again.`,
-      // );
-      alertTxt = `Error in Adding Patient\n${errors}.\n\nPlease try again.`;
+      alertTitle = 'Error in Adding Patient';
+      alertDetails = `\n${errors}.\n\nPlease try again.`;
+      alertTxt = alertTitle + alertDetails;
     }
-    Platform.OS === 'web' ? alert(alertTxt) : Alert.alert(alertTxt);
+    Platform.OS === 'web'
+      ? alert(alertTxt)
+      : Alert.alert(alertTitle, alertDetails);
   };
 
   return (
