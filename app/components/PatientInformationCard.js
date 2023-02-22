@@ -69,22 +69,22 @@ function PatientInformationCard(props) {
               resizeMode="cover"
               size="2xl"
               source={{
-                uri: `${patientProfile.profilePicture}`,
+                uri: `${patientProfile?.profilePicture}`,
               }}
             />
             <Center mt="1">
               <Text bold fontSize="2xl">
-                {`${patientProfile.firstName} ${patientProfile.lastName}`}
+                {`${patientProfile?.firstName} ${patientProfile?.lastName}`}
               </Text>
             </Center>
             <Center mt="1">
               <Text italic fontSize="2xl">
-                {`${patientProfile.preferredName}`}
+                {`${patientProfile?.preferredName}`}
               </Text>
             </Center>
             <Center mt="1">
               <Text italic fontSize="2xl">
-                {patientProfile.gender === 'F' ? 'Female' : 'Male'}
+                {patientProfile?.gender === 'F' ? 'Female' : 'Male'}
               </Text>
             </Center>
           </Center>
@@ -96,7 +96,7 @@ function PatientInformationCard(props) {
             </Text>
           </Box>
           <Box mr="2">
-            <Text italic fontSize="xl">{`${patientProfile.nric}`}</Text>
+            <Text italic fontSize="xl">{`${patientProfile?.nric}`}</Text>
           </Box>
 
           <Box>
@@ -106,7 +106,7 @@ function PatientInformationCard(props) {
           </Box>
           <Box>
             <Text italic fontSize="xl">
-              {`${calcAge(patientProfile.dob)}`}
+              {`${calcAge(patientProfile?.dob)}`}
             </Text>
           </Box>
         </HStack>
@@ -119,7 +119,7 @@ function PatientInformationCard(props) {
           </Box>
           <Box>
             <Text italic fontSize="xl">
-              {`${extractFullYear(patientProfile.dob)}`}
+              {`${extractFullYear(patientProfile?.dob)}`}
             </Text>
           </Box>
         </HStack>
@@ -131,7 +131,7 @@ function PatientInformationCard(props) {
           </Box>
           <Box>
             <Text italic fontSize="xl">
-              {`${patientProfile.preferredLanguage}`}
+              {`${patientProfile?.preferredLanguage}`}
             </Text>
           </Box>
         </HStack>

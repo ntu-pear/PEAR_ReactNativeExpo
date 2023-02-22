@@ -90,6 +90,7 @@ function AddPatientAllergy({ i, title, formData, handleFormData }) {
               key={item}
               label={item.value}
               value={item.list_AllergyReactionID}
+              key={item.list_AllergyReactionID}
             />
           ))}
         </Select>

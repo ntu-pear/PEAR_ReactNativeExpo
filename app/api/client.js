@@ -5,6 +5,7 @@ import { Platform } from 'react-native';
 
 const baseURL = 'https://coremvc.fyp2017.com/api';
 // for CORS error
+// API for local BE
 // const baseURLWeb = 'http://localhost:5383/api';
 // API for BE staging stage
 const baseURLWeb = 'https://ntu-fyp-pear-core.azurewebsites.net/api';
@@ -18,7 +19,6 @@ const apiClient = create({
   // baseURL: Platform.OS === 'web' ? baseURLWeb : baseURL,
   baseURL,
 });
-
 // Method override on apiClient.get()
 const { get } = apiClient;
 apiClient.get = async (url, params, axiosConfig) => {
