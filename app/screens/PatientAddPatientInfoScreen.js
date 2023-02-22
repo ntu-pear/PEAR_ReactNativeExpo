@@ -29,7 +29,7 @@ export function PatientAddPatientInfoScreen(props) {
 
   const page = 'patientInfo';
   const patient = formData.patientInfo;
-  // console.log('patient Info', patient);
+
   // constant values for languages
   const listOfLanguages = [
     { list_LanguageID: 1, value: 'Cantonese' },
@@ -117,7 +117,11 @@ export function PatientAddPatientInfoScreen(props) {
               onValueChange={handleFormData(page, 'PreferredLanguageListID')}
             >
               {listOfLanguages.map((item) => (
-                <Select.Item label={item.value} value={item.list_LanguageID} />
+                <Select.Item
+                  key={item}
+                  label={item.value}
+                  value={item.list_LanguageID}
+                />
               ))}
             </Select>
           </FormControl>

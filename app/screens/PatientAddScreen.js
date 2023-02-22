@@ -160,7 +160,6 @@ export function PatientAddScreen(props) {
     case 1:
       return (
         <PatientAddPatientInfoScreen
-          key={1}
           nextQuestionHandler={nextQuestionHandler}
           handleFormData={handleFormData}
           formData={formData}
@@ -173,7 +172,6 @@ export function PatientAddScreen(props) {
     case 2:
       return (
         <PatientAddGuardianScreen
-          key={2}
           nextQuestionHandler={nextQuestionHandler}
           prevQuestionHandler={prevQuestionHandler}
           handleFormData={handleFormData}
@@ -185,7 +183,6 @@ export function PatientAddScreen(props) {
     case 3:
       return (
         <PatientAddAllergyScreen
-          key={3}
           nextQuestionHandler={nextQuestionHandler}
           prevQuestionHandler={prevQuestionHandler}
           handleFormData={handleFormData}
