@@ -59,7 +59,6 @@ export function PatientAddGuardianScreen(props) {
     removeFormData();
   };
 
-  console.log(formData);
   return (
     <ScrollView>
       <Box alignItems="center">

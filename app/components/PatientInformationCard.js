@@ -61,9 +61,10 @@ function PatientInformationCard(props) {
               mt="2"
               alt="patient_image"
               borderRadius="full"
+              // TODO: to display a meaningful image if image fails to render - display pear icon (this is a quick fix)
               // Note: This is a fall-back uri. Will only be used if source fails to render the image.
               fallbackSource={{
-                uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1640487405/Patient/Alice_Lee_Sxxxx567D/ProfilePicture/zsw7dyprsvn0bjmatofg.jpg',
+                uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1677039560/Assets/jzfbdl15jstf8bgt5ax0.png',
               }}
               resizeMode="cover"
               size="2xl"

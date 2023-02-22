@@ -73,9 +73,9 @@ function AddPatientGuardian({ i, title, formData, handleFormData }) {
         >
           {listOfRelationships.map((item) => (
             <Select.Item
+              key={item}
               label={item.value}
               value={item.list_RelationshipID}
-              key={item.list_RelationshipID}
             />
           ))}
         </Select>

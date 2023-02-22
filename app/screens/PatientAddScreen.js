@@ -107,10 +107,18 @@ export function PatientAddScreen(props) {
       aspect: [4, 3],
       quality: 1,
     });
+    console.log('after picking picture', result);
+    const uriStr = result.uri;
+    const fileName = result.uri.split('/').pop();
+    const fileType = fileName.split('.').pop();
 
     if (!result.cancelled) {
       var img = formData[page];
-      img[input] = result.uri;
+      img[input] = {
+        uri: uriStr,
+        name: fileName.split('.')[0],
+        type: `image/${fileType}`,
+      };
 
       setFormData((prevState) => ({
         ...prevState,
@@ -162,7 +170,6 @@ export function PatientAddScreen(props) {
     case 1:
       return (
         <PatientAddPatientInfoScreen
-          key={1}
           nextQuestionHandler={nextQuestionHandler}
           handleFormData={handleFormData}
           formData={formData}
@@ -175,7 +182,6 @@ export function PatientAddScreen(props) {
     case 2:
       return (
         <PatientAddGuardianScreen
-          key={2}
           nextQuestionHandler={nextQuestionHandler}
           prevQuestionHandler={prevQuestionHandler}
           handleFormData={handleFormData}
@@ -187,7 +193,6 @@ export function PatientAddScreen(props) {
     case 3:
       return (
         <PatientAddAllergyScreen
-          key={3}
           nextQuestionHandler={nextQuestionHandler}
           prevQuestionHandler={prevQuestionHandler}
           handleFormData={handleFormData}

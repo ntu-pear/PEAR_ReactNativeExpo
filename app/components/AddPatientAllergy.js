@@ -70,9 +70,9 @@ function AddPatientAllergy({ i, title, formData, handleFormData }) {
         >
           {listOfAllergies.map((item) => (
             <Select.Item
+              key={item}
               label={item.value}
               value={item.list_AllergyID}
-              key={item.list_AllergyID}
             />
           ))}
         </Select>
@@ -87,6 +87,7 @@ function AddPatientAllergy({ i, title, formData, handleFormData }) {
         >
           {listOfAllergyReactions.map((item) => (
             <Select.Item
+              key={item}
               label={item.value}
               value={item.list_AllergyReactionID}
               key={item.list_AllergyReactionID}
