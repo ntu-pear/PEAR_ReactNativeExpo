@@ -59,6 +59,7 @@ function AddPatientBottomButtons({
         ? alert(alertTxt)
         : Alert.alert(alertTitle, alertDetails);
     }
+    Platform.OS === 'web' ? alert(alertTxt) : Alert.alert(alertTxt);
   };
 
   return (
