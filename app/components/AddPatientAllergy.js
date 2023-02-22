@@ -13,7 +13,39 @@ import typography from 'app/config/typography';
 
 function AddPatientAllergy({ i, title, formData, handleFormData }) {
   const page = 'allergyInfo';
-  const allergy = formData.allergyInfo[i]; //allergyList[0].allergyName
+  const allergy = formData.allergyInfo[i]; //allergyInfo[0].allergyName
+
+  // constant values for list of allergies
+  const listOfAllergies = [
+    // { list_AllergyID: 1, value: 'To Be Updated' },
+    { list_AllergyID: 2, value: 'None' },
+    { list_AllergyID: 3, value: 'Corn' },
+    { list_AllergyID: 4, value: 'Eggs' },
+    { list_AllergyID: 5, value: 'Fish' },
+    { list_AllergyID: 6, value: 'Meat' },
+    { list_AllergyID: 7, value: 'Milk' },
+    { list_AllergyID: 8, value: 'Peanuts' },
+    { list_AllergyID: 9, value: 'Tree nuts' },
+    { list_AllergyID: 10, value: 'Shellfish' },
+    { list_AllergyID: 11, value: 'Soy' },
+    { list_AllergyID: 12, value: 'Wheat' },
+    { list_AllergyID: 13, value: 'Seafood' },
+  ];
+
+  // constant values for list of allergy reactions
+  const listOfAllergyReactions = [
+    { list_AllergyReactionID: 1, value: 'Rashes' },
+    { list_AllergyReactionID: 2, value: 'Sneezing' },
+    { list_AllergyReactionID: 3, value: 'Vomitting' },
+    { list_AllergyReactionID: 4, value: 'Nausea' },
+    { list_AllergyReactionID: 5, value: 'Swelling' },
+    { list_AllergyReactionID: 6, value: 'Difficulty Breathing' },
+    { list_AllergyReactionID: 7, value: 'Diarrhea' },
+    { list_AllergyReactionID: 8, value: 'Abdominal cramp or pain' },
+    { list_AllergyReactionID: 9, value: 'Nasal Congestion' },
+    { list_AllergyReactionID: 10, value: 'Itching' },
+    { list_AllergyReactionID: 11, value: 'Hives' },
+  ];
 
   return (
     <Box>
@@ -33,40 +65,43 @@ function AddPatientAllergy({ i, title, formData, handleFormData }) {
         <FormControl.Label>Allergy</FormControl.Label>
         <Select
           placeholder="Select Allergy"
-          selectedValue={allergy.allergyName}
-          onValueChange={handleFormData(page, 'allergyName', i)}
+          selectedValue={allergy.AllergyListID}
+          onValueChange={handleFormData(page, 'AllergyListID', i)}
         >
-          <Select.Item label="To Be Updated" value="1" />
-          <Select.Item label="None" value="2" />
-          <Select.Item label="Corn" value="3" />
-          <Select.Item label="Eggs" value="4" />
-          <Select.Item label="Fish" value="5" />
-          <Select.Item label="Meat" value="6" />
-          <Select.Item label="Milk" value="7" />
-          <Select.Item label="Peanuts" value="8" />
-          <Select.Item label="Tree nuts" value="9" />
-          <Select.Item label="Shellfish" value="10" />
-          <Select.Item label="Soy" value="11" />
-          <Select.Item label="Wheat" value="12" />
-          <Select.Item label="Seafood" value="13" />
+          {listOfAllergies.map((item) => (
+            <Select.Item
+              key={item}
+              label={item.value}
+              value={item.list_AllergyID}
+            />
+          ))}
         </Select>
       </FormControl>
 
       <FormControl>
         <FormControl.Label>Reaction</FormControl.Label>
-        <Input
-          placeholder="Allergy Reaction"
-          value={allergy.allergyReaction}
-          onChangeText={handleFormData(page, 'allergyReaction', i)}
-        />
+        <Select
+          placeholder="Select Allergy Reaction"
+          selectedValue={allergy.AllergyReactionListID}
+          onValueChange={handleFormData(page, 'AllergyReactionListID', i)}
+        >
+          {listOfAllergyReactions.map((item) => (
+            <Select.Item
+              key={item}
+              label={item.value}
+              value={item.list_AllergyReactionID}
+              key={item.list_AllergyReactionID}
+            />
+          ))}
+        </Select>
       </FormControl>
 
       <FormControl>
-        <FormControl.Label>Notes</FormControl.Label>
+        <FormControl.Label>Remarks</FormControl.Label>
         <TextArea
-          placeholder="Notes (optional)"
-          value={allergy.allergyNotes}
-          onChangeText={handleFormData(page, 'allergyNotes', i)}
+          placeholder="Remarks (optional)"
+          value={allergy.AllergyRemarks}
+          onChangeText={handleFormData(page, 'AllergyRemarks', i)}
         />
       </FormControl>
     </Box>

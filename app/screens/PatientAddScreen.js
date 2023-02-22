@@ -255,7 +255,13 @@ export function PatientAddScreen(props) {
     (e, date = null) => {
       if (page === 'patientInfo') {
         const newData = formData[page];
-        date ? (newData[input] = date) : (newData[input] = e); // eg. guardianInfo[0].FirstName = e
+        newData[input] = date
+          ? date
+          : e['$d'] //e['$d']-check if input from MUI date-picker
+          ? e['$d']
+          : parseInt(e) // check if integer (for dropdown)
+          ? parseInt(e) // change to integer
+          : e; // eg. guardianInfo[0].FirstName = e
 
         setFormData((prevState) => ({
           ...prevState,

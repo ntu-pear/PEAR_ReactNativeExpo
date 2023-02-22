@@ -8,9 +8,6 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import TextField from '@mui/material/TextField';
-import ErrorMessage from 'app/components/ErrorMessage';
-import typography from 'app/config/typography';
-import colors from 'app/config/colors';
 
 function DatePickerComponent({
   label,
@@ -20,27 +17,14 @@ function DatePickerComponent({
   handleFormData,
   show,
   setShow,
-  isChecked,
 }) {
   // handle state of picker for android
   const showPicker = (input) => (e) => {
     setShow((prevState) => ({
       ...prevState,
-      [input]: !prevState[input],
+      [input]: true,
     }));
   };
-
-  const minimumDOB = new Date();
-  minimumDOB.setFullYear(minimumDOB.getFullYear() - 150);
-
-  const maximumDOB = new Date();
-  maximumDOB.setFullYear(maximumDOB.getFullYear() - 15);
-
-  const minimumDate = new Date();
-  minimumDate.setDate(minimumDate.getDate() - 30); // 30 days ago
-
-  const maximumDate = new Date();
-  maximumDate.setDate(maximumDate.getDate() + 30); // 30 days later
 
   return Platform.OS === 'ios' ? (
     <Box>
@@ -141,7 +125,6 @@ function DatePickerComponent({
       </LocalizationProvider>
     </Box>
   ) : (
-    // Platform.OS === 'android'
     <Box>
       {field == 'DOB' || field == 'StartDate' ? (
         <>
