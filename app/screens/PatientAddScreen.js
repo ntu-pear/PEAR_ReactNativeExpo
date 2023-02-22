@@ -107,10 +107,18 @@ export function PatientAddScreen(props) {
       aspect: [4, 3],
       quality: 1,
     });
+    console.log('after picking picture', result);
+    const uriStr = result.uri;
+    const fileName = result.uri.split('/').pop();
+    const fileType = fileName.split('.').pop();
 
     if (!result.cancelled) {
       var img = formData[page];
-      img[input] = result.uri;
+      img[input] = {
+        uri: uriStr,
+        name: fileName.split('.')[0],
+        type: `image/${fileType}`,
+      };
 
       setFormData((prevState) => ({
         ...prevState,
