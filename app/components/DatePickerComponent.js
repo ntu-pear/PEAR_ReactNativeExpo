@@ -129,6 +129,17 @@ function DatePickerComponent({
         />
       </LocalizationProvider>
     </Box>
+  ) : Platform.OS === 'web' ? (
+    <Box>
+      <FormControl.Label>{label} </FormControl.Label>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <DatePicker
+          value={value}
+          onChange={handleFormData(page, field)}
+          renderInput={(params) => <TextField {...params} />}
+        />
+      </LocalizationProvider>
+    </Box>
   ) : (
     // Platform.OS === 'android'
     <Box>

@@ -1,64 +1,72 @@
 import React, { useState } from 'react';
-import { Box, ScrollView, VStack, Center } from 'native-base';
+import { Box, ScrollView, Progress } from 'native-base';
 import AddPatientAllergy from 'app/components/AddPatientAllergy';
 import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import AddPatientProgress from 'app/components/AddPatientProgress';
 
-function PatientAddAllergyScreen(props) {
+export function PatientAddAllergyScreen(props) {
   const {
     prevQuestionHandler,
     formData,
+    setFormData,
     handleFormData,
     componentList,
-    validateStep,
-    errorMessage,
-    concatFormData,
-    removeFormData,
   } = props;
-
   const [allergyInfoDisplay, setAllergyInfoDisplay] = useState(
     componentList.allergy,
   );
 
-  const addNewAllergyComponent = () => {
-    setAllergyInfoDisplay([...allergyInfoDisplay, {}]);
-    concatFormData('allergyInfo', {
-      AllergyListID: null,
-      AllergyReactionListID: null,
+  const concatFormData = () => {
+    var allergyInfo = formData.allergyInfo.concat({
+      AllergyListID: 1,
+      AllergyReactionListID: 1,
       AllergyRemarks: '',
     });
+    setFormData((prevState) => ({
+      ...prevState,
+      allergyInfo,
+    }));
+  };
+
+  const removeFormData = () => {
+    var allergyInfo = [...formData.allergyInfo];
+    allergyInfo.pop();
+    setFormData((prevState) => ({
+      ...prevState,
+      allergyInfo,
+    }));
+  };
+
+  const addNewAllergyComponent = () => {
+    setAllergyInfoDisplay([...allergyInfoDisplay, {}]);
+    concatFormData();
   };
 
   const removeAllergyComponent = (index) => {
     const list = [...allergyInfoDisplay];
     list.splice(index, 1);
     setAllergyInfoDisplay(list);
-    removeFormData('allergyInfo');
+    removeFormData();
   };
 
   return (
     <ScrollView>
       <Box alignItems="center">
-        <Box w="100%">
-          <VStack>
-            <Center>
-              <AddPatientProgress value={100} />
-              {allergyInfoDisplay
-                ? allergyInfoDisplay.map((item, index) => (
-                    <Box w="100%" key={index}>
-                      <AddPatientAllergy
-                        key={item}
-                        i={index}
-                        title={index + 1}
-                        formData={formData}
-                        handleFormData={handleFormData}
-                        errorMessage={errorMessage}
-                      />
-                    </Box>
-                  ))
-                : null}
-            </Center>
-          </VStack>
+        <Box w="75%">
+          <AddPatientProgress value={100} />
+          {allergyInfoDisplay
+            ? allergyInfoDisplay.map((item, index) => (
+                <Box key={index}>
+                  <AddPatientAllergy
+                    key={item}
+                    i={index}
+                    title={index + 1}
+                    formData={formData}
+                    handleFormData={handleFormData}
+                  />
+                </Box>
+              ))
+            : null}
         </Box>
         <AddPatientBottomButtons
           list={allergyInfoDisplay}
@@ -69,10 +77,8 @@ function PatientAddAllergyScreen(props) {
           removeComponent={removeAllergyComponent}
           submit={true}
           formData={formData}
-          validateStep={validateStep}
         />
       </Box>
     </ScrollView>
   );
 }
-export default PatientAddAllergyScreen;
