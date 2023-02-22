@@ -29,7 +29,7 @@ export function PatientAddPatientInfoScreen(props) {
 
   const page = 'patientInfo';
   const patient = formData.patientInfo;
-
+  // console.log('patient Info', patient);
   // constant values for languages
   const listOfLanguages = [
     { list_LanguageID: 1, value: 'Cantonese' },
@@ -64,7 +64,7 @@ export function PatientAddPatientInfoScreen(props) {
 
           <Box mt="3.5" mb="3.5" overflow="hidden" rounded="lg">
             <Center>
-              <Pressable onPress={pickImage(page, 'ProfilePicture')}>
+              <Pressable onPress={pickImage(page, 'UploadProfilePicture')}>
                 <Image
                   alt="patient_image"
                   borderRadius="full"
@@ -75,8 +75,8 @@ export function PatientAddPatientInfoScreen(props) {
                   resizeMode="cover"
                   size="xl"
                   source={{
-                    uri: patient.ProfilePicture
-                      ? `${patient.ProfilePicture}`
+                    uri: patient.UploadProfilePicture.uri
+                      ? `${patient.UploadProfilePicture.uri}`
                       : 'https://res.cloudinary.com/dbpearfyp/image/upload/v1673348736/Assets/bvtnichzakwtzwu2zqt5.jpg',
                   }}
                 />
