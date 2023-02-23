@@ -1,33 +1,35 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { useState } from 'react';
-import { Platform, Alert, StyleSheet } from 'react-native';
+import { Platform, Alert, StyleSheet, ActivityIndicator } from 'react-native';
 import {
   VStack,
   HStack,
   Input,
   FormControl,
   View,
-  Select,
+  Icon,
   Box,
   Center,
 } from 'native-base';
+import { MaterialIcons } from '@expo/vector-icons';
 import userApi from 'app/api/user';
-import typography from 'app/config/typography';
+import authStorage from 'app/auth/authStorage';
+import AuthContext from 'app/auth/context';
 import colors from 'app/config/colors';
-import errors from 'app/config/errors';
-
 import AppButton from 'app/components/AppButton';
 import ErrorMessage from 'app/components/ErrorMessage';
+import CustomFormControl from 'app/components/CustomFormControl';
 
 function ChangePasswordScreen(props) {
   const { navigation, route } = props;
-  const [oldPassword, setOldPassword] = useState(' ');
-  const [newPassword, setNewPassword] = useState(' ');
+  const [isLoading, setIsLoading] = useState(false);
+  const { setUser } = useContext(AuthContext);
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const [changeFailed, setChangeFailed] = useState(false);
-
-  const handleEmail = (e) => {
-    // TODO: get email from get user...
-  };
+  const [error, setError] = useState(' ');
+  const [showOld, setShowOld] = useState(false);
+  const [showNew, setShowNew] = useState(false);
 
   const handleOldPassword = (e) => {
     setOldPassword(e);
@@ -38,92 +40,72 @@ function ChangePasswordScreen(props) {
   };
 
   const onPressConfirm = async () => {
-    // TODO: check if it works?
-    // const result = await userApi.changePassword(email, oldPassword, newPassword);
-    // console.log(result)
-    // if (!result.ok) {
-    //   return setChangeFailed(true);
-    // }
+    // TODO: hide visibility of pw...
+    setIsLoading(true);
+    const currentUser = await authStorage.getUser();
+    const result = await userApi.changePassword(
+      currentUser.email,
+      oldPassword,
+      newPassword,
+    );
+    console.log(result.data);
+    if (!result.ok) {
+      setIsLoading(false);
+      setError(result.data.message);
+      return setChangeFailed(true);
+    }
 
-    console.log(oldPassword, newPassword);
-
-    setChangeFailed(true);
-    // Alert.alert('Instructions to reset password have been sent to email.');
-    // navigation.goBack();
+    setIsLoading(false);
+    setChangeFailed(false);
+    Alert.alert('Password changed successfully. Please login again.');
+    setUser(null);
+    await authStorage.removeToken();
   };
 
   return (
     <View>
       <VStack>
         <Center>
-          <FormControl maxW="80%" mt="5">
-            <VStack alignItems="flex-start">
-              <FormControl.Label
-                _text={{
-                  fontFamily: `${
-                    Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                  }`,
-                  fontWeight: 'bold',
-                }}
-              >
-                Old Password
-              </FormControl.Label>
-
-              <Input
-                color={colors.black_var1}
-                borderRadius="25"
-                height="50"
-                fontFamily={
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android
+          <CustomFormControl
+            title="Old Password"
+            onChangeText={handleOldPassword}
+            placeholder="Enter Old Password"
+            value={oldPassword}
+            InputRightElement={
+              <Icon
+                as={
+                  <MaterialIcons
+                    name={showOld ? 'visibility' : 'visibility-off'}
+                  />
                 }
-                onChangeText={handleOldPassword}
-                placeholder="Enter Old Password"
-                size="18"
-                w="100%"
+                color={colors.black}
+                mr="5"
+                onPress={() => setShowOld(!showOld)}
+                size={5}
               />
-            </VStack>
-          </FormControl>
+            }
+            // type={showOld ? 'text' : 'oldPassword'}
+          />
 
-          <FormControl maxW="80%" mt="5">
-            <VStack alignItems="flex-start">
-              <FormControl.Label
-                _text={{
-                  fontFamily: `${
-                    Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                  }`,
-                  fontWeight: 'bold',
-                }}
-              >
-                New Password
-              </FormControl.Label>
-
-              <Input
-                color={colors.black_var1}
-                borderRadius="25"
-                height="50"
-                fontFamily={
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                }
-                onChangeText={handleNewPassword}
-                placeholder="Enter New Password"
-                size="18"
-                w="100%"
-              />
-            </VStack>
-          </FormControl>
+          <CustomFormControl
+            title="New Password"
+            onChangeText={handleNewPassword}
+            placeholder="Enter New Password"
+          />
         </Center>
 
         <Center>
           <Box maxW="70%">
-            <ErrorMessage
-              visible={changeFailed}
-              message={errors.changePasswordError}
-            />
+            <ErrorMessage visible={changeFailed} message={error} />
           </Box>
         </Center>
 
         <View style={styles.buttonsContainer}>
-          <AppButton title="Confirm" color="green" onPress={onPressConfirm} />
+          {isLoading ? (
+            <ActivityIndicator color={colors.primary_overlay_color} />
+          ) : (
+            <AppButton title="Confirm" color="green" onPress={onPressConfirm} />
+          )}
         </View>
       </VStack>
     </View>
@@ -134,7 +116,7 @@ const styles = StyleSheet.create({
   buttonsContainer: {
     width: '50%',
     padding: 30,
-    alignSelf: 'flex-left',
+    alignSelf: 'flex-start',
   },
 });
 
