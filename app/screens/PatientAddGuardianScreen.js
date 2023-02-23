@@ -81,7 +81,7 @@ export function PatientAddGuardianScreen(props) {
         <AddPatientBottomButtons
           list={guardianInfoDisplay}
           nextQuestionHandler={() =>
-            nextQuestionHandler('guardian', guardianInfoDisplay)
+            nextQuestionHandler(formData, 'guardian', guardianInfoDisplay)
           }
           prevQuestionHandler={() =>
             prevQuestionHandler('guardian', guardianInfoDisplay)

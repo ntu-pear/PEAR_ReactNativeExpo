@@ -130,7 +130,7 @@ function AddPatientBottomButtons({
         {nextQuestionHandler ? (
           <Button
             bg={colors.green}
-            onPress={nextQuestionHandler}
+            onPress={() => nextQuestionHandler(formData)}
             leftIcon={
               <Icon as={<MaterialIcons name="chevron-right" />} color="white" />
             }

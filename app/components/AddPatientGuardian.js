@@ -56,6 +56,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData }) {
         <Input
           placeholder="Guardian NRIC"
           value={guardian.NRIC}
+          maxLength={9}
           onChangeText={handleFormData(page, 'NRIC', i)}
         />
       </FormControl>
@@ -80,6 +81,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData }) {
         <Input
           placeholder="Guardian's Handphone Number"
           value={guardian.ContactNo}
+          maxLength={8}
           onChangeText={handleFormData(page, 'ContactNo', i)}
         />
       </FormControl>{' '}

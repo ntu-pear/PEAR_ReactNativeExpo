@@ -141,6 +141,7 @@ export function PatientAddPatientInfoScreen(props) {
             <Input
               placeholder="NRIC"
               value={patient.NRIC}
+              maxLength={9}
               onChangeText={handleFormData(page, 'NRIC')}
             />
           </FormControl>
@@ -153,17 +154,28 @@ export function PatientAddPatientInfoScreen(props) {
             />
           </FormControl>
           <FormControl>
-            <FormControl.Label>Home Telephone No.</FormControl.Label>
+            <FormControl.Label>Temporary Address (Optional)</FormControl.Label>
+            <Input
+              placeholder="Temporary Address (Optional)"
+              value={patient.TempAddress}
+              onChangeText={handleFormData(page, 'TempAddress')}
+            />
+          </FormControl>
+          <FormControl>
+            <FormControl.Label>Home Telephone No. (Optional)</FormControl.Label>
             <Input
               placeholder="Home Telephone Number (Optional)"
+              keyboardType="numeric"
+              maxLength={8}
               value={patient.HomeNo}
               onChangeText={handleFormData(page, 'HomeNo')}
             />
           </FormControl>
           <FormControl>
-            <FormControl.Label>Handphone No.</FormControl.Label>
+            <FormControl.Label>Handphone No. (Optional)</FormControl.Label>
             <Input
               placeholder="Handphone Number (Optional)"
+              maxLength={8}
               value={patient.HandphoneNo}
               onChangeText={handleFormData(page, 'HandphoneNo')}
             />
@@ -180,6 +192,23 @@ export function PatientAddPatientInfoScreen(props) {
                 </Radio>
                 <Radio value="F" size="sm">
                   Female
+                </Radio>
+              </HStack>
+            </Radio.Group>
+          </FormControl>
+
+          <FormControl>
+            <FormControl.Label>Respite Care </FormControl.Label>
+            <Radio.Group
+              value={patient.IsRespiteCare}
+              onChange={handleFormData(page, 'IsRespiteCare')}
+            >
+              <HStack space={6}>
+                <Radio value={true} size="sm">
+                  Yes
+                </Radio>
+                <Radio value={false} size="sm">
+                  No
                 </Radio>
               </HStack>
             </Radio.Group>
@@ -215,7 +244,11 @@ export function PatientAddPatientInfoScreen(props) {
             setShow={setShow}
           />
         </Box>
-        <AddPatientBottomButtons nextQuestionHandler={nextQuestionHandler} />
+        <AddPatientBottomButtons
+          nextQuestionHandler={nextQuestionHandler}
+          formData={formData}
+          // validateStep={validateStep}
+        />
       </Box>
     </ScrollView>
   );

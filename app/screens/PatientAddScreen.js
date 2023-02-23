@@ -25,6 +25,82 @@ export function PatientAddScreen(props) {
 
   const newDate = new Date();
 
+  // validation using Joi
+  // Reference: https://www.npmjs.com/package/react-joi
+  const Joi = require('joi');
+
+  // Define a schema for data validation
+  const schema = {
+    patientInfo: Joi.object({
+      FirstName: Joi.string().required(),
+      LastName: Joi.string().required(),
+      PreferredName: Joi.string().required(),
+      PreferredLanguageListID: Joi.number().required(),
+      NRIC: Joi.string()
+        .regex(/^[A-Za-z]\d{7}[A-Za-z]$/)
+        .length(9)
+        .message('Invalid NRIC')
+        .required(),
+      Address: Joi.string().required(),
+      TempAddress: Joi.string().allow('').optional(),
+      HomeNo: Joi.string()
+        .regex(/^6[0-9]{7}$/)
+        .allow('')
+        .message('Invalid Home Telephone No.')
+        .optional(),
+      HandphoneNo: Joi.string()
+        .allow('')
+        .regex(/^[89]\d{7}$/)
+        .message('Invalid Handphone No.')
+        .optional(),
+      Gender: Joi.string().required(),
+      DOB: Joi.date().required(),
+      StartDate: Joi.date().required(),
+      EndDate: Joi.date().optional(),
+      PrivacyLevel: Joi.string().required(),
+      UpdateBit: Joi.boolean().required(),
+      AutoGame: Joi.boolean().required(),
+      IsActive: Joi.boolean().required(),
+      IsRespiteCare: Joi.boolean().required(),
+      TerminationReason: Joi.string().allow('').optional(),
+      InactiveReason: Joi.string().allow('').optional(),
+      ProfilePicture: Joi.string().allow('').optional(),
+      UploadProfilePicture: Joi.string().allow('').optional(),
+    }),
+    guardianInfo: Joi.array()
+      .items(
+        Joi.object({
+          FirstName: Joi.string().required(),
+          LastName: Joi.string().required(),
+          NRIC: Joi.string()
+            .regex(/^[A-Za-z]\d{7}[A-Za-z]$/)
+            .length(9)
+            .message('Invalid NRIC')
+            .required(),
+          Email: Joi.string()
+            .email({
+              tlds: { allow: false },
+            })
+            .required(),
+          RelationshipID: Joi.number().required(),
+          IsActive: Joi.boolean().required(),
+          ContactNo: Joi.string()
+            .regex(/^[89]\d{7}$/)
+            .message('Invalid Contact No.')
+            .required(),
+        }),
+      )
+      .min(1)
+      .max(2)
+      .required(),
+
+    allergyInfo: Joi.object({
+      AllergyListID: Joi.number().required(),
+      AllergyReactionListID: Joi.number().optional(),
+      AllergyRemarks: Joi.string().allow('').optional(),
+    }),
+  };
+
   const patientData = {
     patientInfo: {
       FirstName: 'Patient',
@@ -33,8 +109,9 @@ export function PatientAddScreen(props) {
       PreferredLanguageListID: 1,
       NRIC: 'S0948274A',
       Address: 'MyHome',
-      HomeNo: '61236123',
-      HandphoneNo: '91236123',
+      TempAddress: '',
+      HomeNo: '',
+      HandphoneNo: '',
       Gender: 'M',
       DOB: newDate,
       StartDate: newDate,
@@ -44,7 +121,6 @@ export function PatientAddScreen(props) {
       AutoGame: true,
       IsActive: true,
       IsRespiteCare: false,
-      TempAddress: 'MyHome',
       TerminationReason: '',
       InactiveReason: '',
       ProfilePicture: '',
@@ -84,11 +160,33 @@ export function PatientAddScreen(props) {
     }
   };
 
+  const validateStep = (formData) => {
+    const stepSchema = schema[Object.keys(schema)[step - 1]];
+    const toValidate = formData[Object.keys(formData)[step - 1]];
+
+    // Validate the form data against the schema
+    const { error } = stepSchema.validate(toValidate, { abortEarly: false });
+
+    if (error) {
+      // If there are validation errors, return an object indicating that the validation failed
+      const errors = error.details.map((detail) => detail.message);
+      return { success: false, errors };
+    } else {
+      return { success: true };
+    }
+  };
+
+  // for each step of form, validate the data against schema
   // function for going to next step by increasing step state by 1
   // and to set component list
-  const nextQuestionHandler = (page = '', list = []) => {
-    componentHandler(page, list);
-    setStep((prevStep) => prevStep + 1);
+  const nextQuestionHandler = (formData, page = '', list = []) => {
+    const proceed = validateStep(formData);
+
+    // If the validation is successful, continue to the next question
+    if (proceed.success) {
+      componentHandler(page, list);
+      setStep((prevStep) => prevStep + 1);
+    }
   };
 
   // function for going to previous step by decreasing step state by 1
@@ -163,25 +261,46 @@ export function PatientAddScreen(props) {
       }
       if (page === 'patientInfo') {
         const newData = formData[page];
-        newData[input] = date
-          ? date
-          : e['$d'] //e['$d']-check if input from MUI date-picker
-          ? e['$d']
-          : parseInt(e) // check if integer (for dropdown)
-          ? parseInt(e) // change to integer
-          : e; // eg. guardianInfo[0].FirstName = e
+
+        // additional check to convert HomeNo and HandphoneNo to string
+        if (input === 'HomeNo' || input === 'HandphoneNo') {
+          newData[input] = date
+            ? date
+            : e.$d //e['$d']-check if input from MUI date-picker
+            ? e.$d
+            : e.toString(); // convert to string
+        } else {
+          newData[input] = date
+            ? date
+            : e.$d //e['$d']-check if input from MUI date-picker
+            ? e.$d
+            : parseInt(e) // check if integer (for dropdown)
+            ? parseInt(e) // change to integer
+            : e; // eg. guardianInfo[0].FirstName = e
+        }
 
         setFormData((prevState) => ({
           ...prevState,
           [page]: newData,
         }));
       } else {
+        // guardianInfo or allergyInfo
         const newData = formData[page].slice();
-        newData[index][input] = date
-          ? date
-          : parseInt(e) // check if integer (for dropdown)
-          ? parseInt(e) // change to integer
-          : e; // eg. guardianInfo[0].FirstName = e
+
+        // additional check to convert ContactNo  to string
+        if (input === 'ContactNo') {
+          newData[index][input] = date
+            ? date
+            : parseInt(e) // check if integer (for dropdown)
+            ? parseInt(e).toString() // change to string
+            : e.toString(); // convert to string
+        } else {
+          newData[index][input] = date
+            ? date
+            : parseInt(e) // check if integer (for dropdown)
+            ? parseInt(e) // change to integer
+            : e; // eg. guardianInfo[0].FirstName = e
+        }
 
         setFormData((prevState) => ({
           ...prevState,
