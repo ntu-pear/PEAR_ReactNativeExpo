@@ -18,6 +18,7 @@ import errors from 'app/config/errors';
 
 import AppButton from 'app/components/AppButton';
 import ErrorMessage from 'app/components/ErrorMessage';
+import CustomFormControl from 'app/components/CustomFormControl';
 
 function ResetPasswordScreen(props) {
   const { navigation, route } = props;
@@ -30,10 +31,9 @@ function ResetPasswordScreen(props) {
   };
 
   const onPressReset = async () => {
-    // console.log(email, role)
-    // TODO: check if it works?
+    console.log(email, role);
     const result = await userApi.resetPassword(email, role);
-    // console.log(result)
+    console.log(result);
     if (!result.ok) {
       return setResetFailed(true);
     }
@@ -47,33 +47,11 @@ function ResetPasswordScreen(props) {
     <View>
       <VStack>
         <Center>
-          <FormControl maxW="80%" mt="5">
-            <VStack alignItems="flex-start">
-              <FormControl.Label
-                _text={{
-                  fontFamily: `${
-                    Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                  }`,
-                  fontWeight: 'bold',
-                }}
-              >
-                Email
-              </FormControl.Label>
-
-              <Input
-                color={colors.black_var1}
-                borderRadius="25"
-                height="50"
-                fontFamily={
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                }
-                onChangeText={handleEmail}
-                placeholder="jess@gmail.com"
-                size="18"
-                w="100%"
-              />
-            </VStack>
-          </FormControl>
+          <CustomFormControl
+            title="Email"
+            onChangeText={handleEmail}
+            placeholder="jess@gmail.com"
+          />
 
           <FormControl maxW="80%" mt="5">
             <VStack alignItems="flex-start">
@@ -134,7 +112,7 @@ const styles = StyleSheet.create({
   buttonsContainer: {
     width: '50%',
     padding: 30,
-    alignSelf: 'flex-left',
+    alignSelf: 'flex-start',
   },
 });
 
