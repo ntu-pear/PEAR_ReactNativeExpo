@@ -1,15 +1,6 @@
 import React from 'react';
 import { Platform } from 'react-native';
-import {
-  VStack,
-  HStack,
-  Input,
-  FormControl,
-  View,
-  Select,
-  Box,
-  Center,
-} from 'native-base';
+import { VStack, Input, FormControl } from 'native-base';
 import typography from 'app/config/typography';
 import colors from 'app/config/colors';
 
