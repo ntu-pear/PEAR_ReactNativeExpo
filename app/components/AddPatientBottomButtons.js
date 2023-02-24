@@ -17,6 +17,7 @@ function AddPatientBottomButtons({
   submit = false,
   formData = null,
   max = null,
+  validateStep = null,
 }) {
   const navigation = useNavigation();
 
@@ -25,33 +26,39 @@ function AddPatientBottomButtons({
   const navigate = Platform.OS === 'web' ? useNavigate() : null;
 
   const onPressSubmit = async () => {
-    const result = await patientApi.addPatient(formData);
+    const proceed = validateStep(formData);
+    console.log(proceed, formData);
 
-    let alertTxt = '';
-    let alertTitle = '';
-    let alertDetails = '';
+    if (proceed.success) {
+      console.log('success');
+      const result = await patientApi.addPatient(formData);
 
-    if (result.ok) {
-      const allocations = result.data.data.patientAllocationDTO;
-      const caregiver = allocations.caregiverName;
-      const doctor = allocations.doctorName;
-      const gameTherapist = allocations.gameTherapistName;
+      let alertTxt = '';
+      let alertTitle = '';
+      let alertDetails = '';
 
-      alertTitle = 'Successfully added Patient';
-      alertDetails = `Patient has been allocated to\nCaregiver: ${caregiver}\nDoctor: ${doctor}\nGame Therapist: ${gameTherapist}`;
-      alertTxt = alertTitle + alertDetails;
+      if (result.ok) {
+        const allocations = result.data.data.patientAllocationDTO;
+        const caregiver = allocations.caregiverName;
+        const doctor = allocations.doctorName;
+        const gameTherapist = allocations.gameTherapistName;
+
+        alertTitle = 'Successfully added Patient';
+        alertDetails = `Patient has been allocated to\nCaregiver: ${caregiver}\nDoctor: ${doctor}\nGame Therapist: ${gameTherapist}`;
+        alertTxt = alertTitle + alertDetails;
+        Platform.OS === 'web'
+          ? navigate('/' + routes.PATIENTS)
+          : navigation.navigate(routes.PATIENTS_SCREEN);
+      } else {
+        const errors = result.data.message;
+        alertTitle = 'Error in Adding Patient';
+        alertDetails = `\n${errors}.\n\nPlease try again.`;
+        alertTxt = alertTitle + alertDetails;
+      }
       Platform.OS === 'web'
-        ? navigate('/' + routes.PATIENTS)
-        : navigation.navigate(routes.PATIENTS_SCREEN);
-    } else {
-      const errors = result.data.message;
-      alertTitle = 'Error in Adding Patient';
-      alertDetails = `\n${errors}.\n\nPlease try again.`;
-      alertTxt = alertTitle + alertDetails;
+        ? alert(alertTxt)
+        : Alert.alert(alertTitle, alertDetails);
     }
-    Platform.OS === 'web'
-      ? alert(alertTxt)
-      : Alert.alert(alertTitle, alertDetails);
   };
 
   return (
