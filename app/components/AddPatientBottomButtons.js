@@ -26,10 +26,10 @@ function AddPatientBottomButtons({
   const navigate = Platform.OS === 'web' ? useNavigate() : null;
 
   const onPressSubmit = async () => {
-    const proceed = validateStep(formData);
-    console.log(proceed, formData);
+    const promiseResult = await validateStep(formData);
+    console.log(promiseResult, formData);
 
-    if (proceed.success) {
+    if (promiseResult.success) {
       console.log('success');
       const result = await patientApi.addPatient(formData);
 

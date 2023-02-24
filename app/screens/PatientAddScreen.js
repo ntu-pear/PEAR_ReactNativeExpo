@@ -5,7 +5,8 @@ import PatientAddPatientInfoScreen from 'app/screens/PatientAddPatientInfoScreen
 import PatientAddGuardianScreen from 'app/screens/PatientAddGuardianScreen';
 import PatientAddAllergyScreen from 'app/screens/PatientAddAllergyScreen';
 import * as ImagePicker from 'expo-image-picker';
-import Joi from 'joi';
+// import Joi from 'joi';
+import * as Yup from 'yup';
 
 function PatientAddScreen(props) {
   // state for steps
@@ -31,67 +32,140 @@ function PatientAddScreen(props) {
   // const Joi = require('joi');
 
   // Define a schema for data validation
-  const schema = {
-    patientInfo: Joi.object({
-      FirstName: Joi.string().required(),
-      LastName: Joi.string().required(),
-      PreferredName: Joi.string().required(),
-      PreferredLanguageListID: Joi.number().required(),
-      NRIC: Joi.string()
-        .regex(/^[A-Za-z]\d{7}[A-Za-z]$/)
+  // const schema = {
+  //   patientInfo: Joi.object({
+  //     FirstName: Joi.string().required(),
+  //     LastName: Joi.string().required(),
+  //     PreferredName: Joi.string().required(),
+  //     PreferredLanguageListID: Joi.number().required(),
+  //     NRIC: Joi.string()
+  //       .regex(/^[A-Za-z]\d{7}[A-Za-z]$/)
+  //       .length(9)
+  //       .message('Invalid NRIC')
+  //       .required(),
+  //     Address: Joi.string().required(),
+  //     TempAddress: Joi.string().allow('').optional(),
+  //     HomeNo: Joi.string()
+  //       .regex(/^6[0-9]{7}$/)
+  //       .allow('')
+  //       .message('Invalid Home Telephone No.')
+  //       .optional(),
+  //     HandphoneNo: Joi.string()
+  //       .allow('')
+  //       .regex(/^[89]\d{7}$/)
+  //       .message('Invalid Handphone No.')
+  //       .optional(),
+  //     Gender: Joi.string().required(),
+  //     DOB: Joi.date().required(),
+  //     StartDate: Joi.date().required(),
+  //     EndDate: Joi.date().optional(),
+  //     PrivacyLevel: Joi.string().required(),
+  //     UpdateBit: Joi.boolean().required(),
+  //     AutoGame: Joi.boolean().required(),
+  //     IsActive: Joi.boolean().required(),
+  //     IsRespiteCare: Joi.boolean().required(),
+  //     TerminationReason: Joi.string().allow('').optional(),
+  //     InactiveReason: Joi.string().allow('').optional(),
+  //     ProfilePicture: Joi.string().allow('').optional(),
+  //     UploadProfilePicture: Joi.object({
+  //       uri: Joi.string().allow('').optional(),
+  //       name: Joi.string().allow('').optional(),
+  //       type: Joi.string().allow('').optional(),
+  //     }).optional(),
+  //   }),
+  //   guardianInfo: Joi.array()
+  //     .items(
+  //       Joi.object({
+  //         FirstName: Joi.string().required(),
+  //         LastName: Joi.string().required(),
+  //         NRIC: Joi.string()
+  //           .regex(/^[A-Za-z]\d{7}[A-Za-z]$/)
+  //           .length(9)
+  //           .message('Invalid NRIC')
+  //           .required(),
+  //         Email: Joi.string()
+  //           .email({
+  //             tlds: { allow: false },
+  //           })
+  //           .required(),
+  //         RelationshipID: Joi.number().required(),
+  //         IsActive: Joi.boolean().required(),
+  //         ContactNo: Joi.string()
+  //           .regex(/^[89]\d{7}$/)
+  //           .message('Invalid Contact No.')
+  //           .required(),
+  //       }),
+  //     )
+  //     .min(1)
+  //     .max(2)
+  //     .required(),
+
+  //   allergyInfo: Joi.array()
+  //     .items(
+  //       Joi.object({
+  //         AllergyListID: Joi.number().required(),
+  //         AllergyReactionListID: Joi.number().optional(),
+  //         AllergyRemarks: Joi.string().allow('').optional(),
+  //       }),
+  //     )
+  //     .min(1)
+  //     .required(),
+  // };
+
+  const schema = Yup.object().shape({
+    patientInfo: Yup.object().shape({
+      FirstName: Yup.string().required(),
+      LastName: Yup.string().required(),
+      PreferredName: Yup.string().required(),
+      PreferredLanguageListID: Yup.number().required(),
+      NRIC: Yup.string()
+        .matches(/^[A-Za-z]\d{7}[A-Za-z]$/, { message: 'Invalid NRIC' })
         .length(9)
-        .message('Invalid NRIC')
         .required(),
-      Address: Joi.string().required(),
-      TempAddress: Joi.string().allow('').optional(),
-      HomeNo: Joi.string()
-        .regex(/^6[0-9]{7}$/)
-        .allow('')
-        .message('Invalid Home Telephone No.')
-        .optional(),
-      HandphoneNo: Joi.string()
-        .allow('')
-        .regex(/^[89]\d{7}$/)
-        .message('Invalid Handphone No.')
-        .optional(),
-      Gender: Joi.string().required(),
-      DOB: Joi.date().required(),
-      StartDate: Joi.date().required(),
-      EndDate: Joi.date().optional(),
-      PrivacyLevel: Joi.string().required(),
-      UpdateBit: Joi.boolean().required(),
-      AutoGame: Joi.boolean().required(),
-      IsActive: Joi.boolean().required(),
-      IsRespiteCare: Joi.boolean().required(),
-      TerminationReason: Joi.string().allow('').optional(),
-      InactiveReason: Joi.string().allow('').optional(),
-      ProfilePicture: Joi.string().allow('').optional(),
-      UploadProfilePicture: Joi.object({
-        uri: Joi.string().allow('').optional(),
-        name: Joi.string().allow('').optional(),
-        type: Joi.string().allow('').optional(),
-      }).optional(),
+      Address: Yup.string().required(),
+      TempAddress: Yup.string().notRequired(),
+      HomeNo: Yup.string()
+        .matches(/^6[0-9]{7}$/, { message: 'Invalid Home Telephone No.' })
+        .nullable()
+        .default(),
+      HandphoneNo: Yup.string()
+        .matches(/^[89]\d{7}$/, { message: 'Invalid Handphone No.' })
+        .nullable()
+        .default(),
+      Gender: Yup.string().required(),
+      DOB: Yup.date().required(),
+      StartDate: Yup.date().required(),
+      EndDate: Yup.date().notRequired(),
+      PrivacyLevel: Yup.string().required(),
+      UpdateBit: Yup.boolean().required(),
+      AutoGame: Yup.boolean().required(),
+      IsActive: Yup.boolean().required(),
+      IsRespiteCare: Yup.boolean().required(),
+      TerminationReason: Yup.string().notRequired(),
+      InactiveReason: Yup.string().notRequired(),
+      ProfilePicture: Yup.string().notRequired(),
+      UploadProfilePicture: Yup.object()
+        .shape({
+          uri: Yup.string().notRequired(),
+          name: Yup.string().notRequired(),
+          type: Yup.string().notRequired(),
+        })
+        .notRequired(),
     }),
-    guardianInfo: Joi.array()
-      .items(
-        Joi.object({
-          FirstName: Joi.string().required(),
-          LastName: Joi.string().required(),
-          NRIC: Joi.string()
-            .regex(/^[A-Za-z]\d{7}[A-Za-z]$/)
+    guardianInfo: Yup.array()
+      .of(
+        Yup.object().shape({
+          FirstName: Yup.string().required(),
+          LastName: Yup.string().required(),
+          NRIC: Yup.string()
+            .matches(/^[A-Za-z]\d{7}[A-Za-z]$/, { message: 'Invalid NRIC' })
             .length(9)
-            .message('Invalid NRIC')
             .required(),
-          Email: Joi.string()
-            .email({
-              tlds: { allow: false },
-            })
-            .required(),
-          RelationshipID: Joi.number().required(),
-          IsActive: Joi.boolean().required(),
-          ContactNo: Joi.string()
-            .regex(/^[89]\d{7}$/)
-            .message('Invalid Contact No.')
+          Email: Yup.string().email('Invalid email address').required(),
+          RelationshipID: Yup.number().required(),
+          IsActive: Yup.boolean().required(),
+          ContactNo: Yup.string()
+            .matches(/^[89]\d{7}$/, { message: 'Invalid Contact No.' })
             .required(),
         }),
       )
@@ -99,17 +173,17 @@ function PatientAddScreen(props) {
       .max(2)
       .required(),
 
-    allergyInfo: Joi.array()
-      .items(
-        Joi.object({
-          AllergyListID: Joi.number().required(),
-          AllergyReactionListID: Joi.number().optional(),
-          AllergyRemarks: Joi.string().allow('').optional(),
+    allergyInfo: Yup.array()
+      .of(
+        Yup.object().shape({
+          AllergyListID: Yup.number().required(),
+          AllergyReactionListID: Yup.number().notRequired(),
+          AllergyRemarks: Yup.string().notRequired(),
         }),
       )
       .min(1)
       .required(),
-  };
+  });
 
   const patientData = {
     patientInfo: {
@@ -174,30 +248,49 @@ function PatientAddScreen(props) {
     }
   };
 
-  const validateStep = (formData) => {
-    const stepSchema = schema[Object.keys(schema)[step - 1]];
+  // const validateStep = (formData) => {
+  //   const stepSchema = schema[Object.keys(schema)[step - 1]];
+  //   const toValidate = formData[Object.keys(formData)[step - 1]];
+
+  //   // Validate the form data against the schema
+  //   const { error } = stepSchema.validate(toValidate, { abortEarly: false });
+
+  //   if (error) {
+  //     // If there are validation errors, return an object indicating that the validation failed
+  //     const errors = error.details.map((detail) => detail.message);
+  //     return { success: false, errors };
+  //   } else {
+  //     return { success: true };
+  //   }
+  // };
+
+  const validateStep = async (formData) => {
+    const stepSchema = schema.fields[Object.keys(formData)[step - 1]];
     const toValidate = formData[Object.keys(formData)[step - 1]];
+    console.log(stepSchema, step);
+    try {
+      // Validate the form data against the schema
+      await stepSchema.validate(toValidate, { abortEarly: false });
 
-    // Validate the form data against the schema
-    const { error } = stepSchema.validate(toValidate, { abortEarly: false });
-
-    if (error) {
-      // If there are validation errors, return an object indicating that the validation failed
-      const errors = error.details.map((detail) => detail.message);
-      return { success: false, errors };
-    } else {
       return { success: true };
+    } catch (error) {
+      if (error.inner) {
+        const errors = error.inner.map((detail) => detail.message);
+        return { success: false, errors };
+      } else {
+        return { success: false, errors: [error.message] };
+      }
     }
   };
 
   // for each step of form, validate the data against schema
   // function for going to next step by increasing step state by 1
   // and to set component list
-  const nextQuestionHandler = (formData, page = '', list = []) => {
-    const proceed = validateStep(formData);
-    console.log(proceed);
+  const nextQuestionHandler = async (formData, page = '', list = []) => {
+    const promiseResult = await validateStep(formData);
+    console.log(promiseResult);
     // If the validation is successful, continue to the next question
-    if (proceed.success) {
+    if (promiseResult.success) {
       componentHandler(page, list);
       setStep((prevStep) => prevStep + 1);
     }
