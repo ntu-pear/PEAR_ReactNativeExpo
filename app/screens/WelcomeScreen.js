@@ -230,7 +230,7 @@ function WelcomeScreen(props) {
                 <AppButton title="Login" color="green" onPress={onPressLogin} />
               )}
             </View>
-            <View>
+            <View style={Platform.OS === 'web' ? { top: 130 } : ''}>
               <Text
                 style={styles.underline}
                 onPress={navigateToResetPasswordScreen}
@@ -285,6 +285,9 @@ const styles = StyleSheet.create({
   },
   underline: {
     textDecorationLine: 'underline',
+  },
+  underlineWeb: {
+    top: 130,
   },
 });
 

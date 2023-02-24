@@ -15,6 +15,7 @@ import userApi from 'app/api/user';
 import typography from 'app/config/typography';
 import colors from 'app/config/colors';
 import errors from 'app/config/errors';
+import routes from 'app/navigation/routes';
 
 import AppButton from 'app/components/AppButton';
 import ErrorMessage from 'app/components/ErrorMessage';
@@ -37,14 +38,17 @@ function ResetPasswordScreen(props) {
     }
 
     setResetFailed(false);
-    Alert.alert('Instructions to reset password have been sent to email.');
-    navigation.goBack();
+    // Alert.alert('Instructions to reset password have been sent to email.');
+    let alertTxt = 'Instructions to reset password have been sent to email.';
+    Platform.OS === 'web' ? alert(alertTxt) : Alert.alert(alertTxt);
+    // navigation.goBack();
+    navigation.navigate(routes.WELCOME);
   };
 
   return (
     <View>
       <VStack>
-        <Center>
+        <Center flex={1}>
           <CustomFormControl
             title="Email"
             onChangeText={handleEmail}
@@ -52,7 +56,7 @@ function ResetPasswordScreen(props) {
           />
 
           <FormControl maxW="80%" mt="5">
-            <VStack alignItems="flex-start">
+            <VStack>
               <FormControl.Label
                 _text={{
                   fontFamily: `${
@@ -86,21 +90,17 @@ function ResetPasswordScreen(props) {
                 <Select.Item label="Nurse" value="Nurse" />
               </Select>
             </VStack>
+            <Box>
+              <ErrorMessage
+                visible={resetFailed}
+                message={errors.resetPasswordError}
+              />
+            </Box>
+            <View style={styles.buttonsContainer}>
+              <AppButton title="Reset" color="green" onPress={onPressReset} />
+            </View>
           </FormControl>
         </Center>
-
-        <Center>
-          <Box>
-            <ErrorMessage
-              visible={resetFailed}
-              message={errors.resetPasswordError}
-            />
-          </Box>
-        </Center>
-
-        <View style={styles.buttonsContainer}>
-          <AppButton title="Reset" color="green" onPress={onPressReset} />
-        </View>
       </VStack>
     </View>
   );
@@ -109,8 +109,8 @@ function ResetPasswordScreen(props) {
 const styles = StyleSheet.create({
   buttonsContainer: {
     width: '50%',
-    padding: 30,
-    alignSelf: 'flex-start',
+    paddingVertical: 30,
+    alignSelf: 'center',
   },
 });
 
