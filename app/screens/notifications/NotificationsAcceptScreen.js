@@ -73,8 +73,6 @@ function NotificationsAcceptScreen(props) {
       response?.data.results.filter(
         (notification) => notification.status === NotificationActions.Approve,
       );
-    console.log(response.data.results);
-    console.log(filteredNotificationItemsWithApproveAction);
     setIsLoading(false);
     setNotificationAcceptedData(filteredNotificationItemsWithApproveAction);
   };
