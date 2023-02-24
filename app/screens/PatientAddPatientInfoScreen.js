@@ -17,7 +17,7 @@ import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import colors from 'app/config/colors';
 import DatePickerComponent from 'app/components/DatePickerComponent';
 
-export function PatientAddPatientInfoScreen(props) {
+function PatientAddPatientInfoScreen(props) {
   const {
     nextQuestionHandler,
     handleFormData,
@@ -253,3 +253,4 @@ export function PatientAddPatientInfoScreen(props) {
     </ScrollView>
   );
 }
+export default PatientAddPatientInfoScreen;

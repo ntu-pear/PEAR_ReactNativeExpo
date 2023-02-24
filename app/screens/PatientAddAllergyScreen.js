@@ -4,7 +4,7 @@ import AddPatientAllergy from 'app/components/AddPatientAllergy';
 import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import AddPatientProgress from 'app/components/AddPatientProgress';
 
-export function PatientAddAllergyScreen(props) {
+function PatientAddAllergyScreen(props) {
   const {
     prevQuestionHandler,
     formData,
@@ -84,3 +84,4 @@ export function PatientAddAllergyScreen(props) {
     </ScrollView>
   );
 }
+export default PatientAddAllergyScreen;
