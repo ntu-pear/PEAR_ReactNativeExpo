@@ -107,7 +107,7 @@ function PatientDailyHighlights(props) {
     setIsError(false);
     const response = await highlightApi.getHighlight();
     if (!response.ok) {
-      console.log('Request failed with status code: ', response.status);
+      // console.log('Request failed with status code: ', response.status);
       setIsLoading(false);
       setIsError(true);
       setStatusCode(response.status);
@@ -116,7 +116,7 @@ function PatientDailyHighlights(props) {
     setIsLoading(false);
     setStatusCode(response.status);
     setHighlightsData(response.data.data);
-    console.log('Request successful with response: ', response);
+    // console.log('Request successful with response: ', response);
   };
 
   // Filter data when either searchValue or filterValue changes
@@ -196,14 +196,14 @@ function PatientDailyHighlights(props) {
         <View style={styles.modalView}>
           <Text style={styles.modalHeaderText}>Patients Daily Highlights</Text>
           <Pressable
-            style={[styles.button, styles.buttonClose]}
+            style={styles.buttonClose}
             onPress={() => setModalVisible(!modalVisible)}
             testID="highlightsCloseButton"
           >
             <MaterialCommunityIcons name="close" size={20} />
           </Pressable>
-          <View style={{ flexDirection: 'row', width: '100%', zIndex: 1 }}>
-            <View style={{ flex: 1 }}>
+          <View style={styles.searchBarDropDownView}>
+            <View style={styles.searchBarView}>
               <SearchBar
                 placeholder="Search"
                 lightTheme={true}
@@ -220,7 +220,7 @@ function PatientDailyHighlights(props) {
                 style={styles.searchBar}
               />
             </View>
-            <View style={{ flex: 1, zIndex: 1 }}>
+            <View style={styles.dropDownView}>
               <DropDownPicker
                 open={dropdownOpen}
                 value={filterValue}
@@ -311,10 +311,8 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  button: {
-    padding: 10,
-  },
   buttonClose: {
+    padding: 10,
     alignSelf: 'flex-end',
     position: 'absolute',
   },
@@ -330,6 +328,14 @@ const styles = StyleSheet.create({
   modalErrorText: {
     color: 'red',
   },
+  searchBarDropDownView: {
+    flexDirection: 'row',
+    width: '100%',
+    zIndex: 1,
+  },
+  searchBarView: {
+    flex: 1,
+  },
   searchBarContainer: {
     backgroundColor: 'white',
     borderBottomColor: 'transparent',
@@ -338,6 +344,10 @@ const styles = StyleSheet.create({
   searchBar: {
     width: '50%',
     justifyContent: 'flex-start',
+  },
+  dropDownView: {
+    flex: 1,
+    zIndex: 1,
   },
   dropDown: {
     justifyContent: 'flex-end',

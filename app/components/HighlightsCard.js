@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform, TouchableOpacity, View } from 'react-native';
+import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { Text, Box, VStack, HStack, Avatar } from 'native-base';
 import colors from 'app/config/colors';
@@ -92,10 +92,7 @@ function HighlightsCard({ item }) {
   const list = () => {
     return item.highlights.map((element) => {
       return (
-        <View
-          key={element.highlightID}
-          style={{ borderBottomWidth: 1, borderBottomColor: colors.gray }}
-        >
+        <View key={element.highlightID} style={styles.highlightsList}>
           <HStack w="100%" space={2} alignItems="center">
             {getIcon(element)}
             <Text fontSize="13">{getDescription(element)}</Text>
@@ -154,5 +151,12 @@ function HighlightsCard({ item }) {
     </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  highlightsList: {
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gray,
+  },
+});
 
 export default HighlightsCard;
