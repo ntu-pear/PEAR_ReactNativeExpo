@@ -5,6 +5,7 @@ import { PatientAddPatientInfoScreen } from 'app/screens/PatientAddPatientInfoSc
 import { PatientAddGuardianScreen } from 'app/screens/PatientAddGuardianScreen';
 import { PatientAddAllergyScreen } from 'app/screens/PatientAddAllergyScreen';
 import * as ImagePicker from 'expo-image-picker';
+import Joi from 'joi';
 
 export function PatientAddScreen(props) {
   // state for steps
@@ -27,7 +28,7 @@ export function PatientAddScreen(props) {
 
   // validation using Joi
   // Reference: https://www.npmjs.com/package/react-joi
-  const Joi = require('joi');
+  // const Joi = require('joi');
 
   // Define a schema for data validation
   const schema = {
@@ -65,7 +66,11 @@ export function PatientAddScreen(props) {
       TerminationReason: Joi.string().allow('').optional(),
       InactiveReason: Joi.string().allow('').optional(),
       ProfilePicture: Joi.string().allow('').optional(),
-      UploadProfilePicture: Joi.string().allow('').optional(),
+      UploadProfilePicture: Joi.object({
+        uri: Joi.string().allow('').optional(),
+        name: Joi.string().allow('').optional(),
+        type: Joi.string().allow('').optional(),
+      }).optional(),
     }),
     guardianInfo: Joi.array()
       .items(
@@ -94,11 +99,16 @@ export function PatientAddScreen(props) {
       .max(2)
       .required(),
 
-    allergyInfo: Joi.object({
-      AllergyListID: Joi.number().required(),
-      AllergyReactionListID: Joi.number().optional(),
-      AllergyRemarks: Joi.string().allow('').optional(),
-    }),
+    allergyInfo: Joi.array()
+      .items(
+        Joi.object({
+          AllergyListID: Joi.number().required(),
+          AllergyReactionListID: Joi.number().optional(),
+          AllergyRemarks: Joi.string().allow('').optional(),
+        }),
+      )
+      .min(1)
+      .required(),
   };
 
   const patientData = {
@@ -181,7 +191,7 @@ export function PatientAddScreen(props) {
   // and to set component list
   const nextQuestionHandler = (formData, page = '', list = []) => {
     const proceed = validateStep(formData);
-
+    console.log(proceed);
     // If the validation is successful, continue to the next question
     if (proceed.success) {
       componentHandler(page, list);
@@ -342,6 +352,7 @@ export function PatientAddScreen(props) {
           formData={formData}
           setFormData={setFormData}
           componentList={componentList}
+          validateStep={validateStep}
         />
       );
     default:

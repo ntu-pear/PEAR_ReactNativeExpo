@@ -11,6 +11,7 @@ export function PatientAddAllergyScreen(props) {
     setFormData,
     handleFormData,
     componentList,
+    validateStep,
   } = props;
   const [allergyInfoDisplay, setAllergyInfoDisplay] = useState(
     componentList.allergy,
@@ -77,6 +78,7 @@ export function PatientAddAllergyScreen(props) {
           removeComponent={removeAllergyComponent}
           submit={true}
           formData={formData}
+          validateStep={validateStep}
         />
       </Box>
     </ScrollView>
