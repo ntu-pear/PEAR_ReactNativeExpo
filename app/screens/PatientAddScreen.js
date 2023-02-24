@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Platform } from 'react-native';
 
-import { PatientAddPatientInfoScreen } from 'app/screens/PatientAddPatientInfoScreen';
-import { PatientAddGuardianScreen } from 'app/screens/PatientAddGuardianScreen';
-import { PatientAddAllergyScreen } from 'app/screens/PatientAddAllergyScreen';
+import PatientAddPatientInfoScreen from 'app/screens/PatientAddPatientInfoScreen';
+import PatientAddGuardianScreen from 'app/screens/PatientAddGuardianScreen';
+import PatientAddAllergyScreen from 'app/screens/PatientAddAllergyScreen';
 import * as ImagePicker from 'expo-image-picker';
 import Joi from 'joi';
 
-export function PatientAddScreen(props) {
+function PatientAddScreen(props) {
   // state for steps
   const [step, setStep] = useState(1);
 
@@ -134,7 +134,11 @@ export function PatientAddScreen(props) {
       TerminationReason: '',
       InactiveReason: '',
       ProfilePicture: '',
-      UploadProfilePicture: '',
+      UploadProfilePicture: {
+        uri: '',
+        name: '',
+        type: '',
+      },
     },
 
     guardianInfo: [

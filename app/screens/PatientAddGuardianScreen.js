@@ -8,7 +8,7 @@ import AddPatientGuardian from 'app/components/AddPatientGuardian';
 import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import AddPatientProgress from 'app/components/AddPatientProgress';
 
-export function PatientAddGuardianScreen(props) {
+function PatientAddGuardianScreen(props) {
   const {
     nextQuestionHandler,
     prevQuestionHandler,
@@ -94,3 +94,4 @@ export function PatientAddGuardianScreen(props) {
     </ScrollView>
   );
 }
+export default PatientAddGuardianScreen;
