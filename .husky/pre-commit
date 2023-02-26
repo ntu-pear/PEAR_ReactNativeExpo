@@ -9,4 +9,5 @@ if [ "$branch" = "main" ]; then
 fi
 
 npx lint-staged
+npx cypress run
 # node ./node_modules/lint-staged/bin/lint-staged -r

@@ -6,6 +6,8 @@ name: Deploy to Firebase Hosting on merge
   push:
     branches:
       - main
+  # To manually trigger workflow on a branch build on GitHub directly
+  workflow_dispatch: 
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest

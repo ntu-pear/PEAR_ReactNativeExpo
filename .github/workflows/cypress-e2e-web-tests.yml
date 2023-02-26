@@ -1,0 +1,37 @@
+name: Cypress E2E Tests for RN Web
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches: [main]
+jobs:
+  cypress-run:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install Expo CLI and npm dependencies
+        run: npm i -g expo-cli && npm ci && rm webpack.config.js
+      - name: Run Cypress E2E tests
+        uses: cypress-io/github-action@v5
+        env:
+          CYPRESS_LOGIN_USERNAME: ${{ secrets.CYPRESS_LOGIN_USERNAME }}
+          CYPRESS_LOGIN_ROLE: ${{ secrets.CYPRESS_LOGIN_ROLE }}
+          CYPRESS_LOGIN_PASSWORD: ${{ secrets.CYPRESS_LOGIN_PASSWORD }}
+        with:
+          start: npm run web
+          wait-on: 'http://localhost:19006, https://coremvc.fyp2017.com/swagger/index.html'
+          wait-on-timeout: 60
+      - name: Upload screenshots only if tests fail
+        uses: actions/upload-artifact@v3
+        if: failure() # screenshots are only generated on test failure
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+      - name: Upload test run videos
+        uses: actions/upload-artifact@v3
+        if: always() # videos are always captrued
+        with:
+          name: cypress-videos
+          path: cypress/videos
