@@ -83,10 +83,6 @@ function WelcomeScreen(props) {
     apiHandlerHook.setHeaderIfEmpty();
   };
 
-  const navigateToResetPasswordScreen = () => {
-    navigation.navigate(routes.RESET_PASSWORD);
-  };
-
   const handleEmail = (e) => {
     setEmail(e);
   };
@@ -233,7 +229,7 @@ function WelcomeScreen(props) {
             <View style={Platform.OS === 'web' ? { top: 130 } : ''}>
               <Text
                 style={styles.underline}
-                onPress={navigateToResetPasswordScreen}
+                onPress={() => navigation.navigate(routes.RESET_PASSWORD)}
               >
                 Forgot Password?
               </Text>

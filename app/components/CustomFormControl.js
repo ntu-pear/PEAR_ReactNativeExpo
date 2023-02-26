@@ -6,9 +6,22 @@ import colors from 'app/config/colors';
 
 function CustomFormControl(props) {
   // Destructure props
-  const { title, onChangeText, placeholder } = props;
+  const {
+    isRequired,
+    isInvalid,
+    title,
+    onChangeText,
+    placeholder,
+    HelperText,
+    ErrorMessage,
+  } = props;
   return (
-    <FormControl maxW="80%" mt="5">
+    <FormControl
+      maxW="80%"
+      mt="5"
+      isRequired={isRequired}
+      isInvalid={isInvalid}
+    >
       <VStack alignItems="flex-start">
         <FormControl.Label
           _text={{
@@ -31,6 +44,10 @@ function CustomFormControl(props) {
           size="18"
           w="100%"
         />
+
+        <FormControl.HelperText>{HelperText}</FormControl.HelperText>
+
+        <FormControl.ErrorMessage>{ErrorMessage}</FormControl.ErrorMessage>
       </VStack>
     </FormControl>
   );

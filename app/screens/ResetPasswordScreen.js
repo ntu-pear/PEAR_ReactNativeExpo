@@ -1,61 +1,89 @@
 import React from 'react';
 import { useState } from 'react';
-import { Platform, Alert, StyleSheet } from 'react-native';
-import {
-  VStack,
-  HStack,
-  Input,
-  FormControl,
-  View,
-  Select,
-  Box,
-  Center,
-} from 'native-base';
+import { Platform, Alert, StyleSheet, ActivityIndicator } from 'react-native';
+import { VStack, FormControl, View, Select, Box, Center } from 'native-base';
 import userApi from 'app/api/user';
 import typography from 'app/config/typography';
 import colors from 'app/config/colors';
-import errors from 'app/config/errors';
 import routes from 'app/navigation/routes';
 
 import AppButton from 'app/components/AppButton';
 import ErrorMessage from 'app/components/ErrorMessage';
 import CustomFormControl from 'app/components/CustomFormControl';
+import * as Yup from 'yup';
 
 function ResetPasswordScreen(props) {
   const { navigation, route } = props;
   const [role, setRole] = useState('Supervisor');
   const [email, setEmail] = useState('');
-  const [resetFailed, setResetFailed] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleEmail = (e) => {
     setEmail(e);
   };
 
+  const schema = Yup.object().shape({
+    Email: Yup.string().email().required(),
+    Role: Yup.string().required(),
+  });
+
+  const validate = async () => {
+    let formData = {
+      Email: email,
+      Role: role,
+    };
+
+    try {
+      // Validate the form data against the schema
+      await schema.validate(formData);
+      return true;
+    } catch (error) {
+      const key = error.path;
+      const message = error.message;
+      setErrors({
+        [key]: message,
+      });
+      return false;
+    }
+  };
+
   const onPressReset = async () => {
-    const result = await userApi.resetPassword(email, role);
-    if (!result.ok) {
-      return setResetFailed(true);
+    const validation = await validate();
+    if (!validation) {
+      return;
     }
 
-    setResetFailed(false);
-    // Alert.alert('Instructions to reset password have been sent to email.');
+    setIsLoading(true);
+    const result = await userApi.resetPassword(email, role);
+    if (!result.ok) {
+      setErrors({
+        Api: result.data.message,
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(false);
     let alertTxt = 'Instructions to reset password have been sent to email.';
     Platform.OS === 'web' ? alert(alertTxt) : Alert.alert(alertTxt);
-    // navigation.goBack();
     navigation.navigate(routes.WELCOME);
   };
 
   return (
     <View>
       <VStack>
-        <Center flex={1}>
+        <Center>
           <CustomFormControl
+            isRequired
+            isInvalid={'Email' in errors}
             title="Email"
             onChangeText={handleEmail}
             placeholder="jess@gmail.com"
+            ErrorMessage={errors.Email}
           />
 
-          <FormControl maxW="80%" mt="5">
+          <FormControl maxW="80%" mt="5" isRequired>
             <VStack>
               <FormControl.Label
                 _text={{
@@ -91,13 +119,14 @@ function ResetPasswordScreen(props) {
               </Select>
             </VStack>
             <Box>
-              <ErrorMessage
-                visible={resetFailed}
-                message={errors.resetPasswordError}
-              />
+              <ErrorMessage visible={'Api' in errors} message={errors.Api} />
             </Box>
             <View style={styles.buttonsContainer}>
-              <AppButton title="Reset" color="green" onPress={onPressReset} />
+              {isLoading ? (
+                <ActivityIndicator color={colors.primary_overlay_color} />
+              ) : (
+                <AppButton title="Reset" color="green" onPress={onPressReset} />
+              )}
             </View>
           </FormControl>
         </Center>
