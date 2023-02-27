@@ -1,9 +1,8 @@
+name: Create EAS Android build and deploy to Expo (https://expo.dev/accounts/fyppear)
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches: [main]
 jobs:
   build:
     runs-on: ubuntu-latest
