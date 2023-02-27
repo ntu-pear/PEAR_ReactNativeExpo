@@ -27,90 +27,10 @@ function PatientAddScreen(props) {
 
   const newDate = new Date();
 
-  // validation using Joi
-  // Reference: https://www.npmjs.com/package/react-joi
-  // const Joi = require('joi');
+  const [errorMessage, setErrorMessage] = useState('');
 
-  // Define a schema for data validation
-  // const schema = {
-  //   patientInfo: Joi.object({
-  //     FirstName: Joi.string().required(),
-  //     LastName: Joi.string().required(),
-  //     PreferredName: Joi.string().required(),
-  //     PreferredLanguageListID: Joi.number().required(),
-  //     NRIC: Joi.string()
-  //       .regex(/^[A-Za-z]\d{7}[A-Za-z]$/)
-  //       .length(9)
-  //       .message('Invalid NRIC')
-  //       .required(),
-  //     Address: Joi.string().required(),
-  //     TempAddress: Joi.string().allow('').optional(),
-  //     HomeNo: Joi.string()
-  //       .regex(/^6[0-9]{7}$/)
-  //       .allow('')
-  //       .message('Invalid Home Telephone No.')
-  //       .optional(),
-  //     HandphoneNo: Joi.string()
-  //       .allow('')
-  //       .regex(/^[89]\d{7}$/)
-  //       .message('Invalid Handphone No.')
-  //       .optional(),
-  //     Gender: Joi.string().required(),
-  //     DOB: Joi.date().required(),
-  //     StartDate: Joi.date().required(),
-  //     EndDate: Joi.date().optional(),
-  //     PrivacyLevel: Joi.string().required(),
-  //     UpdateBit: Joi.boolean().required(),
-  //     AutoGame: Joi.boolean().required(),
-  //     IsActive: Joi.boolean().required(),
-  //     IsRespiteCare: Joi.boolean().required(),
-  //     TerminationReason: Joi.string().allow('').optional(),
-  //     InactiveReason: Joi.string().allow('').optional(),
-  //     ProfilePicture: Joi.string().allow('').optional(),
-  //     UploadProfilePicture: Joi.object({
-  //       uri: Joi.string().allow('').optional(),
-  //       name: Joi.string().allow('').optional(),
-  //       type: Joi.string().allow('').optional(),
-  //     }).optional(),
-  //   }),
-  //   guardianInfo: Joi.array()
-  //     .items(
-  //       Joi.object({
-  //         FirstName: Joi.string().required(),
-  //         LastName: Joi.string().required(),
-  //         NRIC: Joi.string()
-  //           .regex(/^[A-Za-z]\d{7}[A-Za-z]$/)
-  //           .length(9)
-  //           .message('Invalid NRIC')
-  //           .required(),
-  //         Email: Joi.string()
-  //           .email({
-  //             tlds: { allow: false },
-  //           })
-  //           .required(),
-  //         RelationshipID: Joi.number().required(),
-  //         IsActive: Joi.boolean().required(),
-  //         ContactNo: Joi.string()
-  //           .regex(/^[89]\d{7}$/)
-  //           .message('Invalid Contact No.')
-  //           .required(),
-  //       }),
-  //     )
-  //     .min(1)
-  //     .max(2)
-  //     .required(),
-
-  //   allergyInfo: Joi.array()
-  //     .items(
-  //       Joi.object({
-  //         AllergyListID: Joi.number().required(),
-  //         AllergyReactionListID: Joi.number().optional(),
-  //         AllergyRemarks: Joi.string().allow('').optional(),
-  //       }),
-  //     )
-  //     .min(1)
-  //     .required(),
-  // };
+  // data validation using Yup
+  // Reference: https://github.com/jquense/yup
 
   const schema = Yup.object().shape({
     patientInfo: Yup.object().shape({
@@ -124,6 +44,7 @@ function PatientAddScreen(props) {
         .required(),
       Address: Yup.string().required(),
       TempAddress: Yup.string().notRequired(),
+      // TODO: fix validation for HomeNo and HandphoneNo
       HomeNo: Yup.string()
         .matches(/^6[0-9]{7}$/, { message: 'Invalid Home Telephone No.' })
         .nullable()
@@ -248,34 +169,23 @@ function PatientAddScreen(props) {
     }
   };
 
-  // const validateStep = (formData) => {
-  //   const stepSchema = schema[Object.keys(schema)[step - 1]];
-  //   const toValidate = formData[Object.keys(formData)[step - 1]];
-
-  //   // Validate the form data against the schema
-  //   const { error } = stepSchema.validate(toValidate, { abortEarly: false });
-
-  //   if (error) {
-  //     // If there are validation errors, return an object indicating that the validation failed
-  //     const errors = error.details.map((detail) => detail.message);
-  //     return { success: false, errors };
-  //   } else {
-  //     return { success: true };
-  //   }
-  // };
-
   const validateStep = async (formData) => {
     const stepSchema = schema.fields[Object.keys(formData)[step - 1]];
     const toValidate = formData[Object.keys(formData)[step - 1]];
-    console.log(stepSchema, step);
     try {
       // Validate the form data against the schema
       await stepSchema.validate(toValidate, { abortEarly: false });
+      setErrorMessage('');
 
       return { success: true };
     } catch (error) {
       if (error.inner) {
-        const errors = error.inner.map((detail) => detail.message);
+        const errors = {};
+        error.inner.forEach((e) => {
+          errors[e.path] = e.message;
+        });
+        setErrorMessage(errors);
+        console.log(errors);
         return { success: false, errors };
       } else {
         return { success: false, errors: [error.message] };
@@ -332,30 +242,6 @@ function PatientAddScreen(props) {
     }
   };
   // handling form input data by taking onchange value and updating our previous form data state
-  // const handleFormData =
-  //   (page = '', input, index = null) =>
-  //   (e, date = null) => {
-  //     if (page === 'patientInfo') {
-  //       date
-  //         ? setFormData((prevState) => ({
-  //             ...prevState,
-  //             [input]: date,
-  //           }))
-  //         : setFormData((prevState) => ({
-  //             ...prevState,
-  //             [input]: e,
-  //           }));
-  //     } else {
-  //       const newData = formData[page].slice();
-  //       date ? (newData[index][input] = date) : (newData[index][input] = e); // eg. guardianInfo[0].guardianName = e
-
-  //       setFormData((prevState) => ({
-  //         ...prevState,
-  //         [page]: newData,
-  //       }));
-  //     }
-  //   };
-
   const handleFormData =
     (page = '', input, index = null) =>
     (e, date = null) => {
@@ -427,6 +313,7 @@ function PatientAddScreen(props) {
           pickImage={pickImage}
           show={show}
           setShow={setShow}
+          errorMessage={errorMessage}
         />
       );
     case 2:
@@ -438,6 +325,7 @@ function PatientAddScreen(props) {
           formData={formData}
           setFormData={setFormData}
           componentList={componentList}
+          errorMessage={errorMessage}
         />
       );
     case 3:

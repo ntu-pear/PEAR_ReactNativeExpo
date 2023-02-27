@@ -16,6 +16,7 @@ function PatientAddGuardianScreen(props) {
     setFormData,
     handleFormData,
     componentList,
+    errorMessage,
   } = props;
 
   const concatFormData = () => {
@@ -73,6 +74,7 @@ function PatientAddGuardianScreen(props) {
                     title={index + 1}
                     formData={formData}
                     handleFormData={handleFormData}
+                    errorMessage={errorMessage}
                   />
                 </Box>
               ))

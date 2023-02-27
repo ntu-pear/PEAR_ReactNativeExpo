@@ -16,6 +16,7 @@ import AddPatientProgress from 'app/components/AddPatientProgress';
 import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import colors from 'app/config/colors';
 import DatePickerComponent from 'app/components/DatePickerComponent';
+import ErrorMessage from 'app/components/ErrorMessage';
 
 function PatientAddPatientInfoScreen(props) {
   const {
@@ -25,6 +26,7 @@ function PatientAddPatientInfoScreen(props) {
     pickImage,
     show,
     setShow,
+    errorMessage,
   } = props;
 
   const page = 'patientInfo';
@@ -46,17 +48,6 @@ function PatientAddPatientInfoScreen(props) {
     { list_LanguageID: 12, value: 'Spanish' },
     { list_LanguageID: 13, value: 'Korean' },
   ];
-
-  //   // checking if value of first name and last name is empty show error else take to step 2
-  //   if (
-  //     validator.isEmpty(values.firstName) ||
-  //     validator.isEmpty(values.lastName)
-  //   ) {
-  //     setError(true);
-  //   } else {
-  //     nextQuestionHandler();
-  //   }
-  // };
 
   return (
     <ScrollView>
@@ -103,6 +94,12 @@ function PatientAddPatientInfoScreen(props) {
               onChangeText={handleFormData(page, 'FirstName')}
             />
           </FormControl>
+          {errorMessage.FirstName ? (
+            <ErrorMessage visible={true} message={errorMessage.FirstName} />
+          ) : (
+            <></>
+          )}
+
           <FormControl>
             <FormControl.Label>Last Name</FormControl.Label>
             <Input
@@ -111,6 +108,11 @@ function PatientAddPatientInfoScreen(props) {
               onChangeText={handleFormData(page, 'LastName')}
             />
           </FormControl>
+          {errorMessage.LastName ? (
+            <ErrorMessage visible={true} message={errorMessage.LastName} />
+          ) : (
+            <></>
+          )}
 
           <FormControl>
             <FormControl.Label>Preferred Name</FormControl.Label>
@@ -120,6 +122,12 @@ function PatientAddPatientInfoScreen(props) {
               onChangeText={handleFormData(page, 'PreferredName')}
             />
           </FormControl>
+          {errorMessage.PreferredName ? (
+            <ErrorMessage visible={true} message={errorMessage.PreferredName} />
+          ) : (
+            <></>
+          )}
+
           <FormControl>
             <FormControl.Label>Preferred Language</FormControl.Label>
             <Select
@@ -136,6 +144,15 @@ function PatientAddPatientInfoScreen(props) {
               ))}
             </Select>
           </FormControl>
+          {errorMessage.PreferredLanguageListID ? (
+            <ErrorMessage
+              visible={true}
+              message={errorMessage.PreferredLanguageListID}
+            />
+          ) : (
+            <></>
+          )}
+
           <FormControl>
             <FormControl.Label>NRIC</FormControl.Label>
             <Input
@@ -145,6 +162,12 @@ function PatientAddPatientInfoScreen(props) {
               onChangeText={handleFormData(page, 'NRIC')}
             />
           </FormControl>
+          {errorMessage.NRIC ? (
+            <ErrorMessage visible={true} message={errorMessage.NRIC} />
+          ) : (
+            <></>
+          )}
+
           <FormControl>
             <FormControl.Label>Address</FormControl.Label>
             <Input
@@ -153,6 +176,12 @@ function PatientAddPatientInfoScreen(props) {
               onChangeText={handleFormData(page, 'Address')}
             />
           </FormControl>
+          {errorMessage.Address ? (
+            <ErrorMessage visible={true} message={errorMessage.Address} />
+          ) : (
+            <></>
+          )}
+
           <FormControl>
             <FormControl.Label>Temporary Address (Optional)</FormControl.Label>
             <Input
@@ -161,6 +190,12 @@ function PatientAddPatientInfoScreen(props) {
               onChangeText={handleFormData(page, 'TempAddress')}
             />
           </FormControl>
+          {errorMessage.TempAddress ? (
+            <ErrorMessage visible={true} message={errorMessage.TempAddress} />
+          ) : (
+            <></>
+          )}
+
           <FormControl>
             <FormControl.Label>Home Telephone No. (Optional)</FormControl.Label>
             <Input
@@ -171,6 +206,12 @@ function PatientAddPatientInfoScreen(props) {
               onChangeText={handleFormData(page, 'HomeNo')}
             />
           </FormControl>
+          {errorMessage.HomeNo ? (
+            <ErrorMessage visible={true} message={errorMessage.HomeNo} />
+          ) : (
+            <></>
+          )}
+
           <FormControl>
             <FormControl.Label>Handphone No. (Optional)</FormControl.Label>
             <Input
@@ -180,6 +221,12 @@ function PatientAddPatientInfoScreen(props) {
               onChangeText={handleFormData(page, 'HandphoneNo')}
             />
           </FormControl>
+          {errorMessage.HandphoneNo ? (
+            <ErrorMessage visible={true} message={errorMessage.HandphoneNo} />
+          ) : (
+            <></>
+          )}
+
           <FormControl>
             <FormControl.Label>Gender </FormControl.Label>
             <Radio.Group
@@ -196,6 +243,11 @@ function PatientAddPatientInfoScreen(props) {
               </HStack>
             </Radio.Group>
           </FormControl>
+          {errorMessage.Gender ? (
+            <ErrorMessage visible={true} message={errorMessage.Gender} />
+          ) : (
+            <></>
+          )}
 
           <FormControl>
             <FormControl.Label>Respite Care </FormControl.Label>
@@ -213,6 +265,11 @@ function PatientAddPatientInfoScreen(props) {
               </HStack>
             </Radio.Group>
           </FormControl>
+          {errorMessage.IsRespiteCare ? (
+            <ErrorMessage visible={true} message={errorMessage.IsRespiteCare} />
+          ) : (
+            <></>
+          )}
 
           {/* Reference: https://github.com/react-native-datetimepicker/datetimepicker
           TODO: Align to the left*/}
@@ -225,6 +282,12 @@ function PatientAddPatientInfoScreen(props) {
             show={show}
             setShow={setShow}
           />
+          {errorMessage.DOB ? (
+            <ErrorMessage visible={true} message={errorMessage.DOB} />
+          ) : (
+            <></>
+          )}
+
           <DatePickerComponent
             label={'Date of Joining'}
             value={patient.StartDate}
@@ -234,6 +297,12 @@ function PatientAddPatientInfoScreen(props) {
             show={show}
             setShow={setShow}
           />
+          {errorMessage.StartDate ? (
+            <ErrorMessage visible={true} message={errorMessage.StartDate} />
+          ) : (
+            <></>
+          )}
+
           <DatePickerComponent
             label={'Date of Leaving (Optional)'}
             value={patient.EndDate}
@@ -243,11 +312,15 @@ function PatientAddPatientInfoScreen(props) {
             show={show}
             setShow={setShow}
           />
+          {errorMessage.EndDate ? (
+            <ErrorMessage visible={true} message={errorMessage.EndDate} />
+          ) : (
+            <></>
+          )}
         </Box>
         <AddPatientBottomButtons
           nextQuestionHandler={nextQuestionHandler}
           formData={formData}
-          // validateStep={validateStep}
         />
       </Box>
     </ScrollView>
