@@ -23,7 +23,7 @@ function PatientsScreen(props) {
       setIsLoading(true);
       const promiseFunction = async () => {
         const response = await getListOfPatients();
-        setListOfPatients(response.data.data);
+        setListOfPatients(response.data);
       };
       promiseFunction();
       // eslint-disable-next-line react-hooks/exhaustive-deps
