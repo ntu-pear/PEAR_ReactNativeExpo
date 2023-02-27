@@ -7,6 +7,7 @@ import PatientAddAllergyScreen from 'app/screens/PatientAddAllergyScreen';
 import * as ImagePicker from 'expo-image-picker';
 // import Joi from 'joi';
 import * as Yup from 'yup';
+import mime from 'mime';
 
 function PatientAddScreen(props) {
   // state for steps
@@ -223,16 +224,13 @@ function PatientAddScreen(props) {
       quality: 1,
     });
     console.log('after picking picture', result);
-    const uriStr = result.uri;
-    const fileName = result.uri.split('/').pop();
-    const fileType = fileName.split('.').pop();
-
+    const newImageUri = 'file:///' + result.uri.split('file:/').join('');
     if (!result.cancelled) {
       var img = formData[page];
       img[input] = {
-        uri: uriStr,
-        name: fileName.split('.')[0],
-        type: `image/${fileType}`,
+        uri: newImageUri,
+        name: newImageUri.split('/').pop(),
+        type: mime.getType(newImageUri),
       };
 
       setFormData((prevState) => ({
