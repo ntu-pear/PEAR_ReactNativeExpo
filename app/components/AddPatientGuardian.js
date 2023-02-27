@@ -84,8 +84,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData }) {
           maxLength={8}
           onChangeText={handleFormData(page, 'ContactNo', i)}
         />
-      </FormControl>{' '}
-      */}
+      </FormControl>
       <FormControl>
         <FormControl.Label>Guardian Email </FormControl.Label>
         <Input
