@@ -1,8 +1,13 @@
-name: Create EAS Android build and deploy to Expo (https://expo.dev/accounts/fyppear)
+name: Create production Expo mobile build and deploy to EAS on merge
 on:
   push:
     branches:
       - main
+    paths:
+      - 'app/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/create-eas-build.yml'
 jobs:
   build:
     runs-on: ubuntu-latest
