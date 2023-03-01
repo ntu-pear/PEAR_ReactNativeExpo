@@ -22,8 +22,8 @@ function AddPatientAllergy({
   const page = 'allergyInfo';
   const allergy = formData.allergyInfo[i]; //allergyInfo[0].allergyName
 
-  const optionalText = () => {
-    return allergy.AllergyListID == 2 ? '(Optional)' : '';
+  const isDisabled = () => {
+    return allergy.AllergyListID == 2 ? true : false;
   };
 
   // constant values for list of allergies
@@ -93,15 +93,14 @@ function AddPatientAllergy({
       ) : (
         <></>
       )}
-      {console.log(optionalText)}
 
       <FormControl>
-        <FormControl.Label>Reaction {optionalText()}</FormControl.Label>
+        <FormControl.Label>Reaction</FormControl.Label>
         <Select
-          placeholder={`Select Allergy Reaction ${optionalText()}`}
+          placeholder={'Select Allergy Reaction'}
           selectedValue={allergy.AllergyReactionListID}
           onValueChange={handleFormData(page, 'AllergyReactionListID', i)}
-          clearButton
+          isDisabled={isDisabled()}
         >
           {listOfAllergyReactions.map((item) => (
             <Select.Item
@@ -122,11 +121,12 @@ function AddPatientAllergy({
       )}
 
       <FormControl>
-        <FormControl.Label>Remarks {optionalText()}</FormControl.Label>
+        <FormControl.Label>Remarks</FormControl.Label>
         <TextArea
-          placeholder={`Remarks ${optionalText()}`}
+          placeholder={'Remarks'}
           value={allergy.AllergyRemarks}
           onChangeText={handleFormData(page, 'AllergyRemarks', i)}
+          isDisabled={isDisabled()}
         />
       </FormControl>
       {errorMessage[`[${i}].AllergyRemarks`] ? (

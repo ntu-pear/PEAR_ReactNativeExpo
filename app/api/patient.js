@@ -22,40 +22,18 @@ const addPatientForm = (arr, str, patientData) => {
 
     for (const key in value) {
       const val = value[key];
-      const param = `${str}[${item}].${key}`;
-      patientData.append(param, val);
+      // if value is 'None', do not append to patientData
+      if (key == 'AllergyListID' && val == 2) {
+        break;
+      } else {
+        const param = `${str}[${item}].${key}`;
+        patientData.append(param, val);
+      }
     }
   }
   return patientData;
 };
 // **********************  GET REQUESTS *************************
-
-// const getPatient = async (patientID, isActive, maskNRIC) => {
-//   // Error Handling
-//   isActive ? (isActive = true) : (isActive = false);
-//   maskNRIC ? (maskNRIC = true) : (maskNRIC = false);
-
-//   /*
-//    *   Build Params
-//    */
-//   // if patientId is specified
-//   let params;
-//   if (patientID !== null) {
-//     params = {
-//       patientID,
-//       maskNRIC,
-//     };
-//   }
-//   // if patientId is not specified
-//   else {
-//     params = {
-//       isActive,
-//       maskNRIC,
-//     };
-//   }
-
-//   return client.get(endpoint, params);
-// };
 
 const getPatientList = async (maskNRIC = true) => {
   // Error Handling
@@ -91,7 +69,6 @@ const addPatient = (formData) => {
  * Expose your end points here
  */
 export default {
-  // getPatient,
   getPatientList,
   addPatient,
 };
