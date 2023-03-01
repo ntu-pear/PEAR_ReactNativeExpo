@@ -1,3 +1,4 @@
+name: Publish Expo mobile app preview on PR
 on: [pull_request]
 permissions: write-all
 jobs:
