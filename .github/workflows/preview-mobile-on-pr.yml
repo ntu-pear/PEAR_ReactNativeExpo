@@ -1,5 +1,12 @@
-name: Publish Expo mobile app preview on PR
-on: [pull_request]
+name: Create preview environment for RN Expo Mobile (iOS + Android) App on PR 
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/preview-mobile-on-pr.yml'
 permissions: write-all
 jobs:
   publish:
