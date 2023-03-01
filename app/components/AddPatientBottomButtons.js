@@ -37,6 +37,8 @@ function AddPatientBottomButtons({
       let alertTitle = '';
       let alertDetails = '';
 
+      console.log('response: ', result);
+
       if (result.ok) {
         const allocations = result.data.data.patientAllocationDTO;
         const caregiver = allocations.caregiverName;
@@ -50,9 +52,13 @@ function AddPatientBottomButtons({
           ? navigate('/' + routes.PATIENTS)
           : navigation.navigate(routes.PATIENTS_SCREEN);
       } else {
-        const errors = result.data.message;
+        const errors = result.data?.message;
+
+        result.data
+          ? (alertDetails = `\n${errors}.\n\nPlease try again.`)
+          : (alertDetails = 'Please try again.');
+
         alertTitle = 'Error in Adding Patient';
-        alertDetails = `\n${errors}.\n\nPlease try again.`;
         alertTxt = alertTitle + alertDetails;
       }
       Platform.OS === 'web'

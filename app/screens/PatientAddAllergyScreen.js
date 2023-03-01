@@ -12,6 +12,7 @@ function PatientAddAllergyScreen(props) {
     handleFormData,
     componentList,
     validateStep,
+    errorMessage,
   } = props;
   const [allergyInfoDisplay, setAllergyInfoDisplay] = useState(
     componentList.allergy,
@@ -19,8 +20,8 @@ function PatientAddAllergyScreen(props) {
 
   const concatFormData = () => {
     var allergyInfo = formData.allergyInfo.concat({
-      AllergyListID: 1,
-      AllergyReactionListID: 1,
+      AllergyListID: null,
+      AllergyReactionListID: null,
       AllergyRemarks: '',
     });
     setFormData((prevState) => ({
@@ -64,6 +65,7 @@ function PatientAddAllergyScreen(props) {
                     title={index + 1}
                     formData={formData}
                     handleFormData={handleFormData}
+                    errorMessage={errorMessage}
                   />
                 </Box>
               ))

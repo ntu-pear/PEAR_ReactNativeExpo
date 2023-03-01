@@ -2,8 +2,15 @@ import React from 'react';
 import { Box, Input, FormControl, Text, Select, Divider } from 'native-base';
 import colors from 'app/config/colors';
 import typography from 'app/config/typography';
+import ErrorMessage from 'app/components/ErrorMessage';
 
-function AddPatientGuardian({ i, title, formData, handleFormData }) {
+function AddPatientGuardian({
+  i,
+  title,
+  formData,
+  handleFormData,
+  errorMessage,
+}) {
   const page = 'guardianInfo';
   const guardian = formData.guardianInfo[i]; //guardianInfo[0].FirstName
 
@@ -43,6 +50,12 @@ function AddPatientGuardian({ i, title, formData, handleFormData }) {
           onChangeText={handleFormData(page, 'FirstName', i)}
         />
       </FormControl>
+      {errorMessage[`[${i}].FirstName`] ? (
+        <ErrorMessage visible message={errorMessage[`[${i}].FirstName`]} />
+      ) : (
+        <></>
+      )}
+
       <FormControl>
         <FormControl.Label>Guardian Last Name</FormControl.Label>
         <Input
@@ -51,6 +64,12 @@ function AddPatientGuardian({ i, title, formData, handleFormData }) {
           onChangeText={handleFormData(page, 'LastName', i)}
         />
       </FormControl>
+      {errorMessage[`[${i}].LastName`] ? (
+        <ErrorMessage visible message={errorMessage[`[${i}].LastName`]} />
+      ) : (
+        <></>
+      )}
+
       <FormControl>
         <FormControl.Label>Guardian NRIC</FormControl.Label>
         <Input
@@ -60,6 +79,12 @@ function AddPatientGuardian({ i, title, formData, handleFormData }) {
           onChangeText={handleFormData(page, 'NRIC', i)}
         />
       </FormControl>
+      {errorMessage[`[${i}].NRIC`] ? (
+        <ErrorMessage visible message={errorMessage[`[${i}].NRIC`]} />
+      ) : (
+        <></>
+      )}
+
       <FormControl>
         <FormControl.Label>Guardian is Patient's</FormControl.Label>
         <Select
@@ -76,6 +101,12 @@ function AddPatientGuardian({ i, title, formData, handleFormData }) {
           ))}
         </Select>
       </FormControl>
+      {errorMessage[`[${i}].RelationshipID`] ? (
+        <ErrorMessage visible message={errorMessage[`[${i}].RelationshipID`]} />
+      ) : (
+        <></>
+      )}
+
       <FormControl>
         <FormControl.Label>Guardian's Handphone No.</FormControl.Label>
         <Input
@@ -85,6 +116,12 @@ function AddPatientGuardian({ i, title, formData, handleFormData }) {
           onChangeText={handleFormData(page, 'ContactNo', i)}
         />
       </FormControl>
+      {errorMessage[`[${i}].ContactNo`] ? (
+        <ErrorMessage visible message={errorMessage[`[${i}].ContactNo`]} />
+      ) : (
+        <></>
+      )}
+
       <FormControl>
         <FormControl.Label>Guardian Email </FormControl.Label>
         <Input
@@ -93,6 +130,11 @@ function AddPatientGuardian({ i, title, formData, handleFormData }) {
           onChangeText={handleFormData(page, 'Email', i)}
         />
       </FormControl>
+      {errorMessage[`[${i}].Email`] ? (
+        <ErrorMessage visible message={errorMessage[`[${i}].Email`]} />
+      ) : (
+        <></>
+      )}
     </Box>
   );
 }
