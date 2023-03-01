@@ -16,6 +16,7 @@ import AddPatientProgress from 'app/components/AddPatientProgress';
 import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import colors from 'app/config/colors';
 import DatePickerComponent from 'app/components/DatePickerComponent';
+import DropDownPicker from 'react-native-dropdown-picker';
 import ErrorMessage from 'app/components/ErrorMessage';
 
 function PatientAddPatientInfoScreen(props) {

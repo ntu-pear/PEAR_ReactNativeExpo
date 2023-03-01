@@ -94,13 +94,22 @@ function PatientAddScreen(props) {
       .min(1)
       .max(2)
       .required(),
-
     allergyInfo: Yup.array()
       .of(
         Yup.object().shape({
           AllergyListID: Yup.number().required(),
-          AllergyReactionListID: Yup.number().notRequired(),
-          AllergyRemarks: Yup.string().notRequired(),
+          AllergyReactionListID: Yup.number().when(
+            'AllergyListID',
+            (value, schema) => {
+              return value == 2 ? schema.notRequired() : schema.required(); // validation not required if AllergyListID is 'None'
+            },
+          ),
+          AllergyRemarks: Yup.string().when(
+            'AllergyListID',
+            (value, schema) => {
+              return value == 2 ? schema.notRequired() : schema.required(); // validation not required if AllergyListID is 'None'
+            },
+          ),
         }),
       )
       .min(1)
@@ -151,9 +160,9 @@ function PatientAddScreen(props) {
 
     allergyInfo: [
       {
-        AllergyListID: 3,
-        AllergyReactionListID: 3,
-        AllergyRemarks: 'gg',
+        AllergyListID: null,
+        AllergyReactionListID: null,
+        AllergyRemarks: '',
       },
     ],
   };
@@ -336,6 +345,7 @@ function PatientAddScreen(props) {
           setFormData={setFormData}
           componentList={componentList}
           validateStep={validateStep}
+          errorMessage={errorMessage}
         />
       );
     default:

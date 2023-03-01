@@ -10,10 +10,21 @@ import {
 } from 'native-base';
 import colors from 'app/config/colors';
 import typography from 'app/config/typography';
+import ErrorMessage from 'app/components/ErrorMessage';
 
-function AddPatientAllergy({ i, title, formData, handleFormData }) {
+function AddPatientAllergy({
+  i,
+  title,
+  formData,
+  handleFormData,
+  errorMessage,
+}) {
   const page = 'allergyInfo';
   const allergy = formData.allergyInfo[i]; //allergyInfo[0].allergyName
+
+  const optionalText = () => {
+    return allergy.AllergyListID == 2 ? '(Optional)' : '';
+  };
 
   // constant values for list of allergies
   const listOfAllergies = [
@@ -77,13 +88,20 @@ function AddPatientAllergy({ i, title, formData, handleFormData }) {
           ))}
         </Select>
       </FormControl>
+      {errorMessage[`[${i}].AllergyListID`] ? (
+        <ErrorMessage visible message={errorMessage[`[${i}].AllergyListID`]} />
+      ) : (
+        <></>
+      )}
+      {console.log(optionalText)}
 
       <FormControl>
-        <FormControl.Label>Reaction</FormControl.Label>
+        <FormControl.Label>Reaction {optionalText()}</FormControl.Label>
         <Select
-          placeholder="Select Allergy Reaction"
+          placeholder={`Select Allergy Reaction ${optionalText()}`}
           selectedValue={allergy.AllergyReactionListID}
           onValueChange={handleFormData(page, 'AllergyReactionListID', i)}
+          clearButton
         >
           {listOfAllergyReactions.map((item) => (
             <Select.Item
@@ -94,15 +112,28 @@ function AddPatientAllergy({ i, title, formData, handleFormData }) {
           ))}
         </Select>
       </FormControl>
+      {errorMessage[`[${i}].AllergyReactionListID`] ? (
+        <ErrorMessage
+          visible
+          message={errorMessage[`[${i}].AllergyReactionListID`]}
+        />
+      ) : (
+        <></>
+      )}
 
       <FormControl>
-        <FormControl.Label>Remarks</FormControl.Label>
+        <FormControl.Label>Remarks {optionalText()}</FormControl.Label>
         <TextArea
-          placeholder="Remarks (optional)"
+          placeholder={`Remarks ${optionalText()}`}
           value={allergy.AllergyRemarks}
           onChangeText={handleFormData(page, 'AllergyRemarks', i)}
         />
       </FormControl>
+      {errorMessage[`[${i}].AllergyRemarks`] ? (
+        <ErrorMessage visible message={errorMessage[`[${i}].AllergyRemarks`]} />
+      ) : (
+        <></>
+      )}
     </Box>
   );
 }
