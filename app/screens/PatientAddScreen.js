@@ -35,15 +35,23 @@ function PatientAddScreen(props) {
 
   const schema = Yup.object().shape({
     patientInfo: Yup.object().shape({
-      FirstName: Yup.string().required(),
-      LastName: Yup.string().required(),
-      PreferredName: Yup.string().required(),
-      PreferredLanguageListID: Yup.number().required(),
+      FirstName: Yup.string()
+        .matches(/^[^\d]+$/, 'First Name must not contain any numbers.')
+        .required('First Name is a required field.'),
+      LastName: Yup.string()
+        .matches(/^[^\d]+$/, 'Last Name must not contain any numbers.')
+        .required('Last Name is a required field.'),
+      PreferredName: Yup.string()
+        .matches(/^[^\d]+$/, 'Preferred Name must not contain any numbers.')
+        .required('Preferred Name is a required field.'),
+      PreferredLanguageListID: Yup.number().required(
+        'Preferred Language is a required field.',
+      ),
       NRIC: Yup.string()
-        .matches(/^[A-Za-z]\d{7}[A-Za-z]$/, { message: 'Invalid NRIC' })
-        .length(9)
-        .required(),
-      Address: Yup.string().required(),
+        .matches(/^[A-Za-z]\d{7}[A-Za-z]$/, { message: 'Invalid NRIC.' })
+        .length(9, 'NRIC must be exactly 9 characters.')
+        .required('NRIC is a required field'),
+      Address: Yup.string().required('Address is a required field.'),
       TempAddress: Yup.string().notRequired(),
       // TODO: fix validation for HomeNo and HandphoneNo
       HomeNo: Yup.string()
@@ -77,18 +85,45 @@ function PatientAddScreen(props) {
     guardianInfo: Yup.array()
       .of(
         Yup.object().shape({
-          FirstName: Yup.string().required(),
-          LastName: Yup.string().required(),
+          FirstName: Yup.string()
+            .matches(
+              /^[^\d]+$/,
+              "Guardian's First Name must not contain any numbers.",
+            )
+            .required("Guardian's First Name is a required field."),
+          LastName: Yup.string()
+            .matches(
+              /^[^\d]+$/,
+              "Guardian's Last Name must not contain any numbers.",
+            )
+            .required("Guardian's Last Name is a required field."),
           NRIC: Yup.string()
-            .matches(/^[A-Za-z]\d{7}[A-Za-z]$/, { message: 'Invalid NRIC' })
-            .length(9)
-            .required(),
-          Email: Yup.string().email('Invalid email address').required(),
-          RelationshipID: Yup.number().required(),
+            .matches(/^[A-Za-z]\d{7}[A-Za-z]$/, {
+              message: 'Invalid NRIC format.',
+            })
+            .length(9, 'NRIC must be exactly 9 characters.')
+            .required("Guardian's NRIC is a required field."),
+          IsChecked: Yup.boolean(), // additional item to check if guardian wishes to log in in the future. if yes, email is required
+          Email: Yup.string()
+            .email('Invalid email address.')
+            .required(
+              "Guardian's Email is a required field if Guardian wants to log in.",
+            )
+            .when('IsChecked', {
+              is: true,
+              otherwise: (schema) =>
+                schema.email('Invalid email address.').notRequired(),
+            }),
+
+          RelationshipID: Yup.number().required(
+            'Relationship ID is a required field.',
+          ),
           IsActive: Yup.boolean().required(),
           ContactNo: Yup.string()
-            .matches(/^[89]\d{7}$/, { message: 'Invalid Contact No.' })
-            .required(),
+            .matches(/^[89]\d{7}$/, {
+              message: 'Invalid Contact No. Must start with 8 or 9.',
+            })
+            .required("Guardian's Contact No. is a required field."),
         }),
       )
       .min(1)
@@ -97,17 +132,27 @@ function PatientAddScreen(props) {
     allergyInfo: Yup.array()
       .of(
         Yup.object().shape({
-          AllergyListID: Yup.number().required(),
-          AllergyReactionListID: Yup.number().when(
+          AllergyListID: Yup.string().required(
+            'Allergy Name is a required field.',
+          ),
+          AllergyReactionListID: Yup.string().when(
             'AllergyListID',
             (value, schema) => {
-              return value == 2 ? schema.notRequired() : schema.required(); // validation not required if AllergyListID is 'None'
+              return value == 2
+                ? schema.notRequired()
+                : schema.required(
+                    "Allergy Reaction is a required field if Allergy Name is not 'None'.",
+                  ); // validation not required if AllergyListID is 'None'
             },
           ),
           AllergyRemarks: Yup.string().when(
             'AllergyListID',
             (value, schema) => {
-              return value == 2 ? schema.notRequired() : schema.required(); // validation not required if AllergyListID is 'None'
+              return value == 2
+                ? schema.notRequired()
+                : schema.required(
+                    "Allergy Remarks is a required field if Allergy Name is not 'None'.",
+                  ); // validation not required if AllergyListID is 'None'
             },
           ),
         }),
@@ -119,7 +164,7 @@ function PatientAddScreen(props) {
   const patientData = {
     patientInfo: {
       FirstName: 'Patient',
-      LastName: '',
+      LastName: 'adf',
       PreferredName: 'Patient',
       PreferredLanguageListID: 1,
       NRIC: 'S0948274A',
@@ -151,6 +196,7 @@ function PatientAddScreen(props) {
         FirstName: 'gFirst',
         LastName: 'gLast',
         NRIC: 'S9658567Z',
+        IsChecked: false, // additional item to check if guardian wishes to log in in the future. if yes, email is required
         Email: 'gg@gmail.com',
         RelationshipID: 1,
         IsActive: true,
@@ -180,6 +226,7 @@ function PatientAddScreen(props) {
   };
 
   const validateStep = async (formData) => {
+    console.log(formData);
     const stepSchema = schema.fields[Object.keys(formData)[step - 1]];
     const toValidate = formData[Object.keys(formData)[step - 1]];
     try {

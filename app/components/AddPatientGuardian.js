@@ -1,5 +1,13 @@
 import React from 'react';
-import { Box, Input, FormControl, Text, Select, Divider } from 'native-base';
+import {
+  Box,
+  Input,
+  FormControl,
+  Text,
+  Select,
+  Divider,
+  Checkbox,
+} from 'native-base';
 import colors from 'app/config/colors';
 import typography from 'app/config/typography';
 import ErrorMessage from 'app/components/ErrorMessage';
@@ -13,6 +21,11 @@ function AddPatientGuardian({
 }) {
   const page = 'guardianInfo';
   const guardian = formData.guardianInfo[i]; //guardianInfo[0].FirstName
+  // console.log('guardian: ', i, formData.guardianInfo);
+
+  const isOptional = () => {
+    return guardian.IsChecked ? '' : '(Optional)';
+  };
 
   // constant values for relationships
   const listOfRelationships = [
@@ -121,11 +134,20 @@ function AddPatientGuardian({
       ) : (
         <></>
       )}
+      <FormControl>
+        <FormControl.Label>Does Guardian wish to Log In?</FormControl.Label>
+        <Checkbox
+          isChecked={guardian.IsChecked}
+          value={guardian.IsChecked}
+          onChange={handleFormData(page, 'IsChecked', i)}
+          aria-label="Does Guardian wish to Log In?"
+        />
+      </FormControl>
 
       <FormControl>
-        <FormControl.Label>Guardian Email </FormControl.Label>
+        <FormControl.Label>Guardian Email {isOptional()}</FormControl.Label>
         <Input
-          placeholder="Guardian Email"
+          placeholder={`Guardian Email ${isOptional()}`}
           value={guardian.Email}
           onChangeText={handleFormData(page, 'Email', i)}
         />

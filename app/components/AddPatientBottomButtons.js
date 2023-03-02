@@ -55,7 +55,7 @@ function AddPatientBottomButtons({
         const errors = result.data?.message;
 
         result.data
-          ? (alertDetails = `\n${errors}.\n\nPlease try again.`)
+          ? (alertDetails = `\n${errors}\n\nPlease try again.`)
           : (alertDetails = 'Please try again.');
 
         alertTitle = 'Error in Adding Patient';
