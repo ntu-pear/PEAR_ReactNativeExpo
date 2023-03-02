@@ -25,10 +25,10 @@ function PatientAddGuardianScreen(props) {
       LastName: '',
       ContactNo: '',
       NRIC: '',
+      IsChecked: false,
       Email: '',
       RelationshipID: 1,
       IsActive: true,
-      // IsAdditionalGuardian: true,
     });
     setFormData((prevState) => ({
       ...prevState,
@@ -59,6 +59,8 @@ function PatientAddGuardianScreen(props) {
     setGuardianInfoDisplay(list);
     removeFormData();
   };
+
+  console.log(formData.guardianInfo);
 
   return (
     <ScrollView>

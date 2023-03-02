@@ -22,7 +22,12 @@ const addPatientForm = (arr, str, patientData) => {
 
     for (const key in value) {
       const val = value[key];
-      // if value is 'None', do not append to patientData
+      // if key is IsChecked, do not append to patientData
+      // IsChecked is used for front end validation for guardian's email only
+      if (key == 'IsChecked') {
+        continue;
+      }
+      // if AllergyListID is 'None', do not append allergy info to patientData
       if (key == 'AllergyListID' && val == 2) {
         break;
       } else {
