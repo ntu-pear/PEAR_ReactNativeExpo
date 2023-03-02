@@ -7,6 +7,7 @@ import { Image } from 'react-native';
  */
 const endpoint = '/Patient';
 const patientList = `${endpoint}/patientList`;
+const patientListByUserId = `${endpoint}/patientListByUserId`;
 const patientAdd = `${endpoint}/add`;
 const patientUpdate = `${endpoint}/update`; //eslint-disable-line no-unused-vars
 const privacyLevelUpdate = `${endpoint}/UpdatePatient`; //eslint-disable-line no-unused-vars
@@ -50,6 +51,10 @@ const getPatientList = async (maskNRIC = true) => {
   // maskNRIC ? (maskNRIC = true) : (maskNRIC = false);
 
   return client.get(patientList, maskNRIC);
+};
+
+const getPatientListByUserId = async (maskNRIC = true) => {
+  return client.get(patientListByUserId, maskNRIC);
 };
 
 // **********************  POST REQUESTS *************************
@@ -107,5 +112,6 @@ const addPatient = (formData) => {
  */
 export default {
   getPatientList,
+  getPatientListByUserId,
   addPatient,
 };
