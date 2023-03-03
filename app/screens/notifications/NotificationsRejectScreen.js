@@ -1,18 +1,14 @@
-import notificationApi from 'app/api/notification';
 import AuthContext from 'app/auth/context';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import ErrorRetryApiCard from 'app/components/ErrorRetryApiCard';
 import NotificationCard from 'app/components/NotificationCard';
 import { FlatList, VStack } from 'native-base';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import NotificationActions from 'app/config/notificationActions';
+import useNotifications from 'app/screens/notifications/useNotifications';
+import NotificationSortSelector from 'app/screens/notifications/NotificationsSortSelector';
 
-const defaultPaginationLimit = 20;
-const paginationStartingParam = {
-  offset: 0,
-  limit: defaultPaginationLimit,
-};
 function NotificationsRejectScreen(props) {
+  const { notificationType } = props.route.params;
   const { user } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -20,7 +16,14 @@ function NotificationsRejectScreen(props) {
   const [notificationRejectedData, setNotificationRejectedData] = useState([]);
   const [isFetchingMoreNotifications, setIsFetchingMoreNotifications] =
     useState(false);
-  const paginationParams = useRef({ ...paginationStartingParam });
+  const paginationParams = useRef({});
+  const [sortBy, setSortBy] = useState('');
+  const { getNotifications, handlePullToRefresh } = useNotifications(
+    notificationType,
+    setIsError,
+    setIsLoading,
+    setNotificationRejectedData,
+  );
   // const [notificationRejectedData, setNotificationRejectedData] = useState([
   //   {
   //     requiresAction: false,
@@ -36,56 +39,20 @@ function NotificationsRejectScreen(props) {
   // ]);
 
   useEffect(() => {
-    // Note: `true` refers to readStatus = `true`
-    getAllNotificationRejectedData(true);
+    // Purpose: Get all notification items that has been `rejected`.
+    handlePullToRefresh(paginationParams, sortBy);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const handlePullToRefresh = async () => {
-    // TODO: Uncomment this when api is up
-    setNotificationRejectedData([]);
-    setIsRefreshing(true);
-    paginationParams.current = { ...paginationStartingParam };
-    // Note: `true` refers to readStatus = `true`
-    await getAllNotificationRejectedData(true);
-    setIsRefreshing(false);
-  };
-  // Purpose: Get all notification items that has been `rejected`.
-  const getAllNotificationRejectedData = async (readStatus) => {
-    const { offset, limit } = paginationParams.current;
-    if (offset === -1) {
-      return;
-    }
-    setIsLoading(true);
-    const response = await notificationApi.getNotificationOfUser(
-      readStatus,
-      offset,
-      limit,
-    );
-    if (!response.ok) {
-      setIsLoading(false);
-      setIsError(true);
-      return;
-    }
-    const filteredNotificationItemsWithRejectAction =
-      response?.data.results.filter(
-        (notification) => notification.status === NotificationActions.Reject,
-      );
-    paginationParams.current.offset = response.data.next_offset;
-    paginationParams.current.limit =
-      response.data.next_limit === -1 ? null : response.data.next_limit;
-    setIsLoading(false);
-    setNotificationRejectedData(filteredNotificationItemsWithRejectAction);
-  };
 
   const handleErrorWhenApiFails = () => {
     setIsError(false);
     // Note: `true` refers to readStatus = `true`
-    getAllNotificationRejectedData(true);
+    getNotifications(paginationParams, sortBy);
   };
 
   const getMoreNotifications = async () => {
     setIsFetchingMoreNotifications(true);
-    await getAllNotificationRejectedData(false);
+    await getNotifications(paginationParams, sortBy);
     setIsFetchingMoreNotifications(false);
   };
 
@@ -99,12 +66,17 @@ function NotificationsRejectScreen(props) {
             <ErrorRetryApiCard handleError={handleErrorWhenApiFails} />
           )}
           <VStack w="90%">
+            {notificationRejectedData.length > 0 && (
+              <NotificationSortSelector sortBy={sortBy} setSortBy={setSortBy} />
+            )}
             <FlatList
               showsVerticalScrollIndicator={false}
               data={notificationRejectedData}
               keyExtractor={(item) => item.notificationID}
               onEndReached={getMoreNotifications}
-              onRefresh={handlePullToRefresh}
+              onRefresh={async () =>
+                await handlePullToRefresh(paginationParams, sortBy)
+              }
               refreshing={isRefreshing}
               renderItem={({ item }) => (
                 <NotificationCard item={item} user={user} readStatus={true} />

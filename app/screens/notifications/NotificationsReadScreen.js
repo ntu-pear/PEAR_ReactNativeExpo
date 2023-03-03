@@ -4,14 +4,11 @@ import AuthContext from 'app/auth/context';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import NotificationCard from 'app/components/NotificationCard';
 import ErrorRetryApiCard from 'app/components/ErrorRetryApiCard';
-import notificationApi from 'app/api/notification';
+import useNotifications from 'app/screens/notifications/useNotifications';
+import NotificationSortSelector from 'app/screens/notifications/NotificationsSortSelector';
 
-const defaultPaginationLimit = 20;
-const paginationStartingParam = {
-  offset: 0,
-  limit: defaultPaginationLimit,
-};
 function NotificationsReadScreen(props) {
+  const { notificationType } = props.route.params;
   const { user } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -19,69 +16,25 @@ function NotificationsReadScreen(props) {
   const [notificationReadData, setNotificationReadData] = useState([]);
   const [isFetchingMoreNotifications, setIsFetchingMoreNotifications] =
     useState(false);
-  const paginationParams = useRef({ ...paginationStartingParam });
-  // const [notificationReadData, setNotificationReadData] = useState([
-  //   {
-  //     requiresAction: false,
-  //     actions: ['clear', 'deliver'],
-  //     notificationID: 2,
-  //     logID: 3621,
-  //     message: 'FYI: Adeline has updated information for patient Alice:\n\n',
-  //     initiatorUID: 'B22698B8-42A2-4115-9631-1C2D1E2AC5F2',
-  //     type: 'StandardNotification',
-  //     recipientKey: 'supervisorInCharge',
-  //     recipientUIDs: null,
-  //   },
-  // ]);
+  const paginationParams = useRef({});
+  const [sortBy, setSortBy] = useState('');
+  const { getNotifications, handlePullToRefresh } = useNotifications(
+    notificationType,
+    setIsError,
+    setIsLoading,
+    setNotificationReadData,
+  );
 
   useEffect(() => {
     //  Get all `read` notification of user
     // Note: `true` refers to readStatus = true
-    getAllNotificationReadData(true);
-  }, []);
-
-  const handlePullToRefresh = async () => {
-    //  Get all `read` notification of user
-    setNotificationReadData([]);
-    setIsRefreshing(true);
-    paginationParams.current = { ...paginationStartingParam };
-    // Note: `true` refers to readStatus = true
-    await getAllNotificationReadData(true);
-    setIsRefreshing(false);
-  };
-
-  const getAllNotificationReadData = async (readStatus) => {
-    const { offset, limit } = paginationParams.current;
-    if (offset === -1) {
-      return;
-    }
-    setIsLoading(true);
-    const response = await notificationApi.getNotificationOfUser(
-      readStatus,
-      offset,
-      limit,
-    );
-    setIsLoading(false);
-    if (!response.ok) {
-      // return error block
-      setIsError(true);
-      return;
-    }
-    paginationParams.current.offset = response.data.next_offset;
-    paginationParams.current.limit =
-      response.data.next_limit === -1 ? null : response.data.next_limit;
-    setNotificationReadData((data) => data.concat(response.data.results));
-  };
-
-  const handleErrorWhenApiFails = () => {
-    //  Get all `read` notification of user;
-    //  Note: `true` refers to readStatus = true
-    getAllNotificationReadData(true);
-  };
+    handlePullToRefresh(paginationParams, sortBy);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortBy]);
 
   const getMoreNotifications = async () => {
     setIsFetchingMoreNotifications(true);
-    await getAllNotificationReadData(false);
+    await getNotifications(paginationParams, sortBy);
     setIsFetchingMoreNotifications(false);
   };
 
@@ -92,20 +45,34 @@ function NotificationsReadScreen(props) {
       ) : (
         <VStack w="100%" h="100%" alignItems="center">
           {isError && (
-            <ErrorRetryApiCard handleError={handleErrorWhenApiFails} />
+            <ErrorRetryApiCard
+              handleError={async () =>
+                await handlePullToRefresh(paginationParams, sortBy)
+              }
+            />
           )}
           <VStack w="90%">
-            <FlatList
-              showsVerticalScrollIndicator={false}
-              data={notificationReadData}
-              keyExtractor={(item) => item.notificationID}
-              onEndReached={getMoreNotifications}
-              onRefresh={handlePullToRefresh}
-              refreshing={isRefreshing}
-              renderItem={({ item }) => (
-                <NotificationCard item={item} user={user} readStatus={true} />
+            <>
+              {notificationReadData.length > 0 && (
+                <NotificationSortSelector
+                  sortBy={sortBy}
+                  setSortBy={setSortBy}
+                />
               )}
-            />
+              <FlatList
+                showsVerticalScrollIndicator={false}
+                data={notificationReadData}
+                keyExtractor={(item) => item.notificationID}
+                onEndReached={getMoreNotifications}
+                onRefresh={async () =>
+                  await handlePullToRefresh(paginationParams, sortBy)
+                }
+                refreshing={isRefreshing}
+                renderItem={({ item }) => (
+                  <NotificationCard item={item} user={user} readStatus={true} />
+                )}
+              />
+            </>
           </VStack>
         </VStack>
       )}
