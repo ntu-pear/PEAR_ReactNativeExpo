@@ -1,5 +1,6 @@
 /*eslint eslint-comments/no-unlimited-disable: error */
 import client from 'app/api/client';
+import { Image } from 'react-native';
 
 /*
  * List all end points here
@@ -53,6 +54,20 @@ const addPatient = (formData) => {
 
   for (const key in formData.patientInfo) {
     var value = formData.patientInfo[key];
+    if (
+      key == 'UploadProfilePicture' &&
+      Object.values(value).every((val) => val === '') // if no profile image is uploaded, upload a placeholder profile image
+    ) {
+      const placeholderImage = Image.resolveAssetSource(
+        require('../assets/placeholder.png'),
+      );
+
+      value = {
+        uri: placeholderImage.uri,
+        name: 'placeholder.png',
+        type: 'image/png',
+      };
+    }
     if (value instanceof Date) {
       value = value.toISOString().split('T')[0];
     }

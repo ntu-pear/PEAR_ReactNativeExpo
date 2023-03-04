@@ -5,7 +5,7 @@ import PatientAddPatientInfoScreen from 'app/screens/PatientAddPatientInfoScreen
 import PatientAddGuardianScreen from 'app/screens/PatientAddGuardianScreen';
 import PatientAddAllergyScreen from 'app/screens/PatientAddAllergyScreen';
 import * as ImagePicker from 'expo-image-picker';
-// import Joi from 'joi';
+
 import * as Yup from 'yup';
 import mime from 'mime';
 
@@ -215,6 +215,13 @@ function PatientAddScreen(props) {
 
   const [formData, setFormData] = useState(patientData);
 
+  // order the form data wrt to form steps
+  const orderedFormData = {
+    patientInfo: formData.patientInfo,
+    guardianInfo: formData.guardianInfo,
+    allergyInfo: formData.allergyInfo,
+  };
+
   const componentHandler = (page = '', list = []) => {
     if (list) {
       setComponentList((prevState) => ({
@@ -226,13 +233,13 @@ function PatientAddScreen(props) {
   };
 
   const validateStep = async (formData) => {
-    console.log(formData);
-    const stepSchema = schema.fields[Object.keys(formData)[step - 1]];
-    const toValidate = formData[Object.keys(formData)[step - 1]];
+    const stepSchema = schema.fields[Object.keys(orderedFormData)[step - 1]];
+    const toValidate = formData[Object.keys(orderedFormData)[step - 1]];
+
     try {
+      setErrorMessage('');
       // Validate the form data against the schema
       await stepSchema.validate(toValidate, { abortEarly: false });
-      setErrorMessage('');
 
       return { success: true };
     } catch (error) {
@@ -279,9 +286,9 @@ function PatientAddScreen(props) {
       aspect: [4, 3],
       quality: 1,
     });
-    console.log('after picking picture', result);
-    const newImageUri = 'file:///' + result.uri.split('file:/').join('');
     if (!result.cancelled) {
+      const newImageUri = 'file:///' + result.uri.split('file:/').join('');
+
       var img = formData[page];
       img[input] = {
         uri: newImageUri,
@@ -295,6 +302,7 @@ function PatientAddScreen(props) {
       }));
     }
   };
+
   // handling form input data by taking onchange value and updating our previous form data state
   const handleFormData =
     (page = '', input, index = null) =>
