@@ -50,18 +50,21 @@ function PatientAddScreen(props) {
       NRIC: Yup.string()
         .matches(/^[A-Za-z]\d{7}[A-Za-z]$/, { message: 'Invalid NRIC.' })
         .length(9, 'NRIC must be exactly 9 characters.')
-        .required('NRIC is a required field'),
+        .required('NRIC is a required field.'),
       Address: Yup.string().required('Address is a required field.'),
       TempAddress: Yup.string().notRequired(),
-      // TODO: fix validation for HomeNo and HandphoneNo
       HomeNo: Yup.string()
-        .matches(/^6[0-9]{7}$/, { message: 'Invalid Home Telephone No.' })
-        .nullable()
-        .default(),
+        .matches(/^$|^6[0-9]{7}$/, {
+          message:
+            'Home Telephone No. must start with the digit 6, and must have 8 digits.',
+        })
+        .notRequired(),
       HandphoneNo: Yup.string()
-        .matches(/^[89]\d{7}$/, { message: 'Invalid Handphone No.' })
-        .nullable()
-        .default(),
+        .matches(/^$|^[89][0-9]{7}$/, {
+          message:
+            'Handphone No. must start with the digit 8 or 9, and must have 8 digits.',
+        })
+        .notRequired(),
       Gender: Yup.string().required(),
       DOB: Yup.date().required(),
       StartDate: Yup.date().required(),
@@ -121,9 +124,11 @@ function PatientAddScreen(props) {
           IsActive: Yup.boolean().required(),
           ContactNo: Yup.string()
             .matches(/^[89]\d{7}$/, {
-              message: 'Invalid Contact No. Must start with 8 or 9.',
+              message:
+                "Guardian's Handphone No. must start with the digit 8 or 9.",
             })
-            .required("Guardian's Contact No. is a required field."),
+            .length(8, "Guardian's Handphone No. must be exactly 8 digits.")
+            .required("Guardian's Handphone No. is a required field."),
         }),
       )
       .min(1)
