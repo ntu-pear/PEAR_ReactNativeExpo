@@ -26,7 +26,7 @@ function PatientScreenCard(props) {
               borderRadius="full"
               // Note: This is a fall-back uri. Will only be used if source fails to render the image.
               fallbackSource={{
-                uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1673348736/Assets/bvtnichzakwtzwu2zqt5.jpg',
+                uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1677039560/Assets/jzfbdl15jstf8bgt5ax0.png',
               }}
               resizeMode="cover"
               size={Platform.OS === 'web' ? 'xl' : 'sm'}
