@@ -126,6 +126,7 @@ function AddPatientGuardian({
           placeholder="Guardian's Handphone Number"
           value={guardian.ContactNo}
           maxLength={8}
+          keyboardType="numeric"
           onChangeText={handleFormData(page, 'ContactNo', i)}
         />
       </FormControl>

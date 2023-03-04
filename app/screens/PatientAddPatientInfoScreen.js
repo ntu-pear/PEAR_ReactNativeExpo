@@ -230,6 +230,7 @@ function PatientAddPatientInfoScreen(props) {
               <FormControl.Label>Handphone No. (Optional)</FormControl.Label>
               <Input
                 placeholder="Handphone Number (Optional)"
+                keyboardType="numeric"
                 maxLength={8}
                 value={patient.HandphoneNo}
                 onChangeText={handleFormData(page, 'HandphoneNo')}
