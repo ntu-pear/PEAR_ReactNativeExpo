@@ -8,47 +8,32 @@ function PatientAddAllergyScreen(props) {
   const {
     prevQuestionHandler,
     formData,
-    setFormData,
     handleFormData,
     componentList,
     validateStep,
     errorMessage,
+    concatFormData,
+    removeFormData,
   } = props;
+
   const [allergyInfoDisplay, setAllergyInfoDisplay] = useState(
     componentList.allergy,
   );
 
-  const concatFormData = () => {
-    var allergyInfo = formData.allergyInfo.concat({
+  const addNewAllergyComponent = () => {
+    setAllergyInfoDisplay([...allergyInfoDisplay, {}]);
+    concatFormData('allergyInfo', {
       AllergyListID: null,
       AllergyReactionListID: null,
       AllergyRemarks: '',
     });
-    setFormData((prevState) => ({
-      ...prevState,
-      allergyInfo,
-    }));
-  };
-
-  const removeFormData = () => {
-    var allergyInfo = [...formData.allergyInfo];
-    allergyInfo.pop();
-    setFormData((prevState) => ({
-      ...prevState,
-      allergyInfo,
-    }));
-  };
-
-  const addNewAllergyComponent = () => {
-    setAllergyInfoDisplay([...allergyInfoDisplay, {}]);
-    concatFormData();
   };
 
   const removeAllergyComponent = (index) => {
     const list = [...allergyInfoDisplay];
     list.splice(index, 1);
     setAllergyInfoDisplay(list);
-    removeFormData();
+    removeFormData('allergyInfo');
   };
 
   return (

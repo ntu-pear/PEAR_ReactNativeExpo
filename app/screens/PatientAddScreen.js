@@ -32,7 +32,6 @@ function PatientAddScreen(props) {
 
   // data validation using Yup
   // Reference: https://github.com/jquense/yup
-
   const schema = Yup.object().shape({
     patientInfo: Yup.object().shape({
       FirstName: Yup.string()
@@ -220,23 +219,42 @@ function PatientAddScreen(props) {
 
   const [formData, setFormData] = useState(patientData);
 
-  // order the form data wrt to form steps
+  // order the formData wrt to form steps
   const orderedFormData = {
     patientInfo: formData.patientInfo,
     guardianInfo: formData.guardianInfo,
     allergyInfo: formData.allergyInfo,
   };
 
+  // handle state of components
   const componentHandler = (page = '', list = []) => {
     if (list) {
       setComponentList((prevState) => ({
-        // eg. componentList: { guardian: [{..}, {..}]}
+        // eg. componentList: { guardian: [{..}, {..}] }
         ...prevState,
         [page]: list,
       }));
     }
   };
 
+  // concat component to formData
+  const concatFormData = (key, values) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [key]: prevFormData[key].concat(values),
+    }));
+  };
+
+  // remove component from formData
+  const removeFormData = (key) => {
+    setFormData((prevFormData) => {
+      const formDataCopy = { ...prevFormData };
+      formDataCopy[key].pop();
+      return formDataCopy;
+    });
+  };
+
+  // validate each step of the form
   const validateStep = async (formData) => {
     const stepSchema = schema.fields[Object.keys(orderedFormData)[step - 1]];
     const toValidate = formData[Object.keys(orderedFormData)[step - 1]];
@@ -390,9 +408,10 @@ function PatientAddScreen(props) {
           prevQuestionHandler={prevQuestionHandler}
           handleFormData={handleFormData}
           formData={formData}
-          setFormData={setFormData}
           componentList={componentList}
           errorMessage={errorMessage}
+          concatFormData={concatFormData}
+          removeFormData={removeFormData}
         />
       );
     case 3:
@@ -402,10 +421,11 @@ function PatientAddScreen(props) {
           prevQuestionHandler={prevQuestionHandler}
           handleFormData={handleFormData}
           formData={formData}
-          setFormData={setFormData}
           componentList={componentList}
           validateStep={validateStep}
           errorMessage={errorMessage}
+          concatFormData={concatFormData}
+          removeFormData={removeFormData}
         />
       );
     default:

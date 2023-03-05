@@ -13,14 +13,20 @@ function PatientAddGuardianScreen(props) {
     nextQuestionHandler,
     prevQuestionHandler,
     formData,
-    setFormData,
     handleFormData,
     componentList,
     errorMessage,
+    concatFormData,
+    removeFormData,
   } = props;
 
-  const concatFormData = () => {
-    var guardianInfo = formData.guardianInfo.concat({
+  const [guardianInfoDisplay, setGuardianInfoDisplay] = useState(
+    componentList.guardian,
+  );
+
+  const addNewGuardianComponent = () => {
+    setGuardianInfoDisplay([...guardianInfoDisplay, {}]);
+    concatFormData('guardianInfo', {
       FirstName: '',
       LastName: '',
       ContactNo: '',
@@ -30,37 +36,14 @@ function PatientAddGuardianScreen(props) {
       RelationshipID: 1,
       IsActive: true,
     });
-    setFormData((prevState) => ({
-      ...prevState,
-      guardianInfo,
-    }));
-  };
-
-  const removeFormData = () => {
-    var guardianInfo = [...formData.guardianInfo];
-    guardianInfo.pop();
-    setFormData((prevState) => ({
-      ...prevState,
-      guardianInfo,
-    }));
-  };
-
-  const [guardianInfoDisplay, setGuardianInfoDisplay] = useState(
-    componentList.guardian,
-  );
-  const addNewGuardianComponent = () => {
-    setGuardianInfoDisplay([...guardianInfoDisplay, {}]);
-    concatFormData();
   };
 
   const removeGuardianComponent = (index) => {
     const list = [...guardianInfoDisplay];
     list.splice(index, 1);
     setGuardianInfoDisplay(list);
-    removeFormData();
+    removeFormData('guardianInfo');
   };
-
-  console.log(formData.guardianInfo);
 
   return (
     <ScrollView>
