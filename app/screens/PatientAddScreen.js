@@ -27,6 +27,8 @@ function PatientAddScreen(props) {
   });
 
   const newDate = new Date();
+  const maximumDOB = new Date();
+  maximumDOB.setFullYear(maximumDOB.getFullYear() - 15);
 
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -67,6 +69,17 @@ function PatientAddScreen(props) {
       Gender: Yup.string().required(),
       DOB: Yup.date().required(),
       StartDate: Yup.date().required(),
+      IsChecked: Yup.boolean().required(), // additional item for End Date datepicker to be optional
+      EndDate: Yup.date() // TODO: fix validation for EndDate
+        .required()
+        .when('IsChecked', {
+          is: true,
+          then: Yup.date().test(
+            'is-not-epoch',
+            'Please select a valid End Date',
+            (value) => value.getTime() !== 0,
+          ),
+        }),
       EndDate: Yup.date().notRequired(),
       PrivacyLevel: Yup.string().required(),
       UpdateBit: Yup.boolean().required(),
@@ -177,9 +190,10 @@ function PatientAddScreen(props) {
       HomeNo: '',
       HandphoneNo: '',
       Gender: 'M',
-      DOB: newDate,
+      DOB: maximumDOB,
       StartDate: newDate,
-      EndDate: newDate,
+      IsChecked: false, // additional item to check if user wants to enter EndDate value
+      EndDate: new Date(0), // default value of EndDate is beginning of Epoch time
       PrivacyLevel: '2',
       UpdateBit: true,
       AutoGame: true,
@@ -339,14 +353,15 @@ function PatientAddScreen(props) {
       }
       if (page === 'patientInfo') {
         const newData = formData[page];
-
         // additional check to convert HomeNo and HandphoneNo to string
         if (input === 'HomeNo' || input === 'HandphoneNo') {
-          newData[input] = date
-            ? date
-            : e.$d //e['$d']-check if input from MUI date-picker
-            ? e.$d
-            : e.toString(); // convert to string
+          newData[input] = e.toString(); // convert to string
+        } else if (input === 'IsChecked') {
+          newData[input] = !formData.patientInfo.IsChecked; // opposite boolean value of IsChecked
+          if (!newData[input]) {
+            // if IsChecked is false, reset End Date to beginning of epoch time
+            newData['EndDate'] = new Date(0);
+          }
         } else {
           newData[input] = date
             ? date

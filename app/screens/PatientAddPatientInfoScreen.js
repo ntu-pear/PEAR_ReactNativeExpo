@@ -11,6 +11,7 @@ import {
   Select,
   Pressable,
   FlatList,
+  Checkbox,
 } from 'native-base';
 import AddPatientProgress from 'app/components/AddPatientProgress';
 import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
@@ -321,6 +322,18 @@ function PatientAddPatientInfoScreen(props) {
               <></>
             )}
 
+            <FormControl>
+              <FormControl.Label>
+                Do you wish to key in the Date of Leaving?
+              </FormControl.Label>
+              <Checkbox
+                isChecked={patient.IsChecked}
+                value={patient.IsChecked}
+                onChange={handleFormData(page, 'IsChecked')}
+                aria-label=" Do you wish to key in the Date of Leaving?"
+              />
+            </FormControl>
+
             <DatePickerComponent
               label={'Date of Leaving (Optional)'}
               value={patient.EndDate}
@@ -329,6 +342,7 @@ function PatientAddPatientInfoScreen(props) {
               handleFormData={handleFormData}
               show={show}
               setShow={setShow}
+              isChecked={patient.IsChecked}
             />
             {errorMessage.EndDate ? (
               <ErrorMessage visible={true} message={errorMessage.EndDate} />

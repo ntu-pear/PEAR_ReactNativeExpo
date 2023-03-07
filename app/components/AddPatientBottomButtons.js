@@ -37,7 +37,7 @@ function AddPatientBottomButtons({
       let alertTitle = '';
       let alertDetails = '';
 
-      console.log('response: ', result);
+      // console.log('response: ', result);
 
       if (result.ok) {
         const allocations = result.data.data.patientAllocationDTO;
