@@ -54,9 +54,19 @@ const addPatient = (formData) => {
 
   for (const key in formData.patientInfo) {
     var value = formData.patientInfo[key];
+
+    // do not append 'IsChecked' to patientData
+    if (key === 'IsChecked') {
+      continue;
+    } else if (key === 'EndDate' && value.getTime() === 0) {
+      // if EndDate is beginning of unix epoch, set EndDate's value to empty string
+      value = '';
+    }
+
+    // if no profile image is uploaded, upload a placeholder profile image
     if (
-      key == 'UploadProfilePicture' &&
-      Object.values(value).every((val) => val === '') // if no profile image is uploaded, upload a placeholder profile image
+      key === 'UploadProfilePicture' &&
+      Object.values(value).every((val) => val === '')
     ) {
       const placeholderImage = Image.resolveAssetSource(
         require('../assets/placeholder.png'),
@@ -74,6 +84,7 @@ const addPatient = (formData) => {
     const param = `patientAddDTO.${key}`;
     patientData.append(param, value);
   }
+  console.log(patientData);
 
   addPatientForm(formData.guardianInfo, 'GuardianAddDto', patientData);
   addPatientForm(formData.allergyInfo, 'AllergyAddDto', patientData);
