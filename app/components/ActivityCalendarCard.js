@@ -42,7 +42,7 @@ const ActivityCalendarCard = ({ selectedDate, setSelectedDate }) => {
 const styles = StyleSheet.create({
   dayDateYear: {
     textAlign: 'center',
-    fontSize: '22',
+    fontSize: 22,
     color: colors.black_var1,
   },
   calendarPickerText: {

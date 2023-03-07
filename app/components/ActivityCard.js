@@ -7,29 +7,73 @@ const ActivityCard = ({
   activityTitle,
   activityStartTime,
   activityEndTime,
+  currentTime,
 }) => {
+  const isCurrentActivity = () => {
+    const startTime = new Date(activityStartTime);
+    const endTime = new Date(activityEndTime);
+    if (
+      currentTime.getHours() > endTime.getHours() ||
+      currentTime.getHours() < startTime.getHours()
+    ) {
+      return false;
+    }
+    return !(
+      (currentTime.getHours() === endTime.getHours() &&
+        currentTime.getMinutes() > endTime.getMinutes()) ||
+      (currentTime.getHours() === startTime.getHours() &&
+        currentTime.getMinutes() < startTime.getMinutes())
+    );
+  };
+
   return (
-    <Container style={styles.activityContainer}>
+    <Container
+      style={
+        isCurrentActivity()
+          ? styles.activityContainerPink
+          : styles.activityContainerGray
+      }
+    >
       <Text style={styles.activityName}>{activityTitle}</Text>
       <Text style={styles.activityTime}>
-        {activityStartTime} - {activityEndTime}
+        {new Date(activityStartTime).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        })}{' '}
+        -{' '}
+        {new Date(activityEndTime).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        })}
       </Text>
     </Container>
   );
 };
 
 const styles = StyleSheet.create({
-  activityContainer: {
-    width: 90,
-    height: 85,
+  activityContainerPink: {
+    width: 120,
+    height: 90,
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: colors.pink,
-    marginRight: 2,
-    marginLeft: 2,
-    paddingLeft: 1,
-    paddingRight: 1,
+    marginRight: 5,
+    marginLeft: 5,
+    paddingLeft: 3,
+    paddingRight: 3,
+  },
+  activityContainerGray: {
+    width: 120,
+    height: 90,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.gray,
+    marginRight: 5,
+    marginLeft: 5,
+    paddingLeft: 3,
+    paddingRight: 3,
   },
   activityName: {
     textAlign: 'center',
@@ -42,6 +86,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'normal',
     color: colors.white_var1,
+    paddingLeft: 5,
+    paddingRight: 5,
   },
 });
 
