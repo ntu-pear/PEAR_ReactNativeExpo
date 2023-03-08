@@ -18,11 +18,12 @@ function NotificationsReadScreen(props) {
     useState(false);
   const paginationParams = useRef({});
   const [sortBy, setSortBy] = useState('');
-  const { getNotifications, handlePullToRefresh } = useNotifications(
+  const { getNotifications, handlePullToRefresh, getMoreNotifications} = useNotifications(
     notificationType,
     setIsError,
     setIsLoading,
     setNotificationReadData,
+    setIsFetchingMoreNotifications
   );
 
   useEffect(() => {
@@ -31,12 +32,6 @@ function NotificationsReadScreen(props) {
     handlePullToRefresh(paginationParams, sortBy);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortBy]);
-
-  const getMoreNotifications = async () => {
-    setIsFetchingMoreNotifications(true);
-    await getNotifications(paginationParams, sortBy);
-    setIsFetchingMoreNotifications(false);
-  };
 
   return (
     <>

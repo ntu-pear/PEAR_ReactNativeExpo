@@ -18,11 +18,12 @@ function NotificationsRejectScreen(props) {
     useState(false);
   const paginationParams = useRef({});
   const [sortBy, setSortBy] = useState('');
-  const { getNotifications, handlePullToRefresh } = useNotifications(
+  const { getNotifications, handlePullToRefresh, getMoreNotifications } = useNotifications(
     notificationType,
     setIsError,
     setIsLoading,
     setNotificationRejectedData,
+    setIsFetchingMoreNotifications
   );
   // const [notificationRejectedData, setNotificationRejectedData] = useState([
   //   {
@@ -48,12 +49,6 @@ function NotificationsRejectScreen(props) {
     setIsError(false);
     // Note: `true` refers to readStatus = `true`
     getNotifications(paginationParams, sortBy);
-  };
-
-  const getMoreNotifications = async () => {
-    setIsFetchingMoreNotifications(true);
-    await getNotifications(paginationParams, sortBy);
-    setIsFetchingMoreNotifications(false);
   };
 
   return (

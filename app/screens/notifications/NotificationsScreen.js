@@ -39,11 +39,12 @@ function NotificationsScreen(props) {
     useState(false);
   const paginationParams = useRef({});
   const [sortBy, setSortBy] = useState('');
-  const { getNotifications, handlePullToRefresh } = useNotifications(
+  const { handlePullToRefresh, getMoreNotifications } = useNotifications(
     notificationType,
     setIsError,
     setIsLoading,
     setNotificationData,
+    setIsFetchingMoreNotifications
   );
 
   useEffect(() => {
@@ -133,12 +134,6 @@ function NotificationsScreen(props) {
     );
     // Update Notification Data with the newly filtered data; to re-render flat list.
     setNotificationData(filteredData);
-  };
-
-  const getMoreNotifications = async () => {
-    setIsFetchingMoreNotifications(true);
-    await getNotifications(paginationParams, sortBy);
-    setIsFetchingMoreNotifications(false);
   };
 
   return (

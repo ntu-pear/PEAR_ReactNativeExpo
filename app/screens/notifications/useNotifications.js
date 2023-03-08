@@ -12,23 +12,16 @@ export default function useNotifications(
   setIsError,
   setIsLoading,
   setNotificationData,
+  setIsFetchingMoreNotifications
 ) {
-  const renderItem = () => {};
-
   const getNotifications = async (paginationParams, sortBy) => {
     // Get all `unread` notification of user
     const { offset, limit } = paginationParams.current;
     if (offset == -1) {
       return;
     }
-    const readStatus = ((notificationType) => {
-      switch (notificationType) {
-        case NotificationType.Unread:
-          return false;
-        default:
-          return true;
-      }
-    })(notificationType);
+
+    const readStatus = notificationType !== NotificationType.Unread;
 
     const response = await notificationApi.getNotificationOfUser(
       readStatus,
@@ -79,9 +72,15 @@ export default function useNotifications(
     setIsLoading(false);
   };
 
+  const getMoreNotifications = async () => {
+    setIsFetchingMoreNotifications(true);
+    await getNotifications(paginationParams, sortBy);
+    setIsFetchingMoreNotifications(false);
+  };
+
   return {
     handlePullToRefresh,
     getNotifications,
-    renderItem,
+    getMoreNotifications
   };
 }
