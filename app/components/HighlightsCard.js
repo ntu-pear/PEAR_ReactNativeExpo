@@ -48,7 +48,7 @@ function HighlightsCard({ item }) {
       case 2:
         icon = (
           <MaterialCommunityIcons
-            name="bacteria"
+            name="allergy"
             size={18}
             color={colors.black_var1}
           />

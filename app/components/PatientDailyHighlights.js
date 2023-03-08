@@ -39,7 +39,7 @@ function PatientDailyHighlights(props) {
       value: 'newAllergy',
       icon: () => (
         <MaterialCommunityIcons
-          name="bacteria"
+          name="allergy"
           size={18}
           color={colors.black_var1}
         />
