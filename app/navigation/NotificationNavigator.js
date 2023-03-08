@@ -11,6 +11,7 @@ import NotificationsApprovalRequestScreen from 'app/screens/notifications/Notifi
 import colors from '../config/colors';
 import typography from '../config/typography';
 import { useSafeArea } from 'react-native-safe-area-context';
+import NotificationType from 'app/screens/notifications/NotificationType';
 
 const Tab = createMaterialTopTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -47,6 +48,7 @@ function NotificationTabNavigator() {
       >
         <Tab.Screen
           component={NotificationsScreen}
+          initialParams={{ notificationType: NotificationType.Unread }}
           name={routes.NOTIFICATION}
           options={{
             title: 'Unread',
@@ -54,6 +56,7 @@ function NotificationTabNavigator() {
         />
         <Tab.Screen
           component={NotificationsReadScreen}
+          initialParams={{ notificationType: NotificationType.Read }}
           name={routes.NOTIFICATION_READ}
           options={{
             title: 'Read',
@@ -61,6 +64,7 @@ function NotificationTabNavigator() {
         />
         <Tab.Screen
           component={NotificationsAcceptScreen}
+          initialParams={{ notificationType: NotificationType.Accept }}
           name={routes.NOTIFICATION_ACCEPT}
           options={{
             title: 'Accept',
@@ -68,6 +72,7 @@ function NotificationTabNavigator() {
         />
         <Tab.Screen
           component={NotificationsRejectScreen}
+          initialParams={{ notificationType: NotificationType.Reject }}
           name={routes.NOTIFICATION_REJECT}
           options={{
             title: 'Reject',

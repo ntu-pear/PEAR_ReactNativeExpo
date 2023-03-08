@@ -23,6 +23,7 @@ const getNotificationOfUser = async (
   readStatus = null,
   offset = null,
   limit = null,
+  sortBy = '',
 ) => {
   const params = {
     offset,
@@ -30,6 +31,9 @@ const getNotificationOfUser = async (
   };
   if (readStatus != null) {
     params.readStatus = readStatus;
+  }
+  if (sortBy) {
+    params.sortBy = sortBy;
   }
   return client.get(notificationUser, params);
 };

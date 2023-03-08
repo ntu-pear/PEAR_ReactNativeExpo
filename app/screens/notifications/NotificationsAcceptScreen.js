@@ -4,23 +4,27 @@ import AuthContext from 'app/auth/context';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import NotificationCard from 'app/components/NotificationCard';
 import ErrorRetryApiCard from 'app/components/ErrorRetryApiCard';
-import notificationApi from 'app/api/notification';
-import NotificationActions from 'app/config/notificationActions';
+import useNotifications from 'app/screens/notifications/useNotifications';
+import NotificationSortSelector from 'app/screens/notifications/NotificationsSortSelector';
 
-const defaultPaginationLimit = 20;
-const paginationStartingParam = {
-  offset: 0,
-  limit: defaultPaginationLimit,
-};
 function NotificationsAcceptScreen(props) {
+  const { notificationType } = props.route.params;
   const { user } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const paginationParams = useRef({ ...paginationStartingParam });
+  const paginationParams = useRef({});
   const [isFetchingMoreNotifications, setIsFetchingMoreNotifications] =
     useState(false);
   const [notificationAcceptedData, setNotificationAcceptedData] = useState([]);
+  const [sortBy, setSortBy] = useState('');
+  const { getNotifications, handlePullToRefresh, getMoreNotifications } = useNotifications(
+    notificationType,
+    setIsError,
+    setIsLoading,
+    setNotificationAcceptedData,
+    setIsFetchingMoreNotifications
+  );
   // const [notificationAcceptedData, setNotificationAcceptedData] = useState([
   //   {
   //     requiresAction: false,
@@ -36,57 +40,15 @@ function NotificationsAcceptScreen(props) {
   // ]);
 
   useEffect(() => {
-    // Note: `true` refers to readStatus = `true`
-    getAllNotificationApprovedData(true);
-  }, []);
+    // Purpose: Get all notification items that has been `approved`.
+    handlePullToRefresh(paginationParams, sortBy);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortBy]);
 
-  const handlePullToRefresh = async () => {
-    setNotificationAcceptedData([]);
-    setIsRefreshing(true);
-    paginationParams.current = { ...paginationStartingParam };
-    // Note: `true` refers to readStatus = `true`
-    await getAllNotificationApprovedData(true);
-    setIsRefreshing(false);
-  };
-
-  // Purpose: Get all notification items that has been `approved`.
-  const getAllNotificationApprovedData = async (readStatus) => {
-    const { offset, limit } = paginationParams.current;
-    if (offset === -1) {
-      return;
-    }
-    setIsLoading(true);
-    const response = await notificationApi.getNotificationOfUser(
-      readStatus,
-      offset,
-      limit,
-    );
-    if (!response.ok) {
-      setIsLoading(false);
-      setIsError(true);
-      return;
-    }
-    paginationParams.current.offset = response.data.next_offset;
-    paginationParams.current.limit =
-      response.data.next_limit === -1 ? null : response.data.next_limit;
-    const filteredNotificationItemsWithApproveAction =
-      response?.data.results.filter(
-        (notification) => notification.status === NotificationActions.Approve,
-      );
-    setIsLoading(false);
-    setNotificationAcceptedData(filteredNotificationItemsWithApproveAction);
-  };
-
-  const handleErrorWhenApiFails = () => {
+  const handleErrorWhenApiFails = async () => {
     setIsError(false);
     // Note: `true` refers to readStatus = `true`
-    getAllNotificationApprovedData(true);
-  };
-
-  const getMoreNotifications = async () => {
-    setIsFetchingMoreNotifications(true);
-    await getAllNotificationApprovedData(false);
-    setIsFetchingMoreNotifications(false);
+    await getNotifications(paginationParams, sortBy);
   };
 
   return (
@@ -99,17 +61,27 @@ function NotificationsAcceptScreen(props) {
             <ErrorRetryApiCard handleError={handleErrorWhenApiFails} />
           )}
           <VStack w="90%">
-            <FlatList
-              showsVerticalScrollIndicator={false}
-              data={notificationAcceptedData}
-              keyExtractor={(item) => item.notificationID}
-              onEndReached={getMoreNotifications}
-              onRefresh={handlePullToRefresh}
-              refreshing={isRefreshing}
-              renderItem={({ item }) => (
-                <NotificationCard item={item} user={user} readStatus={true} />
+            <>
+              {notificationAcceptedData.length > 0 && (
+                <NotificationSortSelector
+                  sortBy={sortBy}
+                  setSortBy={setSortBy}
+                />
               )}
-            />
+              <FlatList
+                showsVerticalScrollIndicator={false}
+                data={notificationAcceptedData}
+                keyExtractor={(item) => item.notificationID}
+                onEndReached={getMoreNotifications}
+                onRefresh={async () =>
+                  await handlePullToRefresh(paginationParams, sortBy)
+                }
+                refreshing={isRefreshing}
+                renderItem={({ item }) => (
+                  <NotificationCard item={item} user={user} readStatus={true} />
+                )}
+              />
+            </>
           </VStack>
         </VStack>
       )}
