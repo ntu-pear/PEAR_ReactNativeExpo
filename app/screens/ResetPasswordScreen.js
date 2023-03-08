@@ -35,7 +35,7 @@ function ResetPasswordScreen(props) {
     };
 
     try {
-      // Validate the form data against the schema
+      // Validate the form data against the schema and set errors when needed
       await schema.validate(formData);
       return true;
     } catch (error) {
