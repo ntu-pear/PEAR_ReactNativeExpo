@@ -7,14 +7,16 @@ const baseURL = 'https://coremvc.fyp2017.com/api';
 // for CORS error
 // const baseURLWeb = 'http://localhost:5383/api';
 // API for BE staging stage
-const baseURLWeb = 'https://coremvc.fyp2017.com/api';
+const baseURLWeb = 'https://ntu-fyp-pear-core.azurewebsites.net/api';
 const endpoint = '/User';
 const userRefreshToken = `${endpoint}/RefreshToken`;
 /*
  *   Purpose of this is create a layer of abstraction
  */
 const apiClient = create({
-  baseURL: Platform.OS === 'web' ? baseURLWeb : baseURL,
+  // for local/ staging BE
+  // baseURL: Platform.OS === 'web' ? baseURLWeb : baseURL,
+  baseURL,
 });
 
 // Method override on apiClient.get()

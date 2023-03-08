@@ -8,6 +8,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ActivityIndicator,
+  Text,
 } from 'react-native';
 
 // Custom Import from https://reactnativeelements.com/docs/
@@ -22,6 +23,7 @@ import colors from 'app/config/colors';
 import typography from 'app/config/typography';
 import errors from 'app/config/errors';
 import useApiHandler from 'app/hooks/useApiHandler';
+import routes from 'app/navigation/routes';
 
 // Import from components
 import AppText from 'app/components/AppText';
@@ -56,7 +58,7 @@ function WelcomeScreen(props) {
    * Deconstructor
    * Note: Navigation is passed down as a prop from NativeStackNavigator
    */
-  // const { navigation } = props;
+  const { navigation } = props;
 
   /*
    * All Functions To Be Placed Here
@@ -224,6 +226,14 @@ function WelcomeScreen(props) {
                 <AppButton title="Login" color="green" onPress={onPressLogin} />
               )}
             </View>
+            <View style={Platform.OS === 'web' ? { top: 130 } : ''}>
+              <Text
+                style={styles.underline}
+                onPress={() => navigation.navigate(routes.RESET_PASSWORD)}
+              >
+                Forgot Password?
+              </Text>
+            </View>
           </Center>
         </View>
       </TouchableWithoutFeedback>
@@ -268,6 +278,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     paddingVertical: 800,
     fontSize: 80,
+  },
+  underline: {
+    textDecorationLine: 'underline',
+  },
+  underlineWeb: {
+    top: 130,
   },
 });
 
