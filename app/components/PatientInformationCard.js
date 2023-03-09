@@ -1,23 +1,34 @@
 /*eslint eslint-comments/no-unlimited-disable: error */
 import React, { useState } from 'react';
-import { TouchableOpacity } from 'react-native';
+import { TouchableOpacity, Platform } from 'react-native';
 import { Box, VStack, Center, Image, Text, HStack, Icon } from 'native-base';
 import { MaterialIcons } from '@expo/vector-icons';
 import colors from 'app/config/colors';
 import routes from 'app/navigation/routes';
+import { useNavigate } from 'react-router-dom';
 
 function PatientInformationCard(props) {
   const { patientProfile, navigation } = props;
-
   const [displayPicUrl, setDisplayPicUrl] = //eslint-disable-line no-unused-vars
     useState(
       `https://picsum.photos/400/400/?image=${Math.floor(Math.random() * 85)}`,
     );
+
+  // useNavigate() hook cannot work on mobile
+  const navigate = Platform.OS === 'web' ? useNavigate() : null;
+
   const handleOnPress = () => {
-    navigation.push(routes.PATIENT_INFORMATION, {
-      displayPicUrl: `${displayPicUrl}`,
-      ...patientProfile,
-    });
+    if (Platform.OS === 'web') {
+      // TODO: (yapsiang) link to new paitent infomation screen
+      navigate('/' + routes.PATIENT_INFORMATION, {
+        state: { displayPicUrl: `${displayPicUrl}`, ...patientProfile },
+      });
+    } else {
+      navigation.push(routes.PATIENT_INFORMATION, {
+        displayPicUrl: `${displayPicUrl}`,
+        ...patientProfile,
+      });
+    }
   };
 
   const calcAge = (dob) => {
@@ -123,7 +134,11 @@ function PatientInformationCard(props) {
             </Text>
           </Box>
         </HStack>
-        <Center position="absolute" right="0" marginY="31%">
+        <Center
+          position="absolute"
+          right="0"
+          marginY={Platform.OS === 'web' ? '25%' : '31%'}
+        >
           <Icon
             as={MaterialIcons}
             color={colors.black_var1}

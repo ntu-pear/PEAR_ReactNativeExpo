@@ -6,6 +6,7 @@ function ActivityIndicator({ visible = false }) {
     return null;
   }
 
+  // Lottie for web: https://github.com/react-native-web-community/react-native-web-lottie
   return (
     <LottieView
       autoPlay

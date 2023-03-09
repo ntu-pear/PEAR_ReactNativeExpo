@@ -15,7 +15,7 @@ const highlightList = `${endpoint}/list`;
 // **********************  GET REQUESTS *************************
 
 const getHighlight = async () => {
-  return client.get(highlightList);
+  return client.get(highlightList, {});
 };
 
 // **********************  POST REQUESTS *************************

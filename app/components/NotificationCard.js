@@ -26,14 +26,14 @@ function NotificationCard(
   // in notificationScreen.
   const handlePressIn = () => {
     setSelectedId(item.notificationID);
-    item && item.requiresAction
+    item?.requiresAction
       ? setRequiresAction(item.requiresAction)
       : setRequiresAction(false);
   };
 
   const handleNavigation = () => {
     setSelectedId(item.notificationID);
-    item && item.requiresAction
+    item?.requiresAction
       ? navigateToNotificationsApprovalRequestScreen(item)
       : null;
   };
@@ -45,6 +45,7 @@ function NotificationCard(
     <TouchableOpacity
       onPressIn={readStatus ? null : handlePressIn}
       onPress={handleNavigation}
+      disabled={readStatus}
     >
       <Box
         borderBottomWidth="1"
@@ -67,7 +68,7 @@ function NotificationCard(
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
             >
-              {item && item.requiresAction ? 'Action Required' : ''}
+              {item?.requiresAction ? 'Action Required' : ''}
             </Text>
           </HStack>
           <HStack>
@@ -78,9 +79,9 @@ function NotificationCard(
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
             >
-              {item && item.shortMessage
+              {item?.shortMessage
                 ? handleString(item.shortMessage)
-                : 'Not Available'}
+                : item.message}
             </Text>
           </HStack>
           {/* <HStack justifyContent="flex-start">

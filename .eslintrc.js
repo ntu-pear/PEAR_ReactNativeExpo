@@ -2,7 +2,7 @@ module.exports = {
   root: true,
   extends: ['@react-native-community'],
   // 0 = off, 1 = warn, 2 = error
-  plugins: ['eslint-plugin-absolute-imports'],
+  plugins: ['eslint-plugin-absolute-imports', 'cypress'],
   rules: {
     'no-console': 1,
     'absolute-imports/only-absolute-imports': 1,

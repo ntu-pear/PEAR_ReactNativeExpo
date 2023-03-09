@@ -8,6 +8,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ActivityIndicator,
+  Text,
 } from 'react-native';
 
 // Custom Import from https://reactnativeelements.com/docs/
@@ -22,6 +23,7 @@ import colors from 'app/config/colors';
 import typography from 'app/config/typography';
 import errors from 'app/config/errors';
 import useApiHandler from 'app/hooks/useApiHandler';
+import routes from 'app/navigation/routes';
 
 // Import from components
 import AppText from 'app/components/AppText';
@@ -56,7 +58,7 @@ function WelcomeScreen(props) {
    * Deconstructor
    * Note: Navigation is passed down as a prop from NativeStackNavigator
    */
-  // const { navigation } = props;
+  const { navigation } = props;
 
   /*
    * All Functions To Be Placed Here
@@ -73,11 +75,10 @@ function WelcomeScreen(props) {
     }
     setIsLoading(false);
     setLoginFailed(false);
-    const user = jwt_decode(result.data.accessToken);
+    const user = jwt_decode(result.data.data.accessToken);
     authContext.setUser(user);
-    console.log(user);
-    authStorage.storeToken('userAuthToken', result.data.accessToken);
-    authStorage.storeToken('userRefreshToken', result.data.refreshToken);
+    authStorage.storeToken('userAuthToken', result.data.data.accessToken);
+    authStorage.storeToken('userRefreshToken', result.data.data.refreshToken);
     // set api header if empty
     apiHandlerHook.setHeaderIfEmpty();
   };
@@ -96,7 +97,14 @@ function WelcomeScreen(props) {
       blurRadius={8}
       source={require('../assets/login_background.jpg')}
     >
-      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <TouchableWithoutFeedback
+        onPress={() => {
+          // Prevent keyboard dismiss for web
+          if (Platform.OS !== 'web') {
+            Keyboard.dismiss();
+          }
+        }}
+      >
         <View>
           <View style={styles.logoContainer}>
             <Image
@@ -107,7 +115,13 @@ function WelcomeScreen(props) {
           </View>
 
           <Center flex={1}>
-            <View style={styles.credentialsContainer}>
+            <View
+              style={
+                Platform.OS === 'web'
+                  ? styles.credentialsContainerWeb
+                  : styles.credentialsContainer
+              }
+            >
               <Input
                 autoCapitalize="none"
                 bg={colors.gray}
@@ -134,6 +148,7 @@ function WelcomeScreen(props) {
                 placeholderTextColor={colors.medium}
                 marginBottom="5"
                 size="18"
+                value={email}
               />
               <Select
                 accessibilityLabel="Select Role"
@@ -189,18 +204,35 @@ function WelcomeScreen(props) {
                 placeholderTextColor={colors.medium}
                 marginTop="5"
                 size="18"
+                value={password}
                 type={show ? 'text' : 'password'}
               />
             </View>
-            <Box>
+            <Box
+              style={Platform.OS === 'web' ? styles.errorsContainerWeb : null}
+            >
               <ErrorMessage visible={loginFailed} message={errors.loginError} />
             </Box>
-            <View style={styles.buttonsContainer}>
+            <View
+              style={
+                Platform.OS === 'web'
+                  ? styles.buttonsContainerWeb
+                  : styles.buttonsContainer
+              }
+            >
               {isLoading ? (
                 <ActivityIndicator color={colors.primary_overlay_color} />
               ) : (
                 <AppButton title="Login" color="green" onPress={onPressLogin} />
               )}
+            </View>
+            <View style={Platform.OS === 'web' ? { top: 130 } : ''}>
+              <Text
+                style={styles.underline}
+                onPress={() => navigation.navigate(routes.RESET_PASSWORD)}
+              >
+                Forgot Password?
+              </Text>
             </View>
           </Center>
         </View>
@@ -218,8 +250,20 @@ const styles = StyleSheet.create({
     width: '100%',
     padding: 20,
   },
+  buttonsContainerWeb: {
+    top: 130,
+    width: '100%',
+    padding: 20,
+  },
   credentialsContainer: {
     width: '90%',
+  },
+  credentialsContainerWeb: {
+    top: 130,
+    width: '90%',
+  },
+  errorsContainerWeb: {
+    top: 130,
   },
   logo: {
     width: 100,
@@ -234,6 +278,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     paddingVertical: 800,
     fontSize: 80,
+  },
+  underline: {
+    textDecorationLine: 'underline',
+  },
+  underlineWeb: {
+    top: 130,
   },
 });
 

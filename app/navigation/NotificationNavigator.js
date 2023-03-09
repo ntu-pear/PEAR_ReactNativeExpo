@@ -3,14 +3,15 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Platform, View } from 'react-native';
 import routes from './routes';
-import NotifcationsScreen from '../screens/NotifcationsScreen';
-import NotificationsRejectScreen from '../screens/NotificationsRejectScreen';
-import NotificationsAcceptScreen from '../screens/NotificationsAcceptScreen';
-import NotificationsReadScreen from '../screens/NotificationsReadScreen';
+import NotificationsScreen from 'app/screens/notifications/NotificationsScreen';
+import NotificationsRejectScreen from 'app/screens/notifications/NotificationsRejectScreen';
+import NotificationsAcceptScreen from 'app/screens/notifications/NotificationsAcceptScreen';
+import NotificationsReadScreen from 'app/screens/notifications/NotificationsReadScreen';
+import NotificationsApprovalRequestScreen from 'app/screens/notifications/NotificationsApprovalRequestScreen';
 import colors from '../config/colors';
 import typography from '../config/typography';
-import NotificationsApprovalRequestScreen from '../screens/NotificationsApprovalRequestScreen';
 import { useSafeArea } from 'react-native-safe-area-context';
+import NotificationType from 'app/screens/notifications/NotificationType';
 
 const Tab = createMaterialTopTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -46,7 +47,8 @@ function NotificationTabNavigator() {
         }}
       >
         <Tab.Screen
-          component={NotifcationsScreen}
+          component={NotificationsScreen}
+          initialParams={{ notificationType: NotificationType.Unread }}
           name={routes.NOTIFICATION}
           options={{
             title: 'Unread',
@@ -54,6 +56,7 @@ function NotificationTabNavigator() {
         />
         <Tab.Screen
           component={NotificationsReadScreen}
+          initialParams={{ notificationType: NotificationType.Read }}
           name={routes.NOTIFICATION_READ}
           options={{
             title: 'Read',
@@ -61,6 +64,7 @@ function NotificationTabNavigator() {
         />
         <Tab.Screen
           component={NotificationsAcceptScreen}
+          initialParams={{ notificationType: NotificationType.Accept }}
           name={routes.NOTIFICATION_ACCEPT}
           options={{
             title: 'Accept',
@@ -68,6 +72,7 @@ function NotificationTabNavigator() {
         />
         <Tab.Screen
           component={NotificationsRejectScreen}
+          initialParams={{ notificationType: NotificationType.Reject }}
           name={routes.NOTIFICATION_REJECT}
           options={{
             title: 'Reject',

@@ -33,4 +33,5 @@ export default Object.freeze({
   PATIENT_ROUTINE: 'PatientRoutine',
   REGISTER: 'Register',
   WELCOME: 'Welcome',
+  RESET_PASSWORD: 'Reset Password',
 });

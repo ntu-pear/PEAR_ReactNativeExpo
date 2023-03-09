@@ -59,3 +59,10 @@ android/keystores/debug.keystore
 
 # vscode
 .vscode
+
+# Firebase
+.firebase
+
+# Cypress
+cypress.env.json
+cypress/videos

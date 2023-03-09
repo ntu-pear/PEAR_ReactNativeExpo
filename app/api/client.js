@@ -1,30 +1,43 @@
 import { create } from 'apisauce';
-import cache from 'app/utility/cache';
 import authStorage from 'app/auth/authStorage';
+import cache from 'app/utility/cache';
+import { Platform } from 'react-native';
 
 const baseURL = 'https://coremvc.fyp2017.com/api';
+// for CORS error
+// const baseURLWeb = 'http://localhost:5383/api';
+// API for BE staging stage
+const baseURLWeb = 'https://ntu-fyp-pear-core.azurewebsites.net/api';
 const endpoint = '/User';
 const userRefreshToken = `${endpoint}/RefreshToken`;
 /*
  *   Purpose of this is create a layer of abstraction
  */
 const apiClient = create({
-  baseURL: 'https://coremvc.fyp2017.com/api',
+  // for local/ staging BE
+  // baseURL: Platform.OS === 'web' ? baseURLWeb : baseURL,
+  baseURL,
 });
 
 // Method override on apiClient.get()
 const { get } = apiClient;
 apiClient.get = async (url, params, axiosConfig) => {
   const response = await get(url, params, axiosConfig);
-
+  const url_obj = new URL(url);
+  // add parameters to url object
+  // e.g. url: /Notifications/User  params: {readStatus: false, ...}
+  // becomes /Notifications/User/?readStatus=false...
+  Object.entries(params).forEach(([key, value]) => {
+    url_obj.searchParams.append(key, value);
+  });
   // If there's network connectivity == we can query api successfully; then store data in cache
   if (response.ok) {
-    cache.store(url, response.data);
+    cache.store(url_obj.toString(), response.data);
     return response;
   }
 
   // Else, we do not have network connectivity == cannot query api; then retrieve from cache
-  const data = await cache.get(url);
+  const data = await cache.get(url_obj.toString());
   return data ? { ok: true, data } : response;
 };
 

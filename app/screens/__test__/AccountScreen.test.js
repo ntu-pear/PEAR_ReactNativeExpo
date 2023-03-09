@@ -1,9 +1,17 @@
+/**
+ * @jest-environment node
+ */
 import AuthContext from 'app/auth/context';
-import { create } from 'react-test-renderer';
 import AccountScreen from 'app/screens/AccountScreen';
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from '@testing-library/react-native';
 
-const customRender = (component) => {
-  return create(
+const renderAccountScreen = () => {
+  return render(
     <AuthContext.Provider
       value={{
         user: {
@@ -11,14 +19,19 @@ const customRender = (component) => {
         },
       }}
     >
-      {component}
+      <AccountScreen />
     </AuthContext.Provider>,
   );
 };
 
+afterEach(cleanup);
 describe('Testing Account Screen', () => {
-  it('Should match snapshot', () => {
-    const accountScreen = customRender(<AccountScreen />).toJSON();
-    expect(accountScreen).toMatchSnapshot();
+  it('Account screen snapshot should match', () => {
+    expect(renderAccountScreen().toJSON()).toMatchSnapshot();
+  });
+  it('Logout screen snapshot should match', () => {
+    const accountScreen = renderAccountScreen();
+    fireEvent.press(screen.getByText('Logout'));
+    expect(accountScreen.toJSON()).toMatchSnapshot();
   });
 });
