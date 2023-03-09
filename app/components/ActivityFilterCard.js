@@ -22,6 +22,12 @@ const ActivityFilterCard = ({
   const initialRef = React.useRef(null);
   const finalRef = React.useRef(null);
   const [loading, setLoading] = useState(false);
+  const [selectedStartTimeTemp, setSelectedStartTimeTemp] = useState(
+    new Date('2023-01-01T00:00:00+08:00'),
+  );
+  const [selectedEndTimeTemp, setSelectedEndTimeTemp] = useState(
+    new Date('2023-01-01T23:59:59+08:00'),
+  );
   const [selectedActivityTemp, setSelectedActivityTemp] = useState(null);
   const searchRef = useRef(null);
 
@@ -58,11 +64,37 @@ const ActivityFilterCard = ({
     setSelectedActivityTemp(value);
   };
   const onChangeStartTime = (event, value) => {
-    setSelectedStartTime(value);
+    setSelectedStartTimeTemp(value);
   };
 
   const onChangeEndTime = (event, value) => {
-    setSelectedEndTime(value);
+    setSelectedEndTimeTemp(value);
+  };
+
+  const handleApply = () => {
+    setModalVisible(false);
+    updateFilteredActivityData();
+    setSelectedStartTime(selectedStartTimeTemp);
+    setSelectedEndTimeTemp(selectedEndTimeTemp);
+    setSelectedActivity(selectedActivityTemp);
+    // searchRef.current.clear();
+  };
+
+  const handleCancel = () => {
+    setModalVisible(false);
+    setSelectedStartTimeTemp(new Date('2023-01-01T00:00:00+08:00'));
+    setSelectedEndTimeTemp(new Date('2023-01-01T23:59:59+08:00'));
+    setSelectedActivity(null);
+    setSelectedActivityTemp(null);
+    searchRef.current.clear();
+  };
+
+  const handleReset = () => {
+    setSelectedStartTimeTemp(new Date('2023-01-01T00:00:00+08:00'));
+    setSelectedEndTimeTemp(new Date('2023-01-01T23:59:59+08:00'));
+    setSelectedActivity(null);
+    setSelectedActivityTemp(null);
+    searchRef.current.clear();
   };
 
   useEffect(() => {
@@ -80,7 +112,7 @@ const ActivityFilterCard = ({
       initialFocusRef={initialRef}
       finalFocusRef={finalRef}
     >
-      <Modal.Content height={'2/5'}>
+      <Modal.Content height={'2/5'} backgroundColor={colors.white_var1}>
         <Modal.Body>
           <VStack style={styles.vStackStyle}>
             <View style={styles.viewStyle} zIndex={6}>
@@ -98,6 +130,7 @@ const ActivityFilterCard = ({
                   loading={loading}
                   onClear={() => {
                     setActivityFilterList(null);
+                    setSelectedActivityTemp(null);
                   }}
                   textInputProps={{
                     placeholder: 'Enter Activity Name',
@@ -113,7 +146,7 @@ const ActivityFilterCard = ({
               <Row style={styles.rowStyle}>
                 <View style={styles.dateTimePickerViewStyle}>
                   <DateTimePicker
-                    value={selectedStartTime}
+                    value={selectedStartTimeTemp}
                     mode={'time'}
                     is24Hour={true}
                     onChange={onChangeStartTime}
@@ -132,7 +165,7 @@ const ActivityFilterCard = ({
                 </Center>
                 <View style={styles.dateTimePickerViewStyle}>
                   <DateTimePicker
-                    value={selectedEndTime}
+                    value={selectedEndTimeTemp}
                     mode={'time'}
                     is24Hour={true}
                     onChange={onChangeEndTime}
@@ -143,13 +176,24 @@ const ActivityFilterCard = ({
             </View>
           </VStack>
         </Modal.Body>
-        <Modal.Footer>
+        <Modal.Footer backgroundColor={colors.white}>
           <Button.Group space={2}>
+            <Button
+              backgroundColor={colors.white}
+              paddingRight={90}
+              onPress={() => {
+                handleReset();
+              }}
+            >
+              <Text textDecorationLine={'underline'} color={colors.black}>
+                Reset
+              </Text>
+            </Button>
             <Button
               variant="ghost"
               colorScheme="blueGray"
               onPress={() => {
-                setModalVisible(false);
+                handleCancel();
               }}
             >
               Cancel
@@ -157,10 +201,7 @@ const ActivityFilterCard = ({
             <Button
               backgroundColor={colors.green}
               onPress={() => {
-                setModalVisible(false);
-                updateFilteredActivityData();
-                setSelectedActivity(selectedActivityTemp);
-                searchRef.current.clear();
+                handleApply();
               }}
             >
               Apply
