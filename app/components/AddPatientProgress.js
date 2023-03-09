@@ -5,7 +5,7 @@ import typography from 'app/config/typography';
 
 function AddPatientProgress({ value }) {
   return (
-    <Box marginTop={10}>
+    <Box marginTop={10} w="80%">
       <Progress
         _filledTrack={{
           bg: colors.green,

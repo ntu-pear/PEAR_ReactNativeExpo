@@ -30,7 +30,7 @@ function PatientAddScreen(props) {
   const maximumDOB = new Date();
   maximumDOB.setFullYear(maximumDOB.getFullYear() - 15);
 
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState({});
 
   // data validation using Yup
   // Reference: https://github.com/jquense/yup
@@ -70,16 +70,16 @@ function PatientAddScreen(props) {
       DOB: Yup.date().required(),
       StartDate: Yup.date().required(),
       IsChecked: Yup.boolean().required(), // additional item for End Date datepicker to be optional
-      EndDate: Yup.date() // TODO: fix validation for EndDate
-        .required()
-        .when('IsChecked', {
-          is: true,
-          then: Yup.date().test(
-            'is-not-epoch',
-            'Please select a valid End Date',
-            (value) => value.getTime() !== 0,
-          ),
-        }),
+      // EndDate: Yup.date() // TODO: fix validation for EndDate
+      //   .required()
+      //   .when('IsChecked', {
+      //     is: true,
+      //     then: Yup.date().test(
+      //       'is-not-epoch',
+      //       'Please select a valid End Date',
+      //       (value) => value.getTime() !== 0,
+      //     ),
+      //   }),
       EndDate: Yup.date().notRequired(),
       PrivacyLevel: Yup.string().required(),
       UpdateBit: Yup.boolean().required(),
@@ -180,8 +180,8 @@ function PatientAddScreen(props) {
 
   const patientData = {
     patientInfo: {
-      FirstName: 'Patient',
-      LastName: 'adf',
+      FirstName: '',
+      LastName: '',
       PreferredName: 'Patient',
       PreferredLanguageListID: 1,
       NRIC: 'S0948274A',
@@ -274,7 +274,7 @@ function PatientAddScreen(props) {
     const toValidate = formData[Object.keys(orderedFormData)[step - 1]];
 
     try {
-      setErrorMessage('');
+      setErrorMessage({});
       // Validate the form data against the schema
       await stepSchema.validate(toValidate, { abortEarly: false });
 
@@ -360,7 +360,7 @@ function PatientAddScreen(props) {
           newData[input] = !formData.patientInfo.IsChecked; // opposite boolean value of IsChecked
           if (!newData[input]) {
             // if IsChecked is false, reset End Date to beginning of epoch time
-            newData['EndDate'] = new Date(0);
+            newData.EndDate = new Date(0);
           }
         } else {
           newData[input] = date

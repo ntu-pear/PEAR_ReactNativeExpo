@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, FormControl, Text, Input, Pressable } from 'native-base';
+import { Box, FormControl, Text, Input, Pressable, HStack } from 'native-base';
 // import colors from 'app/config/colors';
 import { ScrollView, Platform, TouchableOpacity } from 'react-native';
 
@@ -10,6 +10,8 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import TextField from '@mui/material/TextField';
 import ErrorMessage from 'app/components/ErrorMessage';
+import typography from 'app/config/typography';
+import colors from 'app/config/colors';
 
 function DatePickerComponent({
   label,
@@ -44,18 +46,39 @@ function DatePickerComponent({
   return Platform.OS === 'ios' ? (
     <Box>
       {field == 'DOB' ? (
-        <>
-          <FormControl.Label>{label} </FormControl.Label>
+        <Box>
+          <FormControl.Label
+            _text={{
+              fontFamily: `${
+                Platform.OS === 'ios' ? typography.ios : typography.android
+              }`,
+              fontWeight: 'bold',
+            }}
+            w="100%"
+          >
+            {label}
+          </FormControl.Label>
           <DateTimePicker
             value={value}
             onChange={handleFormData(page, field)}
             minimumDate={minimumDOB}
             maximumDate={maximumDOB}
+            placeHolderText="Select Date"
           />
-        </>
+        </Box>
       ) : field == 'StartDate' ? (
         <>
-          <FormControl.Label>{label} </FormControl.Label>
+          <FormControl.Label
+            _text={{
+              fontFamily: `${
+                Platform.OS === 'ios' ? typography.ios : typography.android
+              }`,
+              fontWeight: 'bold',
+            }}
+            w="100%"
+          >
+            {label}
+          </FormControl.Label>
 
           <DateTimePicker
             value={value}
@@ -68,8 +91,6 @@ function DatePickerComponent({
         <>
           {isChecked ? (
             <>
-              {/* <FormControl.Label>{label} </FormControl.Label> */}
-
               <DateTimePicker
                 value={value}
                 onChange={handleFormData(page, field)}
@@ -109,7 +130,18 @@ function DatePickerComponent({
         <>
           <FormControl.Label>{label} </FormControl.Label>
           <Pressable onPress={showPicker(field)}>
-            <Input editable={false} value={value.toDateString()} />
+            <Input
+              color={colors.black_var1}
+              borderRadius="25"
+              height="50"
+              fontFamily={
+                Platform.OS === 'ios' ? typography.ios : typography.android
+              }
+              size="18"
+              w="100%"
+              editable={false}
+              value={value.toDateString()}
+            />
             {show[field] ? (
               field == 'DOB' ? (
                 <DateTimePicker
@@ -138,7 +170,14 @@ function DatePickerComponent({
             <>
               <Pressable onPress={showPicker(field)}>
                 <Input
-                  mt={2}
+                  color={colors.black_var1}
+                  borderRadius="25"
+                  height="50"
+                  fontFamily={
+                    Platform.OS === 'ios' ? typography.ios : typography.android
+                  }
+                  size="18"
+                  w="100%"
                   editable={false}
                   value={
                     value.getTime() === 0
