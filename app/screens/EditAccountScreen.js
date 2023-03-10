@@ -14,6 +14,7 @@ import {
   ScrollView,
   Text,
   Button,
+  Box
 } from 'native-base';
 import typography from 'app/config/typography';
 import colors from 'app/config/colors';
@@ -21,9 +22,13 @@ import { TouchableOpacity } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import userApi from 'app/api/user';
 import routes from 'app/navigation/routes';
+import EditField from 'app/components/EditField';
+import ErrorMessage from 'app/components/ErrorMessage';
+import * as Yup from 'yup';
 
 function EditAccountScreen(props) {
   const { navigation, route } = props;
+  // TODO: get userProfile from api instead
   const userProfile = route.params;
   const [formData, setFormData] = useState({
     preferredName: userProfile.preferredName,
@@ -32,6 +37,16 @@ function EditAccountScreen(props) {
   const [profilePicture, setProfilePicture] = useState(
     userProfile.profilePicture,
   );
+  const [errors, setErrors] = useState({});
+
+  const schema = Yup.object().shape({
+    preferredName: Yup.string()
+    .required('Preferred Name is a required field.'),
+    contactNo: Yup.string().matches(/^$|^[869][0-9]{7}$/, {
+      message:
+        'Contact No. must start with the digit 6, 8 or 9, and must have 8 digits.',
+    }).required('Contact No. is a required field.'),
+  });
 
   const handleFormData =
     (input = null) =>
@@ -44,25 +59,58 @@ function EditAccountScreen(props) {
       }));
     };
 
+    const validate = async () => {
+      try {
+        // Validate the form data against the schema and set errors when needed
+        await schema.validate(formData, { abortEarly: false });
+        return true;
+      } catch (error) {
+        if (error.inner) {
+          const errorList = {};
+        error.inner.forEach((e) => {
+          errorList[e.path] = e.message;
+        });
+        // console.log(errorList);
+        setErrors(errorList);
+        return false;
+      }
+    }
+    };
+
   const handleOnPressToSave = async () => {
+    const validation = await validate();
+    if (!validation) {
+      return;
+    }
+
     const result = await userApi.updateUser(formData, profilePicture);
     console.log('Edit acc screen', result);
-
+    // TODO: update api error message
     if (!result.ok) {
-      if (result.data.errors) {
-        Alert.alert(
-          'Update failed. \n' +
-            JSON.stringify(result.data.errors).split('[').pop().slice(0, -2),
-        );
+      if (result.data) {
+        setErrors({
+          api: result.data.message,
+        });
       } else {
-        Alert.alert(
-          'Update failed. \
-        Request failed with status code ' +
-            result.status,
-        );
+        setErrors({
+          api: "Update failed due to api error.",
+        });
       }
+     
+      // Alert.alert('Update failed. ');
+      // if (!result.data.errors) {
+      //   Alert.alert(
+      //     'Update failed. \
+      //   Request failed with status code ' +
+      //       result.status,
+      //   );
+      // } else {
+      //   Alert.alert(
+      //     'Update failed. \n' +
+      //       JSON.stringify(result.data.errors).split('[').pop().slice(0, -2),
+      //   );
+      // }
     } else {
-      // console.log(result.data.data);
       Alert.alert('Successfully updated.');
       navigation.pop();
       navigation.navigate(routes.ACCOUNT);
@@ -83,8 +131,11 @@ function EditAccountScreen(props) {
         quality: 1,
       });
 
-      if (!result.canceled) {
+      console.log(result)
+      if (!result.cancelled) {
         setProfilePicture(result.uri);
+      } else { 
+        return false
       }
     } else {
       Alert.alert('Please enable permissions to pick from image gallery.');
@@ -97,23 +148,25 @@ function EditAccountScreen(props) {
         <Center>
           <HStack>
             <Center>
-              <TouchableOpacity onPress={handleOnPressToImagePicker}>
+              <TouchableOpacity onPress={handleOnPressToImagePicker} alignItems="center">
                 <AspectRatio w="70%" ratio={1} mb="2" alignSelf="center">
                   <Image
                     borderRadius="full"
                     fallbackSource={{
-                      uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1640484552/User/Jessica_Sim_Sxxxx781F/ProfilePicture/l0czagb5s6jxbymwddnr.jpg',
+                      uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1678354032/User/Jessica_Sim_Sxxxx781F/ProfilePicture/osu40mslpycgtm1kajjo.png',
                     }}
                     resizeMode="cover"
                     source={{
                       uri: profilePicture
                         ? `${profilePicture}`
-                        : 'https://res.cloudinary.com/dbpearfyp/image/upload/v1640484552/User/Jessica_Sim_Sxxxx781F/ProfilePicture/l0czagb5s6jxbymwddnr.jpg',
+                        : 'https://res.cloudinary.com/dbpearfyp/image/upload/v1678354032/User/Jessica_Sim_Sxxxx781F/ProfilePicture/osu40mslpycgtm1kajjo.png',
                     }}
                     alt="user_image"
                   />
                 </AspectRatio>
+                <Text color={colors.red}> Click to edit profile picture</Text>
               </TouchableOpacity>
+              
             </Center>
           </HStack>
         </Center>
@@ -202,65 +255,24 @@ function EditAccountScreen(props) {
           </HStack>
         </FormControl>
 
-        <FormControl maxW="60%">
-          <HStack space={2} alignItems="center">
-            <FormControl.Label
-              _text={{
-                fontFamily: `${
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                }`,
-                fontSize: 'lg',
-                fontWeight: 'thin',
-              }}
-            >
-              Preferred Name
-            </FormControl.Label>
 
-            <Input
-              color={colors.black_var1}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
-              borderRadius="25"
-              placeholder={userProfile.preferredName}
-              onChangeText={handleFormData('preferredName')}
-              value={formData.preferredName}
-              w="100%"
-            />
-          </HStack>
-        </FormControl>
-
-        <FormControl maxW="60%">
-          <HStack space={2} alignItems="center">
-            <FormControl.Label
-              _text={{
-                fontFamily: `${
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                }`,
-                fontSize: 'lg',
-                fontWeight: 'thin',
-              }}
-            >
-              Contact Number
-            </FormControl.Label>
-
-            <Input
-              color={colors.black_var1}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
-              borderRadius="25"
-              placeholder={userProfile.contactNo}
-              onChangeText={handleFormData('contactNo')}
-              value={formData.contactNo}
-              type="number"
-              w="100%"
-              mt="1"
-            />
-          </HStack>
-        </FormControl>
+        <EditField isRequired
+          isInvalid={'preferredName' in errors}
+          title="Preferred Name"
+          placeholder={userProfile.preferredName}
+          onChangeText={handleFormData('preferredName')}
+          value={formData.preferredName}
+          ErrorMessage={errors.preferredName}
+        />
+       
+       <EditField isRequired
+          isInvalid={'contactNo' in errors}
+          title="Contact No."
+          placeholder={userProfile.contactNo}
+          onChangeText={handleFormData('contactNo')}
+          value={formData.contactNo}
+          ErrorMessage={errors.contactNo}
+        />
 
         <FormControl>
           <HStack space={2} alignItems="center">
@@ -414,7 +426,10 @@ function EditAccountScreen(props) {
           {' '}
           Note: To edit other information, please contact system administrator.
         </Text>
-        {/* edit info note style */}
+
+        <Box>
+          <ErrorMessage visible={'api' in errors} message={errors.api} />
+        </Box>
 
         <HStack
           w="100%"
