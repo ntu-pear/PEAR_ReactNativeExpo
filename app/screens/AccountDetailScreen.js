@@ -38,12 +38,12 @@ function AccountDetailScreen(props) {
                 <Image
                   borderRadius="full"
                   fallbackSource={{
-                    uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1640484552/User/Jessica_Sim_Sxxxx781F/ProfilePicture/l0czagb5s6jxbymwddnr.jpg',
+                    uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1678354032/User/Jessica_Sim_Sxxxx781F/ProfilePicture/osu40mslpycgtm1kajjo.png',
                   }}
                   source={{
                     uri: userProfile.profilePicture
                       ? `${userProfile.profilePicture}`
-                      : 'https://res.cloudinary.com/dbpearfyp/image/upload/v1640484552/User/Jessica_Sim_Sxxxx781F/ProfilePicture/l0czagb5s6jxbymwddnr.jpg',
+                      : 'https://res.cloudinary.com/dbpearfyp/image/upload/v1678354032/User/Jessica_Sim_Sxxxx781F/ProfilePicture/osu40mslpycgtm1kajjo.png',
                   }}
                   alt="user_image"
                 />

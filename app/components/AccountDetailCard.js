@@ -23,23 +23,23 @@ function AccountDetailCard(props) {
         borderColor={colors.primary_gray}
         borderWidth="1"
       >
-        <HStack space={5}>
+        <HStack space={10}>
           <Image
             alt="user_image"
             borderRadius="full"
             // Note: This is a fall-back uri. Will only be used if source fails to render the image.
             fallbackSource={{
-              uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1640484552/User/Jessica_Sim_Sxxxx781F/ProfilePicture/l0czagb5s6jxbymwddnr.jpg',
+              uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1678354032/User/Jessica_Sim_Sxxxx781F/ProfilePicture/osu40mslpycgtm1kajjo.png',
             }}
             resizeMode="cover"
             size="lg"
             source={{
               uri: userProfile.profilePicture
                 ? `${userProfile.profilePicture}`
-                : 'https://res.cloudinary.com/dbpearfyp/image/upload/v1640484552/User/Jessica_Sim_Sxxxx781F/ProfilePicture/l0czagb5s6jxbymwddnr.jpg',
+                : 'https://res.cloudinary.com/dbpearfyp/image/upload/v1678354032/User/Jessica_Sim_Sxxxx781F/ProfilePicture/osu40mslpycgtm1kajjo.png',
             }}
           />
-          <VStack mt="4">
+          <VStack mt="3" mb="2">
             <Text alignSelf="flex-start" fontSize="2xl">
               {`${userProfile.preferredName}`}
             </Text>
