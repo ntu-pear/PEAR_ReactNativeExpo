@@ -16,7 +16,7 @@ function AccountNavigator() {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name={routes.ACCOUNT}
+        name={routes.ACCOUNT_SCREEN}
         component={AccountScreen}
         options={{
           headerShown: true,

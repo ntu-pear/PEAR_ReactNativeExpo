@@ -6,6 +6,7 @@
 // accidentally.
 export default Object.freeze({
   ACCOUNT: 'Account',
+  ACCOUNT_SCREEN: 'AccountScreen',
   ACCOUNT_DETAIL: 'AccountDetailScreen',
   ACCOUNT_EDIT: 'EditAccount',
   ABOUT: 'About',
