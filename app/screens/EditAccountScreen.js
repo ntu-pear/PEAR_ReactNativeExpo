@@ -14,7 +14,7 @@ import {
   ScrollView,
   Text,
   Button,
-  Box
+  Box,
 } from 'native-base';
 import typography from 'app/config/typography';
 import colors from 'app/config/colors';
@@ -40,12 +40,13 @@ function EditAccountScreen(props) {
   const [errors, setErrors] = useState({});
 
   const schema = Yup.object().shape({
-    preferredName: Yup.string()
-    .required('Preferred Name is a required field.'),
-    contactNo: Yup.string().matches(/^$|^[869][0-9]{7}$/, {
-      message:
-        'Contact No. must start with the digit 6, 8 or 9, and must have 8 digits.',
-    }).required('Contact No. is a required field.'),
+    preferredName: Yup.string().required('Preferred Name is a required field.'),
+    contactNo: Yup.string()
+      .matches(/^$|^[869][0-9]{7}$/, {
+        message:
+          'Contact No. must start with the digit 6, 8 or 9, and must have 8 digits.',
+      })
+      .required('Contact No. is a required field.'),
   });
 
   const handleFormData =
@@ -59,14 +60,14 @@ function EditAccountScreen(props) {
       }));
     };
 
-    const validate = async () => {
-      try {
-        // Validate the form data against the schema and set errors when needed
-        await schema.validate(formData, { abortEarly: false });
-        return true;
-      } catch (error) {
-        if (error.inner) {
-          const errorList = {};
+  const validate = async () => {
+    try {
+      // Validate the form data against the schema and set errors when needed
+      await schema.validate(formData, { abortEarly: false });
+      return true;
+    } catch (error) {
+      if (error.inner) {
+        const errorList = {};
         error.inner.forEach((e) => {
           errorList[e.path] = e.message;
         });
@@ -75,7 +76,7 @@ function EditAccountScreen(props) {
         return false;
       }
     }
-    };
+  };
 
   const handleOnPressToSave = async () => {
     const validation = await validate();
@@ -85,7 +86,7 @@ function EditAccountScreen(props) {
 
     setIsLoading(true);
     const result = await userApi.updateUser(formData, profilePicture);
-    console.log('Edit acc screen', result);
+    // console.log('Edit acc screen', result);
     if (!result.ok) {
       setErrors({
         api: result.data.message,
@@ -114,11 +115,11 @@ function EditAccountScreen(props) {
         quality: 1,
       });
 
-      console.log(result)
+      // console.log(result)
       if (!result.cancelled) {
         setProfilePicture(result.uri);
-      } else { 
-        return false
+      } else {
+        return false;
       }
     } else {
       Alert.alert('Please enable permissions to pick from image gallery.');
@@ -131,7 +132,10 @@ function EditAccountScreen(props) {
         <Center>
           <HStack>
             <Center>
-              <TouchableOpacity onPress={handleOnPressToImagePicker} alignItems="center">
+              <TouchableOpacity
+                onPress={handleOnPressToImagePicker}
+                alignItems="center"
+              >
                 <AspectRatio w="70%" ratio={1} mb="2" alignSelf="center">
                   <Image
                     borderRadius="full"
@@ -149,7 +153,6 @@ function EditAccountScreen(props) {
                 </AspectRatio>
                 <Text color={colors.red}> Click to edit profile picture</Text>
               </TouchableOpacity>
-              
             </Center>
           </HStack>
         </Center>
@@ -238,8 +241,8 @@ function EditAccountScreen(props) {
           </HStack>
         </FormControl>
 
-
-        <EditField isRequired
+        <EditField
+          isRequired
           isInvalid={'preferredName' in errors}
           title="Preferred Name"
           placeholder={userProfile.preferredName}
@@ -247,8 +250,9 @@ function EditAccountScreen(props) {
           value={formData.preferredName}
           ErrorMessage={errors.preferredName}
         />
-       
-       <EditField isRequired
+
+        <EditField
+          isRequired
           isInvalid={'contactNo' in errors}
           title="Contact No."
           placeholder={userProfile.contactNo}
@@ -414,46 +418,46 @@ function EditAccountScreen(props) {
           <ErrorMessage visible={'api' in errors} message={errors.api} />
         </Box>
 
-        <HStack
-          w="100%"
-          space="0"
-          alignItems="center"
-          justifyContent="space-around"
-        >
-          {isLoading ? (
-            <ActivityIndicator color={colors.primary_overlay_color} />
-              ) : (
-          <Button
-            onPress={() => handleOnPressToSave()}
-            w="25%"
-            size="md"
-            bg={colors.green}
-            _text={{
-              color: `${colors.white_var1}`,
-              fontFamily:
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android,
-              fontSize: 'sm',
-            }}
+        {isLoading ? (
+          <ActivityIndicator color={colors.primary_overlay_color} />
+        ) : (
+          <HStack
+            w="100%"
+            space="0"
+            alignItems="center"
+            justifyContent="space-around"
           >
-            Save
-          </Button>
-          )}
+            <Button
+              onPress={() => handleOnPressToSave()}
+              w="25%"
+              size="md"
+              bg={colors.green}
+              _text={{
+                color: `${colors.white_var1}`,
+                fontFamily:
+                  Platform.OS === 'ios' ? 'Helvetica' : typography.android,
+                fontSize: 'sm',
+              }}
+            >
+              Save
+            </Button>
 
-          <Button
-            onPress={() => handleOnPressToCancel()}
-            w="25%"
-            size="md"
-            bg={colors.pink}
-            _text={{
-              color: `${colors.white_var1}`,
-              fontFamily:
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android,
-              fontSize: 'sm',
-            }}
-          >
-            Cancel
-          </Button>
-        </HStack>
+            <Button
+              onPress={() => handleOnPressToCancel()}
+              w="25%"
+              size="md"
+              bg={colors.pink}
+              _text={{
+                color: `${colors.white_var1}`,
+                fontFamily:
+                  Platform.OS === 'ios' ? 'Helvetica' : typography.android,
+                fontSize: 'sm',
+              }}
+            >
+              Cancel
+            </Button>
+          </HStack>
+        )}
       </VStack>
     </ScrollView>
   );
