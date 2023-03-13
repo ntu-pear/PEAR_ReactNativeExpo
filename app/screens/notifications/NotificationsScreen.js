@@ -44,7 +44,7 @@ function NotificationsScreen(props) {
     setIsError,
     setIsLoading,
     setNotificationData,
-    setIsFetchingMoreNotifications
+    setIsFetchingMoreNotifications,
   );
 
   useEffect(() => {
@@ -135,7 +135,6 @@ function NotificationsScreen(props) {
     // Update Notification Data with the newly filtered data; to re-render flat list.
     setNotificationData(filteredData);
   };
-
   return (
     <>
       {isLoading ? (
@@ -173,7 +172,9 @@ function NotificationsScreen(props) {
                     </HStack>
                   )
                 }
-                onEndReached={getMoreNotifications}
+                onEndReached={async () =>
+                  getMoreNotifications(paginationParams, sortBy)
+                }
                 onRefresh={async () =>
                   handlePullToRefresh(paginationParams, sortBy)
                 }
