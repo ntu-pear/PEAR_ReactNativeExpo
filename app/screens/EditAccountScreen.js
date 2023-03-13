@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { useState } from 'react';
-import { Platform, Alert } from 'react-native';
+import { Platform, Alert, ActivityIndicator } from 'react-native';
 import {
   Image,
   VStack,
@@ -27,8 +27,8 @@ import ErrorMessage from 'app/components/ErrorMessage';
 import * as Yup from 'yup';
 
 function EditAccountScreen(props) {
+  const [isLoading, setIsLoading] = useState(false);
   const { navigation, route } = props;
-  // TODO: get userProfile from api instead
   const userProfile = route.params;
   const [formData, setFormData] = useState({
     preferredName: userProfile.preferredName,
@@ -83,38 +83,21 @@ function EditAccountScreen(props) {
       return;
     }
 
+    setIsLoading(true);
     const result = await userApi.updateUser(formData, profilePicture);
     console.log('Edit acc screen', result);
-    // TODO: update api error message
     if (!result.ok) {
-      if (result.data) {
-        setErrors({
-          api: result.data.message,
-        });
-      } else {
-        setErrors({
-          api: "Update failed due to api error.",
-        });
-      }
-     
-      // Alert.alert('Update failed. ');
-      // if (!result.data.errors) {
-      //   Alert.alert(
-      //     'Update failed. \
-      //   Request failed with status code ' +
-      //       result.status,
-      //   );
-      // } else {
-      //   Alert.alert(
-      //     'Update failed. \n' +
-      //       JSON.stringify(result.data.errors).split('[').pop().slice(0, -2),
-      //   );
-      // }
-    } else {
-      Alert.alert('Successfully updated.');
-      navigation.pop();
-      navigation.navigate(routes.ACCOUNT);
+      setErrors({
+        api: result.data.message,
+      });
+      setIsLoading(false);
+      return;
     }
+
+    setIsLoading(false);
+    Alert.alert('Successfully updated.');
+    navigation.pop();
+    navigation.navigate(routes.ACCOUNT_SCREEN);
   };
 
   const handleOnPressToCancel = () => {
@@ -437,6 +420,9 @@ function EditAccountScreen(props) {
           alignItems="center"
           justifyContent="space-around"
         >
+          {isLoading ? (
+            <ActivityIndicator color={colors.primary_overlay_color} />
+              ) : (
           <Button
             onPress={() => handleOnPressToSave()}
             w="25%"
@@ -451,6 +437,7 @@ function EditAccountScreen(props) {
           >
             Save
           </Button>
+          )}
 
           <Button
             onPress={() => handleOnPressToCancel()}
