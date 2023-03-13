@@ -76,6 +76,12 @@ function EditAccountScreen(props) {
         return false;
       }
     }
+
+    // response is successful but not updating db??
+    console.log(result.data.data);
+    Alert.alert('Successfully updated.');
+    navigation.pop();
+    navigation.navigate(routes.ACCOUNT);
   };
 
   const handleOnPressToSave = async () => {

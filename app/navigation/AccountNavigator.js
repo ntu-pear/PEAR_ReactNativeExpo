@@ -7,6 +7,7 @@ import AboutScreen from 'app/screens/AboutScreen';
 import routes from 'app/navigation/routes';
 import SettingsScreen from 'app/screens/SettingsScreen';
 import EditAccountScreen from 'app/screens/EditAccountScreen';
+import ChangePasswordScreen from 'app/screens/ChangePasswordScreen';
 
 // Refer to this: https://reactnavigation.org/docs/hello-react-navigation
 const Stack = createNativeStackNavigator();
@@ -57,6 +58,15 @@ function AccountNavigator() {
           headerShown: true,
           headerBackTitleVisible: false,
           title: 'Settings',
+        }}
+      />
+      <Stack.Screen
+        name={routes.CHANGE_PASSWORD}
+        component={ChangePasswordScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Change Password',
         }}
       />
     </Stack.Navigator>

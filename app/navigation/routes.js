@@ -11,6 +11,7 @@ export default Object.freeze({
   ACCOUNT_EDIT: 'EditAccount',
   ABOUT: 'About',
   SETTINGS: 'Settings',
+  CHANGE_PASSWORD: 'ChangePassword',
 
   CONFIG: 'Config',
   CONFIG_SCREEN: 'ConfigScreen',
