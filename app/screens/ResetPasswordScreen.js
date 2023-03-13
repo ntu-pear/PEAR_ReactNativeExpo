@@ -44,7 +44,7 @@ function ResetPasswordScreen(props) {
       error.inner.forEach((e) => {
         errorList[e.path] = e.message;
       });
-      console.log(errorList);
+      // console.log(errorList);
       setErrors(errorList);
       return false;
     }

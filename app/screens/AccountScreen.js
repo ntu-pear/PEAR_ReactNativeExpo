@@ -17,7 +17,6 @@ import colors from 'app/config/colors';
 function AccountScreen(props) {
   const [isLoading, setIsLoading] = useState(false);
   const { user, setUser } = useContext(AuthContext);
-  const checkExpiredLogOutHook = useCheckExpiredThenLogOut();
   const { navigation } = props;
 
   const onPressLogOut = async () => {
@@ -42,10 +41,11 @@ function AccountScreen(props) {
   const getCurrentUser = async () => {
     const currentUser = await authStorage.getUser();
     const response = await userApi.getUser(currentUser.userID);
-    console.log('getCurrentUser', response);
+    // console.log('getCurrentUser', response);
     if (!response.ok) {
-      // Check if token has expired, if yes, proceed to log out
-      checkExpiredLogOutHook.handleLogOut(response.data);
+      // Proceed to log out if account screen does not load due to api failure
+      setUser(null);
+      await authStorage.removeToken();
       return;
     }
     setIsLoading(false);
