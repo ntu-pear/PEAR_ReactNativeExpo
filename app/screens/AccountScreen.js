@@ -96,4 +96,3 @@ function AccountScreen(props) {
 }
 
 export default AccountScreen;
-

@@ -24,7 +24,9 @@ function ResetPasswordScreen(props) {
   };
 
   const schema = Yup.object().shape({
-    email: Yup.string().email('Invalid email address.').required('Email is a required field.'),
+    email: Yup.string()
+      .email('Invalid email address.')
+      .required('Email is a required field.'),
     role: Yup.string().required('Role is a required field.'),
   });
 
@@ -41,14 +43,14 @@ function ResetPasswordScreen(props) {
     } catch (error) {
       if (error.inner) {
         const errorList = {};
-      error.inner.forEach((e) => {
-        errorList[e.path] = e.message;
-      });
-      // console.log(errorList);
-      setErrors(errorList);
-      return false;
+        error.inner.forEach((e) => {
+          errorList[e.path] = e.message;
+        });
+        // console.log(errorList);
+        setErrors(errorList);
+        return false;
+      }
     }
-  }
   };
 
   const onPressReset = async () => {
@@ -121,19 +123,18 @@ function ResetPasswordScreen(props) {
                 <Select.Item label="Nurse" value="Nurse" />
               </Select>
             </VStack>
-            </FormControl>
-            
-            <Box>
-              <ErrorMessage visible={'api' in errors} message={errors.api} />
-            </Box>
-            <View style={styles.buttonsContainer}>
-              {isLoading ? (
-                <ActivityIndicator color={colors.primary_overlay_color} />
-              ) : (
-                <AppButton title="Reset" color="green" onPress={onPressReset} />
-              )}
-            </View>
-          
+          </FormControl>
+
+          <Box>
+            <ErrorMessage visible={'api' in errors} message={errors.api} />
+          </Box>
+          <View style={styles.buttonsContainer}>
+            {isLoading ? (
+              <ActivityIndicator color={colors.primary_overlay_color} />
+            ) : (
+              <AppButton title="Reset" color="green" onPress={onPressReset} />
+            )}
+          </View>
         </Center>
       </VStack>
     </View>

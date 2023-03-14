@@ -163,8 +163,8 @@ function ChangePasswordScreen(props) {
 const styles = StyleSheet.create({
   buttonsContainer: {
     width: '50%',
-    padding: 30,
-    alignSelf: 'flex-start',
+    paddingVertical: 30,
+    alignSelf: 'center',
   },
 });
 
