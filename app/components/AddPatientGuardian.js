@@ -6,11 +6,18 @@ import {
   Text,
   Select,
   Divider,
+  VStack,
+  Center,
   Checkbox,
+  HStack,
 } from 'native-base';
+import { StyleSheet, Platform } from 'react-native';
+
+import ErrorMessage from 'app/components/ErrorMessage';
+import CustomFormControl from 'app/components/CustomFormControl';
+
 import colors from 'app/config/colors';
 import typography from 'app/config/typography';
-import ErrorMessage from 'app/components/ErrorMessage';
 
 function AddPatientGuardian({
   i,
@@ -21,7 +28,6 @@ function AddPatientGuardian({
 }) {
   const page = 'guardianInfo';
   const guardian = formData.guardianInfo[i]; //guardianInfo[0].FirstName
-  // console.log('guardian: ', i, formData.guardianInfo);
 
   const isOptional = () => {
     return guardian.IsChecked ? '' : '(Optional)';
@@ -44,122 +50,136 @@ function AddPatientGuardian({
   ];
 
   return (
-    <Box>
-      {title == 1 ? null : <Divider mt={10} />}
-      <Text
-        textAlign="center"
-        marginTop={6}
-        bold
-        fontSize="2xl"
-        color={colors.green}
-      >
-        Guardian Information {title}
-      </Text>
-      <FormControl marginTop={4}>
-        <FormControl.Label>Guardian First Name</FormControl.Label>
-        <Input
-          placeholder="Guardian First Name"
-          value={guardian.FirstName}
-          onChangeText={handleFormData(page, 'FirstName', i)}
-        />
-      </FormControl>
-      {errorMessage[`[${i}].FirstName`] ? (
-        <ErrorMessage visible message={errorMessage[`[${i}].FirstName`]} />
-      ) : (
-        <></>
-      )}
+    <Box w="100%">
+      <VStack>
+        <Center>
+          {title == 1 ? null : <Divider w="80%" mt={10} />}
+          <Text
+            marginTop={6}
+            bold
+            fontSize="2xl"
+            color={colors.green}
+            style={styles.text}
+          >
+            Guardian Information {title}
+          </Text>
 
-      <FormControl>
-        <FormControl.Label>Guardian Last Name</FormControl.Label>
-        <Input
-          placeholder="Guardian Last Name"
-          value={guardian.LastName}
-          onChangeText={handleFormData(page, 'LastName', i)}
-        />
-      </FormControl>
-      {errorMessage[`[${i}].LastName`] ? (
-        <ErrorMessage visible message={errorMessage[`[${i}].LastName`]} />
-      ) : (
-        <></>
-      )}
+          <CustomFormControl
+            isRequired
+            isInvalid={[`[${i}].FirstName`] in errorMessage}
+            title="Guardian First Name"
+            value={guardian.FirstName}
+            onChangeText={handleFormData(page, 'FirstName', i)}
+            placeholder="Guardian First Name"
+            ErrorMessage={errorMessage[`[${i}].FirstName`]}
+          />
 
-      <FormControl>
-        <FormControl.Label>Guardian NRIC</FormControl.Label>
-        <Input
-          placeholder="Guardian NRIC"
-          value={guardian.NRIC}
-          maxLength={9}
-          onChangeText={handleFormData(page, 'NRIC', i)}
-        />
-      </FormControl>
-      {errorMessage[`[${i}].NRIC`] ? (
-        <ErrorMessage visible message={errorMessage[`[${i}].NRIC`]} />
-      ) : (
-        <></>
-      )}
+          <CustomFormControl
+            isRequired
+            isInvalid={[`[${i}].LastName`] in errorMessage}
+            title="Guardian Last Name"
+            value={guardian.LastName}
+            onChangeText={handleFormData(page, 'LastName', i)}
+            placeholder="Guardian Last Name"
+            ErrorMessage={errorMessage[`[${i}].LastName`]}
+          />
 
-      <FormControl>
-        <FormControl.Label>Guardian is Patient's</FormControl.Label>
-        <Select
-          placeholder="Select"
-          selectedValue={guardian.RelationshipID}
-          onValueChange={handleFormData(page, 'RelationshipID', i)}
-        >
-          {listOfRelationships.map((item) => (
-            <Select.Item
-              key={item}
-              label={item.value}
-              value={item.list_RelationshipID}
+          <CustomFormControl
+            isRequired
+            isInvalid={[`[${i}].NRIC`] in errorMessage}
+            title="Guardian NRIC"
+            value={guardian.NRIC}
+            onChangeText={handleFormData(page, 'NRIC', i)}
+            placeholder="Guardian NRIC"
+            ErrorMessage={errorMessage[`[${i}].NRIC`]}
+            maxLength={9}
+          />
+
+          <FormControl w="80%" mt="5" isRequired>
+            <FormControl.Label _text={styles.text}>
+              Guardian is Patient's
+            </FormControl.Label>
+            <Select
+              accessibilityLabel="Select Relationship"
+              borderRadius="25"
+              fontFamily={
+                Platform.OS === 'ios' ? typography.ios : typography.android
+              }
+              height="50"
+              minWidth="full"
+              minHeight="3%"
+              placeholderTextColor={colors.medium}
+              size="18"
+              placeholder="Select Relationship"
+              selectedValue={guardian.RelationshipID}
+              onValueChange={handleFormData(page, 'RelationshipID', i)}
+            >
+              {listOfRelationships.map((item) => (
+                <Select.Item
+                  key={item}
+                  label={item.value}
+                  value={item.list_RelationshipID}
+                />
+              ))}
+            </Select>
+          </FormControl>
+          <Box>
+            <ErrorMessage
+              visible={[`[${i}].RelationshipID`] in errorMessage}
+              message={errorMessage[`[${i}].RelationshipID`]}
             />
-          ))}
-        </Select>
-      </FormControl>
-      {errorMessage[`[${i}].RelationshipID`] ? (
-        <ErrorMessage visible message={errorMessage[`[${i}].RelationshipID`]} />
-      ) : (
-        <></>
-      )}
+          </Box>
 
-      <FormControl>
-        <FormControl.Label>Guardian's Handphone No.</FormControl.Label>
-        <Input
-          placeholder="Guardian's Handphone Number"
-          value={guardian.ContactNo}
-          maxLength={8}
-          keyboardType="numeric"
-          onChangeText={handleFormData(page, 'ContactNo', i)}
-        />
-      </FormControl>
-      {errorMessage[`[${i}].ContactNo`] ? (
-        <ErrorMessage visible message={errorMessage[`[${i}].ContactNo`]} />
-      ) : (
-        <></>
-      )}
-      <FormControl>
-        <FormControl.Label>Does Guardian wish to Log In?</FormControl.Label>
-        <Checkbox
-          isChecked={guardian.IsChecked}
-          value={guardian.IsChecked}
-          onChange={handleFormData(page, 'IsChecked', i)}
-          aria-label="Does Guardian wish to Log In?"
-        />
-      </FormControl>
+          <CustomFormControl
+            isRequired
+            isInvalid={[`[${i}].ContactNo`] in errorMessage}
+            title="Guardian's Handphone No."
+            value={guardian.ContactNo}
+            onChangeText={handleFormData(page, 'ContactNo', i)}
+            placeholder="Guardian's Handphone Number"
+            ErrorMessage={errorMessage[`[${i}].ContactNo`]}
+            maxLength={8}
+            keyboardType="numeric"
+          />
 
-      <FormControl>
-        <FormControl.Label>Guardian Email {isOptional()}</FormControl.Label>
-        <Input
-          placeholder={`Guardian Email ${isOptional()}`}
-          value={guardian.Email}
-          onChangeText={handleFormData(page, 'Email', i)}
-        />
-      </FormControl>
-      {errorMessage[`[${i}].Email`] ? (
-        <ErrorMessage visible message={errorMessage[`[${i}].Email`]} />
-      ) : (
-        <></>
-      )}
+          <FormControl w="80%" mt="5">
+            <HStack justifyContent="space-between" alignItems="center">
+              <Box w="80%">
+                <FormControl.Label _text={styles.text}>
+                  Check this box to specify Guardian wants to Log In
+                </FormControl.Label>
+              </Box>
+
+              <Checkbox
+                isChecked={guardian.IsChecked}
+                value={guardian.IsChecked}
+                onChange={handleFormData(page, 'IsChecked', i)}
+                aria-label=" Do you wish to key in the Date of Leaving?"
+                _checked={{ bgColor: colors.green }}
+              />
+            </HStack>
+          </FormControl>
+
+          <CustomFormControl
+            isRequired={isOptional() == '(Optional)' ? false : true}
+            isInvalid={[`[${i}].Email`] in errorMessage}
+            title={'Guardian Email'}
+            value={guardian.Email}
+            onChangeText={handleFormData(page, 'Email', i)}
+            placeholder={`Guardian Email ${isOptional()}`}
+            ErrorMessage={errorMessage[`[${i}].Email`]}
+          />
+        </Center>
+      </VStack>
     </Box>
   );
 }
-
+const styles = StyleSheet.create({
+  text: {
+    fontWeight: 'bold',
+    fontFamily: `${
+      Platform.OS === 'ios' ? typography.ios : typography.android
+    }`,
+  },
+});
 export default AddPatientGuardian;

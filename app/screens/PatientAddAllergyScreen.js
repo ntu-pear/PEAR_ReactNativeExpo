@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, ScrollView, Progress } from 'native-base';
+import { Box, ScrollView, VStack, Center } from 'native-base';
 import AddPatientAllergy from 'app/components/AddPatientAllergy';
 import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import AddPatientProgress from 'app/components/AddPatientProgress';
@@ -39,22 +39,26 @@ function PatientAddAllergyScreen(props) {
   return (
     <ScrollView>
       <Box alignItems="center">
-        <Box w="75%">
-          <AddPatientProgress value={100} />
-          {allergyInfoDisplay
-            ? allergyInfoDisplay.map((item, index) => (
-                <Box key={index}>
-                  <AddPatientAllergy
-                    key={item}
-                    i={index}
-                    title={index + 1}
-                    formData={formData}
-                    handleFormData={handleFormData}
-                    errorMessage={errorMessage}
-                  />
-                </Box>
-              ))
-            : null}
+        <Box w="100%">
+          <VStack>
+            <Center>
+              <AddPatientProgress value={100} />
+              {allergyInfoDisplay
+                ? allergyInfoDisplay.map((item, index) => (
+                    <Box w="100%" key={index}>
+                      <AddPatientAllergy
+                        key={item}
+                        i={index}
+                        title={index + 1}
+                        formData={formData}
+                        handleFormData={handleFormData}
+                        errorMessage={errorMessage}
+                      />
+                    </Box>
+                  ))
+                : null}
+            </Center>
+          </VStack>
         </Box>
         <AddPatientBottomButtons
           list={allergyInfoDisplay}

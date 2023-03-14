@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, ScrollView, Progress } from 'native-base';
+import { Box, ScrollView, VStack, Center } from 'native-base';
 
 import { MaterialIcons } from '@expo/vector-icons';
 import colors from 'app/config/colors';
@@ -48,22 +48,26 @@ function PatientAddGuardianScreen(props) {
   return (
     <ScrollView>
       <Box alignItems="center">
-        <Box w="75%">
-          <AddPatientProgress value={60} />
-          {guardianInfoDisplay
-            ? guardianInfoDisplay.map((item, index) => (
-                <Box key={index}>
-                  <AddPatientGuardian
-                    key={item}
-                    i={index}
-                    title={index + 1}
-                    formData={formData}
-                    handleFormData={handleFormData}
-                    errorMessage={errorMessage}
-                  />
-                </Box>
-              ))
-            : null}
+        <Box w="100%">
+          <VStack>
+            <Center>
+              <AddPatientProgress value={60} />
+              {guardianInfoDisplay
+                ? guardianInfoDisplay.map((item, index) => (
+                    <Box w="100%" key={index}>
+                      <AddPatientGuardian
+                        key={item}
+                        i={index}
+                        title={index + 1}
+                        formData={formData}
+                        handleFormData={handleFormData}
+                        errorMessage={errorMessage}
+                      />
+                    </Box>
+                  ))
+                : null}
+            </Center>
+          </VStack>
         </Box>
         <AddPatientBottomButtons
           list={guardianInfoDisplay}
