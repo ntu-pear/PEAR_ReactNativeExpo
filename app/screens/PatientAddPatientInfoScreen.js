@@ -11,6 +11,7 @@ import {
   Select,
   Pressable,
   FlatList,
+  ScrollView,
   Checkbox,
   VStack,
 } from 'native-base';
@@ -66,7 +67,6 @@ function PatientAddPatientInfoScreen(props) {
               <Center>
                 <AddPatientProgress value={30} />
                 <Text
-                  // textAlign="center"
                   marginTop={6}
                   fontSize="2xl"
                   color={colors.green}
@@ -155,7 +155,7 @@ function PatientAddPatientInfoScreen(props) {
                     height="50"
                     minWidth="full"
                     minHeight="3%"
-                    placeholder="Select role"
+                    placeholder="Select Language"
                     placeholderTextColor={colors.medium}
                     size="18"
                     selectedValue={patient.PreferredLanguageListID}
@@ -188,6 +188,7 @@ function PatientAddPatientInfoScreen(props) {
                   onChangeText={handleFormData(page, 'NRIC')}
                   placeholder="NRIC"
                   ErrorMessage={errorMessage.NRIC}
+                  maxLength={9}
                 />
 
                 <CustomFormControl
@@ -231,7 +232,12 @@ function PatientAddPatientInfoScreen(props) {
                   maxLength={8}
                 />
 
-                <FormControl w="80%" mt="5" isRequired>
+                <FormControl
+                  w="80%"
+                  mt="5"
+                  isRequired
+                  isInvalid={'Gender' in errorMessage}
+                >
                   <FormControl.Label _text={styles.text}>
                     Gender
                   </FormControl.Label>
@@ -262,15 +268,18 @@ function PatientAddPatientInfoScreen(props) {
                       </Radio>
                     </HStack>
                   </Radio.Group>
-                </FormControl>
-                <Box>
-                  <ErrorMessage
-                    visible={'Gender' in errorMessage}
-                    message={errorMessage.Gender}
-                  />
-                </Box>
 
-                <FormControl w="80%" mt="5" isRequired>
+                  <FormControl.ErrorMessage>
+                    {errorMessage.Gender}
+                  </FormControl.ErrorMessage>
+                </FormControl>
+
+                <FormControl
+                  w="80%"
+                  mt="5"
+                  isRequired
+                  isInvalid={'IsRespiteCare' in errorMessage}
+                >
                   <FormControl.Label _text={styles.text}>
                     Respite Care
                   </FormControl.Label>
@@ -301,16 +310,14 @@ function PatientAddPatientInfoScreen(props) {
                       </Radio>
                     </HStack>
                   </Radio.Group>
+
+                  <FormControl.ErrorMessage>
+                    {errorMessage.IsRespiteCare}
+                  </FormControl.ErrorMessage>
                 </FormControl>
-                <Box>
-                  <ErrorMessage
-                    visible={'IsRespiteCare' in errorMessage}
-                    message={errorMessage.IsRespiteCare}
-                  />
-                </Box>
 
                 {/* Reference: https://github.com/react-native-datetimepicker/datetimepicker
-          TODO: Align to the left*/}
+                TODO: Align to the left*/}
                 <FormControl w="80%" mt="5" isRequired>
                   <DatePickerComponent
                     label={'Date of Birth'}
@@ -357,6 +364,7 @@ function PatientAddPatientInfoScreen(props) {
                       value={patient.IsChecked}
                       onChange={handleFormData(page, 'IsChecked')}
                       aria-label=" Do you wish to key in the Date of Leaving?"
+                      _checked={{ bgColor: colors.green }}
                     />
                   </HStack>
                 </FormControl>

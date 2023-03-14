@@ -182,10 +182,10 @@ function PatientAddScreen(props) {
     patientInfo: {
       FirstName: '',
       LastName: '',
-      PreferredName: 'Patient',
+      PreferredName: '',
       PreferredLanguageListID: 1,
-      NRIC: 'S0948274A',
-      Address: 'MyHome',
+      NRIC: '',
+      Address: '',
       TempAddress: '',
       HomeNo: '',
       HandphoneNo: '',
@@ -211,14 +211,14 @@ function PatientAddScreen(props) {
 
     guardianInfo: [
       {
-        FirstName: 'gFirst',
-        LastName: 'gLast',
-        NRIC: 'S9658567Z',
+        FirstName: '',
+        LastName: '',
+        NRIC: '',
         IsChecked: false, // additional item to check if guardian wishes to log in in the future. if yes, email is required
-        Email: 'gg@gmail.com',
+        Email: '',
         RelationshipID: 1,
         IsActive: true,
-        ContactNo: '95655856',
+        ContactNo: '',
       },
     ],
 

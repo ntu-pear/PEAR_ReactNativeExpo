@@ -1,17 +1,18 @@
 import React from 'react';
 import {
   Box,
-  Input,
+  VStack,
+  Center,
   FormControl,
   Text,
   Select,
   Divider,
   TextArea,
 } from 'native-base';
+import { StyleSheet, Platform } from 'react-native';
+
 import colors from 'app/config/colors';
 import typography from 'app/config/typography';
-import ErrorMessage from 'app/components/ErrorMessage';
-
 function AddPatientAllergy({
   i,
   title,
@@ -22,8 +23,8 @@ function AddPatientAllergy({
   const page = 'allergyInfo';
   const allergy = formData.allergyInfo[i]; //allergyInfo[0].allergyName
 
-  const isDisabled = () => {
-    return allergy.AllergyListID == 2 ? true : false;
+  const isShown = () => {
+    return allergy.AllergyListID == 2 ? false : true;
   };
 
   // constant values for list of allergies
@@ -58,84 +59,147 @@ function AddPatientAllergy({
     { list_AllergyReactionID: 11, value: 'Hives' },
   ];
 
+  console.log('erro-remarks', errorMessage);
   return (
-    <Box>
-      {title == 1 ? null : <Divider mt={10} />}
+    <Box w="100%">
+      <VStack>
+        <Center>
+          {title == 1 ? null : <Divider w="80%" mt={10} />}
 
-      <Text
-        textAlign="center"
-        marginTop={6}
-        bold
-        fontSize="2xl"
-        color={colors.green}
-      >
-        Allergy {title}
-      </Text>
+          <Text
+            marginTop={6}
+            bold
+            fontSize="2xl"
+            color={colors.green}
+            style={styles.text}
+          >
+            Allergy Information {title}
+          </Text>
 
-      <FormControl marginTop={4}>
-        <FormControl.Label>Allergy</FormControl.Label>
-        <Select
-          placeholder="Select Allergy"
-          selectedValue={allergy.AllergyListID}
-          onValueChange={handleFormData(page, 'AllergyListID', i)}
-        >
-          {listOfAllergies.map((item) => (
-            <Select.Item
-              key={item}
-              label={item.value}
-              value={item.list_AllergyID}
-            />
-          ))}
-        </Select>
-      </FormControl>
-      {errorMessage[`[${i}].AllergyListID`] ? (
-        <ErrorMessage visible message={errorMessage[`[${i}].AllergyListID`]} />
-      ) : (
-        <></>
-      )}
+          <FormControl
+            w="80%"
+            mt="5"
+            isRequired
+            isInvalid={[`[${i}].AllergyListID`] in errorMessage}
+          >
+            <FormControl.Label _text={styles.text}>Allergy </FormControl.Label>
+            <Select
+              accessibilityLabel="Select Allergy"
+              borderRadius="25"
+              fontFamily={
+                Platform.OS === 'ios' ? typography.ios : typography.android
+              }
+              height="50"
+              minWidth="full"
+              minHeight="3%"
+              placeholderTextColor={colors.medium}
+              size="18"
+              placeholder="Select Allergy"
+              selectedValue={allergy.AllergyListID}
+              onValueChange={handleFormData(page, 'AllergyListID', i)}
+            >
+              {listOfAllergies.map((item, index) => (
+                <Select.Item
+                  key={index}
+                  label={item.value}
+                  value={item.list_AllergyID}
+                />
+              ))}
+            </Select>
 
-      <FormControl>
-        <FormControl.Label>Reaction</FormControl.Label>
-        <Select
-          placeholder={'Select Allergy Reaction'}
-          selectedValue={allergy.AllergyReactionListID}
-          onValueChange={handleFormData(page, 'AllergyReactionListID', i)}
-          isDisabled={isDisabled()}
-        >
-          {listOfAllergyReactions.map((item) => (
-            <Select.Item
-              key={item}
-              label={item.value}
-              value={item.list_AllergyReactionID}
-            />
-          ))}
-        </Select>
-      </FormControl>
-      {errorMessage[`[${i}].AllergyReactionListID`] ? (
-        <ErrorMessage
-          visible
-          message={errorMessage[`[${i}].AllergyReactionListID`]}
-        />
-      ) : (
-        <></>
-      )}
+            <FormControl.ErrorMessage>
+              {errorMessage[`[${i}].AllergyListID`]}
+            </FormControl.ErrorMessage>
+          </FormControl>
 
-      <FormControl>
-        <FormControl.Label>Remarks</FormControl.Label>
-        <TextArea
-          placeholder={'Remarks'}
-          value={allergy.AllergyRemarks}
-          onChangeText={handleFormData(page, 'AllergyRemarks', i)}
-          isDisabled={isDisabled()}
-        />
-      </FormControl>
-      {errorMessage[`[${i}].AllergyRemarks`] ? (
-        <ErrorMessage visible message={errorMessage[`[${i}].AllergyRemarks`]} />
-      ) : (
-        <></>
-      )}
+          {isShown() ? (
+            <>
+              <FormControl
+                w="80%"
+                mt="5"
+                isRequired
+                isInvalid={[`[${i}].AllergyReactionListID`] in errorMessage}
+              >
+                <FormControl.Label _text={styles.text}>
+                  Reaction
+                </FormControl.Label>
+                <Select
+                  accessibilityLabel="Select Reaction"
+                  borderRadius="25"
+                  fontFamily={
+                    Platform.OS === 'ios' ? typography.ios : typography.android
+                  }
+                  height="50"
+                  minWidth="full"
+                  minHeight="3%"
+                  placeholderTextColor={colors.medium}
+                  size="18"
+                  placeholder={'Select Allergy Reaction'}
+                  selectedValue={allergy.AllergyReactionListID}
+                  onValueChange={handleFormData(
+                    page,
+                    'AllergyReactionListID',
+                    i,
+                  )}
+                >
+                  {listOfAllergyReactions.map((item, index) => (
+                    <Select.Item
+                      key={index}
+                      label={item.value}
+                      value={item.list_AllergyReactionID}
+                    />
+                  ))}
+                </Select>
+
+                <FormControl.ErrorMessage>
+                  {errorMessage[`[${i}].AllergyReactionListID`]}
+                </FormControl.ErrorMessage>
+              </FormControl>
+
+              <FormControl
+                w="80%"
+                mt="5 "
+                isRequired
+                isInvalid={[`[${i}].AllergyRemarks`] in errorMessage}
+              >
+                <FormControl.Label _text={styles.text}>
+                  Remarks
+                </FormControl.Label>
+                <TextArea
+                  borderRadius="25"
+                  fontFamily={
+                    Platform.OS === 'ios' ? typography.ios : typography.android
+                  }
+                  height="50"
+                  minWidth="full"
+                  minHeight="3%"
+                  placeholderTextColor={colors.medium}
+                  size="18"
+                  placeholder={'Remarks'}
+                  value={allergy.AllergyRemarks}
+                  onChangeText={handleFormData(page, 'AllergyRemarks', i)}
+                />
+                <FormControl.ErrorMessage>
+                  {errorMessage[`[${i}].AllergyRemarks`]}
+                </FormControl.ErrorMessage>
+              </FormControl>
+            </>
+          ) : (
+            <></>
+          )}
+        </Center>
+      </VStack>
     </Box>
   );
 }
+
+const styles = StyleSheet.create({
+  text: {
+    fontWeight: 'bold',
+    fontFamily: `${
+      Platform.OS === 'ios' ? typography.ios : typography.android
+    }`,
+  },
+});
 
 export default AddPatientAllergy;
