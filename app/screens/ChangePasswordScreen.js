@@ -122,7 +122,7 @@ function ChangePasswordScreen(props) {
             onChangeText={handleNewPassword}
             placeholder="Enter New Password"
             ErrorMessage={errors.newPassword}
-            HelperText="Password must contain one uppercase, one lowercase and one alphanumeric."
+            HelperText="Password must contain one uppercase, one lowercase and one non-alphanumeric."
             InputRightElement={
               <Icon
                 as={
