@@ -1,15 +1,14 @@
-/* eslint-disable */
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import colors from '../config/colors';
+import colors from 'app/config/colors';
 // Import Constants
-import routes from './routes';
-import DashboardNavigator from './DashboardNavigator';
-import PatientsNavigator from './PatientsNavigator';
-import ConfigNavigator from './ConfigNavigator';
-import AccountScreen from '../screens/AccountScreen';
-import NotificationNavigator from './NotificationNavigator';
+import routes from 'app/navigation/routes';
+import DashboardNavigator from 'app/navigation/DashboardNavigator';
+import PatientsNavigator from 'app/navigation/PatientsNavigator';
+import ConfigNavigator from 'app/navigation/ConfigNavigator';
+import AccountNavigator from 'app/navigation/AccountNavigator';
+import NotificationNavigator from 'app/navigation/NotificationNavigator';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
 // Refer to this doc: https://reactnavigation.org/docs/tab-based-navigation
@@ -96,9 +95,8 @@ function AppNavigator() {
       />
       <Tab.Screen
         name={routes.ACCOUNT}
-        component={AccountScreen}
+        component={AccountNavigator}
         options={{
-          headerShown: true,
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
               name="account-circle-outline"

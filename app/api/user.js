@@ -6,11 +6,12 @@ import client from 'app/api/client';
  */
 const endpoint = '/User';
 const userLogin = `${endpoint}/Login`;
-const userUpdate = `${endpoint}/Update`; //eslint-disable-line no-unused-vars
+const userUpdate = `${endpoint}/Update`;
 const userDelete = `${endpoint}/delete`; //eslint-disable-line no-unused-vars
 const userRefreshToken = `${endpoint}/RefereshToken`; //eslint-disable-line no-unused-vars
 const userLogout = `${endpoint}/Logout`; //eslint-disable-line no-unused-vars
 const userResetPassword = `${endpoint}/ResetPassword`;
+const userChangePassword = `${endpoint}/ChangePassword`;
 
 /*
  * List all functions here
@@ -18,6 +19,13 @@ const userResetPassword = `${endpoint}/ResetPassword`;
  */
 
 // **********************  GET REQUESTS *************************
+
+const getUser = async (userID) => {
+  const params = {
+    userID: userID,
+  };
+  return client.get(endpoint, params);
+};
 
 // **********************  POST REQUESTS *************************
 const loginUser = (Email, Role, Password) => {
@@ -34,7 +42,37 @@ const resetPassword = (Email, Role) => {
   return client.post(userResetPassword, body);
 };
 
+const changePassword = (Email, OldPassword, NewPassword) => {
+  const body = JSON.stringify({ Email, OldPassword, NewPassword });
+
+  // Note: client.post accepts 3 parameters. (1) endpoint (2) data and (3) onUploadProgress -- this is optional
+  return client.post(userChangePassword, body);
+};
+
 // ************************* UPDATE REQUESTS *************************
+const updateUser = async (data, profilePicture) => {
+  const formData = new FormData();
+
+  for (const key in data) {
+    var value = data[key];
+    formData.append(key, value);
+  }
+
+  const fileName = profilePicture.split('/').pop();
+  const fileType = fileName.split('.').pop();
+
+  formData.append('uploadProfilePicture', {
+    uri: profilePicture,
+    name: fileName,
+    type: `image/${fileType}`,
+  });
+
+  const headers = { 'Content-Type': 'multipart/form-data' };
+
+  // console.log('formData', formData);
+
+  return client.put(userUpdate, formData, { headers });
+};
 
 /*
  * Expose your end points here
@@ -42,4 +80,7 @@ const resetPassword = (Email, Role) => {
 export default {
   loginUser,
   resetPassword,
+  getUser,
+  updateUser,
+  changePassword,
 };

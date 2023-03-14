@@ -14,6 +14,8 @@ function CustomFormControl(props) {
     placeholder,
     HelperText,
     ErrorMessage,
+    InputRightElement,
+    type,
   } = props;
   return (
     <FormControl
@@ -43,11 +45,11 @@ function CustomFormControl(props) {
           placeholder={placeholder}
           size="18"
           w="100%"
+          InputRightElement={InputRightElement}
+          type={type}
         />
-
-        <FormControl.HelperText>{HelperText}</FormControl.HelperText>
-
         <FormControl.ErrorMessage>{ErrorMessage}</FormControl.ErrorMessage>
+        <FormControl.HelperText>{HelperText}</FormControl.HelperText>
       </VStack>
     </FormControl>
   );
