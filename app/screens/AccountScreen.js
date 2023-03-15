@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { ActivityIndicator } from 'react-native';
+// import { ActivityIndicator } from 'react-native';
 import React, { useContext } from 'react';
 import { VStack, View, Box } from 'native-base';
 import AuthContext from 'app/auth/context';
@@ -13,6 +13,7 @@ import userApi from 'app/api/user';
 import useCheckExpiredThenLogOut from 'app/hooks/useCheckExpiredThenLogOut';
 import { useFocusEffect } from '@react-navigation/native';
 import colors from 'app/config/colors';
+import ActivityIndicator from 'app/components/ActivityIndicator';
 
 function AccountScreen(props) {
   const [isLoading, setIsLoading] = useState(false);
@@ -55,7 +56,7 @@ function AccountScreen(props) {
   return (
     <>
       {isLoading ? (
-        <ActivityIndicator color={colors.primary_overlay_color} />
+        <ActivityIndicator visible />
       ) : (
         <VStack w="100%" h="100%" alignItems="center">
           <AccountDetailCard userProfile={user} navigation={navigation} />
