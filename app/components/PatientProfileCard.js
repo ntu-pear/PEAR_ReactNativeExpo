@@ -1,30 +1,20 @@
 import React from 'react';
-import { TouchableOpacity, Platform } from 'react-native';
-import { Box, Icon, Text } from 'native-base';
+import { TouchableOpacity, Platform, View, StyleSheet } from 'react-native';
+import { Box, Text } from 'native-base';
 import colors from 'app/config/colors';
 import { useNavigate } from 'react-router-dom';
 
 function PatientProfileCard(props) {
-  const {
-    iconTop,
-    iconRight,
-    iconSize,
-    vectorIconComponent,
-    textMarginTop,
-    textMarginLeft,
-    text,
-    navigation,
-    routes,
-    patientProfile,
-  } = props;
+  const { vectorIconComponent, text, navigation, routes, patientProfile } =
+    props;
 
   // useNavigate() hook cannot work on mobile
-  const navigate = Platform.OS === 'web' ? useNavigate() : null;
+  // const navigate = Platform.OS === 'web' ? useNavigate() : null;
 
   const handleOnPressToNextScreen = () => {
     if (Platform.OS === 'web') {
       // TODO: (yapsiang) link to next screen via routes
-      console.log('route to: ' + '/' + routes);
+      // console.log('route to: ' + '/' + routes);
       // navigate('/' + routes, { state: { ...patientProfile }});
     } else {
       navigation.push(routes, { ...patientProfile });
@@ -33,37 +23,41 @@ function PatientProfileCard(props) {
 
   return (
     <TouchableOpacity onPress={handleOnPressToNextScreen}>
-      <Box
-        alignItems="center"
-        rounded="lg"
-        minW="40"
-        minH="40"
-        mt="5"
-        borderWidth="1"
-        borderColor={colors.primary_gray}
-      >
-        <Box alignItems="center">
-          <Icon
-            // Reference: Passing component to child
-            // https://stackoverflow.com/questions/39652686/pass-react-component-as-props
-            as={{ ...vectorIconComponent }}
-            top={iconTop}
-            right={iconRight}
-            color={colors.black_var1}
-            size={iconSize}
-          />
+      <Box alignItems="center" rounded="lg" w="110" h="90">
+        <Box
+          alignItems="center"
+          justifyContent="center"
+          rounded="xl"
+          w="55"
+          h="55"
+          borderWidth="1"
+          // borderColor={colors.primary_gray}
+          borderColor={colors.pink}
+        >
+          {vectorIconComponent}
+        </Box>
+        <View style={styles.container}>
           <Text
-            fontSize="lg"
-            mt={textMarginTop}
-            ml={textMarginLeft}
+            fontSize="xs"
+            mt="2"
             color={colors.black_var1}
+            textAlign="center"
+            lineHeight="xs"
+            flex="1"
+            flexWrap="wrap"
           >
             {text}
           </Text>
-        </Box>
+        </View>
       </Box>
     </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+  },
+});
 
 export default PatientProfileCard;

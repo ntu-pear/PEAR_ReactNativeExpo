@@ -4,8 +4,15 @@ import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { Text, Box, VStack, HStack, Avatar } from 'native-base';
 import colors from 'app/config/colors';
 import typography from 'app/config/typography';
+import routes from 'app/navigation/routes';
 
-function HighlightsCard({ item }) {
+function HighlightsCard({ item, navigation }) {
+  const goToPatientProfile = () => {
+    navigation.navigate(routes.PATIENT_PROFILE, {
+      id: item.patientInfo.patientId,
+    });
+  };
+
   const getDescription = (element) => {
     let desc;
     // TODO: Highlight description is the value in highlightJson which is not captured in BE yet
@@ -103,7 +110,7 @@ function HighlightsCard({ item }) {
   };
 
   return (
-    <TouchableOpacity testID="highlightsCard">
+    <TouchableOpacity testID="highlightsCard" onPress={goToPatientProfile}>
       <Box
         w="100%"
         borderWidth="1"

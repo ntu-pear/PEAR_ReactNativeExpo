@@ -1,9 +1,10 @@
 import React from 'react';
-import { Center, VStack, ScrollView, Stack, Divider } from 'native-base';
+import { Center, VStack, HStack, ScrollView, View } from 'native-base';
 import {
   MaterialCommunityIcons,
   MaterialIcons,
   FontAwesome5,
+  Ionicons,
 } from '@expo/vector-icons';
 import PatientInformationCard from 'app/components/PatientInformationCard';
 import colors from 'app/config/colors';
@@ -12,158 +13,172 @@ import routes from 'app/navigation/routes';
 
 function PatientProfileScreen(props) {
   const { navigation, route } = props;
-  const patientProfile = route.params;
+  // const patientProfile = route.params;
+  const patientProfile = {
+    patientID: 1,
+    preferredLanguage: 'Cantonese',
+    firstName: 'Alice',
+    lastName: 'Lee',
+    nric: 'Sxxxx922I',
+    address: '73 Kampong Bahru Road 169373, Singapore',
+    tempAddress: null,
+    homeNo: '65123456',
+    handphoneNo: '61234564',
+    gender: 'F',
+    dob: '1937-09-12T00:00:00',
+    preferredName: 'Alice',
+    privacyLevel: 2,
+    updateBit: true,
+    autoGame: true,
+    startDate: '2020-05-04T00:00:00',
+    endDate: null,
+    terminationReason: null,
+    isActive: true,
+    inactiveReason: null,
+    inactiveDate: null,
+    isRespiteCare: true,
+    profilePicture:
+      'https://res.cloudinary.com/dbpearfyp/image/upload/v1640487405/Patient/Alice_Lee_Sxxxx567D/ProfilePicture/zsw7dyprsvn0bjmatofg.jpg',
+  };
   //   const handleProfileButton = () => {
   //     console.log("tesitn profile");
   //     console.log(patientProfile);
   //   };
 
   return (
-    <Center minH="100%" backgroundColor={colors.white_var1}>
-      <ScrollView>
-        <VStack ml="2" mr="2">
-          <PatientInformationCard
-            patientProfile={patientProfile}
-            navigation={navigation}
-          />
+    <Center backgroundColor={colors.white_var1}>
+      <ScrollView w="100%">
+        {/* mt="5" */}
+        <VStack justifyContent="center" alignItems="center" mb="5" w="100%">
+          <View w="100%">
+            <PatientInformationCard
+              patientProfile={patientProfile}
+              navigation={navigation}
+              w="100%"
+            />
+          </View>
 
-          <Divider />
-          <VStack
-            /* Reponsive design: https://docs.nativebase.io/responsive
-          Note: These are the breakpoints
-          breakpoints = {
-            base: 0,
-            sm: 480,
-            md: 768,
-            lg: 992,
-            xl: 1280,
-            };
-          */
-            ml={{
-              base: '3',
-              sm: '15',
-              md: '15',
-              lg: '15',
-            }}
-            mt="2"
-            mb="4"
-          >
-            <Stack direction="row" mb="2.5" mt="1.5" space={4} flexWrap="wrap">
+          <VStack space={2} ml="3%" mr="3%" mt="6">
+            <HStack space={2} w="100%">
               <PatientProfileCard
-                iconTop="4"
-                iconRight="2"
-                iconSize="100"
-                vectorIconComponent={<MaterialCommunityIcons name="allergy" />}
-                textMarginTop="5"
-                textMarginLeft="1"
+                vectorIconComponent={
+                  <MaterialCommunityIcons
+                    name="allergy"
+                    size={30}
+                    color={colors.pink}
+                  />
+                }
                 text="Allergy"
                 navigation={navigation}
                 routes={routes.PATIENT_ALLERGY}
                 patientProfile={patientProfile}
               />
               <PatientProfileCard
-                iconTop="4"
-                iconRight="0"
-                iconSize="100"
-                vectorIconComponent={<FontAwesome5 name="heartbeat" />}
-                textMarginTop="5"
-                textMarginLeft="1"
+                vectorIconComponent={
+                  <MaterialCommunityIcons
+                    name="heart-pulse"
+                    size={30}
+                    color={colors.pink}
+                  />
+                }
                 text="Vital"
                 navigation={navigation}
                 routes={routes.PATIENT_VITAL}
                 patientProfile={patientProfile}
               />
               <PatientProfileCard
-                iconTop="4"
-                iconRight="0"
-                iconSize="100"
-                vectorIconComponent={<FontAwesome5 name="smile-beam" />}
-                textMarginTop="5"
-                textMarginLeft="1"
+                vectorIconComponent={
+                  <FontAwesome5 name="pills" size={30} color={colors.pink} />
+                }
+                text="Prescription"
+                navigation={navigation}
+                routes={routes.PATIENT_PRESCRIPTION}
+                patientProfile={patientProfile}
+              />
+            </HStack>
+            <HStack space={2} w="100%">
+              <PatientProfileCard
+                vectorIconComponent={
+                  <FontAwesome5
+                    name="exclamation-triangle"
+                    size={28}
+                    color={colors.pink}
+                  />
+                }
+                text="Problem Log"
+                navigation={navigation}
+                routes={routes.PATIENT_PROBLEM_LOG}
+                patientProfile={patientProfile}
+              />
+              <PatientProfileCard
+                vectorIconComponent={
+                  <MaterialCommunityIcons
+                    name="clipboard-text"
+                    size={30}
+                    color={colors.pink}
+                  />
+                }
+                text="Medical History"
+                navigation={navigation}
+                routes={routes.PATIENT_ACTIVITY_PREFERENCE}
+                patientProfile={patientProfile}
+              />
+              <PatientProfileCard
+                vectorIconComponent={
+                  <FontAwesome5
+                    name="calendar-day"
+                    size={30}
+                    color={colors.pink}
+                  />
+                }
+                text="Activity"
+                navigation={navigation}
+                routes={routes.PATIENT_ROUTINE}
+                patientProfile={patientProfile}
+              />
+            </HStack>
+            <HStack space={2} w="100%">
+              <PatientProfileCard
+                vectorIconComponent={
+                  <MaterialCommunityIcons
+                    name="emoticon-happy"
+                    size={30}
+                    color={colors.pink}
+                  />
+                }
                 text="Patient Preference"
                 navigation={navigation}
                 routes={routes.PATIENT_PREFERENCE}
                 patientProfile={patientProfile}
               />
               <PatientProfileCard
-                iconTop="4"
-                iconRight="-15"
-                iconSize="100"
-                vectorIconComponent={<FontAwesome5 name="clipboard-check" />}
-                textMarginTop="5"
-                textMarginLeft="1"
-                text="Activity Preference"
-                navigation={navigation}
-                routes={routes.PATIENT_ACTIVITY_PREFERENCE}
-                patientProfile={patientProfile}
-              />
-              <PatientProfileCard
-                iconTop="4"
-                iconRight="-10"
-                iconSize="100"
-                vectorIconComponent={<FontAwesome5 name="calendar-day" />}
-                textMarginTop="5"
-                textMarginLeft="1"
-                text="Routine"
-                navigation={navigation}
-                routes={routes.PATIENT_ROUTINE}
-                patientProfile={patientProfile}
-              />
-              <PatientProfileCard
-                iconTop="4"
-                iconRight="-0"
-                iconSize="100"
-                vectorIconComponent={<MaterialIcons name="insert-photo" />}
-                textMarginTop="5"
-                textMarginLeft="1"
+                vectorIconComponent={
+                  <MaterialIcons
+                    name="insert-photo"
+                    size={30}
+                    color={colors.pink}
+                  />
+                }
                 text="Photo Album"
                 navigation={navigation}
                 routes={routes.PATIENT_PHOTO_ALBUM}
                 patientProfile={patientProfile}
               />
               <PatientProfileCard
-                iconTop="4"
-                iconRight="-2"
-                iconSize="100"
-                vectorIconComponent={<MaterialCommunityIcons name="pill" />}
-                textMarginTop="5"
-                textMarginLeft="1"
-                text="Prescription"
-                navigation={navigation}
-                routes={routes.PATIENT_PRESCRIPTION}
-                patientProfile={patientProfile}
-              />
-              <PatientProfileCard
-                iconTop="4"
-                iconRight="1"
-                iconSize="100"
                 vectorIconComponent={
-                  <MaterialCommunityIcons name="umbrella-beach" />
+                  <MaterialCommunityIcons
+                    name="umbrella-beach"
+                    size={30}
+                    color={colors.pink}
+                  />
                 }
-                textMarginTop="5"
-                textMarginLeft="1"
                 text="Holiday"
                 navigation={navigation}
                 routes={routes.PATIENT_HOLIDAY}
                 patientProfile={patientProfile}
               />
-              <PatientProfileCard
-                iconTop="4"
-                iconRight="-2"
-                iconSize="100"
-                vectorIconComponent={
-                  <MaterialCommunityIcons name="note-text-outline" />
-                }
-                textMarginTop="5"
-                textMarginLeft="1"
-                text="Problem Log"
-                navigation={navigation}
-                routes={routes.PATIENT_PROBLEM_LOG}
-                patientProfile={patientProfile}
-              />
-            </Stack>
+            </HStack>
           </VStack>
-          <Divider />
         </VStack>
       </ScrollView>
     </Center>

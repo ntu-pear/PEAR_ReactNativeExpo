@@ -11,6 +11,7 @@ function DashboardScreen(props) {
       <PatientDailyHighlights
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
+        navigation={navigation}
       />
       <Pressable
         style={[styles.button, styles.buttonOpen]}

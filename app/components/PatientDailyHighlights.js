@@ -12,7 +12,7 @@ import colors from 'app/config/colors';
 
 function PatientDailyHighlights(props) {
   // Destructure props
-  const { modalVisible, setModalVisible } = props;
+  const { modalVisible, setModalVisible, navigation } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [statusCode, setStatusCode] = useState();
@@ -276,7 +276,7 @@ function PatientDailyHighlights(props) {
                * Ref: https://stackoverflow.com/questions/70545275/react-native-swipeable-gesture-not-working-on-android
                */
               <GestureHandlerRootView>
-                <HighlightsCard item={item} />
+                <HighlightsCard item={item} navigation={navigation} />
               </GestureHandlerRootView>
             )}
             testID="flatList"

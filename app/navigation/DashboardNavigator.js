@@ -1,6 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import DashboardScreen from 'app/screens/DashboardScreen';
+import PatientProfile from 'app/screens/PatientProfileScreen';
 
 // Import Constants from Routes
 import routes from 'app/navigation/routes';
@@ -15,6 +16,15 @@ function DashboardNavigator() {
       <Stack.Screen
         name={routes.DASHBOARD_SCREEN}
         component={DashboardScreen}
+      />
+      <Stack.Screen
+        name={routes.PATIENT_PROFILE}
+        component={PatientProfile}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Patient Profile',
+        }}
       />
     </Stack.Navigator>
   );
