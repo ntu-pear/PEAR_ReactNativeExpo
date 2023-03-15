@@ -82,7 +82,7 @@ function PatientsScreen(props) {
     setOriginalListOfPatients(response.data.data);
     setListOfPatients(response.data.data);
     setIsLoading(false);
-    return response;
+    return response.data;
   };
 
   const [originalListOfPatients, setOriginalListOfPatients] = useState([]);
