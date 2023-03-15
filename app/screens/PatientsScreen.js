@@ -197,7 +197,7 @@ function PatientsScreen(props) {
               </View>
               </HStack>
               
-          <ScrollView w="100%" height="100%">
+          <ScrollView w="100%" height="93%">
             <VStack>
               {filteredList && filteredList.length > 0 
                 ? filteredList.map((item, index) => (
@@ -210,7 +210,7 @@ function PatientsScreen(props) {
                 : null}
             </VStack>
           </ScrollView>
-          <Center position="absolute" right="5" bottom="5%">
+          <Center position="absolute" right="5" bottom="2%">
             <Fab
               backgroundColor={colors.pink}
               icon={
