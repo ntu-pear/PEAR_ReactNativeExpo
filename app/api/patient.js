@@ -17,9 +17,8 @@ const patientDelete = `${endpoint}/delete`; //eslint-disable-line no-unused-vars
 
 // **********************  GET REQUESTS *************************
 
-const getPatient = async (patientID, isActive, maskNRIC) => {
+const getPatient = async (patientID, maskNRIC) => {
   // Error Handling
-  isActive ? (isActive = true) : (isActive = false);
   maskNRIC ? (maskNRIC = true) : (maskNRIC = false);
 
   /*
@@ -36,7 +35,6 @@ const getPatient = async (patientID, isActive, maskNRIC) => {
   // if patientId is not specified
   else {
     params = {
-      isActive,
       maskNRIC,
     };
   }

@@ -34,31 +34,30 @@ function PatientInformationCard(props) {
   const calcAge = (dob) => {
     const today = new Date().getFullYear();
     const _dob = new Date(dob).getFullYear();
-    // return today - _dob;
-    return 86;
+    return today - _dob;
   };
 
   const extractFullYear = (dob) => {
     const _date = new Date(dob);
-    // return `${_date.getDate()}-${_date.getMonth()}-${_date.getFullYear()}`;
-    return '12-8-1937';
+    return `${_date.getDate()}-${_date.getMonth()}-${_date.getFullYear()}`;
   };
 
   return (
-    <TouchableOpacity onPress={handleOnPress}>
+    <TouchableOpacity
+      onPress={handleOnPress}
+      style={Platform.OS === 'web' ? { flex: 2 } : null}
+    >
       <Box
         overflow="visible"
-        // rounded="lg"
         backgroundColor={colors.green}
         borderColor={colors.primary_gray}
-        // borderWidth="1"
         borderBottomWidth="3"
         style={styles.container}
       >
         <VStack space={4} justifyContent="center" mb="5" mt="5" flex="1">
-          <HStack space={12} justifyContent="center">
+          <HStack space={10} justifyContent="center">
             <Avatar
-              size="2xl"
+              size={Platform.OS === 'web' ? '28vh' : '2xl'}
               bg={colors.pink}
               marginY="auto"
               source={{

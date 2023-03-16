@@ -490,7 +490,7 @@ function PatientsScreenWeb(props) {
         </View>
       ) : (
         <HStack
-          w={sidebar ? '83vw' : '98vw'}
+          w={sidebar ? '85vw' : '100vw'}
           style={{ display: 'flex', flexDirection: 'row' }}
         >
           {/* PatientScreen */}
@@ -531,19 +531,29 @@ function PatientsScreenWeb(props) {
 
           {/* PatientProfileScreen */}
           {/*
-          This is exactly the same as PatientProfileScreen (mobile) except that it has flex 4 and
-          uses HStack instead of VStack
+          This is exactly the same as PatientProfileScreen (mobile) except that it has flex 4,
+          uses HStack instead of VStack and uses flex for styles.
            */}
-          <Center backgroundColor={colors.white_var1} style={{ flex: 4 }}>
-            <ScrollView w="100%">
-              {/* mt="5" */}
+          <Center
+            backgroundColor={colors.white_var1}
+            style={{ flex: 4, borderLeftWidth: 1 }}
+          >
+            <ScrollView
+              w="100%"
+              contentContainerStyle={{
+                flexGrow: 1,
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
               <VStack
                 justifyContent="center"
                 alignItems="center"
                 mb="5"
                 w="100%"
+                style={{ flex: 1 }}
               >
-                <View w="100%">
+                <View w="100%" style={{ flex: 2 }}>
                   <PatientInformationCard
                     patientProfile={clickedPatientProfile}
                     navigation={navigation}
@@ -551,8 +561,14 @@ function PatientsScreenWeb(props) {
                   />
                 </View>
 
-                <HStack space={2} ml="3%" mr="3%" mt="6">
-                  <HStack space={2}>
+                <HStack
+                  space={sidebar ? 0 : 2}
+                  ml="3%"
+                  mr="3%"
+                  mt="6"
+                  style={{ flex: 1 }}
+                >
+                  <HStack space={sidebar ? 0 : 2}>
                     <PatientProfileCard
                       vectorIconComponent={
                         <MaterialCommunityIcons
@@ -593,7 +609,7 @@ function PatientsScreenWeb(props) {
                       patientProfile={clickedPatientProfile}
                     />
                   </HStack>
-                  <HStack space={2}>
+                  <HStack space={sidebar ? 0 : 2}>
                     <PatientProfileCard
                       vectorIconComponent={
                         <FontAwesome5
@@ -634,7 +650,7 @@ function PatientsScreenWeb(props) {
                       patientProfile={clickedPatientProfile}
                     />
                   </HStack>
-                  <HStack space={2}>
+                  <HStack space={sidebar ? 0 : 2}>
                     <PatientProfileCard
                       vectorIconComponent={
                         <MaterialCommunityIcons

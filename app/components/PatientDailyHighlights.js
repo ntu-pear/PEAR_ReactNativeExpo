@@ -276,7 +276,11 @@ function PatientDailyHighlights(props) {
                * Ref: https://stackoverflow.com/questions/70545275/react-native-swipeable-gesture-not-working-on-android
                */
               <GestureHandlerRootView>
-                <HighlightsCard item={item} navigation={navigation} />
+                <HighlightsCard
+                  item={item}
+                  navigation={navigation}
+                  setModalVisible={setModalVisible}
+                />
               </GestureHandlerRootView>
             )}
             testID="flatList"

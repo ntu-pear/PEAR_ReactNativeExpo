@@ -6,10 +6,12 @@ import colors from 'app/config/colors';
 import typography from 'app/config/typography';
 import routes from 'app/navigation/routes';
 
-function HighlightsCard({ item, navigation }) {
+function HighlightsCard({ item, navigation, setModalVisible }) {
   const goToPatientProfile = () => {
-    navigation.navigate(routes.PATIENT_PROFILE, {
+    setModalVisible(false);
+    navigation.push(routes.PATIENT_PROFILE, {
       id: item.patientInfo.patientId,
+      patientProfile: null,
     });
   };
 
