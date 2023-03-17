@@ -1,5 +1,4 @@
 import React from 'react';
-import { useState } from 'react';
 import { Platform } from 'react-native';
 import {
   Image,
@@ -58,6 +57,7 @@ function AccountDetailScreen(props) {
               }}
               size="lg"
               onPress={handleOnPress}
+              testID="iconButton"
             />
           </HStack>
         </Center>
