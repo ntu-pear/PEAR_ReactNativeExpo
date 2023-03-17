@@ -1,0 +1,1651 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Test Update Profile Information Edit account screen snapshot should match 1`] = `
+<RNCSafeAreaProvider
+  onInsetsChange={[Function]}
+  style={
+    [
+      {
+        "flex": 1,
+      },
+      undefined,
+    ]
+  }
+>
+  <RCTScrollView
+    contentContainerStyle={
+      [
+        {},
+        {
+          "dataSet": {},
+        },
+        {},
+      ]
+    }
+    dataSet={{}}
+    style={{}}
+  >
+    <View>
+      <View
+        dataSet={{}}
+        style={
+          {
+            "marginLeft": 16,
+            "marginTop": 16,
+          }
+        }
+      >
+        <View
+          dataSet={{}}
+          style={
+            {
+              "alignItems": "center",
+              "display": "flex",
+              "justifyContent": "center",
+            }
+          }
+        >
+          <View
+            dataSet={{}}
+            style={
+              {
+                "flexDirection": "row",
+              }
+            }
+          >
+            <View
+              dataSet={{}}
+              style={
+                {
+                  "alignItems": "center",
+                  "display": "flex",
+                  "justifyContent": "center",
+                }
+              }
+            >
+              <View
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "opacity": 1,
+                  }
+                }
+              >
+                <View
+                  dataSet={{}}
+                  style={
+                    [
+                      {
+                        "alignSelf": "center",
+                        "marginBottom": 8,
+                        "width": "70%",
+                      },
+                      {
+                        "aspectRatio": 1,
+                        "style": undefined,
+                      },
+                    ]
+                  }
+                >
+                  <Image
+                    accessibilityLabel="user_image"
+                    alt="user_image"
+                    dataSet={{}}
+                    onError={[Function]}
+                    resizeMode="cover"
+                    source={
+                      {
+                        "uri": "https://res.cloudinary.com/dbpearfyp/image/upload/v1678789617/User/Jessica_Sim_Sxxxx781F/ProfilePicture/dvkpw0gsx8duekke7arq.png",
+                      }
+                    }
+                    style={
+                      [
+                        {
+                          "borderRadius": 9999,
+                          "maxWidth": "100%",
+                        },
+                        {
+                          "bottom": 0,
+                          "left": 0,
+                          "position": "absolute",
+                          "right": 0,
+                          "top": 0,
+                        },
+                      ]
+                    }
+                  />
+                </View>
+                <Text
+                  dataSet={{}}
+                  style={
+                    {
+                      "backgroundColor": undefined,
+                      "color": "#FD4734",
+                      "fontFamily": undefined,
+                      "fontSize": 14,
+                      "fontStyle": "normal",
+                      "fontWeight": "400",
+                      "letterSpacing": 0,
+                      "lineHeight": 21,
+                      "textDecorationLine": undefined,
+                    }
+                  }
+                >
+                   Click to edit profile picture
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+        <View
+          dataSet={{}}
+          style={{}}
+        />
+        <View
+          dataSet={{}}
+          style={
+            {
+              "width": "100%",
+            }
+          }
+        >
+          <View
+            dataSet={{}}
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+              }
+            }
+          >
+            <View
+              dataSet={{}}
+              feedbackId="field-1-feedback"
+              hasFeedbackText={false}
+              hasHelpText={false}
+              helpTextId="field-1-helptext"
+              isDisabled={false}
+              isInvalid={false}
+              isReadOnly={false}
+              isRequired={false}
+              labelId="field-1-label"
+              nativeID="field-1-label"
+              setHasFeedbackText={[Function]}
+              setHasHelpText={[Function]}
+              style={
+                {
+                  "flexDirection": "row",
+                  "justifyContent": "flex-start",
+                  "marginBottom": 4,
+                  "marginTop": 4,
+                }
+              }
+            >
+              <Text
+                dataSet={{}}
+                style={
+                  {
+                    "backgroundColor": undefined,
+                    "color": "#737373",
+                    "fontFamily": "Helvetica",
+                    "fontSize": 18,
+                    "fontStyle": "normal",
+                    "fontWeight": "200",
+                    "letterSpacing": 0,
+                    "lineHeight": 27,
+                    "textDecorationLine": undefined,
+                  }
+                }
+              >
+                First Name
+              </Text>
+            </View>
+            <View
+              dataSet={{}}
+              style={
+                {
+                  "width": 8,
+                }
+              }
+            />
+            <View
+              dataSet={{}}
+              isFocused={false}
+              style={
+                {
+                  "alignItems": "center",
+                  "borderColor": "#d4d4d4",
+                  "borderRadius": 4,
+                  "borderWidth": 0,
+                  "flexDirection": "row",
+                  "overflow": "hidden",
+                  "width": "100%",
+                }
+              }
+            >
+              <TextInput
+                accessibilityReadOnly={true}
+                accessible={true}
+                dataSet={{}}
+                disabled={false}
+                editable={false}
+                isRequired={false}
+                nativeID="field-1-input"
+                onBlur={[Function]}
+                onFocus={[Function]}
+                onKeyPress={[Function]}
+                placeholderTextColor="#a3a3a3"
+                readOnly={true}
+                required={false}
+                secureTextEntry={false}
+                style={
+                  {
+                    "backgroundColor": "transparent",
+                    "color": "#484848",
+                    "flex": 1,
+                    "fontFamily": "Helvetica",
+                    "fontSize": 18,
+                    "fontStyle": "normal",
+                    "fontWeight": "400",
+                    "height": "100%",
+                    "paddingBottom": 8,
+                    "paddingLeft": 12,
+                    "paddingRight": 12,
+                    "paddingTop": 8,
+                    "width": "100%",
+                  }
+                }
+                value="Jessica"
+              />
+            </View>
+          </View>
+        </View>
+        <View
+          dataSet={{}}
+          style={{}}
+        />
+        <View
+          dataSet={{}}
+          style={
+            {
+              "width": "100%",
+            }
+          }
+        >
+          <View
+            dataSet={{}}
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+              }
+            }
+          >
+            <View
+              dataSet={{}}
+              feedbackId="field-2-feedback"
+              hasFeedbackText={false}
+              hasHelpText={false}
+              helpTextId="field-2-helptext"
+              isDisabled={false}
+              isInvalid={false}
+              isReadOnly={false}
+              isRequired={false}
+              labelId="field-2-label"
+              nativeID="field-2-label"
+              setHasFeedbackText={[Function]}
+              setHasHelpText={[Function]}
+              style={
+                {
+                  "flexDirection": "row",
+                  "justifyContent": "flex-start",
+                  "marginBottom": 4,
+                  "marginTop": 4,
+                }
+              }
+            >
+              <Text
+                dataSet={{}}
+                style={
+                  {
+                    "backgroundColor": undefined,
+                    "color": "#737373",
+                    "fontFamily": "Helvetica",
+                    "fontSize": 18,
+                    "fontStyle": "normal",
+                    "fontWeight": "200",
+                    "letterSpacing": 0,
+                    "lineHeight": 27,
+                    "textDecorationLine": undefined,
+                  }
+                }
+              >
+                Last Name
+              </Text>
+            </View>
+            <View
+              dataSet={{}}
+              style={
+                {
+                  "width": 8,
+                }
+              }
+            />
+            <View
+              dataSet={{}}
+              isFocused={false}
+              style={
+                {
+                  "alignItems": "center",
+                  "borderColor": "#d4d4d4",
+                  "borderRadius": 4,
+                  "borderWidth": 0,
+                  "flexDirection": "row",
+                  "overflow": "hidden",
+                  "width": "100%",
+                }
+              }
+            >
+              <TextInput
+                accessibilityReadOnly={true}
+                accessible={true}
+                dataSet={{}}
+                disabled={false}
+                editable={false}
+                isRequired={false}
+                nativeID="field-2-input"
+                onBlur={[Function]}
+                onFocus={[Function]}
+                onKeyPress={[Function]}
+                placeholderTextColor="#a3a3a3"
+                readOnly={true}
+                required={false}
+                secureTextEntry={false}
+                style={
+                  {
+                    "backgroundColor": "transparent",
+                    "color": "#484848",
+                    "flex": 1,
+                    "fontFamily": "Helvetica",
+                    "fontSize": 18,
+                    "fontStyle": "normal",
+                    "fontWeight": "400",
+                    "height": "100%",
+                    "paddingBottom": 8,
+                    "paddingLeft": 12,
+                    "paddingRight": 12,
+                    "paddingTop": 8,
+                    "width": "100%",
+                  }
+                }
+                value="Sim"
+              />
+            </View>
+          </View>
+        </View>
+        <View
+          dataSet={{}}
+          style={{}}
+        />
+        <View
+          dataSet={{}}
+          style={
+            {
+              "width": "100%",
+            }
+          }
+        >
+          <View
+            dataSet={{}}
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+              }
+            }
+          >
+            <View
+              dataSet={{}}
+              feedbackId="field-3-feedback"
+              hasFeedbackText={false}
+              hasHelpText={false}
+              helpTextId="field-3-helptext"
+              isDisabled={false}
+              isInvalid={false}
+              isReadOnly={false}
+              isRequired={false}
+              labelId="field-3-label"
+              nativeID="field-3-label"
+              setHasFeedbackText={[Function]}
+              setHasHelpText={[Function]}
+              style={
+                {
+                  "flexDirection": "row",
+                  "justifyContent": "flex-start",
+                  "marginBottom": 4,
+                  "marginTop": 4,
+                }
+              }
+            >
+              <Text
+                dataSet={{}}
+                style={
+                  {
+                    "backgroundColor": undefined,
+                    "color": "#737373",
+                    "fontFamily": "Helvetica",
+                    "fontSize": 18,
+                    "fontStyle": "normal",
+                    "fontWeight": "200",
+                    "letterSpacing": 0,
+                    "lineHeight": 27,
+                    "textDecorationLine": undefined,
+                  }
+                }
+              >
+                Role
+              </Text>
+            </View>
+            <View
+              dataSet={{}}
+              style={
+                {
+                  "width": 8,
+                }
+              }
+            />
+            <View
+              dataSet={{}}
+              isFocused={false}
+              style={
+                {
+                  "alignItems": "center",
+                  "borderColor": "#d4d4d4",
+                  "borderRadius": 4,
+                  "borderWidth": 0,
+                  "flexDirection": "row",
+                  "overflow": "hidden",
+                  "width": "100%",
+                }
+              }
+            >
+              <TextInput
+                accessibilityReadOnly={true}
+                accessible={true}
+                dataSet={{}}
+                disabled={false}
+                editable={false}
+                isRequired={false}
+                nativeID="field-3-input"
+                onBlur={[Function]}
+                onFocus={[Function]}
+                onKeyPress={[Function]}
+                placeholderTextColor="#a3a3a3"
+                readOnly={true}
+                required={false}
+                secureTextEntry={false}
+                style={
+                  {
+                    "backgroundColor": "transparent",
+                    "color": "#484848",
+                    "flex": 1,
+                    "fontFamily": "Helvetica",
+                    "fontSize": 18,
+                    "fontStyle": "normal",
+                    "fontWeight": "400",
+                    "height": "100%",
+                    "paddingBottom": 8,
+                    "paddingLeft": 12,
+                    "paddingRight": 12,
+                    "paddingTop": 8,
+                    "width": "100%",
+                  }
+                }
+                value="Supervisor"
+              />
+            </View>
+          </View>
+        </View>
+        <View
+          dataSet={{}}
+          style={{}}
+        />
+        <View
+          dataSet={{}}
+          isInvalid={false}
+          isRequired={true}
+          style={
+            {
+              "maxWidth": "60%",
+              "width": "100%",
+            }
+          }
+        >
+          <View
+            dataSet={{}}
+            style={{}}
+          >
+            <View
+              dataSet={{}}
+              style={
+                {
+                  "alignItems": "center",
+                  "flexDirection": "row",
+                }
+              }
+            >
+              <View
+                dataSet={{}}
+                feedbackId="field-11-feedback"
+                hasFeedbackText={true}
+                hasHelpText={false}
+                helpTextId="field-11-helptext"
+                isDisabled={false}
+                isInvalid={false}
+                isReadOnly={false}
+                isRequired={true}
+                labelId="field-11-label"
+                nativeID="field-11-label"
+                setHasFeedbackText={[Function]}
+                setHasHelpText={[Function]}
+                style={
+                  {
+                    "flexDirection": "row",
+                    "justifyContent": "flex-start",
+                    "marginBottom": 4,
+                    "marginTop": 4,
+                  }
+                }
+              >
+                <Text
+                  dataSet={{}}
+                  style={
+                    {
+                      "backgroundColor": undefined,
+                      "color": "#737373",
+                      "fontFamily": "Helvetica",
+                      "fontSize": 18,
+                      "fontStyle": "normal",
+                      "fontWeight": "200",
+                      "letterSpacing": 0,
+                      "lineHeight": 27,
+                      "textDecorationLine": undefined,
+                    }
+                  }
+                >
+                  Preferred Name
+                </Text>
+                <Text
+                  dataSet={{}}
+                  style={
+                    {
+                      "backgroundColor": undefined,
+                      "color": "#dc2626",
+                      "fontFamily": undefined,
+                      "fontSize": 14,
+                      "fontStyle": "normal",
+                      "fontWeight": "400",
+                      "letterSpacing": 0,
+                      "lineHeight": 21,
+                      "textDecorationLine": undefined,
+                    }
+                  }
+                >
+                  *
+                </Text>
+              </View>
+              <View
+                dataSet={{}}
+                style={
+                  {
+                    "width": 8,
+                  }
+                }
+              />
+              <View
+                dataSet={{}}
+                isFocused={false}
+                style={
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#ABABAB",
+                    "borderColor": "#d4d4d4",
+                    "borderRadius": 25,
+                    "borderWidth": 1,
+                    "flexDirection": "row",
+                    "height": 50,
+                    "marginTop": 4,
+                    "overflow": "hidden",
+                    "width": "100%",
+                  }
+                }
+              >
+                <TextInput
+                  accessibilityDescribedBy="field-11-feedback"
+                  accessibilityRequired={true}
+                  accessible={true}
+                  dataSet={{}}
+                  disabled={false}
+                  editable={true}
+                  isRequired={true}
+                  nativeID="field-11-input"
+                  onBlur={[Function]}
+                  onChangeText={[Function]}
+                  onFocus={[Function]}
+                  onKeyPress={[Function]}
+                  placeholder="Jess"
+                  placeholderTextColor="#a3a3a3"
+                  readOnly={false}
+                  required={true}
+                  secureTextEntry={false}
+                  style={
+                    {
+                      "backgroundColor": "transparent",
+                      "color": "#484848",
+                      "flex": 1,
+                      "fontFamily": "Helvetica",
+                      "fontSize": 18,
+                      "fontStyle": "normal",
+                      "fontWeight": "400",
+                      "height": "100%",
+                      "paddingBottom": 8,
+                      "paddingLeft": 12,
+                      "paddingRight": 12,
+                      "paddingTop": 8,
+                      "width": "100%",
+                    }
+                  }
+                  value="Jess"
+                />
+              </View>
+            </View>
+            <View
+              dataSet={{}}
+              style={{}}
+            />
+          </View>
+        </View>
+        <View
+          dataSet={{}}
+          style={{}}
+        />
+        <View
+          dataSet={{}}
+          isInvalid={false}
+          isRequired={true}
+          style={
+            {
+              "maxWidth": "60%",
+              "width": "100%",
+            }
+          }
+        >
+          <View
+            dataSet={{}}
+            style={{}}
+          >
+            <View
+              dataSet={{}}
+              style={
+                {
+                  "alignItems": "center",
+                  "flexDirection": "row",
+                }
+              }
+            >
+              <View
+                dataSet={{}}
+                feedbackId="field-12-feedback"
+                hasFeedbackText={true}
+                hasHelpText={false}
+                helpTextId="field-12-helptext"
+                isDisabled={false}
+                isInvalid={false}
+                isReadOnly={false}
+                isRequired={true}
+                labelId="field-12-label"
+                nativeID="field-12-label"
+                setHasFeedbackText={[Function]}
+                setHasHelpText={[Function]}
+                style={
+                  {
+                    "flexDirection": "row",
+                    "justifyContent": "flex-start",
+                    "marginBottom": 4,
+                    "marginTop": 4,
+                  }
+                }
+              >
+                <Text
+                  dataSet={{}}
+                  style={
+                    {
+                      "backgroundColor": undefined,
+                      "color": "#737373",
+                      "fontFamily": "Helvetica",
+                      "fontSize": 18,
+                      "fontStyle": "normal",
+                      "fontWeight": "200",
+                      "letterSpacing": 0,
+                      "lineHeight": 27,
+                      "textDecorationLine": undefined,
+                    }
+                  }
+                >
+                  Contact No.
+                </Text>
+                <Text
+                  dataSet={{}}
+                  style={
+                    {
+                      "backgroundColor": undefined,
+                      "color": "#dc2626",
+                      "fontFamily": undefined,
+                      "fontSize": 14,
+                      "fontStyle": "normal",
+                      "fontWeight": "400",
+                      "letterSpacing": 0,
+                      "lineHeight": 21,
+                      "textDecorationLine": undefined,
+                    }
+                  }
+                >
+                  *
+                </Text>
+              </View>
+              <View
+                dataSet={{}}
+                style={
+                  {
+                    "width": 8,
+                  }
+                }
+              />
+              <View
+                dataSet={{}}
+                isFocused={false}
+                style={
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#ABABAB",
+                    "borderColor": "#d4d4d4",
+                    "borderRadius": 25,
+                    "borderWidth": 1,
+                    "flexDirection": "row",
+                    "height": 50,
+                    "marginTop": 4,
+                    "overflow": "hidden",
+                    "width": "100%",
+                  }
+                }
+              >
+                <TextInput
+                  accessibilityDescribedBy="field-12-feedback"
+                  accessibilityRequired={true}
+                  accessible={true}
+                  dataSet={{}}
+                  disabled={false}
+                  editable={true}
+                  isRequired={true}
+                  nativeID="field-12-input"
+                  onBlur={[Function]}
+                  onChangeText={[Function]}
+                  onFocus={[Function]}
+                  onKeyPress={[Function]}
+                  placeholder="87654321"
+                  placeholderTextColor="#a3a3a3"
+                  readOnly={false}
+                  required={true}
+                  secureTextEntry={false}
+                  style={
+                    {
+                      "backgroundColor": "transparent",
+                      "color": "#484848",
+                      "flex": 1,
+                      "fontFamily": "Helvetica",
+                      "fontSize": 18,
+                      "fontStyle": "normal",
+                      "fontWeight": "400",
+                      "height": "100%",
+                      "paddingBottom": 8,
+                      "paddingLeft": 12,
+                      "paddingRight": 12,
+                      "paddingTop": 8,
+                      "width": "100%",
+                    }
+                  }
+                  value="87654321"
+                />
+              </View>
+            </View>
+            <View
+              dataSet={{}}
+              style={{}}
+            />
+          </View>
+        </View>
+        <View
+          dataSet={{}}
+          style={{}}
+        />
+        <View
+          dataSet={{}}
+          style={
+            {
+              "width": "100%",
+            }
+          }
+        >
+          <View
+            dataSet={{}}
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+              }
+            }
+          >
+            <View
+              dataSet={{}}
+              feedbackId="field-6-feedback"
+              hasFeedbackText={false}
+              hasHelpText={false}
+              helpTextId="field-6-helptext"
+              isDisabled={false}
+              isInvalid={false}
+              isReadOnly={false}
+              isRequired={false}
+              labelId="field-6-label"
+              nativeID="field-6-label"
+              setHasFeedbackText={[Function]}
+              setHasHelpText={[Function]}
+              style={
+                {
+                  "flexDirection": "row",
+                  "justifyContent": "flex-start",
+                  "marginBottom": 4,
+                  "marginTop": 4,
+                }
+              }
+            >
+              <Text
+                dataSet={{}}
+                style={
+                  {
+                    "backgroundColor": undefined,
+                    "color": "#737373",
+                    "fontFamily": "Helvetica",
+                    "fontSize": 18,
+                    "fontStyle": "normal",
+                    "fontWeight": "200",
+                    "letterSpacing": 0,
+                    "lineHeight": 27,
+                    "textDecorationLine": undefined,
+                  }
+                }
+              >
+                NRIC
+              </Text>
+            </View>
+            <View
+              dataSet={{}}
+              style={
+                {
+                  "width": 8,
+                }
+              }
+            />
+            <View
+              dataSet={{}}
+              isFocused={false}
+              style={
+                {
+                  "alignItems": "center",
+                  "borderColor": "#d4d4d4",
+                  "borderRadius": 4,
+                  "borderWidth": 0,
+                  "flexDirection": "row",
+                  "overflow": "hidden",
+                  "width": "100%",
+                }
+              }
+            >
+              <TextInput
+                accessibilityReadOnly={true}
+                accessible={true}
+                dataSet={{}}
+                disabled={false}
+                editable={false}
+                isRequired={false}
+                nativeID="field-6-input"
+                onBlur={[Function]}
+                onFocus={[Function]}
+                onKeyPress={[Function]}
+                placeholderTextColor="#a3a3a3"
+                readOnly={true}
+                required={false}
+                secureTextEntry={false}
+                style={
+                  {
+                    "backgroundColor": "transparent",
+                    "color": "#484848",
+                    "flex": 1,
+                    "fontFamily": "Helvetica",
+                    "fontSize": 18,
+                    "fontStyle": "normal",
+                    "fontWeight": "400",
+                    "height": "100%",
+                    "paddingBottom": 8,
+                    "paddingLeft": 12,
+                    "paddingRight": 12,
+                    "paddingTop": 8,
+                    "width": "100%",
+                  }
+                }
+                value="Sxxxx781F"
+              />
+            </View>
+          </View>
+        </View>
+        <View
+          dataSet={{}}
+          style={{}}
+        />
+        <View
+          dataSet={{}}
+          style={
+            {
+              "width": "100%",
+            }
+          }
+        >
+          <View
+            dataSet={{}}
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+              }
+            }
+          >
+            <View
+              dataSet={{}}
+              feedbackId="field-7-feedback"
+              hasFeedbackText={false}
+              hasHelpText={false}
+              helpTextId="field-7-helptext"
+              isDisabled={false}
+              isInvalid={false}
+              isReadOnly={false}
+              isRequired={false}
+              labelId="field-7-label"
+              nativeID="field-7-label"
+              setHasFeedbackText={[Function]}
+              setHasHelpText={[Function]}
+              style={
+                {
+                  "flexDirection": "row",
+                  "justifyContent": "flex-start",
+                  "marginBottom": 4,
+                  "marginTop": 4,
+                }
+              }
+            >
+              <Text
+                dataSet={{}}
+                style={
+                  {
+                    "backgroundColor": undefined,
+                    "color": "#737373",
+                    "fontFamily": "Helvetica",
+                    "fontSize": 18,
+                    "fontStyle": "normal",
+                    "fontWeight": "200",
+                    "letterSpacing": 0,
+                    "lineHeight": 27,
+                    "textDecorationLine": undefined,
+                  }
+                }
+              >
+                Gender
+              </Text>
+            </View>
+            <View
+              dataSet={{}}
+              style={
+                {
+                  "width": 8,
+                }
+              }
+            />
+            <View
+              dataSet={{}}
+              isFocused={false}
+              style={
+                {
+                  "alignItems": "center",
+                  "borderColor": "#d4d4d4",
+                  "borderRadius": 4,
+                  "borderWidth": 0,
+                  "flexDirection": "row",
+                  "overflow": "hidden",
+                  "width": "100%",
+                }
+              }
+            >
+              <TextInput
+                accessibilityReadOnly={true}
+                accessible={true}
+                dataSet={{}}
+                disabled={false}
+                editable={false}
+                isRequired={false}
+                nativeID="field-7-input"
+                onBlur={[Function]}
+                onFocus={[Function]}
+                onKeyPress={[Function]}
+                placeholderTextColor="#a3a3a3"
+                readOnly={true}
+                required={false}
+                secureTextEntry={false}
+                style={
+                  {
+                    "backgroundColor": "transparent",
+                    "color": "#484848",
+                    "flex": 1,
+                    "fontFamily": "Helvetica",
+                    "fontSize": 18,
+                    "fontStyle": "normal",
+                    "fontWeight": "400",
+                    "height": "100%",
+                    "paddingBottom": 8,
+                    "paddingLeft": 12,
+                    "paddingRight": 12,
+                    "paddingTop": 8,
+                    "width": "100%",
+                  }
+                }
+                value="F"
+              />
+            </View>
+          </View>
+        </View>
+        <View
+          dataSet={{}}
+          style={{}}
+        />
+        <View
+          dataSet={{}}
+          style={
+            {
+              "width": "100%",
+            }
+          }
+        >
+          <View
+            dataSet={{}}
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+              }
+            }
+          >
+            <View
+              dataSet={{}}
+              feedbackId="field-8-feedback"
+              hasFeedbackText={false}
+              hasHelpText={false}
+              helpTextId="field-8-helptext"
+              isDisabled={false}
+              isInvalid={false}
+              isReadOnly={false}
+              isRequired={false}
+              labelId="field-8-label"
+              nativeID="field-8-label"
+              setHasFeedbackText={[Function]}
+              setHasHelpText={[Function]}
+              style={
+                {
+                  "flexDirection": "row",
+                  "justifyContent": "flex-start",
+                  "marginBottom": 4,
+                  "marginTop": 4,
+                }
+              }
+            >
+              <Text
+                dataSet={{}}
+                style={
+                  {
+                    "backgroundColor": undefined,
+                    "color": "#737373",
+                    "fontFamily": "Helvetica",
+                    "fontSize": 18,
+                    "fontStyle": "normal",
+                    "fontWeight": "200",
+                    "letterSpacing": 0,
+                    "lineHeight": 27,
+                    "textDecorationLine": undefined,
+                  }
+                }
+              >
+                DOB
+              </Text>
+            </View>
+            <View
+              dataSet={{}}
+              style={
+                {
+                  "width": 8,
+                }
+              }
+            />
+            <View
+              dataSet={{}}
+              isFocused={false}
+              style={
+                {
+                  "alignItems": "center",
+                  "borderColor": "#d4d4d4",
+                  "borderRadius": 4,
+                  "borderWidth": 0,
+                  "flexDirection": "row",
+                  "overflow": "hidden",
+                  "width": "100%",
+                }
+              }
+            >
+              <TextInput
+                accessibilityReadOnly={true}
+                accessible={true}
+                dataSet={{}}
+                disabled={false}
+                editable={false}
+                isRequired={false}
+                nativeID="field-8-input"
+                onBlur={[Function]}
+                onFocus={[Function]}
+                onKeyPress={[Function]}
+                placeholderTextColor="#a3a3a3"
+                readOnly={true}
+                required={false}
+                secureTextEntry={false}
+                style={
+                  {
+                    "backgroundColor": "transparent",
+                    "color": "#484848",
+                    "flex": 1,
+                    "fontFamily": "Helvetica",
+                    "fontSize": 18,
+                    "fontStyle": "normal",
+                    "fontWeight": "400",
+                    "height": "100%",
+                    "paddingBottom": 8,
+                    "paddingLeft": 12,
+                    "paddingRight": 12,
+                    "paddingTop": 8,
+                    "width": "100%",
+                  }
+                }
+                value="1980-01-01"
+              />
+            </View>
+          </View>
+        </View>
+        <View
+          dataSet={{}}
+          style={{}}
+        />
+        <View
+          dataSet={{}}
+          style={
+            {
+              "width": "100%",
+            }
+          }
+        >
+          <View
+            dataSet={{}}
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+              }
+            }
+          >
+            <View
+              dataSet={{}}
+              feedbackId="field-9-feedback"
+              hasFeedbackText={false}
+              hasHelpText={false}
+              helpTextId="field-9-helptext"
+              isDisabled={false}
+              isInvalid={false}
+              isReadOnly={false}
+              isRequired={false}
+              labelId="field-9-label"
+              nativeID="field-9-label"
+              setHasFeedbackText={[Function]}
+              setHasHelpText={[Function]}
+              style={
+                {
+                  "flexDirection": "row",
+                  "justifyContent": "flex-start",
+                  "marginBottom": 4,
+                  "marginTop": 4,
+                }
+              }
+            >
+              <Text
+                dataSet={{}}
+                style={
+                  {
+                    "backgroundColor": undefined,
+                    "color": "#737373",
+                    "fontFamily": "Helvetica",
+                    "fontSize": 18,
+                    "fontStyle": "normal",
+                    "fontWeight": "200",
+                    "letterSpacing": 0,
+                    "lineHeight": 27,
+                    "textDecorationLine": undefined,
+                  }
+                }
+              >
+                Email
+              </Text>
+            </View>
+            <View
+              dataSet={{}}
+              style={
+                {
+                  "width": 8,
+                }
+              }
+            />
+            <View
+              dataSet={{}}
+              isFocused={false}
+              style={
+                {
+                  "alignItems": "center",
+                  "borderColor": "#d4d4d4",
+                  "borderRadius": 4,
+                  "borderWidth": 0,
+                  "flexDirection": "row",
+                  "overflow": "hidden",
+                  "width": "100%",
+                }
+              }
+            >
+              <TextInput
+                accessibilityReadOnly={true}
+                accessible={true}
+                dataSet={{}}
+                disabled={false}
+                editable={false}
+                isRequired={false}
+                nativeID="field-9-input"
+                onBlur={[Function]}
+                onFocus={[Function]}
+                onKeyPress={[Function]}
+                placeholderTextColor="#a3a3a3"
+                readOnly={true}
+                required={false}
+                secureTextEntry={false}
+                style={
+                  {
+                    "backgroundColor": "transparent",
+                    "color": "#484848",
+                    "flex": 1,
+                    "fontFamily": "Helvetica",
+                    "fontSize": 18,
+                    "fontStyle": "normal",
+                    "fontWeight": "400",
+                    "height": "100%",
+                    "paddingBottom": 8,
+                    "paddingLeft": 12,
+                    "paddingRight": 12,
+                    "paddingTop": 8,
+                    "width": "100%",
+                  }
+                }
+                value="jess@gmail.com"
+              />
+            </View>
+          </View>
+        </View>
+        <View
+          dataSet={{}}
+          style={{}}
+        />
+        <View
+          dataSet={{}}
+          style={
+            {
+              "width": "100%",
+            }
+          }
+        >
+          <View
+            dataSet={{}}
+            style={
+              {
+                "alignItems": "flex-start",
+                "flexWrap": "wrap",
+              }
+            }
+          >
+            <View
+              dataSet={{}}
+              feedbackId="field-10-feedback"
+              hasFeedbackText={false}
+              hasHelpText={false}
+              helpTextId="field-10-helptext"
+              isDisabled={false}
+              isInvalid={false}
+              isReadOnly={false}
+              isRequired={false}
+              labelId="field-10-label"
+              nativeID="field-10-label"
+              setHasFeedbackText={[Function]}
+              setHasHelpText={[Function]}
+              style={
+                {
+                  "flexDirection": "row",
+                  "justifyContent": "flex-start",
+                  "marginBottom": 4,
+                  "marginTop": 4,
+                  "width": "100%",
+                }
+              }
+            >
+              <Text
+                dataSet={{}}
+                style={
+                  {
+                    "backgroundColor": undefined,
+                    "color": "#737373",
+                    "fontFamily": "Helvetica",
+                    "fontSize": 18,
+                    "fontStyle": "normal",
+                    "fontWeight": "200",
+                    "letterSpacing": 0,
+                    "lineHeight": 27,
+                    "textDecorationLine": undefined,
+                  }
+                }
+              >
+                Address
+              </Text>
+            </View>
+            <View
+              dataSet={{}}
+              style={
+                {
+                  "height": 0,
+                }
+              }
+            />
+            <View
+              dataSet={{}}
+              isFocused={false}
+              style={
+                {
+                  "alignItems": "center",
+                  "borderColor": "#d4d4d4",
+                  "borderRadius": 4,
+                  "borderWidth": 0,
+                  "flexDirection": "row",
+                  "height": 80,
+                  "marginLeft": -10,
+                  "maxHeight": "50%",
+                  "minHeight": "30%",
+                  "overflow": "hidden",
+                  "width": "100%",
+                }
+              }
+            >
+              <TextInput
+                accessibilityReadOnly={true}
+                accessible={true}
+                dataSet={{}}
+                disabled={false}
+                editable={false}
+                input="lg"
+                isRequired={false}
+                multiline={true}
+                nativeID="field-10-input"
+                onBlur={[Function]}
+                onFocus={[Function]}
+                onKeyPress={[Function]}
+                placeholderTextColor="#a3a3a3"
+                readOnly={true}
+                required={false}
+                secureTextEntry={false}
+                style={
+                  {
+                    "backgroundColor": "transparent",
+                    "color": "#484848",
+                    "flex": 1,
+                    "fontFamily": "Helvetica",
+                    "fontSize": 18,
+                    "fontStyle": "normal",
+                    "fontWeight": "400",
+                    "height": "100%",
+                    "paddingBottom": 8,
+                    "paddingLeft": 12,
+                    "paddingRight": 12,
+                    "paddingTop": 8,
+                    "width": "100%",
+                  }
+                }
+                textAlignVertical="top"
+                value="521 Woodlands Dr14 #02-343, 730521 Singapore, Singapore"
+              />
+            </View>
+          </View>
+        </View>
+        <View
+          dataSet={{}}
+          style={{}}
+        />
+        <Text
+          dataSet={{}}
+          style={
+            {
+              "backgroundColor": undefined,
+              "color": "#FD4734",
+              "fontFamily": "Helvetica",
+              "fontSize": 14,
+              "fontStyle": "normal",
+              "fontWeight": "400",
+              "letterSpacing": 0,
+              "lineHeight": 21,
+              "marginBottom": 16,
+              "textDecorationLine": undefined,
+            }
+          }
+        >
+           
+          Note: To edit other information, please contact system administrator.
+        </Text>
+        <View
+          dataSet={{}}
+          style={{}}
+        />
+        <View
+          dataSet={{}}
+          style={{}}
+        />
+        <View
+          dataSet={{}}
+          style={{}}
+        />
+        <View
+          dataSet={{}}
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "justifyContent": "space-around",
+              "width": "100%",
+            }
+          }
+        >
+          <View
+            accessibilityRole="button"
+            accessible={true}
+            collapsable={false}
+            colorScheme="primary"
+            dataSet={{}}
+            focusable={true}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#019192",
+                "borderRadius": 4,
+                "flexDirection": "row",
+                "justifyContent": "center",
+                "paddingBottom": 10,
+                "paddingLeft": 12,
+                "paddingRight": 12,
+                "paddingTop": 10,
+                "width": "25%",
+              }
+            }
+          >
+            <View
+              dataSet={{}}
+              style={
+                {
+                  "alignItems": "center",
+                  "flexDirection": "row",
+                }
+              }
+              test={true}
+            >
+              <View
+                dataSet={{}}
+                style={{}}
+              >
+                <Text
+                  dataSet={{}}
+                  style={
+                    {
+                      "backgroundColor": undefined,
+                      "color": "#FFFFFF",
+                      "fontFamily": "Helvetica",
+                      "fontSize": 14,
+                      "fontStyle": "normal",
+                      "fontWeight": "400",
+                      "letterSpacing": 0,
+                      "lineHeight": 21,
+                      "textDecorationLine": undefined,
+                    }
+                  }
+                >
+                  Save
+                </Text>
+              </View>
+            </View>
+          </View>
+          <View
+            dataSet={{}}
+            style={
+              {
+                "width": 0,
+              }
+            }
+          />
+          <View
+            accessibilityRole="button"
+            accessible={true}
+            collapsable={false}
+            colorScheme="primary"
+            dataSet={{}}
+            focusable={true}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#FF585D",
+                "borderRadius": 4,
+                "flexDirection": "row",
+                "justifyContent": "center",
+                "paddingBottom": 10,
+                "paddingLeft": 12,
+                "paddingRight": 12,
+                "paddingTop": 10,
+                "width": "25%",
+              }
+            }
+          >
+            <View
+              dataSet={{}}
+              style={
+                {
+                  "alignItems": "center",
+                  "flexDirection": "row",
+                }
+              }
+              test={true}
+            >
+              <View
+                dataSet={{}}
+                style={{}}
+              >
+                <Text
+                  dataSet={{}}
+                  style={
+                    {
+                      "backgroundColor": undefined,
+                      "color": "#FFFFFF",
+                      "fontFamily": "Helvetica",
+                      "fontSize": 14,
+                      "fontStyle": "normal",
+                      "fontWeight": "400",
+                      "letterSpacing": 0,
+                      "lineHeight": 21,
+                      "textDecorationLine": undefined,
+                    }
+                  }
+                >
+                  Cancel
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </View>
+    </View>
+  </RCTScrollView>
+</RNCSafeAreaProvider>
+`;
