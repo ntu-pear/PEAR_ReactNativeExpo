@@ -46,6 +46,7 @@ function PatientInformationCard(props) {
     <TouchableOpacity
       onPress={handleOnPress}
       style={Platform.OS === 'web' ? { flex: 2 } : null}
+      testID="patientInformationCard"
     >
       <Box
         overflow="visible"

@@ -22,7 +22,10 @@ function PatientProfileCard(props) {
   };
 
   return (
-    <TouchableOpacity onPress={handleOnPressToNextScreen}>
+    <TouchableOpacity
+      onPress={handleOnPressToNextScreen}
+      testID="patientProfileCard"
+    >
       <Box alignItems="center" rounded="lg" w="110" h="90">
         <Box
           alignItems="center"
