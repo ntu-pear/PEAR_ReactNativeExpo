@@ -14,7 +14,7 @@ import ErrorMessage from 'app/components/ErrorMessage';
 
 function ChangePasswordScreen(props) {
   const [isLoading, setIsLoading] = useState(false);
-  const { setUser } = useContext(AuthContext);
+  const authContext = useContext(AuthContext);
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [errors, setErrors] = useState({});
@@ -70,7 +70,6 @@ function ChangePasswordScreen(props) {
       oldPassword,
       newPassword,
     );
-
     // console.log(result.data);
     if (!result.ok) {
       setErrors({
@@ -83,7 +82,7 @@ function ChangePasswordScreen(props) {
     setIsLoading(false);
     Alert.alert('Password changed successfully. Please login again.');
     // Redirects the user to Welcome screen by logging out after successful password change.
-    setUser(null);
+    authContext.setUser(null);
     await authStorage.removeToken();
   };
 
@@ -122,6 +121,7 @@ function ChangePasswordScreen(props) {
             onChangeText={handleNewPassword}
             placeholder="Enter New Password"
             ErrorMessage={errors.newPassword}
+            value={newPassword}
             HelperText="Password must contain one uppercase, one lowercase and one non-alphanumeric."
             InputRightElement={
               <Icon
