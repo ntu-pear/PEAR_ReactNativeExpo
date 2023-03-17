@@ -31,10 +31,6 @@ jest.mock('../../auth/authStorage', () => ({
 }));
 jest.setTimeout(10000);
 
-const mockSupervisor = {
-  email: 'jess@gmail.com',
-};
-
 jest.spyOn(Alert, 'alert').mockImplementation(() => {});
 
 // we need to pass this in to NativeBaseProvider else the content within would
@@ -80,7 +76,9 @@ describe('Test Change Password', () => {
 
   // Only one case (new password does not match requirements) tested to show that error returned from api will be displayed
   test('Should show error from backend validation', async () => {
-    authStorage.getUser.mockReturnValueOnce(mockSupervisor);
+    authStorage.getUser.mockReturnValueOnce({
+      email: 'jess@gmail.com',
+    });
 
     const changePasswordScreen = render(
       <NativeBaseProvider initialWindowMetrics={inset}>
@@ -117,7 +115,9 @@ describe('Test Change Password', () => {
   });
 
   test('Should show alert upon successful password change', async () => {
-    authStorage.getUser.mockReturnValueOnce(mockSupervisor);
+    authStorage.getUser.mockReturnValueOnce({
+      email: 'jess@gmail.com',
+    });
     user.changePassword.mockReturnValueOnce({
       ok: true,
     });
