@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Modal, VStack, Text, View, Row, Center } from 'native-base';
+import { Modal, Text, View, Row, Center } from 'native-base';
 import { Button } from 'native-base';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import colors from 'app/config/colors';
 import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
 
@@ -18,18 +18,20 @@ const ActivityFilterCard = ({
   setSelectedActivity,
   activityFilterList,
   setActivityFilterList,
+  getDefaultStartTime,
+  getDefaultEndTime,
 }) => {
   const initialRef = React.useRef(null);
   const finalRef = React.useRef(null);
   const [loading, setLoading] = useState(false);
-  const [selectedStartTimeTemp, setSelectedStartTimeTemp] = useState(
-    new Date('2023-01-01T00:00:00+08:00'),
-  );
-  const [selectedEndTimeTemp, setSelectedEndTimeTemp] = useState(
-    new Date('2023-01-01T23:59:59+08:00'),
-  );
+  const [selectedStartTimeTemp, setSelectedStartTimeTemp] =
+    useState(getDefaultStartTime);
+  const [selectedEndTimeTemp, setSelectedEndTimeTemp] =
+    useState(getDefaultEndTime);
   const [selectedActivityTemp, setSelectedActivityTemp] = useState(null);
   const searchRef = useRef(null);
+  const [startTimePicker, setStartTimePicker] = useState(Platform.OS === 'ios');
+  const [endTimePicker, setEndTimePicker] = useState(Platform.OS === 'ios');
 
   const onOpenSuggestionsList = () => {
     const list = [];
@@ -65,34 +67,37 @@ const ActivityFilterCard = ({
   };
   const onChangeStartTime = (event, value) => {
     setSelectedStartTimeTemp(value);
+    if (Platform.OS === 'android') {
+      setStartTimePicker(false);
+    }
   };
 
   const onChangeEndTime = (event, value) => {
     setSelectedEndTimeTemp(value);
+    if (Platform.OS === 'android') {
+      setEndTimePicker(false);
+    }
+  };
+
+  const showStartTimePicker = () => {
+    setStartTimePicker(true);
+  };
+
+  const showEndTimePicker = () => {
+    setEndTimePicker(true);
   };
 
   const handleApply = () => {
     setModalVisible(false);
     updateFilteredActivityData();
     setSelectedStartTime(selectedStartTimeTemp);
-    setSelectedEndTimeTemp(selectedEndTimeTemp);
+    setSelectedEndTime(selectedEndTimeTemp);
     setSelectedActivity(selectedActivityTemp);
-    // searchRef.current.clear();
-  };
-
-  const handleCancel = () => {
-    setModalVisible(false);
-    setSelectedStartTimeTemp(new Date('2023-01-01T00:00:00+08:00'));
-    setSelectedEndTimeTemp(new Date('2023-01-01T23:59:59+08:00'));
-    setSelectedActivity(null);
-    setSelectedActivityTemp(null);
-    searchRef.current.clear();
   };
 
   const handleReset = () => {
-    setSelectedStartTimeTemp(new Date('2023-01-01T00:00:00+08:00'));
-    setSelectedEndTimeTemp(new Date('2023-01-01T23:59:59+08:00'));
-    setSelectedActivity(null);
+    setSelectedStartTimeTemp(getDefaultStartTime);
+    setSelectedEndTimeTemp(getDefaultEndTime);
     setSelectedActivityTemp(null);
     searchRef.current.clear();
   };
@@ -112,88 +117,127 @@ const ActivityFilterCard = ({
       initialFocusRef={initialRef}
       finalFocusRef={finalRef}
     >
-      <Modal.Content height={'2/5'} backgroundColor={colors.white_var1}>
+      <Modal.Content
+        height={Platform.OS === 'ios' ? '45%' : '30%'}
+        backgroundColor={colors.white_var1}
+      >
         <Modal.Body>
-          <VStack style={styles.vStackStyle}>
-            <View style={styles.viewStyle} zIndex={6}>
-              <Text>Activity Name</Text>
-              <View>
-                <AutocompleteDropdown
-                  ref={searchRef}
-                  closeOnBlur={true}
-                  closeOnSubmit={false}
-                  dataSet={activityFilterList}
-                  onSelectItem={onChangeActivityName}
-                  onChangeText={findActivityInActivityList}
-                  inputHeight={50}
-                  onOpenSuggestionsList={onOpenSuggestionsList}
-                  loading={loading}
-                  onClear={() => {
-                    setActivityFilterList(null);
-                    setSelectedActivityTemp(null);
-                  }}
-                  textInputProps={{
-                    placeholder: 'Enter Activity Name',
-                    autoCorrect: false,
-                    autoCapitalize: 'none',
-                  }}
-                  suggestionsListMaxHeight={150}
-                />
-              </View>
+          <View style={styles.activityNameViewStyle} zIndex={6}>
+            <Text style={styles.textStyle}>Activity Name</Text>
+            <View>
+              <AutocompleteDropdown
+                ref={searchRef}
+                closeOnBlur={true}
+                closeOnSubmit={false}
+                dataSet={activityFilterList}
+                onSelectItem={onChangeActivityName}
+                onChangeText={findActivityInActivityList}
+                inputHeight={50}
+                onOpenSuggestionsList={onOpenSuggestionsList}
+                loading={loading}
+                onClear={() => {
+                  setActivityFilterList(null);
+                  setSelectedActivityTemp(null);
+                }}
+                textInputProps={{
+                  placeholder: 'Enter Activity Name',
+                  autoCorrect: false,
+                  autoCapitalize: 'none',
+                }}
+                suggestionsListMaxHeight={150}
+              />
             </View>
-            <View zIndex={4}>
-              <Text>Activity Time</Text>
-              <Row style={styles.rowStyle}>
+          </View>
+          <View style={styles.activityTimeViewStyle} zIndex={4}>
+            <Text style={styles.textStyle}>Activity Time</Text>
+            <Row style={styles.rowStyle}>
+              {startTimePicker && (
                 <View style={styles.dateTimePickerViewStyle}>
                   <DateTimePicker
                     value={selectedStartTimeTemp}
+                    display={'default'}
                     mode={'time'}
                     is24Hour={true}
                     onChange={onChangeStartTime}
                     style={styles.dateTimePickerStyle}
                   />
                 </View>
-                <Center
-                  width={'20%'}
-                  alignSelf={'center'}
-                  justifyContent={'center'}
-                  _text={{
-                    fontSize: '25px',
-                  }}
+              )}
+              {!startTimePicker && Platform.OS === 'android' && (
+                <Button
+                  backgroundColor={colors.white_var1}
+                  borderColor={colors.light_gray}
+                  flex={1}
+                  onPress={showStartTimePicker}
                 >
-                  to
-                </Center>
+                  <Text fontSize={20}>
+                    {selectedStartTimeTemp.toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </Text>
+                </Button>
+              )}
+              <Center
+                width={'20%'}
+                alignSelf={'center'}
+                justifyContent={'center'}
+                _text={{
+                  fontSize: '20px',
+                }}
+                flex={1}
+              >
+                to
+              </Center>
+              {endTimePicker && (
                 <View style={styles.dateTimePickerViewStyle}>
                   <DateTimePicker
                     value={selectedEndTimeTemp}
+                    display={'default'}
                     mode={'time'}
                     is24Hour={true}
                     onChange={onChangeEndTime}
                     style={styles.dateTimePickerStyle}
                   />
                 </View>
-              </Row>
-            </View>
-          </VStack>
+              )}
+              {!endTimePicker && Platform.OS === 'android' && (
+                <Button
+                  backgroundColor={colors.white_var1}
+                  borderColor={colors.light_gray}
+                  flex={1}
+                  onPress={showEndTimePicker}
+                >
+                  <Text fontSize={20}>
+                    {selectedEndTimeTemp.toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </Text>
+                </Button>
+              )}
+            </Row>
+          </View>
+          <View style={styles.resetViewStyle}>
+            <Text
+              onPress={() => {
+                handleReset();
+              }}
+              textDecorationLine={'underline'}
+              color={colors.black}
+            >
+              Reset
+            </Text>
+          </View>
         </Modal.Body>
         <Modal.Footer backgroundColor={colors.white}>
           <Button.Group space={2}>
             <Button
-              backgroundColor={colors.white}
-              paddingRight={90}
-              onPress={() => {
-                handleReset();
-              }}
-            >
-              <Text textDecorationLine={'underline'} color={colors.black}>
-                Reset
-              </Text>
-            </Button>
-            <Button
               variant="ghost"
               colorScheme="blueGray"
               onPress={() => {
-                handleCancel();
+                setModalVisible(false);
+                handleReset();
               }}
             >
               Cancel
@@ -219,27 +263,36 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     alignContent: 'space-between',
   },
-  viewStyle: {
-    flex: 1,
+  activityNameViewStyle: {
+    flex: 2,
     padding: 5,
     paddingBottom: 30,
   },
-  vStackStyle: {
+  activityTimeViewStyle: {
+    flex: 2,
+    padding: 5,
+    paddingBottom: 30,
+  },
+  resetViewStyle: {
     flex: 1,
+    alignItems: 'center',
+  },
+  vStackStyle: {
+    flexDirection: 'column',
   },
   dateTimePickerViewStyle: {
     flex: 1,
     width: '50%',
   },
   dateTimePickerStyle: {
-    padding: 30,
+    padding: Platform.OS === 'ios' ? 30 : 60,
     width: '100%',
     height: '30%',
+    fontSize: 20,
   },
   textStyle: {
     fontSize: 20,
-    alignSelf: 'center',
-    width: '100%',
+    padding: 5,
   },
   autocompleteContainer: {
     backgroundColor: '#ffffff',

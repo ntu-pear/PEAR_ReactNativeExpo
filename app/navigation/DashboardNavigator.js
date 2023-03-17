@@ -5,307 +5,67 @@ import DashboardScreen from 'app/screens/DashboardScreen';
 // Import Constants from Routes
 import routes from 'app/navigation/routes';
 import { Image, Row } from 'native-base';
-import { TouchableOpacity } from 'react-native';
+import { TouchableOpacity, Text } from 'react-native';
 import ActivityFilterCard from 'app/components/ActivityFilterCard';
+import dashboardApi from 'app/api/dashboard';
 
 // Refer to this: https://reactnavigation.org/docs/hello-react-navigation
 const Stack = createNativeStackNavigator();
 
-const mockApiV2 = () => {
-  return new Promise((resolve, reject) => {
-    const data = [
-      {
-        patientImage: 'https://cdn-icons-png.flaticon.com/512/2202/2202112.png',
-        patientId: 1,
-        patientName: 'Mary Lim',
-        activities: [
-          {
-            activityTitle: 'Drawing',
-            date: '2023-01-01',
-            startTime: '2023-01-01T08:00:00+08:00',
-            endTime: '2023-01-01T10:00:00+08:00',
-          },
-          {
-            activityTitle: 'Colouring',
-            date: '2023-01-01',
-            startTime: '2023-01-01T10:00:00+08:00',
-            endTime: '2023-01-01T12:00:00+08:00',
-          },
-          {
-            activityTitle: 'Pet Therapy',
-            date: '2023-01-01',
-            startTime: '2023-01-01T14:00:00+08:00',
-            endTime: '2023-01-01T16:00:00+08:00',
-          },
-          {
-            activityTitle: 'Singing',
-            date: '2023-01-02',
-            startTime: '2023-01-02T10:00:00+08:00',
-            endTime: '2023-01-02T12:00:00+08:00',
-          },
-          {
-            activityTitle: 'Exercise',
-            date: '2023-01-03',
-            startTime: '2023-01-03T14:00:00+08:00',
-            endTime: '2023-01-03T16:00:00+08:00',
-          },
-          {
-            activityTitle: 'Cooking',
-            date: '2023-01-04',
-            startTime: '2023-01-04T18:00:00+08:00',
-            endTime: '2023-01-04T20:00:00+08:00',
-          },
-        ],
-      },
-      {
-        patientImage: 'https://cdn-icons-png.flaticon.com/512/2202/2202112.png',
-        patientId: 2,
-        patientName: 'Justin Lim',
-        activities: [
-          {
-            activityTitle: 'Drawing',
-            date: '2023-01-01',
-            startTime: '2023-01-01T08:00:00+08:00',
-            endTime: '2023-01-01T10:00:00+08:00',
-          },
-          {
-            activityTitle: 'Colouring',
-            date: '2023-01-01',
-            startTime: '2023-01-01T10:00:00+08:00',
-            endTime: '2023-01-01T12:00:00+08:00',
-          },
-          {
-            activityTitle: 'Pet Therapy',
-            date: '2023-01-01',
-            startTime: '2023-01-01T14:00:00+08:00',
-            endTime: '2023-01-01T16:00:00+08:00',
-          },
-          {
-            activityTitle: 'Singing',
-            date: '2023-01-01',
-            startTime: '2023-01-01T18:00:00+08:00',
-            endTime: '2023-01-01T20:00:00+08:00',
-          },
-          {
-            activityTitle: 'Pet Therapy',
-            date: '2023-01-02',
-            startTime: '2023-01-02T14:00:00+08:00',
-            endTime: '2023-01-02T16:00:00+08:00',
-          },
-          {
-            activityTitle: 'Singing',
-            date: '2023-01-02',
-            startTime: '2023-01-02T18:00:00+08:00',
-            endTime: '2023-01-02T20:00:00+08:00',
-          },
-        ],
-      },
-      {
-        patientImage: 'https://cdn-icons-png.flaticon.com/512/2202/2202112.png',
-        patientId: 3,
-        patientName: 'Bob Tan',
-        activities: [
-          {
-            activityTitle: 'Drawing',
-            date: '2023-01-01',
-            startTime: '2023-01-01T08:00:00+08:00',
-            endTime: '2023-01-01T10:00:00+08:00',
-          },
-          {
-            activityTitle: 'Colouring',
-            date: '2023-01-01',
-            startTime: '2023-01-01T10:00:00+08:00',
-            endTime: '2023-01-01T12:00:00+08:00',
-          },
-          {
-            activityTitle: 'Pet Therapy',
-            date: '2023-01-01',
-            startTime: '2023-01-01T14:00:00+08:00',
-            endTime: '2023-01-01T16:00:00+08:00',
-          },
-          {
-            activityTitle: 'Singing',
-            date: '2023-01-01',
-            startTime: '2023-01-01T18:00:00+08:00',
-            endTime: '2023-01-01T20:00:00+08:00',
-          },
-          {
-            activityTitle: 'Pet Therapy',
-            date: '2023-01-02',
-            startTime: '2023-01-02T14:00:00+08:00',
-            endTime: '2023-01-02T16:00:00+08:00',
-          },
-          {
-            activityTitle: 'Singing',
-            date: '2023-01-02',
-            startTime: '2023-01-02T18:00:00+08:00',
-            endTime: '2023-01-02T20:00:00+08:00',
-          },
-        ],
-      },
-      {
-        patientImage: 'https://cdn-icons-png.flaticon.com/512/2202/2202112.png',
-        patientId: 4,
-        patientName: 'Xenia Tan',
-        activities: [
-          {
-            activityTitle: 'Drawing',
-            date: '2023-01-01',
-            startTime: '2023-01-01T08:00:00+08:00',
-            endTime: '2023-01-01T10:00:00+08:00',
-          },
-          {
-            activityTitle: 'Colouring',
-            date: '2023-01-01',
-            startTime: '2023-01-01T10:00:00+08:00',
-            endTime: '2023-01-01T12:00:00+08:00',
-          },
-          {
-            activityTitle: 'Pet Therapy',
-            date: '2023-01-01',
-            startTime: '2023-01-01T14:00:00+08:00',
-            endTime: '2023-01-01T16:00:00+08:00',
-          },
-          {
-            activityTitle: 'Singing',
-            date: '2023-01-01',
-            startTime: '2023-01-01T18:00:00+08:00',
-            endTime: '2023-01-01T20:00:00+08:00',
-          },
-        ],
-      },
-      {
-        patientImage: 'https://cdn-icons-png.flaticon.com/512/2202/2202112.png',
-        patientId: 5,
-        patientName: 'Frank Chua',
-        activities: [
-          {
-            activityTitle: 'Drawing',
-            date: '2023-01-01',
-            startTime: '2023-01-01T08:00:00+08:00',
-            endTime: '2023-01-01T10:00:00+08:00',
-          },
-          {
-            activityTitle: 'Colouring',
-            date: '2023-01-01',
-            startTime: '2023-01-01T10:00:00+08:00',
-            endTime: '2023-01-01T12:00:00+08:00',
-          },
-          {
-            activityTitle: 'Pet Therapy',
-            date: '2023-01-01',
-            startTime: '2023-01-01T14:00:00+08:00',
-            endTime: '2023-01-01T16:00:00+08:00',
-          },
-          {
-            activityTitle: 'Singing',
-            date: '2023-01-01',
-            startTime: '2023-01-01T18:00:00+08:00',
-            endTime: '2023-01-01T20:00:00+08:00',
-          },
-          {
-            activityTitle: 'Pet Therapy',
-            date: '2023-01-02',
-            startTime: '2023-01-02T14:00:00+08:00',
-            endTime: '2023-01-02T16:00:00+08:00',
-          },
-          {
-            activityTitle: 'Singing',
-            date: '2023-01-02',
-            startTime: '2023-01-02T18:00:00+08:00',
-            endTime: '2023-01-02T20:00:00+08:00',
-          },
-        ],
-      },
-      {
-        patientImage: 'https://cdn-icons-png.flaticon.com/512/2202/2202112.png',
-        patientId: 6,
-        patientName: 'Joan Wong',
-        activities: [
-          {
-            activityTitle: 'Drawing',
-            date: '2023-01-01',
-            startTime: '2023-01-01T08:00:00+08:00',
-            endTime: '2023-01-01T10:00:00+08:00',
-          },
-          {
-            activityTitle: 'Colouring',
-            date: '2023-01-01',
-            startTime: '2023-01-01T10:00:00+08:00',
-            endTime: '2023-01-01T12:00:00+08:00',
-          },
-          {
-            activityTitle: 'Pet Therapy',
-            date: '2023-01-01',
-            startTime: '2023-01-01T14:00:00+08:00',
-            endTime: '2023-01-01T16:00:00+08:00',
-          },
-          {
-            activityTitle: 'Singing',
-            date: '2023-01-01',
-            startTime: '2023-01-01T18:00:00+08:00',
-            endTime: '2023-01-01T20:00:00+08:00',
-          },
-        ],
-      },
-      {
-        patientImage: 'https://cdn-icons-png.flaticon.com/512/2202/2202112.png',
-        patientId: 7,
-        patientName: 'Brandon Goh',
-        activities: [
-          {
-            activityTitle: 'Drawing',
-            date: '2023-01-01',
-            startTime: '2023-01-01T08:00:00+08:00',
-            endTime: '2023-01-01T10:00:00+08:00',
-          },
-          {
-            activityTitle: 'Colouring',
-            date: '2023-01-01',
-            startTime: '2023-01-01T10:00:00+08:00',
-            endTime: '2023-01-01T12:00:00+08:00',
-          },
-          {
-            activityTitle: 'Pet Therapy',
-            date: '2023-01-01',
-            startTime: '2023-01-01T14:00:00+08:00',
-            endTime: '2023-01-01T16:00:00+08:00',
-          },
-          {
-            activityTitle: 'Singing',
-            date: '2023-01-01',
-            startTime: '2023-01-01T18:00:00+08:00',
-            endTime: '2023-01-01T20:00:00+08:00',
-          },
-        ],
-      },
-    ];
-    if (true) {
-      resolve(data);
-    } else {
-      reject('ERROR');
-    }
-  });
-};
-
 // Refer to this for configuration: https://reactnavigation.org/docs/native-stack-navigator#options
 function DashboardNavigator() {
   const [modalVisible, setModalVisible] = useState(false);
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [selectedStartTime, setSelectedStartTime] = useState(
-    new Date('2023-01-01T00:00:00+08:00'),
+    new Date(
+      currentDateTime.getFullYear(),
+      currentDateTime.getMonth(),
+      currentDateTime.getDate(),
+      0,
+      0,
+      0,
+    ),
   );
   const [selectedEndTime, setSelectedEndTime] = useState(
-    new Date('2023-01-01T23:59:59+08:00'),
+    new Date(
+      currentDateTime.getFullYear(),
+      currentDateTime.getMonth(),
+      currentDateTime.getDate(),
+      23,
+      59,
+      59,
+    ),
   );
   const [patientsData, setPatientsData] = useState([]);
   const [filteredPatientsData, setFilteredPatientsData] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(new Date('2023-01-01'));
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [activityList, setActivityList] = useState([]);
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [activityFilterList, setActivityFilterList] = useState(null);
-  const [currentTime, setCurrentTime] = useState(
-    new Date('2023-01-01T14:30:00+08:00'),
-  );
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [statusCode, setStatusCode] = useState();
+
+  const getDefaultStartTime = () =>
+    new Date(
+      currentDateTime.getFullYear(),
+      currentDateTime.getMonth(),
+      currentDateTime.getDate(),
+      0,
+      0,
+      0,
+    );
+
+  const getDefaultEndTime = () =>
+    new Date(
+      currentDateTime.getFullYear(),
+      currentDateTime.getMonth(),
+      currentDateTime.getDate(),
+      23,
+      59,
+      59,
+    );
 
   const getActivityList = () => {
     const activities = [];
@@ -384,9 +144,45 @@ function DashboardNavigator() {
     setFilteredPatientsData(filtered);
   };
 
+  const getDashboardData = async () => {
+    setIsLoading(true);
+    setIsError(false);
+    const response = await dashboardApi.getDashboard();
+    return new Promise((resolve, reject) => {
+      if (response.ok) {
+        setIsLoading(false);
+        setStatusCode(response.status);
+        resolve(response.data.data);
+      } else {
+        setIsLoading(false);
+        setIsError(true);
+        setStatusCode(response.status);
+        reject('ERROR');
+      }
+    });
+  };
+
+  const noDataMessage = () => {
+    // Display error message if API request fails
+    if (isError) {
+      if (statusCode === 401) {
+        return <Text>Error: User is not authenticated.</Text>;
+      } else if (statusCode >= 500) {
+        return <Text>Error: Server is down. Please try again later.</Text>;
+      }
+      return <Text>{statusCode} error has occurred.</Text>;
+    }
+
+    return <Text>No schedule can be found.</Text>;
+  };
+
+  const handlePullToRefresh = async () => {
+    await getDashboardData();
+    setCurrentDateTime(new Date());
+  };
+
   useEffect(() => {
-    // API GET Activity Data
-    mockApiV2()
+    getDashboardData()
       .then((res) => {
         setPatientsData(res);
       })
@@ -403,11 +199,25 @@ function DashboardNavigator() {
   }, [patientsData]);
 
   useEffect(() => {
-    setSelectedStartTime(new Date('2023-01-01T00:00:00+08:00'));
-    setSelectedEndTime(new Date('2023-01-01T23:59:59+08:00'));
+    setSelectedStartTime(
+      new Date(
+        currentDateTime.getFullYear(),
+        currentDateTime.getMonth(),
+        currentDateTime.getDate(),
+        currentDateTime.setHours(0, 0, 0),
+      ),
+    );
+    setSelectedEndTime(
+      new Date(
+        currentDateTime.getFullYear(),
+        currentDateTime.getMonth(),
+        currentDateTime.getDate(),
+        currentDateTime.setHours(23, 59, 59),
+      ),
+    );
     setSelectedActivity(null);
     setActivityFilterList(null);
-  }, [selectedDate]);
+  }, [currentDateTime, selectedDate]);
 
   useEffect(() => {
     updateFilteredPatientsData();
@@ -441,6 +251,8 @@ function DashboardNavigator() {
                   setSelectedActivity={setSelectedActivity}
                   activityFilterList={activityFilterList}
                   setActivityFilterList={setActivityFilterList}
+                  getDefaultStartTime={getDefaultStartTime}
+                  getDefaultEndTime={getDefaultEndTime}
                 />
               </TouchableOpacity>
               <TouchableOpacity>
@@ -461,7 +273,10 @@ function DashboardNavigator() {
             selectedDate={selectedDate}
             setSelectedDate={setSelectedDate}
             filteredActivityData={filteredPatientsData}
-            currentTime={currentTime}
+            currentTime={currentDateTime}
+            isLoading={isLoading}
+            handlePullToRefresh={handlePullToRefresh}
+            noDataMessage={noDataMessage}
           />
         )}
       </Stack.Screen>

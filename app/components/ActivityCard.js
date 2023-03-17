@@ -9,6 +9,14 @@ const ActivityCard = ({
   activityEndTime,
   currentTime,
 }) => {
+  const isCurrentDate = () => {
+    const startTime = new Date(activityStartTime);
+    return (
+      startTime.getFullYear() === currentTime.getFullYear() &&
+      startTime.getMonth() === currentTime.getMonth() &&
+      startTime.getDate() === currentTime.getDate()
+    );
+  };
   const isCurrentActivity = () => {
     const startTime = new Date(activityStartTime);
     const endTime = new Date(activityEndTime);
@@ -29,7 +37,7 @@ const ActivityCard = ({
   return (
     <Container
       style={
-        isCurrentActivity()
+        isCurrentDate() && isCurrentActivity()
           ? styles.activityContainerPink
           : styles.activityContainerGray
       }

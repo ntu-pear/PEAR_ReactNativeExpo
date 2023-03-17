@@ -21,6 +21,9 @@ const DashboardScreen = ({
   setSelectedDate,
   filteredActivityData,
   currentTime,
+  isLoading,
+  handlePullToRefresh,
+  noDataMessage,
 }) => {
   const handlePreviousDate = () => {
     const previous = new Date(selectedDate.getTime());
@@ -71,6 +74,9 @@ const DashboardScreen = ({
         </TouchableOpacity>
       </Stack>
       <FlatList
+        onRefresh={handlePullToRefresh}
+        refreshing={isLoading}
+        ListEmptyComponent={noDataMessage}
         data={filteredActivityData}
         renderItem={({ item }) => (
           <Box style={styles.rowBox}>
