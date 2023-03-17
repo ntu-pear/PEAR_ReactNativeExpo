@@ -42,6 +42,7 @@ function AccountScreen(props) {
     // console.log('getCurrentUser', response);
     if (!response.ok) {
       // Proceed to log out if account screen does not load due to api failure
+      // should use useCheckExpiredThenLogOut hook but it isnt working and had no time to fix
       Alert.alert('Please reload the application.');
       setUser(null);
       await authStorage.removeToken();

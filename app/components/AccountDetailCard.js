@@ -22,6 +22,7 @@ function AccountDetailCard(props) {
         rounded="lg"
         borderColor={colors.primary_gray}
         borderWidth="1"
+        testID="accountDetailCard"
       >
         <HStack space={10}>
           <Image
