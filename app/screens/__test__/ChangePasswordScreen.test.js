@@ -45,13 +45,21 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
+const renderScreen = () => {
+  return render(
+    <NativeBaseProvider initialWindowMetrics={inset}>
+      <ChangePasswordScreen />
+    </NativeBaseProvider>,
+  );
+};
+
 describe('Test Change Password', () => {
+  test('Change password screen snapshot should match', () => {
+    expect(renderScreen().toJSON()).toMatchSnapshot();
+  });
+
   test('Should show error when compulsory fields are empty', async () => {
-    const changePasswordScreen = render(
-      <NativeBaseProvider initialWindowMetrics={inset}>
-        <ChangePasswordScreen />
-      </NativeBaseProvider>,
-    );
+    const changePasswordScreen = renderScreen();
     const oldPasswordInput =
       changePasswordScreen.getByPlaceholderText('Enter Old Password');
     const newPasswordInput =
@@ -80,11 +88,7 @@ describe('Test Change Password', () => {
       email: 'jess@gmail.com',
     });
 
-    const changePasswordScreen = render(
-      <NativeBaseProvider initialWindowMetrics={inset}>
-        <ChangePasswordScreen />
-      </NativeBaseProvider>,
-    );
+    const changePasswordScreen = renderScreen();
     const oldPasswordInput =
       changePasswordScreen.getByPlaceholderText('Enter Old Password');
     const newPasswordInput =
@@ -122,11 +126,7 @@ describe('Test Change Password', () => {
       ok: true,
     });
 
-    const changePasswordScreen = render(
-      <NativeBaseProvider initialWindowMetrics={inset}>
-        <ChangePasswordScreen />
-      </NativeBaseProvider>,
-    );
+    const changePasswordScreen = renderScreen();
     const oldPasswordInput =
       changePasswordScreen.getByPlaceholderText('Enter Old Password');
     const newPasswordInput =
@@ -147,9 +147,7 @@ describe('Test Change Password', () => {
         'Supervisor!23',
         'Supervisor123!',
       );
-    });
 
-    await waitFor(() => {
       expect(Alert.alert).toBeCalledTimes(1);
       expect(Alert.alert).toBeCalledWith(
         'Password changed successfully. Please login again.',

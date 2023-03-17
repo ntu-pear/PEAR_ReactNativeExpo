@@ -11,10 +11,7 @@ import {
 import { NativeBaseProvider } from 'native-base';
 import EditAccountScreen from 'app/screens/EditAccountScreen';
 import '@testing-library/jest-native/extend-expect';
-import user from 'app/api/user';
-import { act } from 'react-test-renderer';
 import { Alert } from 'react-native';
-import routes from 'app/navigation/routes';
 
 jest.mock('../../hooks/useApiHandler');
 jest.mock('../../api/user', () => ({
@@ -80,7 +77,7 @@ const renderScreen = () => {
 };
 
 describe('Test Update Profile Information', () => {
-  it('Edit account screen snapshot should match', () => {
+  test('Edit account screen snapshot should match', () => {
     expect(renderScreen().toJSON()).toMatchSnapshot();
   });
 

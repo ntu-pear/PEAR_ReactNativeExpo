@@ -12,8 +12,8 @@ import { NativeBaseProvider } from 'native-base';
 import ResetPasswordScreen from 'app/screens/ResetPasswordScreen';
 import '@testing-library/jest-native/extend-expect';
 import user from 'app/api/user';
-import { act } from 'react-test-renderer';
 import { Alert } from 'react-native';
+import routes from 'app/navigation/routes';
 
 jest.mock('../../hooks/useApiHandler');
 jest.mock('../../api/user', () => ({
@@ -25,6 +25,13 @@ jest.setTimeout(10000);
 
 jest.spyOn(Alert, 'alert').mockImplementation(() => {});
 
+const createTestProps = (props) => ({
+  navigation: {
+    navigate: jest.fn(),
+  },
+  ...props,
+});
+
 // we need to pass this in to NativeBaseProvider else the content within would
 // not be rendered
 const inset = {
@@ -34,15 +41,25 @@ const inset = {
 
 afterEach(() => {
   cleanup();
+  jest.clearAllMocks();
 });
 
+const renderScreen = () => {
+  this.props = createTestProps({});
+  return render(
+    <NativeBaseProvider initialWindowMetrics={inset}>
+      <ResetPasswordScreen {...this.props} />
+    </NativeBaseProvider>,
+  );
+};
+
 describe('Test Reset Password', () => {
+  test('Reset password screen snapshot should match', () => {
+    expect(renderScreen().toJSON()).toMatchSnapshot();
+  });
+
   test('Should show error when invalid email is entered', async () => {
-    const resetPasswordScreen = render(
-      <NativeBaseProvider initialWindowMetrics={inset}>
-        <ResetPasswordScreen />
-      </NativeBaseProvider>,
-    );
+    const resetPasswordScreen = renderScreen();
     const emailInput =
       resetPasswordScreen.getByPlaceholderText('jess@gmail.com');
     const resetButton = resetPasswordScreen.getByText('Reset');
@@ -55,11 +72,7 @@ describe('Test Reset Password', () => {
   });
 
   test('Should show error when no email is entered', async () => {
-    const resetPasswordScreen = render(
-      <NativeBaseProvider initialWindowMetrics={inset}>
-        <ResetPasswordScreen />
-      </NativeBaseProvider>,
-    );
+    const resetPasswordScreen = renderScreen();
     const emailInput =
       resetPasswordScreen.getByPlaceholderText('jess@gmail.com');
     const resetButton = resetPasswordScreen.getByText('Reset');
@@ -72,11 +85,7 @@ describe('Test Reset Password', () => {
   });
 
   test('Should show alert upon successful reset', async () => {
-    const resetPasswordScreen = render(
-      <NativeBaseProvider initialWindowMetrics={inset}>
-        <ResetPasswordScreen />
-      </NativeBaseProvider>,
-    );
+    const resetPasswordScreen = renderScreen();
     const emailInput =
       resetPasswordScreen.getByPlaceholderText('jess@gmail.com');
     const resetButton = resetPasswordScreen.getByText('Reset');
@@ -88,12 +97,15 @@ describe('Test Reset Password', () => {
     await waitFor(() => {
       expect(user.resetPassword).toBeCalledTimes(1);
       expect(user.resetPassword).toBeCalledWith('jess@gmail.com', 'Supervisor');
-    });
 
-    await waitFor(() => {
       expect(Alert.alert).toBeCalledTimes(1);
       expect(Alert.alert).toBeCalledWith(
         'Instructions to reset password have been sent to email.',
+      );
+
+      expect(this.props.navigation.navigate).toHaveBeenCalledTimes(1);
+      expect(this.props.navigation.navigate).toHaveBeenCalledWith(
+        routes.WELCOME,
       );
     });
   });

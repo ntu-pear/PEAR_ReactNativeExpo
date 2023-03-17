@@ -1,17 +1,10 @@
 /**
  * @jest-environment node
  */
-import {
-  render,
-  screen,
-  fireEvent,
-  cleanup,
-  waitFor,
-} from '@testing-library/react-native';
+import { render, cleanup, waitFor } from '@testing-library/react-native';
 import { NativeBaseProvider } from 'native-base';
 import AccountScreen from 'app/screens/AccountScreen';
 import '@testing-library/jest-native/extend-expect';
-import { act } from 'react-test-renderer';
 import user from 'app/api/user';
 import authStorage from 'app/auth/authStorage';
 import { NavigationContext } from '@react-navigation/native';
@@ -70,24 +63,27 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
+const renderScreen = () => {
+  return render(
+    <NativeBaseProvider initialWindowMetrics={inset}>
+      <NavigationContext.Provider value={navContext}>
+        <AuthContext.Provider
+          value={{
+            user: {
+              userID: 'B22698B8-42A2-4115-9631-1C2D1E2AC5F4',
+            },
+          }}
+        >
+          <AccountScreen />
+        </AuthContext.Provider>
+      </NavigationContext.Provider>
+    </NativeBaseProvider>,
+  );
+};
+
 describe('Test Account Screen', () => {
   test('should show ActivityIndicator when loading', async () => {
-    const accountScreen = render(
-      <NativeBaseProvider initialWindowMetrics={inset}>
-        <NavigationContext.Provider value={navContext}>
-          <AuthContext.Provider
-            value={{
-              user: {
-                userID: 'B22698B8-42A2-4115-9631-1C2D1E2AC5F4',
-              },
-            }}
-          >
-            <AccountScreen />
-          </AuthContext.Provider>
-        </NavigationContext.Provider>
-      </NativeBaseProvider>,
-    );
-
+    const accountScreen = renderScreen();
     await waitFor(() => {
       const activityIndicator = accountScreen.getByTestId('activityIndicator');
       expect(activityIndicator).toBeVisible();
@@ -103,22 +99,7 @@ describe('Test Account Screen', () => {
       data: { data: mockUserData },
     });
 
-    const accountScreen = render(
-      <NativeBaseProvider initialWindowMetrics={inset}>
-        <NavigationContext.Provider value={navContext}>
-          <AuthContext.Provider
-            value={{
-              user: {
-                userID: 'B22698B8-42A2-4115-9631-1C2D1E2AC5F4',
-              },
-            }}
-          >
-            <AccountScreen />
-          </AuthContext.Provider>
-        </NavigationContext.Provider>
-      </NativeBaseProvider>,
-    );
-
+    const accountScreen = renderScreen();
     await waitFor(() => {
       expect(authStorage.getUser).toBeCalledTimes(1);
       expect(user.getUser).toBeCalledTimes(1);
@@ -145,22 +126,7 @@ describe('Test Account Screen', () => {
       ok: false,
     });
 
-    const accountScreen = render(
-      <NativeBaseProvider initialWindowMetrics={inset}>
-        <NavigationContext.Provider value={navContext}>
-          <AuthContext.Provider
-            value={{
-              user: {
-                userID: 'B22698B8-42A2-4115-9631-1C2D1E2AC5F4',
-              },
-            }}
-          >
-            <AccountScreen />
-          </AuthContext.Provider>
-        </NavigationContext.Provider>
-      </NativeBaseProvider>,
-    );
-
+    const accountScreen = renderScreen();
     await waitFor(() => {
       expect(authStorage.getUser).toBeCalledTimes(1);
       expect(user.getUser).toBeCalledTimes(1);
