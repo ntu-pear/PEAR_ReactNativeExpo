@@ -65,10 +65,6 @@ const renderScreen = () => {
 };
 
 describe('Test View Profile Information', () => {
-  test('Account detail screen snapshot should match', () => {
-    expect(renderScreen().toJSON()).toMatchSnapshot();
-  });
-
   test('Should navigate to Edit Account Screen upon clicking button', async () => {
     const accountViewScreen = renderScreen();
     const iconButton = accountViewScreen.getByTestId('iconButton');

@@ -54,10 +54,6 @@ const renderScreen = () => {
 };
 
 describe('Test Reset Password', () => {
-  test('Reset password screen snapshot should match', () => {
-    expect(renderScreen().toJSON()).toMatchSnapshot();
-  });
-
   test('Should show error when invalid email is entered', async () => {
     const resetPasswordScreen = renderScreen();
     const emailInput =

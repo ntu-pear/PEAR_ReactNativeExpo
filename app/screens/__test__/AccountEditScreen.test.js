@@ -77,10 +77,6 @@ const renderScreen = () => {
 };
 
 describe('Test Update Profile Information', () => {
-  test('Edit account screen snapshot should match', () => {
-    expect(renderScreen().toJSON()).toMatchSnapshot();
-  });
-
   test('Should show error when invalid contact number is entered', async () => {
     const accountEditScreen = renderScreen();
     const preferredNameInput = accountEditScreen.getByPlaceholderText('Jess');

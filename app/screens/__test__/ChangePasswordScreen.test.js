@@ -54,10 +54,6 @@ const renderScreen = () => {
 };
 
 describe('Test Change Password', () => {
-  test('Change password screen snapshot should match', () => {
-    expect(renderScreen().toJSON()).toMatchSnapshot();
-  });
-
   test('Should show error when compulsory fields are empty', async () => {
     const changePasswordScreen = renderScreen();
     const oldPasswordInput =

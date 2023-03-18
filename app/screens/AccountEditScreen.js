@@ -26,7 +26,7 @@ import EditField from 'app/components/EditField';
 import ErrorMessage from 'app/components/ErrorMessage';
 import * as Yup from 'yup';
 
-function EditAccountScreen(props) {
+function AccountEditScreen(props) {
   const [isLoading, setIsLoading] = useState(false);
   const { navigation, route } = props;
   const userProfile = route.params;
@@ -463,4 +463,4 @@ function EditAccountScreen(props) {
   );
 }
 
-export default EditAccountScreen;
+export default AccountEditScreen;
