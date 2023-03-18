@@ -46,7 +46,6 @@ function NotificationsScreen(props) {
     setNotificationData,
     setIsFetchingMoreNotifications,
   );
-
   useEffect(() => {
     // Fetches data from notification api (Once)
     // Note: `false` refers readStatus = `false`
@@ -135,6 +134,7 @@ function NotificationsScreen(props) {
     // Update Notification Data with the newly filtered data; to re-render flat list.
     setNotificationData(filteredData);
   };
+  console.log(notificationData);
   return (
     <>
       {isLoading ? (

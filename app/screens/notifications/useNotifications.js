@@ -30,9 +30,9 @@ export default function useNotifications(
       sortBy,
     );
 
-    console.log(
-      response.data.results.map(({ notificationID }) => notificationID),
-    );
+    // console.log(
+    //   response.data.results.map(({ notificationID }) => notificationID),
+    // );
     if (!response.ok) {
       // return error block
       setIsError(true);
