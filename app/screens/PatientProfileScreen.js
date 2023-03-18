@@ -18,8 +18,11 @@ function PatientProfileScreen(props) {
 
   useEffect(() => {
     if (route.params.patientProfile == null) {
+      // navigated from Highlights Modal or Dashboard Screen
+      // Fetch patient's data from patient api
       getPatient(route.params.id);
     } else {
+      // navigated from Patients List Screen
       setPatientProfile(route.params.patientProfile);
     }
   }, [route.params.id, route.params.patientProfile]);

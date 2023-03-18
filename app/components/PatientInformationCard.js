@@ -42,6 +42,42 @@ function PatientInformationCard(props) {
     return `${_date.getDate()}-${_date.getMonth()}-${_date.getFullYear()}`;
   };
 
+  const MyComponent = () => {
+    return (
+      <HStack space={12} justifyContent="center">
+        <VStack>
+          <Text thin fontSize="xs" color={colors.light}>
+            NRIC NO.
+          </Text>
+          <Text bold fontSize="xl" lineHeight="xs" color={colors.light}>
+            {`${patientProfile.nric}`}
+          </Text>
+          <Text thin fontSize="xs" mt="2" color={colors.light}>
+            DATE OF BIRTH
+          </Text>
+          <Text bold fontSize="xl" lineHeight="xs" color={colors.light}>
+            {`${extractFullYear(patientProfile.dob)}`}
+          </Text>
+        </VStack>
+
+        <VStack>
+          <Text thin fontSize="xs" color={colors.light}>
+            AGE
+          </Text>
+          <Text bold fontSize="xl" lineHeight="xs" color={colors.light}>
+            {`${calcAge(patientProfile.dob)}`}
+          </Text>
+          <Text thin fontSize="xs" mt="2" color={colors.light}>
+            LANGUAGE
+          </Text>
+          <Text bold fontSize="xl" lineHeight="xs" color={colors.light}>
+            {`${patientProfile.preferredLanguage}`}
+          </Text>
+        </VStack>
+      </HStack>
+    );
+  };
+
   return (
     <TouchableOpacity
       onPress={handleOnPress}
@@ -74,50 +110,23 @@ function PatientInformationCard(props) {
                 ? patientProfile.firstName.substring(0, 1)
                 : '--'}{' '}
             </Avatar>
-            <VStack>
-              <Text bold fontSize="2xl" color={colors.light}>
-                {`${patientProfile.firstName} ${patientProfile.lastName}`}
-              </Text>
-              <Text italic fontSize="xl" color={colors.light}>
-                {`${patientProfile.preferredName}`}
-              </Text>
-              <Text italic fontSize="xl" color={colors.light}>
-                {patientProfile.gender === 'F' ? 'Female' : 'Male'}
-              </Text>
+            <VStack space={4}>
+              <VStack>
+                <Text bold fontSize="2xl" color={colors.light}>
+                  {`${patientProfile.firstName} ${patientProfile.lastName}`}
+                </Text>
+                <Text italic fontSize="xl" color={colors.light}>
+                  {`${patientProfile.preferredName}`}
+                </Text>
+                <Text italic fontSize="xl" color={colors.light}>
+                  {patientProfile.gender === 'F' ? 'Female' : 'Male'}
+                </Text>
+              </VStack>
+              {Platform.OS === 'web' ? MyComponent() : null}
             </VStack>
           </HStack>
 
-          <HStack space={12} justifyContent="center">
-            <VStack>
-              <Text thin fontSize="xs" color={colors.light}>
-                NRIC NO.
-              </Text>
-              <Text bold fontSize="xl" lineHeight="xs" color={colors.light}>
-                {`${patientProfile.nric}`}
-              </Text>
-              <Text thin fontSize="xs" mt="2" color={colors.light}>
-                DATE OF BIRTH
-              </Text>
-              <Text bold fontSize="xl" lineHeight="xs" color={colors.light}>
-                {`${extractFullYear(patientProfile.dob)}`}
-              </Text>
-            </VStack>
-
-            <VStack>
-              <Text thin fontSize="xs" color={colors.light}>
-                AGE
-              </Text>
-              <Text bold fontSize="xl" lineHeight="xs" color={colors.light}>
-                {`${calcAge(patientProfile.dob)}`}
-              </Text>
-              <Text thin fontSize="xs" mt="2" color={colors.light}>
-                LANGUAGE
-              </Text>
-              <Text bold fontSize="xl" lineHeight="xs" color={colors.light}>
-                {`${patientProfile.preferredLanguage}`}
-              </Text>
-            </VStack>
-          </HStack>
+          {Platform.OS === 'web' ? null : MyComponent()}
         </VStack>
         <Icon
           as={MaterialIcons}
