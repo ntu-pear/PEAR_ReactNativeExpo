@@ -5,10 +5,6 @@ import {
   Image,
   VStack,
   HStack,
-  Input,
-  FormControl,
-  Stack,
-  TextArea,
   AspectRatio,
   Center,
   ScrollView,
@@ -24,6 +20,7 @@ import userApi from 'app/api/user';
 import routes from 'app/navigation/routes';
 import EditField from 'app/components/EditField';
 import ErrorMessage from 'app/components/ErrorMessage';
+import UserInformationCard from 'app/components/UserInformationCard';
 import * as Yup from 'yup';
 
 function AccountEditScreen(props) {
@@ -101,10 +98,6 @@ function AccountEditScreen(props) {
     navigation.navigate(routes.ACCOUNT_SCREEN);
   };
 
-  const handleOnPressToCancel = () => {
-    navigation.goBack();
-  };
-
   const handleOnPressToImagePicker = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status == 'granted') {
@@ -157,90 +150,6 @@ function AccountEditScreen(props) {
           </HStack>
         </Center>
 
-        <FormControl>
-          <HStack space={2} alignItems="center">
-            <FormControl.Label
-              _text={{
-                fontFamily: `${
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                }`,
-                fontSize: 'lg',
-                fontWeight: 'thin',
-              }}
-            >
-              First Name
-            </FormControl.Label>
-
-            <Input
-              color={colors.black_var1}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
-              isReadOnly
-              variant="unstyled"
-              value={userProfile.firstName}
-              w="100%"
-            />
-          </HStack>
-        </FormControl>
-
-        <FormControl>
-          <HStack space={2} alignItems="center">
-            <FormControl.Label
-              _text={{
-                fontFamily: `${
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                }`,
-                fontSize: 'lg',
-                fontWeight: 'thin',
-              }}
-            >
-              Last Name
-            </FormControl.Label>
-
-            <Input
-              color={colors.black_var1}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
-              isReadOnly
-              variant="unstyled"
-              value={userProfile.lastName}
-              w="100%"
-            />
-          </HStack>
-        </FormControl>
-
-        <FormControl>
-          <HStack space={2} alignItems="center">
-            <FormControl.Label
-              _text={{
-                fontFamily: `${
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                }`,
-                fontSize: 'lg',
-                fontWeight: 'thin',
-              }}
-            >
-              Role
-            </FormControl.Label>
-
-            <Input
-              color={colors.black_var1}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
-              isReadOnly
-              variant="unstyled"
-              value={userProfile.role}
-              w="100%"
-            />
-          </HStack>
-        </FormControl>
-
         <EditField
           isRequired
           isInvalid={'preferredName' in errors}
@@ -261,149 +170,7 @@ function AccountEditScreen(props) {
           ErrorMessage={errors.contactNo}
         />
 
-        <FormControl>
-          <HStack space={2} alignItems="center">
-            <FormControl.Label
-              _text={{
-                fontFamily: `${
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                }`,
-                fontSize: 'lg',
-                fontWeight: 'thin',
-              }}
-            >
-              NRIC
-            </FormControl.Label>
-
-            <Input
-              color={colors.black_var1}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
-              isReadOnly
-              variant="unstyled"
-              value={userProfile.nric}
-              w="100%"
-            />
-          </HStack>
-        </FormControl>
-
-        <FormControl>
-          <HStack space={2} alignItems="center">
-            <FormControl.Label
-              _text={{
-                fontFamily: `${
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                }`,
-                fontSize: 'lg',
-                fontWeight: 'thin',
-              }}
-            >
-              Gender
-            </FormControl.Label>
-
-            <Input
-              color={colors.black_var1}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
-              isReadOnly
-              variant="unstyled"
-              value={userProfile.gender}
-              w="100%"
-            />
-          </HStack>
-        </FormControl>
-
-        <FormControl>
-          <HStack space={2} alignItems="center">
-            <FormControl.Label
-              _text={{
-                fontFamily: `${
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                }`,
-                fontSize: 'lg',
-                fontWeight: 'thin',
-              }}
-            >
-              DOB
-            </FormControl.Label>
-
-            <Input
-              color={colors.black_var1}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
-              isReadOnly
-              variant="unstyled"
-              value={userProfile.dob.substring(0, 10)}
-              w="100%"
-            />
-          </HStack>
-        </FormControl>
-
-        <FormControl>
-          <HStack space={2} alignItems="center">
-            <FormControl.Label
-              _text={{
-                fontFamily: `${
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                }`,
-                fontSize: 'lg',
-                fontWeight: 'thin',
-              }}
-            >
-              Email
-            </FormControl.Label>
-
-            <Input
-              color={colors.black_var1}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
-              isReadOnly
-              variant="unstyled"
-              value={userProfile.email}
-              w="100%"
-            />
-          </HStack>
-        </FormControl>
-
-        <FormControl>
-          <Stack space={0} alignItems="flex-start" flexWrap="wrap">
-            <FormControl.Label
-              width="100%"
-              _text={{
-                fontFamily: `${
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                }`,
-                fontSize: 'lg',
-                fontWeight: 'thin',
-              }}
-            >
-              Address
-            </FormControl.Label>
-            <TextArea
-              color={colors.black_var1}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
-              isReadOnly
-              input="lg"
-              ml="-2.5"
-              minH="30%"
-              maxH="50%"
-              variant="unstyled"
-              value={userProfile.address || 'Not available'}
-              w="100%"
-            />
-          </Stack>
-        </FormControl>
+        <UserInformationCard userProfile={props} />
 
         <Text
           mb="4"
@@ -443,7 +210,7 @@ function AccountEditScreen(props) {
             </Button>
 
             <Button
-              onPress={() => handleOnPressToCancel()}
+              onPress={() => navigation.goBack()}
               w="25%"
               size="md"
               bg={colors.pink}

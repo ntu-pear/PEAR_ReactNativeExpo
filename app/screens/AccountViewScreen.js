@@ -6,8 +6,6 @@ import {
   HStack,
   Input,
   FormControl,
-  Stack,
-  TextArea,
   AspectRatio,
   IconButton,
   Center,
@@ -18,6 +16,7 @@ import routes from 'app/navigation/routes';
 import typography from 'app/config/typography';
 import colors from 'app/config/colors';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import UserInformationCard from 'app/components/UserInformationCard';
 
 function AccountViewScreen(props) {
   const { navigation, route } = props;
@@ -61,90 +60,6 @@ function AccountViewScreen(props) {
             />
           </HStack>
         </Center>
-
-        <FormControl>
-          <HStack space={2} alignItems="center">
-            <FormControl.Label
-              _text={{
-                fontFamily: `${
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                }`,
-                fontSize: 'lg',
-                fontWeight: 'thin',
-              }}
-            >
-              First Name
-            </FormControl.Label>
-
-            <Input
-              color={colors.black_var1}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
-              isReadOnly
-              variant="unstyled"
-              value={userProfile.firstName}
-              w="100%"
-            />
-          </HStack>
-        </FormControl>
-
-        <FormControl>
-          <HStack space={2} alignItems="center">
-            <FormControl.Label
-              _text={{
-                fontFamily: `${
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                }`,
-                fontSize: 'lg',
-                fontWeight: 'thin',
-              }}
-            >
-              Last Name
-            </FormControl.Label>
-
-            <Input
-              color={colors.black_var1}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
-              isReadOnly
-              variant="unstyled"
-              value={userProfile.lastName}
-              w="100%"
-            />
-          </HStack>
-        </FormControl>
-
-        <FormControl>
-          <HStack space={2} alignItems="center">
-            <FormControl.Label
-              _text={{
-                fontFamily: `${
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                }`,
-                fontSize: 'lg',
-                fontWeight: 'thin',
-              }}
-            >
-              Role
-            </FormControl.Label>
-
-            <Input
-              color={colors.black_var1}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
-              isReadOnly
-              variant="unstyled"
-              value={userProfile.role}
-              w="100%"
-            />
-          </HStack>
-        </FormControl>
 
         <FormControl>
           <HStack space={2} alignItems="center">
@@ -202,149 +117,7 @@ function AccountViewScreen(props) {
           </HStack>
         </FormControl>
 
-        <FormControl>
-          <HStack space={2} alignItems="center">
-            <FormControl.Label
-              _text={{
-                fontFamily: `${
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                }`,
-                fontSize: 'lg',
-                fontWeight: 'thin',
-              }}
-            >
-              NRIC
-            </FormControl.Label>
-
-            <Input
-              color={colors.black_var1}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
-              isReadOnly
-              variant="unstyled"
-              value={userProfile.nric}
-              w="100%"
-            />
-          </HStack>
-        </FormControl>
-
-        <FormControl>
-          <HStack space={2} alignItems="center">
-            <FormControl.Label
-              _text={{
-                fontFamily: `${
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                }`,
-                fontSize: 'lg',
-                fontWeight: 'thin',
-              }}
-            >
-              Gender
-            </FormControl.Label>
-
-            <Input
-              color={colors.black_var1}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
-              isReadOnly
-              variant="unstyled"
-              value={userProfile.gender}
-              w="100%"
-            />
-          </HStack>
-        </FormControl>
-
-        <FormControl>
-          <HStack space={2} alignItems="center">
-            <FormControl.Label
-              _text={{
-                fontFamily: `${
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                }`,
-                fontSize: 'lg',
-                fontWeight: 'thin',
-              }}
-            >
-              DOB
-            </FormControl.Label>
-
-            <Input
-              color={colors.black_var1}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
-              isReadOnly
-              variant="unstyled"
-              value={userProfile.dob.substring(0, 10)}
-              w="100%"
-            />
-          </HStack>
-        </FormControl>
-
-        <FormControl>
-          <HStack space={2} alignItems="center">
-            <FormControl.Label
-              _text={{
-                fontFamily: `${
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                }`,
-                fontSize: 'lg',
-                fontWeight: 'thin',
-              }}
-            >
-              Email
-            </FormControl.Label>
-
-            <Input
-              color={colors.black_var1}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
-              isReadOnly
-              variant="unstyled"
-              value={userProfile.email}
-              w="100%"
-            />
-          </HStack>
-        </FormControl>
-
-        <FormControl>
-          <Stack space={0} alignItems="flex-start" flexWrap="wrap">
-            <FormControl.Label
-              width="100%"
-              _text={{
-                fontFamily: `${
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                }`,
-                fontSize: 'lg',
-                fontWeight: 'thin',
-              }}
-            >
-              Address
-            </FormControl.Label>
-            <TextArea
-              color={colors.black_var1}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
-              isReadOnly
-              input="lg"
-              ml="-2.5"
-              minH="30%"
-              maxH="50%"
-              variant="unstyled"
-              value={userProfile.address || 'Not available'}
-              w="100%"
-            />
-          </Stack>
-        </FormControl>
+        <UserInformationCard userProfile={props} />
       </VStack>
     </ScrollView>
   );
