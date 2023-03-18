@@ -8,7 +8,7 @@ import {
   waitFor,
 } from '@testing-library/react-native';
 import { NativeBaseProvider } from 'native-base';
-import AccountDetailScreen from 'app/screens/AccountDetailScreen';
+import AccountViewScreen from 'app/screens/AccountViewScreen';
 import '@testing-library/jest-native/extend-expect';
 import routes from 'app/navigation/routes';
 
@@ -59,7 +59,7 @@ const renderScreen = () => {
   this.props = createTestProps({});
   return render(
     <NativeBaseProvider initialWindowMetrics={inset}>
-      <AccountDetailScreen {...this.props} />
+      <AccountViewScreen {...this.props} />
     </NativeBaseProvider>,
   );
 };
@@ -70,8 +70,8 @@ describe('Test View Profile Information', () => {
   });
 
   test('Should navigate to Edit Account Screen upon clicking button', async () => {
-    const accountDetailScreen = renderScreen();
-    const iconButton = accountDetailScreen.getByTestId('iconButton');
+    const accountViewScreen = renderScreen();
+    const iconButton = accountViewScreen.getByTestId('iconButton');
     expect(iconButton).toBeVisible();
     fireEvent.press(iconButton);
 

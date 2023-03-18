@@ -9,7 +9,7 @@ import {
   waitFor,
 } from '@testing-library/react-native';
 import { NativeBaseProvider } from 'native-base';
-import EditAccountScreen from 'app/screens/EditAccountScreen';
+import AccountEditScreen from 'app/screens/AccountEditScreen';
 import '@testing-library/jest-native/extend-expect';
 import { Alert } from 'react-native';
 
@@ -71,7 +71,7 @@ const renderScreen = () => {
   this.props = createTestProps({});
   return render(
     <NativeBaseProvider initialWindowMetrics={inset}>
-      <EditAccountScreen {...this.props} />
+      <AccountEditScreen {...this.props} />
     </NativeBaseProvider>,
   );
 };
@@ -82,12 +82,12 @@ describe('Test Update Profile Information', () => {
   });
 
   test('Should show error when invalid contact number is entered', async () => {
-    const editAccountScreen = renderScreen();
-    const preferredNameInput = editAccountScreen.getByPlaceholderText('Jess');
+    const accountEditScreen = renderScreen();
+    const preferredNameInput = accountEditScreen.getByPlaceholderText('Jess');
     const contactNumberInput =
-      editAccountScreen.getByPlaceholderText('87654321');
-    const saveButton = editAccountScreen.getByText('Save');
-    const cancelButton = editAccountScreen.getByText('Cancel');
+    accountEditScreen.getByPlaceholderText('87654321');
+    const saveButton = accountEditScreen.getByText('Save');
+    const cancelButton = accountEditScreen.getByText('Cancel');
     expect(preferredNameInput).toBeVisible();
     expect(contactNumberInput).toBeVisible();
     expect(saveButton).toBeVisible();
@@ -103,12 +103,12 @@ describe('Test Update Profile Information', () => {
   });
 
   test('Should show error when compulsory fields are empty', async () => {
-    const editAccountScreen = renderScreen();
-    const preferredNameInput = editAccountScreen.getByPlaceholderText('Jess');
+    const accountEditScreen = renderScreen();
+    const preferredNameInput = accountEditScreen.getByPlaceholderText('Jess');
     const contactNumberInput =
-      editAccountScreen.getByPlaceholderText('87654321');
-    const saveButton = editAccountScreen.getByText('Save');
-    const cancelButton = editAccountScreen.getByText('Cancel');
+    accountEditScreen.getByPlaceholderText('87654321');
+    const saveButton = accountEditScreen.getByText('Save');
+    const cancelButton = accountEditScreen.getByText('Cancel');
     expect(preferredNameInput).toBeVisible();
     expect(contactNumberInput).toBeVisible();
     expect(saveButton).toBeVisible();
@@ -126,9 +126,9 @@ describe('Test Update Profile Information', () => {
   });
 
   test('Should return to previous screen upon clicking on Cancel button', async () => {
-    const editAccountScreen = renderScreen();
+    const accountEditScreen = renderScreen();
 
-    const cancelButton = editAccountScreen.getByText('Cancel');
+    const cancelButton = accountEditScreen.getByText('Cancel');
     expect(cancelButton).toBeVisible();
     fireEvent.press(cancelButton);
 

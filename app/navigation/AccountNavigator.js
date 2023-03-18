@@ -1,12 +1,12 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AccountScreen from 'app/screens/AccountScreen';
-import AccountDetailScreen from 'app/screens/AccountDetailScreen';
+import AccountViewScreen from 'app/screens/AccountViewScreen';
 import AboutScreen from 'app/screens/AboutScreen';
 // Import Constants from routes
 import routes from 'app/navigation/routes';
 import SettingsScreen from 'app/screens/SettingsScreen';
-import EditAccountScreen from 'app/screens/EditAccountScreen';
+import AccountEditScreen from 'app/screens/AccountEditScreen';
 import ChangePasswordScreen from 'app/screens/ChangePasswordScreen';
 
 // Refer to this: https://reactnavigation.org/docs/hello-react-navigation
@@ -25,21 +25,21 @@ function AccountNavigator() {
         }}
       />
       <Stack.Screen
-        name={routes.ACCOUNT_DETAIL}
-        component={AccountDetailScreen}
+        name={routes.ACCOUNT_VIEW}
+        component={AccountViewScreen}
         options={{
           headerShown: true,
           headerBackTitleVisible: false,
-          title: 'Account Details',
+          title: 'View Personal Information',
         }}
       />
       <Stack.Screen
         name={routes.ACCOUNT_EDIT}
-        component={EditAccountScreen}
+        component={AccountEditScreen}
         options={{
           headerShown: true,
           headerBackTitleVisible: false,
-          title: 'Edit Account',
+          title: 'Edit Personal Information',
         }}
       />
       <Stack.Screen

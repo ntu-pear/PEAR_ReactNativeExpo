@@ -19,7 +19,7 @@ import typography from 'app/config/typography';
 import colors from 'app/config/colors';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-function AccountDetailScreen(props) {
+function AccountViewScreen(props) {
   const { navigation, route } = props;
   const userProfile = route.params;
 
@@ -350,4 +350,4 @@ function AccountDetailScreen(props) {
   );
 }
 
-export default AccountDetailScreen;
+export default AccountViewScreen;
