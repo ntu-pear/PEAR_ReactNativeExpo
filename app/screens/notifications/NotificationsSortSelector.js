@@ -2,8 +2,8 @@ import { FormControl, HStack, Select } from 'native-base';
 
 const sortByParams = [
   ['None', ''],
-  ['Name', 'senderName'],
-  ['Date created', 'createdDateTime'],
+  ['Sender name', 'senderName'],
+  ['Date', 'createdDateTime'],
   ['Notification Type', 'type'],
   ['Status', 'status'],
 ];
