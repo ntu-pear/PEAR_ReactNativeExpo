@@ -44,7 +44,7 @@ function PatientInformationCard(props) {
 
   const MyComponent = () => {
     return (
-      <HStack space={12} justifyContent="center">
+      <HStack space={'12%'} justifyContent="center">
         <VStack>
           <Text thin fontSize="xs" color={colors.light}>
             NRIC NO.
@@ -81,7 +81,7 @@ function PatientInformationCard(props) {
   return (
     <TouchableOpacity
       onPress={handleOnPress}
-      style={Platform.OS === 'web' ? { flex: 2 } : null}
+      style={{ flex: 1 }}
       testID="patientInformationCard"
     >
       <Box
@@ -91,15 +91,19 @@ function PatientInformationCard(props) {
         borderBottomWidth="3"
         style={styles.container}
       >
-        <VStack space={4} justifyContent="center" mb="5" mt="5" flex="1">
-          <HStack space={10} justifyContent="center">
+        <VStack space={'8%'} justifyContent="center" mb="5" mt="5" flex="1">
+          <HStack space={'12%'} justifyContent="center">
             <Avatar
               size={Platform.OS === 'web' ? '28vh' : '2xl'}
               bg={colors.pink}
               marginY="auto"
-              source={{
-                uri: `${patientProfile.profilePicture}`,
-              }}
+              source={
+                patientProfile.profilePicture
+                  ? {
+                      uri: `${patientProfile.profilePicture}`,
+                    }
+                  : null
+              }
               borderColor={colors.light}
               borderWidth="2"
             >
@@ -110,7 +114,7 @@ function PatientInformationCard(props) {
                 ? patientProfile.firstName.substring(0, 1)
                 : '--'}{' '}
             </Avatar>
-            <VStack space={4}>
+            <VStack space={'8%'}>
               <VStack>
                 <Text bold fontSize="2xl" color={colors.light}>
                   {`${patientProfile.firstName} ${patientProfile.lastName}`}

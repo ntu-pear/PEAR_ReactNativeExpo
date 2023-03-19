@@ -26,13 +26,18 @@ function PatientProfileCard(props) {
       onPress={handleOnPressToNextScreen}
       testID="patientProfileCard"
     >
-      <Box alignItems="center" rounded="lg" w="110" h="90">
+      <Box
+        alignItems="center"
+        rounded="lg"
+        w={Platform.OS === 'web' ? '110' : '100%'}
+        h={Platform.OS === 'web' ? '90' : '100%'}
+      >
         <Box
           alignItems="center"
           justifyContent="center"
           rounded="xl"
-          w="55"
-          h="55"
+          w="50%"
+          h="60%"
           borderWidth="1"
           // borderColor={colors.primary_gray}
           borderColor={colors.pink}
