@@ -65,7 +65,7 @@ const renderScreen = () => {
 };
 
 describe('Test View Profile Information', () => {
-  test('Should navigate to Edit Account Screen upon clicking button', async () => {
+  test('Should navigate to Edit Profile Information Screen upon clicking button', async () => {
     const accountViewScreen = renderScreen();
     const iconButton = accountViewScreen.getByTestId('iconButton');
     expect(iconButton).toBeVisible();
