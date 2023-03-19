@@ -1,6 +1,11 @@
 /*eslint eslint-comments/no-unlimited-disable: error */
 import React, { useState } from 'react';
-import { TouchableOpacity, Platform, StyleSheet } from 'react-native';
+import {
+  Dimensions,
+  TouchableOpacity,
+  Platform,
+  StyleSheet,
+} from 'react-native';
 import { Box, VStack, Avatar, Text, HStack, Icon } from 'native-base';
 import { MaterialIcons } from '@expo/vector-icons';
 import colors from 'app/config/colors';
@@ -42,35 +47,67 @@ function PatientInformationCard(props) {
     return `${_date.getDate()}-${_date.getMonth()}-${_date.getFullYear()}`;
   };
 
+  const SCREEN_HEIGHT = Dimensions.get('window').height;
+
   const MyComponent = () => {
     return (
       <HStack space={'12%'} justifyContent="center">
         <VStack>
-          <Text thin fontSize="xs" color={colors.light}>
+          <Text thin fontSize={SCREEN_HEIGHT * 0.014} color={colors.light}>
             NRIC NO.
           </Text>
-          <Text bold fontSize="xl" lineHeight="xs" color={colors.light}>
+          <Text
+            bold
+            fontSize={SCREEN_HEIGHT * 0.024}
+            lineHeight="xs"
+            color={colors.light}
+          >
             {`${patientProfile.nric}`}
           </Text>
-          <Text thin fontSize="xs" mt="2" color={colors.light}>
+          <Text
+            thin
+            fontSize={SCREEN_HEIGHT * 0.014}
+            mt="2"
+            color={colors.light}
+          >
             DATE OF BIRTH
           </Text>
-          <Text bold fontSize="xl" lineHeight="xs" color={colors.light}>
+          <Text
+            bold
+            fontSize={SCREEN_HEIGHT * 0.024}
+            lineHeight="xs"
+            color={colors.light}
+          >
             {`${extractFullYear(patientProfile.dob)}`}
           </Text>
         </VStack>
 
         <VStack>
-          <Text thin fontSize="xs" color={colors.light}>
+          <Text thin fontSize={SCREEN_HEIGHT * 0.014} color={colors.light}>
             AGE
           </Text>
-          <Text bold fontSize="xl" lineHeight="xs" color={colors.light}>
+          <Text
+            bold
+            fontSize={SCREEN_HEIGHT * 0.024}
+            lineHeight="xs"
+            color={colors.light}
+          >
             {`${calcAge(patientProfile.dob)}`}
           </Text>
-          <Text thin fontSize="xs" mt="2" color={colors.light}>
+          <Text
+            thin
+            fontSize={SCREEN_HEIGHT * 0.014}
+            mt="2"
+            color={colors.light}
+          >
             LANGUAGE
           </Text>
-          <Text bold fontSize="xl" lineHeight="xs" color={colors.light}>
+          <Text
+            bold
+            fontSize={SCREEN_HEIGHT * 0.024}
+            lineHeight="xs"
+            color={colors.light}
+          >
             {`${patientProfile.preferredLanguage}`}
           </Text>
         </VStack>
@@ -94,7 +131,7 @@ function PatientInformationCard(props) {
         <VStack space={'8%'} justifyContent="center" mb="5" mt="5" flex="1">
           <HStack space={'12%'} justifyContent="center">
             <Avatar
-              size={Platform.OS === 'web' ? '28vh' : '2xl'}
+              size={Platform.OS === 'web' ? '28vh' : SCREEN_HEIGHT * 0.15}
               bg={colors.pink}
               marginY="auto"
               source={
@@ -116,13 +153,25 @@ function PatientInformationCard(props) {
             </Avatar>
             <VStack space={'8%'}>
               <VStack>
-                <Text bold fontSize="2xl" color={colors.light}>
+                <Text
+                  bold
+                  fontSize={SCREEN_HEIGHT * 0.034}
+                  color={colors.light}
+                >
                   {`${patientProfile.firstName} ${patientProfile.lastName}`}
                 </Text>
-                <Text italic fontSize="xl" color={colors.light}>
+                <Text
+                  italic
+                  fontSize={SCREEN_HEIGHT * 0.024}
+                  color={colors.light}
+                >
                   {`${patientProfile.preferredName}`}
                 </Text>
-                <Text italic fontSize="xl" color={colors.light}>
+                <Text
+                  italic
+                  fontSize={SCREEN_HEIGHT * 0.024}
+                  color={colors.light}
+                >
                   {patientProfile.gender === 'F' ? 'Female' : 'Male'}
                 </Text>
               </VStack>
@@ -136,7 +185,7 @@ function PatientInformationCard(props) {
           as={MaterialIcons}
           color={colors.light}
           name="chevron-right"
-          size="5xl"
+          size={SCREEN_HEIGHT * 0.04}
         />
       </Box>
     </TouchableOpacity>

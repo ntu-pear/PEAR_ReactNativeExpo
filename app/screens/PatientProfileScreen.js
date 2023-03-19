@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Dimensions } from 'react-native';
 import { Center, VStack, HStack, ScrollView, View } from 'native-base';
 import {
   MaterialCommunityIcons,
@@ -43,6 +44,8 @@ function PatientProfileScreen(props) {
     setPatientProfile(response.data.data);
     // console.log('Request successful with response: ', response);
   };
+
+  const SCREEN_HEIGHT = Dimensions.get('window').height;
 
   //   const handleProfileButton = () => {
   //     console.log("tesitn profile");
@@ -89,7 +92,7 @@ function PatientProfileScreen(props) {
                   vectorIconComponent={
                     <MaterialCommunityIcons
                       name="allergy"
-                      size={45}
+                      size={SCREEN_HEIGHT * 0.04}
                       color={colors.pink}
                     />
                   }
@@ -104,7 +107,7 @@ function PatientProfileScreen(props) {
                   vectorIconComponent={
                     <MaterialCommunityIcons
                       name="heart-pulse"
-                      size={45}
+                      size={SCREEN_HEIGHT * 0.04}
                       color={colors.pink}
                     />
                   }
@@ -117,7 +120,11 @@ function PatientProfileScreen(props) {
               <View w="30%" h="100%">
                 <PatientProfileCard
                   vectorIconComponent={
-                    <FontAwesome5 name="pills" size={45} color={colors.pink} />
+                    <FontAwesome5
+                      name="pills"
+                      size={SCREEN_HEIGHT * 0.04}
+                      color={colors.pink}
+                    />
                   }
                   text="Prescription"
                   navigation={navigation}
@@ -132,7 +139,7 @@ function PatientProfileScreen(props) {
                   vectorIconComponent={
                     <FontAwesome5
                       name="exclamation-triangle"
-                      size={40}
+                      size={SCREEN_HEIGHT * 0.035}
                       // style={{ size: "60%" }}
                       color={colors.pink}
                     />
@@ -148,7 +155,7 @@ function PatientProfileScreen(props) {
                   vectorIconComponent={
                     <MaterialCommunityIcons
                       name="clipboard-text"
-                      size={45}
+                      size={SCREEN_HEIGHT * 0.04}
                       color={colors.pink}
                     />
                   }
@@ -163,7 +170,7 @@ function PatientProfileScreen(props) {
                   vectorIconComponent={
                     <FontAwesome5
                       name="calendar-day"
-                      size={45}
+                      size={SCREEN_HEIGHT * 0.04}
                       color={colors.pink}
                     />
                   }
@@ -180,7 +187,7 @@ function PatientProfileScreen(props) {
                   vectorIconComponent={
                     <MaterialCommunityIcons
                       name="emoticon-happy"
-                      size={45}
+                      size={SCREEN_HEIGHT * 0.04}
                       color={colors.pink}
                     />
                   }
@@ -195,7 +202,7 @@ function PatientProfileScreen(props) {
                   vectorIconComponent={
                     <MaterialIcons
                       name="insert-photo"
-                      size={45}
+                      size={SCREEN_HEIGHT * 0.04}
                       color={colors.pink}
                     />
                   }
@@ -210,7 +217,7 @@ function PatientProfileScreen(props) {
                   vectorIconComponent={
                     <MaterialCommunityIcons
                       name="umbrella-beach"
-                      size={45}
+                      size={SCREEN_HEIGHT * 0.04}
                       color={colors.pink}
                     />
                   }

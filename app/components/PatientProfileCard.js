@@ -1,5 +1,11 @@
 import React from 'react';
-import { TouchableOpacity, Platform, View, StyleSheet } from 'react-native';
+import {
+  Dimensions,
+  TouchableOpacity,
+  Platform,
+  View,
+  StyleSheet,
+} from 'react-native';
 import { Box, Text } from 'native-base';
 import colors from 'app/config/colors';
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +26,8 @@ function PatientProfileCard(props) {
       navigation.push(routes, { ...patientProfile });
     }
   };
+
+  const SCREEN_HEIGHT = Dimensions.get('window').height;
 
   return (
     <TouchableOpacity
@@ -46,8 +54,8 @@ function PatientProfileCard(props) {
         </Box>
         <View style={styles.container}>
           <Text
-            fontSize="xs"
-            mt="2"
+            fontSize={SCREEN_HEIGHT * 0.013}
+            mt={SCREEN_HEIGHT * 0.01}
             color={colors.black_var1}
             textAlign="center"
             lineHeight="xs"
