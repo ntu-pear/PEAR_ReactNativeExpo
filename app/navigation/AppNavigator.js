@@ -22,7 +22,10 @@ const Tab = createBottomTabNavigator();
  */
 function hideBottomTabOnSpecificRoute(route) {
   const routeName = getFocusedRouteNameFromRoute(route) ?? '';
-  if (routeName === routes.NOTIFICATION_APPROVAL_REQUEST) {
+  if (
+    routeName === routes.NOTIFICATION_APPROVAL_REQUEST ||
+    routeName === routes.ACCOUNT_EDIT
+  ) {
     return { display: 'none' };
   }
   // Continue to include other routes here if hiding bottom tab is required
@@ -96,7 +99,8 @@ function AppNavigator() {
       <Tab.Screen
         name={routes.ACCOUNT}
         component={AccountNavigator}
-        options={{
+        options={({ route }) => ({
+          tabBarStyle: hideBottomTabOnSpecificRoute(route),
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
               name="account-circle-outline"
@@ -104,7 +108,7 @@ function AppNavigator() {
               size={size}
             />
           ),
-        }}
+        })}
       />
     </Tab.Navigator>
   );

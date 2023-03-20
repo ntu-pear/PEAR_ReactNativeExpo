@@ -14,12 +14,7 @@ function SettingsScreen(props) {
       <Center>
         <VStack flexWrap="wrap" mb="1">
           <AccountCard
-            iconTop="3"
-            iconLeft="2"
-            iconSize="50"
             vectorIconComponent={<MaterialCommunityIcons name="key" />}
-            textMarginTop="6"
-            textMarginLeft="1"
             text="Change Password"
             navigation={navigation}
             routes={routes.CHANGE_PASSWORD}
