@@ -7,6 +7,12 @@
 export default Object.freeze({
   ACCOUNT: 'Account',
   ACCOUNT_SCREEN: 'AccountScreen',
+  ACCOUNT_DETAIL: 'AccountDetailScreen',
+  ACCOUNT_EDIT: 'EditAccount',
+  ABOUT: 'About',
+  SETTINGS: 'Settings',
+  CHANGE_PASSWORD: 'ChangePassword',
+
   CONFIG: 'Config',
   CONFIG_SCREEN: 'ConfigScreen',
   DASHBOARD: 'Dashboard',

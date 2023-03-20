@@ -24,27 +24,32 @@ function ResetPasswordScreen(props) {
   };
 
   const schema = Yup.object().shape({
-    Email: Yup.string().email().required(),
-    Role: Yup.string().required(),
+    email: Yup.string()
+      .email('Invalid email address.')
+      .required('Email is a required field.'),
+    role: Yup.string().required('Role is a required field.'),
   });
 
   const validate = async () => {
     let formData = {
-      Email: email,
-      Role: role,
+      email: email,
+      role: role,
     };
 
     try {
       // Validate the form data against the schema and set errors when needed
-      await schema.validate(formData);
+      await schema.validate(formData, { abortEarly: false });
       return true;
     } catch (error) {
-      const key = error.path;
-      const message = error.message;
-      setErrors({
-        [key]: message,
-      });
-      return false;
+      if (error.inner) {
+        const errorList = {};
+        error.inner.forEach((e) => {
+          errorList[e.path] = e.message;
+        });
+        // console.log(errorList);
+        setErrors(errorList);
+        return false;
+      }
     }
   };
 
@@ -58,7 +63,7 @@ function ResetPasswordScreen(props) {
     const result = await userApi.resetPassword(email, role);
     if (!result.ok) {
       setErrors({
-        Api: result.data.message,
+        api: result.data.message,
       });
       setIsLoading(false);
       return;
@@ -76,11 +81,11 @@ function ResetPasswordScreen(props) {
         <Center>
           <CustomFormControl
             isRequired
-            isInvalid={'Email' in errors}
+            isInvalid={'email' in errors}
             title="Email"
             onChangeText={handleEmail}
             placeholder="jess@gmail.com"
-            ErrorMessage={errors.Email}
+            ErrorMessage={errors.email}
           />
 
           <FormControl maxW="80%" mt="5" isRequired>
@@ -118,17 +123,18 @@ function ResetPasswordScreen(props) {
                 <Select.Item label="Nurse" value="Nurse" />
               </Select>
             </VStack>
-            <Box>
-              <ErrorMessage visible={'Api' in errors} message={errors.Api} />
-            </Box>
-            <View style={styles.buttonsContainer}>
-              {isLoading ? (
-                <ActivityIndicator color={colors.primary_overlay_color} />
-              ) : (
-                <AppButton title="Reset" color="green" onPress={onPressReset} />
-              )}
-            </View>
           </FormControl>
+
+          <Box>
+            <ErrorMessage visible={'api' in errors} message={errors.api} />
+          </Box>
+          <View style={styles.buttonsContainer}>
+            {isLoading ? (
+              <ActivityIndicator color={colors.primary_overlay_color} />
+            ) : (
+              <AppButton title="Reset" color="green" onPress={onPressReset} />
+            )}
+          </View>
         </Center>
       </VStack>
     </View>
