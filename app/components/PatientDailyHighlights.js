@@ -4,8 +4,7 @@ import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { SearchBar } from 'react-native-elements';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { FlatList } from 'native-base';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import HighlightsCard from 'app/components/HighlightsCard';
 import highlightApi from 'app/api/highlight';
 import colors from 'app/config/colors';
@@ -89,6 +88,8 @@ function PatientDailyHighlights(props) {
       ),
     },
   ]);
+
+  const navigation = useNavigation();
 
   // useFocusEffect runs when user navigates to PatientDailyHighlights from another page
   // referencing: https://reactnavigation.org/docs/use-focus-effect/
@@ -231,6 +232,7 @@ function PatientDailyHighlights(props) {
                 onPress={setDropdownOpen}
                 setItems={setDropdownItems}
                 mode="BADGE"
+                // listMode="SCROLLVIEW"
                 theme="LIGHT"
                 multiple={true}
                 badgeDotColors={[
@@ -248,6 +250,7 @@ function PatientDailyHighlights(props) {
                 }}
                 dropDownContainerStyle={{
                   backgroundColor: colors.white,
+                  minHeight: 250,
                 }}
                 listItemLabelStyle={{
                   fontSize: 12,
@@ -271,13 +274,11 @@ function PatientDailyHighlights(props) {
             refreshing={isLoading}
             ListEmptyComponent={noDataMessage}
             renderItem={({ item }) => (
-              /*
-               * Issue resolved -- cannot swipe on Android. Soln: Wrap with <GestureHandlerRootView>
-               * Ref: https://stackoverflow.com/questions/70545275/react-native-swipeable-gesture-not-working-on-android
-               */
-              <GestureHandlerRootView>
-                <HighlightsCard item={item} />
-              </GestureHandlerRootView>
+              <HighlightsCard
+                item={item}
+                navigation={navigation}
+                setModalVisible={setModalVisible}
+              />
             )}
             testID="flatList"
           />

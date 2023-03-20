@@ -1,7 +1,12 @@
 /*eslint eslint-comments/no-unlimited-disable: error */
 import React, { useState } from 'react';
-import { TouchableOpacity, Platform } from 'react-native';
-import { Box, VStack, Center, Image, Text, HStack, Icon } from 'native-base';
+import {
+  Dimensions,
+  TouchableOpacity,
+  Platform,
+  StyleSheet,
+} from 'react-native';
+import { Box, VStack, Avatar, Text, HStack, Icon } from 'native-base';
 import { MaterialIcons } from '@expo/vector-icons';
 import colors from 'app/config/colors';
 import routes from 'app/navigation/routes';
@@ -15,14 +20,14 @@ function PatientInformationCard(props) {
     );
 
   // useNavigate() hook cannot work on mobile
-  const navigate = Platform.OS === 'web' ? useNavigate() : null;
+  // const navigate = Platform.OS === 'web' ? useNavigate() : null;
 
   const handleOnPress = () => {
     if (Platform.OS === 'web') {
       // TODO: (yapsiang) link to new paitent infomation screen
-      navigate('/' + routes.PATIENT_INFORMATION, {
-        state: { displayPicUrl: `${displayPicUrl}`, ...patientProfile },
-      });
+      // navigate('/' + routes.PATIENT_INFORMATION, {
+      //   state: { displayPicUrl: `${displayPicUrl}`, ...patientProfile },
+      // });
     } else {
       navigation.push(routes.PATIENT_INFORMATION, {
         displayPicUrl: `${displayPicUrl}`,
@@ -42,113 +47,158 @@ function PatientInformationCard(props) {
     return `${_date.getDate()}-${_date.getMonth()}-${_date.getFullYear()}`;
   };
 
-  return (
-    <TouchableOpacity onPress={handleOnPress}>
-      <Box
-        mt="5"
-        mb="5"
-        ml="1"
-        mr="1"
-        w="97%"
-        overflow="visible"
-        rounded="lg"
-        borderColor={colors.primary_gray}
-        borderWidth="1"
-      >
-        <VStack mb="2" mt="2">
-          <Center>
-            <Image
-              mt="2"
-              alt="patient_image"
-              borderRadius="full"
-              // Note: This is a fall-back uri. Will only be used if source fails to render the image.
-              fallbackSource={{
-                uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1640487405/Patient/Alice_Lee_Sxxxx567D/ProfilePicture/zsw7dyprsvn0bjmatofg.jpg',
-              }}
-              resizeMode="cover"
-              size="2xl"
-              source={{
-                uri: `${patientProfile.profilePicture}`,
-              }}
-            />
-            <Center mt="1">
-              <Text bold fontSize="2xl">
-                {`${patientProfile.firstName} ${patientProfile.lastName}`}
-              </Text>
-            </Center>
-            <Center mt="1">
-              <Text italic fontSize="2xl">
-                {`${patientProfile.preferredName}`}
-              </Text>
-            </Center>
-            <Center mt="1">
-              <Text italic fontSize="2xl">
-                {patientProfile.gender === 'F' ? 'Female' : 'Male'}
-              </Text>
-            </Center>
-          </Center>
+  const SCREEN_HEIGHT = Dimensions.get('window').height;
+
+  const MyComponent = () => {
+    return (
+      <HStack space={'12%'} justifyContent="center">
+        <VStack>
+          <Text thin fontSize={SCREEN_HEIGHT * 0.014} color={colors.light}>
+            NRIC NO.
+          </Text>
+          <Text
+            bold
+            fontSize={SCREEN_HEIGHT * 0.024}
+            lineHeight="xs"
+            color={colors.light}
+          >
+            {`${patientProfile.nric}`}
+          </Text>
+          <Text
+            thin
+            fontSize={SCREEN_HEIGHT * 0.014}
+            mt="2"
+            color={colors.light}
+          >
+            DATE OF BIRTH
+          </Text>
+          <Text
+            bold
+            fontSize={SCREEN_HEIGHT * 0.024}
+            lineHeight="xs"
+            color={colors.light}
+          >
+            {`${extractFullYear(patientProfile.dob)}`}
+          </Text>
         </VStack>
-        <HStack space={2} justifyContent="center" mt="1">
-          <Box>
-            <Text bold fontSize="xl">
-              NRIC
-            </Text>
-          </Box>
-          <Box mr="2">
-            <Text italic fontSize="xl">{`${patientProfile.nric}`}</Text>
-          </Box>
 
-          <Box>
-            <Text bold italic fontSize="xl">
-              Age
-            </Text>
-          </Box>
-          <Box>
-            <Text italic fontSize="xl">
-              {`${calcAge(patientProfile.dob)}`}
-            </Text>
-          </Box>
-        </HStack>
+        <VStack>
+          <Text thin fontSize={SCREEN_HEIGHT * 0.014} color={colors.light}>
+            AGE
+          </Text>
+          <Text
+            bold
+            fontSize={SCREEN_HEIGHT * 0.024}
+            lineHeight="xs"
+            color={colors.light}
+          >
+            {`${calcAge(patientProfile.dob)}`}
+          </Text>
+          <Text
+            thin
+            fontSize={SCREEN_HEIGHT * 0.014}
+            mt="2"
+            color={colors.light}
+          >
+            LANGUAGE
+          </Text>
+          <Text
+            bold
+            fontSize={SCREEN_HEIGHT * 0.024}
+            lineHeight="xs"
+            color={colors.light}
+          >
+            {`${patientProfile.preferredLanguage}`}
+          </Text>
+        </VStack>
+      </HStack>
+    );
+  };
 
-        <HStack space={2} justifyContent="center" mt="2" mb="2">
-          <Box>
-            <Text bold italic fontSize="xl">
-              D.O.B
-            </Text>
-          </Box>
-          <Box>
-            <Text italic fontSize="xl">
-              {`${extractFullYear(patientProfile.dob)}`}
-            </Text>
-          </Box>
-        </HStack>
-        <HStack space={2} justifyContent="center" mt="1" mb="2">
-          <Box>
-            <Text bold italic fontSize="xl">
-              Language
-            </Text>
-          </Box>
-          <Box>
-            <Text italic fontSize="xl">
-              {`${patientProfile.preferredLanguage}`}
-            </Text>
-          </Box>
-        </HStack>
-        <Center
-          position="absolute"
-          right="0"
-          marginY={Platform.OS === 'web' ? '25%' : '31%'}
-        >
-          <Icon
-            as={MaterialIcons}
-            color={colors.black_var1}
-            name="chevron-right"
-            size="5xl"
-          />
-        </Center>
+  return (
+    <TouchableOpacity
+      onPress={handleOnPress}
+      style={{ flex: 1 }}
+      testID="patientInformationCard"
+    >
+      <Box
+        overflow="visible"
+        backgroundColor={colors.green}
+        borderColor={colors.primary_gray}
+        borderBottomWidth="3"
+        style={styles.container}
+      >
+        <VStack space={'8%'} justifyContent="center" mb="5" mt="5" flex="1">
+          <HStack space={'12%'} justifyContent="center">
+            <Avatar
+              size={Platform.OS === 'web' ? '28vh' : SCREEN_HEIGHT * 0.15}
+              bg={colors.pink}
+              marginY="auto"
+              source={
+                patientProfile.profilePicture
+                  ? {
+                      uri: `${patientProfile.profilePicture}`,
+                    }
+                  : null
+              }
+              borderColor={colors.light}
+              borderWidth="2"
+            >
+              {' '}
+              {patientProfile &&
+              patientProfile.firstName &&
+              patientProfile.firstName.substring(0, 1)
+                ? patientProfile.firstName.substring(0, 1)
+                : '--'}{' '}
+            </Avatar>
+            <VStack space={'8%'}>
+              <VStack>
+                <Text
+                  bold
+                  fontSize={SCREEN_HEIGHT * 0.034}
+                  color={colors.light}
+                >
+                  {`${patientProfile.firstName} ${patientProfile.lastName}`}
+                </Text>
+                <Text
+                  italic
+                  fontSize={SCREEN_HEIGHT * 0.024}
+                  color={colors.light}
+                >
+                  {`${patientProfile.preferredName}`}
+                </Text>
+                <Text
+                  italic
+                  fontSize={SCREEN_HEIGHT * 0.024}
+                  color={colors.light}
+                >
+                  {patientProfile.gender === 'F' ? 'Female' : 'Male'}
+                </Text>
+              </VStack>
+              {Platform.OS === 'web' ? MyComponent() : null}
+            </VStack>
+          </HStack>
+
+          {Platform.OS === 'web' ? null : MyComponent()}
+        </VStack>
+        <Icon
+          as={MaterialIcons}
+          color={colors.light}
+          name="chevron-right"
+          size={SCREEN_HEIGHT * 0.04}
+        />
       </Box>
     </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+  },
+});
 
 export default PatientInformationCard;

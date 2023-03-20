@@ -11,43 +11,43 @@ function PatientScreenCard(props) {
 
   const handleOnPress = () => {
     // Navigate to PatientProfileScreen
-    navigation.push(routes.PATIENT_PROFILE, { ...patientProfile });
+    navigation.push(routes.PATIENT_PROFILE, { patientProfile: patientProfile });
   };
 
-  const MyComponent  = Platform.OS === 'web' ? VStack : HStack;
-  
+  const MyComponent = Platform.OS === 'web' ? VStack : HStack;
+
   return (
     <TouchableOpacity onPress={Platform.OS === 'web' ? onClick : handleOnPress}>
       <Box mt="3.5" mb="3.5" minW="90%" overflow="hidden" rounded="lg">
-          <MyComponent pl="5">
+        <MyComponent pl="5">
+          <Center>
+            <Image
+              alt="patient_image"
+              borderRadius="full"
+              // Note: This is a fall-back uri. Will only be used if source fails to render the image.
+              fallbackSource={{
+                uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1640487405/Patient/Alice_Lee_Sxxxx567D/ProfilePicture/zsw7dyprsvn0bjmatofg.jpg',
+              }}
+              resizeMode="cover"
+              size={Platform.OS === 'web' ? 'xl' : 'sm'}
+              source={{
+                uri: `${patientProfile.profilePicture}`,
+              }}
+            />
+          </Center>
+          <VStack>
             <Center>
-              <Image
-                alt="patient_image"
-                borderRadius="full"
-                // Note: This is a fall-back uri. Will only be used if source fails to render the image.
-                fallbackSource={{
-                  uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1640487405/Patient/Alice_Lee_Sxxxx567D/ProfilePicture/zsw7dyprsvn0bjmatofg.jpg',
-                }}
-                resizeMode="cover"
-                size={Platform.OS === 'web' ? "xl": "sm"}
-                source={{
-                  uri: `${patientProfile.profilePicture}`,
-                }}
-              />
+              <Text bold fontSize="lg" alignSelf={true} pl="2" pt="2">
+                {`${patientProfile.preferredName}`}
+              </Text>
             </Center>
-            <VStack>
-              <Center>
-                <Text bold fontSize="lg" alignSelf={true} pl="2" pt="2">
-                  {`${patientProfile.preferredName}`}
-                </Text>
-              </Center>
-              <Center>
-                <Text alignSelf={true} pl="2">
-                  {`${patientProfile.firstName} ${patientProfile.lastName}`}
-                </Text>
-              </Center>
-            </VStack>
-          </MyComponent>
+            <Center>
+              <Text alignSelf={true} pl="2">
+                {`${patientProfile.firstName} ${patientProfile.lastName}`}
+              </Text>
+            </Center>
+          </VStack>
+        </MyComponent>
       </Box>
     </TouchableOpacity>
   );

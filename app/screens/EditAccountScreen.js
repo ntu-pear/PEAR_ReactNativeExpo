@@ -78,7 +78,7 @@ function EditAccountScreen(props) {
     }
 
     // response is successful but not updating db??
-    console.log(result.data.data);
+    // console.log(result.data.data);
     Alert.alert('Successfully updated.');
     navigation.pop();
     navigation.navigate(routes.ACCOUNT);
