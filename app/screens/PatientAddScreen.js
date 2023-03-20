@@ -49,7 +49,7 @@ function PatientAddScreen(props) {
         'Preferred Language is a required field.',
       ),
       NRIC: Yup.string()
-        .matches(/^[A-Za-z]\d{7}[A-Za-z]$/, { message: 'Invalid NRIC.' })
+        .matches(/^[STFGMstfgm]\d{7}[A-Za-z]$/, { message: 'Invalid NRIC.' })
         .length(9, 'NRIC must be exactly 9 characters.')
         .required('NRIC is a required field.'),
       Address: Yup.string().required('Address is a required field.'),
@@ -113,8 +113,8 @@ function PatientAddScreen(props) {
             )
             .required("Guardian's Last Name is a required field."),
           NRIC: Yup.string()
-            .matches(/^[A-Za-z]\d{7}[A-Za-z]$/, {
-              message: 'Invalid NRIC format.',
+            .matches(/^[STFGMstfgm]\d{7}[A-Za-z]$/, {
+              message: 'Invalid NRIC.',
             })
             .length(9, 'NRIC must be exactly 9 characters.')
             .required("Guardian's NRIC is a required field."),
@@ -382,11 +382,7 @@ function PatientAddScreen(props) {
 
         // additional check to convert ContactNo  to string
         if (input === 'ContactNo') {
-          newData[index][input] = date
-            ? date
-            : parseInt(e) // check if integer (for dropdown)
-            ? parseInt(e).toString() // change to string
-            : e.toString(); // convert to string
+          newData[index][input] = e.toString(); // convert to string
         } else {
           newData[index][input] = date
             ? date
