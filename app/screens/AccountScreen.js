@@ -42,6 +42,7 @@ function AccountScreen(props) {
     // console.log('getCurrentUser', response);
     if (!response.ok) {
       // Proceed to log out if account screen does not load due to api failure
+      // Note: should use useCheckExpiredThenLogOut hook but it isnt working and had no time to fix
       setUser(null);
       await authStorage.removeToken();
       return;
@@ -60,25 +61,15 @@ function AccountScreen(props) {
 
           <VStack w="90%" flexWrap="wrap" mb="1">
             <AccountCard
-              iconTop="3"
-              iconLeft="2"
-              iconSize="50"
               vectorIconComponent={<MaterialCommunityIcons name="cog" />}
-              textMarginTop="6"
-              textMarginLeft="1"
               text="Settings"
               navigation={navigation}
               routes={routes.SETTINGS}
             />
             <AccountCard
-              iconTop="3"
-              iconLeft="2"
-              iconSize="50"
               vectorIconComponent={
                 <MaterialCommunityIcons name="information" />
               }
-              textMarginTop="6"
-              textMarginLeft="1"
               text="About"
               navigation={navigation}
               routes={routes.ABOUT}

@@ -86,6 +86,7 @@ function ResetPasswordScreen(props) {
             onChangeText={handleEmail}
             placeholder="jess@gmail.com"
             ErrorMessage={errors.email}
+            value={email}
           />
 
           <FormControl maxW="80%" mt="5" isRequired>

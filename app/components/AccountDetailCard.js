@@ -9,7 +9,7 @@ function AccountDetailCard(props) {
   const { userProfile, navigation } = props;
 
   const handleOnPress = () => {
-    navigation.push(routes.ACCOUNT_DETAIL, { ...userProfile });
+    navigation.push(routes.ACCOUNT_VIEW, { ...userProfile });
   };
 
   return (
@@ -22,6 +22,7 @@ function AccountDetailCard(props) {
         rounded="lg"
         borderColor={colors.primary_gray}
         borderWidth="1"
+        testID="accountDetailCard"
       >
         <HStack space={10}>
           <Image

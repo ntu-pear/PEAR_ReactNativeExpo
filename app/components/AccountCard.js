@@ -4,17 +4,7 @@ import colors from 'app/config/colors';
 import { TouchableOpacity } from 'react-native';
 
 function AccountCard(props) {
-  const {
-    iconTop,
-    iconLeft,
-    iconSize,
-    vectorIconComponent,
-    textMarginTop,
-    textMarginLeft,
-    text,
-    navigation,
-    routes,
-  } = props;
+  const { vectorIconComponent, text, navigation, routes } = props;
 
   const handleOnPressToNextScreen = () => {
     navigation.push(routes);
@@ -36,16 +26,16 @@ function AccountCard(props) {
                 // Reference: Passing component to child
                 // https://stackoverflow.com/questions/39652686/pass-react-component-as-props
                 as={{ ...vectorIconComponent }}
-                top={iconTop}
-                left={iconLeft}
+                top="3"
+                left="2"
                 color={colors.black_var1}
-                size={iconSize}
+                size="50"
               />
               <Text
                 alignSelf="flex-start"
                 fontSize="lg"
-                mt={textMarginTop}
-                ml={textMarginLeft}
+                mt="6"
+                ml="1"
                 color={colors.black_var1}
               >
                 {text}

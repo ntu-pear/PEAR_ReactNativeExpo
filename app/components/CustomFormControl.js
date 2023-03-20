@@ -16,6 +16,7 @@ function CustomFormControl(props) {
     ErrorMessage,
     InputRightElement,
     type,
+    value,
   } = props;
   return (
     <FormControl
@@ -47,6 +48,7 @@ function CustomFormControl(props) {
           w="100%"
           InputRightElement={InputRightElement}
           type={type}
+          value={value}
         />
         <FormControl.ErrorMessage>{ErrorMessage}</FormControl.ErrorMessage>
         <FormControl.HelperText>{HelperText}</FormControl.HelperText>
