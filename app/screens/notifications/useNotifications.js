@@ -12,7 +12,7 @@ export default function useNotifications(
   setIsError,
   setIsLoading,
   setNotificationData,
-  setIsFetchingMoreNotifications
+  setIsFetchingMoreNotifications,
 ) {
   const getNotifications = async (paginationParams, sortBy) => {
     // Get all `unread` notification of user
@@ -31,7 +31,7 @@ export default function useNotifications(
     );
 
     // console.log(
-    // response.data.results.map(({ notificationID }) => notificationID),
+    //   response.data.results.map(({ notificationID }) => notificationID),
     // );
     if (!response.ok) {
       // return error block
@@ -72,7 +72,7 @@ export default function useNotifications(
     setIsLoading(false);
   };
 
-  const getMoreNotifications = async () => {
+  const getMoreNotifications = async (paginationParams, sortBy) => {
     setIsFetchingMoreNotifications(true);
     await getNotifications(paginationParams, sortBy);
     setIsFetchingMoreNotifications(false);
@@ -81,6 +81,6 @@ export default function useNotifications(
   return {
     handlePullToRefresh,
     getNotifications,
-    getMoreNotifications
+    getMoreNotifications,
   };
 }
