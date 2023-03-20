@@ -22,9 +22,13 @@ const addPatientForm = (arr, str, patientData) => {
     const value = arr[item];
 
     for (const key in value) {
-      const val = value[key];
+      let val = value[key];
+
       // if key is IsChecked, do not append to patientData
       // IsChecked is used for front end validation for guardian's email only
+      if (key === 'NRIC') {
+        val = val.toUpperCase();
+      }
       if (key == 'IsChecked') {
         continue;
       }
@@ -78,13 +82,15 @@ const addPatient = (formData) => {
         type: 'image/png',
       };
     }
+    if (key === 'NRIC') {
+      value = value.toUpperCase();
+    }
     if (value instanceof Date) {
       value = value.toISOString().split('T')[0];
     }
     const param = `patientAddDTO.${key}`;
     patientData.append(param, value);
   }
-  console.log(patientData);
 
   addPatientForm(formData.guardianInfo, 'GuardianAddDto', patientData);
   addPatientForm(formData.allergyInfo, 'AllergyAddDto', patientData);
