@@ -16,12 +16,12 @@ const Stack = createNativeStackNavigator();
 // Refer to this for configuration: https://reactnavigation.org/docs/native-stack-navigator#options
 function DashboardNavigator() {
   const [modalVisible, setModalVisible] = useState(false);
-  const [currentDateTime, setCurrentDateTime] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedStartTime, setSelectedStartTime] = useState(
     new Date(
-      currentDateTime.getFullYear(),
-      currentDateTime.getMonth(),
-      currentDateTime.getDate(),
+      currentTime.getFullYear(),
+      currentTime.getMonth(),
+      currentTime.getDate(),
       0,
       0,
       0,
@@ -29,9 +29,9 @@ function DashboardNavigator() {
   );
   const [selectedEndTime, setSelectedEndTime] = useState(
     new Date(
-      currentDateTime.getFullYear(),
-      currentDateTime.getMonth(),
-      currentDateTime.getDate(),
+      currentTime.getFullYear(),
+      currentTime.getMonth(),
+      currentTime.getDate(),
       23,
       59,
       59,
@@ -51,9 +51,9 @@ function DashboardNavigator() {
 
   const getDefaultStartTime = () =>
     new Date(
-      currentDateTime.getFullYear(),
-      currentDateTime.getMonth(),
-      currentDateTime.getDate(),
+      currentTime.getFullYear(),
+      currentTime.getMonth(),
+      currentTime.getDate(),
       0,
       0,
       0,
@@ -61,9 +61,9 @@ function DashboardNavigator() {
 
   const getDefaultEndTime = () =>
     new Date(
-      currentDateTime.getFullYear(),
-      currentDateTime.getMonth(),
-      currentDateTime.getDate(),
+      currentTime.getFullYear(),
+      currentTime.getMonth(),
+      currentTime.getDate(),
       23,
       59,
       59,
@@ -146,22 +146,27 @@ function DashboardNavigator() {
     setFilteredPatientsData(filtered);
   };
 
-  const getDashboardData = async () => {
+  const refreshDashboardData = () => {
     setIsLoading(true);
     setIsError(false);
-    const response = await dashboardApi.getDashboard();
-    return new Promise((resolve, reject) => {
-      if (response.ok) {
-        setIsLoading(false);
-        setStatusCode(response.status);
-        resolve(response.data.data);
-      } else {
+    dashboardApi
+      .getDashboard()
+      .then((res) => {
+        if (res.status === 200) {
+          setPatientsData(res.data.data);
+          setIsLoading(false);
+          setStatusCode(res.status);
+        } else {
+          setIsLoading(false);
+          setIsError(true);
+          setStatusCode(res.status);
+        }
+      })
+      .catch((err) => {
         setIsLoading(false);
         setIsError(true);
-        setStatusCode(response.status);
-        reject('ERROR');
-      }
-    });
+        setStatusCode(err.response.status);
+      });
   };
 
   const noDataMessage = () => {
@@ -178,20 +183,13 @@ function DashboardNavigator() {
     return <Text>No schedule can be found.</Text>;
   };
 
-  const handlePullToRefresh = async () => {
-    await getDashboardData();
-    setCurrentDateTime(new Date());
+  const handlePullToRefresh = () => {
+    refreshDashboardData();
+    setCurrentTime(new Date());
   };
 
   useEffect(() => {
-    getDashboardData()
-      .then((res) => {
-        setPatientsData(res);
-      })
-      .catch((err) => {
-        // eslint-disable-next-line no-console
-        console.log(err);
-      });
+    refreshDashboardData();
   }, []);
 
   useEffect(() => {
@@ -201,25 +199,12 @@ function DashboardNavigator() {
   }, [patientsData]);
 
   useEffect(() => {
-    setSelectedStartTime(
-      new Date(
-        currentDateTime.getFullYear(),
-        currentDateTime.getMonth(),
-        currentDateTime.getDate(),
-        currentDateTime.setHours(0, 0, 0),
-      ),
-    );
-    setSelectedEndTime(
-      new Date(
-        currentDateTime.getFullYear(),
-        currentDateTime.getMonth(),
-        currentDateTime.getDate(),
-        currentDateTime.setHours(23, 59, 59),
-      ),
-    );
+    setSelectedStartTime(getDefaultStartTime());
+    setSelectedEndTime(getDefaultEndTime());
     setSelectedActivity(null);
     setActivityFilterList(null);
-  }, [currentDateTime, selectedDate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentTime, selectedDate]);
 
   useEffect(() => {
     updateFilteredPatientsData();
@@ -282,7 +267,7 @@ function DashboardNavigator() {
             selectedDate={selectedDate}
             setSelectedDate={setSelectedDate}
             filteredActivityData={filteredPatientsData}
-            currentTime={currentDateTime}
+            currentTime={currentTime}
             isLoading={isLoading}
             handlePullToRefresh={handlePullToRefresh}
             noDataMessage={noDataMessage}
