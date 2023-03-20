@@ -18,12 +18,12 @@ function NotificationsReadScreen(props) {
     useState(false);
   const paginationParams = useRef({});
   const [sortBy, setSortBy] = useState('');
-  const { getNotifications, handlePullToRefresh, getMoreNotifications} = useNotifications(
+  const { handlePullToRefresh, getMoreNotifications } = useNotifications(
     notificationType,
     setIsError,
     setIsLoading,
     setNotificationReadData,
-    setIsFetchingMoreNotifications
+    setIsFetchingMoreNotifications,
   );
 
   useEffect(() => {
@@ -58,7 +58,9 @@ function NotificationsReadScreen(props) {
                 showsVerticalScrollIndicator={false}
                 data={notificationReadData}
                 keyExtractor={(item) => item.notificationID}
-                onEndReached={getMoreNotifications}
+                onEndReached={async () =>
+                  await getMoreNotifications(paginationParams, sortBy)
+                }
                 onRefresh={async () =>
                   await handlePullToRefresh(paginationParams, sortBy)
                 }

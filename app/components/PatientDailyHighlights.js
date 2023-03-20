@@ -4,14 +4,14 @@ import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { SearchBar } from 'react-native-elements';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { FlatList } from 'native-base';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import HighlightsCard from 'app/components/HighlightsCard';
 import highlightApi from 'app/api/highlight';
 import colors from 'app/config/colors';
 
 function PatientDailyHighlights(props) {
   // Destructure props
-  const { modalVisible, setModalVisible, navigation } = props;
+  const { modalVisible, setModalVisible } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [statusCode, setStatusCode] = useState();
@@ -88,6 +88,8 @@ function PatientDailyHighlights(props) {
       ),
     },
   ]);
+
+  const navigation = useNavigation();
 
   // useFocusEffect runs when user navigates to PatientDailyHighlights from another page
   // referencing: https://reactnavigation.org/docs/use-focus-effect/

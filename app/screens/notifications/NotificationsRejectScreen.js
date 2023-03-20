@@ -18,13 +18,14 @@ function NotificationsRejectScreen(props) {
     useState(false);
   const paginationParams = useRef({});
   const [sortBy, setSortBy] = useState('');
-  const { getNotifications, handlePullToRefresh, getMoreNotifications } = useNotifications(
-    notificationType,
-    setIsError,
-    setIsLoading,
-    setNotificationRejectedData,
-    setIsFetchingMoreNotifications
-  );
+  const { getNotifications, handlePullToRefresh, getMoreNotifications } =
+    useNotifications(
+      notificationType,
+      setIsError,
+      setIsLoading,
+      setNotificationRejectedData,
+      setIsFetchingMoreNotifications,
+    );
   // const [notificationRejectedData, setNotificationRejectedData] = useState([
   //   {
   //     requiresAction: false,
@@ -68,7 +69,9 @@ function NotificationsRejectScreen(props) {
               showsVerticalScrollIndicator={false}
               data={notificationRejectedData}
               keyExtractor={(item) => item.notificationID}
-              onEndReached={getMoreNotifications}
+              onEndReached={async () =>
+                await getMoreNotifications(paginationParams, sortBy)
+              }
               onRefresh={async () =>
                 await handlePullToRefresh(paginationParams, sortBy)
               }

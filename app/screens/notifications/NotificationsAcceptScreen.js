@@ -18,13 +18,14 @@ function NotificationsAcceptScreen(props) {
     useState(false);
   const [notificationAcceptedData, setNotificationAcceptedData] = useState([]);
   const [sortBy, setSortBy] = useState('');
-  const { getNotifications, handlePullToRefresh, getMoreNotifications } = useNotifications(
-    notificationType,
-    setIsError,
-    setIsLoading,
-    setNotificationAcceptedData,
-    setIsFetchingMoreNotifications
-  );
+  const { getNotifications, handlePullToRefresh, getMoreNotifications } =
+    useNotifications(
+      notificationType,
+      setIsError,
+      setIsLoading,
+      setNotificationAcceptedData,
+      setIsFetchingMoreNotifications,
+    );
   // const [notificationAcceptedData, setNotificationAcceptedData] = useState([
   //   {
   //     requiresAction: false,
@@ -72,7 +73,9 @@ function NotificationsAcceptScreen(props) {
                 showsVerticalScrollIndicator={false}
                 data={notificationAcceptedData}
                 keyExtractor={(item) => item.notificationID}
-                onEndReached={getMoreNotifications}
+                onEndReached={async () =>
+                  await getMoreNotifications(paginationParams, sortBy)
+                }
                 onRefresh={async () =>
                   await handlePullToRefresh(paginationParams, sortBy)
                 }
