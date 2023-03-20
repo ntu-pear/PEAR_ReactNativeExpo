@@ -60,6 +60,7 @@ function DatePickerComponent({
           </FormControl.Label>
           <DateTimePicker
             value={value}
+            display={'default'}
             onChange={handleFormData(page, field)}
             minimumDate={minimumDOB}
             maximumDate={maximumDOB}
@@ -82,6 +83,7 @@ function DatePickerComponent({
 
           <DateTimePicker
             value={value}
+            display={'default'}
             onChange={handleFormData(page, field)}
             minimumDate={minimumDate}
             maximumDate={maximumDate}
@@ -93,6 +95,7 @@ function DatePickerComponent({
             <>
               <DateTimePicker
                 value={value}
+                display={'default'}
                 onChange={handleFormData(page, field)}
                 minimumDate={minimumDate}
                 maximumDate={maximumDate}
@@ -146,6 +149,7 @@ function DatePickerComponent({
               field == 'DOB' ? (
                 <DateTimePicker
                   value={value}
+                  display={'default'}
                   onChange={handleFormData(page, field)}
                   minimumDate={minimumDOB}
                   maximumDate={maximumDOB}
@@ -153,6 +157,7 @@ function DatePickerComponent({
               ) : (
                 <DateTimePicker
                   value={value}
+                  display={'default'}
                   onChange={handleFormData(page, field)}
                   minimumDate={minimumDate}
                   maximumDate={maximumDate}
@@ -201,6 +206,7 @@ function DatePickerComponent({
           {show[field] ? (
             <DateTimePicker
               value={value}
+              display={'default'}
               onChange={handleFormData(page, field)}
               minimumDate={minimumDate}
               maximumDate={maximumDate}
