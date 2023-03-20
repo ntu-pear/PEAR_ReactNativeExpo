@@ -59,7 +59,6 @@ function AddPatientAllergy({
     { list_AllergyReactionID: 11, value: 'Hives' },
   ];
 
-  console.log('erro-remarks', errorMessage);
   return (
     <Box w="100%">
       <VStack>

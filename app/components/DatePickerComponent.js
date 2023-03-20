@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import { Box, FormControl, Text, Input, Pressable, HStack } from 'native-base';
-// import colors from 'app/config/colors';
-import { ScrollView, Platform, TouchableOpacity } from 'react-native';
+import React from 'react';
+import { Box, FormControl, Input, Pressable } from 'native-base';
+import { Platform, StyleSheet } from 'react-native';
 
 import DateTimePicker from '@react-native-community/datetimepicker';
 
@@ -61,10 +60,12 @@ function DatePickerComponent({
           <DateTimePicker
             value={value}
             display={'default'}
+            mode={'date'}
             onChange={handleFormData(page, field)}
             minimumDate={minimumDOB}
             maximumDate={maximumDOB}
             placeHolderText="Select Date"
+            style={styles.dateTimePickerStyle}
           />
         </Box>
       ) : field == 'StartDate' ? (
@@ -87,6 +88,7 @@ function DatePickerComponent({
             onChange={handleFormData(page, field)}
             minimumDate={minimumDate}
             maximumDate={maximumDate}
+            style={styles.dateTimePickerStyle}
           />
         </>
       ) : (
@@ -99,15 +101,16 @@ function DatePickerComponent({
                 onChange={handleFormData(page, field)}
                 minimumDate={minimumDate}
                 maximumDate={maximumDate}
+                style={styles.dateTimePickerStyle}
               />
-              {value.getTime() === 0 ? (
+              {/* {value.getTime() === 0 ? (
                 <ErrorMessage
                   visible
                   message="Please select the Date of Leaving." // quick fix for validation
                 />
               ) : (
                 <></>
-              )}
+              )} */}
             </>
           ) : (
             <></>
@@ -219,5 +222,11 @@ function DatePickerComponent({
     </Box>
   );
 }
-
+const styles = StyleSheet.create({
+  dateTimePickerStyle: {
+    padding: Platform.OS === 'ios' ? 30 : 60,
+    width: '100%',
+    fontSize: 20,
+  },
+});
 export default DatePickerComponent;
