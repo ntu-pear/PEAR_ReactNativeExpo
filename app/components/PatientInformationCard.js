@@ -62,7 +62,7 @@ function PatientInformationCard(props) {
             lineHeight="xs"
             color={colors.light}
           >
-            {`${patientProfile.nric}`}
+            {`${patientProfile?.nric}`}
           </Text>
           <Text
             thin
@@ -78,7 +78,7 @@ function PatientInformationCard(props) {
             lineHeight="xs"
             color={colors.light}
           >
-            {`${extractFullYear(patientProfile.dob)}`}
+            {`${extractFullYear(patientProfile?.dob)}`}
           </Text>
         </VStack>
 
@@ -92,7 +92,7 @@ function PatientInformationCard(props) {
             lineHeight="xs"
             color={colors.light}
           >
-            {`${calcAge(patientProfile.dob)}`}
+            {`${calcAge(patientProfile?.dob)}`}
           </Text>
           <Text
             thin
@@ -108,7 +108,7 @@ function PatientInformationCard(props) {
             lineHeight="xs"
             color={colors.light}
           >
-            {`${patientProfile.preferredLanguage}`}
+            {`${patientProfile?.preferredLanguage}`}
           </Text>
         </VStack>
       </HStack>
@@ -135,7 +135,7 @@ function PatientInformationCard(props) {
               bg={colors.pink}
               marginY="auto"
               source={
-                patientProfile.profilePicture
+                patientProfile?.profilePicture
                   ? {
                       uri: `${patientProfile.profilePicture}`,
                     }
@@ -158,21 +158,21 @@ function PatientInformationCard(props) {
                   fontSize={SCREEN_HEIGHT * 0.034}
                   color={colors.light}
                 >
-                  {`${patientProfile.firstName} ${patientProfile.lastName}`}
+                  {`${patientProfile?.firstName} ${patientProfile?.lastName}`}
                 </Text>
                 <Text
                   italic
                   fontSize={SCREEN_HEIGHT * 0.024}
                   color={colors.light}
                 >
-                  {`${patientProfile.preferredName}`}
+                  {`${patientProfile?.preferredName}`}
                 </Text>
                 <Text
                   italic
                   fontSize={SCREEN_HEIGHT * 0.024}
                   color={colors.light}
                 >
-                  {patientProfile.gender === 'F' ? 'Female' : 'Male'}
+                  {patientProfile?.gender === 'F' ? 'Female' : 'Male'}
                 </Text>
               </VStack>
               {Platform.OS === 'web' ? MyComponent() : null}
