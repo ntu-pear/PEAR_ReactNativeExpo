@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { Box, ScrollView, VStack, Center } from 'native-base';
+import {
+  Box,
+  ScrollView,
+  VStack,
+  Center,
+  SectionList,
+  View,
+} from 'native-base';
 import AddPatientAllergy from 'app/components/AddPatientAllergy';
 import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import AddPatientProgress from 'app/components/AddPatientProgress';
@@ -37,42 +44,39 @@ function PatientAddAllergyScreen(props) {
   };
 
   return (
-    <ScrollView>
-      <Box alignItems="center">
-        <Box w="100%">
-          <VStack>
-            <Center>
-              <AddPatientProgress value={100} />
-              {allergyInfoDisplay
-                ? allergyInfoDisplay.map((item, index) => (
-                    <Box w="100%" key={index}>
-                      <AddPatientAllergy
-                        key={item}
-                        i={index}
-                        title={index + 1}
-                        formData={formData}
-                        handleFormData={handleFormData}
-                        errorMessage={errorMessage}
-                      />
-                    </Box>
-                  ))
-                : null}
-            </Center>
-          </VStack>
-        </Box>
-        <AddPatientBottomButtons
-          list={allergyInfoDisplay}
-          prevQuestionHandler={() =>
-            prevQuestionHandler('allergy', allergyInfoDisplay)
-          }
-          addComponent={addNewAllergyComponent}
-          removeComponent={removeAllergyComponent}
-          submit={true}
-          formData={formData}
-          validateStep={validateStep}
-        />
-      </Box>
-    </ScrollView>
+    <>
+      <Center>
+        <AddPatientProgress value={100} />
+      </Center>
+      <SectionList
+        sections={[{ data: allergyInfoDisplay }]}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item, index }) => (
+          <AddPatientAllergy
+            i={index}
+            title={index + 1}
+            formData={formData}
+            handleFormData={handleFormData}
+            errorMessage={errorMessage}
+          />
+        )}
+        ListFooterComponent={() => (
+          <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+            <AddPatientBottomButtons
+              list={allergyInfoDisplay}
+              prevQuestionHandler={() =>
+                prevQuestionHandler('allergy', allergyInfoDisplay)
+              }
+              addComponent={addNewAllergyComponent}
+              removeComponent={removeAllergyComponent}
+              submit={true}
+              formData={formData}
+              validateStep={validateStep}
+            />
+          </View>
+        )}
+      />
+    </>
   );
 }
 export default PatientAddAllergyScreen;

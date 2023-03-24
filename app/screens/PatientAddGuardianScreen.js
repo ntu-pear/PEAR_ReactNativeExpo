@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Box, ScrollView, VStack, Center } from 'native-base';
+import { Box, SectionList, VStack, Center, View } from 'native-base';
+// import { SectionList } from 'react-native';
 
 import { MaterialIcons } from '@expo/vector-icons';
 import colors from 'app/config/colors';
@@ -44,45 +45,42 @@ function PatientAddGuardianScreen(props) {
     setGuardianInfoDisplay(list);
     removeFormData('guardianInfo');
   };
-
   return (
-    <ScrollView>
-      <Box alignItems="center">
-        <Box w="100%">
-          <VStack>
-            <Center>
-              <AddPatientProgress value={60} />
-              {guardianInfoDisplay
-                ? guardianInfoDisplay.map((item, index) => (
-                    <Box w="100%" key={index}>
-                      <AddPatientGuardian
-                        key={item}
-                        i={index}
-                        title={index + 1}
-                        formData={formData}
-                        handleFormData={handleFormData}
-                        errorMessage={errorMessage}
-                      />
-                    </Box>
-                  ))
-                : null}
-            </Center>
-          </VStack>
-        </Box>
-        <AddPatientBottomButtons
-          list={guardianInfoDisplay}
-          nextQuestionHandler={() =>
-            nextQuestionHandler(formData, 'guardian', guardianInfoDisplay)
-          }
-          prevQuestionHandler={() =>
-            prevQuestionHandler('guardian', guardianInfoDisplay)
-          }
-          addComponent={addNewGuardianComponent}
-          removeComponent={removeGuardianComponent}
-          max={2}
-        />
-      </Box>
-    </ScrollView>
+    <>
+      <Center>
+        <AddPatientProgress value={60} />
+      </Center>
+      <SectionList
+        sections={[{ data: guardianInfoDisplay }]}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item, index }) => (
+          <AddPatientGuardian
+            key={item}
+            i={index}
+            title={index + 1}
+            formData={formData}
+            handleFormData={handleFormData}
+            errorMessage={errorMessage}
+          />
+        )}
+        ListFooterComponent={() => (
+          <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+            <AddPatientBottomButtons
+              list={guardianInfoDisplay}
+              nextQuestionHandler={() =>
+                nextQuestionHandler(formData, 'guardian', guardianInfoDisplay)
+              }
+              prevQuestionHandler={() =>
+                prevQuestionHandler('guardian', guardianInfoDisplay)
+              }
+              addComponent={addNewGuardianComponent}
+              removeComponent={removeGuardianComponent}
+              max={2}
+            />
+          </View>
+        )}
+      />
+    </>
   );
 }
 export default PatientAddGuardianScreen;
