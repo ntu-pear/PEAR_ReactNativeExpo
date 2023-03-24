@@ -103,14 +103,6 @@ function DatePickerComponent({
                 maximumDate={maximumDate}
                 style={styles.dateTimePickerStyle}
               />
-              {value.getTime() === 0 ? (
-                <ErrorMessage
-                  visible
-                  message="Please select the Date of Leaving." // quick fix for validation
-                />
-              ) : (
-                <></>
-              )}
             </>
           ) : (
             <></>
@@ -194,14 +186,6 @@ function DatePickerComponent({
                   }
                 />
               </Pressable>
-              {value.getTime() === 0 ? (
-                <ErrorMessage
-                  visible
-                  message="Please select the Date of Leaving." // quick fix for validation
-                />
-              ) : (
-                <></>
-              )}
             </>
           ) : (
             <></>

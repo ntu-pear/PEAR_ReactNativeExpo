@@ -372,7 +372,11 @@ function PatientAddPatientInfoScreen(props) {
                     </HStack>
                   </FormControl>
 
-                  <FormControl w="80%" mt="5" isRequired>
+                  <FormControl
+                    w="80%"
+                    mt="5"
+                    isInvalid={'EndDate' in errorMessage}
+                  >
                     <DatePickerComponent
                       label={'Date of Leaving (Optional)'}
                       value={patient.EndDate}
@@ -384,11 +388,17 @@ function PatientAddPatientInfoScreen(props) {
                       isChecked={patient.IsChecked}
                     />
                   </FormControl>
-
+                  {/* <FormControl.ErrorMessage>
+                    {errorMessage.EndDate}
+                  </FormControl.ErrorMessage> */}
                   <Box>
                     <ErrorMessage
                       visible={'EndDate' in errorMessage}
-                      message={errorMessage.EndDate}
+                      message={
+                        Platform.OS === 'ios'
+                          ? 'Please select another Date of Leaving.'
+                          : 'Please select a Date of Leaving.'
+                      }
                     />
                   </Box>
                 </Center>

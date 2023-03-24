@@ -70,17 +70,20 @@ function PatientAddScreen(props) {
       DOB: Yup.date().required(),
       StartDate: Yup.date().required(),
       IsChecked: Yup.boolean().required(), // additional item for End Date datepicker to be optional
-      // EndDate: Yup.date() // TODO: fix validation for EndDate
-      //   .required()
-      //   .when('IsChecked', {
-      //     is: true,
-      //     then: Yup.date().test(
-      //       'is-not-epoch',
-      //       'Please select a valid End Date',
-      //       (value) => value.getTime() !== 0,
-      //     ),
-      //   }),
-      EndDate: Yup.date().notRequired(),
+      EndDate: Yup.date().test(
+        'required-if-checked',
+        'EndDate is required',
+        function (value) {
+          const isChecked = this.parent.IsChecked;
+          if (isChecked && !value) {
+            return false;
+          }
+          if (isChecked && value && value.getTime() === new Date(0).getTime()) {
+            return false;
+          }
+          return true;
+        },
+      ),
       PrivacyLevel: Yup.string().required(),
       UpdateBit: Yup.boolean().required(),
       AutoGame: Yup.boolean().required(),
