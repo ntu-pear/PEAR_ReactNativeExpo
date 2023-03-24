@@ -324,6 +324,7 @@ function PatientAddPatientInfoScreen(props) {
                   <FormControl w="80%" mt="5" isRequired>
                     <DatePickerComponent
                       label={'Date of Birth'}
+                      patient={patient}
                       value={patient.DOB}
                       page={page}
                       field="DOB"
@@ -342,6 +343,7 @@ function PatientAddPatientInfoScreen(props) {
                   <FormControl w="80%" mt="5" isRequired>
                     <DatePickerComponent
                       label={'Date of Joining'}
+                      patient={patient}
                       value={patient.StartDate}
                       page={page}
                       field="StartDate"
@@ -372,9 +374,14 @@ function PatientAddPatientInfoScreen(props) {
                     </HStack>
                   </FormControl>
 
-                  <FormControl w="80%" mt="5" isRequired>
+                  <FormControl
+                    w="80%"
+                    mt="5"
+                    isInvalid={'EndDate' in errorMessage}
+                  >
                     <DatePickerComponent
                       label={'Date of Leaving (Optional)'}
+                      patient={patient}
                       value={patient.EndDate}
                       page={page}
                       field="EndDate"
@@ -388,7 +395,11 @@ function PatientAddPatientInfoScreen(props) {
                   <Box>
                     <ErrorMessage
                       visible={'EndDate' in errorMessage}
-                      message={errorMessage.EndDate}
+                      message={
+                        Platform.OS === 'ios'
+                          ? 'Please select another Date of Leaving.'
+                          : 'Please select a Date of Leaving.'
+                      }
                     />
                   </Box>
                 </Center>

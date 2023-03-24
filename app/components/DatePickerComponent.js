@@ -8,12 +8,12 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import TextField from '@mui/material/TextField';
-import ErrorMessage from 'app/components/ErrorMessage';
 import typography from 'app/config/typography';
 import colors from 'app/config/colors';
 
 function DatePickerComponent({
   label,
+  patient,
   value,
   page,
   field,
@@ -99,18 +99,12 @@ function DatePickerComponent({
                 value={value}
                 display={'default'}
                 onChange={handleFormData(page, field)}
-                minimumDate={minimumDate}
+                minimumDate={
+                  patient.StartDate ? patient.StartDate : minimumDate
+                }
                 maximumDate={maximumDate}
                 style={styles.dateTimePickerStyle}
               />
-              {value.getTime() === 0 ? (
-                <ErrorMessage
-                  visible
-                  message="Please select the Date of Leaving." // quick fix for validation
-                />
-              ) : (
-                <></>
-              )}
             </>
           ) : (
             <></>
@@ -194,14 +188,6 @@ function DatePickerComponent({
                   }
                 />
               </Pressable>
-              {value.getTime() === 0 ? (
-                <ErrorMessage
-                  visible
-                  message="Please select the Date of Leaving." // quick fix for validation
-                />
-              ) : (
-                <></>
-              )}
             </>
           ) : (
             <></>
@@ -211,7 +197,7 @@ function DatePickerComponent({
               value={value}
               display={'default'}
               onChange={handleFormData(page, field)}
-              minimumDate={minimumDate}
+              minimumDate={patient.StartDate ? patient.StartDate : minimumDate}
               maximumDate={maximumDate}
             />
           ) : (
