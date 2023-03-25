@@ -15,6 +15,7 @@ import PatientPrescriptionScreen from 'app/screens/PatientPrescriptionScreen';
 import PatientProblemLog from 'app/screens/PatientProblemLog';
 import PatientVitalScreen from 'app/screens/PatientVitalScreen';
 import PatientRoutineScreen from 'app/screens/PatientRoutineScreen';
+import PatientAddScreen from 'app/screens/PatientAddScreen';
 
 // Refer to this: https://reactnavigation.org/docs/hello-react-navigation
 const Stack = createNativeStackNavigator();
@@ -128,6 +129,15 @@ function PatientsNavigator() {
           headerShown: true,
           headerBackTitleVisible: false,
           title: 'Routine',
+        }}
+      />
+      <Stack.Screen
+        name={routes.PATIENT_ADD_PATIENT}
+        component={PatientAddScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Add Patient',
         }}
       />
     </Stack.Navigator>

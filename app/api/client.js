@@ -5,6 +5,7 @@ import { Platform } from 'react-native';
 
 const baseURL = 'https://coremvc.fyp2017.com/api';
 // for CORS error
+// API for local BE
 // const baseURLWeb = 'http://localhost:5383/api';
 // API for BE staging stage
 const baseURLWeb = 'https://ntu-fyp-pear-core.azurewebsites.net/api';
@@ -18,18 +19,19 @@ const apiClient = create({
   // baseURL: Platform.OS === 'web' ? baseURLWeb : baseURL,
   baseURL,
 });
-
 // Method override on apiClient.get()
 const { get } = apiClient;
 apiClient.get = async (url, params, axiosConfig) => {
   const response = await get(url, params, axiosConfig);
-  const url_obj = new URL(url);
+  const url_obj = new URL(url, baseURL);
   // add parameters to url object
   // e.g. url: /Notifications/User  params: {readStatus: false, ...}
   // becomes /Notifications/User/?readStatus=false...
-  Object.entries(params).forEach(([key, value]) => {
-    url_obj.searchParams.append(key, value);
-  });
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      url_obj.searchParams.append(key, value);
+    });
+  }
   // If there's network connectivity == we can query api successfully; then store data in cache
   if (response.ok) {
     cache.store(url_obj.toString(), response.data);
@@ -85,14 +87,14 @@ apiClient.addAsyncResponseTransform(async (response) => {
       // console.log(data.data.error);
       return Promise.resolve();
     }
-    const bearerToken = data.data.accessToken;
+    const bearerToken = data.data.data.accessToken;
     apiClient.setHeaders({
       Authorization: `Bearer ${bearerToken}`,
     });
     // remove existing token
     await authStorage.removeToken();
-    authStorage.storeToken('userAuthToken', data.data.accessToken);
-    authStorage.storeToken('userRefreshToken', data.data.refreshToken);
+    authStorage.storeToken('userAuthToken', data.data.data.accessToken);
+    authStorage.storeToken('userRefreshToken', data.data.data.refreshToken);
     if (response && response.config) {
       // replace response.config.header's Authorization with the new Bearer token
       response.config.headers

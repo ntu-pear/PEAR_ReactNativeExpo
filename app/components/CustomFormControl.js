@@ -10,26 +10,23 @@ function CustomFormControl(props) {
     isRequired,
     isInvalid,
     title,
+    value,
     onChangeText,
     placeholder,
     HelperText,
     ErrorMessage,
     InputRightElement,
     type,
-    value,
+    keyboardType,
+    maxLength,
   } = props;
   return (
-    <FormControl
-      maxW="80%"
-      mt="5"
-      isRequired={isRequired}
-      isInvalid={isInvalid}
-    >
+    <FormControl w="80%" mt="5" isRequired={isRequired} isInvalid={isInvalid}>
       <VStack alignItems="flex-start">
         <FormControl.Label
           _text={{
             fontFamily: `${
-              Platform.OS === 'ios' ? 'Helvetica' : typography.android
+              Platform.OS === 'ios' ? typography.ios : typography.android
             }`,
             fontWeight: 'bold',
           }}
@@ -41,14 +38,18 @@ function CustomFormControl(props) {
           color={colors.black_var1}
           borderRadius="25"
           height="50"
-          fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
+          fontFamily={
+            Platform.OS === 'ios' ? typography.ios : typography.android
+          }
+          value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
           size="18"
           w="100%"
           InputRightElement={InputRightElement}
           type={type}
-          value={value}
+          keyboardType={keyboardType}
+          maxLength={maxLength}
         />
         <FormControl.ErrorMessage>{ErrorMessage}</FormControl.ErrorMessage>
         <FormControl.HelperText>{HelperText}</FormControl.HelperText>
