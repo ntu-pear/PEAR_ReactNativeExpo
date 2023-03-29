@@ -6,6 +6,8 @@ import { FlatList, VStack } from 'native-base';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import useNotifications from 'app/screens/notifications/useNotifications';
 import NotificationSortSelector from 'app/screens/notifications/NotificationsSortSelector';
+import { useFocusEffect } from '@react-navigation/native';
+import { useNotificationContext } from 'app/screens/notifications/NotificationContext';
 
 function NotificationsRejectScreen(props) {
   const { notificationType } = props.route.params;
@@ -26,6 +28,7 @@ function NotificationsRejectScreen(props) {
       setNotificationRejectedData,
       setIsFetchingMoreNotifications,
     );
+  const notificationContext = useNotificationContext();
   // const [notificationRejectedData, setNotificationRejectedData] = useState([
   //   {
   //     requiresAction: false,
@@ -45,6 +48,15 @@ function NotificationsRejectScreen(props) {
     handlePullToRefresh(paginationParams, sortBy);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useFocusEffect(() => {
+    if (notificationContext.shouldRefetchRejectNotifications) {
+      (async () => {
+        await handlePullToRefresh(paginationParams, sortBy);
+      })();
+      notificationContext.shouldRefetchAcceptNotifications = false;
+    }
+  });
 
   const handleErrorWhenApiFails = () => {
     setIsError(false);

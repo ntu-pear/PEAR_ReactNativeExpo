@@ -21,6 +21,7 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 import notificationApi from 'app/api/notification';
 import ErrorRetryApiCard from 'app/components/ErrorRetryApiCard';
 import NotificationActions from 'app/config/notificationActions';
+import { useNotificationContext } from 'app/screens/notifications/NotificationContext';
 
 function NotificationsApprovalRequestScreen(props) {
   const { navigation, route } = props;
@@ -32,6 +33,7 @@ function NotificationsApprovalRequestScreen(props) {
   const [reasonTextAreaValue, setReasonTextAreaValue] = useState('');
   const [functionToCallAgain, setFunctionToCallAgain] = useState(null);
   const [isError, setIsError] = useState(false);
+  const notificationContext = useNotificationContext();
   const cancelRef = useRef(null);
 
   const leftBtnFn = async () => {
@@ -53,6 +55,7 @@ function NotificationsApprovalRequestScreen(props) {
     // unSetLoading
     setIsLoading(false);
     // (3) Navigate back to parent screen
+    notificationContext.shouldRefetchAcceptNotifications = true;
     navigation.goBack();
   };
 
@@ -87,6 +90,7 @@ function NotificationsApprovalRequestScreen(props) {
       setIsError(true);
       return;
     }
+    notificationContext.shouldRefetchRejectNotifications = true;
     // (4) Update parent screen
     setAcceptRejectNotifID(notificationID);
     // (4) unSet Loading

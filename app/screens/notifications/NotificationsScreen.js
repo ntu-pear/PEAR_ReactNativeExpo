@@ -134,7 +134,7 @@ function NotificationsScreen(props) {
     // Update Notification Data with the newly filtered data; to re-render flat list.
     setNotificationData(filteredData);
   };
-  console.log(notificationData);
+  // console.log(notificationData);
   return (
     <>
       {isLoading ? (
