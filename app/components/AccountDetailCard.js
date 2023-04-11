@@ -30,14 +30,14 @@ function AccountDetailCard(props) {
             borderRadius="full"
             // Note: This is a fall-back uri. Will only be used if source fails to render the image.
             fallbackSource={{
-              uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1678354032/User/Jessica_Sim_Sxxxx781F/ProfilePicture/osu40mslpycgtm1kajjo.png',
+              uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1634523641/User/Adeline_Tan_Sxxxx515G/ProfilePicture/ffo5oc4jhurmtjjhqcib.jpg',
             }}
             resizeMode="cover"
             size="lg"
             source={{
               uri: userProfile.profilePicture
                 ? `${userProfile.profilePicture}`
-                : 'https://res.cloudinary.com/dbpearfyp/image/upload/v1678354032/User/Jessica_Sim_Sxxxx781F/ProfilePicture/osu40mslpycgtm1kajjo.png',
+                : 'hhttps://res.cloudinary.com/dbpearfyp/image/upload/v1634523641/User/Adeline_Tan_Sxxxx515G/ProfilePicture/ffo5oc4jhurmtjjhqcib.jpg',
             }}
           />
           <VStack mt="3" mb="2">

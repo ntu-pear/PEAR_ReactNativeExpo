@@ -87,7 +87,7 @@
   "devDependencies": {
     "@babel/core": "^7.12.9",
     "@types/jest": "^29.2.4",
-    "cypress": "^12.7.0",
+    "cypress": "^12.9.0",
     "cypress-image-diff-js": "^1.23.0",
     "eslint": "^8.21.0",
     "eslint-config-prettier": "^8.5.0",

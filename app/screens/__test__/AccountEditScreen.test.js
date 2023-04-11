@@ -40,7 +40,7 @@ const mockedParams = {
       nric: 'Sxxxx781F',
       preferredName: 'Jess',
       profilePicture:
-        'https://res.cloudinary.com/dbpearfyp/image/upload/v1678789617/User/Jessica_Sim_Sxxxx781F/ProfilePicture/dvkpw0gsx8duekke7arq.png',
+        'https://res.cloudinary.com/dbpearfyp/image/upload/v1681207517/User/Jessica_Sim_Sxxxx781F/ProfilePicture/txd37slz5amwsz7rdxfk.png',
       role: 'Supervisor',
       userID: 'B22698B8-42A2-4115-9631-1C2D1E2AC5F4',
     },
@@ -81,7 +81,7 @@ describe('Test Update Profile Information', () => {
     const accountEditScreen = renderScreen();
     const preferredNameInput = accountEditScreen.getByPlaceholderText('Jess');
     const contactNumberInput =
-    accountEditScreen.getByPlaceholderText('87654321');
+      accountEditScreen.getByPlaceholderText('87654321');
     const saveButton = accountEditScreen.getByText('Save');
     const cancelButton = accountEditScreen.getByText('Cancel');
     expect(preferredNameInput).toBeVisible();
@@ -102,7 +102,7 @@ describe('Test Update Profile Information', () => {
     const accountEditScreen = renderScreen();
     const preferredNameInput = accountEditScreen.getByPlaceholderText('Jess');
     const contactNumberInput =
-    accountEditScreen.getByPlaceholderText('87654321');
+      accountEditScreen.getByPlaceholderText('87654321');
     const saveButton = accountEditScreen.getByText('Save');
     const cancelButton = accountEditScreen.getByText('Cancel');
     expect(preferredNameInput).toBeVisible();
