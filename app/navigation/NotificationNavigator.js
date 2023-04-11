@@ -12,6 +12,7 @@ import colors from '../config/colors';
 import typography from '../config/typography';
 import { useSafeArea } from 'react-native-safe-area-context';
 import NotificationType from 'app/screens/notifications/NotificationType';
+import NotificationContext from 'app/screens/notifications/NotificationContext';
 
 const Tab = createMaterialTopTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -87,18 +88,25 @@ function NotificationTabNavigator() {
 // Reference: https://reactnavigation.org/docs/nesting-navigators/#each-navigator-keeps-its-own-navigation-history
 function NotificationNavigator() {
   return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name={routes.NOTIFICATION_TAB}
-        component={NotificationTabNavigator}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name={routes.NOTIFICATION_APPROVAL_REQUEST}
-        component={NotificationsApprovalRequestScreen}
-        options={{ headerShown: false }}
-      />
-    </Stack.Navigator>
+    <NotificationContext.Provider
+      value={{
+        shouldRefetchAcceptNotifications: false,
+        shouldRefetchRejectNotifications: false,
+      }}
+    >
+      <Stack.Navigator>
+        <Stack.Screen
+          name={routes.NOTIFICATION_TAB}
+          component={NotificationTabNavigator}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name={routes.NOTIFICATION_APPROVAL_REQUEST}
+          component={NotificationsApprovalRequestScreen}
+          options={{ headerShown: false }}
+        />
+      </Stack.Navigator>
+    </NotificationContext.Provider>
   );
 }
 

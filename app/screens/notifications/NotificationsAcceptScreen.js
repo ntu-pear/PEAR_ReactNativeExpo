@@ -6,6 +6,8 @@ import NotificationCard from 'app/components/NotificationCard';
 import ErrorRetryApiCard from 'app/components/ErrorRetryApiCard';
 import useNotifications from 'app/screens/notifications/useNotifications';
 import NotificationSortSelector from 'app/screens/notifications/NotificationsSortSelector';
+import { useFocusEffect } from '@react-navigation/native';
+import { useNotificationContext } from 'app/screens/notifications/NotificationContext';
 
 function NotificationsAcceptScreen(props) {
   const { notificationType } = props.route.params;
@@ -26,6 +28,7 @@ function NotificationsAcceptScreen(props) {
       setNotificationAcceptedData,
       setIsFetchingMoreNotifications,
     );
+  const notificationContext = useNotificationContext();
   // const [notificationAcceptedData, setNotificationAcceptedData] = useState([
   //   {
   //     requiresAction: false,
@@ -45,6 +48,15 @@ function NotificationsAcceptScreen(props) {
     handlePullToRefresh(paginationParams, sortBy);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortBy]);
+
+  useFocusEffect(() => {
+    if (notificationContext.shouldRefetchAcceptNotifications) {
+      (async () => {
+        await handlePullToRefresh(paginationParams, sortBy);
+      })();
+      notificationContext.shouldRefetchAcceptNotifications = false;
+    }
+  });
 
   const handleErrorWhenApiFails = async () => {
     setIsError(false);
