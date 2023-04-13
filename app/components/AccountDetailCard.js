@@ -37,7 +37,7 @@ function AccountDetailCard(props) {
             source={{
               uri: userProfile.profilePicture
                 ? `${userProfile.profilePicture}`
-                : 'hhttps://res.cloudinary.com/dbpearfyp/image/upload/v1634523641/User/Adeline_Tan_Sxxxx515G/ProfilePicture/ffo5oc4jhurmtjjhqcib.jpg',
+                : 'https://res.cloudinary.com/dbpearfyp/image/upload/v1634523641/User/Adeline_Tan_Sxxxx515G/ProfilePicture/ffo5oc4jhurmtjjhqcib.jpg',
             }}
           />
           <VStack mt="3" mb="2">
