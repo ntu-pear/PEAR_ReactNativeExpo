@@ -11,14 +11,15 @@
 // import NotificationNavigator from './NotificationNavigator';
 // import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import {
-  BrowserRouter as Router,
+  // BrowserRouter as Router,
   Routes,
   Route,
   Link,
   Outlet,
   useParams,
+  useLocation,
 } from 'react-router-dom';
 import {
   VStack,
@@ -79,6 +80,16 @@ function WebAppNavigator() {
     setUser(null);
     await authStorage.removeToken();
   };
+
+  const location = useLocation();
+
+  useEffect(() => {
+    var currentPathName = location.pathname || 'Welcome';
+
+    document.title = `PEAR | ${decodeURIComponent(
+      currentPathName.replace(/\//g, ''),
+    )}`;
+  }, [location]);
 
   return (
     <>
@@ -183,166 +194,156 @@ function WebAppNavigator() {
       </Box>
 
       {/* TODO: (yapsiang) implements routes for the different pages  */}
-      <Router>
-        <HStack alignContent="center">
-          {sidebar ? (
-            // <Pressable onPress={showSidebar}>
-            <Pressable>
-              <VStack
-                space="xs"
-                pt="2"
-                px="3"
-                borderRightWidth="1"
-                borderBottomWidth="1"
-                h="100vh"
-                w="15vw"
-              >
-                <Text bold fontSize="18px">
-                  PATIENTS
-                </Text>
-                <Link to={routes.PATIENTS} style={linkStyle}>
-                  <Icon as={MaterialIcons} name="apartment" size="md" m="2" />
-                  View Patient
-                </Link>
-                <Link to={routes.PATIENT_ADD_PATIENT} style={linkStyle}>
-                  <Icon
-                    as={MaterialIcons}
-                    name="switch-account"
-                    size="md"
-                    m="2"
-                  />
-                  Add Patient
-                </Link>
-                <Link to={routes.NOTIFICATION} style={linkStyle}>
-                  <Icon
-                    as={MaterialIcons}
-                    name="switch-account"
-                    size="md"
-                    m="2"
-                  />
-                  Manage Preference
-                </Link>
-                <Link to={routes.ACCOUNT} style={linkStyle}>
-                  <Icon
-                    as={MaterialIcons}
-                    name="medical-services"
-                    size="md"
-                    m="2"
-                  />
-                  View Medication Schedule
-                </Link>
-                <Divider />
+      {/* <Router> */}
+      <HStack alignContent="center">
+        {sidebar ? (
+          // <Pressable onPress={showSidebar}>
+          <Pressable>
+            <VStack
+              space="xs"
+              pt="2"
+              px="3"
+              borderRightWidth="1"
+              borderBottomWidth="1"
+              h="100vh"
+              w="15vw"
+            >
+              <Text bold fontSize="18px">
+                PATIENTS
+              </Text>
+              <Link to={routes.PATIENTS} style={linkStyle}>
+                <Icon as={MaterialIcons} name="apartment" size="md" m="2" />
+                View Patient
+              </Link>
+              <Link to={routes.PATIENT_ADD_PATIENT} style={linkStyle}>
+                <Icon
+                  as={MaterialIcons}
+                  name="switch-account"
+                  size="md"
+                  m="2"
+                />
+                Add Patient
+              </Link>
+              <Link to={routes.NOTIFICATION} style={linkStyle}>
+                <Icon
+                  as={MaterialIcons}
+                  name="switch-account"
+                  size="md"
+                  m="2"
+                />
+                Manage Preference
+              </Link>
+              <Link to={routes.ACCOUNT} style={linkStyle}>
+                <Icon
+                  as={MaterialIcons}
+                  name="medical-services"
+                  size="md"
+                  m="2"
+                />
+                View Medication Schedule
+              </Link>
+              <Divider />
 
-                <Text bold fontSize="18px">
-                  ACTIVITIES
-                </Text>
-                <Link to="/example" style={linkStyle}>
-                  <Icon as={MaterialIcons} name="list-alt" size="md" m="2" />
-                  Manage Activities
-                </Link>
-                <Divider />
+              <Text bold fontSize="18px">
+                ACTIVITIES
+              </Text>
+              <Link to="/example" style={linkStyle}>
+                <Icon as={MaterialIcons} name="list-alt" size="md" m="2" />
+                Manage Activities
+              </Link>
+              <Divider />
 
-                <Text bold fontSize="18px">
-                  ATTENDANCE
-                </Text>
-                <Link to="/" style={linkStyle}>
-                  <Icon
-                    as={MaterialIcons}
-                    name="assignment-ind"
-                    size="md"
-                    m="2"
-                  />
-                  Manage Attendance
-                </Link>
-                <Divider />
+              <Text bold fontSize="18px">
+                ATTENDANCE
+              </Text>
+              <Link to="/" style={linkStyle}>
+                <Icon
+                  as={MaterialIcons}
+                  name="assignment-ind"
+                  size="md"
+                  m="2"
+                />
+                Manage Attendance
+              </Link>
+              <Divider />
 
-                <Text bold fontSize="18px">
-                  ADHOC
-                </Text>
-                <Link to="/" style={linkStyle}>
-                  <Icon as={MaterialIcons} name="note" size="md" m="2" />
-                  Manage Adhoc
-                </Link>
-                <Divider />
+              <Text bold fontSize="18px">
+                ADHOC
+              </Text>
+              <Link to="/" style={linkStyle}>
+                <Icon as={MaterialIcons} name="note" size="md" m="2" />
+                Manage Adhoc
+              </Link>
+              <Divider />
 
-                <Text bold fontSize="18px">
-                  SCHEDULE
-                </Text>
-                <Link to="/" style={linkStyle}>
-                  <Icon as={MaterialIcons} name="loop" size="md" m="2" />
-                  Generate Schedule
-                </Link>
-                <Link to="/" style={linkStyle}>
-                  <Icon
-                    as={MaterialIcons}
-                    name="file-download"
-                    size="md"
-                    m="2"
-                  />
-                  Export Schedule
-                </Link>
-                <Divider />
+              <Text bold fontSize="18px">
+                SCHEDULE
+              </Text>
+              <Link to="/" style={linkStyle}>
+                <Icon as={MaterialIcons} name="loop" size="md" m="2" />
+                Generate Schedule
+              </Link>
+              <Link to="/" style={linkStyle}>
+                <Icon as={MaterialIcons} name="file-download" size="md" m="2" />
+                Export Schedule
+              </Link>
+              <Divider />
 
-                <Text bold fontSize="18px">
-                  OTHERS
-                </Text>
-                <Link to="/" style={linkStyle}>
-                  <Icon
-                    as={MaterialIcons}
-                    name="person-search"
-                    size="md"
-                    m="2"
-                  />
-                  View Highlight
-                </Link>
-                <Link to="/" style={linkStyle}>
-                  <Icon
-                    as={MaterialIcons}
-                    name="library-add-check"
-                    size="md"
-                    m="2"
-                  />
-                  Manage Approval Request
-                </Link>
-                <Link to="/" style={linkStyle}>
-                  <Icon as={MaterialIcons} name="search" size="md" m="2" />
-                  View Activity Logs
-                </Link>
-                <Link to="/" style={linkStyle}>
-                  <Icon as={MaterialIcons} name="security" size="md" m="2" />
-                  View Privacy Settings
-                </Link>
-                <Link to="/" style={linkStyle}>
-                  <Icon as={MaterialIcons} name="view-list" size="md" m="2" />
-                  Manage List Items
-                </Link>
-                <Divider />
-              </VStack>
-            </Pressable>
-          ) : null}
-          <Routes>
-            <Route path="" element={<Example />} />
-            <Route path="/example" element={<Example />} />
-            <Route path={routes.ACCOUNT} element={<AccountScreen />} />
-            <Route
-              path={routes.NOTIFICATION}
-              element={<NotificationNavigator />}
-            />
-            <Route
-              path={routes.PATIENTS}
-              element={<PatientsScreenWeb sidebar={sidebar} />}
-            />
-            <Route
-              path={routes.PATIENT_INFORMATION}
-              element={<PatientInformationScreenWeb sidebar={sidebar} />}
-            />
-            <Route
-              path={routes.PATIENT_ADD_PATIENT}
-              element={<PatientAddScreen sidebar={sidebar} />}
-            />
-          </Routes>
-        </HStack>
-      </Router>
+              <Text bold fontSize="18px">
+                OTHERS
+              </Text>
+              <Link to="/" style={linkStyle}>
+                <Icon as={MaterialIcons} name="person-search" size="md" m="2" />
+                View Highlight
+              </Link>
+              <Link to="/" style={linkStyle}>
+                <Icon
+                  as={MaterialIcons}
+                  name="library-add-check"
+                  size="md"
+                  m="2"
+                />
+                Manage Approval Request
+              </Link>
+              <Link to="/" style={linkStyle}>
+                <Icon as={MaterialIcons} name="search" size="md" m="2" />
+                View Activity Logs
+              </Link>
+              <Link to="/" style={linkStyle}>
+                <Icon as={MaterialIcons} name="security" size="md" m="2" />
+                View Privacy Settings
+              </Link>
+              <Link to="/" style={linkStyle}>
+                <Icon as={MaterialIcons} name="view-list" size="md" m="2" />
+                Manage List Items
+              </Link>
+              <Divider />
+            </VStack>
+          </Pressable>
+        ) : null}
+        <Routes>
+          <Route path="/" element={<Example />} />
+          <Route path="/example" element={<Example />} />
+          <Route path={routes.ACCOUNT} element={<AccountScreen />} />
+          <Route
+            path={routes.NOTIFICATION}
+            element={<NotificationNavigator />}
+          />
+          <Route
+            path={routes.PATIENTS}
+            element={<PatientsScreenWeb sidebar={sidebar} />}
+          />
+          <Route
+            path={routes.PATIENT_INFORMATION}
+            element={<PatientInformationScreenWeb sidebar={sidebar} />}
+          />
+          <Route
+            path={routes.PATIENT_ADD_PATIENT}
+            element={<PatientAddScreen sidebar={sidebar} />}
+          />
+        </Routes>
+      </HStack>
+      {/* </Router> */}
     </>
   );
 }

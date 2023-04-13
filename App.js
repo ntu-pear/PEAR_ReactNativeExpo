@@ -17,6 +17,8 @@ import WebAppNavigator from './app/navigation/WebAppNavigator';
 import AuthContext from './app/auth/context';
 import authStorage from './app/auth/authStorage';
 
+import { BrowserRouter } from 'react-router-dom';
+
 export default function App() {
   const [user, setUser] = useState();
   const [acceptRejectNotifID, setAcceptRejectNotifID] = useState(-1);
@@ -53,7 +55,9 @@ export default function App() {
         <NavigationContainer theme={MyTheme}>
           {user ? (
             Platform.OS === 'web' ? (
-              <WebAppNavigator />
+              <BrowserRouter>
+                <WebAppNavigator />
+              </BrowserRouter>
             ) : (
               <AppNavigator />
             )

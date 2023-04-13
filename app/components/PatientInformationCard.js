@@ -20,14 +20,13 @@ function PatientInformationCard(props) {
     );
 
   // useNavigate() hook cannot work on mobile
-  // const navigate = Platform.OS === 'web' ? useNavigate() : null;
+  const navigate = Platform.OS === 'web' ? useNavigate() : null;
 
   const handleOnPress = () => {
     if (Platform.OS === 'web') {
-      // TODO: (yapsiang) link to new paitent infomation screen
-      // navigate('/' + routes.PATIENT_INFORMATION, {
-      //   state: { displayPicUrl: `${displayPicUrl}`, ...patientProfile },
-      // });
+      navigate('/' + routes.PATIENT_INFORMATION, {
+        state: { displayPicUrl: `${displayPicUrl}`, ...patientProfile },
+      });
     } else {
       navigation.push(routes.PATIENT_INFORMATION, {
         displayPicUrl: `${displayPicUrl}`,

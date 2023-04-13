@@ -24,7 +24,8 @@ Note: File structure will continuously be updated
     │   ├── config     -- common constants to be stored here.
     │   │   └── colors.js -- common color constants.
     │   └── screens    -- pages to be navigated to.
-    │
+    │       └── web    -- web related pages.
+    |
     ├── App.js         -- React Native Expo entry point
     │
     ├── docs           -- Includes misc documentations.

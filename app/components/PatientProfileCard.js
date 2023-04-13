@@ -44,8 +44,8 @@ function PatientProfileCard(props) {
           alignItems="center"
           justifyContent="center"
           rounded="xl"
-          w="50%"
-          h="60%"
+          w={Platform.OS === 'web' ? '100%' : '50%'}
+          h={Platform.OS === 'web' ? '100%' : '60%'}
           borderWidth="1"
           // borderColor={colors.primary_gray}
           borderColor={colors.pink}

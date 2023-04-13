@@ -97,11 +97,11 @@ function PatientsScreenWeb(props) {
         </View>
       ) : (
         <HStack
-          w={sidebar ? '85vw' : '100vw'}
+          w={sidebar ? '84vw' : '99vw'}
           style={{ display: 'flex', flexDirection: 'row' }}
         >
           {/* PatientScreen */}
-          <View style={{ flex: 1 }}>
+          <View>
             <Center backgroundColor={colors.white_var1}>
               <ScrollView h="100vh">
                 <VStack paddingRight="10">
@@ -162,7 +162,7 @@ function PatientsScreenWeb(props) {
                 w="100%"
                 style={{ flex: 1 }}
               >
-                <View w="100%" style={{ flex: 2 }}>
+                <View w="100%" style={{ flex: 3 }}>
                   <PatientInformationCard
                     patientProfile={clickedPatientProfile}
                     navigation={navigation}
@@ -171,135 +171,129 @@ function PatientsScreenWeb(props) {
                 </View>
 
                 <HStack
-                  space={sidebar ? 0 : 2}
-                  ml="3%"
-                  mr="3%"
+                  space={sidebar ? 3 : 6}
+                  mx="3"
                   mt="6"
-                  style={{ flex: 1 }}
+                  style={{ flex: 2 }}
+                  flexWrap="wrap"
                 >
-                  <HStack space={sidebar ? 0 : 2}>
-                    <PatientProfileCard
-                      vectorIconComponent={
-                        <MaterialCommunityIcons
-                          name="allergy"
-                          size={30}
-                          color={colors.pink}
-                        />
-                      }
-                      text="Allergy"
-                      navigation={navigation}
-                      routes={routes.PATIENT_ALLERGY}
-                      patientProfile={clickedPatientProfile}
-                    />
-                    <PatientProfileCard
-                      vectorIconComponent={
-                        <MaterialCommunityIcons
-                          name="heart-pulse"
-                          size={30}
-                          color={colors.pink}
-                        />
-                      }
-                      text="Vital"
-                      navigation={navigation}
-                      routes={routes.PATIENT_VITAL}
-                      patientProfile={clickedPatientProfile}
-                    />
-                    <PatientProfileCard
-                      vectorIconComponent={
-                        <FontAwesome5
-                          name="pills"
-                          size={30}
-                          color={colors.pink}
-                        />
-                      }
-                      text="Prescription"
-                      navigation={navigation}
-                      routes={routes.PATIENT_PRESCRIPTION}
-                      patientProfile={clickedPatientProfile}
-                    />
-                  </HStack>
-                  <HStack space={sidebar ? 0 : 2}>
-                    <PatientProfileCard
-                      vectorIconComponent={
-                        <FontAwesome5
-                          name="exclamation-triangle"
-                          size={28}
-                          color={colors.pink}
-                        />
-                      }
-                      text="Problem Log"
-                      navigation={navigation}
-                      routes={routes.PATIENT_PROBLEM_LOG}
-                      patientProfile={clickedPatientProfile}
-                    />
-                    <PatientProfileCard
-                      vectorIconComponent={
-                        <MaterialCommunityIcons
-                          name="clipboard-text"
-                          size={30}
-                          color={colors.pink}
-                        />
-                      }
-                      text="Medical History"
-                      navigation={navigation}
-                      routes={routes.PATIENT_ACTIVITY_PREFERENCE}
-                      patientProfile={clickedPatientProfile}
-                    />
-                    <PatientProfileCard
-                      vectorIconComponent={
-                        <FontAwesome5
-                          name="calendar-day"
-                          size={30}
-                          color={colors.pink}
-                        />
-                      }
-                      text="Activity"
-                      navigation={navigation}
-                      routes={routes.PATIENT_ROUTINE}
-                      patientProfile={clickedPatientProfile}
-                    />
-                  </HStack>
-                  <HStack space={sidebar ? 0 : 2}>
-                    <PatientProfileCard
-                      vectorIconComponent={
-                        <MaterialCommunityIcons
-                          name="emoticon-happy"
-                          size={30}
-                          color={colors.pink}
-                        />
-                      }
-                      text="Patient Preference"
-                      navigation={navigation}
-                      routes={routes.PATIENT_PREFERENCE}
-                      patientProfile={clickedPatientProfile}
-                    />
-                    <PatientProfileCard
-                      vectorIconComponent={
-                        <MaterialIcons
-                          name="insert-photo"
-                          size={30}
-                          color={colors.pink}
-                        />
-                      }
-                      text="Photo Album"
-                      navigation={navigation}
-                      routes={routes.PATIENT_PHOTO_ALBUM}
-                      patientProfile={clickedPatientProfile}
-                    />
-                    <PatientProfileCard
-                      vectorIconComponent={
-                        <MaterialCommunityIcons
-                          name="umbrella-beach"
-                          size={30}
-                          color={colors.pink}
-                        />
-                      }
-                      text="Holiday"
-                      navigation={navigation}
-                      routes={routes.PATIENT_HOLIDAY}
-                      patientProfile={clickedPatientProfile}
-                    />
-                  </HStack>
+                  <PatientProfileCard
+                    vectorIconComponent={
+                      <MaterialCommunityIcons
+                        name="allergy"
+                        size={60}
+                        color={colors.pink}
+                      />
+                    }
+                    text="Allergy"
+                    navigation={navigation}
+                    routes={routes.PATIENT_ALLERGY}
+                    patientProfile={clickedPatientProfile}
+                  />
+                  <PatientProfileCard
+                    vectorIconComponent={
+                      <MaterialCommunityIcons
+                        name="heart-pulse"
+                        size={60}
+                        color={colors.pink}
+                      />
+                    }
+                    text="Vital"
+                    navigation={navigation}
+                    routes={routes.PATIENT_VITAL}
+                    patientProfile={clickedPatientProfile}
+                  />
+                  <PatientProfileCard
+                    vectorIconComponent={
+                      <FontAwesome5
+                        name="pills"
+                        size={60}
+                        color={colors.pink}
+                      />
+                    }
+                    text="Prescription"
+                    navigation={navigation}
+                    routes={routes.PATIENT_PRESCRIPTION}
+                    patientProfile={clickedPatientProfile}
+                  />
+                  <PatientProfileCard
+                    vectorIconComponent={
+                      <FontAwesome5
+                        name="exclamation-triangle"
+                        size={28}
+                        color={colors.pink}
+                      />
+                    }
+                    text="Problem Log"
+                    navigation={navigation}
+                    routes={routes.PATIENT_PROBLEM_LOG}
+                    patientProfile={clickedPatientProfile}
+                  />
+                  <PatientProfileCard
+                    vectorIconComponent={
+                      <MaterialCommunityIcons
+                        name="clipboard-text"
+                        size={60}
+                        color={colors.pink}
+                      />
+                    }
+                    text="Medical History"
+                    navigation={navigation}
+                    routes={routes.PATIENT_ACTIVITY_PREFERENCE}
+                    patientProfile={clickedPatientProfile}
+                  />
+                  <PatientProfileCard
+                    vectorIconComponent={
+                      <FontAwesome5
+                        name="calendar-day"
+                        size={60}
+                        color={colors.pink}
+                      />
+                    }
+                    text="Activity"
+                    navigation={navigation}
+                    routes={routes.PATIENT_ROUTINE}
+                    patientProfile={clickedPatientProfile}
+                  />
+                  <PatientProfileCard
+                    vectorIconComponent={
+                      <MaterialCommunityIcons
+                        name="emoticon-happy"
+                        size={60}
+                        color={colors.pink}
+                      />
+                    }
+                    text="Patient Preference"
+                    navigation={navigation}
+                    routes={routes.PATIENT_PREFERENCE}
+                    patientProfile={clickedPatientProfile}
+                  />
+                  <PatientProfileCard
+                    vectorIconComponent={
+                      <MaterialIcons
+                        name="insert-photo"
+                        size={60}
+                        color={colors.pink}
+                      />
+                    }
+                    text="Photo Album"
+                    navigation={navigation}
+                    routes={routes.PATIENT_PHOTO_ALBUM}
+                    patientProfile={clickedPatientProfile}
+                  />
+                  <PatientProfileCard
+                    vectorIconComponent={
+                      <MaterialCommunityIcons
+                        name="umbrella-beach"
+                        size={60}
+                        color={colors.pink}
+                      />
+                    }
+                    text="Holiday"
+                    navigation={navigation}
+                    routes={routes.PATIENT_HOLIDAY}
+                    patientProfile={clickedPatientProfile}
+                  />
                 </HStack>
               </VStack>
             </ScrollView>

@@ -1,5 +1,13 @@
 import React from 'react';
-import LottieView from 'lottie-react-native';
+// import LottieView from 'lottie-react-native';
+import { Platform } from 'react-native';
+
+let LottieView;
+if (Platform.OS === 'web') {
+  LottieView = require('react-native-web-lottie').default;
+} else {
+  LottieView = require('lottie-react-native').default;
+}
 
 function ActivityIndicator({ visible = false }) {
   if (!visible) {

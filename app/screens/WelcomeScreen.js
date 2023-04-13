@@ -99,8 +99,8 @@ function WelcomeScreen(props) {
     >
       <TouchableWithoutFeedback
         onPress={() => {
-          // Prevent keyboard dismiss for web
-          if (Platform.OS !== 'web') {
+          // Prevent keyboard dismiss for desktop web only
+          if (Platform.OS !== 'web' || navigator.userAgent.includes('Mobile')) {
             Keyboard.dismiss();
           }
         }}

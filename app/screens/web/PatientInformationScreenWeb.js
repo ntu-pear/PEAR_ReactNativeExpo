@@ -26,6 +26,7 @@ import {
   Stack,
   Text,
   VStack,
+  View,
 } from 'native-base';
 import React, { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
@@ -38,74 +39,14 @@ function PatientInformationScreenWeb(props) {
 
   const [isLoading, setIsLoading] = useState(false); //eslint-disable-line no-unused-vars
 
-  // TODO: (yapsiang) use API
-  // const getDoctorNote = useApi(doctorNoteApi.getDoctorNote);
-  // const getPatientGuardian = useApi(guardianApi.getPatientGuardian);
-  // const getSocialHistory = useApi(socialHistoryApi.getSocialHistory);
-  const getDoctorNote = [
-    {
-      doctorNoteId: 1,
-      date: '2022-03-22T11:59:41.7004409',
-      doctorName: 'Daniel Lee',
-      patientId: 1,
-      doctorId: 'B22698B8-42A2-4115-9631-1C2D1E2AC5F6',
-      doctorRemarks: 'Test 22-Mar-2022-1159hrs',
-    },
-  ];
-  const getPatientGuardian = {
-    guardian: {
-      guardianID: 1,
-      patientID: 1,
-      relationship: 'Husband',
-      firstName: 'Tommy',
-      lastName: 'Lee',
-      contactNo: '97123456',
-      nric: 'S7719748F',
-      email: 'tommylee711@gmail.com',
-      relationshipID: 1,
-      isActive: true,
-    },
-    additionalGuardian: {
-      guardianID: 0,
-      patientID: 0,
-      relationship: null,
-      firstName: null,
-      lastName: null,
-      contactNo: null,
-      nric: null,
-      email: null,
-      relationshipID: 0,
-      isActive: false,
-    },
-  };
-  const getSocialHistory = {
-    socialHistoryId: 1,
-    patientId: 1,
-    sexuallyActive: 1,
-    secondhandSmoker: 1,
-    alcoholUse: 1,
-    caffeineUse: 1,
-    tobaccoUse: 1,
-    drugUse: 1,
-    exercise: 1,
-    dietListId: 1,
-    dietDescription: 'Diabetic',
-    educationListId: 1,
-    educationDescription: 'Primary or lower',
-    liveWithListId: 1,
-    liveWithDescription: 'Alone',
-    occupationListId: 1,
-    occupationDescription: 'Accountant',
-    petListId: 1,
-    petDescription: 'Bird',
-    religionListId: 1,
-    religionDescription: 'Atheist',
-  };
+  const getDoctorNote = useApi(doctorNoteApi.getDoctorNote);
+  const getPatientGuardian = useApi(guardianApi.getPatientGuardian);
+  const getSocialHistory = useApi(socialHistoryApi.getSocialHistory);
 
   useEffect(() => {
-    // getDoctorNote.request(patientID);
-    // getPatientGuardian.request(patientID);
-    // getSocialHistory.request(patientID);
+    getDoctorNote.request(patientID);
+    getPatientGuardian.request(patientID);
+    getSocialHistory.request(patientID);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -129,15 +70,25 @@ function PatientInformationScreenWeb(props) {
       {getDoctorNote.loading ||
       getPatientGuardian.loading ||
       getSocialHistory.loading ? (
-        <ActivityIndicator visible />
+        <View
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100vh',
+            width: sidebar ? '83vw' : '100vw',
+          }}
+        >
+          <ActivityIndicator visible />
+        </View>
       ) : (
-        <Box backgroundColor={colors.white_var1} w="100%">
+        <Box backgroundColor={colors.white_var1} w={sidebar ? '84%' : '100%'}>
           {/* Note the immediate bunch of code will only be rendered
            when one of the APIs has an error. Purpose: Error handling of API */}
           {(getDoctorNote.error ||
             getPatientGuardian.error ||
             getSocialHistory.error) && (
-            <Box p="2" w={sidebar ? '84%' : '100%'}>
+            <Box w="100%">
               <Alert w="100%" status="error">
                 <VStack space={2} flexShrink={1} w="100%">
                   <HStack
@@ -173,27 +124,25 @@ function PatientInformationScreenWeb(props) {
               </Box>
             </Box>
           )}
-          <ScrollView p="2" w={sidebar ? '84%' : '100%'}>
+          <ScrollView>
             <Box>
+              <AspectRatio w="100%" ratio={16 / 4}>
                 <Image
                   source={{ uri: `${displayPicUrl}` }}
                   alt="patientInformationImage"
-                  style={{ aspectRatio: 16/4 }}
                 />
+              </AspectRatio>
               <Center
                 position="absolute"
                 bg={colors.primary_overlay_color}
                 width="100%"
                 height="100%"
               />
-              <Center position="absolute" px="15%" py="10%">
+              <Center position="absolute" px="5%" py="10%">
                 <VStack>
                   <Center
                     _text={{
                       color: `${colors.white_var1}`,
-                      fontFamily: `${
-                        Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                      }`,
                       fontSize: '2xl',
                       fontWeight: '500',
                     }}
@@ -203,9 +152,6 @@ function PatientInformationScreenWeb(props) {
                   <Center
                     _text={{
                       color: `${colors.white_var1}`,
-                      fontFamily: `${
-                        Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                      }`,
                       fontSize: '2xl',
                       fontWeight: '500',
                     }}
@@ -215,20 +161,25 @@ function PatientInformationScreenWeb(props) {
                 </VStack>
               </Center>
             </Box>
-            <VStack maxW="100%" mt="2.5" mb="8">
-              <Stack ml="5" mr="5" space={5}>
-                <Divider mt="2" />
+            <HStack ml={2} flexWrap="wrap" space={5}>
+              <Box borderWidth={1} borderRadius={8} p={4} m={5} minW="45%">
                 <PersonalInformationCard patientInformation={state} />
-                <Divider />
+              </Box>
+              <Box borderWidth={1} borderRadius={8} p={4} m={5} minW="45%">
+                <PersonalSocialHistory socialHistory={getSocialHistory.data} />
+              </Box>
+              <Box borderWidth={1} borderRadius={8} p={4} m={5} minW="45%">
                 <PersonalPreferenceCard patientInformation={state} />
-                <Divider />
-                <PersonalDoctorCard doctorNote={getDoctorNote} />
-                <Divider />
-                <PersonalGuardianCard patientGuardian={getPatientGuardian} />
-                <Divider />
-                <PersonalSocialHistory socialHistory={getSocialHistory} />
-              </Stack>
-            </VStack>
+              </Box>
+              <Box borderWidth={1} borderRadius={8} p={4} m={5} minW="45%">
+                <PersonalDoctorCard doctorNote={getDoctorNote.data} />
+              </Box>
+              <Box borderWidth={1} borderRadius={8} p={4} m={5} minW="45%">
+                <PersonalGuardianCard
+                  patientGuardian={getPatientGuardian.data}
+                />
+              </Box>
+            </HStack>
           </ScrollView>
         </Box>
       )}
