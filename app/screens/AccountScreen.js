@@ -27,8 +27,6 @@ function AccountScreen(props) {
       setIsLoading(true);
       const promiseFunction = async () => {
         const response = await getCurrentUser();
-        // console.log(response);
-
         setUser(response.data);
       };
       promiseFunction();
@@ -37,9 +35,10 @@ function AccountScreen(props) {
   );
 
   const getCurrentUser = async () => {
+    // get current user from authStorage
     const currentUser = await authStorage.getUser();
+    // fetch full user profile information by calling api using user ID
     const response = await userApi.getUser(currentUser.userID);
-    // console.log('getCurrentUser', response);
     if (!response.ok) {
       // Proceed to log out if account screen does not load due to api failure
       // Note: should use useCheckExpiredThenLogOut hook but it isnt working and had no time to fix

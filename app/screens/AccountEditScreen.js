@@ -36,6 +36,7 @@ function AccountEditScreen(props) {
   );
   const [errors, setErrors] = useState({});
 
+  // set front end validation schema according to Validation Rules document on Confluence
   const schema = Yup.object().shape({
     preferredName: Yup.string().required('Preferred Name is a required field.'),
     contactNo: Yup.string()
@@ -68,7 +69,6 @@ function AccountEditScreen(props) {
         error.inner.forEach((e) => {
           errorList[e.path] = e.message;
         });
-        // console.log(errorList);
         setErrors(errorList);
         return false;
       }
@@ -76,6 +76,7 @@ function AccountEditScreen(props) {
   };
 
   const handleOnPressToSave = async () => {
+    // carry out front end validation first first before calling out api
     const validation = await validate();
     if (!validation) {
       return;
@@ -83,8 +84,8 @@ function AccountEditScreen(props) {
 
     setIsLoading(true);
     const result = await userApi.updateUser(formData, profilePicture);
-    // console.log('Edit acc screen', result);
     if (!result.ok) {
+      // set errors resulting from back end validation after calling api
       setErrors({
         api: result.data.message,
       });
@@ -95,6 +96,7 @@ function AccountEditScreen(props) {
     setIsLoading(false);
     Alert.alert('Successfully updated.');
     navigation.pop();
+    // redirect user to account screen after successful update
     navigation.navigate(routes.ACCOUNT_SCREEN);
   };
 
@@ -108,7 +110,6 @@ function AccountEditScreen(props) {
         quality: 1,
       });
 
-      // console.log(result)
       if (!result.cancelled) {
         setProfilePicture(result.uri);
       } else {
