@@ -69,7 +69,7 @@ describe('Test Welcome Screen', () => {
   });
 
   test('should navigate to Reset Password Screen upon clicking Forgot Password?', async () => {
-    this.props = createTestProps({});
+    const props = createTestProps({});
     const welcomeScreen = render(
       <NativeBaseProvider initialWindowMetrics={inset}>
         <WelcomeScreen {...this.props} />
@@ -80,8 +80,8 @@ describe('Test Welcome Screen', () => {
     fireEvent.press(forgotPassword);
 
     await waitFor(() => {
-      expect(this.props.navigation.navigate).toHaveBeenCalledTimes(1);
-      expect(this.props.navigation.navigate).toHaveBeenCalledWith(
+      expect(props.navigation.navigate).toHaveBeenCalledTimes(1);
+      expect(props.navigation.navigate).toHaveBeenCalledWith(
         routes.RESET_PASSWORD,
       );
     });

@@ -93,10 +93,14 @@ Some issues faced during installation guide:
 
 ## Testing
 
+### Jest
+
 Jest is used as a testing library to test the logic and the appearance of the components.
 Please refer to the jest documentation in the links above and the existing tests for examples on how to write tests for your components.
 
-### Adding a test
+### Cypress (WIP, @weilun)
+
+### Adding a test (Jest)
 
 0. If a `__test__` directory does not exist in the root directory of your component,
    create a `__test__` directory in the root directory of your component. (Tests do not necessarily need to be for a component, it can be for any file that you wish to test, e.g. files that contain utiliy logic such as
@@ -117,6 +121,56 @@ Creating a `__test__` directory in the root of the component to be tested
 2. To run your tests, run `npm test`.
 
 3. For test re-running when relevant files have been changed (optional feature, like hot-reload), run `npm test-watch`.
+
+### Types of Test (WIP)
+
+1. Unit Tests\
+   Tests that verify the behaviour of individual functions or modules in isolation. Unit tests help to ensure that each piece of code in the application is functioning as intended. Currently there are no unit tests in the repository, some areas where unit tests can be added are the utility functions, such as `cache.js`, various hooks in the `\hooks` directory, `authStorage.js`.
+
+   It's not necessary to test the APIs that call the backend for data (in the `\api` folder), since they are only making a http request to the backend for data, without processing it.
+
+   In short, unit tests can be written for individual functions in the frontend that provide (usually shared) functionality.
+
+2. Integration Tests
+   Tests that verify how different parts of the application work together. Most of the tests in this repository contain integration tests, whereby the integration between components and APIs are tested (e.g. component renders correctly when an action is performed that calls an API -> network request, utility functions etc or an action performed in one component changes data to be displayed in another component).
+   e.g. `WelcomeScreen.test.js` test the expected behaviour of WelcomeScreen when a user enters a wrong username and password, and the forget password functionality.
+
+3. Snapshot Tests\
+   As the name suggests, these are tests that capture the output of a component and compare it to a previously saved version of the same component. Snapshot tests help you catch unexpected changes to your UI or layout. For snapshot tests, add a .snapshot suffix to it, e.g. `NotificationsScreen.snapshot.test.js`. If the snapshot test is being run for the first time, the test will pass and a snapshot of the component will be generated `<Name of snapshot test>.snap`. This file will be used to compare against subsequent snapshots of the component. If a snapshot fails due to an intentional change in the appearance of the UI, run `jest --updateSnapshot` (add it as a script to package.json if not available) to [update the snapshots](https://jestjs.io/docs/snapshot-testing#updating-snapshots).
+
+4. End-to-end Tests (WIP, @weilun)\
+   End-to-end tests simulate a user interacting with the application from start to finish and verifying that everything works correctly from the user's perspective. End-to-end testing can help catch bugs and usability issues that might only become apparent when the application is used in real life.
+
+### Best practices
+
+1. Mocking\
+   If what you're testing involves a call to the backend (unless it's an end-to-end test), mock the API used to call the backend to return mock/fake data. This is because network latencies involved in data fetching can often result in test flakiness (i.e. the test can fail sometimes and succeed sometimes) due to reasons such as the test timing out before the component can re-render.
+
+2. Do not test against implementation details\
+   When writing integration tests/end-to-end tests, in order to verify behaviour, it might be tempting to test against implementation details, for e.g. check whether a certain function is called a certain number of times, or checking the state of a component matches what is expected.
+
+   This is not good practice as it can result in false negatives when code is refactored (but behaviour remains the same), which defeats the point of having failing tests. On the flipside, code may not fail when application code breaks (false positive). This means that tests are failing for the wrong reasons, which means that the tests are not very useful.
+
+   For a more in-depth explanation on why you should (generally) not test against implementation details, read [here](https://kentcdodds.com/blog/testing-implementation-details), and [here](https://codingitwrong.com/2018/12/03/why-you-should-sometimes-test-implementation-details.html) (when to maybe test implementation details).
+
+## Github Actions
+
+Github action workflows can be found in the `.github/workflows` directory. Github actions are used for running tests (`test-e2e.yml`, `test-unit.yml`), previewing changes and deploying code. Refer to the [official site](https://docs.github.com/en/actions/guides) for writing/editing Github actions.
+
+Here are some things to note when creating/editing your Github Actions workflows.
+
+**Limits**
+
+The [limit](https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions) each month for Github Actions on a free account is 2000 minutes. Please
+keep this in mind when introducing more build workflows. As far as possible, try to cache data (e.g. caching node modules) or run workflows under restricted conditions (e.g. (just as an illustration) run end-to-end only when merge to main)
+
+**Versioning**
+
+Make sure that the tests that are being run in the CI are in a same or compatible environment as the environment that is used for development. Outdated npm and/or node versions (that are not updated during the CI pipeline) have been known to cause failed builds in the past, even though the exact same tests pass when run locally.
+
+## Troubleshooting
+
+Add common errors encountered during CI/CD (and fixed) to this section
 
 ## Do we have an onboarding document?
 
