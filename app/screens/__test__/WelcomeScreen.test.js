@@ -72,7 +72,7 @@ describe('Test Welcome Screen', () => {
     const props = createTestProps({});
     const welcomeScreen = render(
       <NativeBaseProvider initialWindowMetrics={inset}>
-        <WelcomeScreen {...this.props} />
+        <WelcomeScreen {...props} />
       </NativeBaseProvider>,
     );
     const forgotPassword = welcomeScreen.getByText('Forgot Password?');

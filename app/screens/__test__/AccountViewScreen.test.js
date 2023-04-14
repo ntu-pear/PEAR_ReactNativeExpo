@@ -29,19 +29,20 @@ const mockedParams = {
       nric: 'Sxxxx781F',
       preferredName: 'Jess',
       profilePicture:
-        'https://res.cloudinary.com/dbpearfyp/image/upload/v1678789617/User/Jessica_Sim_Sxxxx781F/ProfilePicture/dvkpw0gsx8duekke7arq.png',
+        'https://res.cloudinary.com/dbpearfyp/image/upload/v1681207517/User/Jessica_Sim_Sxxxx781F/ProfilePicture/txd37slz5amwsz7rdxfk.png',
       role: 'Supervisor',
       userID: 'B22698B8-42A2-4115-9631-1C2D1E2AC5F4',
     },
   },
 };
 
-const createTestProps = () => ({
+const createTestProps = (props) => ({
   navigation: {
     push: jest.fn(),
   },
   ...mockedParams,
 });
+const props = createTestProps({});
 
 // we need to pass this in to NativeBaseProvider else the content within would
 // not be rendered
@@ -56,10 +57,9 @@ afterEach(() => {
 });
 
 const renderScreen = () => {
-  this.props = createTestProps({});
   return render(
     <NativeBaseProvider initialWindowMetrics={inset}>
-      <AccountViewScreen {...this.props} />
+      <AccountViewScreen {...props} />
     </NativeBaseProvider>,
   );
 };
@@ -72,13 +72,10 @@ describe('Test View Profile Information', () => {
     fireEvent.press(iconButton);
 
     await waitFor(() => {
-      expect(this.props.navigation.push).toHaveBeenCalledTimes(1);
-      expect(this.props.navigation.push).toHaveBeenCalledWith(
-        routes.ACCOUNT_EDIT,
-        {
-          ...mockedParams.route.params,
-        },
-      );
+      expect(props.navigation.push).toHaveBeenCalledTimes(1);
+      expect(props.navigation.push).toHaveBeenCalledWith(routes.ACCOUNT_EDIT, {
+        ...mockedParams.route.params,
+      });
     });
   });
 });

@@ -31,7 +31,9 @@ function ChangePasswordScreen(props) {
 
   const schema = Yup.object().shape({
     oldPassword: Yup.string().required('Old Password is a required field.'),
-    newPassword: Yup.string().required('New Password is a required field.'),
+    newPassword: Yup.string()
+      .min(6, 'New Password must be at least 6 characters.')
+      .required('New Password is a required field.'),
   });
 
   const validate = async () => {
@@ -50,7 +52,6 @@ function ChangePasswordScreen(props) {
         error.inner.forEach((e) => {
           errorList[e.path] = e.message;
         });
-        // console.log(errorList);
         setErrors(errorList);
         return false;
       }
@@ -122,7 +123,7 @@ function ChangePasswordScreen(props) {
             placeholder="Enter New Password"
             ErrorMessage={errors.newPassword}
             value={newPassword}
-            HelperText="Password must contain one uppercase, one lowercase and one non-alphanumeric."
+            HelperText="Password must be at least 6 characters, containing one uppercase, one lowercase and one non-alphanumeric."
             InputRightElement={
               <Icon
                 as={

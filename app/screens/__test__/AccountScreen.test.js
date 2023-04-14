@@ -32,6 +32,7 @@ const createTestProps = (props) => ({
   },
   ...props,
 });
+const props = createTestProps({});
 
 jest.setTimeout(10000);
 
@@ -51,7 +52,7 @@ const mockUserData = [
     nric: 'Sxxxx781F',
     preferredName: 'newname',
     profilePicture:
-      'https://res.cloudinary.com/dbpearfyp/image/upload/v1678789617/User/Jessica_Sim_Sxxxx781F/ProfilePicture/dvkpw0gsx8duekke7arq.png',
+      'https://res.cloudinary.com/dbpearfyp/image/upload/v1681207517/User/Jessica_Sim_Sxxxx781F/ProfilePicture/txd37slz5amwsz7rdxfk.png',
     role: 'Supervisor',
     userID: 'B22698B8-42A2-4115-9631-1C2D1E2AC5F4',
   },
@@ -161,7 +162,6 @@ describe('Test Account Screen', () => {
       ok: true,
       data: { data: mockUserData },
     });
-    this.props = createTestProps({});
     const accountScreen = render(
       <NativeBaseProvider initialWindowMetrics={inset}>
         <NavigationContext.Provider value={navContext}>
@@ -172,7 +172,7 @@ describe('Test Account Screen', () => {
               },
             }}
           >
-            <AccountScreen {...this.props} />
+            <AccountScreen {...props} />
           </AuthContext.Provider>
         </NavigationContext.Provider>
       </NativeBaseProvider>,
@@ -191,8 +191,8 @@ describe('Test Account Screen', () => {
     });
 
     await waitFor(() => {
-      expect(this.props.navigation.push).toHaveBeenCalledTimes(1);
-      expect(this.props.navigation.push).toHaveBeenCalledWith(routes.ABOUT);
+      expect(props.navigation.push).toHaveBeenCalledTimes(1);
+      expect(props.navigation.push).toHaveBeenCalledWith(routes.ABOUT);
     });
   });
 
@@ -204,7 +204,6 @@ describe('Test Account Screen', () => {
       ok: true,
       data: { data: mockUserData },
     });
-    this.props = createTestProps({});
     const accountScreen = render(
       <NativeBaseProvider initialWindowMetrics={inset}>
         <NavigationContext.Provider value={navContext}>
@@ -215,7 +214,7 @@ describe('Test Account Screen', () => {
               },
             }}
           >
-            <AccountScreen {...this.props} />
+            <AccountScreen {...props} />
           </AuthContext.Provider>
         </NavigationContext.Provider>
       </NativeBaseProvider>,
@@ -234,8 +233,8 @@ describe('Test Account Screen', () => {
     });
 
     await waitFor(() => {
-      expect(this.props.navigation.push).toHaveBeenCalledTimes(1);
-      expect(this.props.navigation.push).toHaveBeenCalledWith(routes.SETTINGS);
+      expect(props.navigation.push).toHaveBeenCalledTimes(1);
+      expect(props.navigation.push).toHaveBeenCalledWith(routes.SETTINGS);
     });
   });
 });
