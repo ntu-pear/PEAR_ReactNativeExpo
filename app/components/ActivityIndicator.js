@@ -6,7 +6,7 @@ let LottieView;
 if (Platform.OS === 'web') {
   LottieView = require('react-native-web-lottie').default;
 } else {
-  LottieView = require('lottie-react-native').default;
+  LottieView = require('lottie-react-native');
 }
 
 function ActivityIndicator({ visible = false }) {

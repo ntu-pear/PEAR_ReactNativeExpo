@@ -54,6 +54,7 @@ const createTestProps = () => ({
   },
   ...mockedParams,
 });
+const props = createTestProps({});
 
 // we need to pass this in to NativeBaseProvider else the content within would
 // not be rendered
@@ -68,10 +69,9 @@ afterEach(() => {
 });
 
 const renderScreen = () => {
-  this.props = createTestProps({});
   return render(
     <NativeBaseProvider initialWindowMetrics={inset}>
-      <AccountEditScreen {...this.props} />
+      <AccountEditScreen {...props} />
     </NativeBaseProvider>,
   );
 };
@@ -129,7 +129,7 @@ describe('Test Update Profile Information', () => {
     fireEvent.press(cancelButton);
 
     await waitFor(() => {
-      expect(this.props.navigation.goBack).toHaveBeenCalledTimes(1);
+      expect(props.navigation.goBack).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -35,6 +35,7 @@ const createTestProps = (props) => ({
   },
   ...props,
 });
+const props = createTestProps({});
 
 // we need to pass this in to NativeBaseProvider else the content within would
 // not be rendered
@@ -49,10 +50,9 @@ afterEach(() => {
 });
 
 const renderScreen = () => {
-  this.props = createTestProps({});
   return render(
     <NativeBaseProvider initialWindowMetrics={inset}>
-      <ResetPasswordScreen {...this.props} />
+      <ResetPasswordScreen {...props} />
     </NativeBaseProvider>,
   );
 };
@@ -137,10 +137,8 @@ describe('Test Reset Password', () => {
         'Instructions to reset password have been sent to email.',
       );
 
-      expect(this.props.navigation.navigate).toHaveBeenCalledTimes(1);
-      expect(this.props.navigation.navigate).toHaveBeenCalledWith(
-        routes.WELCOME,
-      );
+      expect(props.navigation.navigate).toHaveBeenCalledTimes(1);
+      expect(props.navigation.navigate).toHaveBeenCalledWith(routes.WELCOME);
     });
   });
 });
