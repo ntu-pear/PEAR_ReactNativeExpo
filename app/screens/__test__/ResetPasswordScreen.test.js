@@ -15,6 +15,7 @@ import user from 'app/api/user';
 import { Alert } from 'react-native';
 import routes from 'app/navigation/routes';
 
+// mock reset password api
 jest.mock('../../hooks/useApiHandler');
 jest.mock('../../api/user', () => ({
   resetPassword: jest.fn(async (_email, _role) => ({
@@ -23,8 +24,11 @@ jest.mock('../../api/user', () => ({
 }));
 jest.setTimeout(10000);
 
+// mock Alert component
 jest.spyOn(Alert, 'alert').mockImplementation(() => {});
 
+// mock navigation prop
+// https://stackoverflow.com/questions/52569447/how-to-mock-react-navigations-navigation-prop-for-unit-tests-with-typescript-in
 const createTestProps = (props) => ({
   navigation: {
     navigate: jest.fn(),
@@ -80,19 +84,53 @@ describe('Test Reset Password', () => {
     expect(await screen.findByText('Email is a required field.')).toBeVisible();
   });
 
-  test('Should show alert upon successful reset', async () => {
+  test('Should show error from backend validation when incorrect email is entered', async () => {
+    user.resetPassword.mockReturnValueOnce({
+      ok: false,
+      data: {
+        message: 'Invalid user with role or user does not exist.',
+      },
+    });
+
     const resetPasswordScreen = renderScreen();
     const emailInput =
       resetPasswordScreen.getByPlaceholderText('jess@gmail.com');
     const resetButton = resetPasswordScreen.getByText('Reset');
     expect(emailInput).toBeVisible();
     expect(resetButton).toBeVisible();
-    fireEvent.changeText(emailInput, 'jess@gmail.com');
+    fireEvent.changeText(emailInput, 'a@gmail.com');
     fireEvent.press(resetButton);
 
     await waitFor(() => {
       expect(user.resetPassword).toBeCalledTimes(1);
-      expect(user.resetPassword).toBeCalledWith('jess@gmail.com', 'Supervisor');
+      expect(user.resetPassword).toBeCalledWith('a@gmail.com', 'Supervisor');
+    });
+
+    expect(
+      await screen.findByText('Invalid user with role or user does not exist.'),
+    ).toBeVisible();
+  });
+
+  test('Should show alert upon successful reset', async () => {
+    const resetPasswordScreen = renderScreen();
+    const emailInput =
+      resetPasswordScreen.getByPlaceholderText('jess@gmail.com');
+    const role = resetPasswordScreen.getByPlaceholderText('Select role');
+    const resetButton = resetPasswordScreen.getByText('Reset');
+    expect(emailInput).toBeVisible();
+    expect(role).toBeVisible();
+    expect(resetButton).toBeVisible();
+    fireEvent.changeText(emailInput, 'pearfyp2019email@gmail.com');
+    fireEvent.press(role);
+    fireEvent.press(screen.getByText('Doctor'));
+    fireEvent.press(resetButton);
+
+    await waitFor(() => {
+      expect(user.resetPassword).toBeCalledTimes(1);
+      expect(user.resetPassword).toBeCalledWith(
+        'pearfyp2019email@gmail.com',
+        'Doctor',
+      );
 
       expect(Alert.alert).toBeCalledTimes(1);
       expect(Alert.alert).toBeCalledWith(
