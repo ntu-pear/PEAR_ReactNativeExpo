@@ -76,7 +76,7 @@ function AccountEditScreen(props) {
   };
 
   const handleOnPressToSave = async () => {
-    // carry out front end validation first first before calling out api
+    // carry out front end validation first before calling api
     const validation = await validate();
     if (!validation) {
       return;
