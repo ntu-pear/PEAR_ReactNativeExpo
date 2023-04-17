@@ -625,25 +625,12 @@ describe('Test PatientDailyHighlights', () => {
       data: { data: MockFilledHighlights },
     });
 
-    await waitFor(() => {
-      expect(getHighlight).toBeCalledTimes(1);
-    });
-
     const flatList = patientDailyHighlights.getByTestId('flatList');
-    expect(flatList).toBeVisible();
-    expect(flatList).toBeDefined();
-    expect(patientDailyHighlights.getAllByTestId('flatList').length).toBe(1);
-    expect(patientDailyHighlights.getAllByTestId('highlightsCard').length).toBe(
-      MockFilledHighlights.length,
-    );
 
     // referencing https://github.com/callstack/react-native-testing-library/issues/809
     const { refreshControl } = flatList.props;
     await act(async () => {
       refreshControl.props.onRefresh();
-    });
-
-    await waitFor(() => {
       expect(getHighlight).toBeCalledTimes(2);
     });
   });

@@ -254,7 +254,7 @@ function DashboardNavigator() {
                 />
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => setHighlightsModalVisible(true)}
+                onPress={() => setHighlightsModalVisible(!modalVisible)}
                 testID={'highlightsButton'}
               >
                 <Image

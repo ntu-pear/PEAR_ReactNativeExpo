@@ -1,17 +1,27 @@
 /**
  * @jest-environment node
  */
-import { cleanup, render, fireEvent } from '@testing-library/react-native';
+import {
+  cleanup,
+  render,
+  fireEvent,
+  waitFor,
+} from '@testing-library/react-native';
 import { NativeBaseProvider } from 'native-base';
 import { NavigationContainer } from '@react-navigation/native';
 import '@testing-library/jest-native/extend-expect';
 import DashboardNavigator from 'app/navigation/DashboardNavigator';
 import { getHighlight } from 'app/api/highlight';
+import { getDashboard } from 'app/api/dashboard';
 
+const MockEmptyPatientsData = [];
 const MockEmptyHighlights = [];
 
 jest.mock('../../hooks/useApiHandler');
 // referencing https://stackoverflow.com/questions/45758366/how-to-change-jest-mock-function-return-value-in-each-test
+jest.mock('../../api/dashboard', () => ({
+  getDashboard: jest.fn(),
+}));
 jest.mock('../../api/highlight', () => ({
   getHighlight: jest.fn(),
 }));
@@ -21,14 +31,6 @@ const inset = {
   insets: { top: 0, left: 0, right: 0, bottom: 0 },
 };
 
-// fake NavigationContext value data
-// allows useFocusEffect to determine if component has been focused
-const navContext = {
-  isFocused: () => true,
-  // addListener returns an unscubscribe function.
-  addListener: jest.fn(() => jest.fn()),
-};
-
 afterEach(() => {
   cleanup();
   jest.clearAllMocks();
@@ -36,6 +38,9 @@ afterEach(() => {
 
 describe('Test DashboardNavigator', () => {
   test('Should open highlights popup when button is pressed', async () => {
+    getDashboard.mockImplementation(() =>
+      Promise.resolve(MockEmptyPatientsData),
+    );
     getHighlight.mockReturnValueOnce({
       ok: true,
       data: { data: MockEmptyHighlights },
@@ -47,10 +52,13 @@ describe('Test DashboardNavigator', () => {
         </NavigationContainer>
       </NativeBaseProvider>,
     );
-    const highlightsButton = dashboardNavigator.getByTestId('highlightsButton');
-    expect(highlightsButton).toBeVisible();
+    await waitFor(() => {
+      const highlightsButton =
+        dashboardNavigator.getByTestId('highlightsButton');
+      expect(highlightsButton).toBeVisible();
 
-    fireEvent.press(highlightsButton);
+      fireEvent.press(highlightsButton);
+    });
 
     const highlightsModal = dashboardNavigator.getByTestId('highlightsModal');
     expect(highlightsModal).toBeTruthy();
@@ -58,6 +66,9 @@ describe('Test DashboardNavigator', () => {
   });
 
   test('Should close highlights popup when close button is pressed', async () => {
+    getDashboard.mockImplementation(() =>
+      Promise.resolve(MockEmptyPatientsData),
+    );
     getHighlight.mockReturnValueOnce({
       ok: true,
       data: { data: MockEmptyHighlights },
@@ -69,10 +80,13 @@ describe('Test DashboardNavigator', () => {
         </NavigationContainer>
       </NativeBaseProvider>,
     );
-    const highlightsButton = dashboardNavigator.getByTestId('highlightsButton');
-    expect(highlightsButton).toBeVisible();
+    await waitFor(() => {
+      const highlightsButton =
+        dashboardNavigator.getByTestId('highlightsButton');
+      expect(highlightsButton).toBeVisible();
 
-    fireEvent.press(highlightsButton);
+      fireEvent.press(highlightsButton);
+    });
 
     const highlightsModal = dashboardNavigator.getByTestId('highlightsModal');
     expect(highlightsModal).toBeTruthy();

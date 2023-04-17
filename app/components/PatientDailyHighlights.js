@@ -77,7 +77,7 @@ function PatientDailyHighlights(props) {
       testID: 'problemDropdownItem',
     },
     {
-      label: 'Medical History',
+      label: 'New Medical Records',
       value: 'medicalHistory',
       icon: () => (
         <MaterialCommunityIcons
@@ -117,6 +117,7 @@ function PatientDailyHighlights(props) {
     setIsLoading(false);
     setStatusCode(response.status);
     setHighlightsData(response.data.data);
+    setIsError(false);
     // console.log('Request successful with response: ', response);
   };
 
@@ -155,6 +156,10 @@ function PatientDailyHighlights(props) {
   };
 
   const noDataMessage = () => {
+    if (isLoading) {
+      return <></>;
+    }
+
     // Display error message if API request fails
     if (isError) {
       if (statusCode == 401) {
