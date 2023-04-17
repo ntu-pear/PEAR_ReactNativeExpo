@@ -117,6 +117,7 @@ function PatientDailyHighlights(props) {
     setIsLoading(false);
     setStatusCode(response.status);
     setHighlightsData(response.data.data);
+    setIsError(false);
     // console.log('Request successful with response: ', response);
   };
 
@@ -156,7 +157,7 @@ function PatientDailyHighlights(props) {
 
   const noDataMessage = () => {
     if (isLoading) {
-      return;
+      return <></>;
     }
 
     // Display error message if API request fails
