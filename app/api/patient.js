@@ -46,6 +46,31 @@ const addPatientForm = (arr, str, patientData) => {
 };
 // **********************  GET REQUESTS *************************
 
+const getPatient = async (patientID, maskNRIC) => {
+  // Error Handling
+  maskNRIC ? (maskNRIC = true) : (maskNRIC = false);
+
+  /*
+   *   Build Params
+   */
+  // if patientId is specified
+  let params;
+  if (patientID !== null) {
+    params = {
+      patientID,
+      maskNRIC,
+    };
+  }
+  // if patientId is not specified
+  else {
+    params = {
+      maskNRIC,
+    };
+  }
+
+  return client.get(endpoint, params);
+};
+
 const getPatientList = async (maskNRIC = true) => {
   // Error Handling
   // maskNRIC ? (maskNRIC = true) : (maskNRIC = false);
@@ -111,6 +136,7 @@ const addPatient = (formData) => {
  * Expose your end points here
  */
 export default {
+  getPatient,
   getPatientList,
   getPatientListByUserId,
   addPatient,
