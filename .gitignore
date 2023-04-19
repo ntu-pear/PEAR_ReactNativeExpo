@@ -66,3 +66,4 @@ android/keystores/debug.keystore
 # Cypress
 cypress.env.json
 cypress/videos
+cypress/screenshots

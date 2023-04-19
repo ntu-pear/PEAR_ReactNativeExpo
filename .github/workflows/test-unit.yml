@@ -32,7 +32,7 @@ jobs:
       - name: Install node modules
         # --ignore-scripts ignore pre-install scripts (I want to avoid installing husky with 'npm prepare')
         # npm ci is used for installing in CI environments: https://docs.npmjs.com/cli/v9/commands/npm-ci
-        run: npm ci --omit=dev --ignore-scripts
+        run: npm ci --omit=dev --ignore-scripts --legacy-peer-deps
 
       - name: Run tests
         run: npm test
