@@ -93,13 +93,20 @@ function NotificationNavigator() {
     useState(false);
   const [shouldRefetchRejectNotifications, setRefetchRejectNotifications] =
     useState(false);
+  const [shouldRefetchNotifications, setRefetchNotifications] = useState(false);
+  const [shouldRefetchReadNotifications, setRefetchReadNotifications] =
+    useState(false);
   return (
     <NotificationContext.Provider
       value={{
         shouldRefetchAcceptNotifications,
         shouldRefetchRejectNotifications,
+        shouldRefetchReadNotifications,
+        shouldRefetchNotifications,
         setRefetchAcceptNotifications,
         setRefetchRejectNotifications,
+        setRefetchNotifications,
+        setRefetchReadNotifications,
       }}
     >
       <Stack.Navigator>

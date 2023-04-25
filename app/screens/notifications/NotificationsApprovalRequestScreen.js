@@ -22,6 +22,8 @@ import notificationApi from 'app/api/notification';
 import ErrorRetryApiCard from 'app/components/ErrorRetryApiCard';
 import NotificationActions from 'app/config/notificationActions';
 import { useNotificationContext } from 'app/screens/notifications/NotificationContext';
+import { setMockNotificationAction } from 'app/screens/notifications/NotificationDataContext';
+notificationApi.setNotificationAction = setMockNotificationAction;
 
 function NotificationsApprovalRequestScreen(props) {
   const { navigation, route } = props;
@@ -33,8 +35,11 @@ function NotificationsApprovalRequestScreen(props) {
   const [reasonTextAreaValue, setReasonTextAreaValue] = useState('');
   const [functionToCallAgain, setFunctionToCallAgain] = useState(null);
   const [isError, setIsError] = useState(false);
-  const { setRefetchAcceptNotifications, setRefetchRejectNotifications } =
-    useNotificationContext();
+  const {
+    setRefetchAcceptNotifications,
+    setRefetchRejectNotifications,
+    setRefetchNotifications,
+  } = useNotificationContext();
   const cancelRef = useRef(null);
 
   const leftBtnFn = async () => {
@@ -57,6 +62,7 @@ function NotificationsApprovalRequestScreen(props) {
     setIsLoading(false);
     // (3) Navigate back to parent screen
     setRefetchAcceptNotifications(true);
+    setRefetchNotifications(true);
     navigation.goBack();
   };
 
@@ -92,6 +98,7 @@ function NotificationsApprovalRequestScreen(props) {
       return;
     }
     setRefetchRejectNotifications(true);
+    setRefetchNotifications(true);
     // (4) Update parent screen
     setAcceptRejectNotifID(notificationID);
     // (4) unSet Loading

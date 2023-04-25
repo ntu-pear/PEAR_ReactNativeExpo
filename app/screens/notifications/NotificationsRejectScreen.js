@@ -3,11 +3,18 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 import ErrorRetryApiCard from 'app/components/ErrorRetryApiCard';
 import NotificationCard from 'app/components/NotificationCard';
 import { FlatList, VStack } from 'native-base';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import useNotifications from 'app/screens/notifications/useNotifications';
 import NotificationSortSelector from 'app/screens/notifications/NotificationsSortSelector';
 import { useFocusEffect } from '@react-navigation/native';
 import { useNotificationContext } from 'app/screens/notifications/NotificationContext';
+import { useMockNotifications } from 'app/screens/notifications/NotificationDataContext';
 
 function NotificationsRejectScreen(props) {
   const { notificationType } = props.route.params;
@@ -21,7 +28,7 @@ function NotificationsRejectScreen(props) {
   const paginationParams = useRef({});
   const [sortBy, setSortBy] = useState('');
   const { getNotifications, handlePullToRefresh, getMoreNotifications } =
-    useNotifications(
+    useMockNotifications(
       notificationType,
       setIsError,
       setIsLoading,
@@ -50,14 +57,20 @@ function NotificationsRejectScreen(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useFocusEffect(() => {
-    if (shouldRefetchRejectNotifications) {
-      (async () => {
-        await handlePullToRefresh(paginationParams, sortBy);
-      })();
-      setRefetchRejectNotifications(true);
-    }
-  });
+  useFocusEffect(
+    useCallback(
+      () => {
+        if (shouldRefetchRejectNotifications) {
+          (async () => {
+            await handlePullToRefresh(paginationParams, sortBy);
+          })();
+          setRefetchRejectNotifications(false);
+        }
+      },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [shouldRefetchRejectNotifications],
+    ),
+  );
 
   const handleErrorWhenApiFails = () => {
     setIsError(false);
