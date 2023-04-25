@@ -13,6 +13,7 @@ import typography from '../config/typography';
 import { useSafeArea } from 'react-native-safe-area-context';
 import NotificationType from 'app/screens/notifications/NotificationType';
 import NotificationContext from 'app/screens/notifications/NotificationContext';
+import { useState } from 'react';
 
 const Tab = createMaterialTopTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -87,11 +88,18 @@ function NotificationTabNavigator() {
 // Purpose: To allow tab components to navigate to `NotificationApprovalRequestScreen`.
 // Reference: https://reactnavigation.org/docs/nesting-navigators/#each-navigator-keeps-its-own-navigation-history
 function NotificationNavigator() {
+  // add NotificationContext data here
+  const [shouldRefetchAcceptNotifications, setRefetchAcceptNotifications] =
+    useState(false);
+  const [shouldRefetchRejectNotifications, setRefetchRejectNotifications] =
+    useState(false);
   return (
     <NotificationContext.Provider
       value={{
-        shouldRefetchAcceptNotifications: false,
-        shouldRefetchRejectNotifications: false,
+        shouldRefetchAcceptNotifications,
+        shouldRefetchRejectNotifications,
+        setRefetchAcceptNotifications,
+        setRefetchRejectNotifications,
       }}
     >
       <Stack.Navigator>

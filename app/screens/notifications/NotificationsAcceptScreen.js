@@ -28,7 +28,8 @@ function NotificationsAcceptScreen(props) {
       setNotificationAcceptedData,
       setIsFetchingMoreNotifications,
     );
-  const notificationContext = useNotificationContext();
+  const { shouldRefetchAcceptNotifications, setRefetchAcceptNotifications } =
+    useNotificationContext();
   // const [notificationAcceptedData, setNotificationAcceptedData] = useState([
   //   {
   //     requiresAction: false,
@@ -50,11 +51,11 @@ function NotificationsAcceptScreen(props) {
   }, [sortBy]);
 
   useFocusEffect(() => {
-    if (notificationContext.shouldRefetchAcceptNotifications) {
+    if (shouldRefetchAcceptNotifications) {
       (async () => {
         await handlePullToRefresh(paginationParams, sortBy);
       })();
-      notificationContext.shouldRefetchAcceptNotifications = false;
+      setRefetchAcceptNotifications(false);
     }
   });
 

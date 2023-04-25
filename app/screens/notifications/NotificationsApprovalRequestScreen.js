@@ -33,7 +33,8 @@ function NotificationsApprovalRequestScreen(props) {
   const [reasonTextAreaValue, setReasonTextAreaValue] = useState('');
   const [functionToCallAgain, setFunctionToCallAgain] = useState(null);
   const [isError, setIsError] = useState(false);
-  const notificationContext = useNotificationContext();
+  const { setRefetchAcceptNotifications, setRefetchRejectNotifications } =
+    useNotificationContext();
   const cancelRef = useRef(null);
 
   const leftBtnFn = async () => {
@@ -55,7 +56,7 @@ function NotificationsApprovalRequestScreen(props) {
     // unSetLoading
     setIsLoading(false);
     // (3) Navigate back to parent screen
-    notificationContext.shouldRefetchAcceptNotifications = true;
+    setRefetchAcceptNotifications(true);
     navigation.goBack();
   };
 
@@ -90,7 +91,7 @@ function NotificationsApprovalRequestScreen(props) {
       setIsError(true);
       return;
     }
-    notificationContext.shouldRefetchRejectNotifications = true;
+    setRefetchRejectNotifications(true);
     // (4) Update parent screen
     setAcceptRejectNotifID(notificationID);
     // (4) unSet Loading
