@@ -1,4 +1,4 @@
-name: Create production Expo mobile build and deploy to EAS on merge
+name: Create production Expo Android APK and deploy to EAS on merge
 on:
   push:
     branches:
@@ -7,7 +7,7 @@ on:
       - 'app/**'
       - 'package.json'
       - 'package-lock.json'
-      - '.github/workflows/create-eas-build.yml'
+      - '.github/workflows/deploy-apk-on-merge.yml'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -31,5 +31,5 @@ jobs:
       - name: 📦 Install dependencies
         run: npm ci
 
-      - name: 🚀 Build app
-        run: eas build --non-interactive --platform android
+      - name: 🚀 Build Android app and deploy the APK to Expo (https://expo.dev/accounts/fyppear/projects/PEAR_ReactNativeExpo/builds)
+        run: eas build -p android --profile preview --non-interactive

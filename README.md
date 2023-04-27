@@ -99,7 +99,8 @@ Some issues faced during installation guide:
 Jest is used as a testing library to test the logic and the appearance of the components.
 Please refer to the jest documentation in the links above and the existing tests for examples on how to write tests for your components.
 
-### Cypress (WIP, @weilun)
+### Cypress
+Documentation on Cypress usage can be found at https://fyppear.atlassian.net/wiki/spaces/FP/pages/12976131/Frontend
 
 ### Adding a test (Jest)
 
@@ -123,7 +124,7 @@ Creating a `__test__` directory in the root of the component to be tested
 
 3. For test re-running when relevant files have been changed (optional feature, like hot-reload), run `npm test-watch`.
 
-### Types of Test (WIP)
+### Types of Test
 
 1. Unit Tests\
    Tests that verify the behaviour of individual functions or modules in isolation. Unit tests help to ensure that each piece of code in the application is functioning as intended. Currently there are no unit tests in the repository, some areas where unit tests can be added are the utility functions, such as `cache.js`, various hooks in the `\hooks` directory, `authStorage.js`.
@@ -139,9 +140,14 @@ Creating a `__test__` directory in the root of the component to be tested
 3. Snapshot Tests\
    As the name suggests, these are tests that capture the output of a component and compare it to a previously saved version of the same component. Snapshot tests help you catch unexpected changes to your UI or layout. For snapshot tests, add a .snapshot suffix to it, e.g. `NotificationsScreen.snapshot.test.js`. If the snapshot test is being run for the first time, the test will pass and a snapshot of the component will be generated `<Name of snapshot test>.snap`. This file will be used to compare against subsequent snapshots of the component. If a snapshot fails due to an intentional change in the appearance of the UI, run `jest --updateSnapshot` (add it as a script to package.json if not available) to [update the snapshots](https://jestjs.io/docs/snapshot-testing#updating-snapshots).
 
-4. End-to-end Tests (WIP, @weilun)\
+4. End-to-end Tests
    End-to-end tests simulate a user interacting with the application from start to finish and verifying that everything works correctly from the user's perspective. End-to-end testing can help catch bugs and usability issues that might only become apparent when the application is used in real life.
 
+## App Deployment
+
+1. RN Web App Deployment - Deployment to our production environment at https://pear-reactnativeexpoweb.web.app/ is automated via GitHub Actions, and can be configured in the `.github/workflows/deploy-web-on-merge.yml` spec file. Deployment to our preview environment (URL can be found as a comment on each PR) can be configured in the `.github/workflows/preview-web-on-pr.yml` spec file.
+
+2. RN Mobile App Deployment - Currently, automated deployments to the Google Play Store is not supported as a paid Google developer account is needed. Instead, automatic builds and deployments of an Android APK to Expo EAS Build (https://expo.dev/accounts/fyppear/projects/PEAR_ReactNativeExpo/builds) under the `fyppear@gmail.com` Google account is done, so Prof can download it directly.  The exact link to the downloadable APK can be found in the Actions > Workflow tab on GitHub. iOS builds are not done, since Prof is currently testing on a physical Android tablet. Additional configuration for building and deploying an iOS IPA can be found at https://docs.expo.dev/archive/classic-updates/building-standalone-apps/#building-for-ios
 ### Best practices
 
 1. Mocking\
