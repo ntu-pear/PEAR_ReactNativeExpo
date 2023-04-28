@@ -2,10 +2,23 @@ import React from 'react';
 import { Text, View, Image, StyleSheet } from 'react-native';
 import colors from 'app/config/colors';
 import { Center } from 'native-base';
+import { Platform } from 'react-native';
 
-function AboutScreen() {
+function AboutScreen(props) {
+  const { sidebar } = props;
+
   return (
-    <View>
+    <View
+      style={
+        Platform.OS === 'web'
+          ? {
+              display: 'flex',
+              alignItems: 'center',
+              width: sidebar ? '83vw' : '100vw',
+            }
+          : {}
+      }
+    >
       <Center>
         <View style={styles.logoContainer}>
           <Image

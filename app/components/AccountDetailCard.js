@@ -1,23 +1,34 @@
 import React from 'react';
-import { TouchableOpacity } from 'react-native';
+import { TouchableOpacity, Platform } from 'react-native';
 import colors from 'app/config/colors';
 import { Image, Text, VStack, Box, HStack } from 'native-base';
 // Import Constants from routes
 import routes from 'app/navigation/routes';
+import { useNavigate } from 'react-router-dom';
 
 function AccountDetailCard(props) {
   const { userProfile, navigation } = props;
 
+  // useNavigate() hook cannot work on mobile
+  // const navigate = Platform.OS === 'web' ? useNavigate() : null;
+
   const handleOnPress = () => {
-    navigation.push(routes.ACCOUNT_VIEW, { ...userProfile });
+    if (Platform.OS === 'web') {
+      navigation('/' + routes.ACCOUNT_VIEW, {
+        state: { userProfile: userProfile },
+      });
+    } else {
+      navigation.push(routes.ACCOUNT_VIEW, { ...userProfile });
+    }
   };
 
   return (
     <TouchableOpacity onPress={handleOnPress}>
       <Box
         minW="90%"
-        mb="5"
-        mt="5"
+        my={Platform.OS === 'web' ? '2' : '5'}
+        // mx={Platform.OS === 'web' ? '' : ''}
+        px={Platform.OS === 'web' ? '8' : ''}
         overflow="visible"
         rounded="lg"
         borderColor={colors.primary_gray}

@@ -1,58 +1,53 @@
-// import React from 'react';
-// import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-// import { MaterialCommunityIcons } from '@expo/vector-icons';
-// import colors from '../config/colors';
-// // Import Constants
-// import routes from './routes';
-// import DashboardNavigator from './DashboardNavigator';
-// import PatientsNavigator from './PatientsNavigator';
-// import ConfigNavigator from './ConfigNavigator';
-// import AccountScreen from '../screens/AccountScreen';
-// import NotificationNavigator from './NotificationNavigator';
-// import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
-
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useCallback } from 'react';
+import { Platform } from 'react-native';
 import {
   // BrowserRouter as Router,
   Routes,
   Route,
   Link,
-  Outlet,
-  useParams,
   useLocation,
+  useNavigate,
 } from 'react-router-dom';
 import {
   VStack,
   HStack,
-  Button,
   IconButton,
   Icon,
   Text,
-  NativeBaseProvider,
-  Center,
   Box,
   StatusBar,
-  View,
   Image,
   Pressable,
   Divider,
   Menu,
   Popover,
 } from 'native-base';
-import { NavigationContainer } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import AuthContext from 'app/auth/context';
 import authStorage from 'app/auth/authStorage';
 
 import NotificationNavigator from 'app/navigation/NotificationNavigator';
 import AccountScreen from 'app/screens/AccountScreen';
+import AccountViewScreen from 'app/screens/AccountViewScreen';
+import AccountEditScreen from 'app/screens/AccountEditScreen';
+import ChangePasswordScreen from 'app/screens/ChangePasswordScreen';
 import PatientsScreenWeb from 'app/screens/web/PatientsScreenWeb';
 import PatientInformationScreenWeb from 'app/screens/web/PatientInformationScreenWeb';
 import PatientAddScreen from 'app/screens/PatientAddScreen';
 
+import AccountDetailCard from 'app/components/AccountDetailCard';
+import AccountCard from 'app/components/AccountCard';
+import AppButton from 'app/components/AppButton';
+
 import routes from 'app/navigation/routes';
+import userApi from 'app/api/user';
+import AboutScreen from 'app/screens/AboutScreen';
+
+import colors from 'app/config/colors';
 
 function Example() {
   return (
@@ -71,6 +66,7 @@ const linkStyle = {
 function WebAppNavigator() {
   const [sidebar, setSidebar] = useState(false);
   const { user, setUser } = useContext(AuthContext);
+  const [isLoading, setIsLoading] = useState(false);
 
   // side navbar
   const showSidebar = () => setSidebar(!sidebar);
@@ -81,8 +77,38 @@ function WebAppNavigator() {
     await authStorage.removeToken();
   };
 
-  const location = useLocation();
+  // get current user
+  useFocusEffect(
+    useCallback(() => {
+      setIsLoading(true);
+      const promiseFunction = async () => {
+        const response = await getCurrentUser();
+        // console.log(response);
 
+        setUser(response?.data);
+      };
+      promiseFunction();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []),
+  );
+
+  const getCurrentUser = async () => {
+    const currentUser = await authStorage.getUser();
+    const response = await userApi.getUser(currentUser?.userID);
+    // console.log('getCurrentUser', response);
+    if (!response.ok) {
+      // Proceed to log out if account screen does not load due to api failure
+      // Note: should use useCheckExpiredThenLogOut hook but it isnt working and had no time to fix
+      setUser(null);
+      await authStorage.removeToken();
+      return;
+    }
+    setIsLoading(false);
+    return response.data;
+  };
+
+  // set title for each web page
+  const location = useLocation();
   useEffect(() => {
     var currentPathName = location.pathname || 'Welcome';
 
@@ -90,6 +116,9 @@ function WebAppNavigator() {
       currentPathName.replace(/\//g, ''),
     )}`;
   }, [location]);
+
+  // useNavigate() hook cannot work on mobile
+  const navigate = Platform.OS === 'web' ? useNavigate() : null;
 
   return (
     <>
@@ -163,7 +192,7 @@ function WebAppNavigator() {
             </Popover>
 
             <Menu
-              w="190"
+              pr="3"
               trigger={(triggerProps) => {
                 return (
                   <Pressable>
@@ -184,10 +213,50 @@ function WebAppNavigator() {
                 );
               }}
             >
-              <Menu.Group title={user.sub}>
-                <Menu.Item>Edit Profile</Menu.Item>
-                <Menu.Item onPress={onPressLogOut}>Logout</Menu.Item>
+              <Menu.Item>
+                <AccountDetailCard userProfile={user} navigation={navigate} />
+              </Menu.Item>
+              <Menu.Group title="Settings">
+                <Menu.Item>
+                  <Box
+                    rounded="lg"
+                    borderWidth={Platform.OS === 'web' ? '1' : ''}
+                    borderColor={colors.primary_gray}
+                    style={{ flex: 1 }}
+                  >
+                    <AccountCard
+                      vectorIconComponent={
+                        <MaterialCommunityIcons name="cog" />
+                      }
+                      text="Change Password"
+                      navigation={navigate}
+                      routes={routes.CHANGE_PASSWORD}
+                    />
+                  </Box>
+                </Menu.Item>
               </Menu.Group>
+              <Menu.Group title="About">
+                <Menu.Item>
+                  <Box
+                    rounded="lg"
+                    borderWidth={Platform.OS === 'web' ? '1' : ''}
+                    borderColor={colors.primary_gray}
+                    style={{ flex: 1 }}
+                  >
+                    <AccountCard
+                      vectorIconComponent={
+                        <MaterialCommunityIcons name="information" />
+                      }
+                      text="About"
+                      navigation={navigate}
+                      routes={routes.ABOUT}
+                    />
+                  </Box>
+                </Menu.Item>
+              </Menu.Group>
+              <Menu.Item>
+                <AppButton title="Logout" color="red" onPress={onPressLogOut} />
+              </Menu.Item>
             </Menu>
           </HStack>
         </HStack>
@@ -233,7 +302,7 @@ function WebAppNavigator() {
                 />
                 Manage Preference
               </Link>
-              <Link to={routes.ACCOUNT} style={linkStyle}>
+              <Link to="/" style={linkStyle}>
                 <Icon
                   as={MaterialIcons}
                   name="medical-services"
@@ -247,7 +316,7 @@ function WebAppNavigator() {
               <Text bold fontSize="18px">
                 ACTIVITIES
               </Text>
-              <Link to="/example" style={linkStyle}>
+              <Link to="/" style={linkStyle}>
                 <Icon as={MaterialIcons} name="list-alt" size="md" m="2" />
                 Manage Activities
               </Link>
@@ -339,7 +408,17 @@ function WebAppNavigator() {
           />
           <Route
             path={routes.PATIENT_ADD_PATIENT}
-            element={<PatientAddScreen sidebar={sidebar} />}
+            element={<PatientAddScreen />}
+          />
+          <Route path={routes.ACCOUNT_VIEW} element={<AccountViewScreen />} />
+          <Route path={routes.ACCOUNT_EDIT} element={<AccountEditScreen />} />
+          <Route
+            path={routes.CHANGE_PASSWORD}
+            element={<ChangePasswordScreen sidebar={sidebar} />}
+          />
+          <Route
+            path={routes.ABOUT}
+            element={<AboutScreen sidebar={sidebar} />}
           />
         </Routes>
       </HStack>

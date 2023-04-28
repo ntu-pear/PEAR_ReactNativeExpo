@@ -22,11 +22,17 @@ import EditField from 'app/components/EditField';
 import ErrorMessage from 'app/components/ErrorMessage';
 import UserInformationCard from 'app/components/UserInformationCard';
 import * as Yup from 'yup';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 function AccountEditScreen(props) {
   const [isLoading, setIsLoading] = useState(false);
   const { navigation, route } = props;
-  const userProfile = route.params;
+  const { state } = Platform.OS === 'web' ? useLocation() : null;
+  const userProfile = Platform.OS === 'web' ? state.userProfile : route.params;
+
+  // useNavigate() hook cannot work on mobile
+  const navigate = Platform.OS === 'web' ? useNavigate() : null;
+
   const [formData, setFormData] = useState({
     preferredName: userProfile.preferredName,
     contactNo: userProfile.contactNo,
@@ -94,10 +100,29 @@ function AccountEditScreen(props) {
     }
 
     setIsLoading(false);
-    Alert.alert('Successfully updated.');
-    navigation.pop();
+
+    const alertTxt = 'Successfully updated.';
+    Platform.OS === 'web' ? alert(alertTxt) : Alert.alert(alertTxt);
+
     // redirect user to account screen after successful update
-    navigation.navigate(routes.ACCOUNT_SCREEN);
+    if (Platform.OS === 'web') {
+      navigate('/' + routes.ACCOUNT_VIEW, {
+        state: { userProfile: userProfile },
+      });
+    } else {
+      navigation.pop();
+      navigation.navigate(routes.ACCOUNT_SCREEN);
+    }
+  };
+
+  const goBack = () => {
+    if (Platform.OS === 'web') {
+      navigate('/' + routes.ACCOUNT_VIEW, {
+        state: { userProfile: userProfile },
+      });
+    } else {
+      navigation.goBack();
+    }
   };
 
   const handleOnPressToImagePicker = async () => {
@@ -116,13 +141,14 @@ function AccountEditScreen(props) {
         return false;
       }
     } else {
-      Alert.alert('Please enable permissions to pick from image gallery.');
+      const alertTxt = 'Please enable permissions to pick from image gallery.';
+      Platform.OS === 'web' ? alert(alertTxt) : Alert.alert(alertTxt);
     }
   };
 
   return (
     <ScrollView>
-      <VStack mt="4" ml="4">
+      <VStack mt="4" ml="4" px={Platform.OS === 'web' ? '10%' : ''}>
         <Center>
           <HStack>
             <Center>
@@ -211,7 +237,7 @@ function AccountEditScreen(props) {
             </Button>
 
             <Button
-              onPress={() => navigation.goBack()}
+              onPress={goBack}
               w="25%"
               size="md"
               bg={colors.pink}

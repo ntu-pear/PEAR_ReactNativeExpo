@@ -79,17 +79,23 @@ function ResetPasswordScreen(props) {
     <View>
       <VStack>
         <Center>
-          <CustomFormControl
-            isRequired
-            isInvalid={'email' in errors}
-            title="Email"
-            onChangeText={handleEmail}
-            placeholder="jess@gmail.com"
-            ErrorMessage={errors.email}
-            value={email}
-          />
+          <Center w={Platform.OS === 'web' ? '62.5%' : ''}>
+            <CustomFormControl
+              isRequired
+              isInvalid={'email' in errors}
+              title="Email"
+              onChangeText={handleEmail}
+              placeholder="jess@gmail.com"
+              ErrorMessage={errors.email}
+              value={email}
+            />
+          </Center>
 
-          <FormControl maxW="80%" mt="5" isRequired>
+          <FormControl
+            maxW={Platform.OS === 'web' ? '50%' : '80%'}
+            mt="5"
+            isRequired
+          >
             <VStack>
               <FormControl.Label
                 _text={{
@@ -144,7 +150,7 @@ function ResetPasswordScreen(props) {
 
 const styles = StyleSheet.create({
   buttonsContainer: {
-    width: '50%',
+    width: Platform.OS === 'web' ? '30%' : '50%',
     paddingVertical: 30,
     alignSelf: 'center',
   },

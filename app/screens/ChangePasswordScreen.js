@@ -11,6 +11,7 @@ import AppButton from 'app/components/AppButton';
 import CustomFormControl from 'app/components/CustomFormControl';
 import * as Yup from 'yup';
 import ErrorMessage from 'app/components/ErrorMessage';
+import { Platform } from 'react-native';
 
 function ChangePasswordScreen(props) {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,6 +21,7 @@ function ChangePasswordScreen(props) {
   const [errors, setErrors] = useState({});
   const [showOld, setShowOld] = useState(false);
   const [showNew, setShowNew] = useState(false);
+  const { sidebar } = props;
 
   const handleOldPassword = (e) => {
     setOldPassword(e);
@@ -81,14 +83,25 @@ function ChangePasswordScreen(props) {
     }
 
     setIsLoading(false);
-    Alert.alert('Password changed successfully. Please login again.');
+    let alertTxt = 'Password changed successfully. Please login again.';
+    Platform.OS === 'web' ? alert(alertTxt) : Alert.alert(alertTxt);
     // Redirects the user to Welcome screen by logging out after successful password change.
     authContext.setUser(null);
     await authStorage.removeToken();
   };
 
   return (
-    <View>
+    <View
+      style={
+        Platform.OS === 'web'
+          ? {
+              display: 'flex',
+              alignItems: 'center',
+              width: sidebar ? '83vw' : '100vw',
+            }
+          : {}
+      }
+    >
       <VStack>
         <Center>
           <CustomFormControl

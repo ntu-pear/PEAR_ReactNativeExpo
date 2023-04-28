@@ -1,13 +1,17 @@
 import React from 'react';
 import { Box, Icon, Text, HStack, VStack } from 'native-base';
 import colors from 'app/config/colors';
-import { TouchableOpacity } from 'react-native';
+import { TouchableOpacity, Platform } from 'react-native';
 
 function AccountCard(props) {
   const { vectorIconComponent, text, navigation, routes } = props;
 
   const handleOnPressToNextScreen = () => {
-    navigation.push(routes);
+    if (Platform.OS === 'web') {
+      navigation('/' + routes);
+    } else {
+      navigation.push(routes);
+    }
   };
 
   return (
@@ -15,10 +19,10 @@ function AccountCard(props) {
       <VStack w="100%" alignItems="center">
         <Box
           rounded="lg"
-          borderWidth="1"
+          borderWidth={Platform.OS === 'web' ? '' : '1'}
           borderColor={colors.primary_gray}
           minW="100%"
-          minH="20"
+          minH={Platform.OS === 'web' ? '' : '20'}
         >
           <VStack w="100%" space={4} flexWrap="wrap" mb="1">
             <HStack space={5} alignItems="center">
@@ -34,7 +38,7 @@ function AccountCard(props) {
               <Text
                 alignSelf="flex-start"
                 fontSize="lg"
-                mt="6"
+                mt={Platform.OS === 'web' ? '2' : '6'}
                 ml="1"
                 color={colors.black_var1}
               >

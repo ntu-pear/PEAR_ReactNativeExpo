@@ -46,7 +46,7 @@ function PatientsScreenWeb(props) {
       const promiseFunction = async () => {
         const response = await getListOfPatients();
         setListOfPatients(response?.data.data);
-        // initialize clicked patient as the first patient TODO: (yapsiang) error handling for no patient
+        // initialize clicked patient as the first patient TODO: error handling for no patient
         setPatientProfile(response?.data.data[0]);
       };
       promiseFunction();

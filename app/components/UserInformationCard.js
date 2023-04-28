@@ -13,11 +13,14 @@ import {
 } from 'native-base';
 import typography from 'app/config/typography';
 import colors from 'app/config/colors';
+import { useLocation } from 'react-router-dom';
 
 function UserInformationCard(props) {
   const { userProfile } = props;
+  const { state } = Platform.OS === 'web' ? useLocation() : null;
+
   const { address, dob, firstName, lastName, gender, nric, email, role } =
-    userProfile.route.params;
+    Platform.OS === 'web' ? state.userProfile : userProfile.route.params;
 
   return (
     <Stack>
@@ -240,8 +243,8 @@ function UserInformationCard(props) {
             isReadOnly
             input="lg"
             ml="-2.5"
-            minH="30%"
-            maxH="50%"
+            minH={Platform.OS === 'web' ? '60%' : '30%'}
+            maxH={Platform.OS === 'web' ? '100%' : '50%'}
             variant="unstyled"
             value={address || 'Not available'}
             w="100%"
