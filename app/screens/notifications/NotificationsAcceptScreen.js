@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useContext,
+  useRef,
+  useCallback,
+} from 'react';
 import { FlatList, VStack } from 'native-base';
 import AuthContext from 'app/auth/context';
 import ActivityIndicator from 'app/components/ActivityIndicator';
@@ -8,6 +14,7 @@ import useNotifications from 'app/screens/notifications/useNotifications';
 import NotificationSortSelector from 'app/screens/notifications/NotificationsSortSelector';
 import { useFocusEffect } from '@react-navigation/native';
 import { useNotificationContext } from 'app/screens/notifications/NotificationContext';
+import { useMockNotifications } from 'app/screens/notifications/NotificationDataContext';
 
 function NotificationsAcceptScreen(props) {
   const { notificationType } = props.route.params;
@@ -21,7 +28,7 @@ function NotificationsAcceptScreen(props) {
   const [notificationAcceptedData, setNotificationAcceptedData] = useState([]);
   const [sortBy, setSortBy] = useState('');
   const { getNotifications, handlePullToRefresh, getMoreNotifications } =
-    useNotifications(
+    useMockNotifications(
       notificationType,
       setIsError,
       setIsLoading,
@@ -50,14 +57,17 @@ function NotificationsAcceptScreen(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortBy]);
 
-  useFocusEffect(() => {
-    if (shouldRefetchAcceptNotifications) {
-      (async () => {
-        await handlePullToRefresh(paginationParams, sortBy);
-      })();
-      setRefetchAcceptNotifications(false);
-    }
-  });
+  useFocusEffect(
+    useCallback(() => {
+      if (shouldRefetchAcceptNotifications) {
+        (async () => {
+          await handlePullToRefresh(paginationParams, sortBy);
+        })();
+        setRefetchAcceptNotifications(false);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [shouldRefetchAcceptNotifications]),
+  );
 
   const handleErrorWhenApiFails = async () => {
     setIsError(false);

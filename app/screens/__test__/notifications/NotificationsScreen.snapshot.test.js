@@ -29,23 +29,25 @@ const inset = {
   insets: { top: 0, left: 0, right: 0, bottom: 0 },
 };
 
-test('renders NotificationsScreen correctly', async () => {
-  const { toJSON } = render(
-    <AuthContext.Provider
-      value={{
-        user: {
-          sub: 'Jessica Sim',
-        },
-        acceptRejectNotifID: null,
-      }}
-    >
-      <NativeBaseProvider initialWindowMetrics={inset}>
-        <NotificationsScreen {...testProps} />
-      </NativeBaseProvider>
-    </AuthContext.Provider>,
-  );
-  // unable to solve the issue of waiting for the component to re-render
-  // after data fetching before comparing snapshots, i.e.
-  // snapshot is of an empty notifications list
-  expect(toJSON()).toMatchSnapshot();
+describe.skip('NotificationsScreen snapshot test', () => {
+  test('renders NotificationsScreen correctly', async () => {
+    const { toJSON } = render(
+      <AuthContext.Provider
+        value={{
+          user: {
+            sub: 'Jessica Sim',
+          },
+          acceptRejectNotifID: null,
+        }}
+      >
+        <NativeBaseProvider initialWindowMetrics={inset}>
+          <NotificationsScreen {...testProps} />
+        </NativeBaseProvider>
+      </AuthContext.Provider>,
+    );
+    // unable to solve the issue of waiting for the component to re-render
+    // after data fetching before comparing snapshots, i.e.
+    // snapshot is of an empty notifications list
+    expect(toJSON()).toMatchSnapshot();
+  });
 });

@@ -6,6 +6,7 @@ import NotificationCard from 'app/components/NotificationCard';
 import ErrorRetryApiCard from 'app/components/ErrorRetryApiCard';
 import useNotifications from 'app/screens/notifications/useNotifications';
 import NotificationSortSelector from 'app/screens/notifications/NotificationsSortSelector';
+import { useMockNotifications } from 'app/screens/notifications/NotificationDataContext';
 
 function NotificationsReadScreen(props) {
   const { notificationType } = props.route.params;
@@ -18,7 +19,7 @@ function NotificationsReadScreen(props) {
     useState(false);
   const paginationParams = useRef({});
   const [sortBy, setSortBy] = useState('');
-  const { handlePullToRefresh, getMoreNotifications } = useNotifications(
+  const { handlePullToRefresh, getMoreNotifications } = useMockNotifications(
     notificationType,
     setIsError,
     setIsLoading,

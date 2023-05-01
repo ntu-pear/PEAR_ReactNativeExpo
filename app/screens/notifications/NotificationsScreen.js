@@ -21,6 +21,10 @@ import ErrorRetryApiCard from 'app/components/ErrorRetryApiCard';
 import routes from 'app/navigation/routes';
 import useNotifications from 'app/screens/notifications/useNotifications';
 import NotificationSortSelector from 'app/screens/notifications/NotificationsSortSelector';
+import { useMockNotifications } from 'app/screens/notifications/NotificationDataContext';
+import { useFocusEffect } from '@react-navigation/native';
+import { useNotificationContext } from 'app/screens/notifications/NotificationContext';
+import NotificationType from 'app/screens/notifications/NotificationType';
 
 function NotificationsScreen(props) {
   const { notificationType } = props.route.params;
@@ -39,13 +43,17 @@ function NotificationsScreen(props) {
     useState(false);
   const paginationParams = useRef({});
   const [sortBy, setSortBy] = useState('');
-  const { handlePullToRefresh, getMoreNotifications } = useNotifications(
+  const { handlePullToRefresh, getMoreNotifications } = useMockNotifications(
     notificationType,
     setIsError,
     setIsLoading,
     setNotificationData,
     setIsFetchingMoreNotifications,
   );
+
+  const { shouldRefetchNotifications, setRefetchNotifications } =
+    useNotificationContext();
+
   useEffect(() => {
     // Fetches data from notification api (Once)
     // Note: `false` refers readStatus = `false`
@@ -53,11 +61,21 @@ function NotificationsScreen(props) {
       handlePullToRefresh(paginationParams, sortBy);
     })();
     // from NotificationApprovalRequestScreen, then proceed to update flatList
-    setIsLoading(true);
-    selectedId === acceptRejectNotifID ? filterAndRerender() : null;
-    setIsLoading(false);
+    // setIsLoading(true);
+    // selectedId === acceptRejectNotifID ? filterAndRerender() : null;
+    // setIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [acceptRejectNotifID, sortBy]);
+
+  useFocusEffect(() => {
+    if (shouldRefetchNotifications) {
+      console.log('removing previous notis');
+      (async () => await handlePullToRefresh(paginationParams, sortBy))();
+      setRefetchNotifications(false);
+      console.log('done');
+    }
+  });
+
   const navigateToNotificationsApprovalRequestScreen = (item) => {
     navigation.navigate(routes.NOTIFICATION_APPROVAL_REQUEST, item);
   };
