@@ -293,7 +293,7 @@ function WebAppNavigator() {
                 />
                 Add Patient
               </Link>
-              <Link to={routes.NOTIFICATION} style={linkStyle}>
+              <Link to="/" style={linkStyle}>
                 <Icon
                   as={MaterialIcons}
                   name="switch-account"
@@ -361,6 +361,10 @@ function WebAppNavigator() {
               <Text bold fontSize="18px">
                 OTHERS
               </Text>
+              <Link to={routes.NOTIFICATION} style={linkStyle}>
+                <Icon as={MaterialIcons} name="notifications" size="md" m="2" />
+                Notifications
+              </Link>
               <Link to="/" style={linkStyle}>
                 <Icon as={MaterialIcons} name="person-search" size="md" m="2" />
                 View Highlight

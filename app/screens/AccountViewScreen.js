@@ -1,4 +1,4 @@
-import React, { useContext, useCallback } from 'react';
+import React, { useContext, useCallback, useEffect } from 'react';
 import { Platform } from 'react-native';
 import {
   Image,
@@ -17,7 +17,6 @@ import typography from 'app/config/typography';
 import colors from 'app/config/colors';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import UserInformationCard from 'app/components/UserInformationCard';
-import { useFocusEffect } from '@react-navigation/native';
 import { useLocation, useNavigate } from 'react-router-dom';
 import AuthContext from 'app/auth/context';
 import authStorage from 'app/auth/authStorage';
@@ -25,24 +24,28 @@ import userApi from 'app/api/user';
 
 function AccountViewScreen(props) {
   const { navigation, route } = props;
-  const { state } = Platform.OS === 'web' ? useLocation() : null;
-  const { user, setUser } = useContext(AuthContext);
+  const { user, setUser } =
+    Platform.OS === 'web' ? useContext(AuthContext) : {};
 
   const userProfile = Platform.OS === 'web' ? user : route.params;
 
   // get current user
-  useFocusEffect(
-    useCallback(() => {
-      const promiseFunction = async () => {
-        const response = await getCurrentUser();
-        // console.log(response);
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      getUserCallback();
+    }
+  }, [getUserCallback]);
 
-        setUser(response.data);
-      };
-      promiseFunction();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []),
-  );
+  const getUserCallback = useCallback(() => {
+    const promiseFunction = async () => {
+      const response = await getCurrentUser();
+      // console.log(response);
+
+      setUser(response.data);
+    };
+    promiseFunction();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const getCurrentUser = async () => {
     const currentUser = await authStorage.getUser();
@@ -67,10 +70,7 @@ function AccountViewScreen(props) {
         state: { userProfile: userProfile },
       });
     } else {
-      navigation.push(routes.ACCOUNT_EDIT, {
-        ...userProfile,
-        navigation: navigate,
-      });
+      navigation.push(routes.ACCOUNT_EDIT, { ...userProfile });
     }
   };
 
@@ -79,7 +79,7 @@ function AccountViewScreen(props) {
       <VStack mt="4" ml="4" px={Platform.OS === 'web' ? '10%' : ''}>
         {Platform.OS === 'web' ? (
           <HStack px="20%">
-            <AspectRatio w="60%" ml="20%" ratio={1} mb="2" alignSelf="center">
+            <AspectRatio w="35%" ml="20%" ratio={1} mb="2" alignSelf="center">
               <Image
                 borderRadius="full"
                 fallbackSource={{
@@ -144,7 +144,7 @@ function AccountViewScreen(props) {
                 fontFamily: `${
                   Platform.OS === 'ios' ? 'Helvetica' : typography.android
                 }`,
-                fontSize: 'lg',
+                fontSize: Platform.OS === 'web' ? '2xl' : 'lg',
                 fontWeight: 'thin',
               }}
             >
@@ -156,7 +156,7 @@ function AccountViewScreen(props) {
               fontFamily={
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
-              fontSize="lg"
+              fontSize={Platform.OS === 'web' ? '3xl' : 'lg'}
               isReadOnly
               variant="unstyled"
               value={userProfile.preferredName}
@@ -172,7 +172,7 @@ function AccountViewScreen(props) {
                 fontFamily: `${
                   Platform.OS === 'ios' ? 'Helvetica' : typography.android
                 }`,
-                fontSize: 'lg',
+                fontSize: Platform.OS === 'web' ? '2xl' : 'lg',
                 fontWeight: 'thin',
               }}
             >
@@ -184,7 +184,7 @@ function AccountViewScreen(props) {
               fontFamily={
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
-              fontSize="lg"
+              fontSize={Platform.OS === 'web' ? '3xl' : 'lg'}
               isReadOnly
               variant="unstyled"
               value={userProfile.contactNo}

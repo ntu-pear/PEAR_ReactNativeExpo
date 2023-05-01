@@ -17,7 +17,7 @@ import { useLocation } from 'react-router-dom';
 
 function UserInformationCard(props) {
   const { userProfile } = props;
-  const { state } = Platform.OS === 'web' ? useLocation() : null;
+  const { state } = Platform.OS === 'web' ? useLocation() : {};
 
   const { address, dob, firstName, lastName, gender, nric, email, role } =
     Platform.OS === 'web' ? state.userProfile : userProfile.route.params;
@@ -31,7 +31,7 @@ function UserInformationCard(props) {
               fontFamily: `${
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }`,
-              fontSize: 'lg',
+              fontSize: Platform.OS === 'web' ? '2xl' : 'lg',
               fontWeight: 'thin',
             }}
           >
@@ -43,7 +43,7 @@ function UserInformationCard(props) {
             fontFamily={
               Platform.OS === 'ios' ? 'Helvetica' : typography.android
             }
-            fontSize="lg"
+            fontSize={Platform.OS === 'web' ? '3xl' : 'lg'}
             isReadOnly
             variant="unstyled"
             value={firstName}
@@ -59,7 +59,7 @@ function UserInformationCard(props) {
               fontFamily: `${
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }`,
-              fontSize: 'lg',
+              fontSize: Platform.OS === 'web' ? '2xl' : 'lg',
               fontWeight: 'thin',
             }}
           >
@@ -71,7 +71,7 @@ function UserInformationCard(props) {
             fontFamily={
               Platform.OS === 'ios' ? 'Helvetica' : typography.android
             }
-            fontSize="lg"
+            fontSize={Platform.OS === 'web' ? '3xl' : 'lg'}
             isReadOnly
             variant="unstyled"
             value={lastName}
@@ -87,7 +87,7 @@ function UserInformationCard(props) {
               fontFamily: `${
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }`,
-              fontSize: 'lg',
+              fontSize: Platform.OS === 'web' ? '2xl' : 'lg',
               fontWeight: 'thin',
             }}
           >
@@ -99,7 +99,7 @@ function UserInformationCard(props) {
             fontFamily={
               Platform.OS === 'ios' ? 'Helvetica' : typography.android
             }
-            fontSize="lg"
+            fontSize={Platform.OS === 'web' ? '3xl' : 'lg'}
             isReadOnly
             variant="unstyled"
             value={role}
@@ -115,7 +115,7 @@ function UserInformationCard(props) {
               fontFamily: `${
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }`,
-              fontSize: 'lg',
+              fontSize: Platform.OS === 'web' ? '2xl' : 'lg',
               fontWeight: 'thin',
             }}
           >
@@ -127,7 +127,7 @@ function UserInformationCard(props) {
             fontFamily={
               Platform.OS === 'ios' ? 'Helvetica' : typography.android
             }
-            fontSize="lg"
+            fontSize={Platform.OS === 'web' ? '3xl' : 'lg'}
             isReadOnly
             variant="unstyled"
             value={nric}
@@ -143,7 +143,7 @@ function UserInformationCard(props) {
               fontFamily: `${
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }`,
-              fontSize: 'lg',
+              fontSize: Platform.OS === 'web' ? '2xl' : 'lg',
               fontWeight: 'thin',
             }}
           >
@@ -155,7 +155,7 @@ function UserInformationCard(props) {
             fontFamily={
               Platform.OS === 'ios' ? 'Helvetica' : typography.android
             }
-            fontSize="lg"
+            fontSize={Platform.OS === 'web' ? '3xl' : 'lg'}
             isReadOnly
             variant="unstyled"
             value={gender === 'F' ? 'Female' : 'Male'}
@@ -171,7 +171,7 @@ function UserInformationCard(props) {
               fontFamily: `${
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }`,
-              fontSize: 'lg',
+              fontSize: Platform.OS === 'web' ? '2xl' : 'lg',
               fontWeight: 'thin',
             }}
           >
@@ -183,7 +183,7 @@ function UserInformationCard(props) {
             fontFamily={
               Platform.OS === 'ios' ? 'Helvetica' : typography.android
             }
-            fontSize="lg"
+            fontSize={Platform.OS === 'web' ? '3xl' : 'lg'}
             isReadOnly
             variant="unstyled"
             value={dob.substring(0, 10)}
@@ -199,7 +199,7 @@ function UserInformationCard(props) {
               fontFamily: `${
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }`,
-              fontSize: 'lg',
+              fontSize: Platform.OS === 'web' ? '2xl' : 'lg',
               fontWeight: 'thin',
             }}
           >
@@ -211,7 +211,7 @@ function UserInformationCard(props) {
             fontFamily={
               Platform.OS === 'ios' ? 'Helvetica' : typography.android
             }
-            fontSize="lg"
+            fontSize={Platform.OS === 'web' ? '3xl' : 'lg'}
             isReadOnly
             variant="unstyled"
             value={email}
@@ -228,7 +228,7 @@ function UserInformationCard(props) {
               fontFamily: `${
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }`,
-              fontSize: 'lg',
+              fontSize: Platform.OS === 'web' ? '2xl' : 'lg',
               fontWeight: 'thin',
             }}
           >
@@ -239,7 +239,7 @@ function UserInformationCard(props) {
             fontFamily={
               Platform.OS === 'ios' ? 'Helvetica' : typography.android
             }
-            fontSize="lg"
+            fontSize={Platform.OS === 'web' ? '3xl' : 'lg'}
             isReadOnly
             input="lg"
             ml="-2.5"

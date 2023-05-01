@@ -25,7 +25,7 @@ function EditField(props) {
               fontFamily: `${
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }`,
-              fontSize: 'lg',
+              fontSize: Platform.OS === 'web' ? '2xl' : 'lg',
               fontWeight: 'thin',
             }}
           >
@@ -49,7 +49,7 @@ function EditField(props) {
             value={value}
             w="100%"
             mt="1"
-            fontSize="lg"
+            fontSize={Platform.OS === 'web' ? '3xl' : 'lg'}
           />
         </HStack>
         <FormControl.ErrorMessage>{ErrorMessage}</FormControl.ErrorMessage>

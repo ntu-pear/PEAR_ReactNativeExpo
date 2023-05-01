@@ -27,7 +27,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 function AccountEditScreen(props) {
   const [isLoading, setIsLoading] = useState(false);
   const { navigation, route } = props;
-  const { state } = Platform.OS === 'web' ? useLocation() : null;
+  const { state } = Platform.OS === 'web' ? useLocation() : {};
   const userProfile = Platform.OS === 'web' ? state.userProfile : route.params;
 
   // useNavigate() hook cannot work on mobile
@@ -156,7 +156,12 @@ function AccountEditScreen(props) {
                 onPress={handleOnPressToImagePicker}
                 alignItems="center"
               >
-                <AspectRatio w="70%" ratio={1} mb="2" alignSelf="center">
+                <AspectRatio
+                  w={Platform.OS === 'web' ? '140%' : '70%'}
+                  ratio={1}
+                  mb="2"
+                  alignSelf="center"
+                >
                   <Image
                     borderRadius="full"
                     fallbackSource={{
@@ -171,7 +176,7 @@ function AccountEditScreen(props) {
                     alt="user_image"
                   />
                 </AspectRatio>
-                <Text color={colors.red}> Click to edit profile picture</Text>
+                <Text alignSelf="center" color={colors.red}> Click to edit profile picture</Text>
               </TouchableOpacity>
             </Center>
           </HStack>
