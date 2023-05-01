@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useContext,
+  useRef,
+  useCallback,
+} from 'react';
 import { FlatList, VStack } from 'native-base';
 import AuthContext from 'app/auth/context';
 import ActivityIndicator from 'app/components/ActivityIndicator';
@@ -50,14 +56,20 @@ function NotificationsAcceptScreen(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortBy]);
 
-  useFocusEffect(() => {
-    if (shouldRefetchAcceptNotifications) {
-      (async () => {
-        await handlePullToRefresh(paginationParams, sortBy);
-      })();
-      setRefetchAcceptNotifications(false);
-    }
-  });
+  useFocusEffect(
+    useCallback(
+      () => {
+        if (shouldRefetchAcceptNotifications) {
+          (async () => {
+            await handlePullToRefresh(paginationParams, sortBy);
+          })();
+          setRefetchAcceptNotifications(false);
+        }
+      },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [shouldRefetchAcceptNotifications],
+    ),
+  );
 
   const handleErrorWhenApiFails = async () => {
     setIsError(false);

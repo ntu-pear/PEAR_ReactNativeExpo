@@ -3,7 +3,13 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 import ErrorRetryApiCard from 'app/components/ErrorRetryApiCard';
 import NotificationCard from 'app/components/NotificationCard';
 import { FlatList, VStack } from 'native-base';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import useNotifications from 'app/screens/notifications/useNotifications';
 import NotificationSortSelector from 'app/screens/notifications/NotificationsSortSelector';
 import { useFocusEffect } from '@react-navigation/native';
@@ -50,14 +56,20 @@ function NotificationsRejectScreen(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useFocusEffect(() => {
-    if (shouldRefetchRejectNotifications) {
-      (async () => {
-        await handlePullToRefresh(paginationParams, sortBy);
-      })();
-      setRefetchRejectNotifications(true);
-    }
-  });
+  useFocusEffect(
+    useCallback(
+      () => {
+        if (shouldRefetchRejectNotifications) {
+          (async () => {
+            await handlePullToRefresh(paginationParams, sortBy);
+          })();
+          setRefetchRejectNotifications(true);
+        }
+      },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [shouldRefetchRejectNotifications],
+    ),
+  );
 
   const handleErrorWhenApiFails = () => {
     setIsError(false);
