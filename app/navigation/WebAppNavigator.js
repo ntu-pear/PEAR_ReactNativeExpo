@@ -38,6 +38,15 @@ import ChangePasswordScreen from 'app/screens/ChangePasswordScreen';
 import PatientsScreenWeb from 'app/screens/web/PatientsScreenWeb';
 import PatientInformationScreenWeb from 'app/screens/web/PatientInformationScreenWeb';
 import PatientAddScreen from 'app/screens/PatientAddScreen';
+import PatientActivityPreferenceScreen from 'app/screens/PatientActivityPreferenceScreen';
+import PatientAllergyScreen from 'app/screens/PatientAllergyScreen';
+import PatientHolidayScreen from 'app/screens/PatientHolidayScreen';
+import PatientPhotoAlbumScreen from 'app/screens/PatientPhotoAlbumScreen';
+import PatientPreferenceScreen from 'app/screens/PatientPreferenceScreen';
+import PatientPrescriptionScreen from 'app/screens/PatientPrescriptionScreen';
+import PatientProblemLog from 'app/screens/PatientProblemLog';
+import PatientVitalScreen from 'app/screens/PatientVitalScreen';
+import PatientRoutineScreen from 'app/screens/PatientRoutineScreen';
 
 import AccountDetailCard from 'app/components/AccountDetailCard';
 import AccountCard from 'app/components/AccountCard';
@@ -410,6 +419,15 @@ function WebAppNavigator() {
             path={routes.PATIENT_INFORMATION}
             element={<PatientInformationScreenWeb sidebar={sidebar} />}
           />
+          <Route path={routes.PATIENT_ALLERGY} element={<PatientAllergyScreen />} />
+          <Route path={routes.PATIENT_VITAL} element={<PatientVitalScreen />} />
+          <Route path={routes.PATIENT_PRESCRIPTION} element={<PatientPrescriptionScreen />} />
+          <Route path={routes.PATIENT_PROBLEM_LOG} element={<PatientProblemLog />} />
+          <Route path={routes.PATIENT_ACTIVITY_PREFERENCE} element={<PatientActivityPreferenceScreen />} />
+          <Route path={routes.PATIENT_ROUTINE} element={<PatientRoutineScreen />} />
+          <Route path={routes.PATIENT_PREFERENCE} element={<PatientPreferenceScreen />} />
+          <Route path={routes.PATIENT_PHOTO_ALBUM} element={<PatientPhotoAlbumScreen />} />
+          <Route path={routes.PATIENT_HOLIDAY} element={<PatientHolidayScreen />} />
           <Route
             path={routes.PATIENT_ADD_PATIENT}
             element={<PatientAddScreen />}

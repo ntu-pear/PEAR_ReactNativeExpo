@@ -15,13 +15,12 @@ function PatientProfileCard(props) {
     props;
 
   // useNavigate() hook cannot work on mobile
-  // const navigate = Platform.OS === 'web' ? useNavigate() : null;
+  const navigate = Platform.OS === 'web' ? useNavigate() : null;
 
   const handleOnPressToNextScreen = () => {
     if (Platform.OS === 'web') {
-      // TODO: (yapsiang) link to next screen via routes
-      // console.log('route to: ' + '/' + routes);
-      // navigate('/' + routes, { state: { ...patientProfile }});
+      console.log('route to: ' + '/' + routes);
+      navigate('/' + routes, { state: { ...patientProfile }});
     } else {
       navigation.push(routes, { ...patientProfile });
     }
