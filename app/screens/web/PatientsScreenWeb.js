@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Platform } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import {
   Center,
@@ -8,8 +8,6 @@ import {
   ScrollView,
   Fab,
   Icon,
-  Stack,
-  Divider,
   View,
 } from 'native-base';
 import {
@@ -30,12 +28,46 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 import routes from 'app/navigation/routes';
 import colors from 'app/config/colors';
 
+import { SearchBar } from 'react-native-elements';
+import DropDownPicker from 'react-native-dropdown-picker';
+
 function PatientsScreenWeb(props) {
+  // Destructure props
   const [isLoading, setIsLoading] = useState(false);
   const [listOfPatients, setListOfPatients] = useState();
-  const [clickedPatientProfile, setPatientProfile] = useState();
   const checkExpiredLogOutHook = useCheckExpiredThenLogOut();
   const { navigation, sidebar } = props;
+  const [clickedPatientProfile, setPatientProfile] = useState();
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  // set default value to my patients
+  const [filterValue, setFilterValue] = useState('myPatients');
+
+  const [dropdownItems, setDropdownItems] = useState([
+    {
+      label: 'My Patients',
+      value: 'myPatients',
+      icon: () => (
+        <MaterialCommunityIcons
+          name="account-multiple"
+          size={18}
+          color={colors.black_var1}
+        />
+      ),
+    },
+    {
+      label: 'All Patients',
+      value: 'allPatients',
+      icon: () => (
+        <MaterialCommunityIcons
+          name="account-group"
+          size={18}
+          color={colors.black_var1}
+        />
+      ),
+    },
+  ]);
 
   // Refreshes every time the user navigates to PatientsScreen
   useFocusEffect(
@@ -50,21 +82,33 @@ function PatientsScreenWeb(props) {
         setPatientProfile(response?.data.data[0]);
       };
       promiseFunction();
-
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []),
   );
 
+  useEffect(() => {
+    getListOfPatients();
+  }, [filterValue]);
+
   const getListOfPatients = async () => {
-    const response = await patientApi.getPatientList(null, true, true);
+    setIsLoading(true);
+    const response =
+      filterValue === 'myPatients'
+        ? await patientApi.getPatientListByUserId()
+        : await patientApi.getPatientList();
+
     if (!response.ok) {
       // Check if token has expired, if yes, proceed to log out
       checkExpiredLogOutHook.handleLogOut(response);
       return;
     }
+    setOriginalListOfPatients(response.data.data);
+    setListOfPatients(response.data.data);
     setIsLoading(false);
     return response;
   };
+
+  const [originalListOfPatients, setOriginalListOfPatients] = useState([]);
 
   // useNavigate() hook cannot work on mobile
   const navigate = Platform.OS === 'web' ? useNavigate() : null;
@@ -80,6 +124,54 @@ function PatientsScreenWeb(props) {
   const handlePatientScreenCardClick = (patientProfile, event) => {
     setPatientProfile(patientProfile);
   };
+
+  // Show all patients as expected when nothing is keyed into the search
+  useEffect(() => {
+    if (!searchQuery) {
+      console.log(
+        'Setting list of patients to original list:',
+        originalListOfPatients,
+      );
+      setListOfPatients(originalListOfPatients);
+    }
+  }, [searchQuery]);
+
+  // Set the search query to filter patient list
+  const handleSearch = (text) => {
+    console.log('Handling search query:', text);
+    setSearchQuery(text);
+  };
+
+  // Filter patient list with search query
+  const filteredList = listOfPatients
+    ? listOfPatients.filter((item) => {
+        const fullName = `${item.firstName} ${item.lastName}`;
+        return fullName.toLowerCase().includes(searchQuery.toLowerCase());
+      })
+    : null;
+
+  const styles = StyleSheet.create({
+    searchBarContainer: {
+      padding: '2%',
+      backgroundColor: 'white',
+      borderBottomColor: 'transparent',
+      borderTopColor: 'transparent',
+    },
+    searchBar: {
+      alignContent: 'flex-start',
+      justifyContent: 'flex-start',
+    },
+    dropDown: {
+      marginTop: 10,
+      padding: '5%',
+      alignContent: 'flex-end',
+      justifyContent: 'flex-end',
+      width: '93%',
+      display: 'flex',
+      flexDirection: 'row',
+      borderColor: colors.primary_overlay_color,
+    },
+  });
 
   return (
     <>
@@ -97,16 +189,82 @@ function PatientsScreenWeb(props) {
         </View>
       ) : (
         <HStack
-          w={sidebar ? '84vw' : '99vw'}
-          style={{ display: 'flex', flexDirection: 'row' }}
+          w={sidebar ? '83vw' : '98vw'}
+          style={{
+            // display: 'flex',
+            // flexDirection: 'row',
+            // width: '100%',
+            zIndex: 1,
+          }}
         >
           {/* PatientScreen */}
           <View>
             <Center backgroundColor={colors.white_var1}>
-              <ScrollView h="100vh">
+              {/* <HStack
+                style={{ flexDirection: 'column', width: '100%', zIndex: 1 }}
+              > */}
+              <View style={{ zIndex: 1 }}>
+                <View style={{ flex: 1, zIndex: 0 }}>
+                  <SearchBar
+                    placeholder="Search"
+                    //platform="ios"
+                    onChangeText={handleSearch}
+                    value={searchQuery}
+                    lightTheme={true}
+                    containerStyle={styles.searchBarContainer}
+                    inputContainerStyle={{
+                      backgroundColor: colors.white,
+                      marginTop: 4.5,
+                      borderRadius: 10,
+                    }}
+                    inputStyle={{ fontSize: 14 }}
+                    style={styles.searchBar}
+                  />
+                </View>
+                <View style={{ flex: 1, zIndex: 0 }}>
+                  <DropDownPicker
+                    open={dropdownOpen}
+                    value={filterValue}
+                    items={dropdownItems}
+                    setOpen={setDropdownOpen}
+                    setValue={setFilterValue}
+                    setItems={setDropdownItems}
+                    onChangeItem={(item) => setFilterValue(item.value)}
+                    mode="BADGE"
+                    theme="LIGHT"
+                    multiple={false}
+                    style={styles.dropDown}
+                    itemSeparator={true}
+                    itemSeparatorStyle={{
+                      backgroundColor: colors.primary_gray,
+                    }}
+                    dropDownContainerStyle={{
+                      marginTop: 13,
+                      marginLeft: 12,
+                      width: '90%',
+                      backgroundColor: colors.white,
+                    }}
+                    textStyle={{
+                      fontSize: 18,
+                    }}
+                    listItemContainerStyle={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                    }}
+                    selectedItemContainerStyle={{
+                      backgroundColor: colors.primary_gray,
+                    }}
+                    placeholderStyle={{
+                      color: colors.primary_overlay_color,
+                    }}
+                  />
+                </View>
+              </View>
+              {/* </HStack> */}
+              <ScrollView h="78vh" w="100%">
                 <VStack paddingRight="10">
-                  {listOfPatients
-                    ? listOfPatients.map((item, index) => (
+                  {filteredList && filteredList.length > 0
+                    ? filteredList.map((item, index) => (
                         <PatientScreenCard
                           patientProfile={item}
                           key={index}
