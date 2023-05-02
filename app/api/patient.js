@@ -83,11 +83,11 @@ const getPatientListByUserId = async (maskNRIC = true) => {
 };
 
 // **********************  POST REQUESTS *************************
-const addPatient = (formData) => {
+const addPatient = (patientFormData) => {
   var patientData = new FormData();
 
-  for (const key in formData.patientInfo) {
-    var value = formData.patientInfo[key];
+  for (const key in patientFormData.patientInfo) {
+    var value = patientFormData.patientInfo[key];
 
     // do not append 'IsChecked' to patientData
     if (key === 'IsChecked') {
@@ -122,14 +122,14 @@ const addPatient = (formData) => {
     patientData.append(param, value);
   }
 
-  addPatientForm(formData.guardianInfo, 'GuardianAddDto', patientData);
-  addPatientForm(formData.allergyInfo, 'AllergyAddDto', patientData);
+  addPatientForm(patientFormData.guardianInfo, 'GuardianAddDto', patientData);
+  addPatientForm(patientFormData.allergyInfo, 'AllergyAddDto', patientData);
 
   const headers = { 'Content-Type': 'multipart/form-data' };
 
-  // Note: client.post accepts 3 parameters. (1) endpoint (2) data and (3) onUploadProgress -- this is optional
   return client.post(patientAdd, patientData, { headers });
 };
+
 // ************************* UPDATE REQUESTS *************************
 
 /*

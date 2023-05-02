@@ -194,6 +194,69 @@ function PatientAddPatientInfoScreen(props) {
                     maxLength={9}
                   />
 
+                  <FormControl
+                    w="80%"
+                    mt="5"
+                    isRequired
+                    isInvalid={'Gender' in errorMessage}
+                  >
+                    <FormControl.Label _text={styles.text}>
+                      Gender
+                    </FormControl.Label>
+                    <Radio.Group
+                      value={patient.Gender}
+                      onChange={handleFormData(page, 'Gender')}
+                    >
+                      <HStack space={4}>
+                        <Radio
+                          value="M"
+                          size="sm"
+                          _icon={{ color: colors.green }}
+                          _checked={{
+                            borderColor: colors.green,
+                          }}
+                        >
+                          Male
+                        </Radio>
+                        <Radio
+                          value="F"
+                          size="sm"
+                          _icon={{ color: colors.green }}
+                          _checked={{
+                            borderColor: colors.green,
+                          }}
+                        >
+                          Female
+                        </Radio>
+                      </HStack>
+                    </Radio.Group>
+
+                    <FormControl.ErrorMessage>
+                      {errorMessage.Gender}
+                    </FormControl.ErrorMessage>
+                  </FormControl>
+
+                  {/* Reference: https://github.com/react-native-datetimepicker/datetimepicker
+                TODO: Align to the left*/}
+                  <FormControl w="80%" mt="5" isRequired>
+                    <DatePickerComponent
+                      label={'Date of Birth'}
+                      patient={patient}
+                      value={patient.DOB}
+                      page={page}
+                      field="DOB"
+                      handleFormData={handleFormData}
+                      show={show}
+                      setShow={setShow}
+                    />
+                    <Box>
+                      <ErrorMessage
+                        visible={'DOB' in errorMessage}
+                        message={errorMessage.DOB}
+                      />
+                    </Box>
+                  </FormControl>
+
                   <CustomFormControl
                     isRequired
                     isInvalid={'Address' in errorMessage}
@@ -239,48 +302,6 @@ function PatientAddPatientInfoScreen(props) {
                     w="80%"
                     mt="5"
                     isRequired
-                    isInvalid={'Gender' in errorMessage}
-                  >
-                    <FormControl.Label _text={styles.text}>
-                      Gender
-                    </FormControl.Label>
-                    <Radio.Group
-                      value={patient.Gender}
-                      onChange={handleFormData(page, 'Gender')}
-                    >
-                      <HStack space={4}>
-                        <Radio
-                          value="M"
-                          size="sm"
-                          _icon={{ color: colors.green }}
-                          _checked={{
-                            borderColor: colors.green,
-                          }}
-                        >
-                          Male
-                        </Radio>
-                        <Radio
-                          value="F"
-                          size="sm"
-                          _icon={{ color: colors.green }}
-                          _checked={{
-                            borderColor: colors.green,
-                          }}
-                        >
-                          Female
-                        </Radio>
-                      </HStack>
-                    </Radio.Group>
-
-                    <FormControl.ErrorMessage>
-                      {errorMessage.Gender}
-                    </FormControl.ErrorMessage>
-                  </FormControl>
-
-                  <FormControl
-                    w="80%"
-                    mt="5"
-                    isRequired
                     isInvalid={'IsRespiteCare' in errorMessage}
                   >
                     <FormControl.Label _text={styles.text}>
@@ -317,27 +338,6 @@ function PatientAddPatientInfoScreen(props) {
                     <FormControl.ErrorMessage>
                       {errorMessage.IsRespiteCare}
                     </FormControl.ErrorMessage>
-                  </FormControl>
-
-                  {/* Reference: https://github.com/react-native-datetimepicker/datetimepicker
-                TODO: Align to the left*/}
-                  <FormControl w="80%" mt="5" isRequired>
-                    <DatePickerComponent
-                      label={'Date of Birth'}
-                      patient={patient}
-                      value={patient.DOB}
-                      page={page}
-                      field="DOB"
-                      handleFormData={handleFormData}
-                      show={show}
-                      setShow={setShow}
-                    />
-                    <Box>
-                      <ErrorMessage
-                        visible={'DOB' in errorMessage}
-                        message={errorMessage.DOB}
-                      />
-                    </Box>
                   </FormControl>
 
                   <FormControl w="80%" mt="5" isRequired>
