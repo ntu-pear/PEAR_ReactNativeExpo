@@ -6,6 +6,11 @@ import { Platform, StyleSheet } from 'react-native';
 import colors from 'app/config/colors';
 import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
 
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import TextField from '@mui/material/TextField';
+
 const ActivityFilterCard = ({
   modalVisible,
   setModalVisible,
@@ -116,9 +121,25 @@ const ActivityFilterCard = ({
       onClose={() => setModalVisible(false)}
       initialFocusRef={initialRef}
       finalFocusRef={finalRef}
+      style={
+        Platform.OS == 'web' ? { marginTop: '20%', flexDirection: 'row' } : {}
+      }
     >
       <Modal.Content
-        height={Platform.OS === 'ios' ? '45%' : '30%'}
+        style={
+          Platform.OS == 'web'
+            ? {
+                alignSelf: 'flex-start',
+              }
+            : {}
+        }
+        height={
+          Platform.OS === 'web'
+            ? '400px'
+            : Platform.OS === 'ios'
+            ? '45%'
+            : '30%'
+        }
         backgroundColor={colors.white_var1}
       >
         <Modal.Body>
@@ -143,7 +164,25 @@ const ActivityFilterCard = ({
                   placeholder: 'Enter Activity Name',
                   autoCorrect: false,
                   autoCapitalize: 'none',
+                  style:
+                    Platform.OS === 'web'
+                      ? {
+                          width: 450,
+                          fontSize: 18,
+                          marginLeft: 15,
+                        }
+                      : {},
                 }}
+                suggestionsListContainerStyle={
+                  Platform.OS === 'web'
+                    ? {
+                        backgroundColor: colors.light,
+                        width: 400,
+                        marginLeft: 25,
+                        fontSize: 18,
+                      }
+                    : {}
+                }
                 suggestionsListMaxHeight={150}
               />
             </View>
@@ -151,71 +190,101 @@ const ActivityFilterCard = ({
           <View style={styles.activityTimeViewStyle} zIndex={4}>
             <Text style={styles.textStyle}>Activity Time</Text>
             <Row style={styles.rowStyle}>
-              {startTimePicker && (
-                <View style={styles.dateTimePickerViewStyle}>
-                  <DateTimePicker
-                    value={selectedStartTimeTemp}
-                    display={'default'}
-                    mode={'time'}
-                    is24Hour={true}
-                    onChange={onChangeStartTime}
-                    style={styles.dateTimePickerStyle}
-                  />
-                </View>
-              )}
-              {!startTimePicker && Platform.OS === 'android' && (
-                <Button
-                  backgroundColor={colors.white_var1}
-                  borderColor={colors.light_gray}
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                {Platform.OS === 'web' && (
+                  <View m="2" px="2" w="40%">
+                    <TimePicker
+                      ampm={false}
+                      label="Start Time"
+                      TrapFocusProps={{ disableEnforceFocus: true }}
+                      value={selectedStartTimeTemp}
+                      onChange={(newValue) => {
+                        setSelectedStartTimeTemp(newValue);
+                      }}
+                      renderInput={(params) => <TextField {...params} />}
+                    />
+                  </View>
+                )}
+                {startTimePicker && (
+                  <View style={styles.dateTimePickerViewStyle}>
+                    <DateTimePicker
+                      value={selectedStartTimeTemp}
+                      display={'default'}
+                      mode={'time'}
+                      is24Hour={true}
+                      onChange={onChangeStartTime}
+                      style={styles.dateTimePickerStyle}
+                    />
+                  </View>
+                )}
+                {!startTimePicker && Platform.OS === 'android' && (
+                  <Button
+                    backgroundColor={colors.white_var1}
+                    borderColor={colors.light_gray}
+                    flex={1}
+                    onPress={showStartTimePicker}
+                  >
+                    <Text fontSize={20}>
+                      {selectedStartTimeTemp.toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </Text>
+                  </Button>
+                )}
+                <Center
+                  width={'20%'}
+                  alignSelf={'center'}
+                  justifyContent={'center'}
+                  _text={{
+                    fontSize: '20px',
+                  }}
                   flex={1}
-                  onPress={showStartTimePicker}
                 >
-                  <Text fontSize={20}>
-                    {selectedStartTimeTemp.toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </Text>
-                </Button>
-              )}
-              <Center
-                width={'20%'}
-                alignSelf={'center'}
-                justifyContent={'center'}
-                _text={{
-                  fontSize: '20px',
-                }}
-                flex={1}
-              >
-                to
-              </Center>
-              {endTimePicker && (
-                <View style={styles.dateTimePickerViewStyle}>
-                  <DateTimePicker
-                    value={selectedEndTimeTemp}
-                    display={'default'}
-                    mode={'time'}
-                    is24Hour={true}
-                    onChange={onChangeEndTime}
-                    style={styles.dateTimePickerStyle}
-                  />
-                </View>
-              )}
-              {!endTimePicker && Platform.OS === 'android' && (
-                <Button
-                  backgroundColor={colors.white_var1}
-                  borderColor={colors.light_gray}
-                  flex={1}
-                  onPress={showEndTimePicker}
-                >
-                  <Text fontSize={20}>
-                    {selectedEndTimeTemp.toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </Text>
-                </Button>
-              )}
+                  to
+                </Center>
+                {Platform.OS === 'web' && (
+                  <View m="2" px="2" w="40%">
+                    <TimePicker
+                      ampm={false}
+                      label="End Time"
+                      TrapFocusProps={{ disableEnforceFocus: true }}
+                      value={selectedEndTimeTemp}
+                      onChange={(newValue) => {
+                        setSelectedEndTimeTemp(newValue);
+                      }}
+                      renderInput={(params) => <TextField {...params} />}
+                    />
+                  </View>
+                )}
+                {endTimePicker && (
+                  <View style={styles.dateTimePickerViewStyle}>
+                    <DateTimePicker
+                      value={selectedEndTimeTemp}
+                      display={'default'}
+                      mode={'time'}
+                      is24Hour={true}
+                      onChange={onChangeEndTime}
+                      style={styles.dateTimePickerStyle}
+                    />
+                  </View>
+                )}
+                {!endTimePicker && Platform.OS === 'android' && (
+                  <Button
+                    backgroundColor={colors.white_var1}
+                    borderColor={colors.light_gray}
+                    flex={1}
+                    onPress={showEndTimePicker}
+                  >
+                    <Text fontSize={20}>
+                      {selectedEndTimeTemp.toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </Text>
+                  </Button>
+                )}
+              </LocalizationProvider>
             </Row>
           </View>
           <View style={styles.resetViewStyle}>

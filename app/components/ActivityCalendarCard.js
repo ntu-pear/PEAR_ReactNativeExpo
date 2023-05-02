@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Popover } from 'native-base';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, Platform } from 'react-native';
 import CalendarPicker from 'react-native-calendar-picker';
 import colors from 'app/config/colors';
 
@@ -28,8 +28,8 @@ const ActivityCalendarCard = ({ selectedDate, setSelectedDate }) => {
               textStyle={styles.calendarPickerText}
               todayBackgroundColor="#FFFFFF"
               selectedDayColor={colors.pink}
-              width={330}
-              height={330}
+              width={Platform.OS === 'web' ? 400 : 330}
+              height={Platform.OS === 'web' ? 400 : 330}
               onDateChange={(date) => setSelectedDate(new Date(date))}
             />
           </Popover.Body>
@@ -42,11 +42,11 @@ const ActivityCalendarCard = ({ selectedDate, setSelectedDate }) => {
 const styles = StyleSheet.create({
   dayDateYear: {
     textAlign: 'center',
-    fontSize: 22,
+    fontSize: Platform.OS === 'web' ? 26 : 22,
     color: colors.black_var1,
   },
   calendarPickerText: {
-    fontSize: 15,
+    fontSize: Platform.OS === 'web' ? 22 : 15,
   },
 });
 export default ActivityCalendarCard;

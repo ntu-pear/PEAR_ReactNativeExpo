@@ -261,7 +261,7 @@ function PatientsScreenWeb(props) {
                 </View>
               </View>
               {/* </HStack> */}
-              <ScrollView h="78vh" w="100%">
+              <ScrollView h="90vh" w="100%">
                 <VStack paddingRight="10">
                   {filteredList && filteredList.length > 0
                     ? filteredList.map((item, index) => (

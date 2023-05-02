@@ -8,6 +8,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import HighlightsCard from 'app/components/HighlightsCard';
 import highlightApi from 'app/api/highlight';
 import colors from 'app/config/colors';
+import { Platform } from 'react-native';
 
 function PatientDailyHighlights(props) {
   // Destructure props
@@ -29,7 +30,12 @@ function PatientDailyHighlights(props) {
       label: 'New Prescription',
       value: 'newPrescription',
       icon: () => (
-        <FontAwesome5 name="pills" size={16} color={colors.black_var1} />
+        <FontAwesome5
+          name="pills"
+          size={Platform.OS === 'web' ? 26 : 16}
+          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : 0 }}
+          color={colors.black_var1}
+        />
       ),
       testID: 'newPrescriptionDropdownItem',
     },
@@ -39,7 +45,8 @@ function PatientDailyHighlights(props) {
       icon: () => (
         <MaterialCommunityIcons
           name="allergy"
-          size={18}
+          size={Platform.OS === 'web' ? 26 : 18}
+          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : 0 }}
           color={colors.black_var1}
         />
       ),
@@ -49,7 +56,12 @@ function PatientDailyHighlights(props) {
       label: 'New Activity Exclusion',
       value: 'newActivityExclusion',
       icon: () => (
-        <FontAwesome5 name="ban" size={18} color={colors.black_var1} />
+        <FontAwesome5
+          name="ban"
+          size={Platform.OS === 'web' ? 26 : 18}
+          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : 0 }}
+          color={colors.black_var1}
+        />
       ),
     },
     {
@@ -58,7 +70,8 @@ function PatientDailyHighlights(props) {
       icon: () => (
         <MaterialCommunityIcons
           name="heart-pulse"
-          size={18}
+          size={Platform.OS === 'web' ? 26 : 18}
+          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : 0 }}
           color={colors.black_var1}
         />
       ),
@@ -70,7 +83,8 @@ function PatientDailyHighlights(props) {
       icon: () => (
         <FontAwesome5
           name="exclamation-triangle"
-          size={18}
+          size={Platform.OS === 'web' ? 26 : 18}
+          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : 0 }}
           color={colors.black_var1}
         />
       ),
@@ -82,7 +96,8 @@ function PatientDailyHighlights(props) {
       icon: () => (
         <MaterialCommunityIcons
           name="clipboard-text"
-          size={18}
+          size={Platform.OS === 'web' ? 26 : 18}
+          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : 0 }}
           color={colors.black_var1}
         />
       ),
@@ -206,7 +221,10 @@ function PatientDailyHighlights(props) {
             onPress={() => setModalVisible(!modalVisible)}
             testID="highlightsCloseButton"
           >
-            <MaterialCommunityIcons name="close" size={20} />
+            <MaterialCommunityIcons
+              name="close"
+              size={Platform.OS === 'web' ? 42 : 20}
+            />
           </Pressable>
           <View style={styles.searchBarDropDownView}>
             <View style={styles.searchBarView}>
@@ -222,7 +240,7 @@ function PatientDailyHighlights(props) {
                   backgroundColor: colors.white,
                   borderRadius: 10,
                 }}
-                inputStyle={{ fontSize: 14 }}
+                inputStyle={{ fontSize: Platform.OS === 'web' ? 18 : 14 }}
                 style={styles.searchBar}
               />
             </View>
@@ -240,6 +258,7 @@ function PatientDailyHighlights(props) {
                 // listMode="SCROLLVIEW"
                 theme="LIGHT"
                 multiple={true}
+                // TODO: badgeDotColors not avaliable in web
                 badgeDotColors={[
                   colors.pink,
                   colors.pink_lighter,
@@ -256,10 +275,26 @@ function PatientDailyHighlights(props) {
                 dropDownContainerStyle={{
                   backgroundColor: colors.white,
                   minHeight: 250,
+                  width: Platform.OS === 'web' ? '95%' : '',
+                  marginTop: Platform.OS === 'web' ? 24 : 0,
                 }}
                 listItemLabelStyle={{
-                  fontSize: 12,
+                  fontSize: Platform.OS === 'web' ? 18 : 12,
                 }}
+                textStyle={{
+                  fontSize: Platform.OS === 'web' ? 18 : null,
+                }}
+                listItemContainerStyle={
+                  Platform.OS === 'web'
+                    ? {
+                        display: 'flex',
+                        flexDirection: 'row',
+                        marginVertical: 3,
+                        paddingVertical: 5,
+                        fontSize: 18,
+                      }
+                    : {}
+                }
                 selectedItemContainerStyle={{
                   backgroundColor: colors.primary_gray,
                 }}
@@ -306,8 +341,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 15,
     alignItems: 'center',
-    height: '70%',
-    width: '90%',
+    height: Platform.OS === 'web' ? '60%' : '70%',
+    width: Platform.OS === 'web' ? '65%' : '90%',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -326,10 +361,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 15,
     textAlign: 'center',
+    fontSize: Platform.OS === 'web' ? 18 : null,
   },
   modalText: {
-    marginTop: 15,
+    marginTop: Platform.OS === 'web' ? 24 : 15,
     marginLeft: 10,
+    fontSize: Platform.OS === 'web' ? 18 : null,
+    textAlign: Platform.OS === 'web' ? 'center' : '',
   },
   modalErrorText: {
     color: 'red',
@@ -357,8 +395,14 @@ const styles = StyleSheet.create({
   },
   dropDown: {
     justifyContent: 'flex-end',
-    marginTop: 7,
+    marginTop: Platform.OS === 'web' ? 10 : 7,
+    borderWidth: Platform.OS === 'web' ? 1 : '',
+    borderRadius: Platform.OS === 'web' ? 10 : '',
+    padding: Platform.OS === 'web' ? 10 : '',
     borderColor: colors.primary_overlay_color,
+    display: Platform.OS === 'web' ? 'flex' : '',
+    flexDirection: Platform.OS === 'web' ? 'row' : '',
+    width: Platform.OS === 'web' ? '95%' : '',
   },
 });
 

@@ -8,12 +8,16 @@ import routes from 'app/navigation/routes';
 
 function HighlightsCard({ item, navigation, setModalVisible }) {
   const goToPatientProfile = () => {
-    // Close Highlights Modal and navigate to PatientProfileScreen
-    setModalVisible(false);
-    navigation.push(routes.PATIENT_PROFILE, {
-      id: item.patientInfo.patientId,
-      patientProfile: null,
-    });
+    if (Platform.OS === 'web') {
+      // TODO: close modal and navigate
+    } else {
+      // Close Highlights Modal and navigate to PatientProfileScreen
+      setModalVisible(false);
+      navigation.push(routes.PATIENT_PROFILE, {
+        id: item.patientInfo.patientId,
+        patientProfile: null,
+      });
+    }
   };
 
   const getDescription = (element) => {

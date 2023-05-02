@@ -1,6 +1,6 @@
 import React from 'react';
 import colors from 'app/config/colors';
-import { StyleSheet, Text } from 'react-native';
+import { Platform, StyleSheet, Text } from 'react-native';
 import { Container } from 'native-base';
 
 const ActivityCard = ({
@@ -60,8 +60,8 @@ const ActivityCard = ({
 
 const styles = StyleSheet.create({
   activityContainerPink: {
-    width: 120,
-    height: 90,
+    width: Platform.OS === 'web' ? 190 : 120,
+    height: Platform.OS === 'web' ? 110 : 90,
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
@@ -72,8 +72,8 @@ const styles = StyleSheet.create({
     paddingRight: 3,
   },
   activityContainerGray: {
-    width: 120,
-    height: 90,
+    width: Platform.OS === 'web' ? 190 : 120,
+    height: Platform.OS === 'web' ? 110 : 90,
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
     marginBottom: 5,
-    fontSize: 18,
+    fontSize: Platform.OS === 'web' ? 22 : 18,
     color: colors.white_var1,
   },
   activityTime: {
@@ -96,6 +96,7 @@ const styles = StyleSheet.create({
     color: colors.white_var1,
     paddingLeft: 5,
     paddingRight: 5,
+    fontSize: Platform.OS === 'web' ? 18 : '',
   },
 });
 

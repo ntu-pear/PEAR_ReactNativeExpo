@@ -35,8 +35,6 @@ import AccountScreen from 'app/screens/AccountScreen';
 import AccountViewScreen from 'app/screens/AccountViewScreen';
 import AccountEditScreen from 'app/screens/AccountEditScreen';
 import ChangePasswordScreen from 'app/screens/ChangePasswordScreen';
-import PatientsScreenWeb from 'app/screens/web/PatientsScreenWeb';
-import PatientInformationScreenWeb from 'app/screens/web/PatientInformationScreenWeb';
 import PatientAddScreen from 'app/screens/PatientAddScreen';
 import PatientActivityPreferenceScreen from 'app/screens/PatientActivityPreferenceScreen';
 import PatientAllergyScreen from 'app/screens/PatientAllergyScreen';
@@ -47,6 +45,10 @@ import PatientPrescriptionScreen from 'app/screens/PatientPrescriptionScreen';
 import PatientProblemLog from 'app/screens/PatientProblemLog';
 import PatientVitalScreen from 'app/screens/PatientVitalScreen';
 import PatientRoutineScreen from 'app/screens/PatientRoutineScreen';
+
+import PatientsScreenWeb from 'app/screens/web/PatientsScreenWeb';
+import PatientInformationScreenWeb from 'app/screens/web/PatientInformationScreenWeb';
+import DashboardScreenWeb from 'app/screens/web/DashboardScreenWeb';
 
 import AccountDetailCard from 'app/components/AccountDetailCard';
 import AccountCard from 'app/components/AccountCard';
@@ -169,7 +171,7 @@ function WebAppNavigator() {
                       <Icon
                         as={MaterialIcons}
                         name="notifications"
-                        size="2xl"
+                        size="4xl"
                         color="black"
                         m="3"
                       />
@@ -210,7 +212,7 @@ function WebAppNavigator() {
                         <Icon
                           as={MaterialIcons}
                           name="person"
-                          size="2xl"
+                          size="4xl"
                           color="black"
                           m="3"
                         />
@@ -374,9 +376,9 @@ function WebAppNavigator() {
                 <Icon as={MaterialIcons} name="notifications" size="md" m="2" />
                 Notifications
               </Link>
-              <Link to="/" style={linkStyle}>
+              <Link to={routes.DASHBOARD_SCREEN} style={linkStyle}>
                 <Icon as={MaterialIcons} name="person-search" size="md" m="2" />
-                View Highlight
+                Dashboard
               </Link>
               <Link to="/" style={linkStyle}>
                 <Icon
@@ -419,18 +421,46 @@ function WebAppNavigator() {
             path={routes.PATIENT_INFORMATION}
             element={<PatientInformationScreenWeb sidebar={sidebar} />}
           />
-          <Route path={routes.PATIENT_ALLERGY} element={<PatientAllergyScreen />} />
+          <Route
+            path={routes.PATIENT_ALLERGY}
+            element={<PatientAllergyScreen />}
+          />
           <Route path={routes.PATIENT_VITAL} element={<PatientVitalScreen />} />
-          <Route path={routes.PATIENT_PRESCRIPTION} element={<PatientPrescriptionScreen />} />
-          <Route path={routes.PATIENT_PROBLEM_LOG} element={<PatientProblemLog />} />
-          <Route path={routes.PATIENT_ACTIVITY_PREFERENCE} element={<PatientActivityPreferenceScreen />} />
-          <Route path={routes.PATIENT_ROUTINE} element={<PatientRoutineScreen />} />
-          <Route path={routes.PATIENT_PREFERENCE} element={<PatientPreferenceScreen />} />
-          <Route path={routes.PATIENT_PHOTO_ALBUM} element={<PatientPhotoAlbumScreen />} />
-          <Route path={routes.PATIENT_HOLIDAY} element={<PatientHolidayScreen />} />
+          <Route
+            path={routes.PATIENT_PRESCRIPTION}
+            element={<PatientPrescriptionScreen />}
+          />
+          <Route
+            path={routes.PATIENT_PROBLEM_LOG}
+            element={<PatientProblemLog />}
+          />
+          <Route
+            path={routes.PATIENT_ACTIVITY_PREFERENCE}
+            element={<PatientActivityPreferenceScreen />}
+          />
+          <Route
+            path={routes.PATIENT_ROUTINE}
+            element={<PatientRoutineScreen />}
+          />
+          <Route
+            path={routes.PATIENT_PREFERENCE}
+            element={<PatientPreferenceScreen />}
+          />
+          <Route
+            path={routes.PATIENT_PHOTO_ALBUM}
+            element={<PatientPhotoAlbumScreen />}
+          />
+          <Route
+            path={routes.PATIENT_HOLIDAY}
+            element={<PatientHolidayScreen />}
+          />
           <Route
             path={routes.PATIENT_ADD_PATIENT}
             element={<PatientAddScreen />}
+          />
+          <Route
+            path={routes.DASHBOARD_SCREEN}
+            element={<DashboardScreenWeb sidebar={sidebar} />}
           />
           <Route path={routes.ACCOUNT_VIEW} element={<AccountViewScreen />} />
           <Route path={routes.ACCOUNT_EDIT} element={<AccountEditScreen />} />

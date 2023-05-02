@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { Platform, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import {
   Avatar,
   Box,
@@ -83,7 +83,7 @@ const DashboardScreen = ({
             <HStack justifyContent="space-between">
               <Container style={styles.patientContainer}>
                 <Avatar
-                  size="60px"
+                  size={Platform.OS === 'web' ? '90px' : '60px'}
                   source={{
                     uri: item.patientImage,
                   }}
@@ -120,13 +120,13 @@ const styles = StyleSheet.create({
   patientName: {
     textAlign: 'center',
     fontWeight: 'bold',
-    fontSize: 12,
+    fontSize: Platform.OS === 'web' ? 18 : 12,
     color: colors.black_var1,
-    width: 90,
+    width: Platform.OS === 'web' ? 150 : 90,
   },
   patientContainer: {
-    width: 30,
-    height: 30,
+    width: Platform.OS === 'web' ? 130 : 30,
+    height: Platform.OS === 'web' ? 60 : 30,
     justifyContent: 'center',
     margin: 25,
     paddingTop: 6,
