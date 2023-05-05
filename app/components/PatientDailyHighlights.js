@@ -33,7 +33,7 @@ function PatientDailyHighlights(props) {
         <FontAwesome5
           name="pills"
           size={Platform.OS === 'web' ? 26 : 16}
-          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : 0 }}
+          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
           color={colors.black_var1}
         />
       ),
@@ -46,7 +46,7 @@ function PatientDailyHighlights(props) {
         <MaterialCommunityIcons
           name="allergy"
           size={Platform.OS === 'web' ? 26 : 18}
-          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : 0 }}
+          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
           color={colors.black_var1}
         />
       ),
@@ -59,7 +59,7 @@ function PatientDailyHighlights(props) {
         <FontAwesome5
           name="ban"
           size={Platform.OS === 'web' ? 26 : 18}
-          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : 0 }}
+          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
           color={colors.black_var1}
         />
       ),
@@ -71,7 +71,7 @@ function PatientDailyHighlights(props) {
         <MaterialCommunityIcons
           name="heart-pulse"
           size={Platform.OS === 'web' ? 26 : 18}
-          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : 0 }}
+          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
           color={colors.black_var1}
         />
       ),
@@ -84,7 +84,7 @@ function PatientDailyHighlights(props) {
         <FontAwesome5
           name="exclamation-triangle"
           size={Platform.OS === 'web' ? 26 : 18}
-          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : 0 }}
+          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
           color={colors.black_var1}
         />
       ),
@@ -97,7 +97,7 @@ function PatientDailyHighlights(props) {
         <MaterialCommunityIcons
           name="clipboard-text"
           size={Platform.OS === 'web' ? 26 : 18}
-          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : 0 }}
+          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
           color={colors.black_var1}
         />
       ),
@@ -267,7 +267,9 @@ function PatientDailyHighlights(props) {
                   colors.pink,
                   colors.green_lighter,
                 ]}
-                style={styles.dropDown}
+                style={
+                  Platform.OS === 'web' ? styles.dropDownWeb : styles.dropDown
+                }
                 itemSeparator={true}
                 itemSeparatorStyle={{
                   backgroundColor: colors.primary_gray,
@@ -275,8 +277,6 @@ function PatientDailyHighlights(props) {
                 dropDownContainerStyle={{
                   backgroundColor: colors.white,
                   minHeight: 250,
-                  width: Platform.OS === 'web' ? '95%' : '',
-                  marginTop: Platform.OS === 'web' ? 24 : 0,
                 }}
                 listItemLabelStyle={{
                   fontSize: Platform.OS === 'web' ? 18 : 12,
@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
     marginTop: Platform.OS === 'web' ? 24 : 15,
     marginLeft: 10,
     fontSize: Platform.OS === 'web' ? 18 : null,
-    textAlign: Platform.OS === 'web' ? 'center' : '',
+    textAlign: Platform.OS === 'web' ? 'center' : null,
   },
   modalErrorText: {
     color: 'red',
@@ -395,14 +395,18 @@ const styles = StyleSheet.create({
   },
   dropDown: {
     justifyContent: 'flex-end',
-    marginTop: Platform.OS === 'web' ? 10 : 7,
-    borderWidth: Platform.OS === 'web' ? 1 : '',
-    borderRadius: Platform.OS === 'web' ? 10 : '',
-    padding: Platform.OS === 'web' ? 10 : '',
+    marginTop: 7,
+  },
+  dropDownWeb: {
+    justifyContent: 'flex-end',
+    marginTop: 10,
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 10,
     borderColor: colors.primary_overlay_color,
-    display: Platform.OS === 'web' ? 'flex' : '',
-    flexDirection: Platform.OS === 'web' ? 'row' : '',
-    width: Platform.OS === 'web' ? '95%' : '',
+    display: 'flex',
+    flexDirection: 'row',
+    width: '95%',
   },
 });
 
