@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { useState } from 'react';
 import { Platform, Alert, ActivityIndicator } from 'react-native';
 import {
@@ -127,7 +127,7 @@ function AccountEditScreen(props) {
 
   const handleOnPressToImagePicker = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status == 'granted') {
+    if (status === 'granted') {
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
@@ -148,7 +148,7 @@ function AccountEditScreen(props) {
 
   return (
     <ScrollView>
-      <VStack mt="4" ml="4" px={Platform.OS === 'web' ? '10%' : ''}>
+      <VStack mt="4" ml="4" px={Platform.OS === 'web' ? '10%' : null}>
         <Center>
           <HStack>
             <Center>

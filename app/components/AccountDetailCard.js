@@ -27,8 +27,7 @@ function AccountDetailCard(props) {
       <Box
         minW="90%"
         my={Platform.OS === 'web' ? '2' : '5'}
-        // mx={Platform.OS === 'web' ? '' : ''}
-        px={Platform.OS === 'web' ? '8' : ''}
+        px={Platform.OS === 'web' ? '8' : null}
         overflow="visible"
         rounded="lg"
         borderColor={colors.primary_gray}

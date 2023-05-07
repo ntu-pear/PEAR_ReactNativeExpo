@@ -19,10 +19,10 @@ function AccountCard(props) {
       <VStack w="100%" alignItems="center">
         <Box
           rounded="lg"
-          borderWidth={Platform.OS === 'web' ? '' : '1'}
+          borderWidth={Platform.OS === 'web' ? null : '1'}
           borderColor={colors.primary_gray}
           minW="100%"
-          minH={Platform.OS === 'web' ? '' : '20'}
+          minH={Platform.OS === 'web' ? null : '20'}
         >
           <VStack w="100%" space={4} flexWrap="wrap" mb="1">
             <HStack space={5} alignItems="center">

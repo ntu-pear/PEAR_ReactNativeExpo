@@ -13,7 +13,7 @@ import CustomFormControl from 'app/components/CustomFormControl';
 import * as Yup from 'yup';
 
 function ResetPasswordScreen(props) {
-  const { navigation, route } = props;
+  const { navigation } = props;
   const [role, setRole] = useState('Supervisor');
   const [email, setEmail] = useState('');
   const [errors, setErrors] = useState({});
@@ -79,7 +79,7 @@ function ResetPasswordScreen(props) {
     <View>
       <VStack>
         <Center>
-          <Center w={Platform.OS === 'web' ? '62.5%' : ''}>
+          <Center w={Platform.OS === 'web' ? '62.5%' : '100%' }>
             <CustomFormControl
               isRequired
               isInvalid={'email' in errors}

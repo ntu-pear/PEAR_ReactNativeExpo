@@ -17,7 +17,7 @@ import typography from 'app/config/typography';
 import colors from 'app/config/colors';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import UserInformationCard from 'app/components/UserInformationCard';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import AuthContext from 'app/auth/context';
 import authStorage from 'app/auth/authStorage';
 import userApi from 'app/api/user';
@@ -76,7 +76,7 @@ function AccountViewScreen(props) {
 
   return (
     <ScrollView>
-      <VStack mt="4" ml="4" px={Platform.OS === 'web' ? '10%' : ''}>
+      <VStack mt="4" ml="4" px={Platform.OS === 'web' ? '10%' : null}>
         {Platform.OS === 'web' ? (
           <HStack px="20%">
             <AspectRatio w="35%" ml="20%" ratio={1} mb="2" alignSelf="center">
