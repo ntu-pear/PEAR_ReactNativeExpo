@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     color: colors.white_var1,
     paddingLeft: 5,
     paddingRight: 5,
-    fontSize: Platform.OS === 'web' ? 18 : '',
+    fontSize: Platform.OS === 'web' ? 18 : 14,
   },
 });
 
