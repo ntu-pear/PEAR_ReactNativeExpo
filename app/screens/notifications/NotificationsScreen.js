@@ -39,6 +39,7 @@ function NotificationsScreen(props) {
     useState(false);
   const paginationParams = useRef({});
   const [sortBy, setSortBy] = useState('');
+  const change = 'A contrived change';
   const { handlePullToRefresh, getMoreNotifications } = useNotifications(
     notificationType,
     setIsError,
