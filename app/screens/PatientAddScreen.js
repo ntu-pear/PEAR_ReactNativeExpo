@@ -9,10 +9,11 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Yup from 'yup';
 import mime from 'mime';
 
-function PatientAddScreen(props) {
+function PatientAddScreen() {
+  // aquire the setIsReloadPatientList from params
+  // const { isReloadPatientList, setIsReloadPatientList } = route.params;
   // state for steps
   const [step, setStep] = useState(1);
-
   // state for datepicker
   const [show, setShow] = useState({
     DOB: false,
@@ -271,11 +272,26 @@ function PatientAddScreen(props) {
     });
   };
 
+  /*
+    TODO: Remove submission validation and add real-time validation
+      1) comment out validateStep function.
+      2) implement validation functions - maybe can use Yup.
+        - if there is no errors remove the previous error message if there is.
+        a) Name validation
+        b) NRIC validation
+        c) Email validation
+        d) Allergy validation
+        e) Ph number
+      3) change errorMessage state to have structure similar to patientData to store the error messages.
+      4) remove the validateStep line from nextQuestionHandler function.
+      5) add final check in nextQuestionHandler for any errors before navigating to next screen.
+  */
   // validate each step of the form
   const validateStep = async (formData) => {
     const stepSchema = schema.fields[Object.keys(orderedFormData)[step - 1]];
     const toValidate = formData[Object.keys(orderedFormData)[step - 1]];
-
+    // console.log("validateStep: ");
+    // console.log(toValidate);
     try {
       setErrorMessage({});
       // Validate the form data against the schema
@@ -289,7 +305,7 @@ function PatientAddScreen(props) {
           errors[e.path] = e.message;
         });
         setErrorMessage(errors);
-        console.log(errors);
+        // console.log(errors);
         return { success: false, errors };
       } else {
         return { success: false, errors: [error.message] };
@@ -302,7 +318,7 @@ function PatientAddScreen(props) {
   // and to set component list
   const nextQuestionHandler = async (formData, page = '', list = []) => {
     const promiseResult = await validateStep(formData);
-    console.log(promiseResult);
+    // console.log(promiseResult);
     // If the validation is successful, continue to the next question
     if (promiseResult.success) {
       componentHandler(page, list);

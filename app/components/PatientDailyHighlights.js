@@ -9,6 +9,7 @@ import HighlightsCard from 'app/components/HighlightsCard';
 import highlightApi from 'app/api/highlight';
 import colors from 'app/config/colors';
 import { Platform } from 'react-native';
+import MessageDisplayCard from 'app/components/MessageDisplayCard';
 
 function PatientDailyHighlights(props) {
   // Destructure props
@@ -20,7 +21,7 @@ function PatientDailyHighlights(props) {
   // highlightsData is all data pulled from backend, filteredData is data displayed
   const [highlightsData, setHighlightsData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-
+  const [isRetry, setIsRetry] = useState(false);
   // searchValue for SearchBar, filterValue for DropDownPicker
   const [searchValue, setSearchValue] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -118,6 +119,14 @@ function PatientDailyHighlights(props) {
     }, []),
   );
 
+  useEffect(() => {
+    if (isRetry) {
+      getAllHighlights();
+      setSearchValue('');
+      setFilterValue([]);
+    }
+  }, [isRetry]);
+
   const getAllHighlights = async () => {
     setIsLoading(true);
     setIsError(false);
@@ -126,6 +135,7 @@ function PatientDailyHighlights(props) {
       // console.log('Request failed with status code: ', response.status);
       setIsLoading(false);
       setIsError(true);
+      setIsRetry(true);
       setStatusCode(response.status);
       return;
     }
@@ -133,6 +143,7 @@ function PatientDailyHighlights(props) {
     setStatusCode(response.status);
     setHighlightsData(response.data.data);
     setIsError(false);
+    setIsRetry(false);
     // console.log('Request successful with response: ', response);
   };
 
@@ -176,30 +187,26 @@ function PatientDailyHighlights(props) {
     }
 
     // Display error message if API request fails
+    let message = '';
     if (isError) {
-      if (statusCode == 401) {
-        return (
-          <Text style={[styles.modalText, styles.modalErrorText]}>
-            Error: User is not authenticated.
-          </Text>
-        );
+      if (statusCode === 401) {
+        message = 'Error: User not Authenticated';
       } else if (statusCode >= 500) {
-        return (
-          <Text style={[styles.modalText, styles.modalErrorText]}>
-            Error: Server is down. Please try again later.
-          </Text>
-        );
+        message = 'Server is down. Please try again later.';
+        // <Text style={[styles.modalText, styles.modalErrorText]}>
+        //   Error: Server is down. Please try again later.
+        // </Text>
+      } else {
+        message = `${statusCode} error has occured`;
       }
-      return (
-        <Text style={[styles.modalText, styles.modalErrorText]}>
-          {statusCode} error has occurred.
-        </Text>
-      );
     }
-
     // Display message when there are no new highlights
     return (
-      <Text style={styles.modalText}>No patient changes found today.</Text>
+      <MessageDisplayCard
+        TextMessage={isError ? message : 'No patient changes found today.'}
+        topPaddingSize={'32%'}
+      />
+      // <Text style={styles.modalText}>No patient changes found today.</Text>
     );
   };
 
@@ -334,6 +341,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    // backgroundColor: 'yellow',
   },
   modalView: {
     margin: 20,

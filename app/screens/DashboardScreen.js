@@ -12,7 +12,7 @@ import {
   View,
 } from 'native-base';
 import ActivityCard from 'app/components/ActivityCard';
-
+import globalStyles from 'app/utility/styles.js';
 import colors from 'app/config/colors';
 import ActivityCalendarCard from 'app/components/ActivityCalendarCard';
 
@@ -38,13 +38,18 @@ const DashboardScreen = ({
   };
 
   return (
-    <View>
+    // TODO: RESOLVE TAB BAR COVERING OF CONTENT
+    // Put padding in here of height = height of tab bar
+    // prevent tab bar covering the schedule list
+    <View style={globalStyles.mainContentContainer}>
+      {/* < Day MM dd YYYY > */}
       <Stack
         direction="row"
         alignItems="center"
         justifyContent="center"
         margin="2"
       >
+        {/* < icon button */}
         <TouchableOpacity onPress={handlePreviousDate}>
           <Image
             alt={'previous date'}
@@ -55,10 +60,12 @@ const DashboardScreen = ({
             size={'30px'}
           />
         </TouchableOpacity>
+        {/* Calender date: Day MM dd YYYY  */}
         <ActivityCalendarCard
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}
         />
+        {/* > icon button */}
         <TouchableOpacity onPress={handleNextDate}>
           <Image
             alt={'next-date'}

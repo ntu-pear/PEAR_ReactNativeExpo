@@ -13,6 +13,8 @@ export default {
   black_var2: '#3C4043',
   red: '#FD4734',
   light_gray: '#595959',
+  light_gray2: '#696969',
+  light_gray3: '#d3d3d3',
   medium: '#6e6969', // place-holder text color
   light: '#f8f4f4',
   light_var1: '#E8DCCC',
@@ -28,6 +30,7 @@ export default {
   green_lighter: '#66bdbd',
   pink: '#FF585D', // ** Frequently used colors throughout app **
   pink_lighter: '#ff9396',
+  pink_lightest: '#ffe6ee',
   primary_gray: '#D4D4D4',
   primary_overlay_color: '#00000080', // ligher black color
   white: '#f3f6f4',

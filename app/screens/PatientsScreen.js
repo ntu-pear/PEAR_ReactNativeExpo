@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Center, VStack, HStack, ScrollView, Fab, Icon } from 'native-base';
+import { RefreshControl } from 'react-native';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import patientApi from 'app/api/patient';
 import useCheckExpiredThenLogOut from 'app/hooks/useCheckExpiredThenLogOut';
@@ -23,7 +24,8 @@ function PatientsScreen(props) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   // set default value to my patients
   const [filterValue, setFilterValue] = useState('myPatients');
-
+  const [originalListOfPatients, setOriginalListOfPatients] = useState([]);
+  const [isReloadPatientList, setIsReloadPatientList] = useState(true);
   const [dropdownItems, setDropdownItems] = useState([
     {
       label: 'My Patients',
@@ -49,23 +51,28 @@ function PatientsScreen(props) {
     },
   ]);
 
-  // Refreshes every time the user navigates to PatientsScreen
+  // Refreshes every time the user navigates to PatientsScreen - OUTDATED
+  // Now refresh only when new patient is added or user requested refresh
   useFocusEffect(
     React.useCallback(() => {
       // Reference https://stackoverflow.com/questions/21518381/proper-way-to-wait-for-one-function-to-finish-before-continuing
       // Resolved the issue of `setListOfPatients` before successfully calling getPatient api.
-      setIsLoading(true);
-      const promiseFunction = async () => {
-        const response = await getListOfPatients();
-        setListOfPatients(response.data);
-      };
-      promiseFunction();
+      if (isReloadPatientList) {
+        setIsLoading(true);
+        const promiseFunction = async () => {
+          const response = await getListOfPatients();
+          setListOfPatients(response.data);
+        };
+        setIsReloadPatientList(false);
+        promiseFunction();
+      }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []),
+    }, [isReloadPatientList]),
   );
 
   useEffect(() => {
     getListOfPatients();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterValue]);
 
   const getListOfPatients = async () => {
@@ -86,26 +93,26 @@ function PatientsScreen(props) {
     return response.data;
   };
 
-  const [originalListOfPatients, setOriginalListOfPatients] = useState([]);
-
   const handleFabOnPress = () => {
     navigation.navigate(routes.PATIENT_ADD_PATIENT);
+    setIsReloadPatientList(true);
   };
 
   // Show all patients as expected when nothing is keyed into the search
   useEffect(() => {
     if (!searchQuery) {
-      console.log(
-        'Setting list of patients to original list:',
-        originalListOfPatients,
-      );
+      // console.log(
+      //   'Setting list of patients to original list:',
+      //   originalListOfPatients,
+      // );
       setListOfPatients(originalListOfPatients);
     }
-  }, [searchQuery]);
+    // added originalListOfPatients into the dependency
+  }, [searchQuery, originalListOfPatients]);
 
   // Set the search query to filter patient list
   const handleSearch = (text) => {
-    console.log('Handling search query:', text);
+    // console.log('Handling search query:', text);
     setSearchQuery(text);
   };
 
@@ -116,28 +123,6 @@ function PatientsScreen(props) {
         return fullName.toLowerCase().includes(searchQuery.toLowerCase());
       })
     : null;
-
-  const styles = StyleSheet.create({
-    searchBarContainer: {
-      marginLeft: '2%',
-      width: '100%',
-      backgroundColor: 'white',
-      borderBottomColor: 'transparent',
-      borderTopColor: 'transparent',
-    },
-    searchBar: {
-      alignContent: 'flex-start',
-      justifyContent: 'flex-start',
-    },
-    dropDown: {
-      marginTop: 12,
-      marginLeft: '3%',
-      alignContent: 'flex-end',
-      justifyContent: 'flex-end',
-      width: '93%',
-      borderColor: colors.primary_overlay_color,
-    },
-  });
 
   return (
     <>
@@ -199,7 +184,16 @@ function PatientsScreen(props) {
               />
             </View>
           </HStack>
-          <ScrollView w="100%" height="93%">
+          <ScrollView
+            w="100%"
+            height="93%"
+            refreshControl={
+              <RefreshControl
+                refreshing={isReloadPatientList}
+                onRefresh={getListOfPatients}
+              />
+            }
+          >
             <VStack>
               {filteredList && filteredList.length > 0
                 ? filteredList.map((item, index) => (
@@ -235,5 +229,27 @@ function PatientsScreen(props) {
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  searchBarContainer: {
+    marginLeft: '2%',
+    width: '100%',
+    backgroundColor: 'white',
+    borderBottomColor: 'transparent',
+    borderTopColor: 'transparent',
+  },
+  searchBar: {
+    alignContent: 'flex-start',
+    justifyContent: 'flex-start',
+  },
+  dropDown: {
+    marginTop: 12,
+    marginLeft: '3%',
+    alignContent: 'flex-end',
+    justifyContent: 'flex-end',
+    width: '93%',
+    borderColor: colors.primary_overlay_color,
+  },
+});
 
 export default PatientsScreen;

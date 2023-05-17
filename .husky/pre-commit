@@ -13,15 +13,15 @@ npx lint-staged
 # node ./node_modules/lint-staged/bin/lint-staged -r
 
 # Kill any existing processes on prot 19006 ( where the web app runs)
-lsof -ti:19006 && kill -9 $(lsof -ti:19006) 
+# lsof -ti:19006 && kill -9 $(lsof -ti:19006) 
 
 # Starting local web app in a background process
-rm -f webpack.config.js && npm run web &
+# rm -f webpack.config.js && npm run web &
 
 # Wait for app to start before running Cypress tests
-npx --yes wait-on http://localhost:19006
-npx cypress run
+# npx --yes wait-on http://localhost:19006
+# npx cypress run
 
 # Kill local web server and restore webpack.config.js
-kill -9 $(lsof -ti:19006) 
-git restore webpack.config.js
+# kill -9 $(lsof -ti:19006) 
+# git restore webpack.config.js

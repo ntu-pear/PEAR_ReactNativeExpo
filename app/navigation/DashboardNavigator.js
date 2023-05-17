@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unstable-nested-components */
 import React, { useEffect, useState } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import DashboardScreen from 'app/screens/DashboardScreen';
@@ -12,6 +13,7 @@ import PatientPrescriptionScreen from 'app/screens/PatientPrescriptionScreen';
 import PatientProblemLog from 'app/screens/PatientProblemLog';
 import PatientVitalScreen from 'app/screens/PatientVitalScreen';
 import PatientRoutineScreen from 'app/screens/PatientRoutineScreen';
+import MessageDisplayCard from 'app/components/MessageDisplayCard';
 
 // Import Constants from Routes
 import routes from 'app/navigation/routes';
@@ -54,10 +56,11 @@ function DashboardNavigator() {
   const [activityList, setActivityList] = useState([]);
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [activityFilterList, setActivityFilterList] = useState(null);
-
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
-  const [statusCode, setStatusCode] = useState();
+  // soln: User not authenticated error after login
+  const [isRetry, setIsRetry] = useState(false);
+  const [statusCode, setStatusCode] = useState(200);
   const [highlightsModalVisible, setHighlightsModalVisible] = useState(true);
 
   const getDefaultStartTime = () =>
@@ -166,32 +169,42 @@ function DashboardNavigator() {
         if (res.status === 200) {
           setPatientsData(res.data.data);
           setIsLoading(false);
+          setIsRetry(false);
           setStatusCode(res.status);
         } else {
           setIsLoading(false);
           setIsError(true);
           setStatusCode(res.status);
+          setIsRetry(true);
         }
       })
       .catch((err) => {
         setIsLoading(false);
         setIsError(true);
+        setIsRetry(true);
         setStatusCode(err.response.status);
       });
   };
 
   const noDataMessage = () => {
     // Display error message if API request fails
+    let message = '';
     if (isError) {
       if (statusCode === 401) {
-        return <Text>Error: User is not authenticated.</Text>;
+        // setIsRetry(true);
+        message = 'Error: User is not authenticated.';
       } else if (statusCode >= 500) {
-        return <Text>Error: Server is down. Please try again later.</Text>;
+        // setIsRetry(false);
+        message = 'Error: Server is down. Please try again later.';
       }
-      return <Text>{statusCode} error has occurred.</Text>;
+      message = `${statusCode} error has occurred.`;
     }
-
-    return <Text>No schedule can be found.</Text>;
+    return (
+      <MessageDisplayCard
+        TextMessage={isError ? message : 'No schedules found today'}
+        topPaddingSize={'42%'}
+      />
+    );
   };
 
   const handlePullToRefresh = () => {
@@ -202,6 +215,12 @@ function DashboardNavigator() {
   useEffect(() => {
     refreshDashboardData();
   }, []);
+
+  useEffect(() => {
+    if (isRetry) {
+      refreshDashboardData();
+    }
+  }, [isRetry]);
 
   useEffect(() => {
     updateFilteredPatientsData();
@@ -228,6 +247,7 @@ function DashboardNavigator() {
         name={routes.DASHBOARD_SCREEN}
         options={{
           headerRight: () => (
+            // This refers to the header calender and 3 dashes icons and their functionalities
             <Row space={4}>
               <TouchableOpacity onPress={() => setModalVisible(true)}>
                 <Image
@@ -237,6 +257,7 @@ function DashboardNavigator() {
                   }}
                   size={'25px'}
                 />
+                {/* This refers to the card that pops up when pressing the 3 dashes icon */}
                 <ActivityFilterCard
                   modalVisible={modalVisible}
                   setModalVisible={setModalVisible}
@@ -253,6 +274,7 @@ function DashboardNavigator() {
                   getDefaultEndTime={getDefaultEndTime}
                 />
               </TouchableOpacity>
+              {/* this refers to the calender icon */}
               <TouchableOpacity
                 onPress={() => setHighlightsModalVisible(!modalVisible)}
                 testID={'highlightsButton'}

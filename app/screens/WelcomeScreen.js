@@ -67,20 +67,35 @@ function WelcomeScreen(props) {
     // "Supervisor!23"
     setIsLoading(true);
     const result = await userApi.loginUser(email, role, password);
+    console.log('logging in!');
+    console.log(result);
     // userLoginApi.request(email, role, password);
     // if returned array is empty or error
+    console.log(result);
     if (!result.ok) {
       setIsLoading(false);
       return setLoginFailed(true);
     }
-    setIsLoading(false);
-    setLoginFailed(false);
+    /*
+    "data": Object {
+      "data": Object {
+        "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOiJCMjI2OThCOC00MkEyLTQxMTUtOTYzMS0xQzJEMUUyQUM1RjQiLCJyb2xlIjoiU3VwZXJ2aXNvciIsInN1YiI6Ikplc3NpY2EgU2ltIiwiZW1haWwiOiJqZXNzQGdtYWlsLmNvbSIsImp0aSI6IjJiMGRiYzUyLTY1NjctNGU3Zi1hOTYzLWVkNjBkOTI3OWRhOSIsIm5iZiI6MTY4NDEyNDM5OCwiZXhwIjoxNjg0MTMxNjA4LCJpYXQiOjE2ODQxMjQ0MDgsImlzcyI6Imh0dHBzOi8vY29yZW12Yy5meXAyMDE3LmNvbS8iLCJhdWQiOiJodHRwczovL2NvcmVtdmMuZnlwMjAxNy5jb20vIn0.QyOmXJu70IMb3B4V34K0sFYWu_G2dUyBNMcGMgRNYx4",
+        "error": null,
+        "refreshToken": "qru284If4moGc1HYv1PqIVJIRAneqHdAB3Bfeeb5cda-c4a9-4b1a-93ea-ec5d1a9ce387",
+        "success": true, */
     const user = jwt_decode(result.data.data.accessToken);
     authContext.setUser(user);
-    authStorage.storeToken('userAuthToken', result.data.data.accessToken);
-    authStorage.storeToken('userRefreshToken', result.data.data.refreshToken);
+    // Replace the old token (if any) with the new one
+    // await authStorage.removeToken();
+    await authStorage.storeToken('userAuthToken', result.data.data.accessToken);
+    await authStorage.storeToken(
+      'userRefreshToken',
+      result.data.data.refreshToken,
+    );
     // set api header if empty
     apiHandlerHook.setHeaderIfEmpty();
+    setIsLoading(false);
+    setLoginFailed(false);
   };
 
   const handleEmail = (e) => {

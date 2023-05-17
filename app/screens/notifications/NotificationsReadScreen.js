@@ -6,6 +6,9 @@ import NotificationCard from 'app/components/NotificationCard';
 import ErrorRetryApiCard from 'app/components/ErrorRetryApiCard';
 import useNotifications from 'app/screens/notifications/useNotifications';
 import NotificationSortSelector from 'app/screens/notifications/NotificationsSortSelector';
+// Resolve the tab bar cutting off issue
+import { View } from 'react-native';
+import globalStyles from 'app/utility/styles.js';
 
 function NotificationsReadScreen(props) {
   const { notificationType } = props.route.params;
@@ -34,7 +37,7 @@ function NotificationsReadScreen(props) {
   }, [sortBy]);
 
   return (
-    <>
+    <View style={globalStyles.mainContentContainer}>
       {isLoading ? (
         <ActivityIndicator visible={true} />
       ) : (
@@ -73,7 +76,7 @@ function NotificationsReadScreen(props) {
           </VStack>
         </VStack>
       )}
-    </>
+    </View>
   );
 }
 
