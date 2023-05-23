@@ -15,8 +15,10 @@ import ActivityCard from 'app/components/ActivityCard';
 import globalStyles from 'app/utility/styles.js';
 import colors from 'app/config/colors';
 import ActivityCalendarCard from 'app/components/ActivityCalendarCard';
+import ProfileNameButton from 'app/components/ProfileNameButton';
+import routes from 'app/navigation/routes';
 
-const DashboardScreen = ({
+function DashboardScreen({
   selectedDate,
   setSelectedDate,
   filteredActivityData,
@@ -24,7 +26,8 @@ const DashboardScreen = ({
   isLoading,
   handlePullToRefresh,
   noDataMessage,
-}) => {
+  navigation,
+}) {
   const handlePreviousDate = () => {
     const previous = new Date(selectedDate.getTime());
     previous.setDate(selectedDate.getDate() - 1);
@@ -38,8 +41,6 @@ const DashboardScreen = ({
   };
 
   return (
-    // TODO: RESOLVE TAB BAR COVERING OF CONTENT
-    // Put padding in here of height = height of tab bar
     // prevent tab bar covering the schedule list
     <View style={globalStyles.mainContentContainer}>
       {/* < Day MM dd YYYY > */}
@@ -96,6 +97,13 @@ const DashboardScreen = ({
                   }}
                 />
                 <Text style={styles.patientName}>{item.patientName}</Text>
+                {/* <ProfileNameButton
+                  navigation={navigation}
+                  route={routes.PATIENT_PROFILE}
+                  profile={item}
+                  isPatient={true}
+                  size={65}
+                /> */}
               </Container>
               <ScrollView
                 horizontal={true}
@@ -121,7 +129,7 @@ const DashboardScreen = ({
       />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   patientName: {

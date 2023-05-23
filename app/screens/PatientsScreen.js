@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Center, VStack, HStack, ScrollView, Fab, Icon } from 'native-base';
 import { RefreshControl } from 'react-native';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
+import AuthContext from 'app/auth/context';
+import authStorage from 'app/auth/authStorage';
 import patientApi from 'app/api/patient';
 import useCheckExpiredThenLogOut from 'app/hooks/useCheckExpiredThenLogOut';
 import PatientScreenCard from 'app/components/PatientScreenCard';
@@ -12,6 +14,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { SearchBar } from 'react-native-elements';
 import { StyleSheet, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
+import ProfileNameButton from 'app/components/ProfileNameButton';
 
 function PatientsScreen(props) {
   // Destructure props
@@ -20,6 +23,7 @@ function PatientsScreen(props) {
   const checkExpiredLogOutHook = useCheckExpiredThenLogOut();
   const { navigation } = props;
 
+  const { user, setUser } = useContext(AuthContext);
   const [searchQuery, setSearchQuery] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   // set default value to my patients
@@ -84,7 +88,9 @@ function PatientsScreen(props) {
 
     if (!response.ok) {
       // Check if token has expired, if yes, proceed to log out
-      checkExpiredLogOutHook.handleLogOut(response);
+      // checkExpiredLogOutHook.handleLogOut(response);
+      setUser(null);
+      // await authStorage.removeToken();
       return;
     }
     setOriginalListOfPatients(response.data.data);
@@ -108,7 +114,8 @@ function PatientsScreen(props) {
       setListOfPatients(originalListOfPatients);
     }
     // added originalListOfPatients into the dependency
-  }, [searchQuery, originalListOfPatients]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery]);
 
   // Set the search query to filter patient list
   const handleSearch = (text) => {
@@ -119,6 +126,7 @@ function PatientsScreen(props) {
   // Filter patient list with search query
   const filteredList = listOfPatients
     ? listOfPatients.filter((item) => {
+        // console.log(item);
         const fullName = `${item.firstName} ${item.lastName}`;
         return fullName.toLowerCase().includes(searchQuery.toLowerCase());
       })
@@ -197,10 +205,17 @@ function PatientsScreen(props) {
             <VStack>
               {filteredList && filteredList.length > 0
                 ? filteredList.map((item, index) => (
-                    <PatientScreenCard
-                      patientProfile={item}
-                      key={index}
+                    // <PatientScreenCard
+                    //   patientProfile={item}
+                    //   key={index}
+                    //   navigation={navigation}
+                    // />
+                    <ProfileNameButton
                       navigation={navigation}
+                      profile={item}
+                      isPatient={true}
+                      size={70}
+                      key={index}
                     />
                   ))
                 : null}

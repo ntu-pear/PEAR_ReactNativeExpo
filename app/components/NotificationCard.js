@@ -56,7 +56,7 @@ function NotificationCard(
         <VStack w="100%" space={4} flexWrap="wrap" mb="1">
           <HStack space={5} alignItems="center">
             <Avatar size="sm" bg={colors.pink} marginY="auto">
-              {' '}
+              {/* Extract the 1st char of the users name for display in the avatar*/}{' '}
               {user && user.sub && user.sub.substring(0, 1)
                 ? user.sub.substring(0, 1)
                 : '--'}{' '}
@@ -65,7 +65,7 @@ function NotificationCard(
               bold
               color={colors.black_var1}
               fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
+                Platform.OS === 'ios' ? typography.ios : typography.android
               }
             >
               {item?.requiresAction ? 'Action Required' : ''}
@@ -76,7 +76,7 @@ function NotificationCard(
               alignSelf="flex-start"
               color={colors.black_var1}
               fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
+                Platform.OS === 'ios' ? typography.ios : typography.android
               }
             >
               {item?.shortMessage

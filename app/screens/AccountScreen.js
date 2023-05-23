@@ -5,6 +5,7 @@ import AuthContext from 'app/auth/context';
 import AppButton from 'app/components/AppButton';
 import authStorage from 'app/auth/authStorage';
 import AccountCard from 'app/components/AccountCard';
+import ProfileNameButton from 'app/components/ProfileNameButton';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import routes from 'app/navigation/routes';
 import AccountDetailCard from 'app/components/AccountDetailCard';
@@ -18,6 +19,7 @@ function AccountScreen(props) {
   const { navigation } = props;
 
   const onPressLogOut = async () => {
+    console.log('Logging out!');
     setUser(null);
     await authStorage.removeToken();
   };
@@ -45,7 +47,7 @@ function AccountScreen(props) {
       // Proceed to log out if account screen does not load due to api failure
       // Note: should use useCheckExpiredThenLogOut hook but it isnt working and had no time to fix
       setUser(null);
-      await authStorage.removeToken();
+      // await authStorage.removeToken();
       return;
     }
     setIsLoading(false);
@@ -58,7 +60,13 @@ function AccountScreen(props) {
         <ActivityIndicator visible />
       ) : (
         <VStack w="100%" h="100%" alignItems="center">
-          <AccountDetailCard userProfile={user} navigation={navigation} />
+          {/* <AccountDetailCard userProfile={user} navigation={navigation} /> */}
+          <ProfileNameButton
+            navigation={navigation}
+            profile={user}
+            size={150}
+            isPatient={false}
+          />
 
           <VStack w="90%" flexWrap="wrap" mb="1">
             <AccountCard

@@ -7,12 +7,7 @@ const MessageDisplayCard = ({ TextMessage, topPaddingSize }) => {
   return (
     <View style={styles.mainContainer} paddingTop={topPaddingSize}>
       <Image source={require('../assets/pear_v2.png')} style={styles.logo} />
-      <Text
-        style={styles.errorText}
-        fontFamily={Platform.OS === 'ios' ? typography.ios : typography.android}
-      >
-        {TextMessage}
-      </Text>
+      <Text style={styles.errorText}>{TextMessage}</Text>
     </View>
   );
 };
@@ -33,7 +28,8 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginTop: 20,
+    marginTop: 15,
+    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
   },
 });
 
