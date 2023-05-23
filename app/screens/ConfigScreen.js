@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import authStorage from 'app/auth/authStorage';
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
-import AuthContext from 'appauthcontext';
+import AuthContext from 'app/auth/context';
 // import authStorage from 'app/auth/authStorage';
 
 const getUserTokens = async () => {
