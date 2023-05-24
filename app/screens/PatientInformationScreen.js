@@ -30,7 +30,7 @@ import {
   CheckIcon,
 } from 'native-base';
 import React, { useEffect, useState } from 'react';
-import { Platform } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 
 function PatientInformationScreen(props) {
   const { displayPicUrl, firstName, lastName, patientID } = props.route.params;
@@ -158,30 +158,17 @@ function PatientInformationScreen(props) {
               <Stack ml="5" mr="5" space={5}>
                 <Divider mt="2" />
                 <Stack name="PersonalInformationCard">
-                  <Text
-                    color={colors.black_var1}
-                    fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
-                    fontSize="2xl"
-                    fontWeight="semibold"
-                  >
+                  <Text style={styles.Header}>
                     Your Patient Information
                   </Text>
                   <FormControl>
                     <HStack space={2} alignItems="center">
-                      <FormControl.Label
-                        _text={{
-                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
-                          fontSize: 'lg',
-                          fontWeight: 'thin',
-                        }}
-                      >
+                      <FormControl.Label _text={styles.LabelStyle}>
                         First Name
                       </FormControl.Label>
 
                       <Input
-                        color={colors.black_var1}
-                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
-                        fontSize="lg"
+                        style={styles.InputStyle}
                         isReadOnly
                         variant="unstyled"
                         value={props.route.params.firstName}
@@ -191,20 +178,12 @@ function PatientInformationScreen(props) {
                   </FormControl>
                   <FormControl>
                     <HStack space={2} alignItems="center">
-                      <FormControl.Label
-                        _text={{
-                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
-                          fontSize: 'lg',
-                          fontWeight: 'thin',
-                        }}
-                      >
+                      <FormControl.Label _text={styles.LabelStyle}>
                         Last Name
                       </FormControl.Label>
 
                       <Input
-                        color={colors.black_var1}
-                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
-                        fontSize="lg"
+                        style={styles.InputStyle}
                         isReadOnly
                         variant="unstyled"
                         value={props.route.params.lastName}
@@ -214,20 +193,12 @@ function PatientInformationScreen(props) {
                   </FormControl>
                   <FormControl>
                     <HStack space={2} alignItems="center">
-                      <FormControl.Label
-                        _text={{
-                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
-                          fontSize: 'lg',
-                          fontWeight: 'thin',
-                        }}
-                      >
+                      <FormControl.Label _text={styles.LabelStyle}>
                         NRIC
                       </FormControl.Label>
 
                       <Input
-                        color={colors.black_var1}
-                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
-                        fontSize="lg"
+                        style={styles.InputStyle}
                         isReadOnly
                         variant="unstyled"
                         value={props.route.params.nric}
@@ -237,20 +208,12 @@ function PatientInformationScreen(props) {
                   </FormControl>
                   <FormControl>
                     <HStack space={2} alignItems="center">
-                      <FormControl.Label
-                        _text={{
-                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
-                          fontSize: 'lg',
-                          fontWeight: 'thin',
-                        }}
-                      >
+                      <FormControl.Label _text={styles.LabelStyle}>
                         Gender
                       </FormControl.Label>
 
                       <Input
-                        color={colors.black_var1}
-                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
-                        fontSize="lg"
+                        style={styles.InputStyle}
                         isReadOnly
                         variant="unstyled"
                         value={props.route.params.gender === 'F' ? 'Female' : 'Male'}
@@ -260,20 +223,12 @@ function PatientInformationScreen(props) {
                   </FormControl>
                   <FormControl>
                     <HStack space={2} alignItems="center">
-                      <FormControl.Label
-                        _text={{
-                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
-                          fontSize: 'lg',
-                          fontWeight: 'thin',
-                        }}
-                      >
+                      <FormControl.Label _text={styles.LabelStyle}>
                         DOB
                       </FormControl.Label>
 
                       <Input
-                        color={colors.black_var1}
-                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
-                        fontSize="lg"
+                        style={styles.InputStyle}
                         isReadOnly
                         variant="unstyled"
                         value={props.route.params.dob.substring(0, 10)}
@@ -283,72 +238,47 @@ function PatientInformationScreen(props) {
                   </FormControl>
                   <FormControl>
                     <HStack space={2} alignItems="center">
-                      <FormControl.Label
-                        _text={{
-                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
-                          fontSize: 'lg',
-                          fontWeight: 'thin',
-                        }}
-                      >
+                      <FormControl.Label _text={styles.LabelStyle}>
                         Home Number
                       </FormControl.Label>
 
                       <Input
-                        color={colors.black_var1}
-                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
-                        fontSize="lg"
+                        style={styles.InputStyle}
                         isReadOnly
                         variant="unstyled"
-                        value={props.route.params.homeNo}
+                        value={props.route.params.homeNo || 'Not available'}
                         w="100%"
                       />
                     </HStack>
                   </FormControl>
                   <FormControl>
                     <HStack space={2} alignItems="center">
-                      <FormControl.Label
-                        _text={{
-                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
-                          fontSize: 'lg',
-                          fontWeight: 'thin',
-                        }}
-                      >
+                      <FormControl.Label _text={styles.LabelStyle}>
                         Mobile Number
                       </FormControl.Label>
 
                       <Input
-                        color={colors.black_var1}
-                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
-                        fontSize="lg"
+                        style={styles.InputStyle}
                         isReadOnly
                         variant="unstyled"
-                        value={props.route.params.handphoneNo}
+                        value={props.route.params.handphoneNo || 'Not available'}
                         w="100%"
                       />
                     </HStack>
                   </FormControl>
                   <FormControl>
                     <Stack space={0} alignItems="flex-start" flexWrap="wrap">
-                      <FormControl.Label
-                        width="100%"
-                        _text={{
-                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
-                          fontSize: 'lg',
-                          fontWeight: 'thin',
-                        }}
-                      >
+                      <FormControl.Label _text={styles.LabelStyle}>
                         Address
                       </FormControl.Label>
-                      <TextArea
-                        color={colors.black_var1}
-                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
-                        fontSize="lg"
+                      <TextArea 
+                        style={styles.InputStyle}
                         isReadOnly
                         input="lg"
                         ml="-2.5"
                         minH="30%"
                         maxH="50%"
-                        //variant="unstyled"
+                        variant="unstyled"
                         value={props.route.params.address || 'Not available'}
                         w="100%"
                       />
@@ -356,26 +286,17 @@ function PatientInformationScreen(props) {
                   </FormControl>
                   <FormControl>
                     <Stack space={0} alignItems="flex-start" flexWrap="wrap">
-                      <FormControl.Label
-                        width="100%"
-                        _text={{
-                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
-                          fontSize: 'lg',
-                          fontWeight: 'thin',
-                        }}
-                      >
+                      <FormControl.Label _text={styles.LabelStyle}>
                         Temporary Address
                       </FormControl.Label>
                       <TextArea
-                        color={colors.black_var1}
-                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
-                        fontSize="lg"
+                        style={styles.InputStyle}
                         isReadOnly
                         input="lg"
                         ml="-2.5"
                         minH="30%"
                         maxH="50%"
-                        //variant="unstyled"
+                        variant="unstyled"
                         value={props.route.params.tempAddress || 'Not available'}
                         w="100%"
                       />
@@ -394,30 +315,17 @@ function PatientInformationScreen(props) {
                 </Stack>
                 <Divider />
                 <Stack name="PersonalPreferenceCard" space={2}>
-                  <Text
-                    color={colors.black_var1}
-                    fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
-                    fontSize="2xl"
-                    fontWeight="semibold"
-                  >
+                  <Text style={styles.Header}>
                     Preference
                   </Text>
                   <FormControl>
                     <HStack space={2} alignItems="center">
-                      <FormControl.Label
-                        _text={{
-                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
-                          fontSize: 'lg',
-                          fontWeight: 'thin',
-                        }}
-                      >
+                      <FormControl.Label _text={styles.LabelStyle}>
                         Preferred Name
                       </FormControl.Label>
 
                       <Input
-                        color={colors.black_var1}
-                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
-                        fontSize="lg"
+                        style={styles.InputStyle}
                         isReadOnly
                         variant="unstyled"
                         value={props.route.params.preferredName}
@@ -427,20 +335,12 @@ function PatientInformationScreen(props) {
                   </FormControl>
                   <FormControl>
                     <HStack space={2} alignItems="center">
-                      <FormControl.Label
-                        _text={{
-                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
-                          fontSize: 'lg',
-                          fontWeight: 'thin',
-                        }}
-                      >
+                      <FormControl.Label _text={styles.LabelStyle}>
                         Preferred Language
                       </FormControl.Label>
 
                       <Input
-                        color={colors.black_var1}
-                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
-                        fontSize="lg"
+                        style={styles.InputStyle}
                         isReadOnly
                         variant="unstyled"
                         value={props.route.params.preferredLanguage}
@@ -451,20 +351,13 @@ function PatientInformationScreen(props) {
                 </Stack>
                 <Divider />
                 <Stack name="PersonalDoctorCard" space={2}>
-                  <Text
-                    color={colors.black_var1}
-                    fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
-                    fontSize="2xl"
-                    fontWeight="semibold"
-                  >
+                  <Text style={styles.Header}>
                     Doctor's Notes
                   </Text>
                   <FormControl>
                     <Stack space={0} alignItems="flex-start" flexWrap="wrap">
                       <TextArea
-                        color={colors.black_var1}
-                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
-                        fontSize="lg"
+                        style={styles.InputStyle}
                         isReadOnly
                         input="lg"
                         //ml="-2.5"
@@ -475,38 +368,24 @@ function PatientInformationScreen(props) {
                         value={
                           getDoctorNote.data && getDoctorNote.data[0] && getDoctorNote.data[0].doctorRemarks
                             ? getDoctorNote.data[0].doctorRemarks
-                            : 'Not available'
-                        }
+                            : 'Not available'}
                       />
                     </Stack>
                   </FormControl>
                 </Stack>
                 <Divider />
                 <Stack name="PersonalGuardianCard">
-                  <Text
-                    color={colors.black_var1}
-                    fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
-                    fontSize="2xl"
-                    fontWeight="semibold"
-                  >
+                  <Text style={styles.Header}>
                     Guardian(s)
                   </Text>
                   <FormControl>
                     <HStack space={2} alignItems="center">
-                      <FormControl.Label
-                        _text={{
-                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
-                          fontSize: 'lg',
-                          fontWeight: 'thin',
-                        }}
-                      >
+                      <FormControl.Label _text={styles.LabelStyle}>
                         First Name
                       </FormControl.Label>
 
                       <Input
-                        color={colors.black_var1}
-                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
-                        fontSize="lg"
+                        style={styles.InputStyle}
                         isReadOnly
                         variant="unstyled"
                         value={getPatientGuardian.data.guardian && getPatientGuardian.data.guardian.firstName 
@@ -517,20 +396,12 @@ function PatientInformationScreen(props) {
                   </FormControl>
                   <FormControl>
                     <HStack space={2} alignItems="center">
-                      <FormControl.Label
-                        _text={{
-                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
-                          fontSize: 'lg',
-                          fontWeight: 'thin',
-                        }}
-                      >
+                      <FormControl.Label _text={styles.LabelStyle}>
                         Last Name
                       </FormControl.Label>
 
                       <Input
-                        color={colors.black_var1}
-                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
-                        fontSize="lg"
+                        style={styles.InputStyle}
                         isReadOnly
                         variant="unstyled"
                         value={getPatientGuardian.data.guardian && getPatientGuardian.data.guardian.lastName
@@ -541,20 +412,12 @@ function PatientInformationScreen(props) {
                   </FormControl>
                   <FormControl>
                     <HStack space={2} alignItems="center">
-                      <FormControl.Label
-                        _text={{
-                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
-                          fontSize: 'lg',
-                          fontWeight: 'thin',
-                        }}
-                      >
+                      <FormControl.Label _text={styles.LabelStyle}>
                         NRIC
                       </FormControl.Label>
 
                       <Input
-                        color={colors.black_var1}
-                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
-                        fontSize="lg"
+                        style={styles.InputStyle}
                         isReadOnly
                         variant="unstyled"
                         value={getPatientGuardian.data.guardian && getPatientGuardian.data.guardian.nric
@@ -565,25 +428,16 @@ function PatientInformationScreen(props) {
                   </FormControl>
                   <FormControl>
                     <HStack space={2} alignItems="center">
-                      <FormControl.Label
-                        _text={{
-                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
-                          fontSize: 'lg',
-                          fontWeight: 'thin',
-                        }}
-                      >
+                      <FormControl.Label _text={styles.LabelStyle}>
                         Relationship
                       </FormControl.Label>
 
                       <Input
-                        color={colors.black_var1}
-                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
-                        fontSize="lg"
+                        style={styles.InputStyle}
                         isReadOnly
                         variant="unstyled"
                         value={getPatientGuardian.data.guardian && getPatientGuardian.data.guardian.relationship
-                          ? getPatientGuardian.data.guardian.relationship: 'Not Available'
-                        }
+                          ? getPatientGuardian.data.guardian.relationship: 'Not Available'}
                         w="100%"
                       />
                     </HStack>
@@ -600,7 +454,25 @@ function PatientInformationScreen(props) {
   );
 }
 
+const styles = StyleSheet.create({
+  Header: {
+    color: colors.black_var1,
+    fontFamily: Platform.OS === 'ios' ? 'Helvetica' : typography.android,
+    fontSize: 24,
+    fontWeight: "semibold",
+    paddingTop: 5,
+  },
+  LabelStyle: {
+    fontFamily: Platform.OS === 'ios' ? 'Helvetica' : typography.android,
+    fontSize: 18,
+    fontWeight: "thin",
+  },
+  InputStyle: {
+    color: colors.black_var1,
+    fontFamily: Platform.OS === 'ios' ? 'Helvetica' : typography.android,
+    fontSize: 18,
+  },
+});
+
 export default PatientInformationScreen;
-/*
-fontFamily={ Platform.OS === "ios" ? "Helvetica" : typography.android }
-*/
+
