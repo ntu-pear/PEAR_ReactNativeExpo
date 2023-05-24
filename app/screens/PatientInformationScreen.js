@@ -4,10 +4,6 @@ import guardianApi from 'app/api/guardian';
 import socialHistoryApi from 'app/api/socialHistory';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import AppButton from 'app/components/AppButton';
-import PersonalDoctorCard from 'app/components/PersonalDoctorCard';
-import PersonalGuardianCard from 'app/components/PersonalGuardianCard';
-import PersonalInformationCard from 'app/components/PersonalInformationCard';
-import PersonalPreferenceCard from 'app/components/PersonalPreferenceCard';
 import PersonalSocialHistory from 'app/components/PersonalSocialHistory';
 import colors from 'app/config/colors';
 import typography from 'app/config/typography';
@@ -26,6 +22,12 @@ import {
   Stack,
   Text,
   VStack,
+  Avatar,
+  Input,
+  FormControl,
+  TextArea,
+  Select,
+  CheckIcon,
 } from 'native-base';
 import React, { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
@@ -155,15 +157,438 @@ function PatientInformationScreen(props) {
             <VStack maxW="100%" mt="2.5" mb="8">
               <Stack ml="5" mr="5" space={5}>
                 <Divider mt="2" />
-                <PersonalInformationCard patientInformation={props} />
+                <Stack name="PersonalInformationCard">
+                  <Text
+                    color={colors.black_var1}
+                    fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
+                    fontSize="2xl"
+                    fontWeight="semibold"
+                  >
+                    Your Patient Information
+                  </Text>
+                  <FormControl>
+                    <HStack space={2} alignItems="center">
+                      <FormControl.Label
+                        _text={{
+                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
+                          fontSize: 'lg',
+                          fontWeight: 'thin',
+                        }}
+                      >
+                        First Name
+                      </FormControl.Label>
+
+                      <Input
+                        color={colors.black_var1}
+                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
+                        fontSize="lg"
+                        isReadOnly
+                        variant="unstyled"
+                        value={props.route.params.firstName}
+                        w="100%"
+                      />
+                    </HStack>
+                  </FormControl>
+                  <FormControl>
+                    <HStack space={2} alignItems="center">
+                      <FormControl.Label
+                        _text={{
+                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
+                          fontSize: 'lg',
+                          fontWeight: 'thin',
+                        }}
+                      >
+                        Last Name
+                      </FormControl.Label>
+
+                      <Input
+                        color={colors.black_var1}
+                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
+                        fontSize="lg"
+                        isReadOnly
+                        variant="unstyled"
+                        value={props.route.params.lastName}
+                        w="100%"
+                      />
+                    </HStack>
+                  </FormControl>
+                  <FormControl>
+                    <HStack space={2} alignItems="center">
+                      <FormControl.Label
+                        _text={{
+                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
+                          fontSize: 'lg',
+                          fontWeight: 'thin',
+                        }}
+                      >
+                        NRIC
+                      </FormControl.Label>
+
+                      <Input
+                        color={colors.black_var1}
+                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
+                        fontSize="lg"
+                        isReadOnly
+                        variant="unstyled"
+                        value={props.route.params.nric}
+                        w="100%"
+                      />
+                    </HStack>
+                  </FormControl>
+                  <FormControl>
+                    <HStack space={2} alignItems="center">
+                      <FormControl.Label
+                        _text={{
+                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
+                          fontSize: 'lg',
+                          fontWeight: 'thin',
+                        }}
+                      >
+                        Gender
+                      </FormControl.Label>
+
+                      <Input
+                        color={colors.black_var1}
+                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
+                        fontSize="lg"
+                        isReadOnly
+                        variant="unstyled"
+                        value={props.route.params.gender === 'F' ? 'Female' : 'Male'}
+                        w="100%"
+                      />
+                    </HStack>
+                  </FormControl>
+                  <FormControl>
+                    <HStack space={2} alignItems="center">
+                      <FormControl.Label
+                        _text={{
+                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
+                          fontSize: 'lg',
+                          fontWeight: 'thin',
+                        }}
+                      >
+                        DOB
+                      </FormControl.Label>
+
+                      <Input
+                        color={colors.black_var1}
+                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
+                        fontSize="lg"
+                        isReadOnly
+                        variant="unstyled"
+                        value={props.route.params.dob.substring(0, 10)}
+                        w="100%"
+                      />
+                    </HStack>
+                  </FormControl>
+                  <FormControl>
+                    <HStack space={2} alignItems="center">
+                      <FormControl.Label
+                        _text={{
+                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
+                          fontSize: 'lg',
+                          fontWeight: 'thin',
+                        }}
+                      >
+                        Home Number
+                      </FormControl.Label>
+
+                      <Input
+                        color={colors.black_var1}
+                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
+                        fontSize="lg"
+                        isReadOnly
+                        variant="unstyled"
+                        value={props.route.params.homeNo}
+                        w="100%"
+                      />
+                    </HStack>
+                  </FormControl>
+                  <FormControl>
+                    <HStack space={2} alignItems="center">
+                      <FormControl.Label
+                        _text={{
+                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
+                          fontSize: 'lg',
+                          fontWeight: 'thin',
+                        }}
+                      >
+                        Mobile Number
+                      </FormControl.Label>
+
+                      <Input
+                        color={colors.black_var1}
+                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
+                        fontSize="lg"
+                        isReadOnly
+                        variant="unstyled"
+                        value={props.route.params.handphoneNo}
+                        w="100%"
+                      />
+                    </HStack>
+                  </FormControl>
+                  <FormControl>
+                    <Stack space={0} alignItems="flex-start" flexWrap="wrap">
+                      <FormControl.Label
+                        width="100%"
+                        _text={{
+                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
+                          fontSize: 'lg',
+                          fontWeight: 'thin',
+                        }}
+                      >
+                        Address
+                      </FormControl.Label>
+                      <TextArea
+                        color={colors.black_var1}
+                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
+                        fontSize="lg"
+                        isReadOnly
+                        input="lg"
+                        ml="-2.5"
+                        minH="30%"
+                        maxH="50%"
+                        //variant="unstyled"
+                        value={props.route.params.address || 'Not available'}
+                        w="100%"
+                      />
+                    </Stack>
+                  </FormControl>
+                  <FormControl>
+                    <Stack space={0} alignItems="flex-start" flexWrap="wrap">
+                      <FormControl.Label
+                        width="100%"
+                        _text={{
+                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
+                          fontSize: 'lg',
+                          fontWeight: 'thin',
+                        }}
+                      >
+                        Temporary Address
+                      </FormControl.Label>
+                      <TextArea
+                        color={colors.black_var1}
+                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
+                        fontSize="lg"
+                        isReadOnly
+                        input="lg"
+                        ml="-2.5"
+                        minH="30%"
+                        maxH="50%"
+                        //variant="unstyled"
+                        value={props.route.params.tempAddress || 'Not available'}
+                        w="100%"
+                      />
+                    </Stack>
+                  </FormControl>
+
+                  <Center position="absolute" right="0" py="1.5">
+                    <Avatar
+                      size={Platform.OS === 'web' ? '2xl' : 'md'}
+                      source={{uri: props.route.params.profilePicture,}}
+                    >
+                      {/* Note this is a fall-back, in case image isn't rendered */}
+                      {`${props.route.params.firstName.substring(0, 1)}${props.route.params.lastName.substring(0, 1)}`}
+                    </Avatar>
+                  </Center>
+                </Stack>
                 <Divider />
-                <PersonalPreferenceCard patientInformation={props} />
+                <Stack name="PersonalPreferenceCard" space={2}>
+                  <Text
+                    color={colors.black_var1}
+                    fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
+                    fontSize="2xl"
+                    fontWeight="semibold"
+                  >
+                    Preference
+                  </Text>
+                  <FormControl>
+                    <HStack space={2} alignItems="center">
+                      <FormControl.Label
+                        _text={{
+                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
+                          fontSize: 'lg',
+                          fontWeight: 'thin',
+                        }}
+                      >
+                        Preferred Name
+                      </FormControl.Label>
+
+                      <Input
+                        color={colors.black_var1}
+                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
+                        fontSize="lg"
+                        isReadOnly
+                        variant="unstyled"
+                        value={props.route.params.preferredName}
+                        w="100%"
+                      />
+                    </HStack>
+                  </FormControl>
+                  <FormControl>
+                    <HStack space={2} alignItems="center">
+                      <FormControl.Label
+                        _text={{
+                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
+                          fontSize: 'lg',
+                          fontWeight: 'thin',
+                        }}
+                      >
+                        Preferred Language
+                      </FormControl.Label>
+
+                      <Input
+                        color={colors.black_var1}
+                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
+                        fontSize="lg"
+                        isReadOnly
+                        variant="unstyled"
+                        value={props.route.params.preferredLanguage}
+                        w="100%"
+                      />
+                    </HStack>
+                  </FormControl>
+                </Stack>
                 <Divider />
-                <PersonalDoctorCard doctorNote={getDoctorNote.data} />
+                <Stack name="PersonalDoctorCard" space={2}>
+                  <Text
+                    color={colors.black_var1}
+                    fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
+                    fontSize="2xl"
+                    fontWeight="semibold"
+                  >
+                    Doctor's Notes
+                  </Text>
+                  <FormControl>
+                    <Stack space={0} alignItems="flex-start" flexWrap="wrap">
+                      <TextArea
+                        color={colors.black_var1}
+                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
+                        fontSize="lg"
+                        isReadOnly
+                        input="lg"
+                        //ml="-2.5"
+                        //minH="30%"
+                        //maxH="50%"
+                        //w="100%"
+                        //variant="unstyled"
+                        value={
+                          getDoctorNote.data && getDoctorNote.data[0] && getDoctorNote.data[0].doctorRemarks
+                            ? getDoctorNote.data[0].doctorRemarks
+                            : 'Not available'
+                        }
+                      />
+                    </Stack>
+                  </FormControl>
+                </Stack>
                 <Divider />
-                <PersonalGuardianCard
-                  patientGuardian={getPatientGuardian.data}
-                />
+                <Stack name="PersonalGuardianCard">
+                  <Text
+                    color={colors.black_var1}
+                    fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
+                    fontSize="2xl"
+                    fontWeight="semibold"
+                  >
+                    Guardian(s)
+                  </Text>
+                  <FormControl>
+                    <HStack space={2} alignItems="center">
+                      <FormControl.Label
+                        _text={{
+                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
+                          fontSize: 'lg',
+                          fontWeight: 'thin',
+                        }}
+                      >
+                        First Name
+                      </FormControl.Label>
+
+                      <Input
+                        color={colors.black_var1}
+                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
+                        fontSize="lg"
+                        isReadOnly
+                        variant="unstyled"
+                        value={getPatientGuardian.data.guardian && getPatientGuardian.data.guardian.firstName 
+                          ? getPatientGuardian.data.guardian.firstName : 'Not Available'}
+                        w="100%"
+                      />
+                    </HStack>
+                  </FormControl>
+                  <FormControl>
+                    <HStack space={2} alignItems="center">
+                      <FormControl.Label
+                        _text={{
+                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
+                          fontSize: 'lg',
+                          fontWeight: 'thin',
+                        }}
+                      >
+                        Last Name
+                      </FormControl.Label>
+
+                      <Input
+                        color={colors.black_var1}
+                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
+                        fontSize="lg"
+                        isReadOnly
+                        variant="unstyled"
+                        value={getPatientGuardian.data.guardian && getPatientGuardian.data.guardian.lastName
+                          ? getPatientGuardian.data.guardian.lastName: 'Not Available'}
+                        w="100%"
+                      />
+                    </HStack>
+                  </FormControl>
+                  <FormControl>
+                    <HStack space={2} alignItems="center">
+                      <FormControl.Label
+                        _text={{
+                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
+                          fontSize: 'lg',
+                          fontWeight: 'thin',
+                        }}
+                      >
+                        NRIC
+                      </FormControl.Label>
+
+                      <Input
+                        color={colors.black_var1}
+                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
+                        fontSize="lg"
+                        isReadOnly
+                        variant="unstyled"
+                        value={getPatientGuardian.data.guardian && getPatientGuardian.data.guardian.nric
+                          ? getPatientGuardian.data.guardian.nric : 'Not Available'}
+                        w="100%"
+                      />
+                    </HStack>
+                  </FormControl>
+                  <FormControl>
+                    <HStack space={2} alignItems="center">
+                      <FormControl.Label
+                        _text={{
+                          fontFamily: `${Platform.OS === 'ios' ? 'Helvetica' : typography.android}`,
+                          fontSize: 'lg',
+                          fontWeight: 'thin',
+                        }}
+                      >
+                        Relationship
+                      </FormControl.Label>
+
+                      <Input
+                        color={colors.black_var1}
+                        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
+                        fontSize="lg"
+                        isReadOnly
+                        variant="unstyled"
+                        value={getPatientGuardian.data.guardian && getPatientGuardian.data.guardian.relationship
+                          ? getPatientGuardian.data.guardian.relationship: 'Not Available'
+                        }
+                        w="100%"
+                      />
+                    </HStack>
+                  </FormControl>
+                </Stack>
                 <Divider />
                 <PersonalSocialHistory socialHistory={getSocialHistory.data} />
               </Stack>
