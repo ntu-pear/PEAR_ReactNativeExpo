@@ -373,7 +373,12 @@ function PatientAddScreen() {
       if (page === 'patientInfo') {
         const newData = formData[page];
         // additional check to convert HomeNo and HandphoneNo to string
-        if (input === 'HomeNo' || input === 'HandphoneNo') {
+        if (
+          input === 'HomeNo' ||
+          input === 'HandphoneNo' ||
+          input === 'Address' ||
+          input === 'TempAddress'
+        ) {
           newData[input] = e.toString(); // convert to string
         } else if (input === 'IsChecked') {
           newData[input] = !formData.patientInfo.IsChecked; // opposite boolean value of IsChecked
@@ -426,9 +431,9 @@ function PatientAddScreen() {
           formData={formData}
           componentList={componentList}
           pickImage={pickImage}
-          show={show}
-          setShow={setShow}
-          errorMessage={errorMessage}
+          // show={show}
+          // setShow={setShow}
+          // errorMessage={errorMessage}
         />
       );
     case 2:

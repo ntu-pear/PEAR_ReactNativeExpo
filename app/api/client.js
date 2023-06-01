@@ -66,6 +66,7 @@ apiClient.addAsyncResponseTransform(async (response) => {
     response.status &&
     (response.status === 401 || response.status === 403)
   ) {
+    console.log('client.js: Renewing user tokens');
     const unformattedUserAccessToken = await authStorage.getToken(
       'userAuthToken',
     );
@@ -82,12 +83,13 @@ apiClient.addAsyncResponseTransform(async (response) => {
     const data = await apiClient.post(`${baseURL}${userRefreshToken}`, body);
     // if token refresh is unsuccessful
     if (!data.ok || !data.data.data.success) {
+      console.log('client.js: !data.ok || !data.data.data.success');
+      // console.log('\n!/data.data.success: ', !data.data.success, data.data.success);
+      console.log(data);
       // if refreshToken invalid, remove token
       // await authStorage.removeToken();
       // console.log('!/data.ok: ', !data.ok, data.ok);
-      // console.log('\n!/data.data.success: ', !data.data.success, data.data.success);
       // console.log('\naddAsyncResponseTransform: ');
-      // console.log(data);
       // // TODO: Implement logout() here.
       // navigation.navigate(routes.WELCOME);
       if (data.data.message) {
