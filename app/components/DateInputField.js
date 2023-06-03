@@ -1,10 +1,20 @@
+// Libs
 import React, { useState, useEffect } from 'react';
-import { Platform, StyleSheet, View, Text } from 'react-native';
+import {
+  Platform,
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+} from 'react-native';
 import { VStack } from 'native-base';
 import DateTimePicker from '@react-native-community/datetimepicker';
+
+// Configuration
 import typography from 'app/config/typography';
 import colors from 'app/config/colors';
-import { TouchableOpacity } from 'react-native';
+
+// Components
 import ErrorMessage from 'app/components/ErrorMessage';
 
 function DateInputField({
@@ -18,26 +28,29 @@ function DateInputField({
   onChildData,
 }) {
   const [show, setShow] = useState(false);
+
+  // This state is used to track if the component is in its first render
   const [isFirstRender, setIsFirstRender] = useState(true);
+
+  // This state is used to track the error state of this component via validation
   const [isError, setIsError] = useState({
     error: false,
     errorMsg: '',
   });
 
+  // Earliest year user can be born (150 years ago)
   const minimumDOB = new Date();
   minimumDOB.setFullYear(minimumDOB.getFullYear() - 150);
 
+  // Latest year user can be born (15 years ago)
   const maximumDOB = new Date();
   maximumDOB.setFullYear(maximumDOB.getFullYear() - 15);
 
-  const minimumDate = new Date();
-  minimumDate.setDate(minimumDate.getDate() - 30); // 30 days ago
-
-  const maximumDate = new Date();
-  maximumDate.setDate(maximumDate.getDate() + 30); // 30 days later
-
   const requiredIndicator = <Text style={styles.RequiredIndicator}> *</Text>;
 
+  // Validation function for user input:
+  // Error if:
+  // 1) required but empty
   const validation = () => {
     let message = '';
     if (isRequired && value.toDateString() <= 0) {
@@ -58,6 +71,7 @@ function DateInputField({
     validation();
   };
 
+  // Used to format the date to DD/MM/YYYY for display in the input field.
   const formatDate = (inputDate) => {
     let date, month, year;
 
@@ -74,6 +88,10 @@ function DateInputField({
     setShow(true);
   };
 
+  // This useEffect is used to track if the component is in its first render. This is mainly used to
+  // ensure that the submission blocking in the parent component is active (as it is first rendered, user will not
+  // likely have filled anything). This also ensures that since there is no input yet, the component error message
+  // does not show until the user focuses and violates the validation with their input.
   useEffect(() => {
     onChildData ? onChildData(isFirstRender || isError.error) : null;
     setIsFirstRender(false);
@@ -85,6 +103,8 @@ function DateInputField({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // This is used to update the parent component that there is a validation error
+  // validation passed via the onChildData prop.
   useEffect(() => {
     if (!isFirstRender) {
       onChildData ? onChildData(isError.error) : null;
@@ -110,19 +130,14 @@ function DateInputField({
             display="default"
             mode="date"
             onChange={onChangeData}
+            // if the selection mode is set to Date of Birth (DOB), fixed max and min years will be specified
+            // else, the minimumInputDate and maximumInputDate will be used.
+            // if there is no minimumInputDate or maximumInputDate specified in the prop, default DateTimePicker min and max dates will be used.
             minimumDate={
-              selectionMode === 'DOB'
-                ? minimumInputDate
-                  ? minimumInputDate
-                  : minimumDOB
-                : minimumDate
+              selectionMode === 'DOB' ? minimumDOB : minimumInputDate
             }
             maximumDate={
-              selectionMode === 'DOB'
-                ? maximumInputDate
-                  ? maximumInputDate
-                  : maximumDOB
-                : maximumDate
+              selectionMode === 'DOB' ? maximumDOB : maximumInputDate
             }
           />
         )}
@@ -178,6 +193,7 @@ const styles = StyleSheet.create({
   },
   RequiredIndicator: {
     color: colors.red,
+    fontSize: 18,
   },
 });
 

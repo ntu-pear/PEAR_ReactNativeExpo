@@ -1,8 +1,13 @@
+// Libs
 import React, { useState, useEffect } from 'react';
 import { Platform, StyleSheet, View, Text } from 'react-native';
 import { VStack, Select } from 'native-base';
+
+// Configurations
 import typography from 'app/config/typography';
 import colors from 'app/config/colors';
+
+// Components
 import ErrorMessage from 'app/components/ErrorMessage';
 
 function SelectionInputField({
@@ -15,6 +20,7 @@ function SelectionInputField({
   onChildData,
 }) {
   const requiredIndicator = <Text style={styles.RequiredIndicator}> *</Text>;
+  // This state is used to track if the component is in its first render.
   const [isFirstRender, setIsFirstRender] = useState(true);
   const [isError, setIsError] = useState({
     error: false,
@@ -29,6 +35,10 @@ function SelectionInputField({
     onDataChange(selected);
   };
 
+  // This useEffect is used to track if the component is in its first render. This is mainly used to
+  // ensure that the submission blocking in the parent component is active (as it is first rendered, user will not
+  // likely have filled anything). This also ensures that since there is no input yet, the component error message
+  // does not show until the user focuses and violates the validation with their input.
   useEffect(() => {
     onChildData ? onChildData(isFirstRender || isError.error) : null;
     setIsFirstRender(false);
@@ -100,6 +110,7 @@ const styles = StyleSheet.create({
   },
   RequiredIndicator: {
     color: colors.red,
+    fontSize: 18,
   },
 });
 

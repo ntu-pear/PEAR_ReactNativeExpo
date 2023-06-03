@@ -1,8 +1,13 @@
+// Libs
 import React, { useState, useEffect } from 'react';
 import { Platform, StyleSheet, View, Text } from 'react-native';
 import { VStack, Input } from 'native-base';
+
+// Configurations
 import typography from 'app/config/typography';
 import colors from 'app/config/colors';
+
+// Components
 import ErrorMessage from 'app/components/ErrorMessage';
 
 function BaseInputField({
@@ -19,8 +24,13 @@ function BaseInputField({
   onChildData,
   setErrorState,
 }) {
-  const [isFirstRender, setIsFirstRender] = useState(true);
   const requiredIndicator = <Text style={styles.RequiredIndicator}> *</Text>;
+
+  // This state and subsequent useEffect are used to track if the component is in its first render. This is mainly used to
+  // ensure that the submission blocking in the parent component is active (as it is first rendered, user will not
+  // likely have filled anything). This also ensures that since there will be no input, the component error message
+  // does not show until the user focuses and violates the validation with their input.
+  const [isFirstRender, setIsFirstRender] = useState(true);
 
   useEffect(() => {
     onChildData ? onChildData(isFirstRender || isError.error) : null;
@@ -32,6 +42,8 @@ function BaseInputField({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // This is used to update the parent component that there is a validation error
+  // validation passed via the onChildData prop.
   useEffect(() => {
     if (!isFirstRender) {
       onChildData ? onChildData(isError.error) : null;

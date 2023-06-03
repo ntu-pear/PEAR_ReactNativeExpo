@@ -1,30 +1,23 @@
+// Base
 import React, { useState, useCallback, useEffect } from 'react';
+import { StyleSheet, Platform } from 'react-native';
 import {
   Box,
-  // Input,
-  // FormControl,
   Text,
   Center,
   Image,
-  // Radio,
-  // HStack,
-  // Select,
   Pressable,
   FlatList,
-  // ScrollView,
-  // Checkbox,
   VStack,
 } from 'native-base';
-import { StyleSheet, Platform } from 'react-native';
 
-import AddPatientProgress from 'app/components/AddPatientProgress';
-import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
-// import DatePickerComponent from 'app/components/DatePickerComponent';
-// import ErrorMessage from 'app/components/ErrorMessage';
-// import CustomFormControl from 'app/components/CustomFormControl';
-
+// Configurations
 import colors from 'app/config/colors';
 import typography from 'app/config/typography';
+
+// Components
+import AddPatientProgress from 'app/components/AddPatientProgress';
+import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import NameInputField from 'app/components/NameInputField';
 import NRICInputField from 'app/components/NRICInputField';
 import AddressInputField from 'app/components/AddressInputField';
@@ -35,21 +28,17 @@ import RadioButtonInput from 'app/components/RadioButtonsInput';
 import SingleOptionCheckBox from 'app/components/SingleOptionCheckBox';
 
 function PatientAddPatientInfoScreen(props) {
-  const {
-    nextQuestionHandler,
-    handleFormData,
-    formData,
-    pickImage,
-    // show,
-    // setShow,
-    // errorMessage,
-  } = props;
+  const { nextQuestionHandler, handleFormData, formData, pickImage } = props;
 
-  // main page error state = true in errorchecking function if any fields
-  // have errors.
+  const page = 'patientInfo';
+  const patient = formData.patientInfo;
+
+  // Screen error state: This = true when the child components report error(input fields)
+  // Enables use of dynamic rendering of components when the page error = true/false.
   const [isInputErrors, setIsInputErrors] = useState(false);
 
-  // input error states
+  // Input error states (Child components)
+  // This records the error states of each child component (ones that require tracking).
   const [isFirstNameError, setIsFirstNameError] = useState(false);
   const [isLastNameError, setIsLastNameError] = useState(false);
   const [isPrefNameError, setIsPrefNameError] = useState(false);
@@ -65,26 +54,13 @@ function PatientAddPatientInfoScreen(props) {
   const [isGenderError, setIsGenderError] = useState(false);
   const [isRespiteError, setIsRespiteError] = useState(false);
 
-  const page = 'patientInfo';
-  const patient = formData.patientInfo;
+  // Maximum and minimum valid joining dates
+  const minimumJoiningDate = new Date();
+  minimumJoiningDate.setDate(minimumJoiningDate.getDate() - 30); // 30 days ago
+  const maximumJoiningDate = new Date();
+  maximumJoiningDate.setDate(maximumJoiningDate.getDate() + 30); // 30 days later
 
-  // constant values for languages
-  // const listOfLanguages = [
-  //   { itemID: 1, value: 'Cantonese' },
-  //   { itemID: 2, value: 'English' },
-  //   { itemID: 3, value: 'Hainanese' },
-  //   { itemID: 4, value: 'Hakka' },
-  //   { itemID: 5, value: 'Hindi' },
-  //   { itemID: 6, value: 'Hokkien' },
-  //   { itemID: 7, value: 'Malay' },
-  //   { itemID: 8, value: 'Mandarin' },
-  //   { itemID: 9, value: 'Tamil' },
-  //   { itemID: 10, value: 'Teochew' },
-  //   { itemID: 11, value: 'Japanese' },
-  //   { itemID: 12, value: 'Spanish' },
-  //   { itemID: 13, value: 'Korean' },
-  // ];
-
+  // Use for the SelectionInputField dataArray prop -> follow format of "label" and "value"
   const listOfLanguages = [
     { label: 'Cantonese', value: 1 },
     { label: 'English', value: 2 },
@@ -101,17 +77,19 @@ function PatientAddPatientInfoScreen(props) {
     { label: 'Korean', value: 13 },
   ];
 
+  // use for the RadioButtonInput dataArray prop -> follow format of "label" and "value"
   const listOfGenders = [
     { label: 'Male', value: 'M' },
     { label: 'Female', value: 'F' },
   ];
-
   const listRespiteCare = [
     { label: 'Yes', value: true },
     { label: 'No', value: false },
   ];
 
-  // Callback functions for the Input field children
+  // Callback functions for error state reporting for the child components
+  // Pass these functions into the onChildData prop of the child components. This will allow for
+  // the parent component to track the error states of the child.
   const handleFirstNameState = useCallback(
     (state) => {
       setIsFirstNameError(state);
@@ -225,7 +203,7 @@ function PatientAddPatientInfoScreen(props) {
     [isRespiteError],
   );
 
-  // This use effect enables the page to show correct error checking
+  // This useEffect enables the page to show correct error checking
   // the main isInputErrors is responsible for the error state of the screen
   // this state will be true whenever any child input components are in error state.
   useEffect(() => {
@@ -430,6 +408,8 @@ function PatientAddPatientInfoScreen(props) {
                     value={patient.StartDate}
                     handleFormData={handleFormData(page, 'StartDate')}
                     onChildData={handleJoiningState}
+                    minimumInputDate={minimumJoiningDate}
+                    maximumInputDate={maximumJoiningDate}
                   />
 
                   <SingleOptionCheckBox
@@ -441,6 +421,7 @@ function PatientAddPatientInfoScreen(props) {
                     }
                   />
 
+                  {/* Rendered only when the specify date of leaving checkbox is selected. */}
                   {formData.patientInfo.IsChecked ? (
                     <DateInputField
                       title={'Date of Leaving (Optional)'}
@@ -449,299 +430,11 @@ function PatientAddPatientInfoScreen(props) {
                       onChildData={handleLeavingState}
                     />
                   ) : null}
-
-                  {/* <CustomFormControl
-                    isRequired
-                    isInvalid={'FirstName' in errorMessage}
-                    title="First Name"
-                    value={patient.FirstName}
-                    onChangeText={handleFormData(page, 'FirstName')}
-                    placeholder="First Name"
-                    ErrorMessage={errorMessage.FirstName}
-                  /> */}
-
-                  {/* <CustomFormControl
-                    isRequired
-                    isInvalid={'LastName' in errorMessage}
-                    title="Last Name"
-                    value={patient.LastName}
-                    onChangeText={handleFormData(page, 'LastName')}
-                    placeholder="Last Name"
-                    ErrorMessage={errorMessage.LastName}
-                  /> */}
-
-                  {/* <CustomFormControl
-                    isRequired
-                    isInvalid={'PreferredName' in errorMessage}
-                    title="Preferred Name"
-                    value={patient.PreferredName}
-                    onChangeText={handleFormData(page, 'PreferredName')}
-                    placeholder="Preferred Name"
-                    ErrorMessage={errorMessage.PreferredName}
-                  /> */}
-
-                  {/* <FormControl w="80%" mt="5" isRequired>
-                    <FormControl.Label _text={styles.text}>
-                      Preferred Language
-                    </FormControl.Label>
-                    <Select
-                      accessibilityLabel="Select Language"
-                      borderRadius="25"
-                      fontFamily={
-                        Platform.OS === 'ios'
-                          ? typography.ios
-                          : typography.android
-                      }
-                      height="50"
-                      minWidth="full"
-                      minHeight="3%"
-                      placeholder="Select Language"
-                      placeholderTextColor={colors.medium}
-                      size="18"
-                      selectedValue={patient.PreferredLanguageListID}
-                      onValueChange={handleFormData(
-                        page,
-                        'PreferredLanguageListID',
-                      )}
-                    >
-                      {listOfLanguages.map((item) => (
-                        <Select.Item
-                          key={item}
-                          label={item.value}
-                          value={item.list_LanguageID}
-                        />
-                      ))}
-                    </Select>
-                  </FormControl>
-                  <Box>
-                    <ErrorMessage
-                      visible={'PreferredLanguage' in errorMessage}
-                      message={errorMessage.PreferredLanguage}
-                    />
-                  </Box> */}
-
-                  {/* <CustomFormControl
-                    isRequired
-                    isInvalid={'NRIC' in errorMessage}
-                    title="NRIC"
-                    value={patient.NRIC}
-                    onChangeText={handleFormData(page, 'NRIC')}
-                    placeholder="NRIC"
-                    ErrorMessage={errorMessage.NRIC}
-                    maxLength={9}
-                  /> */}
-
-                  {/* <FormControl
-                    w="80%"
-                    mt="5"
-                    isRequired
-                    isInvalid={'Gender' in errorMessage}
-                  >
-                    <FormControl.Label _text={styles.text}>
-                      Gender
-                    </FormControl.Label>
-                    <Radio.Group
-                      value={patient.Gender}
-                      onChange={handleFormData(page, 'Gender')}
-                    >
-                      <HStack space={4}>
-                        <Radio
-                          value="M"
-                          size="sm"
-                          _icon={{ color: colors.green }}
-                          _checked={{
-                            borderColor: colors.green,
-                          }}
-                        >
-                          Male
-                        </Radio>
-                        <Radio
-                          value="F"
-                          size="sm"
-                          _icon={{ color: colors.green }}
-                          _checked={{
-                            borderColor: colors.green,
-                          }}
-                        >
-                          Female
-                        </Radio>
-                      </HStack>
-                    </Radio.Group>
-
-                    <FormControl.ErrorMessage>
-                      {errorMessage.Gender}
-                    </FormControl.ErrorMessage>
-                  </FormControl> */}
-
-                  {/* Reference: https://github.com/react-native-datetimepicker/datetimepicker
-                TODO: Align to the left*/}
-                  {/* <FormControl w="80%" mt="5" isRequired>
-                    <DatePickerComponent
-                      label={'Date of Birth'}
-                      patient={patient}
-                      value={patient.DOB}
-                      page={page}
-                      field="DOB"
-                      handleFormData={handleFormData}
-                      show={show}
-                      setShow={setShow}
-                    />
-                    <Box>
-                      <ErrorMessage
-                        visible={'DOB' in errorMessage}
-                        message={errorMessage.DOB}
-                      />
-                    </Box>
-                  </FormControl> */}
-
-                  {/* <CustomFormControl
-                    isRequired
-                    isInvalid={'Address' in errorMessage}
-                    title="Address"
-                    value={patient.Address}
-                    onChangeText={handleFormData(page, 'Address')}
-                    placeholder="Address"
-                    ErrorMessage={errorMessage.Address}
-                  /> */}
-
-                  {/* <CustomFormControl
-                    isInvalid={'TempAddress' in errorMessage}
-                    title="Temporary Address"
-                    value={patient.TempAddress}
-                    onChangeText={handleFormData(page, 'TempAddress')}
-                    placeholder="Temporary Address (Optional)"
-                    ErrorMessage={errorMessage.TempAddress}
-                  /> */}
-
-                  {/* <CustomFormControl
-                    isInvalid={'HomeNo' in errorMessage}
-                    title="Home Telephone No."
-                    value={patient.HomeNo}
-                    onChangeText={handleFormData(page, 'HomeNo')}
-                    placeholder="Home Telephone No. (Optional)"
-                    ErrorMessage={errorMessage.HomeNo}
-                    keyboardType="numeric"
-                    maxLength={8}
-                  /> */}
-
-                  {/* <CustomFormControl
-                    isInvalid={'HandphoneNo' in errorMessage}
-                    title="Handphone No."
-                    value={patient.HandphoneNo}
-                    onChangeText={handleFormData(page, 'HandphoneNo')}
-                    placeholder="Handphone No. (Optional)"
-                    ErrorMessage={errorMessage.HandphoneNo}
-                    keyboardType="numeric"
-                    maxLength={8}
-                  /> */}
-
-                  {/* <FormControl w="80%" mt="5" isRequired>
-                    <DatePickerComponent
-                      label={'Date of Joining'}
-                      patient={patient}
-                      value={patient.StartDate}
-                      page={page}
-                      field="StartDate"
-                      handleFormData={handleFormData}
-                      show={show}
-                      setShow={setShow}
-                    />
-                    <Box>
-                      <ErrorMessage
-                        visible={'StartDate' in errorMessage}
-                        message={errorMessage.StartDate}
-                      />
-                    </Box>
-                  </FormControl> */}
-
-                  {/* <FormControl
-                    w="80%"
-                    mt="5"
-                    isRequired
-                    isInvalid={'IsRespiteCare' in errorMessage}
-                  >
-                  <FormControl.Label _text={styles.text}>
-                      Respite Care
-                    </FormControl.Label>
-                    <Radio.Group
-                      value={patient.IsRespiteCare}
-                      onChange={handleFormData(page, 'IsRespiteCare')}
-                    >
-                      <HStack space={6}>
-                        <Radio
-                          value={true}
-                          size="sm"
-                          _icon={{ color: colors.green }}
-                          _checked={{
-                            borderColor: colors.green,
-                          }}
-                        >
-                          Yes
-                        </Radio>
-                        <Radio
-                          value={false}
-                          size="sm"
-                          _icon={{ color: colors.green }}
-                          _checked={{
-                            borderColor: colors.green,
-                          }}
-                        >
-                          No
-                        </Radio>
-                      </HStack>
-                    </Radio.Group>
-
-                    <FormControl.ErrorMessage>
-                      {errorMessage.IsRespiteCare}
-                    </FormControl.ErrorMessage>
-                  </FormControl> */}
-
-                  {/* <FormControl w="80%" mt="5">
-                    <HStack justifyContent="space-between" alignItems="center">
-                      <FormControl.Label _text={styles.text}>
-                        Check this box to specify Date of Leaving
-                      </FormControl.Label>
-                      <Checkbox
-                        isChecked={patient.IsChecked}
-                        value={patient.IsChecked}
-                        onChange={handleFormData(page, 'IsChecked')}
-                        aria-label=" Do you wish to key in the Date of Leaving?"
-                        _checked={{ bgColor: colors.green }}
-                      />
-                    </HStack>
-                  </FormControl> */}
-
-                  {/* <FormControl
-                    w="80%"
-                    mt="5"
-                    isInvalid={'EndDate' in errorMessage}
-                  >
-                    <DatePickerComponent
-                      label={'Date of Leaving (Optional)'}
-                      patient={patient}
-                      value={patient.EndDate}
-                      page={page}
-                      field="EndDate"
-                      handleFormData={handleFormData}
-                      show={show}
-                      setShow={setShow}
-                      isChecked={patient.IsChecked}
-                    />
-                  </FormControl>
-
-                  <Box>
-                    <ErrorMessage
-                      visible={'EndDate' in errorMessage}
-                      message={
-                        Platform.OS === 'ios'
-                          ? 'Please select another Date of Leaving.'
-                          : 'Please select a Date of Leaving.'
-                      }
-                    />
-                  </Box> */}
                 </Center>
               </VStack>
             </Box>
+
+            {/* This form of submission blocking due to errors is subject to change*/}
             {isInputErrors ? (
               <Text style={[styles.text, styles.errorText]}>
                 Ensure all filled fields are correct before proceeding.

@@ -1,4 +1,7 @@
-import React, { useState, useEffect } from 'react';
+// Libs
+import React, { useState } from 'react';
+
+// Components
 import BaseInputField from 'app/components/BaseInputField';
 
 function AddressInputField({
@@ -12,11 +15,15 @@ function AddressInputField({
   maxLength,
   onChildData,
 }) {
+  // This state is used to track the error state of this component via validation
   const [isError, setIsError] = useState({
     error: false,
     errorMsg: '',
   });
 
+  // Validation function for user input:
+  // Error if:
+  // 1) required but empty
   const validation = () => {
     let message = '';
     if (isRequired && value <= 0) {
@@ -49,6 +56,7 @@ function AddressInputField({
   );
 }
 
+// This settings will be used if the props are not specified in the parent component.
 AddressInputField.defaultProps = {
   isRequired: false,
   keyboardType: 'default',

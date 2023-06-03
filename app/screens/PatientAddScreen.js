@@ -376,6 +376,9 @@ function PatientAddScreen() {
         if (
           input === 'HomeNo' ||
           input === 'HandphoneNo' ||
+          // BUGFIX: Address not saved properly when number specifed first -- Justin
+          // soln: Address is included: fixes a bug where if number is specified first address will not be captured properly
+          // i.e: '123 abc lane' -- saved as --> '123'
           input === 'Address' ||
           input === 'TempAddress'
         ) {
@@ -431,6 +434,8 @@ function PatientAddScreen() {
           formData={formData}
           componentList={componentList}
           pickImage={pickImage}
+
+          // Props no longer needed - Justin
           // show={show}
           // setShow={setShow}
           // errorMessage={errorMessage}

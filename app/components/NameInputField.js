@@ -1,4 +1,7 @@
-import React, { useState, useEffect } from 'react';
+// Libs
+import React, { useState } from 'react';
+
+// Components
 import BaseInputField from 'app/components/BaseInputField';
 
 function NameInputField({
@@ -12,11 +15,16 @@ function NameInputField({
   maxLength,
   onChildData,
 }) {
+  // This state is used to track the error state of this component via validation
   const [isError, setIsError] = useState({
     error: false,
     errorMsg: '',
   });
 
+  // Validation function for user input:
+  // Error if:
+  // 1) required but empty
+  // 2) there are number and/or symbols within the input
   const validation = () => {
     let message = '';
     if (isRequired && value <= 0) {

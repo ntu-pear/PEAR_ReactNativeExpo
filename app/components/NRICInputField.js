@@ -1,4 +1,7 @@
-import React, { useState, useEffect } from 'react';
+// Libs
+import React, { useState } from 'react';
+
+// Components
 import BaseInputField from 'app/components/BaseInputField';
 
 function NRICInputField({
@@ -12,11 +15,17 @@ function NRICInputField({
   maxLength,
   onChildData,
 }) {
+  // This state is used to track the error state of this component via validation
   const [isError, setIsError] = useState({
     error: false,
     errorMsg: '',
   });
 
+  // Validation function for user input:
+  // Error if:
+  // 1) Required but empty
+  // 2) 1st character contains characters other than "S", "T", "F", "G" or "M"
+  // 3) More than 9 total characters
   const validation = () => {
     let message;
     if (isRequired && value <= 0) {

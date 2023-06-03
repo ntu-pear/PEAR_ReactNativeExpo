@@ -1,4 +1,7 @@
-import React, { useState, useEffect } from 'react';
+// Libs
+import React, { useState } from 'react';
+
+// Components
 import BaseInputField from 'app/components/BaseInputField';
 
 function TelephoneInputField({
@@ -13,13 +16,18 @@ function TelephoneInputField({
   maxLength,
   onChildData,
 }) {
+  // This state is used to track the error state of this component via validation
   const [isError, setIsError] = useState({
     error: false,
     errorMsg: '',
   });
 
-  const [isFirstRender, setIsFirstRender] = useState(true);
-
+  // Validation function for user input:
+  // Error if:
+  // 1) Required but empty
+  // 2) if mobile, 1st number != 8 or 9
+  // 3) if home, 1st number != 6
+  // 3) More than 8 total characters
   const validation = () => {
     let message = '';
     if (isRequired && value.length <= 0) {
@@ -44,23 +52,6 @@ function TelephoneInputField({
     });
   };
 
-  // useEffect(() => {
-  //   onChildData ? onChildData(isFirstRender || isError.error) : null;
-  //   setIsFirstRender(false);
-  //   setIsError({
-  //     ...isError,
-  //     error: isRequired && value.length === 0,
-  //   });
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
-
-  // useEffect(() => {
-  //   if (!isFirstRender) {
-  //     onChildData ? onChildData(isError.error) : null;
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [isError, onChildData]);
-
   return (
     <BaseInputField
       isRequired={isRequired}
@@ -81,6 +72,7 @@ function TelephoneInputField({
 
 TelephoneInputField.defaultProps = {
   isRequired: false,
+  numberType: 'mobile',
 };
 
 export default TelephoneInputField;
