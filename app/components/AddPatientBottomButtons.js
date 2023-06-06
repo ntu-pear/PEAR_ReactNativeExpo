@@ -22,6 +22,7 @@ function AddPatientBottomButtons({
   formData = null,
   max = null,
   validateStep = null,
+  isNextDisabled,
 }) {
   const navigation = useNavigation();
 
@@ -151,7 +152,10 @@ function AddPatientBottomButtons({
           leftIcon={
             <Icon as={<MaterialIcons name="chevron-right" />} color="white" />
           }
-          isDisabled={nextQuestionHandler == null ? true : false}
+          // Disable the buttons when there is no next page or when page has errors -- Justin
+          isDisabled={
+            nextQuestionHandler == null || isNextDisabled ? true : false
+          }
           onPress={
             nextQuestionHandler == null
               ? true

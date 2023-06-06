@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
-import { Box, SectionList, VStack, Center, View } from 'native-base';
-// import { SectionList } from 'react-native';
+// Lib
+import React, { useState, useCallback } from 'react';
+import { SectionList, Center, View } from 'native-base';
 
-import { MaterialIcons } from '@expo/vector-icons';
-import colors from 'app/config/colors';
-
+// Components
 import AddPatientGuardian from 'app/components/AddPatientGuardian';
 import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import AddPatientProgress from 'app/components/AddPatientProgress';
@@ -24,8 +22,26 @@ function PatientAddGuardianScreen(props) {
   const [guardianInfoDisplay, setGuardianInfoDisplay] = useState(
     componentList.guardian,
   );
+  const [errorStates, setErrorStates] = useState([true]);
+
+  const handleChildError = useCallback(
+    (childId, isError) => {
+      // console.log('callback', isError, childId);
+      setErrorStates((prevErrorStates) => {
+        const updatedErrorStates = [...prevErrorStates];
+        updatedErrorStates[childId] = isError;
+        return updatedErrorStates;
+      });
+      // console.log(errorStates);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [errorStates],
+  );
+
+  let isNextDisabled = errorStates.includes(true);
 
   const addNewGuardianComponent = () => {
+    setErrorStates((prev) => [...prev, true]);
     setGuardianInfoDisplay([...guardianInfoDisplay, {}]);
     concatFormData('guardianInfo', {
       FirstName: '',
@@ -37,14 +53,25 @@ function PatientAddGuardianScreen(props) {
       RelationshipID: 1,
       IsActive: true,
     });
+    // console.log(errorStates);
+    // console.log('add, button: ', isButtonDisabled);
   };
 
   const removeGuardianComponent = (index) => {
+    const errorList = [...errorStates];
+    let newErrorList = errorList.slice(0, -1);
+    setErrorStates(newErrorList);
+
+    // console.log('new error list: ', newErrorList);
     const list = [...guardianInfoDisplay];
     list.splice(index, 1);
     setGuardianInfoDisplay(list);
     removeFormData('guardianInfo');
+
+    // console.log('removing', errorStates);
+    // console.log('rem, button: ', isNextDisabled);
   };
+
   return (
     <>
       <Center>
@@ -60,7 +87,7 @@ function PatientAddGuardianScreen(props) {
             title={index + 1}
             formData={formData}
             handleFormData={handleFormData}
-            errorMessage={errorMessage}
+            onError={handleChildError}
           />
         )}
         ListFooterComponent={() => (
@@ -76,6 +103,7 @@ function PatientAddGuardianScreen(props) {
               addComponent={addNewGuardianComponent}
               removeComponent={removeGuardianComponent}
               max={2}
+              isNextDisabled={isNextDisabled}
             />
           </View>
         )}

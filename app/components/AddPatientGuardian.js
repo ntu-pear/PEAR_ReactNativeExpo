@@ -1,52 +1,142 @@
-import React from 'react';
+// Libs
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   Box,
-  Input,
-  FormControl,
+  // Input,
+  // FormControl,
   Text,
-  Select,
+  // Select,
   Divider,
   VStack,
   Center,
-  Checkbox,
-  HStack,
+  // Checkbox,
+  // HStack,
 } from 'native-base';
 import { StyleSheet, Platform } from 'react-native';
 
-import ErrorMessage from 'app/components/ErrorMessage';
-import CustomFormControl from 'app/components/CustomFormControl';
-
+// Configurations
 import colors from 'app/config/colors';
 import typography from 'app/config/typography';
+
+// Components
+import NameInputField from 'app/components/NameInputField';
+import NRICInputField from 'app/components/NRICInputField';
+import SelectionInputField from 'app/components/SelectionInputField';
+import TelephoneInputField from 'app/components/TelephoneInputField';
+import SingleOptionCheckBox from 'app/components/SingleOptionCheckBox';
+import EmailInputField from 'app/components/EmailInputField';
+// import ErrorMessage from 'app/components/ErrorMessage';
+// import CustomFormControl from 'app/components/CustomFormControl';
 
 function AddPatientGuardian({
   i,
   title,
   formData,
   handleFormData,
-  errorMessage,
+  // errorMessage,
+  onError,
 }) {
   const page = 'guardianInfo';
   const guardian = formData.guardianInfo[i]; //guardianInfo[0].FirstName
 
-  const isOptional = () => {
-    return guardian.IsChecked ? '' : '(Optional)';
-  };
+  const [isInputErrors, setIsInputErrors] = useState(false);
+
+  const [isFirstNameError, setIsFirstNameError] = useState(false);
+  const [isLastNameError, setIsLastNameError] = useState(false);
+  const [isNRICError, setIsNRICError] = useState(false);
+  const [isRelationError, setIsRelationError] = useState(false);
+  const [isPhoneError, setIsPhoneError] = useState(false);
+  const [isEmailError, setIsEmailError] = useState(false);
+
+  const handleFirstNameState = useCallback(
+    (state) => {
+      setIsFirstNameError(state);
+      // console.log('FirstName: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isFirstNameError],
+  );
+  const handleLastNameState = useCallback(
+    (state) => {
+      setIsLastNameError(state);
+      // console.log('LastName: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isLastNameError],
+  );
+  const handleNRICState = useCallback(
+    (state) => {
+      setIsNRICError(state);
+      // console.log('NRIC: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isNRICError],
+  );
+  const handleRelationState = useCallback(
+    (state) => {
+      setIsRelationError(state);
+      // console.log('Relation: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isRelationError],
+  );
+  const handlePhoneState = useCallback(
+    (state) => {
+      setIsPhoneError(state);
+      // console.log('Phone: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isPhoneError],
+  );
+  const handleEmailState = useCallback(
+    (state) => {
+      setIsEmailError(state);
+      // console.log('Email: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isEmailError],
+  );
+
+  // const isOptional = () => {
+  //   return guardian.IsChecked ? '' : '(Optional)';
+  // };
+
+  useEffect(() => {
+    setIsInputErrors(
+      isFirstNameError ||
+        isLastNameError ||
+        isNRICError ||
+        isPhoneError ||
+        isRelationError ||
+        isEmailError,
+    );
+    console.log('isInputErrors', isInputErrors);
+    onError(i, isInputErrors);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    isFirstNameError,
+    isLastNameError,
+    isNRICError,
+    isPhoneError,
+    isRelationError,
+    isEmailError,
+    isInputErrors,
+  ]);
 
   // constant values for relationships
   const listOfRelationships = [
-    { list_RelationshipID: 1, value: 'Husband' },
-    { list_RelationshipID: 2, value: 'Wife' },
-    { list_RelationshipID: 3, value: 'Child' },
-    { list_RelationshipID: 4, value: 'Parent' },
-    { list_RelationshipID: 5, value: 'Sibling' },
-    { list_RelationshipID: 6, value: 'Grandchild' },
-    { list_RelationshipID: 7, value: 'Friend' },
-    { list_RelationshipID: 8, value: 'Nephew' },
-    { list_RelationshipID: 9, value: 'Niece' },
-    { list_RelationshipID: 10, value: 'Aunt' },
-    { list_RelationshipID: 11, value: 'Uncle' },
-    { list_RelationshipID: 12, value: 'Grandparent' },
+    { value: 1, label: 'Husband' },
+    { value: 2, label: 'Wife' },
+    { value: 3, label: 'Child' },
+    { value: 4, label: 'Parent' },
+    { value: 5, label: 'Sibling' },
+    { value: 6, label: 'Grandchild' },
+    { value: 7, label: 'Friend' },
+    { value: 8, label: 'Nephew' },
+    { value: 9, label: 'Niece' },
+    { value: 10, label: 'Aunt' },
+    { value: 11, label: 'Uncle' },
+    { value: 12, label: 'Grandparent' },
   ];
 
   return (
@@ -64,110 +154,65 @@ function AddPatientGuardian({
             Guardian Information {title}
           </Text>
 
-          <CustomFormControl
+          <NameInputField
             isRequired
-            isInvalid={[`[${i}].FirstName`] in errorMessage}
-            title="Guardian First Name"
+            title={'Guardian First Name'}
             value={guardian.FirstName}
             onChangeText={handleFormData(page, 'FirstName', i)}
-            placeholder="Guardian First Name"
-            ErrorMessage={errorMessage[`[${i}].FirstName`]}
+            onChildData={handleFirstNameState}
           />
 
-          <CustomFormControl
+          <NameInputField
             isRequired
-            isInvalid={[`[${i}].LastName`] in errorMessage}
-            title="Guardian Last Name"
+            title={'Guardian Last Name'}
             value={guardian.LastName}
             onChangeText={handleFormData(page, 'LastName', i)}
-            placeholder="Guardian Last Name"
-            ErrorMessage={errorMessage[`[${i}].LastName`]}
+            onChildData={handleLastNameState}
           />
 
-          <CustomFormControl
+          <NRICInputField
             isRequired
-            isInvalid={[`[${i}].NRIC`] in errorMessage}
-            title="Guardian NRIC"
+            title={'Guardian NRIC'}
             value={guardian.NRIC}
             onChangeText={handleFormData(page, 'NRIC', i)}
-            placeholder="Guardian NRIC"
-            ErrorMessage={errorMessage[`[${i}].NRIC`]}
+            onChildData={handleNRICState}
             maxLength={9}
           />
 
-          <FormControl w="80%" mt="5" isRequired>
-            <FormControl.Label _text={styles.text}>
-              Guardian is Patient's
-            </FormControl.Label>
-            <Select
-              accessibilityLabel="Select Relationship"
-              borderRadius="25"
-              fontFamily={
-                Platform.OS === 'ios' ? typography.ios : typography.android
-              }
-              height="50"
-              minWidth="full"
-              minHeight="3%"
-              placeholderTextColor={colors.medium}
-              size="18"
-              placeholder="Select Relationship"
-              selectedValue={guardian.RelationshipID}
-              onValueChange={handleFormData(page, 'RelationshipID', i)}
-            >
-              {listOfRelationships.map((item) => (
-                <Select.Item
-                  key={item}
-                  label={item.value}
-                  value={item.list_RelationshipID}
-                />
-              ))}
-            </Select>
-          </FormControl>
-          <Box>
-            <ErrorMessage
-              visible={[`[${i}].RelationshipID`] in errorMessage}
-              message={errorMessage[`[${i}].RelationshipID`]}
-            />
-          </Box>
-
-          <CustomFormControl
+          <SelectionInputField
             isRequired
-            isInvalid={[`[${i}].ContactNo`] in errorMessage}
-            title="Guardian's Handphone No."
-            value={guardian.ContactNo}
-            onChangeText={handleFormData(page, 'ContactNo', i)}
-            placeholder="Guardian's Handphone Number"
-            ErrorMessage={errorMessage[`[${i}].ContactNo`]}
-            maxLength={8}
-            keyboardType="numeric"
+            title={'Relationship'}
+            placeholderText={'Select Relationship'}
+            onDataChange={handleFormData(page, 'RelationshipID', i)}
+            value={guardian.RelationshipID}
+            dataArray={listOfRelationships}
+            onChildData={handleRelationState}
           />
 
-          <FormControl w="80%" mt="5">
-            <HStack justifyContent="space-between" alignItems="center">
-              <Box w="80%">
-                <FormControl.Label _text={styles.text}>
-                  Check this box to specify Guardian wants to Log In
-                </FormControl.Label>
-              </Box>
+          <TelephoneInputField
+            isRequired
+            title={"Guardian's Handphone No."}
+            value={guardian.ContactNo}
+            onChangeText={handleFormData(page, 'ContactNo', i)}
+            onChildData={handlePhoneState}
+            maxLength={8}
+          />
 
-              <Checkbox
-                isChecked={guardian.IsChecked}
-                value={guardian.IsChecked}
-                onChange={handleFormData(page, 'IsChecked', i)}
-                aria-label=" Do you wish to key in the Date of Leaving?"
-                _checked={{ bgColor: colors.green }}
-              />
-            </HStack>
-          </FormControl>
+          <SingleOptionCheckBox
+            title={'Check this box to specify Guardian wants to log in'}
+            value={guardian.IsChecked}
+            onChangeData={handleFormData(page, 'IsChecked', i)}
+            accessibilityText={
+              'Check this box to specify Guardian wants to log in'
+            }
+          />
 
-          <CustomFormControl
-            isRequired={isOptional() == '(Optional)' ? false : true}
-            isInvalid={[`[${i}].Email`] in errorMessage}
+          <EmailInputField
+            isRequired={guardian.IsChecked}
             title={'Guardian Email'}
             value={guardian.Email}
             onChangeText={handleFormData(page, 'Email', i)}
-            placeholder={`Guardian Email ${isOptional()}`}
-            ErrorMessage={errorMessage[`[${i}].Email`]}
+            onChildData={handleEmailState}
           />
         </Center>
       </VStack>

@@ -12,28 +12,39 @@ import AccountDetailCard from 'app/components/AccountDetailCard';
 import userApi from 'app/api/user';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import { useFocusEffect } from '@react-navigation/native';
+// import { useNavigation, CommonActions } from '@react-navigation/native';
 
 function AccountScreen(props) {
+  const [isReloadPage, setIsReloadPage] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const { user, setUser } = useContext(AuthContext);
   const { navigation } = props;
+  // const resetNavigation = useNavigation();
+  // const resetAction = CommonActions.reset({
+  //   index: 0,
+  //   routes: [{ route: '/' + routes.WELCOME }],
+  // });
 
   const onPressLogOut = async () => {
     console.log('Logging out!');
+    // resetNavigation.dispatch(resetAction);
     setUser(null);
     await authStorage.removeToken();
   };
 
   useFocusEffect(
     useCallback(() => {
-      setIsLoading(true);
-      const promiseFunction = async () => {
-        const response = await getCurrentUser();
-        setUser(response.data);
-      };
-      promiseFunction();
+      if (isReloadPage) {
+        setIsLoading(true);
+        const promiseFunction = async () => {
+          const response = await getCurrentUser();
+          setUser(response.data);
+        };
+        setIsReloadPage(false);
+        promiseFunction();
+      }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []),
+    }, [isReloadPage]),
   );
 
   const getCurrentUser = async () => {
@@ -46,6 +57,9 @@ function AccountScreen(props) {
     if (!response.ok) {
       // Proceed to log out if account screen does not load due to api failure
       // Note: should use useCheckExpiredThenLogOut hook but it isnt working and had no time to fix
+
+      // reset the navigation stack when logging out
+      // resetNavigation.dispatch(resetAction);
       setUser(null);
       // await authStorage.removeToken();
       return;
