@@ -27,11 +27,12 @@ function EmailInputField({
   // 2) there are number and/or symbols within the input
   const validation = () => {
     let message = '';
-    if (isRequired && value <= 0) {
+    // const emailRegex = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
+    if (isRequired && value.length <= 0) {
       message = 'This field is required';
     } else if (
-      value > 0 &&
-      !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/.test(value)
+      value.length > 0 &&
+      !/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/.test(value)
     ) {
       message = 'Invalid Email';
     } else {

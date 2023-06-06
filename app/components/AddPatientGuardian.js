@@ -36,6 +36,7 @@ function AddPatientGuardian({
   const [isRelationError, setIsRelationError] = useState(false);
   const [isPhoneError, setIsPhoneError] = useState(false);
   const [isEmailError, setIsEmailError] = useState(false);
+  const [isLoginError, setIsLoginError] = useState(false);
 
   const handleFirstNameState = useCallback(
     (state) => {
@@ -93,8 +94,10 @@ function AddPatientGuardian({
         isNRICError ||
         isPhoneError ||
         isRelationError ||
-        isEmailError,
+        isEmailError ||
+        isLoginError,
     );
+    console.log(isInputErrors);
     onError(i, isInputErrors);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -105,7 +108,19 @@ function AddPatientGuardian({
     isRelationError,
     isEmailError,
     isInputErrors,
+    isLoginError,
   ]);
+  // To ensure that when the is guardian login required checkbox is checked, guardian email
+  // must be filled before continuing. Done by verifying if guardian.Email is empty or not.
+  useEffect(() => {
+    setIsLoginError(() => {
+      if (guardian.IsChecked && guardian.Email.length === 0) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+  }, [guardian.Email.length, guardian.IsChecked]);
 
   // constant values for relationships
   const listOfRelationships = [
@@ -190,7 +205,6 @@ function AddPatientGuardian({
               'Check this box to specify Guardian wants to log in'
             }
           />
-
           <EmailInputField
             isRequired={guardian.IsChecked}
             title={'Guardian Email'}

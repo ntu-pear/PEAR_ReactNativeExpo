@@ -434,17 +434,11 @@ function PatientAddPatientInfoScreen(props) {
               </VStack>
             </Box>
 
-            {/* This form of submission blocking due to errors is subject to change*/}
-            {isInputErrors ? (
-              <Text style={[styles.text, styles.errorText]}>
-                Ensure all filled fields are correct before proceeding.
-              </Text>
-            ) : (
-              <AddPatientBottomButtons
-                nextQuestionHandler={nextQuestionHandler}
-                formData={formData}
-              />
-            )}
+            <AddPatientBottomButtons
+              nextQuestionHandler={nextQuestionHandler}
+              formData={formData}
+              isNextDisabled={isInputErrors}
+            />
           </Box>
         )}
       />
