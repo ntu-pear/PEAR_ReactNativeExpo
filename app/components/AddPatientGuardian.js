@@ -1,17 +1,6 @@
 // Libs
 import React, { useState, useCallback, useEffect } from 'react';
-import {
-  Box,
-  // Input,
-  // FormControl,
-  Text,
-  // Select,
-  Divider,
-  VStack,
-  Center,
-  // Checkbox,
-  // HStack,
-} from 'native-base';
+import { Box, Text, Divider, VStack, Center } from 'native-base';
 import { StyleSheet, Platform } from 'react-native';
 
 // Configurations
@@ -97,10 +86,6 @@ function AddPatientGuardian({
     [isEmailError],
   );
 
-  // const isOptional = () => {
-  //   return guardian.IsChecked ? '' : '(Optional)';
-  // };
-
   useEffect(() => {
     setIsInputErrors(
       isFirstNameError ||
@@ -110,7 +95,6 @@ function AddPatientGuardian({
         isRelationError ||
         isEmailError,
     );
-    console.log('isInputErrors', isInputErrors);
     onError(i, isInputErrors);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [

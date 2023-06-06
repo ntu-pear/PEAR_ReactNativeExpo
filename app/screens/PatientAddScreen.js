@@ -449,9 +449,10 @@ function PatientAddScreen() {
           handleFormData={handleFormData}
           formData={formData}
           componentList={componentList}
-          errorMessage={errorMessage}
           concatFormData={concatFormData}
           removeFormData={removeFormData}
+          // Props no longer needed - Justin
+          // errorMessage={errorMessage}
         />
       );
     case 3:

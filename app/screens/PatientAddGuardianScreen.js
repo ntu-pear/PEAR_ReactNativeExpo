@@ -14,7 +14,6 @@ function PatientAddGuardianScreen(props) {
     formData,
     handleFormData,
     componentList,
-    errorMessage,
     concatFormData,
     removeFormData,
   } = props;
@@ -24,23 +23,26 @@ function PatientAddGuardianScreen(props) {
   );
   const [errorStates, setErrorStates] = useState([true]);
 
+  // Callback function passed to child components. Lets them update their corresponding
+  // error states in ErrorStates state.
   const handleChildError = useCallback(
     (childId, isError) => {
-      // console.log('callback', isError, childId);
       setErrorStates((prevErrorStates) => {
         const updatedErrorStates = [...prevErrorStates];
         updatedErrorStates[childId] = isError;
         return updatedErrorStates;
       });
-      // console.log(errorStates);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [errorStates],
   );
 
+  // Variable that determines whether user can go to next page based on whether there are
+  // errors present in the child Components or not.
   let isNextDisabled = errorStates.includes(true);
 
   const addNewGuardianComponent = () => {
+    // Add new error state for new child component
     setErrorStates((prev) => [...prev, true]);
     setGuardianInfoDisplay([...guardianInfoDisplay, {}]);
     concatFormData('guardianInfo', {
@@ -53,23 +55,18 @@ function PatientAddGuardianScreen(props) {
       RelationshipID: 1,
       IsActive: true,
     });
-    // console.log(errorStates);
-    // console.log('add, button: ', isButtonDisabled);
   };
 
   const removeGuardianComponent = (index) => {
+    // Remove error state for removed child component.
     const errorList = [...errorStates];
     let newErrorList = errorList.slice(0, -1);
     setErrorStates(newErrorList);
 
-    // console.log('new error list: ', newErrorList);
     const list = [...guardianInfoDisplay];
     list.splice(index, 1);
     setGuardianInfoDisplay(list);
     removeFormData('guardianInfo');
-
-    // console.log('removing', errorStates);
-    // console.log('rem, button: ', isNextDisabled);
   };
 
   return (
