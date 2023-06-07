@@ -1,4 +1,5 @@
-import React from 'react';
+// Lib
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   Box,
   VStack,
@@ -11,59 +12,120 @@ import {
 } from 'native-base';
 import { StyleSheet, Platform } from 'react-native';
 
+// Configurations
 import colors from 'app/config/colors';
 import typography from 'app/config/typography';
-function AddPatientAllergy({
-  i,
-  title,
-  formData,
-  handleFormData,
-  errorMessage,
-}) {
+
+// Components
+import CommonInputField from 'app/components/CommonInputField';
+import SelectionInputField from 'app/components/SelectionInputField';
+
+function AddPatientAllergy({ i, title, formData, handleFormData, onError }) {
   const page = 'allergyInfo';
   const allergy = formData.allergyInfo[i]; //allergyInfo[0].allergyName
-
-  const isShown = () => {
-    return allergy.AllergyListID == 2 ? false : true;
-  };
+  const [isErrors, setIsErrors] = useState([false]);
+  const [allergyOption, setAllergyOption] = useState(allergy.AllergyListID);
 
   // constant values for list of allergies
   const listOfAllergies = [
     // { list_AllergyID: 1, value: 'To Be Updated' },
-    { list_AllergyID: 2, value: 'None' },
-    { list_AllergyID: 3, value: 'Corn' },
-    { list_AllergyID: 4, value: 'Eggs' },
-    { list_AllergyID: 5, value: 'Fish' },
-    { list_AllergyID: 6, value: 'Meat' },
-    { list_AllergyID: 7, value: 'Milk' },
-    { list_AllergyID: 8, value: 'Peanuts' },
-    { list_AllergyID: 9, value: 'Tree nuts' },
-    { list_AllergyID: 10, value: 'Shellfish' },
-    { list_AllergyID: 11, value: 'Soy' },
-    { list_AllergyID: 12, value: 'Wheat' },
-    { list_AllergyID: 13, value: 'Seafood' },
+    { value: 2, label: 'None' },
+    { value: 3, label: 'Corn' },
+    { value: 4, label: 'Eggs' },
+    { value: 5, label: 'Fish' },
+    { value: 6, label: 'Meat' },
+    { value: 7, label: 'Milk' },
+    { value: 8, label: 'Peanuts' },
+    { value: 9, label: 'Tree nuts' },
+    { value: 10, label: 'Shellfish' },
+    { value: 11, label: 'Soy' },
+    { value: 12, label: 'Wheat' },
+    { value: 13, label: 'Seafood' },
   ];
 
   // constant values for list of allergy reactions
   const listOfAllergyReactions = [
-    { list_AllergyReactionID: 1, value: 'Rashes' },
-    { list_AllergyReactionID: 2, value: 'Sneezing' },
-    { list_AllergyReactionID: 3, value: 'Vomitting' },
-    { list_AllergyReactionID: 4, value: 'Nausea' },
-    { list_AllergyReactionID: 5, value: 'Swelling' },
-    { list_AllergyReactionID: 6, value: 'Difficulty Breathing' },
-    { list_AllergyReactionID: 7, value: 'Diarrhea' },
-    { list_AllergyReactionID: 8, value: 'Abdominal cramp or pain' },
-    { list_AllergyReactionID: 9, value: 'Nasal Congestion' },
-    { list_AllergyReactionID: 10, value: 'Itching' },
-    { list_AllergyReactionID: 11, value: 'Hives' },
+    { value: 1, label: 'Rashes' },
+    { value: 2, label: 'Sneezing' },
+    { value: 3, label: 'Vomitting' },
+    { value: 4, label: 'Nausea' },
+    { value: 5, label: 'Swelling' },
+    { value: 6, label: 'Difficulty Breathing' },
+    { value: 7, label: 'Diarrhea' },
+    { value: 8, label: 'Abdominal cramp or pain' },
+    { value: 9, label: 'Nasal Congestion' },
+    { value: 10, label: 'Itching' },
+    { value: 11, label: 'Hives' },
   ];
+
+  const handleAllergyState = useCallback(
+    (state) => {
+      setIsErrors((prevErrorStates) => {
+        const updatedErrorStates = [...prevErrorStates];
+        updatedErrorStates[0] = state;
+        return updatedErrorStates;
+      });
+    },
+
+    [],
+  );
+  const handleReactionState = useCallback(
+    (state) => {
+      setIsErrors((prevErrorStates) => {
+        const updatedErrorStates = [...prevErrorStates];
+        updatedErrorStates[1] = state;
+        return updatedErrorStates;
+      });
+    },
+
+    [],
+  );
+  const handleRemarksState = useCallback(
+    (state) => {
+      setIsErrors((prevErrorStates) => {
+        const updatedErrorStates = [...prevErrorStates];
+        updatedErrorStates[2] = state;
+        return updatedErrorStates;
+      });
+    },
+
+    [],
+  );
+  // parent callback function to enable editing of the errorStates array tracked by
+  // the parent
+  useEffect(() => {
+    onError(i, isErrors.includes(true));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isErrors]);
+
+  // Add/Remove the states for the additional components reaction and remarks when
+  // they are rendered or de-rendered respectively.
+  useEffect(() => {
+    if (allergyOption <= 2 && isErrors.length > 1) {
+      const errorList = [...isErrors];
+      // Remove the last 2 elements corresponding to reactions and remarks fields
+      let updatedErrors = errorList.slice(0, -2);
+      setIsErrors(updatedErrors);
+      handleFormData(page, 'AllergyReactionListID', i)(null);
+      handleFormData(page, 'AllergyRemarks', i)('');
+    }
+    if (allergyOption > 2 && isErrors.length < 3) {
+      const newStates = [true, true];
+      setIsErrors([...isErrors, ...newStates]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allergyOption]);
+
+  // allergyListID is stored in a state to track it for the useEffect above.
+  useEffect(() => {
+    setAllergyOption(allergy.AllergyListID);
+  }, [allergy.AllergyListID]);
 
   return (
     <Box w="100%">
       <VStack>
         <Center>
-          {title == 1 ? null : <Divider w="80%" mt={10} />}
+          {title === 1 ? null : <Divider w="80%" mt={10} />}
 
           <Text
             marginTop={6}
@@ -75,113 +137,36 @@ function AddPatientAllergy({
             Allergy Information {title}
           </Text>
 
-          <FormControl
-            w="80%"
-            mt="5"
+          <SelectionInputField
             isRequired
-            isInvalid={[`[${i}].AllergyListID`] in errorMessage}
-          >
-            <FormControl.Label _text={styles.text}>Allergy </FormControl.Label>
-            <Select
-              accessibilityLabel="Select Allergy"
-              borderRadius="25"
-              fontFamily={
-                Platform.OS === 'ios' ? typography.ios : typography.android
-              }
-              height="50"
-              minWidth="full"
-              minHeight="3%"
-              placeholderTextColor={colors.medium}
-              size="18"
-              placeholder="Select Allergy"
-              selectedValue={allergy.AllergyListID}
-              onValueChange={handleFormData(page, 'AllergyListID', i)}
-            >
-              {listOfAllergies.map((item, index) => (
-                <Select.Item
-                  key={index}
-                  label={item.value}
-                  value={item.list_AllergyID}
-                />
-              ))}
-            </Select>
-
-            <FormControl.ErrorMessage>
-              {errorMessage[`[${i}].AllergyListID`]}
-            </FormControl.ErrorMessage>
-          </FormControl>
-
-          {isShown() ? (
+            title={'Select Allergy'}
+            placeholderText={'Select Allergy'}
+            onDataChange={handleFormData(page, 'AllergyListID', i)}
+            value={allergy.AllergyListID}
+            dataArray={listOfAllergies}
+            onChildData={handleAllergyState}
+          />
+          {/* When Allergy is not "None" show the rest of the form*/}
+          {allergy.AllergyListID > 2 ? (
             <>
-              <FormControl
-                w="80%"
-                mt="5"
-                isRequired
-                isInvalid={[`[${i}].AllergyReactionListID`] in errorMessage}
-              >
-                <FormControl.Label _text={styles.text}>
-                  Reaction
-                </FormControl.Label>
-                <Select
-                  accessibilityLabel="Select Reaction"
-                  borderRadius="25"
-                  fontFamily={
-                    Platform.OS === 'ios' ? typography.ios : typography.android
-                  }
-                  height="50"
-                  minWidth="full"
-                  minHeight="3%"
-                  placeholderTextColor={colors.medium}
-                  size="18"
-                  placeholder={'Select Allergy Reaction'}
-                  selectedValue={allergy.AllergyReactionListID}
-                  onValueChange={handleFormData(
-                    page,
-                    'AllergyReactionListID',
-                    i,
-                  )}
-                >
-                  {listOfAllergyReactions.map((item, index) => (
-                    <Select.Item
-                      key={index}
-                      label={item.value}
-                      value={item.list_AllergyReactionID}
-                    />
-                  ))}
-                </Select>
+              <SelectionInputField
+                isRequired={allergy.AllergyListID > 2 ? true : false}
+                title={'Select Reaction'}
+                placeholderText={'Select Reaction'}
+                onDataChange={handleFormData(page, 'AllergyReactionListID', i)}
+                value={allergy.AllergyReactionListID}
+                dataArray={listOfAllergyReactions}
+                onChildData={handleReactionState}
+              />
 
-                <FormControl.ErrorMessage>
-                  {errorMessage[`[${i}].AllergyReactionListID`]}
-                </FormControl.ErrorMessage>
-              </FormControl>
-
-              <FormControl
-                w="80%"
-                mt="5 "
-                isRequired
-                isInvalid={[`[${i}].AllergyRemarks`] in errorMessage}
-              >
-                <FormControl.Label _text={styles.text}>
-                  Remarks
-                </FormControl.Label>
-                <TextArea
-                  borderRadius="25"
-                  fontFamily={
-                    Platform.OS === 'ios' ? typography.ios : typography.android
-                  }
-                  height="50"
-                  minWidth="full"
-                  minHeight="3%"
-                  placeholderTextColor={colors.medium}
-                  size="18"
-                  placeholder={'Remarks'}
-                  value={allergy.AllergyRemarks}
-                  onChangeText={handleFormData(page, 'AllergyRemarks', i)}
-                />
-                <FormControl.ErrorMessage>
-                  {errorMessage[`[${i}].AllergyRemarks`]}
-                </FormControl.ErrorMessage>
-              </FormControl>
+              <CommonInputField
+                isRequired={allergy.AllergyListID > 2 ? true : false}
+                title={'Remarks'}
+                value={allergy.AllergyRemarks}
+                onChangeText={handleFormData(page, 'AllergyRemarks', i)}
+                variant={'multiLine'}
+                onChildData={handleRemarksState}
+              />
             </>
           ) : (
             <></>

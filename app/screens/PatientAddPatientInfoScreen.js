@@ -20,7 +20,7 @@ import AddPatientProgress from 'app/components/AddPatientProgress';
 import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import NameInputField from 'app/components/NameInputField';
 import NRICInputField from 'app/components/NRICInputField';
-import AddressInputField from 'app/components/AddressInputField';
+import CommonInputField from 'app/components/CommonInputField';
 import TelephoneInputField from 'app/components/TelephoneInputField';
 import DateInputField from 'app/components/DateInputField';
 import SelectionInputField from 'app/components/SelectionInputField';
@@ -337,7 +337,6 @@ function PatientAddPatientInfoScreen(props) {
                     value={patient.NRIC}
                     onChangeText={handleFormData(page, 'NRIC')}
                     onChildData={handleNRICState}
-                    maxLength={9}
                   />
 
                   <RadioButtonInput
@@ -358,7 +357,7 @@ function PatientAddPatientInfoScreen(props) {
                     onChildData={handleDOBState}
                   />
 
-                  <AddressInputField
+                  <CommonInputField
                     isRequired
                     title={'Address'}
                     value={patient.Address}
@@ -366,7 +365,7 @@ function PatientAddPatientInfoScreen(props) {
                     onChildData={handleAddrState}
                   />
 
-                  <AddressInputField
+                  <CommonInputField
                     title={'Temporary Address (optional)'}
                     value={patient.TempAddress}
                     onChangeText={handleFormData(page, 'TempAddress')}
@@ -379,8 +378,6 @@ function PatientAddPatientInfoScreen(props) {
                     numberType={'home'}
                     onChangeText={handleFormData(page, 'HomeNo')}
                     onChildData={handleHomeTeleState}
-                    keyboardType="numeric"
-                    maxLength={8}
                   />
 
                   <TelephoneInputField
@@ -389,8 +386,6 @@ function PatientAddPatientInfoScreen(props) {
                     numberType={'mobile'}
                     onChangeText={handleFormData(page, 'HandphoneNo')}
                     onChildData={handleMobileState}
-                    keyboardType="numeric"
-                    maxLength={8}
                   />
 
                   <RadioButtonInput

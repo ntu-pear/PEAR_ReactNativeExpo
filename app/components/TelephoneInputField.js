@@ -12,8 +12,6 @@ function TelephoneInputField({
   InputRightElement,
   type,
   numberType,
-  keyboardType,
-  maxLength,
   onChildData,
 }) {
   // This state is used to track the error state of this component via validation
@@ -60,8 +58,8 @@ function TelephoneInputField({
       onChangeText={onChangeText}
       InputRightElement={InputRightElement}
       type={type}
-      keyboardType={keyboardType}
-      maxLength={maxLength}
+      keyboardType={'numeric'}
+      maxLength={8}
       validation={validation}
       isError={isError}
       onChildData={onChildData}

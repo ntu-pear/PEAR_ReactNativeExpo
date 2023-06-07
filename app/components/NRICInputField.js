@@ -12,7 +12,6 @@ function NRICInputField({
   InputRightElement,
   type,
   keyboardType,
-  maxLength,
   onChildData,
 }) {
   // This state is used to track the error state of this component via validation
@@ -51,7 +50,7 @@ function NRICInputField({
       InputRightElement={InputRightElement}
       type={type}
       keyboardType={keyboardType}
-      maxLength={maxLength}
+      maxLength={9}
       validation={validation}
       isError={isError}
       onChildData={onChildData}

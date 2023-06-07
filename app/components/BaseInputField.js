@@ -23,6 +23,7 @@ function BaseInputField({
   validation,
   onChildData,
   setErrorState,
+  variant,
 }) {
   const requiredIndicator = <Text style={styles.RequiredIndicator}> *</Text>;
 
@@ -61,7 +62,9 @@ function BaseInputField({
           borderColor={
             isError.errorMsg === '' ? colors.light_gray3 : colors.red
           }
+          textAlignVertical={variant === 'multiLine' ? 'top' : 'center'}
           borderRadius="25"
+          height={variant === 'multiLine' ? '150' : '50'}
           value={value}
           onChangeText={onChangeText}
           onEndEditing={validation}
@@ -79,6 +82,10 @@ function BaseInputField({
     </View>
   );
 }
+
+BaseInputField.defaultProps = {
+  variant: 'singleLine',
+};
 
 const styles = StyleSheet.create({
   ComponentContainer: {
@@ -107,7 +114,7 @@ const styles = StyleSheet.create({
   InputField: {
     fontSize: 16,
     width: '100%',
-    height: 50,
+    // height: 100,
     color: colors.black_var1,
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
   },

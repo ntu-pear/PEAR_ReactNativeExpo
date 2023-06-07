@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 // Components
 import BaseInputField from 'app/components/BaseInputField';
 
-function AddressInputField({
+function CommonInputField({
   isRequired,
   title,
   value,
@@ -14,6 +14,7 @@ function AddressInputField({
   keyboardType,
   maxLength,
   onChildData,
+  variant,
 }) {
   // This state is used to track the error state of this component via validation
   const [isError, setIsError] = useState({
@@ -52,14 +53,15 @@ function AddressInputField({
       isError={isError}
       onChildData={onChildData}
       setErrorState={setIsError}
+      variant={variant}
     />
   );
 }
 
 // This settings will be used if the props are not specified in the parent component.
-AddressInputField.defaultProps = {
+CommonInputField.defaultProps = {
   isRequired: false,
   keyboardType: 'default',
 };
 
-export default AddressInputField;
+export default CommonInputField;

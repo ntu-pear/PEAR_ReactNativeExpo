@@ -97,7 +97,7 @@ function AddPatientGuardian({
         isEmailError ||
         isLoginError,
     );
-    console.log(isInputErrors);
+    // console.log(isInputErrors);
     onError(i, isInputErrors);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [

@@ -1,12 +1,5 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  ScrollView,
-  VStack,
-  Center,
-  SectionList,
-  View,
-} from 'native-base';
+import React, { useState, useCallback } from 'react';
+import { Center, SectionList, View } from 'native-base';
 import AddPatientAllergy from 'app/components/AddPatientAllergy';
 import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import AddPatientProgress from 'app/components/AddPatientProgress';
@@ -18,7 +11,6 @@ function PatientAddAllergyScreen(props) {
     handleFormData,
     componentList,
     validateStep,
-    errorMessage,
     concatFormData,
     removeFormData,
   } = props;
@@ -27,7 +19,28 @@ function PatientAddAllergyScreen(props) {
     componentList.allergy,
   );
 
+  const [errorStates, setErrorStates] = useState([false]);
+
+  // Callback function passed to child components. Lets them update their corresponding
+  // error states in ErrorStates state.
+  const handleChildError = useCallback(
+    (childId, isError) => {
+      setErrorStates((prevErrorStates) => {
+        const updatedErrorStates = [...prevErrorStates];
+        updatedErrorStates[childId] = isError;
+        return updatedErrorStates;
+      });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [errorStates],
+  );
+
+  // if errorStates has true(s) within (errors) => is submit enabled = false
+  // if errorStates does not have true(s) (no error) false => is submit enabled = true
+  let isSubmitEnabled = !errorStates.includes(true);
+
   const addNewAllergyComponent = () => {
+    setErrorStates((prev) => [...prev, true]);
     setAllergyInfoDisplay([...allergyInfoDisplay, {}]);
     concatFormData('allergyInfo', {
       AllergyListID: null,
@@ -37,6 +50,10 @@ function PatientAddAllergyScreen(props) {
   };
 
   const removeAllergyComponent = (index) => {
+    const errorList = [...errorStates];
+    let newErrorList = errorList.slice(0, -1);
+    setErrorStates(newErrorList);
+
     const list = [...allergyInfoDisplay];
     list.splice(index, 1);
     setAllergyInfoDisplay(list);
@@ -57,7 +74,7 @@ function PatientAddAllergyScreen(props) {
             title={index + 1}
             formData={formData}
             handleFormData={handleFormData}
-            errorMessage={errorMessage}
+            onError={handleChildError}
           />
         )}
         ListFooterComponent={() => (
@@ -69,7 +86,7 @@ function PatientAddAllergyScreen(props) {
               }
               addComponent={addNewAllergyComponent}
               removeComponent={removeAllergyComponent}
-              submit={true}
+              submit={isSubmitEnabled}
               formData={formData}
               validateStep={validateStep}
             />
