@@ -119,7 +119,14 @@ function AddPatientAllergy({ i, title, formData, handleFormData, onError }) {
   // allergyListID is stored in a state to track it for the useEffect above.
   useEffect(() => {
     setAllergyOption(allergy.AllergyListID);
-  }, [allergy.AllergyListID]);
+    if (allergyOption > 2 && allergy.AllergyReactionListID === null) {
+      handleFormData(page, 'AllergyReactionListID', i)(1);
+    } else if (allergyOption === 2) {
+      handleFormData(page, 'AllergyReactionListID', i)(null);
+      handleFormData(page, 'AllergyRemarks', i)('');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allergy.AllergyListID, allergyOption]);
 
   return (
     <Box w="100%">

@@ -28,7 +28,7 @@ function CommonInputField({
   const validation = () => {
     let message = '';
     if (isRequired && value <= 0) {
-      message = 'Address is a required field.';
+      message = 'This is a required field.';
     } else {
       message = '';
     }

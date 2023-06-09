@@ -21,7 +21,7 @@ function AddPatientBottomButtons({
   submit = false,
   formData = null,
   max = null,
-  validateStep = null,
+  // validateStep = null,
   isNextDisabled,
 }) {
   const navigation = useNavigation();
@@ -31,45 +31,46 @@ function AddPatientBottomButtons({
   const navigate = Platform.OS === 'web' ? useNavigate() : null;
 
   const onPressSubmit = async () => {
-    const promiseResult = await validateStep(formData);
-    console.log(promiseResult, formData);
+    // -- Validation is now real-time no need to have on submit validation - Justin
+    // const promiseResult = await validateStep(formData);
+    // console.log(promiseResult, formData);
 
-    if (promiseResult.success) {
-      console.log('success');
-      const result = await patientApi.addPatient(formData);
+    // if (promiseResult.success) {
+    // console.log('success');
+    const result = await patientApi.addPatient(formData);
 
-      let alertTxt = '';
-      let alertTitle = '';
-      let alertDetails = '';
+    let alertTxt = '';
+    let alertTitle = '';
+    let alertDetails = '';
 
-      console.log('response: ', result);
+    console.log('response: ', result);
 
-      if (result.ok) {
-        const allocations = result.data.data.patientAllocationDTO;
-        const caregiver = allocations.caregiverName;
-        const doctor = allocations.doctorName;
-        const gameTherapist = allocations.gameTherapistName;
+    if (result.ok) {
+      const allocations = result.data.data.patientAllocationDTO;
+      const caregiver = allocations.caregiverName;
+      const doctor = allocations.doctorName;
+      const gameTherapist = allocations.gameTherapistName;
 
-        alertTitle = 'Successfully added Patient';
-        alertDetails = `Patient has been allocated to\nCaregiver: ${caregiver}\nDoctor: ${doctor}\nGame Therapist: ${gameTherapist}`;
-        alertTxt = alertTitle + alertDetails;
-        Platform.OS === 'web'
-          ? navigate('/' + routes.PATIENTS)
-          : navigation.navigate(routes.PATIENTS_SCREEN);
-      } else {
-        const errors = result.data?.message;
-
-        result.data
-          ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-          : (alertDetails = 'Please try again.');
-
-        alertTitle = 'Error in Adding Patient';
-        alertTxt = alertTitle + alertDetails;
-      }
+      alertTitle = 'Successfully added Patient';
+      alertDetails = `Patient has been allocated to\nCaregiver: ${caregiver}\nDoctor: ${doctor}\nGame Therapist: ${gameTherapist}`;
+      alertTxt = alertTitle + alertDetails;
       Platform.OS === 'web'
-        ? alert(alertTxt)
-        : Alert.alert(alertTitle, alertDetails);
+        ? navigate('/' + routes.PATIENTS)
+        : navigation.navigate(routes.PATIENTS_SCREEN);
+    } else {
+      const errors = result.data?.message;
+
+      result.data
+        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
+        : (alertDetails = 'Please try again.');
+
+      alertTitle = 'Error in Adding Patient';
+      alertTxt = alertTitle + alertDetails;
     }
+    Platform.OS === 'web'
+      ? alert(alertTxt)
+      : Alert.alert(alertTitle, alertDetails);
+    // }
   };
 
   return (

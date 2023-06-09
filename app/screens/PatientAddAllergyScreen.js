@@ -10,9 +10,10 @@ function PatientAddAllergyScreen(props) {
     formData,
     handleFormData,
     componentList,
-    validateStep,
     concatFormData,
     removeFormData,
+    // -- Validation is now real-time no need to have on submit validation - Justin
+    // validateStep,
   } = props;
 
   const [allergyInfoDisplay, setAllergyInfoDisplay] = useState(
@@ -88,7 +89,8 @@ function PatientAddAllergyScreen(props) {
               removeComponent={removeAllergyComponent}
               submit={isSubmitEnabled}
               formData={formData}
-              validateStep={validateStep}
+              // // -- Validation is now real-time no need to have on submit validation - Justin
+              // validateStep={validateStep}
             />
           </View>
         )}

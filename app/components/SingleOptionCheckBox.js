@@ -1,26 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Platform, StyleSheet, View, Text } from 'react-native';
-import { HStack, Checkbox } from 'native-base';
+import { HStack } from 'native-base';
 import typography from 'app/config/typography';
 import colors from 'app/config/colors';
+import Checkbox from 'expo-checkbox';
 
-function SingleOptionCheckBox({
-  title,
-  value,
-  onChangeData,
-  accessibilityText,
-}) {
+function SingleOptionCheckBox({ title, value, onChangeData }) {
   return (
     <View style={styles.ComponentContainer}>
       <HStack justifyContent="space-between" alignItems="center">
         <Text style={styles.TitleMsg}>{title}</Text>
         <Checkbox
-          isChecked={value}
+          disabled={false}
           value={value}
-          onChange={onChangeData}
-          //   aria-label=" Do you wish to key in the Date of Leaving?"
-          accessibilityLabel={accessibilityText}
-          _checked={{ bgColor: colors.green }}
+          onValueChange={(newValue) => onChangeData(newValue)}
         />
       </HStack>
     </View>

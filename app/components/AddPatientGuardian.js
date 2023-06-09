@@ -14,6 +14,8 @@ import SelectionInputField from 'app/components/SelectionInputField';
 import TelephoneInputField from 'app/components/TelephoneInputField';
 import SingleOptionCheckBox from 'app/components/SingleOptionCheckBox';
 import EmailInputField from 'app/components/EmailInputField';
+import RadioButtonInput from 'appcomponentsRadioButtonsInput';
+import CommonInputField from 'appcomponentsCommonInputField';
 // import ErrorMessage from 'app/components/ErrorMessage';
 // import CustomFormControl from 'app/components/CustomFormControl';
 
@@ -25,9 +27,11 @@ function AddPatientGuardian({
   // errorMessage,
   onError,
 }) {
+  console.log('formData.guardianInfo: ', i, formData.guardianInfo);
   const page = 'guardianInfo';
   const guardian = formData.guardianInfo[i]; //guardianInfo[0].FirstName
-
+  // console.log(String(guardian) + ' ' + guardian.IsChecked);
+  // console.log(guardian.IsChecked, '\n');
   const [isInputErrors, setIsInputErrors] = useState(false);
 
   const [isFirstNameError, setIsFirstNameError] = useState(false);
@@ -35,6 +39,7 @@ function AddPatientGuardian({
   const [isNRICError, setIsNRICError] = useState(false);
   const [isRelationError, setIsRelationError] = useState(false);
   const [isPhoneError, setIsPhoneError] = useState(false);
+  const [isCheckedError, setIsCheckedError] = useState(false);
   const [isEmailError, setIsEmailError] = useState(false);
   const [isLoginError, setIsLoginError] = useState(false);
 
@@ -86,6 +91,14 @@ function AddPatientGuardian({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [isEmailError],
   );
+  const handleCheckedState = useCallback(
+    (state) => {
+      setIsCheckedError(state);
+      // console.log('Email: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isCheckedError],
+  );
 
   useEffect(() => {
     setIsInputErrors(
@@ -109,18 +122,20 @@ function AddPatientGuardian({
     isEmailError,
     isInputErrors,
     isLoginError,
+    isCheckedError,
   ]);
   // To ensure that when the is guardian login required checkbox is checked, guardian email
   // must be filled before continuing. Done by verifying if guardian.Email is empty or not.
+  // console.log(i);
   useEffect(() => {
     setIsLoginError(() => {
-      if (guardian.IsChecked && guardian.Email.length === 0) {
+      if (guardian.IsChecked && guardian.Email === '') {
         return true;
       } else {
         return false;
       }
     });
-  }, [guardian.Email.length, guardian.IsChecked]);
+  }, [guardian.IsChecked, guardian.Email]);
 
   // constant values for relationships
   const listOfRelationships = [
@@ -136,6 +151,11 @@ function AddPatientGuardian({
     { value: 10, label: 'Aunt' },
     { value: 11, label: 'Uncle' },
     { value: 12, label: 'Grandparent' },
+  ];
+
+  const loginOptions = [
+    { value: true, label: 'Yes' },
+    { value: false, label: 'No' },
   ];
 
   return (
@@ -204,7 +224,9 @@ function AddPatientGuardian({
             accessibilityText={
               'Check this box to specify Guardian wants to log in'
             }
+            onChildData={handleCheckedState}
           />
+
           <EmailInputField
             isRequired={guardian.IsChecked}
             title={'Guardian Email'}
