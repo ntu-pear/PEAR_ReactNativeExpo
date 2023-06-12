@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Platform, StyleSheet, View, Text } from 'react-native';
 import { HStack } from 'native-base';
 import typography from 'app/config/typography';

@@ -8,22 +8,25 @@ import {
 } from 'react-native';
 import { Text } from 'native-base';
 import typography from 'app/config/typography';
-import routes from 'app/navigation/routes';
 import DefaultImage from 'app/assets/placeholder.png';
 
-function ProfileNameButton({ navigation, profile, isPatient, size }) {
+function ProfileNameButton({
+  profilePicture,
+  profileName,
+  profileRole,
+  isPatient,
+  size,
+  isVertical,
+  handleOnPress,
+}) {
   const defaultImage = Image.resolveAssetSource(DefaultImage).uri;
 
-  const handleOnPress = () => {
-    if (isPatient === true) {
-      navigation.push(routes.PATIENT_PROFILE, { patientProfile: profile });
-    } else {
-      navigation.push(routes.ACCOUNT_VIEW, { ...profile });
-    }
-  };
+  const containerStyle = isVertical
+    ? styles.ContentWrapperVertical
+    : styles.ContentWrapperHorizontal;
 
   return (
-    <View style={styles.ContentWrapper}>
+    <View style={containerStyle}>
       <TouchableOpacity onPress={handleOnPress}>
         <Image
           style={styles.ProfilePicture(size)}
@@ -33,28 +36,38 @@ function ProfileNameButton({ navigation, profile, isPatient, size }) {
             uri: defaultImage,
           }}
           source={{
-            uri: profile.profilePicture
-              ? `${profile.profilePicture}`
-              : defaultImage,
+            uri: profilePicture ? `${profilePicture}` : defaultImage,
           }}
         />
       </TouchableOpacity>
-      <Text style={[styles.DefaultText, styles.NameText]} fontSize={size / 5}>
-        {profile.preferredName}
-      </Text>
-      {isPatient !== true ? (
-        <Text style={styles.DefaultText} fontSize={size / 6}>
-          {`${profile.role}`}
+      <View style={styles.TextContainer(isVertical)}>
+        <Text style={[styles.DefaultText, styles.NameText]} fontSize={size / 5}>
+          {profileName}
         </Text>
-      ) : null}
+        {isPatient !== true ? (
+          <Text style={styles.DefaultText} fontSize={size / 6}>
+            {`${profileRole}`}
+          </Text>
+        ) : null}
+      </View>
     </View>
   );
 }
 
+ProfileNameButton.defaultProps = {
+  isVertical: true,
+};
+
 const styles = StyleSheet.create({
-  ContentWrapper: {
-    alignItems: 'center',
-    // backgroundColor: 'red',
+  ContentWrapperVertical: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+    paddingBottom: '4%',
+    paddingTop: '6%',
+  },
+  ContentWrapperHorizontal: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     paddingBottom: '4%',
     paddingTop: '6%',
   },
@@ -72,6 +85,12 @@ const styles = StyleSheet.create({
   },
   NameText: {
     fontWeight: 'bold',
+  },
+  TextContainer: (isVertical) => {
+    return {
+      justifyContent: 'center',
+      marginLeft: isVertical ? null : 30,
+    };
   },
 });
 

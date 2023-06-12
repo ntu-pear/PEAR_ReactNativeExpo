@@ -132,6 +132,10 @@ function PatientsScreen(props) {
       })
     : null;
 
+  const handleOnPress = (item) => {
+    navigation.push(routes.PATIENT_PROFILE, { patientProfile: item });
+  };
+
   return (
     <>
       {isLoading ? (
@@ -202,7 +206,7 @@ function PatientsScreen(props) {
               />
             }
           >
-            <VStack>
+            <VStack w="100%" h="100%" alignItems="flex-start">
               {filteredList && filteredList.length > 0
                 ? filteredList.map((item, index) => (
                     // <PatientScreenCard
@@ -210,13 +214,17 @@ function PatientsScreen(props) {
                     //   key={index}
                     //   navigation={navigation}
                     // />
-                    <ProfileNameButton
-                      navigation={navigation}
-                      profile={item}
-                      isPatient={true}
-                      size={70}
-                      key={index}
-                    />
+                    <View marginLeft={'5%'}>
+                      <ProfileNameButton
+                        profileName={item.preferredName}
+                        profilePicture={item.profilePicture}
+                        handleOnPress={() => handleOnPress(item)}
+                        isPatient={true}
+                        size={80}
+                        key={index}
+                        isVertical={false}
+                      />
+                    </View>
                   ))
                 : null}
             </VStack>

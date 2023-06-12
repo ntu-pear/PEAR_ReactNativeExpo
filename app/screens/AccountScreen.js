@@ -68,6 +68,10 @@ function AccountScreen(props) {
     return response.data;
   };
 
+  const handleOnPress = () => {
+    navigation.push(routes.ACCOUNT_VIEW, { ...user });
+  };
+
   return (
     <>
       {isLoading ? (
@@ -76,10 +80,13 @@ function AccountScreen(props) {
         <VStack w="100%" h="100%" alignItems="center">
           {/* <AccountDetailCard userProfile={user} navigation={navigation} /> */}
           <ProfileNameButton
-            navigation={navigation}
-            profile={user}
+            profilePicture={user.profilePicture}
+            profileName={user.preferredName}
+            profileRole={user.role}
             size={150}
             isPatient={false}
+            isVertical={false}
+            handleOnPress={handleOnPress}
           />
 
           <VStack w="90%" flexWrap="wrap" mb="1">
