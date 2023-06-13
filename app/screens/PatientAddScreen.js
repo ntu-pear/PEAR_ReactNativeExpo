@@ -1,15 +1,25 @@
-import React, { useCallback, useState } from 'react';
-import { Platform } from 'react-native';
+// Libs
+import React, { useState } from 'react';
+import { Platform, Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+// import { useNavigate } from 'react-router-dom';
 
+// API
+import patientApi from 'app/api/patient';
+import mime from 'mime';
+
+// Configurations
+import routes from 'app/navigation/routes';
+
+// Components
 import PatientAddPatientInfoScreen from 'app/screens/PatientAddPatientInfoScreen';
 import PatientAddGuardianScreen from 'app/screens/PatientAddGuardianScreen';
 import PatientAddAllergyScreen from 'app/screens/PatientAddAllergyScreen';
 import * as ImagePicker from 'expo-image-picker';
 
-import * as Yup from 'yup';
-import mime from 'mime';
-
 function PatientAddScreen() {
+  const navigation = useNavigation();
+  // const navigate = Platform.OS === 'web' ? useNavigate() : null;
   // aquire the setIsReloadPatientList from params
   // const { isReloadPatientList, setIsReloadPatientList } = route.params;
   // state for steps
@@ -30,158 +40,6 @@ function PatientAddScreen() {
   const newDate = new Date();
   const maximumDOB = new Date();
   maximumDOB.setFullYear(maximumDOB.getFullYear() - 15);
-
-  // const [errorMessage, setErrorMessage] = useState({});
-
-  // On SUBMIT VALIDATION CHANGED TO REAL-TIME VALIDATION --- JUSTIN
-  // data validation using Yup
-  // Reference: https://github.com/jquense/yup
-  // const schema = Yup.object().shape({
-  //   patientInfo: Yup.object().shape({
-  //     FirstName: Yup.string()
-  //       .matches(/^[^\d]+$/, 'First Name must not contain any numbers.')
-  //       .required('First Name is a required field.'),
-  //     LastName: Yup.string()
-  //       .matches(/^[^\d]+$/, 'Last Name must not contain any numbers.')
-  //       .required('Last Name is a required field.'),
-  //     PreferredName: Yup.string()
-  //       .matches(/^[^\d]+$/, 'Preferred Name must not contain any numbers.')
-  //       .required('Preferred Name is a required field.'),
-  //     PreferredLanguageListID: Yup.number().required(
-  //       'Preferred Language is a required field.',
-  //     ),
-  //     NRIC: Yup.string()
-  //       .matches(/^[STFGMstfgm]\d{7}[A-Za-z]$/, { message: 'Invalid NRIC.' })
-  //       .length(9, 'NRIC must be exactly 9 characters.')
-  //       .required('NRIC is a required field.'),
-  //     Address: Yup.string().required('Address is a required field.'),
-  //     TempAddress: Yup.string().notRequired(),
-  //     HomeNo: Yup.string()
-  //       .matches(/^$|^6[0-9]{7}$/, {
-  //         message:
-  //           'Home Telephone No. must start with the digit 6, and must have 8 digits.',
-  //       })
-  //       .notRequired(),
-  //     HandphoneNo: Yup.string()
-  //       .matches(/^$|^[89][0-9]{7}$/, {
-  //         message:
-  //           'Handphone No. must start with the digit 8 or 9, and must have 8 digits.',
-  //       })
-  //       .notRequired(),
-  //     Gender: Yup.string().required(),
-  //     DOB: Yup.date().required(),
-  //     StartDate: Yup.date().required(),
-  //     IsChecked: Yup.boolean().required(), // additional item for End Date datepicker to be optional
-  //     EndDate: Yup.date().test(
-  //       'required-if-checked',
-  //       'EndDate is required',
-  //       function (value) {
-  //         const isChecked = this.parent.IsChecked;
-  //         if (isChecked && !value) {
-  //           return false;
-  //         }
-  //         if (isChecked && value && value.getTime() === new Date(0).getTime()) {
-  //           return false;
-  //         }
-  //         return true;
-  //       },
-  //     ),
-  //     PrivacyLevel: Yup.string().required(),
-  //     UpdateBit: Yup.boolean().required(),
-  //     AutoGame: Yup.boolean().required(),
-  //     IsActive: Yup.boolean().required(),
-  //     IsRespiteCare: Yup.boolean().required(),
-  //     TerminationReason: Yup.string().notRequired(),
-  //     InactiveReason: Yup.string().notRequired(),
-  //     ProfilePicture: Yup.string().notRequired(),
-  //     UploadProfilePicture: Yup.object()
-  //       .shape({
-  //         uri: Yup.string().notRequired(),
-  //         name: Yup.string().notRequired(),
-  //         type: Yup.string().notRequired(),
-  //       })
-  //       .notRequired(),
-  //   }),
-  //   guardianInfo: Yup.array()
-  //     .of(
-  //       Yup.object().shape({
-  //         FirstName: Yup.string()
-  //           .matches(
-  //             /^[^\d]+$/,
-  //             "Guardian's First Name must not contain any numbers.",
-  //           )
-  //           .required("Guardian's First Name is a required field."),
-  //         LastName: Yup.string()
-  //           .matches(
-  //             /^[^\d]+$/,
-  //             "Guardian's Last Name must not contain any numbers.",
-  //           )
-  //           .required("Guardian's Last Name is a required field."),
-  //         NRIC: Yup.string()
-  //           .matches(/^[STFGMstfgm]\d{7}[A-Za-z]$/, {
-  //             message: 'Invalid NRIC.',
-  //           })
-  //           .length(9, 'NRIC must be exactly 9 characters.')
-  //           .required("Guardian's NRIC is a required field."),
-  //         IsChecked: Yup.boolean(), // additional item to check if guardian wishes to log in in the future. if yes, email is required
-  //         Email: Yup.string()
-  //           .email('Invalid email address.')
-  //           .required(
-  //             "Guardian's Email is a required field if Guardian wants to log in.",
-  //           )
-  //           .when('IsChecked', {
-  //             is: true,
-  //             otherwise: (schema) =>
-  //               schema.email('Invalid email address.').notRequired(),
-  //           }),
-
-  //         RelationshipID: Yup.number().required(
-  //           'Relationship ID is a required field.',
-  //         ),
-  //         IsActive: Yup.boolean().required(),
-  //         ContactNo: Yup.string()
-  //           .matches(/^[89]\d{7}$/, {
-  //             message:
-  //               "Guardian's Handphone No. must start with the digit 8 or 9.",
-  //           })
-  //           .length(8, "Guardian's Handphone No. must be exactly 8 digits.")
-  //           .required("Guardian's Handphone No. is a required field."),
-  //       }),
-  //     )
-  //     .min(1)
-  //     .max(2)
-  //     .required(),
-  //   allergyInfo: Yup.array()
-  //     .of(
-  //       Yup.object().shape({
-  //         AllergyListID: Yup.string().required(
-  //           'Allergy Name is a required field.',
-  //         ),
-  //         AllergyReactionListID: Yup.string().when(
-  //           'AllergyListID',
-  //           (value, schema) => {
-  //             return value == 2
-  //               ? schema.notRequired()
-  //               : schema.required(
-  //                   "Allergy Reaction is a required field if Allergy Name is not 'None'.",
-  //                 ); // validation not required if AllergyListID is 'None'
-  //           },
-  //         ),
-  //         AllergyRemarks: Yup.string().when(
-  //           'AllergyListID',
-  //           (value, schema) => {
-  //             return value == 2
-  //               ? schema.notRequired()
-  //               : schema.required(
-  //                   "Allergy Remarks is a required field if Allergy Name is not 'None'.",
-  //                 ); // validation not required if AllergyListID is 'None'
-  //           },
-  //         ),
-  //       }),
-  //     )
-  //     .min(1)
-  //     .required(),
-  // });
 
   const patientData = {
     patientInfo: {
@@ -229,7 +87,7 @@ function PatientAddScreen() {
 
     allergyInfo: [
       {
-        AllergyListID: null,
+        AllergyListID: 2,
         AllergyReactionListID: null,
         AllergyRemarks: '',
       },
@@ -237,13 +95,6 @@ function PatientAddScreen() {
   };
 
   const [formData, setFormData] = useState(patientData);
-
-  // order the formData wrt to form steps
-  // const orderedFormData = {
-  //   patientInfo: formData.patientInfo,
-  //   guardianInfo: formData.guardianInfo,
-  //   allergyInfo: formData.allergyInfo,
-  // };
 
   // handle state of components
   const componentHandler = (page = '', list = []) => {
@@ -272,39 +123,8 @@ function PatientAddScreen() {
     });
   };
 
-  /* --- On Submit validation changed to realtime validation --- Justin
-  validate each step of the form
-  const validateStep = async (formData) => {
-    const stepSchema = schema.fields[Object.keys(orderedFormData)[step - 1]];
-    const toValidate = formData[Object.keys(orderedFormData)[step - 1]];
-    // console.log("validateStep: ");
-    // console.log(toValidate);
-    try {
-      setErrorMessage({});
-      // Validate the form data against the schema
-      await stepSchema.validate(toValidate, { abortEarly: false });
-
-      return { success: true };
-    } catch (error) {
-      if (error.inner) {
-        const errors = {};
-        error.inner.forEach((e) => {
-          errors[e.path] = e.message;
-        });
-        setErrorMessage(errors);
-        // console.log(errors);
-        return { success: false, errors };
-      } else {
-        return { success: false, errors: [error.message] };
-      }
-    }
-  };
-  */
   const nextQuestionHandler = async (formData, page = '', list = []) => {
     // -- Validation is now real-time no need to have on submit validation - Justin
-    // const promiseResult = await validateStep(formData);
-    // If the validation is successful, continue to the next question
-    // if (promiseResult.success) {
     componentHandler(page, list);
     setStep((prevStep) => prevStep + 1);
     // }
@@ -409,6 +229,46 @@ function PatientAddScreen() {
       }
     };
 
+  const submitForm = async () => {
+    // -- Validation is now real-time no need to have on submit validation - Justin
+    const result = await patientApi.addPatient(formData);
+
+    // let alertTxt = '';
+    let alertTitle = '';
+    let alertDetails = '';
+
+    // console.log('response: ', result);
+
+    if (result.ok) {
+      const allocations = result.data.data.patientAllocationDTO;
+      const caregiver = allocations.caregiverName;
+      const doctor = allocations.doctorName;
+      const gameTherapist = allocations.gameTherapistName;
+
+      alertTitle = 'Successfully added Patient';
+      alertDetails = `Patient has been allocated to\nCaregiver: ${caregiver}\nDoctor: ${doctor}\nGame Therapist: ${gameTherapist}`;
+      // alertTxt = alertTitle + alertDetails;
+      // Platform.OS === 'web'
+      //   ? navigate('/' + routes.PATIENTS)
+      //   : navigation.navigate(routes.PATIENTS_SCREEN);
+      navigation.navigate(routes.PATIENTS_SCREEN);
+    } else {
+      const errors = result.data?.message;
+
+      result.data
+        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
+        : (alertDetails = 'Please try again.');
+
+      alertTitle = 'Error in Adding Patient';
+      // alertTxt = alertTitle + alertDetails;
+    }
+    // Platform.OS === 'web'
+    //   ? alert(alertTxt)
+    //   : Alert.alert(alertTitle, alertDetails);
+    // }
+    Alert.alert(alertTitle, alertDetails);
+  };
+
   switch (step) {
     case 1:
       return (
@@ -418,10 +278,6 @@ function PatientAddScreen() {
           formData={formData}
           componentList={componentList}
           pickImage={pickImage}
-          // Props no longer needed --- Justin
-          // show={show}
-          // setShow={setShow}
-          // errorMessage={errorMessage}
         />
       );
     case 2:
@@ -434,8 +290,6 @@ function PatientAddScreen() {
           componentList={componentList}
           concatFormData={concatFormData}
           removeFormData={removeFormData}
-          // Props no longer needed --- Justin
-          // errorMessage={errorMessage}
         />
       );
     case 3:
@@ -448,9 +302,7 @@ function PatientAddScreen() {
           componentList={componentList}
           concatFormData={concatFormData}
           removeFormData={removeFormData}
-          // Props no longer needed. --- Justin
-          // validateStep={validateStep}
-          // errorMessage={errorMessage}
+          onSubmitFunction={submitForm}
         />
       );
     default:

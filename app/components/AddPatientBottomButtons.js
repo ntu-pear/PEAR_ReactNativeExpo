@@ -1,12 +1,15 @@
+// Libs
 import React from 'react';
+import { Platform } from 'react-native';
 import { Box, Button, Flex, Spacer, Icon, HStack } from 'native-base';
-import { Alert, Platform, StyleSheet } from 'react-native';
-
 import { MaterialIcons } from '@expo/vector-icons';
-import patientApi from 'app/api/patient';
-import { useNavigation } from '@react-navigation/native';
-import routes from 'app/navigation/routes';
-import { useNavigate } from 'react-router-dom';
+
+// onPressSubmit function extracted to PatientAddScreen --- Justin
+// import { Alert, Platform, StyleSheet } from 'react-native';
+// import patientApi from 'app/api/patient';
+// import { useNavigation } from '@react-navigation/native';
+// import routes from 'app/navigation/routes';
+// import { useNavigate } from 'react-router-dom';
 
 import AppButton from 'app/components/AppButton';
 
@@ -23,27 +26,24 @@ function AddPatientBottomButtons({
   max = null,
   // validateStep = null,
   isNextDisabled,
+  submitFunction,
 }) {
-  const navigation = useNavigation();
+  /* onPressSubmit function extracted to PatientAddScreen as submitForm --- Justin
 
-  // useNavigate() hook cannot work on mobile
-  // eslint-disable-next-line
+  const navigation = useNavigation();
+  useNavigate() hook cannot work on mobile
+  eslint-disable-next-line
   const navigate = Platform.OS === 'web' ? useNavigate() : null;
 
   const onPressSubmit = async () => {
     // -- Validation is now real-time no need to have on submit validation - Justin
-    // const promiseResult = await validateStep(formData);
-    // console.log(promiseResult, formData);
-
-    // if (promiseResult.success) {
-    // console.log('success');
     const result = await patientApi.addPatient(formData);
 
     let alertTxt = '';
     let alertTitle = '';
     let alertDetails = '';
 
-    console.log('response: ', result);
+    // console.log('response: ', result);
 
     if (result.ok) {
       const allocations = result.data.data.patientAllocationDTO;
@@ -72,6 +72,7 @@ function AddPatientBottomButtons({
       : Alert.alert(alertTitle, alertDetails);
     // }
   };
+  */
 
   return (
     <Box mt={8} mb={8}>
@@ -168,7 +169,7 @@ function AddPatientBottomButtons({
       </Flex>
       {submit ? (
         <Box mt={8}>
-          <AppButton title="Submit" color="green" onPress={onPressSubmit} />
+          <AppButton title="Submit" color="green" onPress={submitFunction} />
         </Box>
       ) : null}
     </Box>

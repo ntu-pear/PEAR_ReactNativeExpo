@@ -81,11 +81,11 @@ function AccountScreen(props) {
           {/* <AccountDetailCard userProfile={user} navigation={navigation} /> */}
           <ProfileNameButton
             profilePicture={user.profilePicture}
-            profileName={user.preferredName}
-            profileRole={user.role}
+            profileLineOne={user.preferredName}
+            profileLineTwo={user.role}
             size={150}
             isPatient={false}
-            isVertical={false}
+            // isVertical={false}
             handleOnPress={handleOnPress}
           />
 

@@ -12,6 +12,7 @@ function PatientAddAllergyScreen(props) {
     componentList,
     concatFormData,
     removeFormData,
+    onSubmitFunction,
     // -- Validation is now real-time no need to have on submit validation - Justin
     // validateStep,
   } = props;
@@ -36,15 +37,15 @@ function PatientAddAllergyScreen(props) {
     [errorStates],
   );
 
-  // if errorStates has true(s) within (errors) => is submit enabled = false
-  // if errorStates does not have true(s) (no error) false => is submit enabled = true
+  // if errorStates has true(s) within (errors present) => is submit enabled = false
+  // if errorStates does not have true(s) (no errors present) false => is submit enabled = true
   let isSubmitEnabled = !errorStates.includes(true);
 
   const addNewAllergyComponent = () => {
     setErrorStates((prev) => [...prev, true]);
     setAllergyInfoDisplay([...allergyInfoDisplay, {}]);
     concatFormData('allergyInfo', {
-      AllergyListID: null,
+      AllergyListID: 2,
       AllergyReactionListID: null,
       AllergyRemarks: '',
     });
@@ -89,8 +90,8 @@ function PatientAddAllergyScreen(props) {
               removeComponent={removeAllergyComponent}
               submit={isSubmitEnabled}
               formData={formData}
+              submitFunction={onSubmitFunction}
               // // -- Validation is now real-time no need to have on submit validation - Justin
-              // validateStep={validateStep}
             />
           </View>
         )}

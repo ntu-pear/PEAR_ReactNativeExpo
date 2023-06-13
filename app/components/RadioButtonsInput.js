@@ -1,7 +1,8 @@
 // Libs
 import React, { useState, useEffect } from 'react';
 import { Platform, StyleSheet, View, Text } from 'react-native';
-import { VStack, HStack, Radio } from 'native-base';
+import { VStack, HStack } from 'native-base';
+import { RadioButton } from 'react-native-paper';
 
 // Configurations
 import typography from 'app/config/typography';
@@ -75,25 +76,20 @@ function RadioButtonInput({
         <Text style={styles.TitleMsg}>
           {title}:{isRequired ? requiredIndicator : ''}
         </Text>
-        <Radio.Group value={value} onChange={onChangeSelection}>
-          <HStack space={4} flexWrap="wrap">
+        <RadioButton.Group value={value} onValueChange={onChangeSelection}>
+          <HStack space={1} flexWrap="wrap">
             {dataArray.map((item) => (
-              <View paddingBottom={10} key={item.value}>
-                <Radio
+              <View style={styles.RadioButtonContainer} key={item.value}>
+                <RadioButton.Item
                   key={item.value}
                   value={item.value}
-                  size="sm"
-                  _icon={{ color: colors.green }}
-                  _checked={{
-                    borderColor: colors.green,
-                  }}
-                >
-                  {item.label}
-                </Radio>
+                  label={item.label}
+                  color={colors.green}
+                />
               </View>
             ))}
           </HStack>
-        </Radio.Group>
+        </RadioButton.Group>
         {isError.errorMsg ? (
           <ErrorMessage message={isError.errorMsg} visible={true} />
         ) : null}
@@ -120,6 +116,13 @@ const styles = StyleSheet.create({
   RequiredIndicator: {
     color: colors.red,
     fontSize: 18,
+  },
+  RadioButtonContainer: {
+    flexShrink: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingBottom: 10,
   },
 });
 

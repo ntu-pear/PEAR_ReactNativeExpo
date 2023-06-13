@@ -206,17 +206,12 @@ function PatientsScreen(props) {
               />
             }
           >
-            <VStack w="100%" h="100%" alignItems="flex-start">
+            <VStack alignItems="flex-start">
               {filteredList && filteredList.length > 0
                 ? filteredList.map((item, index) => (
-                    // <PatientScreenCard
-                    //   patientProfile={item}
-                    //   key={index}
-                    //   navigation={navigation}
-                    // />
-                    <View marginLeft={'5%'}>
+                    <View marginLeft={'5%'} key={index}>
                       <ProfileNameButton
-                        profileName={item.preferredName}
+                        profileLineOne={item.preferredName}
                         profilePicture={item.profilePicture}
                         handleOnPress={() => handleOnPress(item)}
                         isPatient={true}
