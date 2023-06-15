@@ -1,31 +1,40 @@
+// Libs
 import React, { useState, useEffect, useContext } from 'react';
 import { Center, VStack, HStack, ScrollView, Fab, Icon } from 'native-base';
 import { RefreshControl } from 'react-native';
-import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import AuthContext from 'app/auth/context';
-import authStorage from 'app/auth/authStorage';
-import patientApi from 'app/api/patient';
-import useCheckExpiredThenLogOut from 'app/hooks/useCheckExpiredThenLogOut';
-import PatientScreenCard from 'app/components/PatientScreenCard';
-import colors from 'app/config/colors';
-import ActivityIndicator from 'app/components/ActivityIndicator';
-import routes from 'app/navigation/routes';
 import { useFocusEffect } from '@react-navigation/native';
 import { SearchBar } from 'react-native-elements';
 import { StyleSheet, View } from 'react-native';
-import DropDownPicker from 'react-native-dropdown-picker';
+
+// API
+import patientApi from 'app/api/patient';
+
+// Configurations
+import routes from 'app/navigation/routes';
+import colors from 'app/config/colors';
+
+// Components
+import ActivityIndicator from 'app/components/ActivityIndicator';
 import ProfileNameButton from 'app/components/ProfileNameButton';
+import SelectionInputField from 'app/components/SelectionInputField';
+
+// import DropDownPicker from 'react-native-dropdown-picker';
+// import useCheckExpiredThenLogOut from 'app/hooks/useCheckExpiredThenLogOut';
+// import PatientScreenCard from 'app/components/PatientScreenCard';
+// import authStorage from 'app/auth/authStorage';
 
 function PatientsScreen(props) {
   // Destructure props
   const [isLoading, setIsLoading] = useState(false);
   const [listOfPatients, setListOfPatients] = useState();
-  const checkExpiredLogOutHook = useCheckExpiredThenLogOut();
+  // const checkExpiredLogOutHook = useCheckExpiredThenLogOut();
   const { navigation } = props;
 
   const { user, setUser } = useContext(AuthContext);
   const [searchQuery, setSearchQuery] = useState('');
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  // const [dropdownOpen, setDropdownOpen] = useState(false);
   // set default value to my patients
   const [filterValue, setFilterValue] = useState('myPatients');
   const [originalListOfPatients, setOriginalListOfPatients] = useState([]);
@@ -34,24 +43,10 @@ function PatientsScreen(props) {
     {
       label: 'My Patients',
       value: 'myPatients',
-      icon: () => (
-        <MaterialCommunityIcons
-          name="account-multiple"
-          size={18}
-          color={colors.black_var1}
-        />
-      ),
     },
     {
       label: 'All Patients',
       value: 'allPatients',
-      icon: () => (
-        <MaterialCommunityIcons
-          name="account-group"
-          size={18}
-          color={colors.black_var1}
-        />
-      ),
     },
   ]);
 
@@ -142,57 +137,27 @@ function PatientsScreen(props) {
         <ActivityIndicator visible />
       ) : (
         <Center backgroundColor={colors.white_var1}>
-          <HStack style={{ flexDirection: 'row', width: '100%', zIndex: 1 }}>
-            <View style={{ flex: 1, zIndex: 0 }}>
+          <HStack style={styles.headerSearchAndDropDownContainer}>
+            <View style={styles.headerContainer}>
               <SearchBar
                 placeholder="Search"
-                //platform="ios"
                 onChangeText={handleSearch}
                 value={searchQuery}
                 lightTheme={true}
                 containerStyle={styles.searchBarContainer}
-                inputContainerStyle={{
-                  backgroundColor: colors.white,
-                  marginTop: 4.5,
-                  borderRadius: 10,
-                }}
+                inputContainerStyle={styles.searchBarInputStyle}
                 inputStyle={{ fontSize: 14 }}
                 style={styles.searchBar}
               />
             </View>
-            <View style={{ flex: 1, zIndex: 0 }}>
-              <DropDownPicker
-                open={dropdownOpen}
+            <View
+              style={[styles.headerContainer, styles.dropDownOptionsAlignment]}
+            >
+              {/* Standardized Dropdown picker component  --- Justin*/}
+              <SelectionInputField
+                onDataChange={(item) => setFilterValue(item.value)}
                 value={filterValue}
-                items={dropdownItems}
-                setOpen={setDropdownOpen}
-                setValue={setFilterValue}
-                setItems={setDropdownItems}
-                onChangeItem={(item) => setFilterValue(item.value)}
-                mode="BADGE"
-                theme="LIGHT"
-                multiple={false}
-                style={styles.dropDown}
-                itemSeparator={true}
-                itemSeparatorStyle={{
-                  backgroundColor: colors.primary_gray,
-                }}
-                dropDownContainerStyle={{
-                  height: 85,
-                  marginTop: 9,
-                  marginLeft: 12.1,
-                  width: '93%',
-                  backgroundColor: colors.white,
-                }}
-                listItemLabelStyle={{
-                  fontSize: 12,
-                }}
-                selectedItemContainerStyle={{
-                  backgroundColor: colors.primary_gray,
-                }}
-                placeholderStyle={{
-                  color: colors.primary_overlay_color,
-                }}
+                dataArray={dropdownItems}
               />
             </View>
           </HStack>
@@ -249,6 +214,19 @@ function PatientsScreen(props) {
 }
 
 const styles = StyleSheet.create({
+  headerSearchAndDropDownContainer: {
+    flexDirection: 'row',
+    width: '100%',
+    zIndex: 1,
+  },
+  dropDownOptionsAlignment: {
+    marginTop: 10,
+    marginHorizontal: 10,
+  },
+  headerContainer: {
+    flex: 1,
+    zIndex: 0,
+  },
   searchBarContainer: {
     marginLeft: '2%',
     width: '100%',
@@ -260,13 +238,10 @@ const styles = StyleSheet.create({
     alignContent: 'flex-start',
     justifyContent: 'flex-start',
   },
-  dropDown: {
-    marginTop: 12,
-    marginLeft: '3%',
-    alignContent: 'flex-end',
-    justifyContent: 'flex-end',
-    width: '93%',
-    borderColor: colors.primary_overlay_color,
+  searchBarInputStyle: {
+    backgroundColor: colors.white,
+    marginTop: 4.5,
+    borderRadius: 10,
   },
 });
 

@@ -10,6 +10,7 @@ import highlightApi from 'app/api/highlight';
 import colors from 'app/config/colors';
 import { Platform } from 'react-native';
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
+import SelectionInputField from 'appcomponentsSelectionInputField';
 
 function PatientDailyHighlights(props) {
   // Destructure props
@@ -28,80 +29,84 @@ function PatientDailyHighlights(props) {
   const [filterValue, setFilterValue] = useState([]);
   const [dropdownItems, setDropdownItems] = useState([
     {
+      label: 'All',
+      value: [],
+    },
+    {
       label: 'New Prescription',
       value: 'newPrescription',
-      icon: () => (
-        <FontAwesome5
-          name="pills"
-          size={Platform.OS === 'web' ? 26 : 16}
-          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
-          color={colors.black_var1}
-        />
-      ),
-      testID: 'newPrescriptionDropdownItem',
+      // icon: () => (
+      //   <FontAwesome5
+      //     name="pills"
+      //     size={Platform.OS === 'web' ? 26 : 16}
+      //     style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
+      //     color={colors.black_var1}
+      //   />
+      // ),
+      // testID: 'newPrescriptionDropdownItem',
     },
     {
       label: 'New Allergy',
       value: 'newAllergy',
-      icon: () => (
-        <MaterialCommunityIcons
-          name="allergy"
-          size={Platform.OS === 'web' ? 26 : 18}
-          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
-          color={colors.black_var1}
-        />
-      ),
-      testID: 'newAllergyDropdownItem',
+      // icon: () => (
+      //   <MaterialCommunityIcons
+      //     name="allergy"
+      //     size={Platform.OS === 'web' ? 26 : 18}
+      //     style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
+      //     color={colors.black_var1}
+      //   />
+      // ),
+      // testID: 'newAllergyDropdownItem',
     },
     {
       label: 'New Activity Exclusion',
       value: 'newActivityExclusion',
-      icon: () => (
-        <FontAwesome5
-          name="ban"
-          size={Platform.OS === 'web' ? 26 : 18}
-          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
-          color={colors.black_var1}
-        />
-      ),
+      // icon: () => (
+      //   <FontAwesome5
+      //     name="ban"
+      //     size={Platform.OS === 'web' ? 26 : 18}
+      //     style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
+      //     color={colors.black_var1}
+      //   />
+      // ),
     },
     {
       label: 'Abnormal Vital',
       value: 'abnormalVital',
-      icon: () => (
-        <MaterialCommunityIcons
-          name="heart-pulse"
-          size={Platform.OS === 'web' ? 26 : 18}
-          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
-          color={colors.black_var1}
-        />
-      ),
-      testID: 'abnormalVitalDropdownItem',
+      // icon: () => (
+      //   <MaterialCommunityIcons
+      //     name="heart-pulse"
+      //     size={Platform.OS === 'web' ? 26 : 18}
+      //     style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
+      //     color={colors.black_var1}
+      //   />
+      // ),
+      // testID: 'abnormalVitalDropdownItem',
     },
     {
       label: 'Problem',
       value: 'problem',
-      icon: () => (
-        <FontAwesome5
-          name="exclamation-triangle"
-          size={Platform.OS === 'web' ? 26 : 18}
-          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
-          color={colors.black_var1}
-        />
-      ),
-      testID: 'problemDropdownItem',
+      // icon: () => (
+      //   <FontAwesome5
+      //     name="exclamation-triangle"
+      //     size={Platform.OS === 'web' ? 26 : 18}
+      //     style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
+      //     color={colors.black_var1}
+      //   />
+      // ),
+      // testID: 'problemDropdownItem',
     },
     {
       label: 'New Medical Records',
       value: 'medicalHistory',
-      icon: () => (
-        <MaterialCommunityIcons
-          name="clipboard-text"
-          size={Platform.OS === 'web' ? 26 : 18}
-          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
-          color={colors.black_var1}
-        />
-      ),
+      // icon: () => (
+      //   <MaterialCommunityIcons
+      //     name="clipboard-text"
+      //     size={Platform.OS === 'web' ? 26 : 18}
+      //     style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
+      //     color={colors.black_var1}
+      //   />
+      // ),
     },
   ]);
 
@@ -151,6 +156,7 @@ function PatientDailyHighlights(props) {
   useEffect(() => {
     // Search by searchValue
     // .toLowerCase() ensures that the search is not case sensitive
+    // console.log(filterValue);
     const dataAfterSearch = highlightsData.filter((item) =>
       item.patientInfo.patientName
         .toLowerCase()
@@ -252,7 +258,14 @@ function PatientDailyHighlights(props) {
               />
             </View>
             <View style={styles.dropDownView}>
-              <DropDownPicker
+              <SelectionInputField
+                value={filterValue}
+                dataArray={dropdownItems}
+                onDataChange={setFilterValue}
+                placeholderText={'Select Filter'}
+              />
+              {/* Standardize Dropdown component --- Justin */}
+              {/* <DropDownPicker
                 open={dropdownOpen}
                 value={filterValue}
                 items={dropdownItems}
@@ -309,7 +322,7 @@ function PatientDailyHighlights(props) {
                   color: colors.primary_overlay_color,
                 }}
                 testID="dropdownPicker"
-              />
+              /> */}
             </View>
           </View>
           <FlatList
@@ -400,6 +413,7 @@ const styles = StyleSheet.create({
   dropDownView: {
     flex: 1,
     zIndex: 1,
+    marginTop: 5,
   },
   dropDown: {
     justifyContent: 'flex-end',

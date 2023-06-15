@@ -10,7 +10,7 @@ import {
   Divider,
   TextArea,
 } from 'native-base';
-import { StyleSheet, Platform } from 'react-native';
+import { StyleSheet, Platform, View } from 'react-native';
 
 // Configurations
 import colors from 'app/config/colors';
@@ -131,19 +131,19 @@ function AddPatientAllergy({ i, title, formData, handleFormData, onError }) {
   return (
     <Box w="100%">
       <VStack>
-        <Center>
-          {title === 1 ? null : <Divider w="80%" mt={10} />}
-
-          <Text
-            marginTop={6}
-            bold
-            fontSize="2xl"
-            color={colors.green}
-            style={styles.text}
-          >
-            Allergy Information {title}
-          </Text>
-
+        <View style={styles.formContainer}>
+          <View style={styles.titleContainer}>
+            {title === 1 ? null : <Divider w="80%" mt={10} />}
+            <Text
+              marginTop={6}
+              bold
+              fontSize="2xl"
+              color={colors.green}
+              style={styles.text}
+            >
+              Allergy Information {title}
+            </Text>
+          </View>
           <SelectionInputField
             isRequired
             title={'Select Allergy'}
@@ -178,13 +178,24 @@ function AddPatientAllergy({ i, title, formData, handleFormData, onError }) {
           ) : (
             <></>
           )}
-        </Center>
+        </View>
       </VStack>
     </Box>
   );
 }
 
 const styles = StyleSheet.create({
+  formContainer: {
+    flex: 1,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    paddingLeft: '10%',
+    width: '90%',
+  },
+  titleContainer: {
+    alignItems: 'center',
+    width: '100%',
+  },
   text: {
     fontWeight: 'bold',
     fontFamily: `${

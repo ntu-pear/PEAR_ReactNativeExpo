@@ -1,6 +1,6 @@
 // Base
 import React, { useState, useCallback, useEffect } from 'react';
-import { StyleSheet, Platform } from 'react-native';
+import { StyleSheet, Platform, View } from 'react-native';
 import {
   Box,
   Text,
@@ -249,50 +249,53 @@ function PatientAddPatientInfoScreen(props) {
           <Box alignItems="center">
             <Box w="100%">
               <VStack>
-                <Center>
-                  <Text
-                    marginTop={6}
-                    fontSize="2xl"
-                    color={colors.green}
-                    style={styles.text}
-                  >
-                    Patient Information
-                  </Text>
+                {/* <Center> */}
+                <View style={styles.formContainer}>
+                  <View style={styles.titleAndPictureContainer}>
+                    <Text
+                      marginTop={6}
+                      fontSize="2xl"
+                      color={colors.green}
+                      style={styles.text}
+                    >
+                      Patient Information
+                    </Text>
 
-                  <Box mt="3.5" mb="3.5" overflow="hidden" rounded="lg">
-                    <Center>
-                      <Pressable
-                        onPress={pickImage(page, 'UploadProfilePicture')}
-                      >
-                        <Image
-                          alt="patient_image"
-                          borderRadius="full"
-                          // Note: This is a fall-back uri. Will only be used if source fails to render the image.
-                          fallbackSource={{
-                            uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1677039560/Assets/jzfbdl15jstf8bgt5ax0.png',
-                          }}
-                          resizeMode="cover"
-                          size="xl"
-                          source={{
-                            uri: patient.UploadProfilePicture.uri
-                              ? `${patient.UploadProfilePicture.uri}`
-                              : 'https://res.cloudinary.com/dbpearfyp/image/upload/v1677917228/Assets/w2vyggaj8loyi0lmkrwo.png',
-                          }}
-                        />
-                      </Pressable>
-                      {patient.UploadProfilePicture.uri ? (
-                        <></>
-                      ) : (
-                        <Text
-                          style={styles.text}
-                          color={colors.black_var1}
-                          mt="2"
+                    <Box mt="3.5" mb="3.5" overflow="hidden" rounded="lg">
+                      <Center>
+                        <Pressable
+                          onPress={pickImage(page, 'UploadProfilePicture')}
                         >
-                          Upload a Profile Picture
-                        </Text>
-                      )}
-                    </Center>
-                  </Box>
+                          <Image
+                            alt="patient_image"
+                            borderRadius="full"
+                            // Note: This is a fall-back uri. Will only be used if source fails to render the image.
+                            fallbackSource={{
+                              uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1677039560/Assets/jzfbdl15jstf8bgt5ax0.png',
+                            }}
+                            resizeMode="cover"
+                            size="xl"
+                            source={{
+                              uri: patient.UploadProfilePicture.uri
+                                ? `${patient.UploadProfilePicture.uri}`
+                                : 'https://res.cloudinary.com/dbpearfyp/image/upload/v1677917228/Assets/w2vyggaj8loyi0lmkrwo.png',
+                            }}
+                          />
+                        </Pressable>
+                        {patient.UploadProfilePicture.uri ? (
+                          <></>
+                        ) : (
+                          <Text
+                            style={styles.text}
+                            color={colors.black_var1}
+                            mt="2"
+                          >
+                            Upload a Profile Picture
+                          </Text>
+                        )}
+                      </Center>
+                    </Box>
+                  </View>
 
                   <NameInputField
                     isRequired
@@ -347,15 +350,16 @@ function PatientAddPatientInfoScreen(props) {
                     onChildData={handleGenderState}
                     dataArray={listOfGenders}
                   />
-
-                  <DateInputField
-                    isRequired
-                    selectionMode={'DOB'}
-                    title={'Date of Birth'}
-                    value={patient.DOB}
-                    handleFormData={handleFormData(page, 'DOB')}
-                    onChildData={handleDOBState}
-                  />
+                  <View style={styles.dateSelectionContainer}>
+                    <DateInputField
+                      isRequired
+                      selectionMode={'DOB'}
+                      title={'Date of Birth'}
+                      value={patient.DOB}
+                      handleFormData={handleFormData(page, 'DOB')}
+                      onChildData={handleDOBState}
+                    />
+                  </View>
 
                   <CommonInputField
                     isRequired
@@ -397,15 +401,17 @@ function PatientAddPatientInfoScreen(props) {
                     onChildData={handleRespiteState}
                   />
 
-                  <DateInputField
-                    isRequired
-                    title={'Date of Joining'}
-                    value={patient.StartDate}
-                    handleFormData={handleFormData(page, 'StartDate')}
-                    onChildData={handleJoiningState}
-                    minimumInputDate={minimumJoiningDate}
-                    maximumInputDate={maximumJoiningDate}
-                  />
+                  <View style={styles.dateSelectionContainer}>
+                    <DateInputField
+                      isRequired
+                      title={'Date of Joining'}
+                      value={patient.StartDate}
+                      handleFormData={handleFormData(page, 'StartDate')}
+                      onChildData={handleJoiningState}
+                      minimumInputDate={minimumJoiningDate}
+                      maximumInputDate={maximumJoiningDate}
+                    />
+                  </View>
 
                   <SingleOptionCheckBox
                     title={'Check this box to specify Date of Leaving'}
@@ -425,7 +431,8 @@ function PatientAddPatientInfoScreen(props) {
                       onChildData={handleLeavingState}
                     />
                   ) : null}
-                </Center>
+                </View>
+                {/* </Center> */}
               </VStack>
             </Box>
 
@@ -441,6 +448,20 @@ function PatientAddPatientInfoScreen(props) {
   );
 }
 const styles = StyleSheet.create({
+  formContainer: {
+    flex: 1,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    paddingLeft: '10%',
+    width: '90%',
+  },
+  titleAndPictureContainer: {
+    alignItems: 'center',
+    width: '100%',
+  },
+  dateSelectionContainer: {
+    width: '70%',
+  },
   text: {
     fontWeight: 'bold',
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,

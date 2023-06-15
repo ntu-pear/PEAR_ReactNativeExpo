@@ -59,9 +59,13 @@ function SelectionInputField({
   return (
     <View style={styles.ComponentContainer}>
       <VStack>
-        <Text style={styles.TitleMsg}>
-          {title}:{isRequired ? requiredIndicator : ''}
-        </Text>
+        {title ? (
+          <Text style={styles.TitleMsg}>
+            {title}:{isRequired ? requiredIndicator : ''}
+          </Text>
+        ) : (
+          <></>
+        )}
         <Select
           accessibilityLabel={title}
           borderRadius="25"
@@ -96,7 +100,7 @@ SelectionInputField.defaultProps = {
 const styles = StyleSheet.create({
   ComponentContainer: {
     display: 'flex',
-    width: '80%',
+    width: '100%',
     marginTop: 5,
     justifyContent: 'flex-start',
   },

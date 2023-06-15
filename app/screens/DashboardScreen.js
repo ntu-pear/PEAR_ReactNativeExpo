@@ -14,9 +14,10 @@ import {
 import ActivityCard from 'app/components/ActivityCard';
 import globalStyles from 'app/utility/styles.js';
 import colors from 'app/config/colors';
-import ActivityCalendarCard from 'app/components/ActivityCalendarCard';
-import ProfileNameButton from 'app/components/ProfileNameButton';
-import routes from 'app/navigation/routes';
+// import ActivityCalendarCard from 'app/components/ActivityCalendarCard';
+// import ProfileNameButton from 'app/components/ProfileNameButton';
+// import routes from 'app/navigation/routes';
+import DateInputField from 'app/components/DateInputField';
 
 function DashboardScreen({
   selectedDate,
@@ -50,36 +51,37 @@ function DashboardScreen({
         justifyContent="center"
         margin="2"
       >
-        {/* < icon button */}
-        <TouchableOpacity onPress={handlePreviousDate}>
-          <Image
-            alt={'previous date'}
-            marginRight="3"
-            source={{
-              uri: 'https://cdn-icons-png.flaticon.com/512/2722/2722991.png',
-            }}
-            size={'30px'}
+        <View style={styles.dateSelectionContainer}>
+          {/* < icon button */}
+          <TouchableOpacity onPress={handlePreviousDate}>
+            <Image
+              alt={'previous date'}
+              marginRight="3"
+              source={{
+                uri: 'https://cdn-icons-png.flaticon.com/512/2722/2722991.png',
+              }}
+              size={'30px'}
+            />
+          </TouchableOpacity>
+          <DateInputField
+            handleFormData={setSelectedDate}
+            value={selectedDate}
           />
-        </TouchableOpacity>
-        {/* Calender date: Day MM dd YYYY  */}
-        <ActivityCalendarCard
-          selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
-        />
-        {/* > icon button */}
-        <TouchableOpacity onPress={handleNextDate}>
-          <Image
-            alt={'next-date'}
-            marginLeft="3"
-            source={{
-              uri: 'https://cdn-icons-png.flaticon.com/512/2722/2722991.png',
-            }}
-            style={{
-              transform: [{ rotate: '180deg' }],
-            }}
-            size={'30px'}
-          />
-        </TouchableOpacity>
+          {/* > icon button */}
+          <TouchableOpacity onPress={handleNextDate}>
+            <Image
+              alt={'next-date'}
+              marginLeft="3"
+              source={{
+                uri: 'https://cdn-icons-png.flaticon.com/512/2722/2722991.png',
+              }}
+              style={{
+                transform: [{ rotate: '180deg' }],
+              }}
+              size={'30px'}
+            />
+          </TouchableOpacity>
+        </View>
       </Stack>
       <FlatList
         onRefresh={handlePullToRefresh}
@@ -132,6 +134,11 @@ function DashboardScreen({
 }
 
 const styles = StyleSheet.create({
+  dateSelectionContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '50%',
+  },
   patientName: {
     textAlign: 'center',
     fontWeight: 'bold',

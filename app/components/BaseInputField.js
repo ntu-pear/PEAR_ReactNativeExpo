@@ -90,7 +90,7 @@ BaseInputField.defaultProps = {
 const styles = StyleSheet.create({
   ComponentContainer: {
     display: 'flex',
-    width: '80%',
+    width: '100%',
     marginTop: 5,
     justifyContent: 'flex-start',
   },

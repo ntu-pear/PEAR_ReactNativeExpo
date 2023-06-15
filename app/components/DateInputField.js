@@ -38,6 +38,8 @@ function DateInputField({
     errorMsg: '',
   });
 
+  const listOfDays = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
+
   // Earliest year user can be born (150 years ago)
   const minimumDOB = new Date();
   minimumDOB.setFullYear(minimumDOB.getFullYear() - 150);
@@ -73,15 +75,15 @@ function DateInputField({
 
   // Used to format the date to DD/MM/YYYY for display in the input field.
   const formatDate = (inputDate) => {
-    let date, month, year;
-
+    let day, date, month, year;
+    day = inputDate.getDay();
     date = inputDate.getDate();
     month = inputDate.getMonth() + 1;
     year = inputDate.getFullYear();
     date = date.toString().padStart(2, '0');
     month = month.toString().padStart(2, '0');
 
-    return `${date}/${month}/${year}`;
+    return `${listOfDays[day]}, ${date}/${month}/${year}`;
   };
 
   const showPicker = () => {
@@ -115,9 +117,13 @@ function DateInputField({
   return (
     <View style={styles.ComponentContainer}>
       <VStack>
-        <Text style={styles.TitleMsg}>
-          {title}:{isRequired ? requiredIndicator : ''}
-        </Text>
+        {title ? (
+          <Text style={styles.TitleMsg}>
+            {title}:{isRequired ? requiredIndicator : ''}
+          </Text>
+        ) : (
+          <></>
+        )}
         <View style={styles.pickerButton}>
           <TouchableOpacity onPress={() => showPicker()}>
             <Text style={styles.textField}>{formatDate(value)}</Text>
@@ -159,7 +165,7 @@ const styles = StyleSheet.create({
   ComponentContainer: {
     display: 'flex',
     width: '80%',
-    marginTop: 5,
+    // marginTop: 5,
     justifyContent: 'flex-start',
   },
   TitleMsg: {
@@ -170,24 +176,18 @@ const styles = StyleSheet.create({
     color: colors.light_gray2,
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
   },
-  dateTimePickerStyle: {
-    padding: Platform.OS === 'ios' ? 30 : 60,
-    width: '100%',
-    fontSize: 20,
-  },
   pickerButton: {
     display: 'flex',
-    justifyContent: 'flex-start',
-    width: '50%',
+    justifyContent: 'center',
+    width: '100%',
     height: 50,
     borderWidth: 1,
     borderRadius: 25,
     borderColor: colors.light_gray3,
   },
   textField: {
-    fontSize: 16,
-    paddingVertical: '4.2%',
-    paddingLeft: '5%',
+    fontSize: 18,
+    textAlign: 'center',
     color: colors.black_var1,
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
   },

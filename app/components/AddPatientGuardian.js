@@ -1,7 +1,7 @@
 // Libs
 import React, { useState, useCallback, useEffect } from 'react';
 import { Box, Text, Divider, VStack, Center } from 'native-base';
-import { StyleSheet, Platform } from 'react-native';
+import { StyleSheet, Platform, View } from 'react-native';
 
 // Configurations
 import colors from 'app/config/colors';
@@ -135,18 +135,20 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
   return (
     <Box w="100%">
       <VStack>
-        <Center>
-          {title == 1 ? null : <Divider w="80%" mt={10} />}
-          <Text
-            marginTop={6}
-            bold
-            fontSize="2xl"
-            color={colors.green}
-            style={styles.text}
-          >
-            Guardian Information {title}
-          </Text>
-
+        {/* <Center> */}
+        <View style={styles.formContainer}>
+          <View style={styles.titleContainer}>
+            {title == 1 ? null : <Divider w="80%" mt={10} />}
+            <Text
+              marginTop={6}
+              bold
+              fontSize="2xl"
+              color={colors.green}
+              style={styles.text}
+            >
+              Guardian Information {title}
+            </Text>
+          </View>
           <NameInputField
             isRequired
             title={'Guardian First Name'}
@@ -204,12 +206,24 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
             onChangeText={handleFormData(page, 'Email', i)}
             onChildData={handleEmailState}
           />
-        </Center>
+        </View>
+        {/* </Center> */}
       </VStack>
     </Box>
   );
 }
 const styles = StyleSheet.create({
+  formContainer: {
+    flex: 1,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    paddingLeft: '10%',
+    width: '90%',
+  },
+  titleContainer: {
+    alignItems: 'center',
+    width: '100%',
+  },
   text: {
     fontWeight: 'bold',
     fontFamily: `${
