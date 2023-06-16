@@ -10,7 +10,7 @@ import highlightApi from 'app/api/highlight';
 import colors from 'app/config/colors';
 import { Platform } from 'react-native';
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
-import SelectionInputField from 'appcomponentsSelectionInputField';
+import SelectionInputField from 'app/components/SelectionInputField';
 
 function PatientDailyHighlights(props) {
   // Destructure props
