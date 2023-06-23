@@ -4,6 +4,7 @@ import guardianApi from 'app/api/guardian';
 import socialHistoryApi from 'app/api/socialHistory';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import AppButton from 'app/components/AppButton';
+import InformationCard from 'app/components/InformationCard';
 import PersonalSocialHistory from 'app/components/PersonalSocialHistory';
 import colors from 'app/config/colors';
 import typography from 'app/config/typography';
@@ -22,12 +23,12 @@ import {
   Stack,
   Text,
   VStack,
-  Avatar,
-  Input,
-  FormControl,
-  TextArea,
-  Select,
-  CheckIcon,
+  // Avatar,
+  // Input,
+  // FormControl,
+  // TextArea,
+  // Select,
+  // CheckIcon,
 } from 'native-base';
 import React, { useEffect, useState } from 'react';
 import { Platform, StyleSheet } from 'react-native';
@@ -39,11 +40,161 @@ function PatientInformationScreen(props) {
   const getPatientGuardian = useApi(guardianApi.getPatientGuardian);
   const getSocialHistory = useApi(socialHistoryApi.getSocialHistory);
 
+  const formatDate = (str) => {
+    let splitDate = str.split('-');
+    // splitDate[0] = splitDate[0].split('').reverse().join('');
+
+    return `${splitDate[2]}-${splitDate[1]}-${splitDate[0]}`;
+  };
+
+  const [guardianData, setGuardianData] = useState([]);
+  const [secondGuardianData, setSecondGuardianData] = useState([]);
+  const [isSecondGuardian, setIsSecondGuardian] = useState(false);
+
+  const patientData = [
+    { label: 'First Name', value: props.route.params.firstName },
+    { label: 'Last Name', value: props.route.params.lastName },
+    { label: 'NRIC', value: props.route.params.nric },
+    {
+      label: 'Gender',
+      value: props.route.params.gender === 'F' ? 'Female' : 'Male',
+    },
+    {
+      label: 'DOB',
+      value: formatDate(props.route.params.dob.substring(0, 10)),
+    },
+    {
+      label: 'Home Number',
+      value: props.route.params.homeNo || 'Not available',
+    },
+    {
+      label: 'Mobile Number',
+      value: props.route.params.handphoneNo || 'Not available',
+    },
+    { label: 'Address', value: props.route.params.address || 'Not available' },
+    {
+      label: 'Temp. Address',
+      value: props.route.params.tempAddress || 'Not available',
+    },
+  ];
+
+  const preferenceData = [
+    { label: 'Preferred name', value: props.route.params.preferredName },
+    {
+      label: 'Preferred language',
+      value: props.route.params.preferredLanguage,
+    },
+  ];
+
+  const doctorData = [
+    {
+      label: "Doctor's Notes",
+      value:
+        getDoctorNote.data &&
+        getDoctorNote.data[0] &&
+        getDoctorNote.data[0].doctorRemarks
+          ? getDoctorNote.data[0].doctorRemarks
+          : 'Not available',
+    },
+  ];
+
+  useEffect(() => {
+    if (getPatientGuardian.data.guardian) {
+      // get data of first guardian
+      setGuardianData([
+        {
+          label: 'First Name',
+          value: getPatientGuardian.data.guardian.firstName
+            ? getPatientGuardian.data.guardian.firstName
+            : 'Not Available',
+        },
+        {
+          label: 'Last Name',
+          value: getPatientGuardian.data.guardian.lastName
+            ? getPatientGuardian.data.guardian.lastName
+            : 'Not Available',
+        },
+        {
+          label: 'NRIC',
+          value: getPatientGuardian.data.guardian.nric
+            ? getPatientGuardian.data.guardian.nric
+            : 'Not Available',
+        },
+        {
+          label: 'Relationship',
+          value: getPatientGuardian.data.guardian.relationship
+            ? getPatientGuardian.data.guardian.relationship
+            : 'Not Available',
+        },
+        {
+          label: 'Contact Number',
+          value: getPatientGuardian.data.guardian.contactNo
+            ? getPatientGuardian.data.guardian.contactNo
+            : 'Not Available',
+        },
+        {
+          label: 'Email',
+          value: getPatientGuardian.data.guardian.email
+            ? getPatientGuardian.data.guardian.email
+            : 'Not Available',
+        },
+      ]);
+    }
+    // get data of 2nd guardian if any.
+    if (
+      getPatientGuardian.data.additionalGuardian &&
+      getPatientGuardian.data.additionalGuardian.nric !== null
+    ) {
+      setIsSecondGuardian(true);
+      setSecondGuardianData([
+        {
+          label: 'First Name',
+          value: getPatientGuardian.data.additionalGuardian.firstName
+            ? getPatientGuardian.data.additionalGuardian.firstName
+            : 'Not Available',
+        },
+        {
+          label: 'Last Name',
+          value: getPatientGuardian.data.additionalGuardian.lastName
+            ? getPatientGuardian.data.additionalGuardian.lastName
+            : 'Not Available',
+        },
+        {
+          label: 'NRIC',
+          value: getPatientGuardian.data.additionalGuardian.nric
+            ? getPatientGuardian.data.additionalGuardian.nric
+            : 'Not Available',
+        },
+        {
+          label: 'Relationship',
+          value: getPatientGuardian.data.additionalGuardian.relationship
+            ? getPatientGuardian.data.additionalGuardian.relationship
+            : 'Not Available',
+        },
+        {
+          label: 'Contact Number',
+          value: getPatientGuardian.data.additionalGuardian.contactNo
+            ? getPatientGuardian.data.additionalGuardian.contactNo
+            : 'Not Available',
+        },
+        {
+          label: 'Email',
+          value: getPatientGuardian.data.additionalGuardian.email
+            ? getPatientGuardian.data.additionalGuardian.email
+            : 'Not Available',
+        },
+      ]);
+    }
+  }, [
+    getPatientGuardian.data.guardian,
+    getPatientGuardian.data.additionalGuardian,
+  ]);
+
   useEffect(() => {
     getDoctorNote.request(patientID);
     getPatientGuardian.request(patientID);
     getSocialHistory.request(patientID);
-
+    // console.log(getPatientGuardian.data.guardian);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -157,293 +308,38 @@ function PatientInformationScreen(props) {
             <VStack maxW="100%" mt="2.5" mb="8">
               <Stack ml="5" mr="5" space={5}>
                 <Divider mt="2" />
-                <Stack name="PersonalInformationCard">
-                  <Text style={styles.Header}>
-                    Your Patient Information
-                  </Text>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        First Name
-                      </FormControl.Label>
 
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={props.route.params.firstName}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        Last Name
-                      </FormControl.Label>
-
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={props.route.params.lastName}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        NRIC
-                      </FormControl.Label>
-
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={props.route.params.nric}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        Gender
-                      </FormControl.Label>
-
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={props.route.params.gender === 'F' ? 'Female' : 'Male'}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        DOB
-                      </FormControl.Label>
-
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={props.route.params.dob.substring(0, 10)}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        Home Number
-                      </FormControl.Label>
-
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={props.route.params.homeNo || 'Not available'}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        Mobile Number
-                      </FormControl.Label>
-
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={props.route.params.handphoneNo || 'Not available'}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                  <FormControl>
-                    <Stack space={0} alignItems="flex-start" flexWrap="wrap">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        Address
-                      </FormControl.Label>
-                      <TextArea 
-                        style={styles.InputStyle}
-                        isReadOnly
-                        input="lg"
-                        ml="-2.5"
-                        minH="30%"
-                        maxH="50%"
-                        variant="unstyled"
-                        value={props.route.params.address || 'Not available'}
-                        w="100%"
-                      />
-                    </Stack>
-                  </FormControl>
-                  <FormControl>
-                    <Stack space={0} alignItems="flex-start" flexWrap="wrap">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        Temporary Address
-                      </FormControl.Label>
-                      <TextArea
-                        style={styles.InputStyle}
-                        isReadOnly
-                        input="lg"
-                        ml="-2.5"
-                        minH="30%"
-                        maxH="50%"
-                        variant="unstyled"
-                        value={props.route.params.tempAddress || 'Not available'}
-                        w="100%"
-                      />
-                    </Stack>
-                  </FormControl>
-
-                  <Center position="absolute" right="0" py="1.5">
-                    <Avatar
-                      size={Platform.OS === 'web' ? '2xl' : 'md'}
-                      source={{uri: props.route.params.profilePicture,}}
-                    >
-                      {/* Note this is a fall-back, in case image isn't rendered */}
-                      {`${props.route.params.firstName.substring(0, 1)}${props.route.params.lastName.substring(0, 1)}`}
-                    </Avatar>
-                  </Center>
-                </Stack>
+                <InformationCard
+                  title={'Your Patient Information'}
+                  displayData={patientData}
+                />
                 <Divider />
-                <Stack name="PersonalPreferenceCard" space={2}>
-                  <Text style={styles.Header}>
-                    Preference
-                  </Text>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        Preferred Name
-                      </FormControl.Label>
 
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={props.route.params.preferredName}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        Preferred Language
-                      </FormControl.Label>
-
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={props.route.params.preferredLanguage}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                </Stack>
+                <InformationCard
+                  title={'Preferences'}
+                  displayData={preferenceData}
+                />
                 <Divider />
-                <Stack name="PersonalDoctorCard" space={2}>
-                  <Text style={styles.Header}>
-                    Doctor's Notes
-                  </Text>
-                  <FormControl>
-                    <Stack space={0} alignItems="flex-start" flexWrap="wrap">
-                      <TextArea
-                        style={styles.InputStyle}
-                        isReadOnly
-                        input="lg"
-                        //ml="-2.5"
-                        //minH="30%"
-                        //maxH="50%"
-                        //w="100%"
-                        //variant="unstyled"
-                        value={
-                          getDoctorNote.data && getDoctorNote.data[0] && getDoctorNote.data[0].doctorRemarks
-                            ? getDoctorNote.data[0].doctorRemarks
-                            : 'Not available'}
-                      />
-                    </Stack>
-                  </FormControl>
-                </Stack>
+
+                <InformationCard
+                  title={"Doctor's Notes"}
+                  displayData={doctorData}
+                />
                 <Divider />
-                <Stack name="PersonalGuardianCard">
-                  <Text style={styles.Header}>
-                    Guardian(s)
-                  </Text>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        First Name
-                      </FormControl.Label>
 
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={getPatientGuardian.data.guardian && getPatientGuardian.data.guardian.firstName 
-                          ? getPatientGuardian.data.guardian.firstName : 'Not Available'}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        Last Name
-                      </FormControl.Label>
-
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={getPatientGuardian.data.guardian && getPatientGuardian.data.guardian.lastName
-                          ? getPatientGuardian.data.guardian.lastName: 'Not Available'}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        NRIC
-                      </FormControl.Label>
-
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={getPatientGuardian.data.guardian && getPatientGuardian.data.guardian.nric
-                          ? getPatientGuardian.data.guardian.nric : 'Not Available'}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        Relationship
-                      </FormControl.Label>
-
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={getPatientGuardian.data.guardian && getPatientGuardian.data.guardian.relationship
-                          ? getPatientGuardian.data.guardian.relationship: 'Not Available'}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                </Stack>
+                <InformationCard
+                  title={'Guardian(s) Information'}
+                  subtitle={'Guardian 1'}
+                  displayData={guardianData}
+                />
+                {isSecondGuardian ? (
+                  <InformationCard
+                    subtitle={'Guardian 2'}
+                    displayData={secondGuardianData}
+                  />
+                ) : null}
                 <Divider />
+
                 <PersonalSocialHistory socialHistory={getSocialHistory.data} />
               </Stack>
             </VStack>
@@ -459,13 +355,13 @@ const styles = StyleSheet.create({
     color: colors.black_var1,
     fontFamily: Platform.OS === 'ios' ? 'Helvetica' : typography.android,
     fontSize: 24,
-    fontWeight: "semibold",
+    fontWeight: 'semibold',
     paddingTop: 5,
   },
   LabelStyle: {
     fontFamily: Platform.OS === 'ios' ? 'Helvetica' : typography.android,
     fontSize: 18,
-    fontWeight: "thin",
+    fontWeight: 'thin',
   },
   InputStyle: {
     color: colors.black_var1,
@@ -475,4 +371,3 @@ const styles = StyleSheet.create({
 });
 
 export default PatientInformationScreen;
-
