@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import authStorage from 'app/auth/authStorage';
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
 import AuthContext from 'app/auth/context';
+import { useGetPersonalDetails } from 'app/hooks/useGetPersonalDetails';
 // import authStorage from 'app/auth/authStorage';
 
 const getUserTokens = async () => {
@@ -17,6 +18,8 @@ const getUserTokens = async () => {
 function ConfigScreen() {
   const { setUser } = useContext(AuthContext);
   getUserTokens();
+  // const { data, isError, isLoading } = useGetPersonalDetails('B22698B8-42A2-4115-9631-1C2D1E2AC5F2', false);
+  // console.log(data);
   // setUser(null);
   return <MessageDisplayCard TextMessage={'Configuration Screen'} />;
 }

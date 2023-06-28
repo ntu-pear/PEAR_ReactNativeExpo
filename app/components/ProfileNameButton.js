@@ -62,12 +62,14 @@ function ProfileNameButton({
 ProfileNameButton.defaultProps = {
   isVertical: true,
   isPatient: false,
+  size: 65,
 };
 
 const styles = StyleSheet.create({
   ContentWrapperVertical: {
     flexDirection: 'column',
     justifyContent: 'center',
+    alignItems: 'center',
     paddingBottom: '4%',
     paddingTop: '6%',
   },
@@ -95,6 +97,7 @@ const styles = StyleSheet.create({
   TextContainer: (isVertical) => {
     return {
       justifyContent: 'center',
+      marginTop: isVertical ? '5%' : null,
       marginLeft: isVertical ? null : 30,
     };
   },

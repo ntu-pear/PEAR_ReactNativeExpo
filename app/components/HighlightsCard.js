@@ -1,10 +1,10 @@
 import React from 'react';
 import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
-import { Text, Box, VStack, HStack, Avatar } from 'native-base';
+import { Text, Box, VStack, HStack } from 'native-base';
 import colors from 'app/config/colors';
-import typography from 'app/config/typography';
 import routes from 'app/navigation/routes';
+import ProfileNameButton from 'app/components/ProfileNameButton';
 
 function HighlightsCard({ item, navigation, setModalVisible }) {
   const goToPatientProfile = () => {
@@ -127,8 +127,9 @@ function HighlightsCard({ item, navigation, setModalVisible }) {
         mt="3"
       >
         <HStack w="100%" space={3} flexWrap="wrap" mb="1">
-          <VStack w="28%" space={1} alignItems="center" justifyContent="center">
-            <Avatar
+          <VStack w="28%">
+            {/* --- Replace Avatar and Text component with ProfileNameButton --- Justin */}
+            {/* <Avatar
               size="lg"
               bg={colors.pink}
               source={
@@ -155,7 +156,12 @@ function HighlightsCard({ item, navigation, setModalVisible }) {
               }
             >
               {item.patientInfo.patientName}
-            </Text>
+            </Text> */}
+            <ProfileNameButton
+              profilePicture={item.patientInfo.patientPhoto}
+              profileLineOne={item.patientInfo.patientName}
+              handleOnPress={goToPatientProfile}
+            />
           </VStack>
           <VStack w="68%" space={2}>
             {list()}
