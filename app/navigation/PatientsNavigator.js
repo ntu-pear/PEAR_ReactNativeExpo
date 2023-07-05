@@ -16,6 +16,10 @@ import PatientProblemLog from 'app/screens/PatientProblemLog';
 import PatientVitalScreen from 'app/screens/PatientVitalScreen';
 import PatientRoutineScreen from 'app/screens/PatientRoutineScreen';
 import PatientAddScreen from 'app/screens/PatientAddScreen';
+import EditPatientInfoScreen from 'app/screens/EditPatientInfoScreen';
+import EditPatientPreferencesScreen from 'app/screens/EditPatientPreferencesScreen';
+import EditPatientGuardianScreen from 'app/screens/EditPatientGuardianScreen';
+import EditPatientSocialHistScreen from 'app/screens/EditPatientSocialHistScreen';
 
 // Refer to this: https://reactnavigation.org/docs/hello-react-navigation
 const Stack = createNativeStackNavigator();
@@ -138,6 +142,42 @@ function PatientsNavigator() {
           headerShown: true,
           headerBackTitleVisible: false,
           title: 'Add Patient',
+        }}
+      />
+      <Stack.Screen
+        name={routes.EDIT_PATIENT_INFO}
+        component={EditPatientInfoScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Edit Patient Info',
+        }}
+      />
+      <Stack.Screen
+        name={routes.EDIT_PATIENT_PREFERENCES}
+        component={EditPatientPreferencesScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Edit Patient Preferences',
+        }}
+      />
+      <Stack.Screen
+        name={routes.EDIT_PATIENT_GUARDIAN}
+        component={EditPatientGuardianScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Edit Patient Guardian',
+        }}
+      />
+      <Stack.Screen
+        name={routes.EDIT_PATIENT_SOCIALHIST}
+        component={EditPatientSocialHistScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Edit Patient Social History',
         }}
       />
     </Stack.Navigator>

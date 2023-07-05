@@ -5,7 +5,6 @@ import socialHistoryApi from 'app/api/socialHistory';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import AppButton from 'app/components/AppButton';
 import InformationCard from 'app/components/InformationCard';
-import PersonalSocialHistory from 'app/components/PersonalSocialHistory';
 import colors from 'app/config/colors';
 import typography from 'app/config/typography';
 import useApi from 'app/hooks/useApi';
@@ -34,22 +33,16 @@ import React, { useEffect, useState } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 
 function PatientInformationScreen(props) {
-  const { displayPicUrl, firstName, lastName, patientID } = props.route.params;
+  const { displayPicUrl, firstName, lastName, patientID, navigation } = props.route.params;
   const [isLoading, setIsLoading] = useState(false); //eslint-disable-line no-unused-vars
   const getDoctorNote = useApi(doctorNoteApi.getDoctorNote);
   const getPatientGuardian = useApi(guardianApi.getPatientGuardian);
   const getSocialHistory = useApi(socialHistoryApi.getSocialHistory);
 
-  const formatDate = (str) => {
-    let splitDate = str.split('-');
-    // splitDate[0] = splitDate[0].split('').reverse().join('');
-
-    return `${splitDate[2]}-${splitDate[1]}-${splitDate[0]}`;
-  };
-
   const [guardianData, setGuardianData] = useState([]);
   const [secondGuardianData, setSecondGuardianData] = useState([]);
   const [isSecondGuardian, setIsSecondGuardian] = useState(false);
+  const [socialHistoryData, setSocialHistoryData] = useState([]);
 
   const patientData = [
     { label: 'First Name', value: props.route.params.firstName },
@@ -61,7 +54,7 @@ function PatientInformationScreen(props) {
     },
     {
       label: 'DOB',
-      value: formatDate(props.route.params.dob.substring(0, 10)),
+      value: props.route.params.dob,
     },
     {
       label: 'Home Number',
@@ -71,7 +64,10 @@ function PatientInformationScreen(props) {
       label: 'Mobile Number',
       value: props.route.params.handphoneNo || 'Not available',
     },
-    { label: 'Address', value: props.route.params.address || 'Not available' },
+    { 
+      label: 'Address', 
+      value: props.route.params.address || 'Not available',
+    },
     {
       label: 'Temp. Address',
       value: props.route.params.tempAddress || 'Not available',
@@ -79,7 +75,10 @@ function PatientInformationScreen(props) {
   ];
 
   const preferenceData = [
-    { label: 'Preferred name', value: props.route.params.preferredName },
+    { 
+      label: 'Preferred name', 
+      value: props.route.params.preferredName 
+    },
     {
       label: 'Preferred language',
       value: props.route.params.preferredLanguage,
@@ -133,6 +132,10 @@ function PatientInformationScreen(props) {
             : 'Not Available',
         },
         {
+          label: 'Is Active',
+          value: getPatientGuardian.data.guardian.isActive
+        },
+        {
           label: 'Email',
           value: getPatientGuardian.data.guardian.email
             ? getPatientGuardian.data.guardian.email
@@ -178,6 +181,10 @@ function PatientInformationScreen(props) {
             : 'Not Available',
         },
         {
+          label: 'Is Active',
+          value: getPatientGuardian.data.additionalGuardian.isActive
+        },
+        {
           label: 'Email',
           value: getPatientGuardian.data.additionalGuardian.email
             ? getPatientGuardian.data.additionalGuardian.email
@@ -188,6 +195,93 @@ function PatientInformationScreen(props) {
   }, [
     getPatientGuardian.data.guardian,
     getPatientGuardian.data.additionalGuardian,
+  ]);
+
+  useEffect(() => {
+    if (getSocialHistory.data) {
+      setSocialHistoryData([
+        {
+          label: 'Live with',
+          value: getSocialHistory.data.liveWithDescription
+            ? getSocialHistory.data.liveWithDescription
+            : 'Not Available',
+        },
+        {
+          label: 'Education',
+          value: getSocialHistory.data.educationDescription
+            ? getSocialHistory.data.educationDescription
+            : 'Not Available',
+        },
+        {
+          label: 'Occupation',
+          value: getSocialHistory.data.occupationDescription
+            ? getSocialHistory.data.occupationDescription
+            : 'Not Available',
+        },
+        {
+          label: 'Religion',
+          value: getSocialHistory.data.religionDescription
+            ? getSocialHistory.data.religionDescription
+            : 'Not Available',
+        },
+        {
+          label: 'Pet',
+          value: getSocialHistory.data.petDescription
+            ? getSocialHistory.data.petDescription
+            : 'Not Available',
+        },
+        {
+          label: 'Diet',
+          value: getSocialHistory.data.dietDescription
+            ? getSocialHistory.data.dietDescription
+            : 'Not Available',
+        },
+        {
+          label: 'Exercise',
+          value: getSocialHistory.data.exercise
+            ? getSocialHistory.data.exercise
+            : 'Not Available',
+        },
+        {
+          label: 'Sexually active',
+          value: getSocialHistory.data.sexuallyActive
+            ? getSocialHistory.data.sexuallyActive
+            : 'Not Available',
+        },
+        {
+          label: 'Drug use',
+          value: getSocialHistory.data.drugUse
+            ? getSocialHistory.data.drugUse
+            : 'Not Available',
+        },
+        {
+          label: 'Caffeine use',
+          value: getSocialHistory.data.caffeineUse
+            ? getSocialHistory.data.caffeineUse
+            : 'Not Available',
+        },
+        {
+          label: 'Alochol use',
+          value: getSocialHistory.data.alcoholUse
+            ? getSocialHistory.data.alcoholUse
+            : 'Not Available',
+        },
+        {
+          label: 'Tobacco use',
+          value: getSocialHistory.data.tobaccoUse
+            ? getSocialHistory.data.tobaccoUse
+            : 'Not Available',
+        },
+        {
+          label: 'Secondhand smoker',
+          value: getSocialHistory.data.secondhandSmoker
+            ? getSocialHistory.data.secondhandSmoker
+            : 'Not Available',
+        },
+      ]);
+    }
+  }, [
+    getSocialHistory.data,
   ]);
 
   useEffect(() => {
@@ -310,20 +404,23 @@ function PatientInformationScreen(props) {
                 <Divider mt="2" />
 
                 <InformationCard
-                  title={'Your Patient Information'}
+                  title={'Patient Information'}
                   displayData={patientData}
+                  navigation={navigation}
                 />
                 <Divider />
 
                 <InformationCard
-                  title={'Preferences'}
+                  title={'Patient Preferences'}
                   displayData={preferenceData}
+                  navigation={navigation}
                 />
                 <Divider />
 
                 <InformationCard
                   title={"Doctor's Notes"}
                   displayData={doctorData}
+                  navigation={navigation}
                 />
                 <Divider />
 
@@ -331,16 +428,23 @@ function PatientInformationScreen(props) {
                   title={'Guardian(s) Information'}
                   subtitle={'Guardian 1'}
                   displayData={guardianData}
+                  navigation={navigation}
                 />
                 {isSecondGuardian ? (
                   <InformationCard
                     subtitle={'Guardian 2'}
                     displayData={secondGuardianData}
+                    navigation={navigation}
                   />
                 ) : null}
                 <Divider />
-
-                <PersonalSocialHistory socialHistory={getSocialHistory.data} />
+                {//Divide into about and lifystyle?
+                }
+                <InformationCard
+                  title={'Social History'}
+                  displayData={socialHistoryData}
+                  navigation={navigation}
+                />
               </Stack>
             </VStack>
           </ScrollView>
