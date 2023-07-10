@@ -129,34 +129,6 @@ function HighlightsCard({ item, navigation, setModalVisible }) {
         <HStack w="100%" space={3} flexWrap="wrap" mb="1">
           <VStack w="28%">
             {/* --- Replace Avatar and Text component with ProfileNameButton --- Justin */}
-            {/* <Avatar
-              size="lg"
-              bg={colors.pink}
-              source={
-                item.patientInfo.patientPhoto
-                  ? {
-                      uri: `${item.patientInfo.patientPhoto}`,
-                    }
-                  : null
-              }
-            >
-              {' '}
-              {item &&
-              item.patientInfo.patientName &&
-              item.patientInfo.patientName.substring(0, 1)
-                ? item.patientInfo.patientName.substring(0, 1)
-                : '--'}{' '}
-            </Avatar>
-
-            <Text
-              bold
-              color={colors.black_var1}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-            >
-              {item.patientInfo.patientName}
-            </Text> */}
             <ProfileNameButton
               profilePicture={item.patientInfo.patientPhoto}
               profileLineOne={item.patientInfo.patientName}

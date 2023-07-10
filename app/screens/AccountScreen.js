@@ -8,7 +8,7 @@ import AccountCard from 'app/components/AccountCard';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import routes from 'app/navigation/routes';
-import AccountDetailCard from 'app/components/AccountDetailCard';
+// import AccountDetailCard from 'app/components/AccountDetailCard'; --- replaced by ProfileNameButton
 import userApi from 'app/api/user';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import { useFocusEffect } from '@react-navigation/native';

@@ -1,7 +1,7 @@
 import { create } from 'apisauce';
 import authStorage from 'app/auth/authStorage';
 import cache from 'app/utility/cache';
-import { Platform } from 'react-native';
+// import { Platform } from 'react-native';
 import { useContext } from 'react';
 import AuthContext from 'app/auth/context';
 
@@ -83,13 +83,11 @@ apiClient.addAsyncResponseTransform(async (response) => {
     const data = await apiClient.post(`${baseURL}${userRefreshToken}`, body);
     // if token refresh is unsuccessful
     if (!data.ok || !data.data.data.success) {
+      const { setUser } = useContext(AuthContext);
       console.log('client.js: !data.ok || !data.data.data.success');
-      // console.log('\n!/data.data.success: ', !data.data.success, data.data.success);
       console.log(data);
       // if refreshToken invalid, remove token
-      // await authStorage.removeToken();
-      // console.log('!/data.ok: ', !data.ok, data.ok);
-      // console.log('\naddAsyncResponseTransform: ');
+      await authStorage.removeToken();
       // // TODO: Implement logout() here.
       // navigation.navigate(routes.WELCOME);
       if (data.data.message) {
@@ -99,7 +97,7 @@ apiClient.addAsyncResponseTransform(async (response) => {
       }
       // return Promise.reject(data.data.error);
       // TODO: include alert component
-      // console.log(data.data.error);
+      setUser(null);
       return Promise.resolve();
     }
     // if token refresh is successful
@@ -116,7 +114,7 @@ apiClient.addAsyncResponseTransform(async (response) => {
       data.data.data.refreshToken,
     );
     if (response && response.config) {
-      // replace response.config.header's Authorization with the new Bearer token
+      // Replace response.config.header's Authorization with the new Bearer token
       response.config.headers
         ? (response.config.headers.Authorization = `Bearer ${bearerToken}`)
         : null;
