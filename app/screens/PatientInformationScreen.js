@@ -33,7 +33,8 @@ import React, { useEffect, useState } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 
 function PatientInformationScreen(props) {
-  const { displayPicUrl, firstName, lastName, patientID, navigation } = props.route.params;
+  const { displayPicUrl, firstName, lastName, patientID, navigation } =
+    props.route.params;
   const [isLoading, setIsLoading] = useState(false); //eslint-disable-line no-unused-vars
   const getDoctorNote = useApi(doctorNoteApi.getDoctorNote);
   const getPatientGuardian = useApi(guardianApi.getPatientGuardian);
@@ -64,8 +65,8 @@ function PatientInformationScreen(props) {
       label: 'Mobile Number',
       value: props.route.params.handphoneNo || 'Not available',
     },
-    { 
-      label: 'Address', 
+    {
+      label: 'Address',
       value: props.route.params.address || 'Not available',
     },
     {
@@ -75,9 +76,9 @@ function PatientInformationScreen(props) {
   ];
 
   const preferenceData = [
-    { 
-      label: 'Preferred name', 
-      value: props.route.params.preferredName 
+    {
+      label: 'Preferred name',
+      value: props.route.params.preferredName,
     },
     {
       label: 'Preferred language',
@@ -133,7 +134,7 @@ function PatientInformationScreen(props) {
         },
         {
           label: 'Is Active',
-          value: getPatientGuardian.data.guardian.isActive
+          value: getPatientGuardian.data.guardian.isActive,
         },
         {
           label: 'Email',
@@ -146,7 +147,9 @@ function PatientInformationScreen(props) {
     // get data of 2nd guardian if any.
     if (
       getPatientGuardian.data.additionalGuardian &&
-      getPatientGuardian.data.additionalGuardian.nric !== null
+      getPatientGuardian.data.additionalGuardian.nric !== null &&
+      getPatientGuardian.data.additionalGuardian.nric !==
+        getPatientGuardian.data.guardian.nric
     ) {
       setIsSecondGuardian(true);
       setSecondGuardianData([
@@ -182,7 +185,7 @@ function PatientInformationScreen(props) {
         },
         {
           label: 'Is Active',
-          value: getPatientGuardian.data.additionalGuardian.isActive
+          value: getPatientGuardian.data.additionalGuardian.isActive,
         },
         {
           label: 'Email',
@@ -280,9 +283,7 @@ function PatientInformationScreen(props) {
         },
       ]);
     }
-  }, [
-    getSocialHistory.data,
-  ]);
+  }, [getSocialHistory.data]);
 
   useEffect(() => {
     getDoctorNote.request(patientID);
@@ -438,7 +439,8 @@ function PatientInformationScreen(props) {
                   />
                 ) : null}
                 <Divider />
-                {//Divide into about and lifystyle?
+                {
+                  //Divide into about and lifystyle?
                 }
                 <InformationCard
                   title={'Social History'}

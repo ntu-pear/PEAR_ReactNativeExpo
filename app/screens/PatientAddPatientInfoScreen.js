@@ -15,6 +15,9 @@ import {
 import colors from 'app/config/colors';
 import typography from 'app/config/typography';
 
+// Hooks
+import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
+
 // Components
 import AddPatientProgress from 'app/components/AddPatientProgress';
 import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
@@ -26,12 +29,18 @@ import DateInputField from 'app/components/DateInputField';
 import SelectionInputField from 'app/components/SelectionInputField';
 import RadioButtonInput from 'app/components/RadioButtonsInput';
 import SingleOptionCheckBox from 'app/components/SingleOptionCheckBox';
+import ActivityIndicator from 'app/components/ActivityIndicator';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
 
-function PatientAddPatientInfoScreen(props) {
-  const { nextQuestionHandler, handleFormData, formData, pickImage } = props;
-
+function PatientAddPatientInfoScreen({
+  nextQuestionHandler,
+  handleFormData,
+  formData,
+  pickImage,
+}) {
   const page = 'patientInfo';
   const patient = formData.patientInfo;
+  const { data, isError, isLoading } = useGetSelectionOptions('Language');
 
   // Screen error state: This = true when the child components report error(input fields)
   // Enables use of dynamic rendering of components when the page error = true/false.
@@ -60,8 +69,8 @@ function PatientAddPatientInfoScreen(props) {
   const maximumJoiningDate = new Date();
   maximumJoiningDate.setDate(maximumJoiningDate.getDate() + 30); // 30 days later
 
-  // Use for the SelectionInputField dataArray prop -> follow format of "label" and "value"
-  const listOfLanguages = [
+  // set initial value for  SelectionInputField dataArray prop -> follow format of "label" and "value"
+  const [listOfLanguages, setListOfLanguages] = useState([
     { label: 'Cantonese', value: 1 },
     { label: 'English', value: 2 },
     { label: 'Hainanese', value: 3 },
@@ -75,7 +84,7 @@ function PatientAddPatientInfoScreen(props) {
     { label: 'Japanese', value: 11 },
     { label: 'Spanish', value: 12 },
     { label: 'Korean', value: 13 },
-  ];
+  ]);
 
   // use for the RadioButtonInput dataArray prop -> follow format of "label" and "value"
   const listOfGenders = [
@@ -238,7 +247,17 @@ function PatientAddPatientInfoScreen(props) {
     isGenderError,
   ]);
 
-  return (
+  /* If retrieval from the hook is successful, replace the content in
+     listOfLanguages with the retrieved one. */
+  useEffect(() => {
+    if (!isLoading && !isError && data) {
+      setListOfLanguages(data);
+    }
+  }, [data, isError, isLoading]);
+
+  return isLoading ? (
+    <ActivityIndicator visible />
+  ) : (
     <>
       <Center>
         <AddPatientProgress value={30} />
