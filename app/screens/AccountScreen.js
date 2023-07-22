@@ -1,29 +1,28 @@
-import { useState, useCallback } from 'react';
-import React, { useContext } from 'react';
+// Libs
+import React, { useContext, useState, useCallback } from 'react';
+import { Dimensions } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { VStack, Box } from 'native-base';
 import AuthContext from 'app/auth/context';
+import routes from 'app/navigation/routes';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+
+// Components
 import AppButton from 'app/components/AppButton';
 import authStorage from 'app/auth/authStorage';
 import AccountCard from 'app/components/AccountCard';
 import ProfileNameButton from 'app/components/ProfileNameButton';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import routes from 'app/navigation/routes';
-import AccountDetailCard from 'app/components/AccountDetailCard';
-import userApi from 'app/api/user';
 import ActivityIndicator from 'app/components/ActivityIndicator';
-import { useFocusEffect } from '@react-navigation/native';
-// import { useNavigation, CommonActions } from '@react-navigation/native';
+
+// API
+import userApi from 'app/api/user';
 
 function AccountScreen(props) {
   const [isReloadPage, setIsReloadPage] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const { user, setUser } = useContext(AuthContext);
   const { navigation } = props;
-  // const resetNavigation = useNavigation();
-  // const resetAction = CommonActions.reset({
-  //   index: 0,
-  //   routes: [{ route: '/' + routes.WELCOME }],
-  // });
+  const SCREEN_WIDTH = Dimensions.get('window').width;
 
   const onPressLogOut = async () => {
     console.log('Logging out!');
@@ -83,7 +82,7 @@ function AccountScreen(props) {
             profilePicture={user.profilePicture}
             profileLineOne={user.preferredName}
             profileLineTwo={user.role}
-            size={150}
+            size={SCREEN_WIDTH / 5.5}
             isPatient={false}
             // isVertical={false}
             handleOnPress={handleOnPress}

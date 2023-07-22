@@ -209,6 +209,7 @@ function PatientDailyHighlights(props) {
     // Display message when there are no new highlights
     return (
       <MessageDisplayCard
+        accessibilityLabel="Text"
         TextMessage={isError ? message : 'No patient changes found today.'}
         topPaddingSize={'32%'}
       />

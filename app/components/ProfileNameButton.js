@@ -19,28 +19,41 @@ function ProfileNameButton({
   isVertical,
   handleOnPress,
 }) {
-  const defaultImage = Image.resolveAssetSource(DefaultImage).uri;
+  // const defaultImage = Image.resolveAssetSource(DefaultImage).uri;
 
   const containerStyle = isVertical
     ? styles.ContentWrapperVertical
     : styles.ContentWrapperHorizontal;
+
+  const profilePictureStyle = styles.ProfilePicture;
+  const textLayoutStyle = styles.TextContainer;
+
+  const customProfilePictureStyle = {
+    ...profilePictureStyle,
+    borderRadius: 100,
+    height: size,
+    width: size,
+  };
+
+  const customTextContainerStyle = {
+    ...textLayoutStyle,
+    marginLeft: isVertical ? null : 30,
+  };
 
   return (
     <VStack alignItems="center">
       <TouchableOpacity onPress={handleOnPress}>
         <View style={containerStyle}>
           <Image
-            style={styles.ProfilePicture(size)}
+            style={customProfilePictureStyle}
             alt={isPatient === true ? 'patient_image' : 'user_image'}
             // Note: This is a fall-back uri. Will only be used if source fails to render the image.
-            fallbackSource={{
-              uri: defaultImage,
-            }}
-            source={{
-              uri: profilePicture ? `${profilePicture}` : defaultImage,
-            }}
+            fallbackSource={DefaultImage}
+            source={
+              profilePicture ? { uri: `${profilePicture}` } : DefaultImage
+            }
           />
-          <View style={styles.TextContainer(isVertical)}>
+          <View style={customTextContainerStyle}>
             <Text
               style={[styles.DefaultText, styles.NameText]}
               fontSize={size / 4}
@@ -74,16 +87,15 @@ const styles = StyleSheet.create({
   ContentWrapperHorizontal: {
     flexDirection: 'row',
     justifyContent: 'center',
+    alignItems: 'center',
     paddingBottom: '4%',
     paddingTop: '6%',
   },
-  ProfilePicture: (size) => {
-    return {
-      height: size,
-      width: size,
-      borderRadius: 100,
-      resizeMode: 'contain',
-    };
+  ProfilePicture: {
+    height: 100,
+    width: 100,
+    borderRadius: 100,
+    resizeMode: 'contain',
   },
   DefaultText: {
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
@@ -92,11 +104,9 @@ const styles = StyleSheet.create({
   NameText: {
     fontWeight: 'bold',
   },
-  TextContainer: (isVertical) => {
-    return {
-      justifyContent: 'center',
-      marginLeft: isVertical ? null : 30,
-    };
+  TextContainer: {
+    justifyContent: 'center',
+    marginLeft: 30,
   },
 });
 
