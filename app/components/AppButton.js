@@ -4,9 +4,11 @@ import colors from 'app/config/colors';
 
 function AppButton(props) {
   // Destructure props
-  const { title, onPress, color } = props;
+  const { title, onPress, color, testingID } = props;
   return (
     <TouchableOpacity
+      accessible={true}
+      testID={testingID}
       style={[styles.button, { backgroundColor: colors[color] }]}
       onPress={onPress}
     >

@@ -5,7 +5,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import colors from 'app/config/colors';
 
 function ErrorMessage(props) {
-  const { message, visible } = props;
+  const { message, visible, testID } = props;
   if (!visible) {
     return null;
   }
@@ -15,7 +15,7 @@ function ErrorMessage(props) {
       <FormControl.ErrorMessage
         leftIcon={<MaterialIcons name="warning" color={colors.red} size={25} />}
       >
-        <Text>{message}</Text>
+        <Text testID={testID}>{message}</Text>
       </FormControl.ErrorMessage>
     </FormControl>
   );
