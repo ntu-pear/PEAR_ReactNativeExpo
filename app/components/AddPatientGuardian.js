@@ -1,11 +1,14 @@
 // Libs
 import React, { useState, useCallback, useEffect } from 'react';
-import { Box, Text, Divider, VStack, Center } from 'native-base';
+import { Box, Text, Divider, VStack } from 'native-base';
 import { StyleSheet, Platform, View } from 'react-native';
 
 // Configurations
 import colors from 'app/config/colors';
 import typography from 'app/config/typography';
+
+// Hooks
+import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
 // Components
 import NameInputField from 'app/components/NameInputField';
@@ -14,13 +17,32 @@ import SelectionInputField from 'app/components/SelectionInputField';
 import TelephoneInputField from 'app/components/TelephoneInputField';
 import SingleOptionCheckBox from 'app/components/SingleOptionCheckBox';
 import EmailInputField from 'app/components/EmailInputField';
+import LoadingWheel from 'app/components/LoadingWheel';
 
 function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
+  const { data, isError, isLoading } = useGetSelectionOptions('Relationship');
   // console.log('formData.guardianInfo: ', i, formData.guardianInfo);
   const page = 'guardianInfo';
   const guardian = formData.guardianInfo[i]; //guardianInfo[0].FirstName
   // console.log(String(guardian) + ' ' + guardian.IsChecked);
   // console.log(guardian.IsChecked, '\n');
+
+  // constant values for relationships
+  const [listOfRelationships, setListOfRelationships] = useState([
+    { value: 1, label: 'Husband' },
+    { value: 2, label: 'Wife' },
+    { value: 3, label: 'Child' },
+    { value: 4, label: 'Parent' },
+    { value: 5, label: 'Sibling' },
+    { value: 6, label: 'Grandchild' },
+    { value: 7, label: 'Friend' },
+    { value: 8, label: 'Nephew' },
+    { value: 9, label: 'Niece' },
+    { value: 10, label: 'Aunt' },
+    { value: 11, label: 'Uncle' },
+    { value: 12, label: 'Grandparent' },
+  ]);
+
   const [isInputErrors, setIsInputErrors] = useState(false);
 
   const [isFirstNameError, setIsFirstNameError] = useState(false);
@@ -116,23 +138,17 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
     });
   }, [guardian.IsChecked, guardian.Email]);
 
-  // constant values for relationships
-  const listOfRelationships = [
-    { value: 1, label: 'Husband' },
-    { value: 2, label: 'Wife' },
-    { value: 3, label: 'Child' },
-    { value: 4, label: 'Parent' },
-    { value: 5, label: 'Sibling' },
-    { value: 6, label: 'Grandchild' },
-    { value: 7, label: 'Friend' },
-    { value: 8, label: 'Nephew' },
-    { value: 9, label: 'Niece' },
-    { value: 10, label: 'Aunt' },
-    { value: 11, label: 'Uncle' },
-    { value: 12, label: 'Grandparent' },
-  ];
+  /* If retrieval from the hook is successful, replace the content in
+     listOfLanguages with the retrieved one. */
+  useEffect(() => {
+    if (!isLoading && !isError && data) {
+      setListOfRelationships(data);
+    }
+  }, [data, isError, isLoading]);
 
-  return (
+  return isLoading ? (
+    <LoadingWheel />
+  ) : (
     <Box w="100%">
       <VStack>
         {/* <Center> */}

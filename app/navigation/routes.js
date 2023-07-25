@@ -40,5 +40,9 @@ export default Object.freeze({
   REGISTER: 'Register',
   WELCOME: 'Welcome',
   PATIENT_ADD_PATIENT: 'Add Patient',
+  EDIT_PATIENT_INFO: 'EditPatientPersonalInfo',
+  EDIT_PATIENT_PREFERENCES: 'EditPatientPreferences',
+  EDIT_PATIENT_GUARDIAN: 'EditPatientGuardian',
+  EDIT_PATIENT_SOCIALHIST: 'EditPatientSocialHist',
   RESET_PASSWORD: 'Reset Password',
 });

@@ -30,6 +30,7 @@ function PatientInformationCard(props) {
     } else {
       navigation.push(routes.PATIENT_INFORMATION, {
         displayPicUrl: `${displayPicUrl}`,
+        navigation: navigation,
         ...patientProfile,
       });
     }

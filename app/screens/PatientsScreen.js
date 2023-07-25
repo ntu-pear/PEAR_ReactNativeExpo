@@ -91,6 +91,7 @@ function PatientsScreen(props) {
     setOriginalListOfPatients(response.data.data);
     setListOfPatients(response.data.data);
     setIsLoading(false);
+    // console.log(filterValue === 'allPatients' ? response : null);
     return response.data;
   };
 
@@ -153,9 +154,9 @@ function PatientsScreen(props) {
             <View
               style={[styles.headerContainer, styles.dropDownOptionsAlignment]}
             >
-              {/* Standardized Dropdown picker component  --- Justin*/}
+              {/* Standardized Dropdown picker component --- Justin */}
               <SelectionInputField
-                onDataChange={(item) => setFilterValue(item.value)}
+                onDataChange={setFilterValue}
                 value={filterValue}
                 dataArray={dropdownItems}
               />
@@ -177,6 +178,15 @@ function PatientsScreen(props) {
                     <View marginLeft={'5%'} key={index}>
                       <ProfileNameButton
                         profileLineOne={item.preferredName}
+                        // patient Mary does not have patientAllocationDTO object?
+                        // add caregiverName into the All Patients option
+                        profileLineTwo={
+                          filterValue === 'allPatients'
+                            ? item.patientAllocationDTO !== null
+                              ? item.patientAllocationDTO.caregiverName
+                              : 'No Caregivers'
+                            : null
+                        }
                         profilePicture={item.profilePicture}
                         handleOnPress={() => handleOnPress(item)}
                         isPatient={true}

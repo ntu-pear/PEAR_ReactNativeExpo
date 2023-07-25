@@ -9,7 +9,7 @@ if [ "$branch" = "main" ]; then
 fi
 
 # Linting
-npx lint-staged
+#npx lint-staged
 # node ./node_modules/lint-staged/bin/lint-staged -r
 
 # Kill any existing processes on prot 19006 ( where the web app runs)

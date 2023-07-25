@@ -1,13 +1,5 @@
 /*eslint eslint-comments/no-unlimited-disable: error */
-import doctorNoteApi from 'app/api/doctorNote';
-import guardianApi from 'app/api/guardian';
-import socialHistoryApi from 'app/api/socialHistory';
-import ActivityIndicator from 'app/components/ActivityIndicator';
-import AppButton from 'app/components/AppButton';
-import PersonalSocialHistory from 'app/components/PersonalSocialHistory';
-import colors from 'app/config/colors';
-import typography from 'app/config/typography';
-import useApi from 'app/hooks/useApi';
+// Libs
 import {
   Alert,
   AspectRatio,
@@ -22,34 +14,279 @@ import {
   Stack,
   Text,
   VStack,
-  Avatar,
-  Input,
-  FormControl,
-  TextArea,
-  Select,
-  CheckIcon,
 } from 'native-base';
 import React, { useEffect, useState } from 'react';
 import { Platform, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+
+// Hooks
+import useApi from 'app/hooks/useApi';
+
+// API
+import patientApi from 'app/api/patient';
+import doctorNoteApi from 'app/api/doctorNote';
+import guardianApi from 'app/api/guardian';
+import socialHistoryApi from 'app/api/socialHistory';
+
+// Configurations
+import routes from 'app/navigation/routes';
+import colors from 'app/config/colors';
+import typography from 'app/config/typography';
+
+//Components
+import ActivityIndicator from 'app/components/ActivityIndicator';
+import AppButton from 'app/components/AppButton';
+import InformationCard from 'app/components/InformationCard';
 
 function PatientInformationScreen(props) {
   const { displayPicUrl, firstName, lastName, patientID } = props.route.params;
-  const [isLoading, setIsLoading] = useState(false); //eslint-disable-line no-unused-vars
+  const navigation = useNavigation();
+  const [isLoading, setIsLoading] = useState(true); //eslint-disable-line no-unused-vars
   const getDoctorNote = useApi(doctorNoteApi.getDoctorNote);
   const getPatientGuardian = useApi(guardianApi.getPatientGuardian);
   const getSocialHistory = useApi(socialHistoryApi.getSocialHistory);
 
+  const [guardianData, setGuardianData] = useState([]);
+  const [secondGuardianData, setSecondGuardianData] = useState([]);
+  const [isSecondGuardian, setIsSecondGuardian] = useState(false);
+  const [socialHistoryData, setSocialHistoryData] = useState([]);
+  const [patientProfile, setpatientProfile] = useState({});
+
+  //Used to retrieve the patient since after an editing of the patients particulars it will need to be refreshed - Russell
+  const getPatient = async (id, masked = true) => {
+    setIsLoading(true);
+    const response = await patientApi.getPatient(id, masked);
+    if (!response.ok) {
+      console.log('Request failed with status code: ', response.status);
+      return;
+    }
+    setpatientProfile(response.data.data);
+  };
+
+  const patientData = [
+    { label: 'First Name', value: patientProfile.firstName },
+    { label: 'Last Name', value: patientProfile.lastName },
+    { label: 'NRIC', value: patientProfile.nric },
+    {
+      label: 'Gender',
+      value: patientProfile.gender === 'F' ? 'Female' : 'Male',
+    },
+    {
+      label: 'DOB',
+      value: patientProfile.dob || 'Not available',
+    },
+    {
+      label: 'Home Number',
+      value: patientProfile.homeNo || 'Not available',
+    },
+    {
+      label: 'Mobile Number',
+      value: patientProfile.handphoneNo || 'Not available',
+    },
+    {
+      label: 'Address',
+      value: patientProfile.address || 'Not available',
+    },
+    {
+      label: 'Temp. Address',
+      value: patientProfile.tempAddress || 'Not available',
+    },
+    {
+      label: 'Start Date',
+      value: patientProfile.startDate || 'Not available',
+    },
+    {
+      label: 'End Date',
+      value: patientProfile.endDate || 'Not available',
+    },
+    {
+      label: 'Respite Care',
+      value: patientProfile.isRespiteCare || 'Not available',
+    },
+  ];
+
+  const preferenceData = [
+    {
+      label: 'Preferred name',
+      value: patientProfile.preferredName || 'Not available',
+    },
+    {
+      label: 'Preferred language',
+      value: patientProfile.preferredLanguage || 'Not available',
+    },
+  ];
+
+  const doctorData = [
+    {
+      label: "Doctor's Notes",
+      value:
+        getDoctorNote.data &&
+        getDoctorNote.data[0] &&
+        getDoctorNote.data[0].doctorRemarks
+          ? getDoctorNote.data[0].doctorRemarks
+          : 'Not available',
+    },
+  ];
+
   useEffect(() => {
+    if (getPatientGuardian.data.guardian) {
+      // get data of first guardian
+      setGuardianData([
+        {
+          label: 'First Name',
+          value: getPatientGuardian.data.guardian.firstName || 'Not Available',
+        },
+        {
+          label: 'Last Name',
+          value: getPatientGuardian.data.guardian.lastName || 'Not Available',
+        },
+        {
+          label: 'NRIC',
+          value: getPatientGuardian.data.guardian.nric || 'Not Available',
+        },
+        {
+          label: 'Relationship',
+          value: getPatientGuardian.data.guardian.relationship || 'Not Available',
+        },
+        {
+          label: 'Contact Number',
+          value: getPatientGuardian.data.guardian.contactNo || 'Not Available',
+        },
+        {
+          label: 'Is Active',
+          value: getPatientGuardian.data.guardian.isActive,
+        },
+        {
+          label: 'Email',
+          value: getPatientGuardian.data.guardian.email || 'Not Available',
+        },
+      ]);
+    }
+    // get data of 2nd guardian if any.
+    if (
+      getPatientGuardian.data.additionalGuardian &&
+      getPatientGuardian.data.additionalGuardian.nric !== null &&
+      getPatientGuardian.data.additionalGuardian.nric !==
+        getPatientGuardian.data.guardian.nric
+    ) {
+      setIsSecondGuardian(true);
+      setSecondGuardianData([
+        {
+          label: 'First Name',
+          value: getPatientGuardian.data.additionalGuardian.firstName || 'Not Available',
+        },
+        {
+          label: 'Last Name',
+          value: getPatientGuardian.data.additionalGuardian.lastName || 'Not Available',
+        },
+        {
+          label: 'NRIC',
+          value: getPatientGuardian.data.additionalGuardian.nric || 'Not Available',
+        },
+        {
+          label: 'Relationship',
+          value: getPatientGuardian.data.additionalGuardian.relationship || 'Not Available',
+        },
+        {
+          label: 'Contact Number',
+          value: getPatientGuardian.data.additionalGuardian.contactNo || 'Not Available',
+        },
+        {
+          label: 'Is Active',
+          value: getPatientGuardian.data.additionalGuardian.isActive,
+        },
+        {
+          label: 'Email',
+          value: getPatientGuardian.data.additionalGuardian.email || 'Not Available',
+        },
+      ]);
+    }
+  }, [
+    getPatientGuardian.data.guardian,
+    getPatientGuardian.data.additionalGuardian,
+  ]);
+
+  useEffect(() => {
+    if (getSocialHistory.data) {
+      setSocialHistoryData([
+        {
+          label: 'Live with',
+          value: getSocialHistory.data.liveWithDescription || 'Not Available',
+        },
+        {
+          label: 'Education',
+          value: getSocialHistory.data.educationDescription || 'Not Available',
+        },
+        {
+          label: 'Occupation',
+          value: getSocialHistory.data.occupationDescription || 'Not Available',
+        },
+        {
+          label: 'Religion',
+          value: getSocialHistory.data.religionDescription || 'Not Available',
+        },
+        {
+          label: 'Pet',
+          value: getSocialHistory.data.petDescription || 'Not Available',
+        },
+        {
+          label: 'Diet',
+          value: getSocialHistory.data.dietDescription || 'Not Available',
+        },
+        {
+          label: 'Exercise',
+          value: getSocialHistory.data.exercise,
+        },
+        {
+          label: 'Sexually active',
+          value: getSocialHistory.data.sexuallyActive,
+        },
+        {
+          label: 'Drug use',
+          value: getSocialHistory.data.drugUse,
+        },
+        {
+          label: 'Caffeine use',
+          value: getSocialHistory.data.caffeineUse,
+        },
+        {
+          label: 'Alochol use',
+          value: getSocialHistory.data.alcoholUse,
+        },
+        {
+          label: 'Tobacco use',
+          value: getSocialHistory.data.tobaccoUse,
+        },
+        {
+          label: 'Secondhand smoker',
+          value: getSocialHistory.data.secondhandSmoker,
+        },
+      ]);
+    }
+  }, [getSocialHistory.data]);
+
+  // used to call api when page loads
+  useEffect(() => {
+    getPatient(patientID, true);
     getDoctorNote.request(patientID);
     getPatientGuardian.request(patientID);
     getSocialHistory.request(patientID);
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /*
-   * Purpose: Handle API error if fetch fails
-   */
+  // This callback function will be executed when the screen comes into focus - Russell
+  useEffect(() => {
+    const navListener = navigation.addListener('focus', () => {
+      getPatient(patientID, true)
+      getPatientGuardian.request(patientID);
+      getSocialHistory.request(patientID);
+      setIsLoading(false);
+    });
+    return navListener;
+  }, [navigation]);
+
+  
+  // Purpose: Handle API error if fetch fails
   const handleError = () => {
     if (getDoctorNote.error) {
       getDoctorNote.request(patientID);
@@ -62,417 +299,170 @@ function PatientInformationScreen(props) {
     }
   };
 
-  return (
-    <>
-      {getDoctorNote.loading ||
-      getPatientGuardian.loading ||
-      getSocialHistory.loading ? (
-        <ActivityIndicator visible />
-      ) : (
-        <Center minH="100%" backgroundColor={colors.white_var1}>
-          {/* Note the immediate bunch of code will only be rendered
-          when one of the APIs has an error. Purpose: Error handling of API */}
-          {(getDoctorNote.error ||
-            getPatientGuardian.error ||
-            getSocialHistory.error) && (
-            <Box h="100%">
-              <Alert w="100%" status="error">
-                <VStack space={2} flexShrink={1} w="100%">
-                  <HStack
-                    flexShrink={1}
-                    space={2}
-                    justifyContent="space-between"
-                  >
-                    <HStack space={2} flexShrink={1}>
-                      <Alert.Icon mt="1" />
-                      <Text fontSize="md" color="coolGray.800">
-                        Unable to retrieve api data. Try again? Or Relogin
-                      </Text>
-                    </HStack>
-                    <IconButton
-                      variant="unstyled"
-                      _focus={{
-                        borderWidth: 0,
-                      }}
-                      icon={<CloseIcon size="3" />}
-                      _icon={{
-                        color: 'coolGray.600',
-                      }}
-                    />
-                  </HStack>
-                </VStack>
-              </Alert>
-              <Box position="fixed" my="50%" w="60%" mx="auto">
-                <AppButton
-                  title="Try Again"
-                  color="red"
-                  onPress={handleError}
+  // Handling of InformationCard editing button onPress
+  const handlePatientInfoOnPress = () => {
+    navigation.push(routes.EDIT_PATIENT_INFO, { 
+      patientProfile: patientProfile,
+      navigation: navigation,
+    })
+  };
+  
+  const handlePatientPrefOnPress = () => {
+    navigation.push(routes.EDIT_PATIENT_PREFERENCES, {
+      patientProfile: patientProfile,
+      navigation: navigation,
+    })
+  };
+  
+  const handlePatientGuardianOnPress = () => {
+    navigation.push(routes.EDIT_PATIENT_GUARDIAN, { 
+      guardianProfile: getPatientGuardian.data.guardian,
+      navigation: navigation,
+    })
+  };
+  
+  const handlePatientSecondGuardianOnPress = () => {
+    navigation.push(routes.EDIT_PATIENT_GUARDIAN, { 
+      guardianProfile: getPatientGuardian.data.additionalGuardian,
+      navigation: navigation,
+    })
+  };
+  
+  const handlePatientSocialHistOnPress = () => {
+    navigation.push(routes.EDIT_PATIENT_SOCIALHIST, { 
+      socialHistory: getSocialHistory.data,
+      navigation: navigation,
+    })
+  };
+
+  return getDoctorNote.loading || getPatientGuardian.loading || getSocialHistory.loading || isLoading ? (
+    <ActivityIndicator visible />
+  ) : (
+    <Center minH="100%" backgroundColor={colors.white_var1}>
+      {/* Note the immediate bunch of code will only be rendered
+      when one of the APIs has an error. Purpose: Error handling of API */}
+      {(getDoctorNote.error ||
+        getPatientGuardian.error ||
+        getSocialHistory.error) && (
+        <Box h="100%">
+          <Alert w="100%" status="error">
+            <VStack space={2} flexShrink={1} w="100%">
+              <HStack
+                flexShrink={1}
+                space={2}
+                justifyContent="space-between"
+              >
+                <HStack space={2} flexShrink={1}>
+                  <Alert.Icon mt="1" />
+                  <Text fontSize="md" color="coolGray.800">
+                    Unable to retrieve api data. Try again? Or Relogin
+                  </Text>
+                </HStack>
+                <IconButton
+                  variant="unstyled"
+                  _focus={{
+                    borderWidth: 0,
+                  }}
+                  icon={<CloseIcon size="3" />}
+                  _icon={{
+                    color: 'coolGray.600',
+                  }}
                 />
-              </Box>
-            </Box>
-          )}
-          <ScrollView>
-            <Box>
-              <AspectRatio w="100%" ratio={16 / 9}>
-                <Image
-                  source={{ uri: `${displayPicUrl}` }}
-                  alt="patientInformationImage"
-                />
-              </AspectRatio>
-              <Center
-                position="absolute"
-                bg={colors.primary_overlay_color}
-                width="100%"
-                height="100%"
-              />
-              <Center position="absolute" px="5%" py="10%">
-                <VStack>
-                  <Center
-                    _text={{
-                      color: `${colors.white_var1}`,
-                      fontFamily: `${
-                        Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                      }`,
-                      fontSize: '2xl',
-                      fontWeight: '500',
-                    }}
-                  >
-                    You're caring for
-                  </Center>
-                  <Center
-                    _text={{
-                      color: `${colors.white_var1}`,
-                      fontFamily: `${
-                        Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                      }`,
-                      fontSize: '2xl',
-                      fontWeight: '500',
-                    }}
-                  >
-                    {`${firstName} ${lastName}`}
-                  </Center>
-                </VStack>
-              </Center>
-            </Box>
-            <VStack maxW="100%" mt="2.5" mb="8">
-              <Stack ml="5" mr="5" space={5}>
-                <Divider mt="2" />
-                <Stack name="PersonalInformationCard">
-                  <Text style={styles.Header}>
-                    Your Patient Information
-                  </Text>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        First Name
-                      </FormControl.Label>
-
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={props.route.params.firstName}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        Last Name
-                      </FormControl.Label>
-
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={props.route.params.lastName}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        NRIC
-                      </FormControl.Label>
-
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={props.route.params.nric}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        Gender
-                      </FormControl.Label>
-
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={props.route.params.gender === 'F' ? 'Female' : 'Male'}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        DOB
-                      </FormControl.Label>
-
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={props.route.params.dob.substring(0, 10)}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        Home Number
-                      </FormControl.Label>
-
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={props.route.params.homeNo || 'Not available'}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        Mobile Number
-                      </FormControl.Label>
-
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={props.route.params.handphoneNo || 'Not available'}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                  <FormControl>
-                    <Stack space={0} alignItems="flex-start" flexWrap="wrap">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        Address
-                      </FormControl.Label>
-                      <TextArea 
-                        style={styles.InputStyle}
-                        isReadOnly
-                        input="lg"
-                        ml="-2.5"
-                        minH="30%"
-                        maxH="50%"
-                        variant="unstyled"
-                        value={props.route.params.address || 'Not available'}
-                        w="100%"
-                      />
-                    </Stack>
-                  </FormControl>
-                  <FormControl>
-                    <Stack space={0} alignItems="flex-start" flexWrap="wrap">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        Temporary Address
-                      </FormControl.Label>
-                      <TextArea
-                        style={styles.InputStyle}
-                        isReadOnly
-                        input="lg"
-                        ml="-2.5"
-                        minH="30%"
-                        maxH="50%"
-                        variant="unstyled"
-                        value={props.route.params.tempAddress || 'Not available'}
-                        w="100%"
-                      />
-                    </Stack>
-                  </FormControl>
-
-                  <Center position="absolute" right="0" py="1.5">
-                    <Avatar
-                      size={Platform.OS === 'web' ? '2xl' : 'md'}
-                      source={{uri: props.route.params.profilePicture,}}
-                    >
-                      {/* Note this is a fall-back, in case image isn't rendered */}
-                      {`${props.route.params.firstName.substring(0, 1)}${props.route.params.lastName.substring(0, 1)}`}
-                    </Avatar>
-                  </Center>
-                </Stack>
-                <Divider />
-                <Stack name="PersonalPreferenceCard" space={2}>
-                  <Text style={styles.Header}>
-                    Preference
-                  </Text>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        Preferred Name
-                      </FormControl.Label>
-
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={props.route.params.preferredName}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        Preferred Language
-                      </FormControl.Label>
-
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={props.route.params.preferredLanguage}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                </Stack>
-                <Divider />
-                <Stack name="PersonalDoctorCard" space={2}>
-                  <Text style={styles.Header}>
-                    Doctor's Notes
-                  </Text>
-                  <FormControl>
-                    <Stack space={0} alignItems="flex-start" flexWrap="wrap">
-                      <TextArea
-                        style={styles.InputStyle}
-                        isReadOnly
-                        input="lg"
-                        //ml="-2.5"
-                        //minH="30%"
-                        //maxH="50%"
-                        //w="100%"
-                        //variant="unstyled"
-                        value={
-                          getDoctorNote.data && getDoctorNote.data[0] && getDoctorNote.data[0].doctorRemarks
-                            ? getDoctorNote.data[0].doctorRemarks
-                            : 'Not available'}
-                      />
-                    </Stack>
-                  </FormControl>
-                </Stack>
-                <Divider />
-                <Stack name="PersonalGuardianCard">
-                  <Text style={styles.Header}>
-                    Guardian(s)
-                  </Text>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        First Name
-                      </FormControl.Label>
-
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={getPatientGuardian.data.guardian && getPatientGuardian.data.guardian.firstName 
-                          ? getPatientGuardian.data.guardian.firstName : 'Not Available'}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        Last Name
-                      </FormControl.Label>
-
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={getPatientGuardian.data.guardian && getPatientGuardian.data.guardian.lastName
-                          ? getPatientGuardian.data.guardian.lastName: 'Not Available'}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        NRIC
-                      </FormControl.Label>
-
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={getPatientGuardian.data.guardian && getPatientGuardian.data.guardian.nric
-                          ? getPatientGuardian.data.guardian.nric : 'Not Available'}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                  <FormControl>
-                    <HStack space={2} alignItems="center">
-                      <FormControl.Label _text={styles.LabelStyle}>
-                        Relationship
-                      </FormControl.Label>
-
-                      <Input
-                        style={styles.InputStyle}
-                        isReadOnly
-                        variant="unstyled"
-                        value={getPatientGuardian.data.guardian && getPatientGuardian.data.guardian.relationship
-                          ? getPatientGuardian.data.guardian.relationship: 'Not Available'}
-                        w="100%"
-                      />
-                    </HStack>
-                  </FormControl>
-                </Stack>
-                <Divider />
-                <PersonalSocialHistory socialHistory={getSocialHistory.data} />
-              </Stack>
+              </HStack>
             </VStack>
-          </ScrollView>
-        </Center>
+          </Alert>
+          <Box position="fixed" my="50%" w="60%" mx="auto">
+            <AppButton
+              title="Try Again"
+              color="red"
+              onPress={handleError}
+            />
+          </Box>
+        </Box>
       )}
-    </>
+      <ScrollView>
+        <Box>
+          <AspectRatio w="100%" ratio={16 / 9}>
+            <Image
+              source={{ uri: `${displayPicUrl}` }}
+              alt="patientInformationImage"
+            />
+          </AspectRatio>
+          <Center
+            position="absolute"
+            bg={colors.primary_overlay_color}
+            width="100%"
+            height="100%"
+          />
+          <Center position="absolute" px="5%" py="10%">
+            <Text style={styles.pictureText}>
+              You're caring for
+            </Text>
+            <Text style={styles.pictureText}>
+              {`${firstName} ${lastName}`}
+            </Text>
+          </Center>
+        </Box>
+        <VStack maxW="100%" mt="2.5" mb="8">
+          <Stack ml="5" mr="5" space={5}>
+            <Divider mt="2" />
+
+            <InformationCard
+              title={'Patient Information'}
+              displayData={patientData}
+              handleOnPress={handlePatientInfoOnPress}
+            />
+            <Divider />
+
+            <InformationCard
+              title={'Patient Preferences'}
+              displayData={preferenceData}
+              handleOnPress={handlePatientPrefOnPress}
+            />
+            <Divider />
+
+            <InformationCard
+              title={"Doctor's Notes"}
+              displayData={doctorData}
+            />
+            <Divider />
+
+            <InformationCard
+              title={'Guardian(s) Information'}
+              subtitle={'Guardian 1'}
+              displayData={guardianData}
+              handleOnPress={handlePatientGuardianOnPress}
+            />
+            {isSecondGuardian ? (
+              <InformationCard
+                subtitle={'Guardian 2'}
+                displayData={secondGuardianData}
+                handleOnPress={handlePatientSecondGuardianOnPress}
+              />
+            ) : null}
+            <Divider />
+            {
+              //Divide into about and lifystyle?
+            }
+            <InformationCard
+              title={'Social History'}
+              displayData={socialHistoryData}
+              handleOnPress={handlePatientSocialHistOnPress}
+            />
+          </Stack>
+        </VStack>
+      </ScrollView>
+    </Center>
   );
 }
 
 const styles = StyleSheet.create({
-  Header: {
-    color: colors.black_var1,
+  pictureText: {
+    color: colors.white_var1,
     fontFamily: Platform.OS === 'ios' ? 'Helvetica' : typography.android,
     fontSize: 24,
-    fontWeight: "semibold",
-    paddingTop: 5,
-  },
-  LabelStyle: {
-    fontFamily: Platform.OS === 'ios' ? 'Helvetica' : typography.android,
-    fontSize: 18,
-    fontWeight: "thin",
-  },
-  InputStyle: {
-    color: colors.black_var1,
-    fontFamily: Platform.OS === 'ios' ? 'Helvetica' : typography.android,
-    fontSize: 18,
+    paddingTop: 15,
   },
 });
 
 export default PatientInformationScreen;
-

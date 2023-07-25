@@ -1,33 +1,36 @@
 // Lib
 import React, { useState, useCallback, useEffect } from 'react';
-import {
-  Box,
-  VStack,
-  Center,
-  FormControl,
-  Text,
-  Select,
-  Divider,
-  TextArea,
-} from 'native-base';
+import { Box, VStack, Text, Divider } from 'native-base';
 import { StyleSheet, Platform, View } from 'react-native';
 
 // Configurations
 import colors from 'app/config/colors';
 import typography from 'app/config/typography';
 
+// Hooks
+import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
+
 // Components
 import CommonInputField from 'app/components/CommonInputField';
 import SelectionInputField from 'app/components/SelectionInputField';
+import LoadingWheel from 'app/components/LoadingWheel';
 
 function AddPatientAllergy({ i, title, formData, handleFormData, onError }) {
+  // retrieve dropdown options from hook
+  const { data, isError, isLoading } = useGetSelectionOptions('Allergy');
+  const {
+    data: reactionData,
+    isError: reactionError,
+    isLoading: reactionLoading,
+  } = useGetSelectionOptions('AllergyReaction');
+
   const page = 'allergyInfo';
   const allergy = formData.allergyInfo[i]; //allergyInfo[0].allergyName
   const [isErrors, setIsErrors] = useState([false]);
   const [allergyOption, setAllergyOption] = useState(allergy.AllergyListID);
 
   // constant values for list of allergies
-  const listOfAllergies = [
+  const [listOfAllergies, setListOfAllergies] = useState([
     // { list_AllergyID: 1, value: 'To Be Updated' },
     { value: 2, label: 'None' },
     { value: 3, label: 'Corn' },
@@ -41,10 +44,10 @@ function AddPatientAllergy({ i, title, formData, handleFormData, onError }) {
     { value: 11, label: 'Soy' },
     { value: 12, label: 'Wheat' },
     { value: 13, label: 'Seafood' },
-  ];
+  ]);
 
   // constant values for list of allergy reactions
-  const listOfAllergyReactions = [
+  const [listOfAllergyReactions, setListOfAllergyReactions] = useState([
     { value: 1, label: 'Rashes' },
     { value: 2, label: 'Sneezing' },
     { value: 3, label: 'Vomitting' },
@@ -56,7 +59,7 @@ function AddPatientAllergy({ i, title, formData, handleFormData, onError }) {
     { value: 9, label: 'Nasal Congestion' },
     { value: 10, label: 'Itching' },
     { value: 11, label: 'Hives' },
-  ];
+  ]);
 
   const handleAllergyState = useCallback(
     (state) => {
@@ -128,7 +131,21 @@ function AddPatientAllergy({ i, title, formData, handleFormData, onError }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allergy.AllergyListID, allergyOption]);
 
-  return (
+  useEffect(() => {
+    if (!isLoading && !isError && data) {
+      setListOfAllergies(data);
+    }
+  }, [data, isError, isLoading]);
+
+  useEffect(() => {
+    if (!reactionLoading && !reactionError && reactionData) {
+      setListOfAllergyReactions(reactionData);
+    }
+  }, [reactionData, reactionError, reactionLoading]);
+
+  return isLoading || reactionLoading ? (
+    <LoadingWheel />
+  ) : (
     <Box w="100%">
       <VStack>
         <View style={styles.formContainer}>

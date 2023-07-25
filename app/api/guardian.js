@@ -29,10 +29,16 @@ const getPatientGuardian = (patientID) => {
 // **********************  POST REQUESTS *************************
 
 // ************************* UPDATE REQUESTS *************************
+const updateGuardian = async (data) => {
+  const headers = { 'Content-Type': 'application/json-patch+json' };
+
+  return client.put(guardianUpdate, data, { headers });
+};
 
 /*
  * Expose your end points here
  */
 export default {
   getPatientGuardian,
+  updateGuardian,
 };

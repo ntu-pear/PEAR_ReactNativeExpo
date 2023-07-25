@@ -28,10 +28,16 @@ const getSocialHistory = (patientID) => {
 // **********************  POST REQUESTS *************************
 
 // ************************* UPDATE REQUESTS *************************
+const updateSocialHistory= async (data) => {
+  const headers = { 'Content-Type': 'application/json-patch+json' };
+
+  return client.put(socialHistoryUpdate, data, { headers });
+};
 
 /*
  * Expose your end points here
  */
 export default {
   getSocialHistory,
+  updateSocialHistory,
 };
