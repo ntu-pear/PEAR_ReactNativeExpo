@@ -131,7 +131,18 @@ const addPatient = (patientFormData) => {
 };
 
 // ************************* UPDATE REQUESTS *************************
+const updatePatient = async (data) => {
+  const formData = new FormData();
 
+  for (const key in data) {
+    var value = data[key];
+    formData.append(key, value);
+  }
+
+  const headers = { 'Content-Type': 'multipart/form-data' };
+
+  return client.put(patientUpdate, formData, { headers });
+};
 /*
  * Expose your end points here
  */
@@ -140,4 +151,5 @@ export default {
   getPatientList,
   getPatientListByUserId,
   addPatient,
+  updatePatient,
 };

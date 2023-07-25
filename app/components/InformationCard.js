@@ -8,39 +8,13 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import typography from 'app/config/typography';
 import colors from 'app/config/colors';
 
-// Import Constants from Routes
-import routes from 'app/navigation/routes';
-
-function InformationCard(props) {
-  const { displayData, title, subtitle, navigation } = props;
+function InformationCard({ displayData, title, subtitle, handleOnPress }) {
 
   const formatDate = (str) => {
     let splitDate = str.split('-');
     // splitDate[0] = splitDate[0].split('').reverse().join('');
 
     return `${splitDate[2]}-${splitDate[1]}-${splitDate[0]}`;
-  };
-
-  const handleOnPress = () => {
-    title === 'Patient Information' ? (
-      navigation.push(routes.EDIT_PATIENT_INFO, { 
-        displayData: displayData,
-      })
-    ) : title === 'Patient Preferences' ? (
-      navigation.push(routes.EDIT_PATIENT_PREFERENCES, { 
-        displayData: displayData,
-      })
-    ) : title === 'Guardian(s) Information' ? (
-      navigation.push(routes.EDIT_PATIENT_GUARDIAN, { 
-        displayData: displayData,
-      })
-    ) : title === 'Social History' ? (
-      navigation.push(routes.EDIT_PATIENT_SOCIALHIST, { 
-        displayData: displayData,
-      })
-    ) : (
-      null
-    )
   };
 
   return (
@@ -50,8 +24,8 @@ function InformationCard(props) {
           {title ? (
             <Text style={[styles.TextContent, styles.titleText]}>{title}</Text>
           ) : null}
-          {(subtitle === null && title !== "Doctor's Notes") ? (
-            <IconButton
+          {(subtitle === null && title !== "Doctor's Notes") ? ( // editing button will appear if the title is not
+            <IconButton                                          // "Doctor's Notes" or Guardian(s) Information
               _icon={{
                 as: MaterialCommunityIcons,
                 name: 'pencil',
@@ -67,7 +41,7 @@ function InformationCard(props) {
               {subtitle}
             </Text>
           ) : null}
-          {title ===  "Guardian(s) Information" ? (
+          {subtitle ? (
             <IconButton
               _icon={{
                 as: MaterialCommunityIcons,
@@ -84,7 +58,16 @@ function InformationCard(props) {
               {data === undefined ? 'undefined' : `${data.label}:  `}
             </Text>
             <Text style={[styles.TextContent, styles.fieldValue]}>
-              {data === undefined ? 'undefined' : data.label === 'DOB' ? `${formatDate(data.value.substring(0, 10))}` : `${data.value}`}
+              {data === undefined ? 'undefined' :                             // formatting of data
+                data.value === 'Not available' ? 'Not available' :
+                data.value === 1 ? 'Yes' : 
+                data.value === true ? 'Yes' : 
+                data.value === 0 ? 'No' :
+                data.value === 'null' ? 'Not available' :
+                data.label === 'DOB' ? `${formatDate(data.value.substring(0, 10))}` : 
+                data.label === 'Start Date' ? `${formatDate(data.value.substring(0, 10))}` : 
+                data.label === 'End Date' ? `${formatDate(data.value.substring(0, 10))}` : 
+                `${data.value}`}
             </Text>
           </View>
         ))}

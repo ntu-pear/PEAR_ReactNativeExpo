@@ -1,22 +1,65 @@
 // Libs
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 import { Box, VStack, FlatList } from 'native-base'
+
+// Configurations
+import routes from 'app/navigation/routes';
+
+// Hooks
+import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
+
+//API
+import socialHistoryApi from 'app/api/socialHistory';
 
 // Components
 import SelectionInputField from 'app/components/SelectionInputField';
 import RadioButtonInput from 'app/components/RadioButtonsInput';
 import AppButton from 'app/components/AppButton';
+import ActivityIndicator from 'app/components/ActivityIndicator';
 
 function EditPatientSocialHistScreen(props) {
-  const { displayData } = props.route.params;
-  const socialHistDictionary = displayData.reduce((dict, item) => {
-    dict[item.label] = item.value;
-    return dict;
-  }, {});
+  const { navigation, socialHistory } = props.route.params;
 
-  // constant values
-  const listOfLiveWith = [
+  // retrive list data from database using useGetSelectionOptions
+  const {
+    data: liveWithData,
+    isError: liveWithError,
+    isLoading: liveWithLoading,
+  } = useGetSelectionOptions('livewith');
+
+  const {
+    data: educationData,
+    isError: educationError,
+    isLoading: educationLoading,
+  } = useGetSelectionOptions('education');
+
+  const {
+    data: occupationData,
+    isError: occupationError,
+    isLoading: occupationLoading,
+  } = useGetSelectionOptions('occupation');
+
+  const {
+    data: religionData,
+    isError: religionError,
+    isLoading: religionLoading,
+  } = useGetSelectionOptions('religion');
+
+  const {
+    data: petData,
+    isError: petError,
+    isLoading: petLoading,
+  } = useGetSelectionOptions('pet');
+
+  const {
+    data: dietData,
+    isError: dietError,
+    isLoading: dietLoading,
+  } = useGetSelectionOptions('diet');
+
+  // set initial value for SelectionInputField dataArray props -> follow format of "label" and "value"
+  const [listOfLiveWith, setListOfLiveWith] = useState([
     { value: 1, label: 'Alone' },
     { value: 2, label: 'Children' },
     { value: 3, label: 'Friend' },
@@ -24,9 +67,9 @@ function EditPatientSocialHistScreen(props) {
     { value: 5, label: 'Spouse' },
     { value: 6, label: 'Family' },
     { value: 7, label: 'Parents' },
-  ];
+  ]);
 
-  const listOfEducation = [
+  const [listOfEducation, setListOfEducation] = useState([
     { value: 1, label: 'Primary or lower' },
     { value: 2, label: 'Secondary' },
     { value: 3, label: 'Diploma' },
@@ -36,9 +79,9 @@ function EditPatientSocialHistScreen(props) {
     { value: 7, label: 'Doctorate' },
     { value: 8, label: 'Vocational' },
     { value: 9, label: 'ITE' },
-  ];
+  ]);
 
-  const listOfOccupation = [
+  const [listOfOccupation, setListOfOccupation] = useState([
     { value: 1, label: 'Accountant' },
     { value: 2, label: 'Business owner' },
     { value: 3, label: 'Chef/Cook' },
@@ -76,9 +119,9 @@ function EditPatientSocialHistScreen(props) {
     { value: 35, label: 'Actor' },
     { value: 36, label: 'Professor' },
     { value: 37, label: 'Florist' },
-  ];
+  ]);
 
-  const listOfReligion = [
+  const [listOfReligion, setListOfReligion] = useState([
     { value: 1, label: 'Atheist' },
     { value: 2, label: 'Buddhist' },
     { value: 3, label: 'Catholic' },
@@ -94,9 +137,9 @@ function EditPatientSocialHistScreen(props) {
     { value: 13, label: 'Judaism' },
     { value: 14, label: 'Confucianism' },
     { value: 15, label: 'Protestantism' },
-  ];
+  ]);
 
-  const listOfPet = [
+  const [listOfPet, setListOfPet] = useState([
     { value: 1, label: 'Bird' },
     { value: 2, label: 'Cat' },
     { value: 3, label: 'Dog' },
@@ -108,9 +151,9 @@ function EditPatientSocialHistScreen(props) {
     { value: 9, label: 'Tortoise' },
     { value: 10, label: 'Spider' },
     { value: 11, label: 'Unicorn' },
-  ];
+  ]);
 
-  const listOfDiet = [
+  const [listOfDiet, setListOfDiet] = useState([
     { value: 1, label: 'Diabetic' },
     { value: 2, label: 'Halal' },
     { value: 3, label: 'Vegan' },
@@ -123,7 +166,7 @@ function EditPatientSocialHistScreen(props) {
     { value: 10, label: 'No Vegetables' },
     { value: 11, label: 'No Meat' },
     { value: 12, label: 'No Dairy' },
-  ];
+  ]);
 
   const listYesNo = [
     { value: 0, label: 'No' },
@@ -157,72 +200,84 @@ function EditPatientSocialHistScreen(props) {
     (state) => {
       setIsEducationError(state);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isEducationError],
   );
   const handleOccupationState = useCallback(
     (state) => {
       setIsOccupationError(state);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isOccupationError],
   );
   const handleReligionState = useCallback(
     (state) => {
       setIsReligionError(state);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isReligionError],
   );
   const handlePetState = useCallback(
     (state) => {
       setIsPetError(state);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isPetError],
   );
   const handleDietState = useCallback(
     (state) => {
       setIsDietError(state);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isDietError],
   );
   const handleExerciseState = useCallback(
     (state) => {
       setIsExerciseError(state);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isExerciseError],
   );
   const handleSexuallyActiveState = useCallback(
     (state) => {
       setIsSexuallyActiveError(state);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isSexuallyActiveError],
   );
   const handleDrugUseState = useCallback(
     (state) => {
       setIsDrugUseError(state);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isDrugUseError],
   );
   const handleCaffeineUseState = useCallback(
     (state) => {
       setIsCaffeineUseError(state);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isCaffeineUseError],
   );
   const handleAlcoholUseState = useCallback(
     (state) => {
       setIsAlcoholUseError(state);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isAlcoholUseError],
   );
   const handleTobaccoUseState = useCallback(
     (state) => {
       setIsTobaccoUseError(state);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isTobaccoUseError],
   );
   const handleSecondhandSmokerState = useCallback(
     (state) => {
       setIsSecondhandSmokerError(state);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isSecondhandSmokerError],
   );
 
@@ -259,120 +314,145 @@ function EditPatientSocialHistScreen(props) {
     isSecondhandSmokerError,
     isInputErrors,
   ]);
-  
-  const [formData, setFormData] = useState({
-    LiveWith: socialHistDictionary['Live with'],
-    LiveWithID: listOfLiveWith.find((item) => item.label === socialHistDictionary['Live with']).value, // convert label to value
-    Education: socialHistDictionary['Education'],
-    EducationID: listOfEducation.find((item) => item.label === socialHistDictionary['Education']).value,
-    Occupation: socialHistDictionary['Occupation'],
-    OccupationID: listOfOccupation.find((item) => item.label === socialHistDictionary['Occupation']).value,
-    Religion: socialHistDictionary['Religion'],
-    ReligionID: listOfReligion.find((item) => item.label === socialHistDictionary['Religion']).value,
-    Pet: socialHistDictionary['Pet'],
-    PetID: listOfPet.find((item) => item.label === socialHistDictionary['Pet']).value,
-    Diet: socialHistDictionary['Diet'],
-    DietID: listOfDiet.find((item) => item.label === socialHistDictionary['Diet']).value,
-    Exercise: socialHistDictionary['Exercise'],
-    SexuallyActive: socialHistDictionary['Sexually active'],
-    DrugUse: socialHistDictionary['Drug use'],
-    CaffeineUse: socialHistDictionary['Caffeine use'],
-    AlocholUse: socialHistDictionary['Alochol use'],
-    TobaccoUse: socialHistDictionary['Tobacco use'],
-    SecondhandSmoker: socialHistDictionary['Secondhand smoker'],
-  });
 
-  //const concatFormData = (key, values) => {
-  //  setFormData((prevFormData) => ({
-  //    ...prevFormData,
-  //    [key]: prevFormData[key].concat(values),
-  //  }));
-  //};
+  const [formData, setFormData] = useState({
+    PatientID: socialHistory.patientId,
+    SocialHistoryId: socialHistory.socialHistoryId,
+    LiveWithDescription: socialHistory.liveWithDescription,
+    LiveWithListId: socialHistory.liveWithListId,
+    EducationDescription: socialHistory.educationDescription,
+    EducationListId: socialHistory.educationListId,
+    OccupationDescription: socialHistory.occupationDescription,
+    OccupationListId: socialHistory.occupationListId,
+    ReligionDescription: socialHistory.religionDescription,
+    ReligionListId: socialHistory.religionListId,
+    PetDescription: socialHistory.petDescription,
+    PetListId: socialHistory.petListId,
+    DietDescription: socialHistory.dietDescription,
+    DietListId: socialHistory.dietListId,
+    Exercise: socialHistory.exercise,
+    SexuallyActive: socialHistory.sexuallyActive,
+    DrugUse: socialHistory.drugUse,
+    CaffeineUse: socialHistory.caffeineUse,
+    AlcoholUse: socialHistory.alcoholUse,
+    TobaccoUse: socialHistory.tobaccoUse,
+    SecondhandSmoker: socialHistory.secondhandSmoker,
+  });
 
   // handling form input data by taking onchange value and updating our previous form data state
   const handleFormData =
     (input = null) =>
-    (e, date = null) => {
-      const newData = formData;
-      if (input === 'LiveWith') {
-        newData['LiveWith'] = listOfLiveWith.find((item) => item.value === e).label;
-        newData['LiveWithID'] = e.toString();
-      } else if (input === 'Education') {
-        newData['Education'] = listOfEducation.find((item) => item.value === e).label;
-        newData['EducationID'] = e.toString();
-      } else if (input === 'Occupation') {
-        newData['Occupation'] = listOfOccupation.find((item) => item.value === e).label;
-        newData['OccupationID'] = e.toString();
-      } else if (input === 'Religion') {
-        newData['Religion'] = listOfReligion.find((item) => item.value === e).label;
-        newData['ReligionID'] = e.toString();
-      } else if (input === 'Pet') {
-        newData['Pet'] = listOfPet.find((item) => item.value === e).label;
-        newData['PetID'] = e.toString();
-      } else if (input === 'Diet') {
-        newData['Diet'] = listOfDiet.find((item) => item.value === e).label;
-        newData['DietID'] = e.toString();
+    (e) => {
+      if (input === 'LiveWithDescription') {
+        setFormData((previousState) => ({
+          ...previousState,
+          LiveWithDescription: listOfLiveWith.find((item) => item.value === e).label,
+          LiveWithListId: e,
+        }));
+      } else if (input === 'EducationDescription') {
+        setFormData((previousState) => ({
+          ...previousState,
+          EducationDescription: listOfEducation.find((item) => item.value === e).label,
+          EducationListId: e,
+        }));
+      } else if (input === 'OccupationDescription') {
+        setFormData((previousState) => ({
+          ...previousState,
+          OccupationDescription: listOfOccupation.find((item) => item.value === e).label,
+          OccupationListId: e,
+        }));
+      } else if (input === 'ReligionDescription') {
+        setFormData((previousState) => ({
+          ...previousState,
+          ReligionDescription: listOfReligion.find((item) => item.value === e).label,
+          ReligionListId: e,
+        }));
+      } else if (input === 'PetDescription') {
+        setFormData((previousState) => ({
+          ...previousState,
+          PetDescription: listOfPet.find((item) => item.value === e).label,
+          PetListId: e,
+        }));
+      } else if (input === 'DietDescription') {
+        setFormData((previousState) => ({
+          ...previousState,
+          DietDescription: listOfDiet.find((item) => item.value === e).label,
+          DietListId: e,
+        }));
       } else {
-        newData[input] = date
-          ? date
-          : e.$d //e['$d']-check if input from MUI date-picker
-          ? e.$d
-          : parseInt(e) // check if integer (for dropdown)
-          ? parseInt(e) // change to integer
-          : e; // eg. guardianInfo[0].FirstName = e
+        setFormData((previousState) => ({
+          ...previousState,
+          [input]: e,
+        }));
       }
-      
-      setFormData((previousState) => ({
-        ...previousState,
-        newData,
-      }));
     };
-  
+
+  // form submission when save button is pressed
   const submitForm = async () => {
-    console.log("sumbit");
-  }
+    const result = await socialHistoryApi.updateSocialHistory(formData);
 
-//  const submitForm = async () => {
-//    // -- Validation is now real-time no need to have on submit validation - Justin
-//    const result = await patientApi.addPatient(formData);
-//
-//    // let alertTxt = '';
-//    let alertTitle = '';
-//    let alertDetails = '';
-//
-//    // console.log('response: ', result);
-//
-//    if (result.ok) {
-//      const allocations = result.data.data.patientAllocationDTO;
-//      const caregiver = allocations.caregiverName;
-//      const doctor = allocations.doctorName;
-//      const gameTherapist = allocations.gameTherapistName;
-//
-//      alertTitle = 'Successfully added Patient';
-//      alertDetails = `Patient has been allocated to\nCaregiver: ${caregiver}\nDoctor: ${doctor}\nGame Therapist: ${gameTherapist}`;
-//      // alertTxt = alertTitle + alertDetails;
-//      // Platform.OS === 'web'
-//      //   ? navigate('/' + routes.PATIENTS)
-//      //   : navigation.navigate(routes.PATIENTS_SCREEN);
-//      navigation.navigate(routes.PATIENTS_SCREEN);
-//    } else {
-//      const errors = result.data?.message;
-//
-//      result.data
-//        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-//        : (alertDetails = 'Please try again.');
-//
-//      alertTitle = 'Error in Adding Patient';
-//      // alertTxt = alertTitle + alertDetails;
-//    }
-//    // Platform.OS === 'web'
-//    //   ? alert(alertTxt)
-//    //   : Alert.alert(alertTitle, alertDetails);
-//    // }
-//    Alert.alert(alertTitle, alertDetails);
-//  };
+    let alertTitle = '';
+    let alertDetails = '';
 
-  return (
+    if (result.ok) {
+      navigation.goBack(routes.PATIENT_INFORMATION, {
+        navigation: navigation,
+      });
+      alertTitle = 'Saved Successfully';
+    } else {
+      const errors = result.data?.message;
+
+      result.data
+        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
+        : (alertDetails = 'Please try again.');
+
+      alertTitle = 'Error in Editing Patient Preferences';
+    }
+    Alert.alert(alertTitle, alertDetails);
+    console.log("result error "+JSON.stringify(result));
+    console.log("formData "+JSON.stringify(formData));
+  };
+
+  /* If retrieval from the hook is successful, replace the content in the list with the retrieved one. */
+  useEffect(() => {
+    if (!liveWithLoading && !liveWithError && liveWithData) {
+      setListOfLiveWith(liveWithData);
+    }
+  }, [liveWithData, liveWithError, liveWithLoading]);
+
+  useEffect(() => {
+    if (!educationLoading && !educationError && educationData) {
+      setListOfEducation(educationData);
+    }
+  }, [educationData, educationError, educationLoading]);
+  
+  useEffect(() => {
+    if (!occupationLoading && !occupationError && occupationData) {
+      setListOfOccupation(occupationData);
+    }
+  }, [occupationData, occupationError, occupationLoading]);
+
+  useEffect(() => {
+    if (!religionLoading && !religionError && religionData) {
+      setListOfReligion(religionData);
+    }
+  }, [religionData, religionError, religionLoading]);
+
+  useEffect(() => {
+    if (!petLoading && !petError && petData) {
+      setListOfPet(petData);
+    }
+  }, [petData, petError, petLoading]);
+
+  useEffect(() => {
+    if (!dietLoading && !dietError && dietData) {
+      setListOfDiet(dietData);
+    }
+  }, [dietData, dietError, dietLoading]);
+
+  return liveWithLoading || educationLoading || occupationLoading || religionLoading || petLoading || dietLoading ? (
+    <ActivityIndicator visible />
+  ) : (
     <FlatList
       data={[0]}
       renderItem={() => (
@@ -383,9 +463,9 @@ function EditPatientSocialHistScreen(props) {
                 <SelectionInputField
                   isRequired
                   title={'Live with'}
-                  placeholderText={socialHistDictionary['Live with']}
-                  onDataChange={handleFormData('LiveWith')}
-                  value={formData['LiveWithID']}
+                  placeholderText={formData['LiveWithDescription']}
+                  onDataChange={handleFormData('LiveWithDescription')}
+                  value={formData['LiveWithListId']}
                   dataArray={listOfLiveWith}
                   onChildData={handleLiveWithState}
                 />
@@ -393,9 +473,9 @@ function EditPatientSocialHistScreen(props) {
                 <SelectionInputField
                   isRequired
                   title={'Education'}
-                  placeholderText={socialHistDictionary['Education']}
-                  onDataChange={handleFormData('Education')}
-                  value={formData['EducationID']}
+                  placeholderText={formData['EducationDescription']}
+                  onDataChange={handleFormData('EducationDescription')}
+                  value={formData['EducationListId']}
                   dataArray={listOfEducation}
                   onChildData={handleEducationState}
                 />
@@ -403,9 +483,9 @@ function EditPatientSocialHistScreen(props) {
                 <SelectionInputField
                   isRequired
                   title={'Occupation'}
-                  placeholderText={socialHistDictionary['Occupation']}
-                  onDataChange={handleFormData('Occupation')}
-                  value={formData['OccupationID']}
+                  placeholderText={formData['OccupationDescription']}
+                  onDataChange={handleFormData('OccupationDescription')}
+                  value={formData['OccupationListId']}
                   dataArray={listOfOccupation}
                   onChildData={handleOccupationState}
                 />
@@ -413,9 +493,9 @@ function EditPatientSocialHistScreen(props) {
                 <SelectionInputField
                   isRequired
                   title={'Religion'}
-                  placeholderText={socialHistDictionary['Religion']}
-                  onDataChange={handleFormData('Religion')}
-                  value={formData['ReligionID']}
+                  placeholderText={formData['ReligionDescription']}
+                  onDataChange={handleFormData('ReligionDescription')}
+                  value={formData['ReligionListId']}
                   dataArray={listOfReligion}
                   onChildData={handleReligionState}
                 />
@@ -423,9 +503,9 @@ function EditPatientSocialHistScreen(props) {
                 <SelectionInputField
                   isRequired
                   title={'Pet'}
-                  placeholderText={socialHistDictionary['Pet']}
-                  onDataChange={handleFormData('Pet')}
-                  value={formData['PetID']}
+                  placeholderText={formData['PetDescription']}
+                  onDataChange={handleFormData('PetDescription')}
+                  value={formData['PetListId']}
                   dataArray={listOfPet}
                   onChildData={handlePetState}
                 />
@@ -433,9 +513,9 @@ function EditPatientSocialHistScreen(props) {
                 <SelectionInputField
                   isRequired
                   title={'Diet'}
-                  placeholderText={socialHistDictionary['Diet']}
-                  onDataChange={handleFormData('Diet')}
-                  value={formData['DietID']}
+                  placeholderText={formData['DietDescription']}
+                  onDataChange={handleFormData('DietDescription')}
+                  value={formData['DietListId']}
                   dataArray={listOfDiet}
                   onChildData={handleDietState}
                 />
@@ -478,9 +558,9 @@ function EditPatientSocialHistScreen(props) {
 
                 <RadioButtonInput
                   isRequired
-                  title={'Alochol use'}
-                  value={formData['AlocholUse']}
-                  onChangeData={handleFormData('AlocholUse')}
+                  title={'Alcohol use'}
+                  value={formData['AlcoholUse']}
+                  onChangeData={handleFormData('AlcoholUse')}
                   onChildData={handleAlcoholUseState}
                   dataArray={listYesNo}
                 />
@@ -505,7 +585,7 @@ function EditPatientSocialHistScreen(props) {
               </View>
               <View style={styles.saveButtonContainer}>
                 <Box width='70%'>
-                  <AppButton title="Save" color="green" onPress={submitForm} />
+                  <AppButton title="Save" color="green" onPress={submitForm} isDisabled={isInputErrors} />
                 </Box>
               </View>
             </VStack>

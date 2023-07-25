@@ -69,7 +69,7 @@ function PatientAddPatientInfoScreen({
   const maximumJoiningDate = new Date();
   maximumJoiningDate.setDate(maximumJoiningDate.getDate() + 30); // 30 days later
 
-  // set initial value for  SelectionInputField dataArray prop -> follow format of "label" and "value"
+  // set initial value for SelectionInputField dataArray prop -> follow format of "label" and "value"
   const [listOfLanguages, setListOfLanguages] = useState([
     { label: 'Cantonese', value: 1 },
     { label: 'English', value: 2 },

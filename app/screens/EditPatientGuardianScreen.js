@@ -1,7 +1,16 @@
 // Libs
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 import { Box, VStack, FlatList } from 'native-base'
+
+// Configurations
+import routes from 'app/navigation/routes';
+
+// Hooks
+import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
+
+//API
+import guardianApi from 'app/api/guardian';
 
 // Components
 import NameInputField from 'app/components/NameInputField';
@@ -11,16 +20,21 @@ import TelephoneInputField from 'app/components/TelephoneInputField';
 import SingleOptionCheckBox from 'app/components/SingleOptionCheckBox';
 import EmailInputField from 'app/components/EmailInputField';
 import AppButton from 'app/components/AppButton';
+import ActivityIndicator from 'app/components/ActivityIndicator';
 
 function EditPatientGuardianScreen(props) {
-  const { displayData } = props.route.params;
-  const guardianDictionary = displayData.reduce((dict, item) => {
-    dict[item.label] = item.value;
-    return dict;
-  }, {});
+  const { navigation, guardianProfile } = props.route.params;
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // retrive list data from database using useGetSelectionOptions
+  const {
+    data: relationshipData,
+    isError: relationshipError,
+    isLoading: relationshipLoading,
+  } = useGetSelectionOptions('relationship');
 
-  // constant values for relationships
-  const listOfRelationships = [
+  // set initial value for SelectionInputField dataArray prop -> follow format of "label" and "value"
+  const [listOfRelationships, setListOfRelationships] = useState([
     { value: 1, label: 'Husband' },
     { value: 2, label: 'Wife' },
     { value: 3, label: 'Child' },
@@ -33,7 +47,7 @@ function EditPatientGuardianScreen(props) {
     { value: 10, label: 'Aunt' },
     { value: 11, label: 'Uncle' },
     { value: 12, label: 'Grandparent' },
-  ];
+  ]);
 
   const [isInputErrors, setIsInputErrors] = useState(false);
 
@@ -43,7 +57,7 @@ function EditPatientGuardianScreen(props) {
   const [isRelationError, setIsRelationError] = useState(false);
   const [isPhoneError, setIsPhoneError] = useState(false);
   const [isEmailError, setIsEmailError] = useState(false);
-  const [isLoginError, setIsLoginError] = useState(false);
+  const [isGuardianLoginError, setIsGuardianLoginError] = useState(false);
 
   const handleFirstNameState = useCallback(
     (state) => {
@@ -58,6 +72,7 @@ function EditPatientGuardianScreen(props) {
       setIsLastNameError(state);
       // console.log('LastName: ', state);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isLastNameError],
   );
   const handleNRICState = useCallback(
@@ -65,6 +80,7 @@ function EditPatientGuardianScreen(props) {
       setIsNRICError(state);
       // console.log('NRIC: ', state);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isNRICError],
   );
   const handleRelationState = useCallback(
@@ -72,6 +88,7 @@ function EditPatientGuardianScreen(props) {
       setIsRelationError(state);
       // console.log('Relation: ', state);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isRelationError],
   );
   const handlePhoneState = useCallback(
@@ -79,6 +96,7 @@ function EditPatientGuardianScreen(props) {
       setIsPhoneError(state);
       // console.log('Phone: ', state);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isPhoneError],
   );
   const handleEmailState = useCallback(
@@ -86,6 +104,7 @@ function EditPatientGuardianScreen(props) {
       setIsEmailError(state);
       // console.log('Email: ', state);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isEmailError],
   );
 
@@ -97,7 +116,7 @@ function EditPatientGuardianScreen(props) {
       isPhoneError ||
       isRelationError ||
       isEmailError ||
-      isLoginError,
+      isGuardianLoginError,
     );
     // console.log(isInputErrors);
   }, [
@@ -108,115 +127,96 @@ function EditPatientGuardianScreen(props) {
     isRelationError,
     isEmailError,
     isInputErrors,
-    isLoginError,
+    isGuardianLoginError,
   ]);
+
+  const [formData, setFormData] = useState({
+    GuardianID: guardianProfile.guardianID,
+    FirstName: guardianProfile.firstName,
+    LastName: guardianProfile.lastName,
+    NRIC: guardianProfile.nric,
+    Email: guardianProfile.email,
+    RelationshipID: guardianProfile.relationshipID,
+    isActive: guardianProfile.isActive,
+    ContactNo: guardianProfile.contactNo,
+  });
+
   // To ensure that when the is guardian login required checkbox is checked, guardian email
   // must be filled before continuing. Done by verifying if formData['Email'] is empty or not.
   // console.log(i);
-  //useEffect(() => {
-  //  setIsLoginError(() => {
-  //    if ((formData['IsActive'] !== undefined && formData['IsActive']) && 
-  //    (formData['Email'] !== undefined && formData['Email']=== '')) {
-  //      return true;
-  //    } else {
-  //      return false;
-  //    }
-  //  });
-  //}, [formData['IsActive'], formData['Email']]);
+  useEffect(() => {
+    setIsGuardianLoginError(() => {
+      if ((formData['isActive'] !== undefined && formData['isActive']) && 
+      (formData['Email'] !== undefined && formData['Email'] === '')) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+  }, [formData['isActive'], formData['Email']]);
 
-  const [formData, setFormData] = useState({
-    FirstName: guardianDictionary['First Name'],
-    LastName: guardianDictionary['Last Name'],
-    NRIC: guardianDictionary['NRIC'],
-    Relationship: guardianDictionary['Relationship'],
-    ContactNo: guardianDictionary['Contact Number'],
-    IsActive: guardianDictionary['Is Active'],
-    Email: guardianDictionary['Email'],
-  });
-
-  //const concatFormData = (key, values) => {
-  //  setFormData((prevFormData) => ({
-  //    ...prevFormData,
-  //    [key]: prevFormData[key].concat(values),
-  //  }));
-  //};
 
   // handling form input data by taking onchange value and updating our previous form data state
   const handleFormData =
-    (input = null) =>
-    (e, date = null) => {
-
-      const newData = formData;
-      // additional check to convert HomeNo and HandphoneNo to string
-      if (
-        input === 'ContactNo' ||
-        // BUGFIX: Address not saved properly when number specifed first -- Justin
-        // soln: Address is included: fixes a bug where if number is specified first address will not be captured properly
-        // i.e: '123 abc lane' -- saved as --> '123'
-        input === 'Address' ||
-        input === 'TempAddress'
-      ) {
-        newData[input] = e.toString(); // convert to string
-      } else {
-        newData[input] = date
-          ? date
-          : e.$d //e['$d']-check if input from MUI date-picker
-          ? e.$d
-          : parseInt(e) // check if integer (for dropdown)
-          ? parseInt(e) // change to integer
-          : e; // eg. guardianInfo[0].FirstName = e
-      }
-
-      setFormData((previousState) => ({
-        ...previousState,
-        newData,
+  (input = null) =>
+  (e) => {
+    if (input === 'ContactNo') {
+      e.toString(); // convert to string
+      setFormData((prevData) => ({
+        ...prevData,
+        [input]: e,
       }));
-    };
+    } else if (input === 'Relationship') {
+      setFormData((prevData) => ({
+        ...prevData,
+        RelationshipID: e,
+      }));
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [input]: e,
+      }));
+    }
+  };
+
+  // form submission when save button is pressed
   const submitForm = async () => {
-    console.log("sumbit");
-  }
+    const result = await guardianApi.updateGuardian(formData);
 
-//  const submitForm = async () => {
-//    // -- Validation is now real-time no need to have on submit validation - Justin
-//    const result = await patientApi.addPatient(formData);
-//
-//    // let alertTxt = '';
-//    let alertTitle = '';
-//    let alertDetails = '';
-//
-//    // console.log('response: ', result);
-//
-//    if (result.ok) {
-//      const allocations = result.data.data.patientAllocationDTO;
-//      const caregiver = allocations.caregiverName;
-//      const doctor = allocations.doctorName;
-//      const gameTherapist = allocations.gameTherapistName;
-//
-//      alertTitle = 'Successfully added Patient';
-//      alertDetails = `Patient has been allocated to\nCaregiver: ${caregiver}\nDoctor: ${doctor}\nGame Therapist: ${gameTherapist}`;
-//      // alertTxt = alertTitle + alertDetails;
-//      // Platform.OS === 'web'
-//      //   ? navigate('/' + routes.PATIENTS)
-//      //   : navigation.navigate(routes.PATIENTS_SCREEN);
-//      navigation.navigate(routes.PATIENTS_SCREEN);
-//    } else {
-//      const errors = result.data?.message;
-//
-//      result.data
-//        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-//        : (alertDetails = 'Please try again.');
-//
-//      alertTitle = 'Error in Adding Patient';
-//      // alertTxt = alertTitle + alertDetails;
-//    }
-//    // Platform.OS === 'web'
-//    //   ? alert(alertTxt)
-//    //   : Alert.alert(alertTitle, alertDetails);
-//    // }
-//    Alert.alert(alertTitle, alertDetails);
-//  };
+    let alertTitle = '';
+    let alertDetails = '';
 
-  return (
+    if (result.ok) {
+      navigation.goBack(routes.PATIENT_INFORMATION, {
+        navigation: navigation,
+        ...guardianProfile,
+      });
+      alertTitle = 'Saved Successfully';
+    } else {
+      const errors = result.data?.message;
+
+      result.data
+        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
+        : (alertDetails = 'Please try again.');
+
+      alertTitle = 'Error in Editing Guardian Info';
+      console.log("result error "+JSON.stringify(result));
+    }
+    Alert.alert(alertTitle, alertDetails);
+  };
+
+  /* If retrieval from the hook is successful, replace the content in
+     listOfLanguages with the retrieved one. */
+  useEffect(() => {
+    if (!relationshipLoading && !relationshipError && relationshipData) {
+      setListOfRelationships(relationshipData);
+      setIsLoading(false);
+    }
+  }, [relationshipData, relationshipError, relationshipLoading]);
+
+  return relationshipLoading || isLoading ? (
+    <ActivityIndicator visible />
+  ) : (
     <FlatList
       data={[0]}
       renderItem={() => (
@@ -252,9 +252,9 @@ function EditPatientGuardianScreen(props) {
                 <SelectionInputField
                   isRequired
                   title={'Relationship'}
-                  placeholderText={guardianDictionary['Relationship']}
-                  onDataChange={handleFormData('RelationshipID')}
-                  value={formData['Relationship']}
+                  placeholderText={guardianProfile.relationship}
+                  onDataChange={handleFormData('Relationship')}
+                  value={guardianProfile.relationship}
                   dataArray={listOfRelationships}
                   onChildData={handleRelationState}
                 />
@@ -270,12 +270,12 @@ function EditPatientGuardianScreen(props) {
 
                 <SingleOptionCheckBox
                   title={'Check this box to specify Guardian wants to log in'}
-                  value={(formData['IsActive'] !== undefined && formData['IsActive'])}
-                  onChangeData={handleFormData('IsActive')}
+                  value={(formData['isActive'] !== undefined && formData['isActive'])}
+                  onChangeData={handleFormData('isActive')}
                 />
 
                 <EmailInputField
-                  isRequired={(formData['IsActive'] !== undefined && formData['IsActive'])}
+                  isRequired={(formData['isActive'] !== undefined && formData['isActive'])}
                   title={'Guardian Email'}
                   value={formData['Email']}
                   onChangeText={handleFormData('Email')}
@@ -284,7 +284,7 @@ function EditPatientGuardianScreen(props) {
               </View>
               <View style={styles.saveButtonContainer}>
                 <Box width='70%'>
-                  <AppButton title="Save" color="green" onPress={submitForm} />
+                  <AppButton title="Save" color="green" onPress={submitForm} isDisabled={isInputErrors} />
                 </Box>
               </View>
             </VStack>
