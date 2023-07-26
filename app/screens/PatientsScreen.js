@@ -1,7 +1,7 @@
 // Libs
 import React, { useState, useEffect, useContext } from 'react';
 import { Center, VStack, HStack, ScrollView, Fab, Icon } from 'native-base';
-import { RefreshControl } from 'react-native';
+import { RefreshControl, Dimensions } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import AuthContext from 'app/auth/context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -20,21 +20,11 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import SelectionInputField from 'app/components/SelectionInputField';
 
-// import DropDownPicker from 'react-native-dropdown-picker';
-// import useCheckExpiredThenLogOut from 'app/hooks/useCheckExpiredThenLogOut';
-// import PatientScreenCard from 'app/components/PatientScreenCard';
-// import authStorage from 'app/auth/authStorage';
-
-function PatientsScreen(props) {
-  // Destructure props
+function PatientsScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(false);
   const [listOfPatients, setListOfPatients] = useState();
-  // const checkExpiredLogOutHook = useCheckExpiredThenLogOut();
-  const { navigation } = props;
-
   const { user, setUser } = useContext(AuthContext);
   const [searchQuery, setSearchQuery] = useState('');
-  // const [dropdownOpen, setDropdownOpen] = useState(false);
   // set default value to my patients
   const [filterValue, setFilterValue] = useState('myPatients');
   const [originalListOfPatients, setOriginalListOfPatients] = useState([]);
@@ -49,7 +39,7 @@ function PatientsScreen(props) {
       value: 'allPatients',
     },
   ]);
-
+  const SCREEN_WIDTH = Dimensions.get('window').width;
   // Refreshes every time the user navigates to PatientsScreen - OUTDATED
   // Now refresh only when new patient is added or user requested refresh
   useFocusEffect(
@@ -190,7 +180,7 @@ function PatientsScreen(props) {
                         profilePicture={item.profilePicture}
                         handleOnPress={() => handleOnPress(item)}
                         isPatient={true}
-                        size={80}
+                        size={SCREEN_WIDTH / 10}
                         key={index}
                         isVertical={false}
                       />

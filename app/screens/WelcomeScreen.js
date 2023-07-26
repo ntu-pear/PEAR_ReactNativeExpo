@@ -32,6 +32,7 @@ import ErrorMessage from 'app/components/ErrorMessage';
 
 // Import Api
 import userApi from 'app/api/user';
+import LoadingWheel from 'app/components/LoadingWheel';
 
 function WelcomeScreen(props) {
   /*
@@ -116,7 +117,7 @@ function WelcomeScreen(props) {
           }
         }}
       >
-        <View>
+        <View testID={'loginContentContainer'}>
           <View style={styles.logoContainer}>
             <Image
               source={require('../assets/pear_v2.png')}
@@ -134,6 +135,8 @@ function WelcomeScreen(props) {
               }
             >
               <Input
+                accessible={true}
+                testID="username"
                 autoCapitalize="none"
                 bg={colors.gray}
                 borderRadius="25"
@@ -185,6 +188,8 @@ function WelcomeScreen(props) {
                 <Select.Item label="Nurse" value="Nurse" />
               </Select>
               <Input
+                accessible={true}
+                testID="password"
                 autoCapitalize="none"
                 bg={colors.gray}
                 borderRadius="25"
@@ -219,22 +224,24 @@ function WelcomeScreen(props) {
                 type={show ? 'text' : 'password'}
               />
             </View>
-            <Box
-              style={Platform.OS === 'web' ? styles.errorsContainerWeb : null}
-            >
-              <ErrorMessage visible={loginFailed} message={errors.loginError} />
+            <Box>
+              <ErrorMessage
+                visible={loginFailed}
+                message={errors.loginError}
+                testID={'loginError'}
+              />
             </Box>
-            <View
-              style={
-                Platform.OS === 'web'
-                  ? styles.buttonsContainerWeb
-                  : styles.buttonsContainer
-              }
-            >
+            <View style={styles.buttonsContainer}>
               {isLoading ? (
-                <ActivityIndicator color={colors.primary_overlay_color} />
+                // <ActivityIndicator color={colors.primary_overlay_color} />
+                <LoadingWheel />
               ) : (
-                <AppButton title="Login" color="green" onPress={onPressLogin} />
+                <AppButton
+                  title="Login"
+                  color="green"
+                  onPress={onPressLogin}
+                  testingID="Login"
+                />
               )}
             </View>
             <View style={Platform.OS === 'web' ? { top: 130 } : ''}>

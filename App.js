@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { StyleSheet, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet } from 'react-native';
 
 // Custom import from https://docs.nativebase.io/
 import { NativeBaseProvider } from 'native-base';
@@ -12,12 +12,9 @@ import OfflineNotice from './app/components/OfflineNotice';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import AuthNavigator from './app/navigation/AuthNavigator';
 import AppNavigator from './app/navigation/AppNavigator';
-import WebAppNavigator from './app/navigation/WebAppNavigator';
 
 import AuthContext from './app/auth/context';
 import authStorage from './app/auth/authStorage';
-
-import { BrowserRouter } from 'react-router-dom';
 
 export default function App() {
   const [user, setUser] = useState();
@@ -53,17 +50,7 @@ export default function App() {
       >
         <OfflineNotice />
         <NavigationContainer theme={MyTheme}>
-          {user ? (
-            Platform.OS === 'web' ? (
-              <BrowserRouter>
-                <WebAppNavigator />
-              </BrowserRouter>
-            ) : (
-              <AppNavigator />
-            )
-          ) : (
-            <AuthNavigator />
-          )}
+          {user ? <AppNavigator /> : <AuthNavigator />}
         </NavigationContainer>
       </AuthContext.Provider>
     </NativeBaseProvider>
