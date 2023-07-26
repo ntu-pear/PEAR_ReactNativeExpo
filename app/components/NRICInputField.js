@@ -27,9 +27,13 @@ function NRICInputField({
   // 3) More than 9 total characters
   const validation = () => {
     let message;
-    if (isRequired && value <= 0) {
+    let testerValue = '' + value;
+    if (isRequired && testerValue.length <= 0) {
       message = 'NRIC cannot be empty.';
-    } else if (value.length > 0 && !/^[STFGMstfgm]\d{7}[A-Za-z]$/.test(value)) {
+    } else if (
+      testerValue.length > 0 &&
+      !/^[STFGMstfgm]\d{7}[A-Za-z]$/.test(testerValue)
+    ) {
       message = 'Invalid NRIC.';
     } else {
       message = '';
@@ -45,7 +49,7 @@ function NRICInputField({
     <BaseInputField
       isRequired={isRequired}
       title={title}
-      value={value}
+      value={'' + value}
       onChangeText={onChangeText}
       InputRightElement={InputRightElement}
       type={type}
