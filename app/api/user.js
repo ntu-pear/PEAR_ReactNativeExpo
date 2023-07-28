@@ -51,28 +51,9 @@ const changePassword = (Email, OldPassword, NewPassword) => {
 };
 
 // ************************* UPDATE REQUESTS *************************
-const updateUser = async (data, profilePicture) => {
-  const formData = new FormData();
-
-  for (const key in data) {
-    var value = data[key];
-    formData.append(key, value);
-  }
-
-  const fileName = profilePicture.split('/').pop();
-  const fileType = fileName.split('.').pop();
-
-  formData.append('uploadProfilePicture', {
-    uri: profilePicture,
-    name: fileName,
-    type: `image/${fileType}`,
-  });
-
-  const headers = { 'Content-Type': 'multipart/form-data' };
-
-  // console.log('formData', formData);
-
-  return client.put(userUpdate, formData, { headers });
+const updateUser = async (data) => {
+  const headers = { 'Content-Type': 'application/json-patch+json' };
+  return client.put(userUpdate, data, { headers });
 };
 
 /*

@@ -33,7 +33,7 @@ import routes from 'app/navigation/routes';
 import colors from 'app/config/colors';
 import typography from 'app/config/typography';
 
-//Components
+// Components
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import AppButton from 'app/components/AppButton';
 import InformationCard from 'app/components/InformationCard';

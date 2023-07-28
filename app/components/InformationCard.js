@@ -8,7 +8,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import typography from 'app/config/typography';
 import colors from 'app/config/colors';
 
-function InformationCard({ displayData, title, subtitle, handleOnPress }) {
+function InformationCard({ displayData, title, subtitle, handleOnPress=null }) {
 
   const formatDate = (str) => {
     let splitDate = str.split('-');
@@ -24,8 +24,8 @@ function InformationCard({ displayData, title, subtitle, handleOnPress }) {
           {title ? (
             <Text style={[styles.TextContent, styles.titleText]}>{title}</Text>
           ) : null}
-          {(subtitle === null && title !== "Doctor's Notes") ? ( // editing button will appear if the title is not
-            <IconButton                                          // "Doctor's Notes" or Guardian(s) Information
+          {(handleOnPress !== null && title !== "Guardian(s) Information") ? ( // editing button will appear if the title is not null
+            <IconButton                                                        // or "Guardian(s) Information"
               _icon={{
                 as: MaterialCommunityIcons,
                 name: 'pencil',

@@ -1,128 +1,108 @@
-import React from 'react';
-import { useState } from 'react';
-import { Platform, Alert, ActivityIndicator } from 'react-native';
+// Libs
+import React, { useState, useEffect, useCallback } from 'react';
+import { Platform, Alert, ActivityIndicator, TouchableOpacity, StyleSheet, View } from 'react-native';
 import {
   Image,
   VStack,
   HStack,
   AspectRatio,
   Center,
-  ScrollView,
+  FlatList,
   Text,
-  Button,
   Box,
 } from 'native-base';
-import typography from 'app/config/typography';
-import colors from 'app/config/colors';
-import { TouchableOpacity } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+
+//API
 import userApi from 'app/api/user';
+
+// Configurations
 import routes from 'app/navigation/routes';
-import EditField from 'app/components/EditField';
-import ErrorMessage from 'app/components/ErrorMessage';
-import UserInformationCard from 'app/components/UserInformationCard';
-import * as Yup from 'yup';
-import { useLocation, useNavigate } from 'react-router-dom';
+import colors from 'app/config/colors';
+
+// Components
+import NameInputField from 'app/components/NameInputField';
+import TelephoneInputField from 'app/components/TelephoneInputField';
+import InformationCard from 'app/components/InformationCard';
+import AppButton from 'app/components/AppButton';
 
 function AccountEditScreen(props) {
   const [isLoading, setIsLoading] = useState(false);
-  const { navigation, route } = props;
-  const { state } = Platform.OS === 'web' ? useLocation() : {};
-  const userProfile = Platform.OS === 'web' ? state.userProfile : route.params;
+  const { navigation, userData } = props.route.params;
+  const [profilePicture, setProfilePicture] = useState(props.route.params.profilePicture);
 
-  // useNavigate() hook cannot work on mobile
-  const navigate = Platform.OS === 'web' ? useNavigate() : null;
+  // error state for component
+  const [isInputErrors, setIsInputErrors] = useState(false);
+
+  // error states for child components
+  const [isPrefNameError, setIsPrefNameError] = useState(false);
+  const [isContactError, setIsContactError] = useState(false);
+
+  const handlePrefNameState = useCallback(
+    (state) => {
+      setIsPrefNameError(state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isPrefNameError],
+  );
+  const handleContactNoState = useCallback(
+    (state) => {
+      setIsContactError(state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isContactError],
+  );
+
+  // Error state handling for this component
+  useEffect(() => {
+    setIsInputErrors(
+      isPrefNameError ||
+      isContactError,
+    );
+  }, [
+    isPrefNameError,
+    isContactError,
+    isInputErrors,
+  ]);
 
   const [formData, setFormData] = useState({
-    preferredName: userProfile.preferredName,
-    contactNo: userProfile.contactNo,
-  });
-  const [profilePicture, setProfilePicture] = useState(
-    userProfile.profilePicture,
-  );
-  const [errors, setErrors] = useState({});
-
-  // set front end validation schema according to Validation Rules document on Confluence
-  const schema = Yup.object().shape({
-    preferredName: Yup.string().required('Preferred Name is a required field.'),
-    contactNo: Yup.string()
-      .matches(/^$|^[869][0-9]{7}$/, {
-        message:
-          'Contact No. must start with the digit 6, 8 or 9, and must have 8 digits.',
-      })
-      .required('Contact No. is a required field.'),
+    PreferredName: props.route.params.preferredName,
+    ContactNo: props.route.params.contactNo,
   });
 
   const handleFormData =
     (input = null) =>
-    (e, date = null) => {
-      const newData = formData;
-      date ? (newData[input] = date) : (newData[input] = e);
-      setFormData(() => ({
-        preferredName: newData.preferredName,
-        contactNo: newData.contactNo,
+    (e) => {
+      setFormData((previousState) => ({
+        ...previousState,
+        [input]: e,
       }));
     };
 
-  const validate = async () => {
-    try {
-      // Validate the form data against the schema and set errors when needed
-      await schema.validate(formData, { abortEarly: false });
-      return true;
-    } catch (error) {
-      if (error.inner) {
-        const errorList = {};
-        error.inner.forEach((e) => {
-          errorList[e.path] = e.message;
-        });
-        setErrors(errorList);
-        return false;
-      }
-    }
-  };
-
-  const handleOnPressToSave = async () => {
-    // carry out front end validation first before calling api
-    const validation = await validate();
-    if (!validation) {
-      return;
-    }
-
+  const submitForm = async () => {
     setIsLoading(true);
-    const result = await userApi.updateUser(formData, profilePicture);
-    if (!result.ok) {
-      // set errors resulting from back end validation after calling api
-      setErrors({
-        api: result.data.message,
-      });
-      setIsLoading(false);
-      return;
-    }
+    const result = await userApi.updateUser(formData);
+    let alertTitle = '';
+    let alertDetails = '';
 
+    if (result.ok) {
+      navigation.goBack(routes.ACCOUNT_SCREEN, {
+        navigation: navigation,
+      });
+      alertTitle = 'Saved Successfully';
+    } else {
+      const errors = result.data?.message;
+
+      result.data
+        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
+        : (alertDetails = 'Please try again.');
+
+      alertTitle = 'Error in Editing Personal Information';
+      console.log("result error "+JSON.stringify(result));
+    }
+    Alert.alert(alertTitle, alertDetails);
+    console.log("formData "+JSON.stringify(formData));
     setIsLoading(false);
-
-    const alertTxt = 'Successfully updated.';
-    Platform.OS === 'web' ? alert(alertTxt) : Alert.alert(alertTxt);
-
-    // redirect user to account screen after successful update
-    if (Platform.OS === 'web') {
-      navigate('/' + routes.ACCOUNT_VIEW, {
-        state: { userProfile: userProfile },
-      });
-    } else {
-      navigation.pop();
-      navigation.navigate(routes.ACCOUNT_SCREEN);
-    }
-  };
-
-  const goBack = () => {
-    if (Platform.OS === 'web') {
-      navigate('/' + routes.ACCOUNT_VIEW, {
-        state: { userProfile: userProfile },
-      });
-    } else {
-      navigation.goBack();
-    }
   };
 
   const handleOnPressToImagePicker = async () => {
@@ -137,6 +117,16 @@ function AccountEditScreen(props) {
 
       if (!result.cancelled) {
         setProfilePicture(result.uri);
+        const fileName = result.uri.split('/').pop();
+        const fileType = fileName.split('.').pop();
+        setFormData(prevUserData => ({
+          ...prevUserData,
+          "uploadProfilePicture": {
+            uri: result.uri,
+            name: fileName,
+            type: `image/${fileType}`,
+          },
+        }));
       } else {
         return false;
       }
@@ -146,120 +136,103 @@ function AccountEditScreen(props) {
     }
   };
 
-  return (
-    <ScrollView>
-      <VStack mt="4" ml="4" px={Platform.OS === 'web' ? '10%' : null}>
-        <Center>
-          <HStack>
-            <Center>
-              <TouchableOpacity
-                onPress={handleOnPressToImagePicker}
-                alignItems="center"
-              >
-                <AspectRatio
-                  w={Platform.OS === 'web' ? '140%' : '70%'}
-                  ratio={1}
-                  mb="2"
-                  alignSelf="center"
-                >
-                  <Image
-                    borderRadius="full"
-                    fallbackSource={{
-                      uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1634523641/User/Adeline_Tan_Sxxxx515G/ProfilePicture/ffo5oc4jhurmtjjhqcib.jpg',
-                    }}
-                    resizeMode="cover"
-                    source={{
-                      uri: profilePicture
-                        ? `${profilePicture}`
-                        : 'https://res.cloudinary.com/dbpearfyp/image/upload/v1634523641/User/Adeline_Tan_Sxxxx515G/ProfilePicture/ffo5oc4jhurmtjjhqcib.jpg',
-                    }}
-                    alt="user_image"
-                  />
-                </AspectRatio>
-                <Text alignSelf="center" color={colors.red}> Click to edit profile picture</Text>
-              </TouchableOpacity>
-            </Center>
-          </HStack>
-        </Center>
+  return isLoading ? (
+    <ActivityIndicator visible />
+  ) : (
+    <FlatList
+      data={[0]}
+      renderItem={() => (
+        <Box alignItems="center">
+          <Box w="100%">
+            <VStack>
+              <View style={styles.formContainer}>
+                <Center alignSelf="center">
+                  <TouchableOpacity
+                    onPress={handleOnPressToImagePicker}
+                  >
+                    <AspectRatio
+                      w='70%'
+                      ratio={1}
+                      mb="2"
+                    >
+                      <Image
+                        borderRadius="full"
+                        fallbackSource={{
+                          uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1634523641/User/Adeline_Tan_Sxxxx515G/ProfilePicture/ffo5oc4jhurmtjjhqcib.jpg',
+                        }}
+                        resizeMode="cover"
+                        source={{
+                          uri: profilePicture
+                            ? `${profilePicture}`
+                            : 'https://res.cloudinary.com/dbpearfyp/image/upload/v1634523641/User/Adeline_Tan_Sxxxx515G/ProfilePicture/ffo5oc4jhurmtjjhqcib.jpg',
+                        }}
+                        alt="user_image"
+                      />
+                    </AspectRatio>
+                    <Text style={styles.redText}> Click to edit profile picture</Text>
+                  </TouchableOpacity>
+                </Center>
 
-        <EditField
-          isRequired
-          isInvalid={'preferredName' in errors}
-          title="Preferred Name"
-          placeholder={userProfile.preferredName}
-          onChangeText={handleFormData('preferredName')}
-          value={formData.preferredName}
-          ErrorMessage={errors.preferredName}
-        />
+                <NameInputField
+                  isRequired
+                  title={'Preferred Name'}
+                  value={formData['PreferredName']}
+                  onChangeText={handleFormData('PreferredName')}
+                  onChildData={handlePrefNameState}
+                />
 
-        <EditField
-          isRequired
-          isInvalid={'contactNo' in errors}
-          title="Contact No."
-          placeholder={userProfile.contactNo}
-          onChangeText={handleFormData('contactNo')}
-          value={formData.contactNo}
-          ErrorMessage={errors.contactNo}
-        />
+                <TelephoneInputField
+                  isRequired
+                  title={'Contact No.'}
+                  value={formData['ContactNo']}
+                  numberType={'mobile'}
+                  onChangeText={handleFormData('ContactNo')}
+                  onChildData={handleContactNoState}
+                />
 
-        <UserInformationCard userProfile={props} />
+                <InformationCard
+                  displayData={userData}
+                />
 
-        <Text
-          mb="4"
-          color={colors.red}
-          fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
-        >
-          {' '}
-          Note: To edit other information, please contact system administrator.
-        </Text>
-
-        <Box>
-          <ErrorMessage visible={'api' in errors} message={errors.api} />
+                <Text style={styles.redText}>
+                  Note: To edit other information, please contact system administrator.
+                </Text>
+              </View>
+              <View style={styles.saveButtonContainer}>
+                <Box width='70%'>
+                  {isLoading ? 
+                  <AppButton title="Save" color="green" onPress={submitForm} isDisabled={true} /> :
+                  <AppButton title="Save" color="green" onPress={submitForm} isDisabled={isInputErrors} /> 
+                  }
+                </Box>
+              </View>
+            </VStack>
+          </Box>
         </Box>
-
-        {isLoading ? (
-          <ActivityIndicator color={colors.primary_overlay_color} />
-        ) : (
-          <HStack
-            w="100%"
-            space="0"
-            alignItems="center"
-            justifyContent="space-around"
-          >
-            <Button
-              onPress={() => handleOnPressToSave()}
-              w="25%"
-              size="md"
-              bg={colors.green}
-              _text={{
-                color: `${colors.white_var1}`,
-                fontFamily:
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android,
-                fontSize: 'sm',
-              }}
-            >
-              Save
-            </Button>
-
-            <Button
-              onPress={goBack}
-              w="25%"
-              size="md"
-              bg={colors.pink}
-              _text={{
-                color: `${colors.white_var1}`,
-                fontFamily:
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android,
-                fontSize: 'sm',
-              }}
-            >
-              Cancel
-            </Button>
-          </HStack>
-        )}
-      </VStack>
-    </ScrollView>
+      )}
+    />
   );
 }
+
+const styles = StyleSheet.create({
+  formContainer: {
+    flex: 1,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    paddingLeft: '10%',
+    width: '90%',
+    marginBottom: 20,
+  },
+  redText: {
+    marginBottom: 4,
+    alignSelf: "center",
+    color: colors.red,
+  },
+  saveButtonContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+});
 
 export default AccountEditScreen;
