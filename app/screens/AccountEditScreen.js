@@ -38,6 +38,7 @@ function AccountEditScreen(props) {
   const [isPrefNameError, setIsPrefNameError] = useState(false);
   const [isContactError, setIsContactError] = useState(false);
 
+  // Error state handling for child components
   const handlePrefNameState = useCallback(
     (state) => {
       setIsPrefNameError(state);
@@ -105,6 +106,7 @@ function AccountEditScreen(props) {
     setIsLoading(false);
   };
 
+  // Used to pick images for profile picture (Not working?)
   const handleOnPressToImagePicker = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status === 'granted') {
@@ -119,6 +121,8 @@ function AccountEditScreen(props) {
         setProfilePicture(result.uri);
         const fileName = result.uri.split('/').pop();
         const fileType = fileName.split('.').pop();
+        
+        // Moved spliting of profilePicture from user.js to here
         setFormData(prevUserData => ({
           ...prevUserData,
           "uploadProfilePicture": {

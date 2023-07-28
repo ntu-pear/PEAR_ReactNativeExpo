@@ -17,7 +17,8 @@ import authStorage from 'app/auth/authStorage';
 function AccountViewScreen(props) {
   const { user, setUser } = useContext(AuthContext);
   const { navigation } = props;
-
+  
+  // Data used for display, sent to InformationCard
   const userData = [
     { label: 'Preferred Name', value: user.preferredName },
     { label: 'Contact Number', value: user.contactNo },

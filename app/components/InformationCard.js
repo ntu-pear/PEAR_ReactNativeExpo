@@ -10,6 +10,7 @@ import colors from 'app/config/colors';
 
 function InformationCard({ displayData, title, subtitle, handleOnPress=null }) {
 
+  // Function used to format date data into dd-mm-yyyy
   const formatDate = (str) => {
     let splitDate = str.split('-');
     // splitDate[0] = splitDate[0].split('').reverse().join('');

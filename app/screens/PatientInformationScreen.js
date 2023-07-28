@@ -52,7 +52,7 @@ function PatientInformationScreen(props) {
   const [socialHistoryData, setSocialHistoryData] = useState([]);
   const [patientProfile, setpatientProfile] = useState({});
 
-  //Used to retrieve the patient since after an editing of the patients particulars it will need to be refreshed - Russell
+  // Used to retrieve the patient since after an editing of the patients particulars it will need to be refreshed - Russell
   const getPatient = async (id, masked = true) => {
     setIsLoading(true);
     const response = await patientApi.getPatient(id, masked);
@@ -63,6 +63,7 @@ function PatientInformationScreen(props) {
     setpatientProfile(response.data.data);
   };
 
+  // Data used for display, sent to InformationCard
   const patientData = [
     { label: 'First Name', value: patientProfile.firstName },
     { label: 'Last Name', value: patientProfile.lastName },
