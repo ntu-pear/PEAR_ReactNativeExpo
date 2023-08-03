@@ -50,6 +50,7 @@ function AccountScreen(props) {
   const getCurrentUser = async () => {
     // get current user from authStorage
     const currentUser = await authStorage.getUser();
+    console.log(currentUser);
     // fetch full user profile information by calling api using user ID
     const response = await userApi.getUser(currentUser.userID);
     // console.log('\ngetCurrentUser: ');

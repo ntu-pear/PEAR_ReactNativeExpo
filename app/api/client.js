@@ -82,12 +82,13 @@ apiClient.addAsyncResponseTransform(async (response) => {
     // console.log('POST is: ', `${baseURL}${userRefreshToken}`, body);
     const data = await apiClient.post(`${baseURL}${userRefreshToken}`, body);
     // if token refresh is unsuccessful
+    // console.log(data);
     if (!data.ok || !data.data.data.success) {
-      const { setUser } = useContext(AuthContext);
+      // const { setUser } = useContext(AuthContext);
       console.log('client.js: !data.ok || !data.data.data.success');
       console.log(data);
       // if refreshToken invalid, remove token
-      await authStorage.removeToken();
+      // await authStorage.removeToken();
       // // TODO: Implement logout() here.
       // navigation.navigate(routes.WELCOME);
       if (data.data.message) {
@@ -97,7 +98,7 @@ apiClient.addAsyncResponseTransform(async (response) => {
       }
       // return Promise.reject(data.data.error);
       // TODO: include alert component
-      setUser(null);
+      // setUser(null);
       return Promise.resolve();
     }
     // if token refresh is successful

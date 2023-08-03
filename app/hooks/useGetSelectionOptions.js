@@ -1,6 +1,5 @@
 // Base
 import React, { useState, useEffect, useCallback } from 'react';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Local Cache
 import {
@@ -34,7 +33,9 @@ export default function useGetSelectionOptions(option) {
       try {
         console.log('Retrieving from API!');
         const response = await apiFunction.request(option);
-        const responseData = response.data;
+        const responseData = response.data.data;
+        // console.log('response data = ');
+        // console.log(responseData);
         responseData.map((object) => {
           /* response have inconsistent key name for ID (e.g: list_RelationshipID, list_EducationID)
              but have consistent position i.e: required value is always in position 0
@@ -71,6 +72,6 @@ export default function useGetSelectionOptions(option) {
     getSelectionOptions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [option]);
-
+  // console.log(data);
   return { data, isLoading, isError };
 }

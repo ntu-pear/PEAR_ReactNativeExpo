@@ -7,7 +7,9 @@ import { Image } from 'react-native';
  */
 const endpoint = '/Patient';
 const patientList = `${endpoint}/patientList`;
-const patientListByUserId = `${endpoint}/patientListByUserId`;
+// `${endpoint}/patientListByUserId` changed to ${endpoint}/patientListByLoggedInCaregiver
+// to enable fetching caregiver specific patients
+const patientListByUserId = `${endpoint}/patientListByLoggedInCaregiver`;
 const patientAdd = `${endpoint}/add`;
 const patientUpdate = `${endpoint}/update`; //eslint-disable-line no-unused-vars
 const privacyLevelUpdate = `${endpoint}/UpdatePatient`; //eslint-disable-line no-unused-vars
@@ -78,7 +80,7 @@ const getPatientList = async (maskNRIC = true) => {
   return client.get(patientList, maskNRIC);
 };
 
-const getPatientListByUserId = async (maskNRIC = true) => {
+const getPatientListByLoggedInCaregiver = async (maskNRIC = true) => {
   return client.get(patientListByUserId, maskNRIC);
 };
 
@@ -149,7 +151,7 @@ const updatePatient = async (data) => {
 export default {
   getPatient,
   getPatientList,
-  getPatientListByUserId,
+  getPatientListByLoggedInCaregiver,
   addPatient,
   updatePatient,
 };

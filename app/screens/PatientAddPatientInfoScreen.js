@@ -251,6 +251,8 @@ function PatientAddPatientInfoScreen({
      listOfLanguages with the retrieved one. */
   useEffect(() => {
     if (!isLoading && !isError && data) {
+      // console.log('selection data!');
+      // console.log(data);
       setListOfLanguages(data);
     }
   }, [data, isError, isLoading]);

@@ -81,6 +81,7 @@ function WelcomeScreen(props) {
     }
     console.log('Storing token');
     const user = jwt_decode(result.data.data.accessToken);
+    console.log('user = ' + user);
     authContext.setUser(user);
     await authStorage.storeToken('userAuthToken', result.data.data.accessToken);
     await authStorage.storeToken(

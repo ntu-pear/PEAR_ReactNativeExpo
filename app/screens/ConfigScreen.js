@@ -30,8 +30,8 @@ function ConfigScreen() {
   //console.log(data);
 
   // setUser(null);
-  // return <MessageDisplayCard TextMessage={'Configuration Screen'} />;
-  return <LoadingWheel />;
+  return <MessageDisplayCard TextMessage={'Configuration Screen'} />;
+  // return <LoadingWheel />;
 }
 
 export default ConfigScreen;

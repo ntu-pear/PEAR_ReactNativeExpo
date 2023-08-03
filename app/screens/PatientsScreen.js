@@ -64,11 +64,12 @@ function PatientsScreen({ navigation }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterValue]);
 
+  // Changed patientListByUserId API to new getPatientListByLoggedInCaregiver API -- Justin
   const getListOfPatients = async () => {
     setIsLoading(true);
     const response =
       filterValue === 'myPatients'
-        ? await patientApi.getPatientListByUserId()
+        ? await patientApi.getPatientListByLoggedInCaregiver()
         : await patientApi.getPatientList();
 
     if (!response.ok) {
@@ -109,11 +110,24 @@ function PatientsScreen({ navigation }) {
     setSearchQuery(text);
   };
 
-  // Filter patient list with search query
+  // Filter patient list with search query by FULL NAME
+  // const filteredList = listOfPatients
+  //   ? listOfPatients.filter((item) => {
+  //       // console.log(item);
+  //       const fullName = `${item.firstName} ${item.lastName}`;
+  //       return fullName.toLowerCase().includes(searchQuery.toLowerCase());
+  //     })
+  //   : null;
+
+  // const handleOnPress = (item) => {
+  //   navigation.push(routes.PATIENT_PROFILE, { patientProfile: item });
+  // };
+
+  // Filter patient list with search query by PREFERRED NAME
   const filteredList = listOfPatients
     ? listOfPatients.filter((item) => {
         // console.log(item);
-        const fullName = `${item.firstName} ${item.lastName}`;
+        const fullName = item.preferredName;
         return fullName.toLowerCase().includes(searchQuery.toLowerCase());
       })
     : null;
@@ -167,6 +181,7 @@ function PatientsScreen({ navigation }) {
                 ? filteredList.map((item, index) => (
                     <View marginLeft={'5%'} key={index}>
                       <ProfileNameButton
+                        // profileLineOne={`${item.firstName} ${item.lastName}`}
                         profileLineOne={item.preferredName}
                         // patient Mary does not have patientAllocationDTO object?
                         // add caregiverName into the All Patients option
@@ -175,7 +190,7 @@ function PatientsScreen({ navigation }) {
                             ? item.patientAllocationDTO !== null
                               ? item.patientAllocationDTO.caregiverName
                               : 'No Caregivers'
-                            : null
+                            : `${item.firstName} ${item.lastName}`
                         }
                         profilePicture={item.profilePicture}
                         handleOnPress={() => handleOnPress(item)}

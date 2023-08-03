@@ -210,7 +210,7 @@ function PatientDailyHighlights(props) {
     return (
       <MessageDisplayCard
         accessibilityLabel="Text"
-        TextMessage={isError ? message : 'No patient changes found today.'}
+        TextMessage={isError ? message : 'Nothing to highlight today'}
         topPaddingSize={'32%'}
       />
       // <Text style={styles.modalText}>No patient changes found today.</Text>
