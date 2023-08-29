@@ -41,33 +41,47 @@ import InformationCard from 'app/components/InformationCard';
 function PatientInformationScreen(props) {
   const { displayPicUrl, firstName, lastName, patientID } = props.route.params;
   const navigation = useNavigation();
-  const [isLoading, setIsLoading] = useState(true); //eslint-disable-line no-unused-vars
+  const [isLoading, setIsLoading] = useState(true);
+  const [isPatientLoading, setIsPatientLoading] = useState(true);
+  const [isSocialHistoryLoading, setIsSocialHistoryLoading] = useState(true);
+  const [isGuardianLoading, setIsGuardianLoading] = useState(true);
   const getDoctorNote = useApi(doctorNoteApi.getDoctorNote);
   const getPatientGuardian = useApi(guardianApi.getPatientGuardian);
-  const getSocialHistory = useApi(socialHistoryApi.getSocialHistory);
 
   const [guardianData, setGuardianData] = useState([]);
   const [secondGuardianData, setSecondGuardianData] = useState([]);
   const [isSecondGuardian, setIsSecondGuardian] = useState(false);
   const [socialHistoryData, setSocialHistoryData] = useState([]);
-  const [patientProfile, setpatientProfile] = useState({});
+  const [patientProfile, setPatientProfile] = useState({});
+  const [unMaskedPatientNRIC, setUnMaskedPatientNRIC] = useState('');
+  const [unMaskedGuardianNRIC, setUnMaskedGuardianNRIC] = useState('');
+  const [unMasked2ndGuardianNRIC, setUnMasked2ndGuardianNRIC] = useState('');
 
   // Used to retrieve the patient since after an editing of the patients particulars it will need to be refreshed - Russell
-  const getPatient = async (id, masked = true) => {
-    setIsLoading(true);
-    const response = await patientApi.getPatient(id, masked);
+  const retrievePatient = async (id) => {
+    const response = await patientApi.getPatient(id);
     if (!response.ok) {
       console.log('Request failed with status code: ', response.status);
       return;
     }
-    setpatientProfile(response.data.data);
+    setPatientProfile(response.data.data);
+    setUnMaskedPatientNRIC(response.data.data.nric)
+  };
+
+  const retrieveSocialHistory = async (id) => {
+    const response = await socialHistoryApi.getSocialHistory(id);
+    if (!response.ok) {
+      console.log('Request failed with status code: ', response.status);
+      return;
+    }
+    setSocialHistoryData(response.data.data);
   };
 
   // Data used for display, sent to InformationCard
   const patientData = [
     { label: 'First Name', value: patientProfile.firstName },
     { label: 'Last Name', value: patientProfile.lastName },
-    { label: 'NRIC', value: patientProfile.nric },
+    { label: 'NRIC', value: unMaskedPatientNRIC.replace(/\d{4}(\d{3})/, 'xxxx$1') },
     {
       label: 'Gender',
       value: patientProfile.gender === 'F' ? 'Female' : 'Male',
@@ -102,7 +116,7 @@ function PatientInformationScreen(props) {
     },
     {
       label: 'Respite Care',
-      value: patientProfile.isRespiteCare || 'Not available',
+      value: patientProfile.isRespiteCare ? 'Yes' : 'No',
     },
   ];
 
@@ -121,167 +135,169 @@ function PatientInformationScreen(props) {
     {
       label: "Doctor's Notes",
       value:
-        getDoctorNote.data &&
-        getDoctorNote.data[0] &&
-        getDoctorNote.data[0].doctorRemarks
-          ? getDoctorNote.data[0].doctorRemarks
+        getDoctorNote.data.data &&
+        getDoctorNote.data.data[0] &&
+        getDoctorNote.data.data[0].doctorRemarks
+          ? getDoctorNote.data.data[0].doctorRemarks
           : 'Not available',
     },
   ];
 
   useEffect(() => {
-    if (getPatientGuardian.data.guardian) {
+    if (getPatientGuardian.data.data) {
       // get data of first guardian
+      setUnMaskedGuardianNRIC(getPatientGuardian.data.data.guardian.nric);
       setGuardianData([
         {
           label: 'First Name',
-          value: getPatientGuardian.data.guardian.firstName || 'Not Available',
+          value: getPatientGuardian.data.data.guardian.firstName || 'Not Available',
         },
         {
           label: 'Last Name',
-          value: getPatientGuardian.data.guardian.lastName || 'Not Available',
+          value: getPatientGuardian.data.data.guardian.lastName || 'Not Available',
         },
         {
           label: 'NRIC',
-          value: getPatientGuardian.data.guardian.nric || 'Not Available',
+          value: getPatientGuardian.data.data.guardian.nric.replace(/\d{4}(\d{3})/, 'xxxx$1') || 'Not Available',
         },
         {
-          label: 'Relationship',
-          value: getPatientGuardian.data.guardian.relationship || 'Not Available',
+          label: "Patient's",
+          value: getPatientGuardian.data.data.guardian.relationship || 'Not Available',
         },
         {
           label: 'Contact Number',
-          value: getPatientGuardian.data.guardian.contactNo || 'Not Available',
-        },
-        {
-          label: 'Is Active',
-          value: getPatientGuardian.data.guardian.isActive,
+          value: getPatientGuardian.data.data.guardian.contactNo || 'Not Available',
         },
         {
           label: 'Email',
-          value: getPatientGuardian.data.guardian.email || 'Not Available',
+          value: getPatientGuardian.data.data.guardian.email || 'Not Available',
         },
       ]);
     }
     // get data of 2nd guardian if any.
     if (
-      getPatientGuardian.data.additionalGuardian &&
-      getPatientGuardian.data.additionalGuardian.nric !== null &&
-      getPatientGuardian.data.additionalGuardian.nric !==
-        getPatientGuardian.data.guardian.nric
+      getPatientGuardian.data.data &&
+      getPatientGuardian.data.data.additionalGuardian &&
+      getPatientGuardian.data.data.additionalGuardian.nric !== null &&
+      getPatientGuardian.data.data.additionalGuardian.nric !==
+        getPatientGuardian.data.data.guardian.nric
     ) {
       setIsSecondGuardian(true);
+      setUnMasked2ndGuardianNRIC(getPatientGuardian.data.data.additionalGuardian.nric);
       setSecondGuardianData([
         {
           label: 'First Name',
-          value: getPatientGuardian.data.additionalGuardian.firstName || 'Not Available',
+          value: getPatientGuardian.data.data.additionalGuardian.firstName || 'Not Available',
         },
         {
           label: 'Last Name',
-          value: getPatientGuardian.data.additionalGuardian.lastName || 'Not Available',
+          value: getPatientGuardian.data.data.additionalGuardian.lastName || 'Not Available',
         },
         {
           label: 'NRIC',
-          value: getPatientGuardian.data.additionalGuardian.nric || 'Not Available',
+          value: getPatientGuardian.data.data.additionalGuardian.nric.replace(/\d{4}(\d{3})/, 'xxxx$1') || 'Not Available',
         },
         {
-          label: 'Relationship',
-          value: getPatientGuardian.data.additionalGuardian.relationship || 'Not Available',
+          label: "Patient's",
+          value: getPatientGuardian.data.data.additionalGuardian.relationship || 'Not Available',
         },
         {
           label: 'Contact Number',
-          value: getPatientGuardian.data.additionalGuardian.contactNo || 'Not Available',
-        },
-        {
-          label: 'Is Active',
-          value: getPatientGuardian.data.additionalGuardian.isActive,
+          value: getPatientGuardian.data.data.additionalGuardian.contactNo || 'Not Available',
         },
         {
           label: 'Email',
-          value: getPatientGuardian.data.additionalGuardian.email || 'Not Available',
+          value: getPatientGuardian.data.data.additionalGuardian.email || 'Not Available',
         },
       ]);
     }
   }, [
-    getPatientGuardian.data.guardian,
-    getPatientGuardian.data.additionalGuardian,
+    getPatientGuardian.data.data
   ]);
 
-  useEffect(() => {
-    if (getSocialHistory.data) {
-      setSocialHistoryData([
-        {
-          label: 'Live with',
-          value: getSocialHistory.data.liveWithDescription || 'Not Available',
-        },
-        {
-          label: 'Education',
-          value: getSocialHistory.data.educationDescription || 'Not Available',
-        },
-        {
-          label: 'Occupation',
-          value: getSocialHistory.data.occupationDescription || 'Not Available',
-        },
-        {
-          label: 'Religion',
-          value: getSocialHistory.data.religionDescription || 'Not Available',
-        },
-        {
-          label: 'Pet',
-          value: getSocialHistory.data.petDescription || 'Not Available',
-        },
-        {
-          label: 'Diet',
-          value: getSocialHistory.data.dietDescription || 'Not Available',
-        },
-        {
-          label: 'Exercise',
-          value: getSocialHistory.data.exercise,
-        },
-        {
-          label: 'Sexually active',
-          value: getSocialHistory.data.sexuallyActive,
-        },
-        {
-          label: 'Drug use',
-          value: getSocialHistory.data.drugUse,
-        },
-        {
-          label: 'Caffeine use',
-          value: getSocialHistory.data.caffeineUse,
-        },
-        {
-          label: 'Alochol use',
-          value: getSocialHistory.data.alcoholUse,
-        },
-        {
-          label: 'Tobacco use',
-          value: getSocialHistory.data.tobaccoUse,
-        },
-        {
-          label: 'Secondhand smoker',
-          value: getSocialHistory.data.secondhandSmoker,
-        },
-      ]);
-    }
-  }, [getSocialHistory.data]);
+  const socialHistoryDataArray = [
+    {
+      label: 'Live with',
+      value: socialHistoryData.liveWithDescription || 'Not Available',
+    },
+    {
+      label: 'Education',
+      value: socialHistoryData.educationDescription || 'Not Available',
+    },
+    {
+      label: 'Occupation',
+      value: socialHistoryData.occupationDescription || 'Not Available',
+    },
+    {
+      label: 'Religion',
+      value: socialHistoryData.religionDescription || 'Not Available',
+    },
+    {
+      label: 'Pet',
+      value: socialHistoryData.petDescription || 'Not Available',
+    },
+    {
+      label: 'Diet',
+      value: socialHistoryData.dietDescription || 'Not Available',
+    },
+    {
+      label: 'Exercise',
+      value: socialHistoryData.exercise,
+    },
+    {
+      label: 'Sexually active',
+      value: socialHistoryData.sexuallyActive,
+    },
+    {
+      label: 'Drug use',
+      value: socialHistoryData.drugUse,
+    },
+    {
+      label: 'Caffeine use',
+      value: socialHistoryData.caffeineUse,
+    },
+    {
+      label: 'Alcohol use',
+      value: socialHistoryData.alcoholUse,
+    },
+    {
+      label: 'Tobacco use',
+      value: socialHistoryData.tobaccoUse,
+    },
+    {
+      label: 'Secondhand smoker',
+      value: socialHistoryData.secondhandSmoker,
+    },
+  ];
 
   // used to call api when page loads
   useEffect(() => {
-    getPatient(patientID, true);
+    retrievePatient(patientID);
+    retrieveSocialHistory(patientID);
     getDoctorNote.request(patientID);
     getPatientGuardian.request(patientID);
-    getSocialHistory.request(patientID);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // used to confirm that data has returned from apis before loading the page - Russell
+  useEffect(() => {
+    if(patientProfile !== undefined && Object.keys(patientProfile).length>0 ){
+      setIsPatientLoading(false);
+    }
+    if(socialHistoryData !== undefined && Object.keys(socialHistoryData).length>0 ){
+      setIsSocialHistoryLoading(false);
+    }
+    if(isPatientLoading === false && isSocialHistoryLoading === false){
+      setIsLoading(false);
+    }
+  }, [patientProfile, isPatientLoading, socialHistoryData, isSocialHistoryLoading]);
 
   // This callback function will be executed when the screen comes into focus - Russell
   useEffect(() => {
     const navListener = navigation.addListener('focus', () => {
-      getPatient(patientID, true)
+      retrievePatient(patientID, true)
+      retrieveSocialHistory(patientID);
       getPatientGuardian.request(patientID);
-      getSocialHistory.request(patientID);
-      setIsLoading(false);
     });
     return navListener;
   }, [navigation]);
@@ -295,9 +311,9 @@ function PatientInformationScreen(props) {
     if (getPatientGuardian.error) {
       getPatientGuardian.request(patientID);
     }
-    if (getSocialHistory.error) {
-      getSocialHistory.request(patientID);
-    }
+    //if (getSocialHistory.error) {
+    //  getSocialHistory.request(patientID);
+    //}
   };
 
   // Handling of InformationCard editing button onPress
@@ -317,34 +333,34 @@ function PatientInformationScreen(props) {
   
   const handlePatientGuardianOnPress = () => {
     navigation.push(routes.EDIT_PATIENT_GUARDIAN, { 
-      guardianProfile: getPatientGuardian.data.guardian,
+      guardianProfile: getPatientGuardian.data.data.guardian,
       navigation: navigation,
     })
   };
   
   const handlePatientSecondGuardianOnPress = () => {
     navigation.push(routes.EDIT_PATIENT_GUARDIAN, { 
-      guardianProfile: getPatientGuardian.data.additionalGuardian,
+      guardianProfile: getPatientGuardian.data.data.additionalGuardian,
       navigation: navigation,
     })
   };
   
   const handlePatientSocialHistOnPress = () => {
     navigation.push(routes.EDIT_PATIENT_SOCIALHIST, { 
-      socialHistory: getSocialHistory.data,
+      socialHistory: socialHistoryData,
+      patientID: patientID,
       navigation: navigation,
     })
   };
 
-  return getDoctorNote.loading || getPatientGuardian.loading || getSocialHistory.loading || isLoading ? (
+  return getDoctorNote.loading || getPatientGuardian.loading || isLoading ? (
     <ActivityIndicator visible />
   ) : (
     <Center minH="100%" backgroundColor={colors.white_var1}>
       {/* Note the immediate bunch of code will only be rendered
       when one of the APIs has an error. Purpose: Error handling of API */}
       {(getDoctorNote.error ||
-        getPatientGuardian.error ||
-        getSocialHistory.error) && (
+        getPatientGuardian.error) && (
         <Box h="100%">
           <Alert w="100%" status="error">
             <VStack space={2} flexShrink={1} w="100%">
@@ -412,6 +428,7 @@ function PatientInformationScreen(props) {
               title={'Patient Information'}
               displayData={patientData}
               handleOnPress={handlePatientInfoOnPress}
+              unMaskedNRIC={unMaskedPatientNRIC}
             />
             <Divider />
 
@@ -433,21 +450,21 @@ function PatientInformationScreen(props) {
               subtitle={'Guardian 1'}
               displayData={guardianData}
               handleOnPress={handlePatientGuardianOnPress}
+              unMaskedNRIC={unMaskedGuardianNRIC}
             />
             {isSecondGuardian ? (
               <InformationCard
                 subtitle={'Guardian 2'}
                 displayData={secondGuardianData}
                 handleOnPress={handlePatientSecondGuardianOnPress}
+                unMaskedNRIC={unMasked2ndGuardianNRIC}
               />
             ) : null}
             <Divider />
-            {
-              //Divide into about and lifystyle?
-            }
+            
             <InformationCard
               title={'Social History'}
-              displayData={socialHistoryData}
+              displayData={socialHistoryDataArray}
               handleOnPress={handlePatientSocialHistOnPress}
             />
           </Stack>

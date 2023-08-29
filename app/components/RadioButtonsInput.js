@@ -85,6 +85,7 @@ function RadioButtonInput({
                   value={item.value}
                   label={item.label}
                   color={colors.green}
+                  style={styles.RadioButton}
                 />
               </View>
             ))}
@@ -101,7 +102,7 @@ function RadioButtonInput({
 const styles = StyleSheet.create({
   ComponentContainer: {
     display: 'flex',
-    width: '80%',
+    width: '100%',
     marginTop: 5,
     justifyContent: 'flex-start',
   },
@@ -123,6 +124,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingBottom: 10,
+  },
+  RadioButton: {
+    paddingLeft: 10,
+    paddingRight: 0,
   },
 });
 

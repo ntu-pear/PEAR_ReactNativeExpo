@@ -20,16 +20,9 @@ function PatientProfileScreen(props) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (route.params.patientProfile == null) {
-      // navigated from Highlights Modal or Dashboard Screen
-      // Fetch patient's data from patient api
-      getPatient(route.params.id);
-    } else {
-      // navigated from Patients List Screen
-      setPatientProfile(route.params.patientProfile);
-      setIsLoading(false);
-    }
-  }, [route.params.id, route.params.patientProfile]);
+    getPatient(route.params.patientProfile.patientID);
+    setIsLoading(false);
+  }, [route.params.patientProfile.patientID]);
 
   const getPatient = async (id) => {
     setIsLoading(true);

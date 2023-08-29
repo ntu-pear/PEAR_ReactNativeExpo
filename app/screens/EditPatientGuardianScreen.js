@@ -203,6 +203,7 @@ function EditPatientGuardianScreen(props) {
       console.log("result error "+JSON.stringify(result));
     }
     Alert.alert(alertTitle, alertDetails);
+    console.log("formData "+JSON.stringify(formData));
   };
 
   /* If retrieval from the hook is successful, replace the content in
