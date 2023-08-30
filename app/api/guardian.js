@@ -19,9 +19,11 @@ const guaridanDelete = `${endPoint}/delete`; //eslint-disable-line no-unused-var
 
 // params: patientID
 // purpose: retrieve's guardian tagged to the patient by patient's ID.
-const getPatientGuardian = (patientID) => {
+const getPatientGuardian = (patientID, maskNRIC = false) => {
+  // Error Handling
   const params = {
     patientID,
+    maskNRIC,
   };
   return client.get(guardianPatientGuardian, params);
 };

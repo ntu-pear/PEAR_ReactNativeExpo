@@ -1,5 +1,5 @@
 // Lib
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Text, Platform } from 'react-native';
 import { VStack, HStack, IconButton } from 'native-base';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -8,7 +8,9 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import typography from 'app/config/typography';
 import colors from 'app/config/colors';
 
-function InformationCard({ displayData, title, subtitle, handleOnPress=null }) {
+function InformationCard({ displayData, title, subtitle, handleOnPress=null, unMaskedNRIC=null }) {
+  const [itemizedData, setItemizedData] = useState(displayData);
+  const [masked, setMasked] = useState(true);
 
   // Function used to format date data into dd-mm-yyyy
   const formatDate = (str) => {
@@ -18,6 +20,37 @@ function InformationCard({ displayData, title, subtitle, handleOnPress=null }) {
     return `${splitDate[2]}-${splitDate[1]}-${splitDate[0]}`;
   };
 
+  // Handling of unmasking of NRIC
+  const handleUnmaskNRIC = () => {
+    if (masked) {
+      const newData = itemizedData.map(item => {
+        if (item.label === 'NRIC') {
+          return { ...item, value: unMaskedNRIC };
+        }
+        return item;
+      });
+  
+      setItemizedData(newData);
+      setMasked(false);
+    } else {
+      const newData = itemizedData.map(item => {
+        if (item.label === 'NRIC') {
+          return { ...item, value: unMaskedNRIC.replace(/\d{4}(\d{3})/, 'xxxx$1') };
+        }
+        return item;
+      });
+
+      setItemizedData(newData);
+      setMasked(true);
+    }
+  };
+
+  useEffect(() =>{
+    if (itemizedData.length === 0){
+      setItemizedData(displayData);
+    }
+  }, [itemizedData, displayData]);
+
   return (
     <View style={styles.cardContainer}>
       <VStack>
@@ -25,8 +58,8 @@ function InformationCard({ displayData, title, subtitle, handleOnPress=null }) {
           {title ? (
             <Text style={[styles.TextContent, styles.titleText]}>{title}</Text>
           ) : null}
-          {(handleOnPress !== null && title !== "Guardian(s) Information") ? ( // editing button will appear if the title is not null
-            <IconButton                                                        // or "Guardian(s) Information"
+          {(handleOnPress !== null && title !== null && title !== "Guardian(s) Information") ? ( // editing button will appear if the title is not null
+            <IconButton                                                                          // or "Guardian(s) Information"
               _icon={{
                 as: MaterialCommunityIcons,
                 name: 'pencil',
@@ -53,25 +86,52 @@ function InformationCard({ displayData, title, subtitle, handleOnPress=null }) {
             />
           ) : null}
         </HStack>
-        {displayData.map((data, index) => (
+        {itemizedData.length !== 0 ? 
+          itemizedData.map((data, index) => (
           <View style={styles.fieldContainer} key={index}>
             <Text style={[styles.TextContent, styles.fieldLabel]}>
               {data === undefined ? 'undefined' : `${data.label}:  `}
             </Text>
-            <Text style={[styles.TextContent, styles.fieldValue]}>
-              {data === undefined ? 'Not available' :                             // formatting of data
-                data.value === undefined ? 'Not available':
-                data.value === 1 ? 'Yes' : 
-                data.value === true ? 'Yes' : 
+            <Text style={[styles.TextContent, styles.fieldValue]} key={index+"text"}>
+              {data === undefined ? 'undefined' :                             // formatting of data
+                data.value === 'Not available' ? 'Not available' :
+                data.value === 1 ? 'Yes' :
+                data.value === true ? 'Yes' :
                 data.value === 0 ? 'No' :
+                data.value === null ? 'Not available' :
                 data.value === 'null' ? 'Not available' :
                 data.label === 'DOB' ? `${formatDate(data.value.substring(0, 10))}` : 
                 data.label === 'Start Date' ? `${formatDate(data.value.substring(0, 10))}` : 
                 data.label === 'End Date' ? `${formatDate(data.value.substring(0, 10))}` : 
                 `${data.value}`}
             </Text>
+            {(data.label !== null && data.label === 'NRIC' && masked === true) ? (
+              <IconButton
+                _icon={{
+                  as: MaterialCommunityIcons,
+                  name: 'eye-outline',
+                }}
+                padding={0}
+                onPress={() => handleUnmaskNRIC()}
+              />
+            ) : (data.label !== null && data.label === 'NRIC' && masked === false) ? (
+              <IconButton
+                _icon={{
+                  as: MaterialCommunityIcons,
+                  name: 'eye',
+                }}
+                padding={0}
+                onPress={() => handleUnmaskNRIC()}
+              />
+            ) : null}
           </View>
-        ))}
+        )) :
+          <View style={styles.fieldContainer}>
+            <Text style={[styles.TextContent, styles.fieldLabel]}>
+              Not available
+            </Text>
+          </View>
+      }
       </VStack>
     </View>
   );
@@ -114,8 +174,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   buttonContainer:{
-    w:"100%",
-  }
+    w: "100%",
+  },
 });
 
 export default InformationCard;

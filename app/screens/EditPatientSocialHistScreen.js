@@ -19,7 +19,7 @@ import AppButton from 'app/components/AppButton';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 
 function EditPatientSocialHistScreen(props) {
-  const { navigation, socialHistory } = props.route.params;
+  const { navigation, socialHistory, patientID } = props.route.params;
 
   // retrive list data from database using useGetSelectionOptions
   const {
@@ -171,6 +171,7 @@ function EditPatientSocialHistScreen(props) {
   const listYesNo = [
     { value: 0, label: 'No' },
     { value: 1, label: 'Yes' },
+    { value: 2, label: 'Not available' },
   ]
 
   const [isInputErrors, setIsInputErrors] = useState(false);
@@ -316,7 +317,7 @@ function EditPatientSocialHistScreen(props) {
   ]);
 
   const [formData, setFormData] = useState({
-    PatientID: socialHistory.patientId,
+    PatientID: patientID,
     SocialHistoryId: socialHistory.socialHistoryId,
     LiveWithDescription: socialHistory.liveWithDescription,
     LiveWithListId: socialHistory.liveWithListId,
@@ -331,12 +332,19 @@ function EditPatientSocialHistScreen(props) {
     DietDescription: socialHistory.dietDescription,
     DietListId: socialHistory.dietListId,
     Exercise: socialHistory.exercise,
+    ExerciseDisplay: socialHistory.exercise !== null ? socialHistory.exercise : 2,
     SexuallyActive: socialHistory.sexuallyActive,
+    SexuallyActiveDisplay: socialHistory.sexuallyActive !== null ? socialHistory.sexuallyActive : 2,
     DrugUse: socialHistory.drugUse,
+    DrugUseDisplay: socialHistory.drugUse !== null ? socialHistory.drugUse : 2,
     CaffeineUse: socialHistory.caffeineUse,
+    CaffeineUseDisplay: socialHistory.caffeineUse !== null ? socialHistory.caffeineUse : 2,
     AlcoholUse: socialHistory.alcoholUse,
+    AlcoholUseDisplay: socialHistory.alcoholUse !== null ? socialHistory.alcoholUse : 2,
     TobaccoUse: socialHistory.tobaccoUse,
+    TobaccoUseDisplay: socialHistory.tobaccoUse !== null ? socialHistory.tobaccoUse : 2,
     SecondhandSmoker: socialHistory.secondhandSmoker,
+    SecondhandSmokerDisplay: socialHistory.secondhandSmoker !== null ? socialHistory.secondhandSmoker : 2,
   });
 
   // handling form input data by taking onchange value and updating our previous form data state
@@ -379,14 +387,24 @@ function EditPatientSocialHistScreen(props) {
           DietDescription: listOfDiet.find((item) => item.value === e).label,
           DietListId: e,
         }));
-      } else {
+      } else if (e === 2){
         setFormData((previousState) => ({
           ...previousState,
-          [input]: e,
+          [input]: null,
+          [input+"Display"]: 2,
         }));
-      }
+      } else {
+      setFormData((previousState) => ({
+        ...previousState,
+        [input]: e,
+        [input+"Display"]: e,
+      }));
+    }
     };
 
+  const submitForm1 = async () => {
+    console.log("formData "+JSON.stringify(formData));
+  }
   // form submission when save button is pressed
   const submitForm = async () => {
     const result = await socialHistoryApi.updateSocialHistory(formData);
@@ -407,9 +425,9 @@ function EditPatientSocialHistScreen(props) {
         : (alertDetails = 'Please try again.');
 
       alertTitle = 'Error in Editing Patient Preferences';
+      console.log("result error "+JSON.stringify(result));
     }
     Alert.alert(alertTitle, alertDetails);
-    console.log("result error "+JSON.stringify(result));
     console.log("formData "+JSON.stringify(formData));
   };
 
@@ -523,7 +541,7 @@ function EditPatientSocialHistScreen(props) {
                 <RadioButtonInput
                   isRequired
                   title={'Exercise'}
-                  value={formData['Exercise']}
+                  value={formData['ExerciseDisplay']}
                   onChangeData={handleFormData('Exercise')}
                   onChildData={handleExerciseState}
                   dataArray={listYesNo}
@@ -532,7 +550,7 @@ function EditPatientSocialHistScreen(props) {
                 <RadioButtonInput
                   isRequired
                   title={'Sexually active'}
-                  value={formData['SexuallyActive']}
+                  value={formData['SexuallyActiveDisplay']}
                   onChangeData={handleFormData('SexuallyActive')}
                   onChildData={handleSexuallyActiveState}
                   dataArray={listYesNo}
@@ -541,7 +559,7 @@ function EditPatientSocialHistScreen(props) {
                 <RadioButtonInput
                   isRequired
                   title={'Drug use'}
-                  value={formData['DrugUse']}
+                  value={formData['DrugUseDisplay']}
                   onChangeData={handleFormData('DrugUse')}
                   onChildData={handleDrugUseState}
                   dataArray={listYesNo}
@@ -550,7 +568,7 @@ function EditPatientSocialHistScreen(props) {
                 <RadioButtonInput
                   isRequired
                   title={'Caffeine use'}
-                  value={formData['CaffeineUse']}
+                  value={formData['CaffeineUseDisplay']}
                   onChangeData={handleFormData('CaffeineUse')}
                   onChildData={handleCaffeineUseState}
                   dataArray={listYesNo}
@@ -559,7 +577,7 @@ function EditPatientSocialHistScreen(props) {
                 <RadioButtonInput
                   isRequired
                   title={'Alcohol use'}
-                  value={formData['AlcoholUse']}
+                  value={formData['AlcoholUseDisplay']}
                   onChangeData={handleFormData('AlcoholUse')}
                   onChildData={handleAlcoholUseState}
                   dataArray={listYesNo}
@@ -568,7 +586,7 @@ function EditPatientSocialHistScreen(props) {
                 <RadioButtonInput
                   isRequired
                   title={'Tobacco use'}
-                  value={formData['TobaccoUse']}
+                  value={formData['TobaccoUseDisplay']}
                   onChangeData={handleFormData('TobaccoUse')}
                   onChildData={handleTobaccoUseState}
                   dataArray={listYesNo}
@@ -577,7 +595,7 @@ function EditPatientSocialHistScreen(props) {
                 <RadioButtonInput
                   isRequired
                   title={'Secondhand smoker'}
-                  value={formData['SecondhandSmoker']}
+                  value={formData['SecondhandSmokerDisplay']}
                   onChangeData={handleFormData('SecondhandSmoker')}
                   onChildData={handleSecondhandSmokerState}
                   dataArray={listYesNo}

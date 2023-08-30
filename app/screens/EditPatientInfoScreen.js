@@ -1,17 +1,16 @@
 // Libs
 import React, { useState, useEffect, useCallback } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
-import { Box, VStack, FlatList } from 'native-base';
+import { Box, VStack, FlatList, Text } from 'native-base';
 
 // Configurations
 import routes from 'app/navigation/routes';
+import colors from 'app/config/colors';
 
 //API
 import patientApi from 'app/api/patient';
 
 //Components
-import NameInputField from 'app/components/NameInputField';
-import NRICInputField from 'app/components/NRICInputField';
 import RadioButtonInput from 'app/components/RadioButtonsInput';
 import DateInputField from 'app/components/DateInputField';
 import CommonInputField from 'app/components/CommonInputField';
@@ -26,11 +25,6 @@ function EditPatientInfoScreen(props) {
   minimumJoiningDate.setDate(minimumJoiningDate.getDate() - 30); // 30 days ago
   const maximumJoiningDate = new Date();
   maximumJoiningDate.setDate(maximumJoiningDate.getDate() + 30); // 30 days later
-  
-  const listOfGenders = [
-    { label: 'Male', value: 'M' },
-    { label: 'Female', value: 'F' },
-  ];
 
   const listOfRespiteCare = [
     { label: 'Yes', value: true },
@@ -41,11 +35,6 @@ function EditPatientInfoScreen(props) {
   const [isInputErrors, setIsInputErrors] = useState(false);
 
   // error states for child components
-  const [isFirstNameError, setIsFirstNameError] = useState(false);
-  const [isLastNameError, setIsLastNameError] = useState(false);
-  const [isNRICError, setIsNRICError] = useState(false);
-  const [isGenderError, setIsGenderError] = useState(false);
-  const [isDOBError, setIsDOBError] = useState(false);
   const [isAddrError, setIsAddrError] = useState(false);
   const [isTempAddrError, setIsTempAddrError] = useState(false);
   const [isHomeNumberError, setIsHomeNumberError] = useState(false);
@@ -70,41 +59,6 @@ function EditPatientInfoScreen(props) {
   ];
   
   // Error state handling for child components
-  const handleFirstNameState = useCallback(
-    (state) => {
-      setIsFirstNameError(state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isFirstNameError],
-  );
-  const handleLastNameState = useCallback(
-    (state) => {
-      setIsLastNameError(state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isLastNameError],
-  );
-  const handleNRICState = useCallback(
-    (state) => {
-      setIsNRICError(state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isNRICError],
-  );
-  const handleGenderState = useCallback(
-    (state) => {
-      setIsGenderError(state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isGenderError],
-  );
-  const handleDOBState = useCallback(
-    (state) => {
-      setIsDOBError(state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isDOBError],
-  );
   const handleAddrState = useCallback(
     (state) => {
       setIsAddrError(state);
@@ -158,27 +112,23 @@ function EditPatientInfoScreen(props) {
   // Error state handling for this component
   useEffect(() => {
     setIsInputErrors(
-      isFirstNameError || 
-      isLastNameError || 
-      isNRICError || 
-      isGenderError ||
-      isDOBError || 
       isAddrError ||
       isTempAddrError ||
       isHomeNumberError ||
-      isMobileNumberError,
+      isMobileNumberError ||
+      isJoiningError ||
+      isLeavingError ||
+      isRespiteError,
     );
     // console.log(isInputErrors);
   }, [
-    isFirstNameError,
-    isLastNameError,
-    isNRICError,
-    isGenderError,
-    isDOBError,
     isAddrError,
     isTempAddrError,
     isHomeNumberError,
     isMobileNumberError,
+    isJoiningError,
+    isLeavingError,
+    isRespiteError,
     isInputErrors,
   ]);
 
@@ -204,6 +154,19 @@ function EditPatientInfoScreen(props) {
     AutoGame: patientProfile.autoGame,
     IsActive: patientProfile.isActive,
   });
+
+  useEffect(() => {
+    if (formData['EndDate'] === null){
+      let replacedDate = new Date(0);
+      replacedDate = replacedDate.toISOString().replace('.000Z', '');
+      setFormData((previousState) => ({
+        ...previousState,
+        'EndDate': replacedDate,
+      }));
+    }
+  }, [
+    
+  ]);
 
   // handling form input data by taking onchange value and updating our previous form data state
   const handleFormData =
@@ -271,51 +234,6 @@ function EditPatientInfoScreen(props) {
           <Box w="100%">
             <VStack>
               <View style={styles.formContainer}>
-{
-//                <NameInputField
-//                  isRequired
-//                  title={'First Name'}
-//                  value={formData['FirstName']}
-//                  onChangeText={handleFormData('FirstName')}
-//                  onChildData={handleFirstNameState}
-//                />
-//
-//                <NameInputField
-//                  isRequired
-//                  title={'Last Name'}
-//                  value={formData['LastName']}
-//                  onChangeText={handleFormData('LastName')}
-//                  onChildData={handleLastNameState}
-//                />
-//
-//                <NRICInputField
-//                  isRequired
-//                  title={'NRIC'}
-//                  value={formData['NRIC']}
-//                  onChangeText={handleFormData('NRIC')}
-//                  onChildData={handleNRICState}
-//                />
-//
-//                <RadioButtonInput
-//                  isRequired
-//                  title={'Gender'}
-//                  value={formData['Gender']}
-//                  onChangeData={handleFormData('Gender')}
-//                  onChildData={handleGenderState}
-//                  dataArray={listOfGenders}
-//                />
-//
-//               <View style={styles.dateSelectionContainer}>
-//                 <DateInputField
-//                   isRequired
-//                   selectionMode={'DOB'}
-//                   title={'Date of Birth'}
-//                   value={new Date(formData['DOB'])}
-//                   handleFormData={handleFormData('DOB')}
-//                   onChildData={handleDOBState}
-//                 />
-//               </View>
-}
                 <TelephoneInputField
                   title={'Home Number'}
                   value={formData['HomeNo']}
@@ -362,7 +280,7 @@ function EditPatientInfoScreen(props) {
                 <View style={styles.dateSelectionContainer}>
                   <DateInputField
                     title={'Date of Leaving (Optional)'}
-                    value={new Date(formData['EndDate']) || new Date(0)}
+                    value={new Date(formData['EndDate'])}
                     handleFormData={handleFormData('EndDate')}
                     onChildData={handleLeavingState}
                   />
@@ -376,6 +294,10 @@ function EditPatientInfoScreen(props) {
                   dataArray={listOfRespiteCare}
                   onChildData={handleRespiteState}
                 />
+
+                <Text style={styles.redText}>
+                  Note: To edit other information, please contact system administrator.
+                </Text>
               </View>
               <View style={styles.saveButtonContainer}>
                 <Box width='70%'>
@@ -410,6 +332,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 20,
+  },
+  redText: {
+    marginBottom: 4,
+    alignSelf: "center",
+    color: colors.red,
   },
 });
 
