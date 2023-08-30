@@ -82,6 +82,9 @@ function PatientAddScreen() {
         RelationshipID: 1,
         IsActive: true,
         ContactNo: '',
+        DOB: maximumDOB,
+        Address: '',
+        TempAddress: '',
       },
     ],
 
@@ -212,7 +215,11 @@ function PatientAddScreen() {
         // guardianInfo or allergyInfo
         const newData = formData[page].slice();
         // additional check to convert ContactNo  to string
-        if (input === 'ContactNo') {
+        if (
+          input === 'ContactNo' ||
+          input === 'Address' ||
+          input === 'TempAddress'
+        ) {
           newData[index][input] = e.toString(); // convert to string
         } else {
           newData[index][input] = date

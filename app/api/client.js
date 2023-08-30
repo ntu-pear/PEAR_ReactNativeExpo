@@ -61,6 +61,7 @@ setHeader();
 // existing token with the refreshed token
 // TODO: FIX RefreshToken Issue [https://trello.com/c/LiDqXESB/163-fix-refreshtoken-issue]
 apiClient.addAsyncResponseTransform(async (response) => {
+  // console.log(response);
   if (
     response &&
     response.status &&

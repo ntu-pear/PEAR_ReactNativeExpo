@@ -18,6 +18,8 @@ import TelephoneInputField from 'app/components/TelephoneInputField';
 import SingleOptionCheckBox from 'app/components/SingleOptionCheckBox';
 import EmailInputField from 'app/components/EmailInputField';
 import LoadingWheel from 'app/components/LoadingWheel';
+import CommonInputField from 'app/components/CommonInputField';
+import DateInputField from 'app/components/DateInputField';
 
 function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
   const { data, isError, isLoading } = useGetSelectionOptions('Relationship');
@@ -52,6 +54,9 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
   const [isPhoneError, setIsPhoneError] = useState(false);
   const [isEmailError, setIsEmailError] = useState(false);
   const [isLoginError, setIsLoginError] = useState(false);
+  const [isTempAddrError, setIsTempAddrError] = useState(false);
+  const [isAddrError, setIsAddrError] = useState(false);
+  const [isDOBError, setIsDOBError] = useState(false);
 
   const handleFirstNameState = useCallback(
     (state) => {
@@ -102,6 +107,33 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
     [isEmailError],
   );
 
+  const handleTempAddrState = useCallback(
+    (state) => {
+      setIsTempAddrError(state);
+      // console.log('Email: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isTempAddrError],
+  );
+
+  const handleAddrState = useCallback(
+    (state) => {
+      setIsAddrError(state);
+      // console.log('Email: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isAddrError],
+  );
+
+  const handleDOBState = useCallback(
+    (state) => {
+      setIsDOBError(state);
+      // console.log('DOB: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isDOBError],
+  );
+
   useEffect(() => {
     setIsInputErrors(
       isFirstNameError ||
@@ -110,7 +142,10 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
         isPhoneError ||
         isRelationError ||
         isEmailError ||
-        isLoginError,
+        isLoginError ||
+        isTempAddrError ||
+        isAddrError ||
+        isDOBError,
     );
     // console.log(isInputErrors);
     onError(i, isInputErrors);
@@ -124,6 +159,9 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
     isEmailError,
     isInputErrors,
     isLoginError,
+    isAddrError,
+    isTempAddrError,
+    isDOBError,
   ]);
   // To ensure that when the is guardian login required checkbox is checked, guardian email
   // must be filled before continuing. Done by verifying if guardian.Email is empty or not.
@@ -190,6 +228,17 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
             maxLength={9}
           />
 
+          <View style={styles.dateSelectionContainer}>
+            <DateInputField
+              isRequired
+              selectionMode={'DOB'}
+              title={'Date of Birth'}
+              value={guardian.DOB}
+              handleFormData={handleFormData(page, 'DOB', i)}
+              onChildData={handleDOBState}
+            />
+          </View>
+
           <SelectionInputField
             isRequired
             title={'Relationship'}
@@ -207,6 +256,21 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
             onChangeText={handleFormData(page, 'ContactNo', i)}
             onChildData={handlePhoneState}
             maxLength={8}
+          />
+
+          <CommonInputField
+            isRequired
+            title={'Address'}
+            value={guardian.Address}
+            onChangeText={handleFormData(page, 'Address', i)}
+            onChildData={handleAddrState}
+          />
+
+          <CommonInputField
+            title={'Temporary Address (optional)'}
+            value={guardian.TempAddress}
+            onChangeText={handleFormData(page, 'TempAddress', i)}
+            onChildData={handleTempAddrState}
           />
 
           <SingleOptionCheckBox
@@ -245,6 +309,9 @@ const styles = StyleSheet.create({
     fontFamily: `${
       Platform.OS === 'ios' ? typography.ios : typography.android
     }`,
+  },
+  dateSelectionContainer: {
+    width: '70%',
   },
 });
 export default AddPatientGuardian;

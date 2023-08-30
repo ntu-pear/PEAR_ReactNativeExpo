@@ -42,6 +42,8 @@ function PatientAddGuardianScreen(props) {
   let isNextDisabled = errorStates.includes(true);
 
   const addNewGuardianComponent = () => {
+    const maximumDOB = new Date();
+    maximumDOB.setFullYear(maximumDOB.getFullYear() - 15);
     // Add new error state for new child component
     setErrorStates((prev) => [...prev, true]);
     setGuardianInfoDisplay([...guardianInfoDisplay, {}]);
@@ -54,6 +56,9 @@ function PatientAddGuardianScreen(props) {
       Email: '',
       RelationshipID: 1,
       IsActive: true,
+      DOB: maximumDOB,
+      Address: '',
+      TempAddress: '',
     });
   };
 

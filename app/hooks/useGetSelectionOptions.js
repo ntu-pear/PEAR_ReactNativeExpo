@@ -26,7 +26,6 @@ export default function useGetSelectionOptions(option) {
     setIsError(false);
     setIsLoading(true);
     // Check if there is exist a cached value in selectionDataCache.
-    // const storedData = await AsyncStorage.getItem(option);
     const storedData = getSelectionOptionCache(option);
     // Call API if there is no cached value.
     if (storedData === null || storedData === undefined) {
@@ -48,7 +47,7 @@ export default function useGetSelectionOptions(option) {
           extractedObjects.push(extractedObject);
         });
         setData(extractedObjects);
-        // cache the data in Async Storage for later retrieval
+        // store the data locally after retrieval
         try {
           // await AsyncStorage.setItem(option, JSON.stringify(extractedObjects));
           setSelectionOptionsCache(option, extractedObjects);
@@ -56,7 +55,6 @@ export default function useGetSelectionOptions(option) {
           setIsError(error);
           setIsLoading(false);
         }
-        // store the data locally after retrieval
       } catch (error) {
         setIsError(error);
       }

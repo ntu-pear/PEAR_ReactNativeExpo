@@ -59,8 +59,8 @@ function InformationCard({ displayData, title, subtitle, handleOnPress=null }) {
               {data === undefined ? 'undefined' : `${data.label}:  `}
             </Text>
             <Text style={[styles.TextContent, styles.fieldValue]}>
-              {data === undefined ? 'undefined' :                             // formatting of data
-                data.value === 'Not available' ? 'Not available' :
+              {data === undefined ? 'Not available' :                             // formatting of data
+                data.value === undefined ? 'Not available':
                 data.value === 1 ? 'Yes' : 
                 data.value === true ? 'Yes' : 
                 data.value === 0 ? 'No' :

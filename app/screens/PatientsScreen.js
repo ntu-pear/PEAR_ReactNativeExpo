@@ -1,7 +1,7 @@
 // Libs
 import React, { useState, useEffect, useContext } from 'react';
 import { Center, VStack, HStack, ScrollView, Fab, Icon } from 'native-base';
-import { RefreshControl, Dimensions } from 'react-native';
+import { RefreshControl, Dimensions, Text } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import AuthContext from 'app/auth/context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -49,8 +49,9 @@ function PatientsScreen({ navigation }) {
       if (isReloadPatientList) {
         setIsLoading(true);
         const promiseFunction = async () => {
-          const response = await getListOfPatients();
-          setListOfPatients(response.data);
+          await getListOfPatients();
+          // const response = await getListOfPatients();
+          // setListOfPatients(response);
         };
         setIsReloadPatientList(false);
         promiseFunction();
@@ -71,7 +72,6 @@ function PatientsScreen({ navigation }) {
       filterValue === 'myPatients'
         ? await patientApi.getPatientListByLoggedInCaregiver()
         : await patientApi.getPatientList();
-
     if (!response.ok) {
       // Check if token has expired, if yes, proceed to log out
       // checkExpiredLogOutHook.handleLogOut(response);
@@ -83,7 +83,7 @@ function PatientsScreen({ navigation }) {
     setListOfPatients(response.data.data);
     setIsLoading(false);
     // console.log(filterValue === 'allPatients' ? response : null);
-    return response.data;
+    // return response.data.data;
   };
 
   const handleFabOnPress = () => {
@@ -126,14 +126,16 @@ function PatientsScreen({ navigation }) {
   // Filter patient list with search query by PREFERRED NAME
   const filteredList = listOfPatients
     ? listOfPatients.filter((item) => {
-        // console.log(item);
-        const fullName = item.preferredName;
-        return fullName.toLowerCase().includes(searchQuery.toLowerCase());
+        return item.preferredName
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
       })
     : null;
 
-  const handleOnPress = (item) => {
-    navigation.push(routes.PATIENT_PROFILE, { patientProfile: item });
+  const handleOnPress = (patientID) => {
+    console.log(patientID);
+    // navigation.push(routes.PATIENT_PROFILE, { patientProfile: item });
+    navigation.push(routes.PATIENT_PROFILE, { id: patientID });
   };
 
   return (
@@ -176,29 +178,40 @@ function PatientsScreen({ navigation }) {
               />
             }
           >
-            <VStack alignItems="flex-start">
+            <VStack alignItems="flex-start" backgroundColor={'yellow'}>
               {filteredList && filteredList.length > 0
                 ? filteredList.map((item, index) => (
-                    <View marginLeft={'5%'} key={index}>
+                    <View style={styles.patientRowContainer} key={index}>
                       <ProfileNameButton
                         // profileLineOne={`${item.firstName} ${item.lastName}`}
                         profileLineOne={item.preferredName}
                         // patient Mary does not have patientAllocationDTO object?
                         // add caregiverName into the All Patients option
                         profileLineTwo={
-                          filterValue === 'allPatients'
-                            ? item.patientAllocationDTO !== null
-                              ? item.patientAllocationDTO.caregiverName
-                              : 'No Caregivers'
-                            : `${item.firstName} ${item.lastName}`
+                          `${item.firstName} ${item.lastName}`
+                          // filterValue === 'allPatients'
+                          //   ? item.patientAllocationDTO !== null
+                          //     ? item.patientAllocationDTO.caregiverName
+                          //     : 'No Caregivers'
+                          //   : `${item.firstName} ${item.lastName}`
                         }
                         profilePicture={item.profilePicture}
-                        handleOnPress={() => handleOnPress(item)}
+                        // navigation done by patientID to avoid receiving unnecessary patient info -- Justin
+                        handleOnPress={() => handleOnPress(item.patientID)}
                         isPatient={true}
                         size={SCREEN_WIDTH / 10}
                         key={index}
                         isVertical={false}
                       />
+                      <View style={styles.guardianNameContainer}>
+                        <Text style={styles.guardianName}>
+                          {filterValue === 'allPatients'
+                            ? item.caregiverName !== null
+                              ? item.caregiverName
+                              : 'No Caregivers'
+                            : null}
+                        </Text>
+                      </View>
                     </View>
                   ))
                 : null}
@@ -257,6 +270,24 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     marginTop: 4.5,
     borderRadius: 10,
+  },
+  patientRowContainer: {
+    marginLeft: '5%',
+    marginVertical: '3%',
+    width: '90%',
+    flex: 2,
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    justifyContent: 'space-between',
+  },
+  guardianNameContainer: {
+    marginLeft: '5%',
+    justifyContent: 'center',
+    alignItem: 'center',
+  },
+  guardianName: {
+    fontSize: 15,
+    fontWeight: 'bold',
   },
 });
 

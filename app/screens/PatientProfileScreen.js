@@ -23,9 +23,12 @@ function PatientProfileScreen(props) {
     if (route.params.patientProfile == null) {
       // navigated from Highlights Modal or Dashboard Screen
       // Fetch patient's data from patient api
+      console.log('id');
       getPatient(route.params.id);
     } else {
+      // may be depreciated as patientScreen no longer passes by patientProfile. passes PatientID -- Justin
       // navigated from Patients List Screen
+      console.log('profile');
       setPatientProfile(route.params.patientProfile);
       setIsLoading(false);
     }
@@ -49,11 +52,6 @@ function PatientProfileScreen(props) {
   };
 
   const SCREEN_HEIGHT = Dimensions.get('window').height;
-
-  //   const handleProfileButton = () => {
-  //     console.log("tesitn profile");
-  //     console.log(patientProfile);
-  //   };
 
   return (
     <>
