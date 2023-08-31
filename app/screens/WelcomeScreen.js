@@ -7,7 +7,6 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  ActivityIndicator,
   Text,
 } from 'react-native';
 
@@ -159,7 +158,7 @@ function WelcomeScreen(props) {
                   />
                 }
                 onChangeText={handleEmail}
-                placeholder="jess@gmail.com"
+                placeholder="Username/Email"
                 placeholderTextColor={colors.medium}
                 marginBottom="5"
                 size="18"
