@@ -2,8 +2,9 @@ import { create } from 'apisauce';
 import authStorage from 'app/auth/authStorage';
 import cache from 'app/utility/cache';
 // import { Platform } from 'react-native';
-import { useContext } from 'react';
-import AuthContext from 'app/auth/context';
+// import { useContext } from 'react';
+// import AuthContext from 'app/auth/context';
+// import useTokenExpiredLogOut from 'app/hooks/useTokenExpiredLogOut';
 
 const baseURL = 'https://coremvc.fyp2017.com/api';
 // for CORS error
@@ -61,7 +62,8 @@ setHeader();
 // existing token with the refreshed token
 // TODO: FIX RefreshToken Issue [https://trello.com/c/LiDqXESB/163-fix-refreshtoken-issue]
 apiClient.addAsyncResponseTransform(async (response) => {
-  // console.log(response);
+  console.log(response);
+  // if token has expired
   if (
     response &&
     response.status &&
@@ -74,47 +76,38 @@ apiClient.addAsyncResponseTransform(async (response) => {
     const unformattedUserRefreshToken = await authStorage.getToken(
       'userRefreshToken',
     );
+    // remove any foreign characters in the token strings
     const accessToken = unformattedUserAccessToken.replace(/['"]+/g, '');
     const refreshToken = unformattedUserRefreshToken.replace(/['"]+/g, '');
-
+    var bearerToken = accessToken;
     const body = JSON.stringify({ accessToken, refreshToken });
-    // console.log('Body is: ');
-    // console.log(body);
-    // console.log('POST is: ', `${baseURL}${userRefreshToken}`, body);
     const data = await apiClient.post(`${baseURL}${userRefreshToken}`, body);
-    // if token refresh is unsuccessful
-    // console.log(data);
-    if (!data.ok || !data.data.data.success) {
-      // const { setUser } = useContext(AuthContext);
-      console.log('client.js: !data.ok || !data.data.data.success');
+    // if token refresh is unsuccessful excluding token not expired error
+    if (
+      (!data.ok || !data.data.data.success) &&
+      data.data.data.error !== 'Token has not yet expired'
+    ) {
+      console.log('ERROR: Token renewal error!');
       console.log(data);
-      // if refreshToken invalid, remove token
-      // await authStorage.removeToken();
-      // // TODO: Implement logout() here.
-      // navigation.navigate(routes.WELCOME);
       if (data.data.message) {
-        // TODO: include alert component
-        // return Promise.reject(data.data.title);
-        console.log('Error: ', data.data.error);
+        console.log('ERROR: ', data.data.error);
       }
-      // return Promise.reject(data.data.error);
-      // TODO: include alert component
-      // setUser(null);
       return Promise.resolve();
     }
+    // if new token is received -> replace the old tokens
+    if (data.data.data.error !== 'Token has not yet expired') {
+      bearerToken = data.data.data.accessToken;
+      apiClient.setHeaders({
+        Authorization: `Bearer ${bearerToken}`,
+      });
+      await authStorage.removeToken();
+      await authStorage.storeToken('userAuthToken', data.data.data.accessToken);
+      await authStorage.storeToken(
+        'userRefreshToken',
+        data.data.data.refreshToken,
+      );
+    }
     // if token refresh is successful
-    const bearerToken = data.data.data.accessToken;
-    apiClient.setHeaders({
-      Authorization: `Bearer ${bearerToken}`,
-    });
-    await authStorage.removeToken();
-    // console.log('accessToken: ', data.data.data.accessToken);
-    // console.log('refreshToken: ', data.data.data.refreshToken);
-    await authStorage.storeToken('userAuthToken', data.data.data.accessToken);
-    await authStorage.storeToken(
-      'userRefreshToken',
-      data.data.data.refreshToken,
-    );
     if (response && response.config) {
       // Replace response.config.header's Authorization with the new Bearer token
       response.config.headers
@@ -125,9 +118,9 @@ apiClient.addAsyncResponseTransform(async (response) => {
       // replace data
       response.data = res.data;
     }
-    console.log('Token renewed');
-    console.log('New access token: ', data.data.data.accessToken);
-    console.log('New refresh token: ', data.data.data.refreshToken);
+    console.log('SUCCESS: Token renewed');
+    // console.log('New access token: ', data.data.data.accessToken);
+    // console.log('New refresh token: ', data.data.data.refreshToken);
     return Promise.resolve();
   }
 });
