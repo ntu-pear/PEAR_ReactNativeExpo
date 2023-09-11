@@ -6,7 +6,7 @@ import PatientInformationScreen from 'app/screens/PatientInformationScreen';
 
 // Import Constants from routes
 import routes from 'app/navigation/routes';
-import PatientActivityPreferenceScreen from 'app/screens/PatientActivityPreferenceScreen';
+import PatientMedicalHistoryScreen from 'app/screens/PatientMedicalHistoryScreen';
 import PatientAllergyScreen from 'app/screens/PatientAllergyScreen';
 import PatientHolidayScreen from 'app/screens/PatientHolidayScreen';
 import PatientPhotoAlbumScreen from 'app/screens/PatientPhotoAlbumScreen';
@@ -55,12 +55,12 @@ function PatientsNavigator() {
         }}
       />
       <Stack.Screen
-        name={routes.PATIENT_ACTIVITY_PREFERENCE}
-        component={PatientActivityPreferenceScreen}
+        name={routes.PATIENT_MEDICAL_HISTORY}
+        component={PatientMedicalHistoryScreen}
         options={{
           headerShown: true,
           headerBackTitleVisible: false,
-          title: 'Activity Preference',
+          title: 'Medical History',
         }}
       />
       <Stack.Screen

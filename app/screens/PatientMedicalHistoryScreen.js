@@ -6,11 +6,14 @@ import { View } from 'native-base';
 // API
 import patientApi from 'app/api/patient';
 
+// Hooks
+import formatDateTime from 'app/hooks/useFormatDateTime.js';
+
 // Components
 import DynamicTable from 'app/components/DynamicTable';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 
-function PatientProblemLog(props) {
+function PatientMedicalHistoryScreen(props) {
   const [isLoading, setIsLoading] = useState(true);
   const [headerData, setHeaderData] = useState([]);
   const [rowData, setRowData] = useState([]);
@@ -19,15 +22,19 @@ function PatientProblemLog(props) {
   const [patientID, setPatientID] = useState(props.route.params.patientID);
 
   const retrieveScreenData = async (id) => {
-    const response = await patientApi.getPatientProblemLog(id);
+    const response = await patientApi.getPatientMedicalHistory(id);
     if (!response.ok) {
       console.log('Request failed with status code: ', response.status);
       return;
     }
-    const newArray = response.data.data.map(({ authorName, problemLogListDesc, problemLogRemarks }) => ({
-      "Author": authorName,
-      "Description": problemLogListDesc,
-      "Remarks": problemLogRemarks,
+
+    const newArray = response.data.data.map(({ 
+      medicalEstimatedDate, medicalDetails, informationSource, medicalRemarks
+    }) => ({
+      "Date": `${formatDateTime(medicalEstimatedDate, true)}`,
+      "Diagnosis": medicalDetails,
+      "Diagnosis By": informationSource,
+      "Remarks": medicalRemarks,
     }));
     setTableDataFormated(newArray);
   };
@@ -46,7 +53,7 @@ function PatientProblemLog(props) {
 
   useEffect(() => {
     retrieveScreenData(patientID);
-    setWidthData([120, 200, 300]);
+    setWidthData([120, 120, 150, 300]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -58,7 +65,7 @@ function PatientProblemLog(props) {
         headerData={headerData}
         rowData={rowData}
         widthData={widthData}
-        screenName={'patient problem'}
+        screenName={'patient medical history'}
       />
     </View>
   );
@@ -71,4 +78,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PatientProblemLog;
+export default PatientMedicalHistoryScreen;

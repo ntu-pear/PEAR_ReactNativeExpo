@@ -36,7 +36,7 @@ import AccountViewScreen from 'app/screens/AccountViewScreen';
 import AccountEditScreen from 'app/screens/AccountEditScreen';
 import ChangePasswordScreen from 'app/screens/ChangePasswordScreen';
 import PatientAddScreen from 'app/screens/PatientAddScreen';
-import PatientActivityPreferenceScreen from 'app/screens/PatientActivityPreferenceScreen';
+import PatientMedicalHistoryScreen from 'app/screens/PatientMedicalHistoryScreen';
 import PatientAllergyScreen from 'app/screens/PatientAllergyScreen';
 import PatientHolidayScreen from 'app/screens/PatientHolidayScreen';
 import PatientPhotoAlbumScreen from 'app/screens/PatientPhotoAlbumScreen';
@@ -435,8 +435,8 @@ function WebAppNavigator() {
             element={<PatientProblemLog />}
           />
           <Route
-            path={routes.PATIENT_ACTIVITY_PREFERENCE}
-            element={<PatientActivityPreferenceScreen />}
+            path={routes.PATIENT_MEDICAL_HISTORY}
+            element={<PatientMedicalHistoryScreen />}
           />
           <Route
             path={routes.PATIENT_ROUTINE}

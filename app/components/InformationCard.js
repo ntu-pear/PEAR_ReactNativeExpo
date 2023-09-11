@@ -131,7 +131,7 @@ function InformationCard({ displayData, title, subtitle, handleOnPress=null, unM
               Not available
             </Text>
           </View>
-      }
+        }
       </VStack>
     </View>
   );

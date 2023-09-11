@@ -45,7 +45,7 @@ module.exports = {
     attached: {
       type: 'android.attached',
       device: {
-        adbName: '.*'
+        adbName: 'SM_G960F'
       }
     },
     emulator: {

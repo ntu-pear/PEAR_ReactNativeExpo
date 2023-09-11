@@ -166,7 +166,7 @@ function PatientProfileScreen(props) {
                       }
                       text="Medical History"
                       navigation={navigation}
-                      routes={routes.PATIENT_ACTIVITY_PREFERENCE}
+                      routes={routes.PATIENT_MEDICAL_HISTORY}
                       patientProfile={patientProfile}
                     />
                   </View>
@@ -179,7 +179,7 @@ function PatientProfileScreen(props) {
                           color={colors.pink}
                         />
                       }
-                      text="Activity"
+                      text="Activity Routine"
                       navigation={navigation}
                       routes={routes.PATIENT_ROUTINE}
                       patientProfile={patientProfile}
