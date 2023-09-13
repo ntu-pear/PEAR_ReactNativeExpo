@@ -18,7 +18,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Install Expo CLI and npm dependencies
-        run: npm i -g expo-cli && npm ci --legacy-peer-deps && rm webpack.config.js
+        run: npm i -g expo-cli && npm ci && rm webpack.config.js
       - name: Run Cypress E2E tests
         uses: cypress-io/github-action@v5
         env:
@@ -29,7 +29,6 @@ jobs:
           start: npm run web
           wait-on: 'http://localhost:19006, https://coremvc.fyp2017.com/swagger/index.html'
           wait-on-timeout: 60
-          additional-options: --legacy-peer-deps
       - name: Upload screenshots only if tests fail
         uses: actions/upload-artifact@v3
         if: failure() # screenshots are only generated on test failure

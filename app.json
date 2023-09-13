@@ -14,9 +14,7 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
@@ -30,9 +28,8 @@
     "web": {
       "favicon": "app/assets/favicon.png"
     },
-    "plugins": [
-      "expo-image-picker"
-    ],
+    "plugins": ["expo-image-picker"],
+
     "extra": {
       "eas": {
         "projectId": "05c2129e-f73b-408d-8aa3-e3fff4f75e68"

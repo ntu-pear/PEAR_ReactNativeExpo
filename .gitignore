@@ -126,4 +126,3 @@ web-build/
 dist/
 
 # @end expo-cli
-cypress/screenshots

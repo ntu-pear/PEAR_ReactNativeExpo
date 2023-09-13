@@ -28,13 +28,13 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: 📦 Install dependencies
-        run: npm ci --legacy-peer-deps
+        run: npm ci
 
       - name: 🏗 Install expo-updates
-        run: npx expo install expo-updates -- --legacy-peer-deps
+        run: expo install expo-updates
 
       - name: 🚀 Publish preview
-        run: npx eas publish --release-channel=pr-${{ github.event.number }} --non-interactive
+        run: expo publish --release-channel=pr-${{ github.event.number }} --non-interactive
 
       - name: 💬 Comment preview
         uses: expo/expo-github-action/preview-comment@v7
