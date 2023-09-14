@@ -48,6 +48,9 @@ const addPatientForm = (arr, str, patientData) => {
       if (key == 'IsChecked') {
         continue;
       }
+      if (val instanceof Date) {
+        val = val.toISOString().split('T')[0];
+      }
       // if AllergyListID is 'None', do not append allergy info to patientData
       if (key == 'AllergyListID' && val == 2) {
         break;
