@@ -19,12 +19,20 @@ import SelectionInputField from 'app/components/SelectionInputField';
 import TelephoneInputField from 'app/components/TelephoneInputField';
 import SingleOptionCheckBox from 'app/components/SingleOptionCheckBox';
 import EmailInputField from 'app/components/EmailInputField';
+import CommonInputField from 'app/components/CommonInputField';
+import DateInputField from 'app/components/DateInputField';
 import AppButton from 'app/components/AppButton';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 
 function EditPatientGuardianScreen(props) {
   const { navigation, guardianProfile } = props.route.params;
   const [isLoading, setIsLoading] = useState(true);
+
+  // Maximum and minimum valid joining dates
+  const minimumJoiningDate = new Date();
+  minimumJoiningDate.setDate(minimumJoiningDate.getDate() - 30); // 30 days ago
+  const maximumJoiningDate = new Date();
+  maximumJoiningDate.setDate(maximumJoiningDate.getDate() + 30); // 30 days later
   
   // retrive list data from database using useGetSelectionOptions
   const {
@@ -54,9 +62,12 @@ function EditPatientGuardianScreen(props) {
   const [isFirstNameError, setIsFirstNameError] = useState(false);
   const [isLastNameError, setIsLastNameError] = useState(false);
   const [isNRICError, setIsNRICError] = useState(false);
+  const [isEmailError, setIsEmailError] = useState(false);
   const [isRelationError, setIsRelationError] = useState(false);
   const [isPhoneError, setIsPhoneError] = useState(false);
-  const [isEmailError, setIsEmailError] = useState(false);
+  const [isDOBError, setIsDOBError] = useState(false);
+  const [isAddrError, setIsAddrError] = useState(false);
+  const [isTempAddrError, setIsTempAddrError] = useState(false);
   const [isGuardianLoginError, setIsGuardianLoginError] = useState(false);
 
   const handleFirstNameState = useCallback(
@@ -83,6 +94,14 @@ function EditPatientGuardianScreen(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [isNRICError],
   );
+  const handleEmailState = useCallback(
+    (state) => {
+      setIsEmailError(state);
+      // console.log('Email: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isEmailError],
+  );
   const handleRelationState = useCallback(
     (state) => {
       setIsRelationError(state);
@@ -99,13 +118,29 @@ function EditPatientGuardianScreen(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [isPhoneError],
   );
-  const handleEmailState = useCallback(
+  const handleDOBState = useCallback(
     (state) => {
-      setIsEmailError(state);
-      // console.log('Email: ', state);
+      setIsDOBError(state);
+      // console.log('DOB: ', state);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isEmailError],
+    [isDOBError],
+  );
+  const handleAddrState = useCallback(
+    (state) => {
+      setIsAddrError(state);
+      // console.log('Addr: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isAddrError],
+  );
+  const handleTempAddrState = useCallback(
+    (state) => {
+      setIsTempAddrError(state);
+      // console.log('TempAddr: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isTempAddrError],
   );
 
   useEffect(() => {
@@ -113,9 +148,12 @@ function EditPatientGuardianScreen(props) {
       isFirstNameError ||
       isLastNameError ||
       isNRICError ||
+      isEmailError ||
       isPhoneError ||
       isRelationError ||
-      isEmailError ||
+      isDOBError ||
+      isAddrError ||
+      isTempAddrError ||
       isGuardianLoginError,
     );
     // console.log(isInputErrors);
@@ -123,9 +161,12 @@ function EditPatientGuardianScreen(props) {
     isFirstNameError,
     isLastNameError,
     isNRICError,
+    isEmailError,
     isPhoneError,
     isRelationError,
-    isEmailError,
+    isDOBError,
+    isAddrError,
+    isTempAddrError,
     isInputErrors,
     isGuardianLoginError,
   ]);
@@ -139,6 +180,9 @@ function EditPatientGuardianScreen(props) {
     RelationshipID: guardianProfile.relationshipID,
     isActive: guardianProfile.isActive,
     ContactNo: guardianProfile.contactNo,
+    DOB: guardianProfile.dob ? guardianProfile.dob : minimumJoiningDate,
+    Address: guardianProfile.address ? guardianProfile.address : "",
+    TempAddress: guardianProfile.tempAddress ? guardianProfile.tempAddress : "",
   });
 
   // To ensure that when the is guardian login required checkbox is checked, guardian email
@@ -203,7 +247,6 @@ function EditPatientGuardianScreen(props) {
       console.log("result error "+JSON.stringify(result));
     }
     Alert.alert(alertTitle, alertDetails);
-    console.log("formData "+JSON.stringify(formData));
   };
 
   /* If retrieval from the hook is successful, replace the content in
@@ -269,6 +312,32 @@ function EditPatientGuardianScreen(props) {
                   maxLength={8}
                 />
 
+                <View style={styles.dateSelectionContainer}>
+                  <DateInputField
+                    isRequired
+                    selectionMode={'DOB'}
+                    title={'Date of Birth'}
+                    value={new Date(formData['DOB'])}
+                    handleFormData={handleFormData('DOB')}
+                    onChildData={handleDOBState}
+                  />
+                </View>
+
+                <CommonInputField
+                  isRequired
+                  title={'Address'}
+                  value={formData['Address']}
+                  onChangeText={handleFormData('Address')}
+                  onChildData={handleAddrState}
+                />
+
+                <CommonInputField
+                  title={'Temporary Address (optional)'}
+                  value={formData['TempAddress']}
+                  onChangeText={handleFormData('TempAddress')}
+                  onChildData={handleTempAddrState}
+                />
+
                 <SingleOptionCheckBox
                   title={'Check this box to specify Guardian wants to log in'}
                   value={(formData['isActive'] !== undefined && formData['isActive'])}
@@ -308,6 +377,9 @@ const styles = StyleSheet.create({
     paddingLeft: '10%',
     width: '90%',
     marginBottom: 20,
+  },
+  dateSelectionContainer: {
+    width: '70%',
   },
   saveButtonContainer: {
     alignItems: 'center',

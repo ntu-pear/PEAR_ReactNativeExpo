@@ -318,33 +318,33 @@ function EditPatientSocialHistScreen(props) {
 
   const [formData, setFormData] = useState({
     PatientID: patientID,
-    SocialHistoryId: socialHistory.socialHistoryId,
-    LiveWithDescription: socialHistory.liveWithDescription,
-    LiveWithListId: socialHistory.liveWithListId,
-    EducationDescription: socialHistory.educationDescription,
-    EducationListId: socialHistory.educationListId,
-    OccupationDescription: socialHistory.occupationDescription,
-    OccupationListId: socialHistory.occupationListId,
-    ReligionDescription: socialHistory.religionDescription,
-    ReligionListId: socialHistory.religionListId,
-    PetDescription: socialHistory.petDescription,
-    PetListId: socialHistory.petListId,
-    DietDescription: socialHistory.dietDescription,
-    DietListId: socialHistory.dietListId,
-    Exercise: socialHistory.exercise,
-    ExerciseDisplay: socialHistory.exercise !== null ? socialHistory.exercise : 2,
-    SexuallyActive: socialHistory.sexuallyActive,
-    SexuallyActiveDisplay: socialHistory.sexuallyActive !== null ? socialHistory.sexuallyActive : 2,
-    DrugUse: socialHistory.drugUse,
-    DrugUseDisplay: socialHistory.drugUse !== null ? socialHistory.drugUse : 2,
-    CaffeineUse: socialHistory.caffeineUse,
-    CaffeineUseDisplay: socialHistory.caffeineUse !== null ? socialHistory.caffeineUse : 2,
-    AlcoholUse: socialHistory.alcoholUse,
-    AlcoholUseDisplay: socialHistory.alcoholUse !== null ? socialHistory.alcoholUse : 2,
-    TobaccoUse: socialHistory.tobaccoUse,
-    TobaccoUseDisplay: socialHistory.tobaccoUse !== null ? socialHistory.tobaccoUse : 2,
-    SecondhandSmoker: socialHistory.secondhandSmoker,
-    SecondhandSmokerDisplay: socialHistory.secondhandSmoker !== null ? socialHistory.secondhandSmoker : 2,
+    SocialHistoryId: Object.keys(socialHistory).length>0 ? socialHistory.socialHistoryId : 1,
+    LiveWithDescription: Object.keys(socialHistory).length>0 ? socialHistory.liveWithDescription : "Alone",
+    LiveWithListId: Object.keys(socialHistory).length>0 ? socialHistory.liveWithListId : 1,
+    EducationDescription: Object.keys(socialHistory).length>0 ? socialHistory.educationDescription : 'Primary or lower',
+    EducationListId: Object.keys(socialHistory).length>0 ? socialHistory.educationListId : 1,
+    OccupationDescription: Object.keys(socialHistory).length>0 ? socialHistory.occupationDescription : 'Accountant',
+    OccupationListId: Object.keys(socialHistory).length>0 ? socialHistory.occupationListId : 1,
+    ReligionDescription: Object.keys(socialHistory).length>0 ? socialHistory.religionDescription : 'Atheist',
+    ReligionListId: Object.keys(socialHistory).length>0 ? socialHistory.religionListId : 1,
+    PetDescription: Object.keys(socialHistory).length>0 ? socialHistory.petDescription : 'Bird',
+    PetListId: Object.keys(socialHistory).length>0 ? socialHistory.petListId : 1,
+    DietDescription: Object.keys(socialHistory).length>0 ? socialHistory.dietDescription : 'Diabetic',
+    DietListId: Object.keys(socialHistory).length>0 ? socialHistory.dietListId : 1,
+    Exercise: Object.keys(socialHistory).length>0 ? socialHistory.exercise : null,
+    ExerciseDisplay: Object.keys(socialHistory).length>0 ? socialHistory.exercise !== null ? socialHistory.exercise : 2 : 2,
+    SexuallyActive: Object.keys(socialHistory).length>0 ? socialHistory.sexuallyActive : null,
+    SexuallyActiveDisplay: Object.keys(socialHistory).length>0 ? socialHistory.sexuallyActive !== null ? socialHistory.sexuallyActive : 2 : 2,
+    DrugUse: Object.keys(socialHistory).length>0 ? socialHistory.drugUse : null,
+    DrugUseDisplay: Object.keys(socialHistory).length>0 ? socialHistory.drugUse !== null ? socialHistory.drugUse : 2 : 2,
+    CaffeineUse: Object.keys(socialHistory).length>0 ? socialHistory.caffeineUse : null,
+    CaffeineUseDisplay: Object.keys(socialHistory).length>0 ? socialHistory.caffeineUse !== null ? socialHistory.caffeineUse : 2 : 2,
+    AlcoholUse: Object.keys(socialHistory).length>0 ? socialHistory.alcoholUse : null,
+    AlcoholUseDisplay: Object.keys(socialHistory).length>0 ? socialHistory.alcoholUse !== null ? socialHistory.alcoholUse : 2 : 2,
+    TobaccoUse: Object.keys(socialHistory).length>0 ? socialHistory.tobaccoUse : null,
+    TobaccoUseDisplay: Object.keys(socialHistory).length>0 ? socialHistory.tobaccoUse !== null ? socialHistory.tobaccoUse : 2 : 2,
+    SecondhandSmoker: Object.keys(socialHistory).length>0 ? socialHistory.secondhandSmoker : null,
+    SecondhandSmokerDisplay: Object.keys(socialHistory).length>0 ? socialHistory.secondhandSmoker !== null ? socialHistory.secondhandSmoker : 2 : 2,
   });
 
   // handling form input data by taking onchange value and updating our previous form data state
@@ -394,17 +394,14 @@ function EditPatientSocialHistScreen(props) {
           [input+"Display"]: 2,
         }));
       } else {
-      setFormData((previousState) => ({
-        ...previousState,
-        [input]: e,
-        [input+"Display"]: e,
-      }));
-    }
+        setFormData((previousState) => ({
+          ...previousState,
+          [input]: e,
+          [input+"Display"]: e,
+        }));
+      }
     };
-
-  const submitForm1 = async () => {
-    console.log("formData "+JSON.stringify(formData));
-  }
+  
   // form submission when save button is pressed
   const submitForm = async () => {
     const result = await socialHistoryApi.updateSocialHistory(formData);
