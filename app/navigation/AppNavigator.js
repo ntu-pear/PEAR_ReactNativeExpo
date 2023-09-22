@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text } from 'react-native';
+// import { Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import colors from 'app/config/colors';
@@ -40,13 +40,13 @@ function AppNavigator() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.pink,
-        // tabBarInactiveTintColor: colors.black_var1,
       }}
     >
       <Tab.Screen
         name={routes.DASHBOARD}
         component={DashboardNavigator}
         options={{
+          tabBarTestID: 'Dashboard_Tab',
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
               name="notebook-outline"
@@ -59,8 +59,9 @@ function AppNavigator() {
       <Tab.Screen
         name={routes.NOTIFICATION}
         component={NotificationNavigator}
-        options={({ route }) => ({
-          tabBarStyle: hideBottomTabOnSpecificRoute(route),
+        options={{
+          tabBarTestID: 'Notification_Tab',
+          tabBarStyle: ({ route }) => hideBottomTabOnSpecificRoute(route),
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
@@ -69,12 +70,13 @@ function AppNavigator() {
               size={size}
             />
           ),
-        })}
+        }}
       />
       <Tab.Screen
         name={routes.PATIENTS}
         component={PatientsNavigator}
         options={{
+          tabBarTestID: 'Patients_Tab',
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
               name="home-outline"
@@ -88,6 +90,7 @@ function AppNavigator() {
         name={routes.CONFIG}
         component={ConfigNavigator}
         options={{
+          tabBarTestID: 'Config_Tab',
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
               name="cog-outline"
@@ -100,8 +103,9 @@ function AppNavigator() {
       <Tab.Screen
         name={routes.ACCOUNT}
         component={AccountNavigator}
-        options={({ route }) => ({
-          tabBarStyle: hideBottomTabOnSpecificRoute(route),
+        options={{
+          tabBarStyle: ({ route }) => hideBottomTabOnSpecificRoute(route),
+          tabBarTestID: 'Account_Tab',
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
               name="account-circle-outline"
@@ -109,7 +113,7 @@ function AppNavigator() {
               size={size}
             />
           ),
-        })}
+        }}
       />
     </Tab.Navigator>
   );

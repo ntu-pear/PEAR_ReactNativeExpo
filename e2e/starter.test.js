@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 // const { reloadApp } = require('detox-expo-helpers');
 
-describe('Example', () => {
+describe('Login tests', () => {
   beforeAll(async () => {
     await device.launchApp();
   });

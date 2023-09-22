@@ -35,78 +35,26 @@ function PatientDailyHighlights(props) {
     {
       label: 'New Prescription',
       value: 'newPrescription',
-      // icon: () => (
-      //   <FontAwesome5
-      //     name="pills"
-      //     size={Platform.OS === 'web' ? 26 : 16}
-      //     style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
-      //     color={colors.black_var1}
-      //   />
-      // ),
-      // testID: 'newPrescriptionDropdownItem',
     },
     {
       label: 'New Allergy',
       value: 'newAllergy',
-      // icon: () => (
-      //   <MaterialCommunityIcons
-      //     name="allergy"
-      //     size={Platform.OS === 'web' ? 26 : 18}
-      //     style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
-      //     color={colors.black_var1}
-      //   />
-      // ),
-      // testID: 'newAllergyDropdownItem',
     },
     {
       label: 'New Activity Exclusion',
       value: 'newActivityExclusion',
-      // icon: () => (
-      //   <FontAwesome5
-      //     name="ban"
-      //     size={Platform.OS === 'web' ? 26 : 18}
-      //     style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
-      //     color={colors.black_var1}
-      //   />
-      // ),
     },
     {
       label: 'Abnormal Vital',
       value: 'abnormalVital',
-      // icon: () => (
-      //   <MaterialCommunityIcons
-      //     name="heart-pulse"
-      //     size={Platform.OS === 'web' ? 26 : 18}
-      //     style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
-      //     color={colors.black_var1}
-      //   />
-      // ),
-      // testID: 'abnormalVitalDropdownItem',
     },
     {
       label: 'Problem',
       value: 'problem',
-      // icon: () => (
-      //   <FontAwesome5
-      //     name="exclamation-triangle"
-      //     size={Platform.OS === 'web' ? 26 : 18}
-      //     style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
-      //     color={colors.black_var1}
-      //   />
-      // ),
-      // testID: 'problemDropdownItem',
     },
     {
       label: 'New Medical Records',
       value: 'medicalHistory',
-      // icon: () => (
-      //   <MaterialCommunityIcons
-      //     name="clipboard-text"
-      //     size={Platform.OS === 'web' ? 26 : 18}
-      //     style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
-      //     color={colors.black_var1}
-      //   />
-      // ),
     },
   ]);
 
@@ -199,9 +147,6 @@ function PatientDailyHighlights(props) {
         message = 'Error: User not Authenticated';
       } else if (statusCode >= 500) {
         message = 'Server is down. Please try again later.';
-        // <Text style={[styles.modalText, styles.modalErrorText]}>
-        //   Error: Server is down. Please try again later.
-        // </Text>
       } else {
         message = `${statusCode} error has occured`;
       }
@@ -213,7 +158,6 @@ function PatientDailyHighlights(props) {
         TextMessage={isError ? message : 'Nothing to highlight today'}
         topPaddingSize={'32%'}
       />
-      // <Text style={styles.modalText}>No patient changes found today.</Text>
     );
   };
 
