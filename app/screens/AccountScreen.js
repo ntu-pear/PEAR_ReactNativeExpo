@@ -12,7 +12,6 @@ import AppButton from 'app/components/AppButton';
 import authStorage from 'app/auth/authStorage';
 import AccountCard from 'app/components/AccountCard';
 import ProfileNameButton from 'app/components/ProfileNameButton';
-// import AccountDetailCard from 'app/components/AccountDetailCard'; --- replaced by ProfileNameButton
 import ActivityIndicator from 'app/components/ActivityIndicator';
 
 // API
@@ -25,11 +24,9 @@ function AccountScreen(props) {
   const { navigation } = props;
   const SCREEN_WIDTH = Dimensions.get('window').width;
 
-  const onPressLogOut = async () => {
+  const onPressLogOut = () => {
     console.log('Logging out!');
-    // resetNavigation.dispatch(resetAction);
     setUser(null);
-    await authStorage.removeToken();
   };
 
   useFocusEffect(
@@ -53,16 +50,13 @@ function AccountScreen(props) {
     console.log(currentUser);
     // fetch full user profile information by calling api using user ID
     const response = await userApi.getUser(currentUser.userID);
-    // console.log('\ngetCurrentUser: ');
-    // console.log(response);
     if (!response.ok) {
       // Proceed to log out if account screen does not load due to api failure
       // Note: should use useCheckExpiredThenLogOut hook but it isnt working and had no time to fix
 
       // reset the navigation stack when logging out
       // resetNavigation.dispatch(resetAction);
-      setUser(null);
-      // await authStorage.removeToken();
+      onPressLogOut();
       return;
     }
     setIsLoading(false);
@@ -79,7 +73,6 @@ function AccountScreen(props) {
         <ActivityIndicator visible />
       ) : (
         <VStack w="100%" h="100%" alignItems="center">
-          {/* <AccountDetailCard userProfile={user} navigation={navigation} /> */}
           <ProfileNameButton
             profilePicture={user.profilePicture}
             profileLineOne={user.preferredName}

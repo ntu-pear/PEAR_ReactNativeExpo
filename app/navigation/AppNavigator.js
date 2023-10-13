@@ -1,9 +1,9 @@
+// Base
 import React from 'react';
-// import { Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import colors from 'app/config/colors';
-// Import Constants
+// Navigations
 import routes from 'app/navigation/routes';
 import DashboardNavigator from 'app/navigation/DashboardNavigator';
 import PatientsNavigator from 'app/navigation/PatientsNavigator';
@@ -85,6 +85,7 @@ function AppNavigator() {
             />
           ),
         }}
+        screenOptions={{ unmountOnBlur: true }}
       />
       <Tab.Screen
         name={routes.CONFIG}
@@ -104,6 +105,7 @@ function AppNavigator() {
         name={routes.ACCOUNT}
         component={AccountNavigator}
         options={{
+          unmountOnBlur: true,
           tabBarStyle: ({ route }) => hideBottomTabOnSpecificRoute(route),
           tabBarTestID: 'Account_Tab',
           tabBarIcon: ({ color, size }) => (

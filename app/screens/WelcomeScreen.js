@@ -31,7 +31,6 @@ import ErrorMessage from 'app/components/ErrorMessage';
 
 // Import Api
 import userApi from 'app/api/user';
-import LoadingWheel from 'app/components/LoadingWheel';
 
 function WelcomeScreen(props) {
   /*
@@ -68,9 +67,6 @@ function WelcomeScreen(props) {
     console.log('Logging in!\n');
     setIsLoading(true);
     const result = await userApi.loginUser(email, role, password);
-    // console.log('logging in!');
-    console.log(result);
-    // userLoginApi.request(email, role, password);
     // if returned array is empty or error
     if (!result.ok) {
       console.log('Authentication error');
@@ -127,13 +123,7 @@ function WelcomeScreen(props) {
           </View>
 
           <Center flex={1}>
-            <View
-              style={
-                Platform.OS === 'web'
-                  ? styles.credentialsContainerWeb
-                  : styles.credentialsContainer
-              }
-            >
+            <View style={styles.credentialsContainer}>
               <Input
                 accessible={true}
                 testID="username"
@@ -232,19 +222,14 @@ function WelcomeScreen(props) {
               />
             </Box>
             <View style={styles.buttonsContainer}>
-              {isLoading ? (
-                // <ActivityIndicator color={colors.primary_overlay_color} />
-                <LoadingWheel />
-              ) : (
-                <AppButton
-                  title="Login"
-                  color="green"
-                  onPress={onPressLogin}
-                  testingID="Login"
-                />
-              )}
+              <AppButton
+                title="Login"
+                color="green"
+                onPress={onPressLogin}
+                testingID="Login"
+              />
             </View>
-            <View style={Platform.OS === 'web' ? { top: 130 } : ''}>
+            <View>
               <Text
                 style={styles.underline}
                 onPress={() => navigation.navigate(routes.RESET_PASSWORD)}
