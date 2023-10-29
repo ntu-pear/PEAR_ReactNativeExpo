@@ -41,7 +41,6 @@ function PatientPrescriptionScreen(props) {
       "Chronic": isChronic ? 'Yes' : 'No',
     }));
     setTableDataFormated(newArray);
-    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -52,6 +51,7 @@ function PatientPrescriptionScreen(props) {
         return Object.values(item).map((value) => value.toString());
       });
       setRowData(finalArray);
+      setIsLoading(false);
     }
   }, [tableDataFormated]);
 

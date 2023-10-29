@@ -176,7 +176,7 @@ function EditPatientGuardianScreen(props) {
     FirstName: guardianProfile.firstName,
     LastName: guardianProfile.lastName,
     NRIC: guardianProfile.nric,
-    Email: guardianProfile.email ? guardianProfile.email : "",
+    Email: guardianProfile.email,
     RelationshipID: guardianProfile.relationshipID,
     isActive: guardianProfile.isActive,
     ContactNo: guardianProfile.contactNo,
@@ -188,16 +188,16 @@ function EditPatientGuardianScreen(props) {
   // To ensure that when the is guardian login required checkbox is checked, guardian email
   // must be filled before continuing. Done by verifying if formData['Email'] is empty or not.
   // console.log(i);
-  //useEffect(() => {
-  //  setIsGuardianLoginError(() => {
-  //    if ((formData['isActive'] !== undefined && formData['isActive']) && 
-  //    (formData['Email'] !== undefined && formData['Email'] === '')) {
-  //      return true;
-  //    } else {
-  //      return false;
-  //    }
-  //  });
-  //}, [formData['isActive'], formData['Email']]);
+  useEffect(() => {
+    setIsGuardianLoginError(() => {
+      if ((formData['isActive'] !== undefined && formData['isActive']) && 
+      (formData['Email'] !== undefined && formData['Email'] === '')) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+  }, [formData['isActive'], formData['Email']]);
 
 
   // handling form input data by taking onchange value and updating our previous form data state
@@ -338,16 +338,14 @@ function EditPatientGuardianScreen(props) {
                   onChildData={handleTempAddrState}
                 />
 
-                {
-                  //<SingleOptionCheckBox
-                  //  title={'Check this box to specify Guardian wants to log in'}
-                  //  value={(formData['isActive'] !== undefined && formData['isActive'])}
-                  //  onChangeData={handleFormData('isActive')}
-                  ///>
-                }
-                
+                <SingleOptionCheckBox
+                  title={'Check this box to specify Guardian wants to log in'}
+                  value={(formData['isActive'] !== undefined && formData['isActive'])}
+                  onChangeData={handleFormData('isActive')}
+                />
 
                 <EmailInputField
+                  isRequired={(formData['isActive'] !== undefined && formData['isActive'])}
                   title={'Guardian Email'}
                   value={formData['Email']}
                   onChangeText={handleFormData('Email')}

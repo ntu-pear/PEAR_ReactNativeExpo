@@ -18,7 +18,7 @@ const doctorNoteAdd = `${endpoint}/add`; //eslint-disable-line no-unused-vars
 // purpose: receive doctor's note for specific patient
 const getDoctorNote = async (patientID) => {
   const params = {
-    patientID,
+    patientId: patientID,
   };
   return client.get(endpoint, params);
 };
