@@ -4,6 +4,7 @@ import cache from 'app/utility/cache';
 // import { Platform } from 'react-native';
 import { useContext } from 'react';
 import AuthContext from 'app/auth/context';
+import jwt_decode from 'jwt-decode';
 
 const baseURL = 'https://coremvc.fyp2017.com/api';
 // for CORS error
@@ -18,7 +19,6 @@ const userRefreshToken = `${endpoint}/RefreshToken`;
  */
 const apiClient = create({
   // for local/ staging BE
-  // baseURL: Platform.OS === 'web' ? baseURLWeb : baseURL,
   baseURL,
 });
 // Method override on apiClient.get()
@@ -61,34 +61,32 @@ setHeader();
 // existing token with the refreshed token
 // TODO: FIX RefreshToken Issue [https://trello.com/c/LiDqXESB/163-fix-refreshtoken-issue]
 apiClient.addAsyncResponseTransform(async (response) => {
-  // console.log(response);
+  const unformattedUserAccessToken = await authStorage.getToken(
+    'userAuthToken',
+  );
+  const unformattedUserRefreshToken = await authStorage.getToken(
+    'userRefreshToken',
+  );
+  var decoded = jwt_decode(unformattedUserAccessToken);
+  var exp = decoded.exp * 1000;
+  const utcPlus8Date = new Date();
+  // Convert UTC+8 time to UTC time
+  const utcTimeInMilliseconds = utcPlus8Date.getTime() - 8 * 60 * 60 * 1000;
   if (
     response &&
     response.status &&
-    (response.status === 401 || response.status === 403)
+    (response.status === 401 || response.status === 403) &&
+    utcTimeInMilliseconds >= exp
   ) {
     // if access token is invalid, begin renewal.
     console.log('client.js: Renewing user tokens');
-    const unformattedUserAccessToken = await authStorage.getToken(
-      'userAuthToken',
-    );
-    const unformattedUserRefreshToken = await authStorage.getToken(
-      'userRefreshToken',
-    );
     const accessToken = unformattedUserAccessToken.replace(/['"]+/g, '');
     const refreshToken = unformattedUserRefreshToken.replace(/['"]+/g, '');
     let bearerToken = accessToken;
     const body = JSON.stringify({ accessToken, refreshToken });
-    // console.log('Body is: ');
-    // console.log(body);
     const data = await apiClient.post(`${baseURL}${userRefreshToken}`, body);
-
     // if token refresh is unsuccessful
-    if (
-      (!data.ok || !data.data.data.success) &&
-      data.data.data.error !== 'Token has not yet expired'
-    ) {
-      // const { setUser } = useContext(AuthContext);
+    if (!data.ok || !data.data.data.success) {
       console.log('client.js: !data.ok || !data.data.data.success');
       console.log(data);
       if (data.data.message) {
@@ -97,7 +95,6 @@ apiClient.addAsyncResponseTransform(async (response) => {
       }
       return Promise.resolve();
     }
-
     // if token refresh is successful and store the renewed tokens.
     if (data.data.data.accessToken && data.data.data.refreshToken) {
       await authStorage.storeToken('userAuthToken', data.data.data.accessToken);
@@ -114,7 +111,6 @@ apiClient.addAsyncResponseTransform(async (response) => {
       console.log('New access token: ', data.data.data.accessToken);
       console.log('New refresh token: ', data.data.data.refreshToken);
     }
-
     // retry API call
     if (response && response.config) {
       // Replace response.config.header's Authorization with the new Bearer token

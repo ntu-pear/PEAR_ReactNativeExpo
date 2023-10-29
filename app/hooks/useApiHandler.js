@@ -18,5 +18,28 @@ export default function useApiHandler() {
     }
   };
 
-  return { setHeaderIfEmpty };
+  const setHeader = async () => {
+    const bearerToken = await authStorage.getToken('userAuthToken');
+    // Set the header if there are none configured.
+    if (!client.headers.Authorization || client.headers.Authorization !== `Bearer ${bearerToken}`) {
+      console.log('!client.headers.Authorization');
+      bearerToken
+        ? client.setHeaders({
+            Authorization: `Bearer ${bearerToken}`,
+          })
+        : setUser(null);
+    }
+    // else if (client.headers.Authorization !== `Bearer ${bearerToken}`) {
+    //   // Update the header newer auth token.
+    //   console.log('client.headers.Authorization !==');
+    //   // const bearerToken = await authStorage.getToken('userAuthToken');
+    //   bearerToken
+    //     ? client.setHeaders({
+    //         Authorization: `Bearer ${bearerToken}`,
+    //       })
+    //     : setUser(null);
+    // }
+  }
+
+  return { setHeaderIfEmpty, setHeader };
 }
