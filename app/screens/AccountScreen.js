@@ -24,9 +24,10 @@ function AccountScreen(props) {
   const { navigation } = props;
   const SCREEN_WIDTH = Dimensions.get('window').width;
 
-  const onPressLogOut = () => {
+  const onPressLogOut = async () => {
     console.log('Logging out!');
     setUser(null);
+    await authStorage.removeToken();
   };
 
   const retrieveCurrentUser = async () => {

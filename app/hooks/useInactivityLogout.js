@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { PanResponder } from 'react-native';
 import AuthContext from 'app/auth/context';
+import authStorage from 'app/auth/authStorage';
 
 // ref: https://facto.hashnode.dev/auto-logout-user-after-inactivity-react-native
 
@@ -32,9 +33,10 @@ export default function useInactivityLogout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, waitForInactivity.current]);
 
-  const performAutoLogout = useCallback(() => {
+  const performAutoLogout = useCallback(async () => {
     console.log('useInactivitylogout: Performing auto logout!');
     setUser(null);
+    await authStorage.removeToken();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

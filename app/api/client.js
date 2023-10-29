@@ -61,25 +61,20 @@ setHeader();
 // existing token with the refreshed token
 // TODO: FIX RefreshToken Issue [https://trello.com/c/LiDqXESB/163-fix-refreshtoken-issue]
 apiClient.addAsyncResponseTransform(async (response) => {
-  const unformattedUserAccessToken = await authStorage.getToken(
-    'userAuthToken',
-  );
-  const unformattedUserRefreshToken = await authStorage.getToken(
-    'userRefreshToken',
-  );
-  var decoded = jwt_decode(unformattedUserAccessToken);
-  var exp = decoded.exp * 1000;
-  const utcPlus8Date = new Date();
-  // Convert UTC+8 time to UTC time
-  const utcTimeInMilliseconds = utcPlus8Date.getTime() - 8 * 60 * 60 * 1000;
+  // console.log('addAsyncResponseTransform');
   if (
     response &&
     response.status &&
-    (response.status === 401 || response.status === 403) &&
-    utcTimeInMilliseconds >= exp
+    (response.status === 401 || response.status === 403) 
   ) {
     // if access token is invalid, begin renewal.
     console.log('client.js: Renewing user tokens');
+    const unformattedUserAccessToken = await authStorage.getToken(
+      'userAuthToken',
+    );
+    const unformattedUserRefreshToken = await authStorage.getToken(
+      'userRefreshToken',
+    );
     const accessToken = unformattedUserAccessToken.replace(/['"]+/g, '');
     const refreshToken = unformattedUserRefreshToken.replace(/['"]+/g, '');
     let bearerToken = accessToken;
