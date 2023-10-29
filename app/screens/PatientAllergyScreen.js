@@ -24,12 +24,14 @@ function PatientAllergyScreen(props) {
       console.log('Request failed with status code: ', response.status);
       return;
     }
+    
     const newArray = response.data.data.map(({ allergyListDesc, allergyReaction, allergyRemarks }) => ({
       "Allergic To": allergyListDesc,
       "Reaction": allergyReaction,
       "Notes": allergyRemarks,
     }));
     setTableDataFormated(newArray);
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -40,7 +42,6 @@ function PatientAllergyScreen(props) {
         return Object.values(item).map((value) => value.toString());
       });
       setRowData(finalArray);
-      setIsLoading(false);
     }
   }, [tableDataFormated]);
 

@@ -1,5 +1,5 @@
 // Libs
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Platform } from 'react-native';
 import { Image, VStack, AspectRatio, Center, ScrollView } from 'native-base';
 import AuthContext from 'app/auth/context';
@@ -11,68 +11,84 @@ import userApi from 'app/api/user';
 import routes from 'app/navigation/routes';
 
 // Components
+import ActivityIndicator from 'app/components/ActivityIndicator';
 import InformationCard from 'app/components/InformationCard';
 import authStorage from 'app/auth/authStorage';
 
 function AccountViewScreen(props) {
-  const { user, setUser } = useContext(AuthContext);
   const { navigation } = props;
+  const [isLoading, setIsLoading] = useState(true);
+  const [userProfile, setUserProfile] = useState([]);
+  const [unMaskedUserNRIC, setUnMaskedUserNRIC] = useState('');
   
   // Data used for display, sent to InformationCard
   const userData = [
-    { label: 'Preferred Name', value: user.preferredName },
-    { label: 'Contact Number', value: user.contactNo },
-    { label: 'First Name', value: user.firstName },
-    { label: 'Last Name', value: user.lastName },
-    { label: 'Role', value: user.role },
-    { label: 'NRIC', value: user.nric },
+    { label: 'Preferred Name', value: userProfile.preferredName },
+    { label: 'Contact Number', value: userProfile.contactNo },
+    { label: 'First Name', value: userProfile.firstName },
+    { label: 'Last Name', value: userProfile.lastName },
+    { label: 'Role', value: userProfile.role },
+    { label: 'NRIC', value: unMaskedUserNRIC.replace(/\d{4}(\d{3})/, 'xxxx$1') },
     {
       label: 'Gender',
-      value: user.gender === 'F' ? 'Female' : 'Male',
+      value: userProfile.gender === 'F' ? 'Female' : 'Male',
     },
     {
       label: 'DOB',
-      value: user.dob || 'Not available',
+      value: userProfile.dob || 'Not available',
     },
     {
       label: 'Email',
-      value: user.email || 'Not available',
+      value: userProfile.email || 'Not available',
     },
     {
       label: 'Address',
-      value: user.address || 'Not available',
+      value: userProfile.address || 'Not available',
     },
   ];
-
-  const getCurrentUser = async () => {
+  // Used to retrieve the user since after an editing of the user's particulars it will need to be refreshed - Russell
+  const retrieveCurrentUser = async () => {
     // get current user from authStorage
     const currentUser = await authStorage.getUser();
     // fetch full user profile information by calling api using user ID
-    const response = await userApi.getUser(currentUser.userID);
-    return response.data;
+    const response = await userApi.getUser(currentUser.userID, false);
+    if (!response.ok) {
+      console.log('Request failed with status code: ', response.status);
+      return;
+    }
+    setUserProfile(response.data.data);
+    setUnMaskedUserNRIC(response.data.data.nric)
   };
+
+  // used to confirm that data has returned from apis before loading the page - Russell
+  useEffect(() => {
+    if(userProfile !== undefined && Object.keys(userProfile).length>0){
+      setIsLoading(false);
+    }
+  }, [userProfile]);
+
+  // This callback function will be executed when the screen comes into focus - Russell
+  useEffect(() => {
+    const navListener = navigation.addListener('focus', () => {
+      setUserProfile([]);
+      setIsLoading(true);
+      retrieveCurrentUser();
+    });
+    return navListener;
+  }, [navigation]);
 
   const handleOnPress = () => {
     navigation.push(routes.ACCOUNT_EDIT, { 
       userData: userData,
       navigation: navigation,
-       ...user 
+      unMaskedUserNRIC: unMaskedUserNRIC,
+       ...userProfile 
       });
   };
 
-  // This callback function will be executed when the screen comes into focus - Russell
-  useEffect(() => {
-    const navListener = navigation.addListener('focus', () => {
-      const promiseFunction = async () => {
-        const response = await getCurrentUser();
-        setUser(response.data);
-      };
-      promiseFunction();
-    });
-    return navListener;
-  }, [navigation]);
-
-  return (
+  return isLoading ? (
+    <ActivityIndicator visible />
+  ) : (
     <ScrollView>
       <VStack mt="4" ml="4" px={Platform.OS === 'web' ? '10%' : null}>
         <Center>
@@ -84,8 +100,8 @@ function AccountViewScreen(props) {
                   uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1634523641/User/Adeline_Tan_Sxxxx515G/ProfilePicture/ffo5oc4jhurmtjjhqcib.jpg',
                 }}
                 source={{
-                  uri: user.profilePicture
-                    ? `${user.profilePicture}`
+                  uri: userProfile.profilePicture
+                    ? `${userProfile.profilePicture}`
                     : 'https://res.cloudinary.com/dbpearfyp/image/upload/v1634523641/User/Adeline_Tan_Sxxxx515G/ProfilePicture/ffo5oc4jhurmtjjhqcib.jpg',
                 }}
                 alt="user_image"
@@ -98,6 +114,7 @@ function AccountViewScreen(props) {
           title={"Personal Information"}
           displayData={userData}
           handleOnPress={handleOnPress}
+          unMaskedNRIC={unMaskedUserNRIC}
         />
       </VStack>
     </ScrollView>
