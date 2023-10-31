@@ -1,16 +1,22 @@
+// Base
 import React, { useState, useEffect } from 'react';
 import { Modal, StyleSheet, Text, Pressable, View } from 'react-native';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
-import { SearchBar } from 'react-native-elements';
-import DropDownPicker from 'react-native-dropdown-picker';
-import { FlatList } from 'native-base';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import HighlightsCard from 'app/components/HighlightsCard';
+
+//Navigation
 import highlightApi from 'app/api/highlight';
+
+// Configs
 import colors from 'app/config/colors';
 import { Platform } from 'react-native';
+
+// Components
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
 import SelectionInputField from 'app/components/SelectionInputField';
+import HighlightsCard from 'app/components/HighlightsCard';
+import { SearchBar } from 'react-native-elements';
+import { FlatList } from 'native-base';
 
 function PatientDailyHighlights(props) {
   // Destructure props
@@ -209,65 +215,7 @@ function PatientDailyHighlights(props) {
                 onDataChange={setFilterValue}
                 placeholderText={'Select Filter'}
               />
-              {/* Standardize Dropdown component --- Justin */}
-              {/* <DropDownPicker
-                open={dropdownOpen}
-                value={filterValue}
-                items={dropdownItems}
-                setOpen={setDropdownOpen}
-                setValue={setFilterValue}
-                // onChangeValue={setFilterValue}
-                onPress={setDropdownOpen}
-                setItems={setDropdownItems}
-                mode="BADGE"
-                // listMode="SCROLLVIEW"
-                theme="LIGHT"
-                multiple={true}
-                // TODO: badgeDotColors not avaliable in web
-                badgeDotColors={[
-                  colors.pink,
-                  colors.pink_lighter,
-                  colors.red,
-                  colors.green,
-                  colors.pink,
-                  colors.green_lighter,
-                ]}
-                style={
-                  Platform.OS === 'web' ? styles.dropDownWeb : styles.dropDown
-                }
-                itemSeparator={true}
-                itemSeparatorStyle={{
-                  backgroundColor: colors.primary_gray,
-                }}
-                dropDownContainerStyle={{
-                  backgroundColor: colors.white,
-                  minHeight: 250,
-                }}
-                listItemLabelStyle={{
-                  fontSize: Platform.OS === 'web' ? 18 : 12,
-                }}
-                textStyle={{
-                  fontSize: Platform.OS === 'web' ? 18 : null,
-                }}
-                listItemContainerStyle={
-                  Platform.OS === 'web'
-                    ? {
-                        display: 'flex',
-                        flexDirection: 'row',
-                        marginVertical: 3,
-                        paddingVertical: 5,
-                        fontSize: 18,
-                      }
-                    : {}
-                }
-                selectedItemContainerStyle={{
-                  backgroundColor: colors.primary_gray,
-                }}
-                placeholderStyle={{
-                  color: colors.primary_overlay_color,
-                }}
-                testID="dropdownPicker"
-              /> */}
+              {/* Standardized Dropdown component --- Justin */}
             </View>
           </View>
           <FlatList

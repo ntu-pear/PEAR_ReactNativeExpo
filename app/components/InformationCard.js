@@ -4,6 +4,9 @@ import { View, StyleSheet, Text, Platform } from 'react-native';
 import { VStack, HStack, IconButton } from 'native-base';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
+// Hooks
+import formatDateTime from 'app/hooks/useFormatDateTime.js';
+
 //Configuration
 import typography from 'app/config/typography';
 import colors from 'app/config/colors';
@@ -11,14 +14,6 @@ import colors from 'app/config/colors';
 function InformationCard({ displayData, title, subtitle, handleOnPress=null, unMaskedNRIC=null }) {
   const [itemizedData, setItemizedData] = useState(displayData);
   const [masked, setMasked] = useState(true);
-
-  // Function used to format date data into dd-mm-yyyy
-  const formatDate = (str) => {
-    let splitDate = str.split('-');
-    // splitDate[0] = splitDate[0].split('').reverse().join('');
-
-    return `${splitDate[2]}-${splitDate[1]}-${splitDate[0]}`;
-  };
 
   // Handling of unmasking of NRIC
   const handleUnmaskNRIC = () => {
@@ -100,9 +95,10 @@ function InformationCard({ displayData, title, subtitle, handleOnPress=null, unM
                 data.value === 0 ? 'No' :
                 data.value === null ? 'Not available' :
                 data.value === 'null' ? 'Not available' :
-                data.label === 'DOB' ? `${formatDate(data.value.substring(0, 10))}` : 
-                data.label === 'Start Date' ? `${formatDate(data.value.substring(0, 10))}` : 
-                data.label === 'End Date' ? `${formatDate(data.value.substring(0, 10))}` : 
+                data.label === 'DOB' ? `${formatDateTime(data.value, true)}` : 
+                data.label === 'Start Date' ? `${formatDateTime(data.value, true)}` : 
+                data.label === 'End Date' ? `${formatDateTime(data.value, true)}` : 
+                data.label === 'Date' ? `${formatDateTime(data.value, true)}` : 
                 `${data.value}`}
             </Text>
             {(data.label !== null && data.label === 'NRIC' && masked === true) ? (

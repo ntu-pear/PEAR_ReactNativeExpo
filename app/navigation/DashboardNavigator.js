@@ -28,6 +28,7 @@ const Stack = createNativeStackNavigator();
 
 // Refer to this for configuration: https://reactnavigation.org/docs/native-stack-navigator#options
 function DashboardNavigator() {
+  // const [errorMessage, setErrorMessage] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedStartTime, setSelectedStartTime] = useState(
@@ -95,6 +96,7 @@ function DashboardNavigator() {
     activities.sort();
     return activities;
   };
+
   const compareDates = (activityDate, selectedDateLocal) => {
     return (
       activityDate.getFullYear() === selectedDateLocal.getFullYear() &&
@@ -123,6 +125,7 @@ function DashboardNavigator() {
         activityEnd.getMinutes() < selectedStartTime.getMinutes())
     );
   };
+
   const updateFilteredPatientsData = () => {
     const filtered = [];
     patientsData.forEach((patient) => {
@@ -156,7 +159,6 @@ function DashboardNavigator() {
         });
       }
     });
-
     setFilteredPatientsData(filtered);
   };
 
@@ -189,22 +191,33 @@ function DashboardNavigator() {
   const noDataMessage = () => {
     // Display error message if API request fails
     let message = '';
+    if (isLoading) {
+      return <></>;
+    }
     if (isError) {
       if (statusCode === 401) {
         // setIsRetry(true);
         message = 'Error: User is not authenticated.';
+        // setErrorMessage('Error: User is not authenticated.');
       } else if (statusCode >= 500) {
         // setIsRetry(false);
         message = 'Error: Server is down. Please try again later.';
+        // setErrorMessage('Error: Server is down. Please try again later.');
+      } else {
+        message = `${statusCode} error has occured`;
       }
-      message = `${statusCode} error has occurred.`;
+      // setErrorMessage(`${statusCode} error has occurred.`);
     }
+    // else {
+    //   setErrorMessage('');
+    // }
     return (
       <MessageDisplayCard
         TextMessage={isError ? message : 'No schedules found today'}
         topPaddingSize={'42%'}
       />
     );
+    // return message;
   };
 
   const handlePullToRefresh = () => {
@@ -214,12 +227,17 @@ function DashboardNavigator() {
 
   useEffect(() => {
     refreshDashboardData();
+    // noDataMessage();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (isRetry) {
+      console.log('Retrying dashboard API call');
       refreshDashboardData();
+      // noDataMessage();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRetry]);
 
   useEffect(() => {

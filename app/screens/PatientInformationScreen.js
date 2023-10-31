@@ -1,14 +1,10 @@
 /*eslint eslint-comments/no-unlimited-disable: error */
 // Libs
 import {
-  Alert,
   AspectRatio,
   Box,
   Center,
-  CloseIcon,
   Divider,
-  HStack,
-  IconButton,
   Image,
   ScrollView,
   Stack,
@@ -18,9 +14,6 @@ import {
 import React, { useEffect, useState } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-
-// Hooks
-import useApi from 'app/hooks/useApi';
 
 // API
 import patientApi from 'app/api/patient';
@@ -35,7 +28,6 @@ import typography from 'app/config/typography';
 
 // Components
 import ActivityIndicator from 'app/components/ActivityIndicator';
-import AppButton from 'app/components/AppButton';
 import InformationCard from 'app/components/InformationCard';
 
 function PatientInformationScreen(props) {
@@ -45,7 +37,7 @@ function PatientInformationScreen(props) {
   const [isPatientLoading, setIsPatientLoading] = useState(true);
   const [isSocialHistoryLoading, setIsSocialHistoryLoading] = useState(true);
   const [isGuardianLoading, setIsGuardianLoading] = useState(true);
-  const getDoctorNote = useApi(doctorNoteApi.getDoctorNote);
+  const [isDoctorsNoteLoading, setIsDoctorsNoteLoading] = useState(true);
 
   const [guardianData, setGuardianData] = useState([]);
   const [guardianInfoData, setGuardianInfoData] = useState([]);
@@ -54,6 +46,8 @@ function PatientInformationScreen(props) {
   const [socialHistoryData, setSocialHistoryData] = useState([]);
   const [socialHistoryInfo, setSocialHistoryInfo] = useState([]);
   const [patientProfile, setPatientProfile] = useState({});
+  const [doctorsNoteData, setDoctorNoteData] = useState([]);
+  const [doctorsNoteInfo, setDoctorNoteInfo] = useState([]);
   const [unMaskedPatientNRIC, setUnMaskedPatientNRIC] = useState('');
   const [unMaskedGuardianNRIC, setUnMaskedGuardianNRIC] = useState('');
   const [unMasked2ndGuardianNRIC, setUnMasked2ndGuardianNRIC] = useState('');
@@ -83,12 +77,21 @@ function PatientInformationScreen(props) {
   };
 
   const retrieveGuardian = async (id) => {
-    const response = await guardianApi.getPatientGuardian(id);
+    const response = await guardianApi.getPatientGuardian(id, false);
     if (!response.ok) {
       console.log('Request failed with status code: ', response.status);
       return;
     }
     setGuardianData(response.data.data);
+  };
+
+  const retrieveDoctorsNote = async (id) => {
+    const response = await doctorNoteApi.getDoctorNote(id);
+    if (!response.ok) {
+      console.log('Request failed with status code: ', response.status);
+      return;
+    }
+    setDoctorNoteData(response.data.data);
   };
 
   // Data used for display, sent to InformationCard
@@ -145,17 +148,29 @@ function PatientInformationScreen(props) {
     },
   ];
 
-  const doctorData = [
-    {
-      label: "Doctor's Notes",
-      value:
-        getDoctorNote.data.data &&
-        getDoctorNote.data.data[0] &&
-        getDoctorNote.data.data[0].doctorRemarks
-          ? getDoctorNote.data.data[0].doctorRemarks
-          : 'Not available',
-    },
-  ];
+  useEffect(() => {
+    if (doctorsNoteData !== null && Object.keys(doctorsNoteData).length>0) {
+      var lastItem = doctorsNoteData.pop();
+      setDoctorNoteInfo([
+        {
+          label: "Date",
+          value: lastItem.date || 'Not Available',
+        },
+        {
+          label: "Doctor's Name",
+          value: lastItem.doctorName || 'Not Available',
+        },
+        {
+          label: "Doctor's ID",
+          value: lastItem.doctorId || 'Not Available',
+        },
+        {
+          label: "Doctor's Remarks",
+          value: lastItem.doctorRemarks || 'Not Available',
+        },
+      ]);
+    }
+  }, [doctorsNoteData]);
 
   useEffect(() => {
     if (Object.keys(guardianData).length>0) {
@@ -315,7 +330,7 @@ function PatientInformationScreen(props) {
     retrievePatient(patientID);
     retrieveSocialHistory(patientID);
     retrieveGuardian(patientID);
-    getDoctorNote.request(patientID);
+    retrieveDoctorsNote(patientID);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -330,38 +345,38 @@ function PatientInformationScreen(props) {
     if(guardianData !== undefined){
       setIsGuardianLoading(false);
     }
-    if(isPatientLoading === false && isSocialHistoryLoading === false && isGuardianLoading === false){
+    if(doctorsNoteData !== undefined){
+      setIsDoctorsNoteLoading(false);
+    }
+    if(isPatientLoading === false && isSocialHistoryLoading === false && isGuardianLoading === false && isDoctorsNoteLoading === false ){
       setIsLoading(false);
     }
-  }, [patientProfile, isPatientLoading, socialHistoryData, isSocialHistoryLoading, guardianData, isGuardianLoading]);
+  }, [patientProfile, isPatientLoading, socialHistoryData, isSocialHistoryLoading, 
+    guardianData, isGuardianLoading, doctorsNoteData, isDoctorsNoteLoading]);
 
   // This callback function will be executed when the screen comes into focus - Russell
   useEffect(() => {
     const navListener = navigation.addListener('focus', () => {
+      setPatientProfile({});
+      setSocialHistoryData([]);
+      setSocialHistoryInfo([]);
       setGuardianData([]);
       setGuardianInfoData([]);
       setSecondGuardianInfoData([]);
-      setSocialHistoryData([]);
-      setSocialHistoryInfo([]);
-      setPatientProfile({});
+      setDoctorNoteData([]);
+      setDoctorNoteInfo([]);
       setIsLoading(true);
       setIsPatientLoading(true);
       setIsSocialHistoryLoading(true);
       setIsGuardianLoading(true);
+      setIsDoctorsNoteLoading(true);
       retrievePatient(patientID, true)
       retrieveSocialHistory(patientID);
       retrieveGuardian(patientID);
+      retrieveDoctorsNote(patientID);
     });
     return navListener;
   }, [navigation]);
-
-  
-  // Purpose: Handle API error if fetch fails
-  const handleError = () => {
-    if (getDoctorNote.error) {
-      getDoctorNote.request(patientID);
-    }
-  };
 
   // Handling of InformationCard editing button onPress
   const handlePatientInfoOnPress = () => {
@@ -400,49 +415,10 @@ function PatientInformationScreen(props) {
     })
   };
 
-  return getDoctorNote.loading || isLoading ? (
+  return isLoading ? (
     <ActivityIndicator visible />
   ) : (
     <Center minH="100%" backgroundColor={colors.white_var1}>
-      {/* Note the immediate bunch of code will only be rendered
-      when one of the APIs has an error. Purpose: Error handling of API */}
-      {(getDoctorNote.error) && (
-        <Box h="100%">
-          <Alert w="100%" status="error">
-            <VStack space={2} flexShrink={1} w="100%">
-              <HStack
-                flexShrink={1}
-                space={2}
-                justifyContent="space-between"
-              >
-                <HStack space={2} flexShrink={1}>
-                  <Alert.Icon mt="1" />
-                  <Text fontSize="md" color="coolGray.800">
-                    Unable to retrieve api data. Try again? Or Relogin
-                  </Text>
-                </HStack>
-                <IconButton
-                  variant="unstyled"
-                  _focus={{
-                    borderWidth: 0,
-                  }}
-                  icon={<CloseIcon size="3" />}
-                  _icon={{
-                    color: 'coolGray.600',
-                  }}
-                />
-              </HStack>
-            </VStack>
-          </Alert>
-          <Box position="fixed" my="50%" w="60%" mx="auto">
-            <AppButton
-              title="Try Again"
-              color="red"
-              onPress={handleError}
-            />
-          </Box>
-        </Box>
-      )}
       <ScrollView>
         <Box>
           <AspectRatio w="100%" ratio={16 / 9}>
@@ -487,7 +463,7 @@ function PatientInformationScreen(props) {
 
             <InformationCard
               title={"Doctor's Notes"}
-              displayData={doctorData}
+              displayData={doctorsNoteInfo}
             />
             <Divider />
 

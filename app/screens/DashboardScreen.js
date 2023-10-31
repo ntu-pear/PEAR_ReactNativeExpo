@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import {
   Avatar,
   Box,
@@ -18,6 +18,7 @@ import colors from 'app/config/colors';
 // import ProfileNameButton from 'app/components/ProfileNameButton';
 // import routes from 'app/navigation/routes';
 import DateInputField from 'app/components/DateInputField';
+// import MessageDisplayCard from 'app/components/MessageDisplayCard';
 
 function DashboardScreen({
   selectedDate,
@@ -27,7 +28,7 @@ function DashboardScreen({
   isLoading,
   handlePullToRefresh,
   noDataMessage,
-  navigation,
+  // navigation,
 }) {
   const handlePreviousDate = () => {
     const previous = new Date(selectedDate.getTime());
@@ -43,7 +44,10 @@ function DashboardScreen({
 
   return (
     // prevent tab bar covering the schedule list
-    <View style={globalStyles.mainContentContainer}>
+    <View
+      style={globalStyles.mainContentContainer}
+      // {...panResponder.panHandlers}
+    >
       {/* < Day MM dd YYYY > */}
       <Stack
         direction="row"
@@ -87,13 +91,22 @@ function DashboardScreen({
         onRefresh={handlePullToRefresh}
         refreshing={isLoading}
         ListEmptyComponent={noDataMessage}
+        // eslint-disable-next-line react/no-unstable-nested-components
+        // ListEmptyComponent={() => (
+        //   <MessageDisplayCard
+        //     TextMessage={
+        //       noDataMessage ? noDataMessage : 'No schedules found today'
+        //     }
+        //     topPaddingSize={'42%'}
+        //   />
+        // )}
         data={filteredActivityData}
         renderItem={({ item }) => (
           <Box style={styles.rowBox}>
             <HStack justifyContent="space-between">
               <Container style={styles.patientContainer}>
                 <Avatar
-                  size={Platform.OS === 'web' ? '90px' : '60px'}
+                  size={'60px'}
                   source={{
                     uri: item.patientImage,
                   }}
@@ -142,13 +155,13 @@ const styles = StyleSheet.create({
   patientName: {
     textAlign: 'center',
     fontWeight: 'bold',
-    fontSize: Platform.OS === 'web' ? 18 : 12,
+    fontSize: 12,
     color: colors.black_var1,
-    width: Platform.OS === 'web' ? 150 : 90,
+    width: 90,
   },
   patientContainer: {
-    width: Platform.OS === 'web' ? 130 : 30,
-    height: Platform.OS === 'web' ? 60 : 30,
+    width: 30,
+    height: 30,
     justifyContent: 'center',
     margin: 25,
     paddingTop: 6,

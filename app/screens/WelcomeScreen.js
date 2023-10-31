@@ -35,9 +35,6 @@ import InputFieldCommon from 'app/components/InputFieldCommon';
 
 
 function WelcomeScreen(props) {
-  /*
-   * All States To Be Placed Here
-   */
   const authContext = useContext(AuthContext);
   const [role, setRole] = useState('Supervisor');
   const [show, setShow] = useState(false);
@@ -64,17 +61,10 @@ function WelcomeScreen(props) {
    */
   const { navigation } = props;
 
-  /*
-   * All Functions To Be Placed Here
-   */
   const onPressLogin = async () => {
-    // "Supervisor!23"
-    console.log('Logging in!\n');
+    console.log('Starting login process...\n');
     setIsLoading(true);
     const result = await userApi.loginUser(email, role, password);
-    // console.log('logging in!');
-    console.log(result);
-    // userLoginApi.request(email, role, password);
     // if returned array is empty or error
     if (!result.ok) {
       console.log('Authentication error');
@@ -82,21 +72,22 @@ function WelcomeScreen(props) {
       setLoginFailed(true);
       return;
     }
-    console.log('Storing token');
+    console.log('Authenticated...');
+    console.log('Storing token...');
     const user = jwt_decode(result.data.data.accessToken);
-    console.log('user = ' + user);
-    authContext.setUser(user);
     await authStorage.storeToken('userAuthToken', result.data.data.accessToken);
     await authStorage.storeToken(
       'userRefreshToken',
       result.data.data.refreshToken,
     );
     // set api header if empty
-    console.log('Tokens stored');
-    apiHandlerHook.setHeaderIfEmpty();
+    console.log('Tokens stored and setting header...');
+    apiHandlerHook.setHeader();
+    console.log('Header updated...');
     setIsLoading(false);
     setLoginFailed(false);
-    console.log('Authenticated');
+    console.log('Logging in!');
+    authContext.setUser(user);
   };
 
   const handleEmail = (e) => {

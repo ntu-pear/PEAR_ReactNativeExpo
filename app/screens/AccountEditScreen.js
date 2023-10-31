@@ -28,7 +28,7 @@ import AppButton from 'app/components/AppButton';
 
 function AccountEditScreen(props) {
   const [isLoading, setIsLoading] = useState(false);
-  const { navigation, userData } = props.route.params;
+  const { navigation, userData, unMaskedUserNRIC } = props.route.params;
   const [profilePicture, setProfilePicture] = useState(props.route.params.profilePicture);
 
   // error state for component
@@ -196,6 +196,7 @@ function AccountEditScreen(props) {
 
                 <InformationCard
                   displayData={userData}
+                  unMaskedNRIC={unMaskedUserNRIC}
                 />
 
                 <Text style={styles.redText}>

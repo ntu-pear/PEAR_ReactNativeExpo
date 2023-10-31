@@ -21,9 +21,10 @@ const userChangePassword = `${endpoint}/ChangePassword`;
 
 // **********************  GET REQUESTS *************************
 
-const getUser = async (userID) => {
+const getUser = async (userID, maskNRIC = true) => {
   const params = {
     userID: userID,
+    maskNRIC,
   };
   return client.get(endpoint, params);
 };

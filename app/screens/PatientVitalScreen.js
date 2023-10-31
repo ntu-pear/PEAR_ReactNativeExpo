@@ -42,6 +42,7 @@ function PatientVitalScreen(props) {
       "Notes": vitalRemarks,
     }));
     setTableDataFormated(newArray);
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -52,7 +53,6 @@ function PatientVitalScreen(props) {
         return Object.values(item).map((value) => value.toString());
       });
       setRowData(finalArray);
-      setIsLoading(false);
     }
   }, [tableDataFormated]);
 

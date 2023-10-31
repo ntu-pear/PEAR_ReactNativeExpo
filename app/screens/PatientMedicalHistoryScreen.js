@@ -37,6 +37,7 @@ function PatientMedicalHistoryScreen(props) {
       "Remarks": medicalRemarks,
     }));
     setTableDataFormated(newArray);
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -47,7 +48,6 @@ function PatientMedicalHistoryScreen(props) {
         return Object.values(item).map((value) => value.toString());
       });
       setRowData(finalArray);
-      setIsLoading(false);
     }
   }, [tableDataFormated]);
 

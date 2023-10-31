@@ -30,6 +30,7 @@ function PatientProblemLog(props) {
       "Remarks": problemLogRemarks,
     }));
     setTableDataFormated(newArray);
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -40,7 +41,6 @@ function PatientProblemLog(props) {
         return Object.values(item).map((value) => value.toString());
       });
       setRowData(finalArray);
-      setIsLoading(false);
     }
   }, [tableDataFormated]);
 

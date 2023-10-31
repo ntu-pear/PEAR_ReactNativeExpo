@@ -28,18 +28,23 @@ function PatientRoutineScreen(props) {
       return;
     }
 
-    const newArray = response.data.data.map(({ 
-      startDate, endDate, activityTitle, activityDesc, routineIssues, includeInSchedule
-    }) => ({
-      "Date": `${formatDateTime(startDate, true)}`,
-      "Start Time": `${formatDateTime(startDate, false)}`,
-      "End Time": `${formatDateTime(endDate, false)}`,
-      "Activity Title": activityTitle,
-      "Activity Description": activityDesc,
-      "Routine Issues": routineIssues,
-      "Was Scheduled": includeInSchedule ? 'Yes' : 'No',
-    }));
-    setTableDataFormated(newArray);
+    if (response.data.data !== null){
+      const newArray = response.data.data.map(({ 
+        startDate, endDate, activityTitle, activityDesc, routineIssues, includeInSchedule
+      }) => ({
+        "Date": `${formatDateTime(startDate, true)}`,
+        "Start Time": `${formatDateTime(startDate, false)}`,
+        "End Time": `${formatDateTime(endDate, false)}`,
+        "Activity Title": activityTitle,
+        "Activity Description": activityDesc,
+        "Routine Issues": routineIssues,
+        "Was Scheduled": includeInSchedule ? 'Yes' : 'No',
+      }));
+      setTableDataFormated(newArray);
+    } else {
+      setTableDataFormated([]);
+    }
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -50,7 +55,6 @@ function PatientRoutineScreen(props) {
         return Object.values(item).map((value) => value.toString());
       });
       setRowData(finalArray);
-      setIsLoading(false);
     }
   }, [tableDataFormated]);
 
