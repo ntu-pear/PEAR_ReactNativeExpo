@@ -13,16 +13,11 @@ import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 import guardianApi from 'app/api/guardian';
 
 // Components
-import NameInputField from 'app/components/NameInputField';
-import NRICInputField from 'app/components/NRICInputField';
 import SelectionInputField from 'app/components/SelectionInputField';
-import TelephoneInputField from 'app/components/TelephoneInputField';
-import SingleOptionCheckBox from 'app/components/SingleOptionCheckBox';
-import EmailInputField from 'app/components/EmailInputField';
-import CommonInputField from 'app/components/CommonInputField';
 import DateInputField from 'app/components/DateInputField';
 import AppButton from 'app/components/AppButton';
 import ActivityIndicator from 'app/components/ActivityIndicator';
+import InputFieldCommon from 'app/components/InputFieldCommon';
 
 function EditPatientGuardianScreen(props) {
   const { navigation, guardianProfile } = props.route.params;
@@ -267,30 +262,34 @@ function EditPatientGuardianScreen(props) {
         <Box alignItems="center">
           <Box w="100%">
             <VStack>
-              <View style={styles.formContainer}>
-                <NameInputField
+              <View style={styles.formContainer}>                
+                <InputFieldCommon
                   isRequired
+                  autoCapitalize="words"
                   title={'Guardian First Name'}
                   value={formData['FirstName']}
                   onChangeText={handleFormData('FirstName')}
                   onChildData={handleFirstNameState}
+                  validation="name"
                 />
 
-                <NameInputField
+                <InputFieldCommon
                   isRequired
+                  autoCapitalize="words"
                   title={'Guardian Last Name'}
                   value={formData['LastName']}
                   onChangeText={handleFormData('LastName')}
                   onChildData={handleLastNameState}
+                  validation="name"
                 />
 
-                <NRICInputField
+                <InputFieldCommon
                   isRequired
                   title={'Guardian NRIC'}
                   value={formData['NRIC']}
                   onChangeText={handleFormData('NRIC')}
                   onChildData={handleNRICState}
-                  maxLength={9}
+                  validation="nric"
                 />
 
                 <SelectionInputField
@@ -302,16 +301,16 @@ function EditPatientGuardianScreen(props) {
                   dataArray={listOfRelationships}
                   onChildData={handleRelationState}
                 />
-
-                <TelephoneInputField
+                
+                <InputFieldCommon
                   isRequired
+                  validation={'mobile phone'}
+                  keyboardType={'numeric'}
                   title={"Guardian's Handphone No."}
                   value={formData['ContactNo']}
                   onChangeText={handleFormData('ContactNo')}
                   onChildData={handlePhoneState}
-                  maxLength={8}
                 />
-
                 <View style={styles.dateSelectionContainer}>
                   <DateInputField
                     isRequired
@@ -323,7 +322,7 @@ function EditPatientGuardianScreen(props) {
                   />
                 </View>
 
-                <CommonInputField
+                <InputFieldCommon
                   isRequired
                   title={'Address'}
                   value={formData['Address']}
@@ -331,27 +330,19 @@ function EditPatientGuardianScreen(props) {
                   onChildData={handleAddrState}
                 />
 
-                <CommonInputField
+                <InputFieldCommon
                   title={'Temporary Address (optional)'}
                   value={formData['TempAddress']}
                   onChangeText={handleFormData('TempAddress')}
                   onChildData={handleTempAddrState}
                 />
 
-                {
-                  //<SingleOptionCheckBox
-                  //  title={'Check this box to specify Guardian wants to log in'}
-                  //  value={(formData['isActive'] !== undefined && formData['isActive'])}
-                  //  onChangeData={handleFormData('isActive')}
-                  ///>
-                }
-                
-
-                <EmailInputField
+                <InputFieldCommon
                   title={'Guardian Email'}
                   value={formData['Email']}
                   onChangeText={handleFormData('Email')}
                   onChildData={handleEmailState}
+                  validaition="email"
                 />
               </View>
               <View style={styles.saveButtonContainer}>

@@ -13,10 +13,10 @@ import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 import patientApi from 'app/api/patient';
 
 //Components
-import CommonInputField from 'app/components/CommonInputField';
 import AppButton from 'app/components/AppButton';
 import SelectionInputField from 'app/components/SelectionInputField';
 import ActivityIndicator from 'app/components/ActivityIndicator';
+import InputFieldCommon from 'app/components/InputFieldCommon';
 
 function EditPatientPreferencesScreen(props) {
   const { navigation, patientProfile } = props.route.params;
@@ -182,8 +182,9 @@ function EditPatientPreferencesScreen(props) {
           <Box w="100%">
             <VStack>
               <View style={styles.formContainer}>
-                <CommonInputField
+                <InputFieldCommon
                   isRequired
+                  validation="name"
                   title={'Preferred name'}
                   value={formData['PreferredName']}
                   onChangeText={handleFormData('PreferredName')}

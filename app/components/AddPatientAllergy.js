@@ -11,7 +11,6 @@ import typography from 'app/config/typography';
 import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
 // Components
-import CommonInputField from 'app/components/CommonInputField';
 import SelectionInputField from 'app/components/SelectionInputField';
 import LoadingWheel from 'app/components/LoadingWheel';
 import InputFieldCommon from './InputFieldCommon';

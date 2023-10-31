@@ -13,9 +13,8 @@ import patientApi from 'app/api/patient';
 //Components
 import RadioButtonInput from 'app/components/RadioButtonsInput';
 import DateInputField from 'app/components/DateInputField';
-import CommonInputField from 'app/components/CommonInputField';
-import TelephoneInputField from 'app/components/TelephoneInputField';
 import AppButton from 'app/components/AppButton';
+import InputFieldCommon from 'app/components/InputFieldCommon';
 
 function EditPatientInfoScreen(props) {
   const { navigation, patientProfile } = props.route.params;
@@ -233,24 +232,26 @@ function EditPatientInfoScreen(props) {
         <Box alignItems="center">
           <Box w="100%">
             <VStack>
-              <View style={styles.formContainer}>
-                <TelephoneInputField
+              <View style={styles.formContainer}>                
+                <InputFieldCommon
                   title={'Home Number'}
                   value={formData['HomeNo']}
-                  numberType={'home'}
+                  validation={'home phone'}
+                  keyboardType={'numeric'}
                   onChangeText={handleFormData('HomeNo')}
                   onChildData={handleHomeNumberState}
                 />
 
-                <TelephoneInputField
+                <InputFieldCommon
                   title={'Mobile Number'}
                   value={formData['HandphoneNo']}
-                  numberType={'mobile'}
+                  validation={'mobile phone'}
+                  keyboardType={'numeric'}
                   onChangeText={handleFormData('HandphoneNo')}
                   onChildData={handleMobileNumberState}
                 />
-                
-                <CommonInputField
+
+                <InputFieldCommon
                   isRequired
                   title={'Address'}
                   value={formData['Address']}
@@ -258,7 +259,7 @@ function EditPatientInfoScreen(props) {
                   onChildData={handleAddrState}
                 />
 
-                <CommonInputField
+                <InputFieldCommon
                   title={'Temporary Address'}
                   value={formData['TempAddress']}
                   onChangeText={handleFormData('TempAddress')}

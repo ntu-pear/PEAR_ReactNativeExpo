@@ -21,10 +21,6 @@ import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 // Components
 import AddPatientProgress from 'app/components/AddPatientProgress';
 import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
-import NameInputField from 'app/components/NameInputField';
-import NRICInputField from 'app/components/NRICInputField';
-import CommonInputField from 'app/components/CommonInputField';
-import TelephoneInputField from 'app/components/TelephoneInputField';
 import DateInputField from 'app/components/DateInputField';
 import SelectionInputField from 'app/components/SelectionInputField';
 import RadioButtonInput from 'app/components/RadioButtonsInput';
