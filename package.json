@@ -62,7 +62,7 @@
     "nice-try": "^3.0.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-native": "0.71.8",
+    "react-native": "0.71.14",
     "react-native-autocomplete-dropdown": "^2.1.0",
     "react-native-calendar-picker": "^7.1.4",
     "react-native-dropdown-picker": "^5.4.3",

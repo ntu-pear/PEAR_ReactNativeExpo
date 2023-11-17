@@ -257,7 +257,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
             onChildData={handlePhoneState}
             keyboardType={'numeric'}
             maxLength={8}
-            validation={'home phone'}
+            validation={'mobile phone'}
           />
 
           <InputFieldCommon
