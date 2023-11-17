@@ -85,6 +85,8 @@ function PatientAddScreen() {
         DOB: maximumDOB,
         Address: '',
         TempAddress: '',
+        Gender: 'M',
+        PreferredName: '',
       },
     ],
 

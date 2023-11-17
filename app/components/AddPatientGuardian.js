@@ -20,6 +20,7 @@ import EmailInputField from 'app/components/EmailInputField';
 import LoadingWheel from 'app/components/LoadingWheel';
 import CommonInputField from 'app/components/CommonInputField';
 import DateInputField from 'app/components/DateInputField';
+import RadioButtonInput from 'app/components/RadioButtonsInput';
 
 function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
   const { data, isError, isLoading } = useGetSelectionOptions('Relationship');
@@ -45,10 +46,16 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
     { value: 12, label: 'Grandparent' },
   ]);
 
+  const listOfGenders = [
+    { label: 'Male', value: 'M' },
+    { label: 'Female', value: 'F' },
+  ];
+
   const [isInputErrors, setIsInputErrors] = useState(false);
 
   const [isFirstNameError, setIsFirstNameError] = useState(false);
   const [isLastNameError, setIsLastNameError] = useState(false);
+  const [isPrefNameError, setIsPrefNameError] = useState(false);
   const [isNRICError, setIsNRICError] = useState(false);
   const [isRelationError, setIsRelationError] = useState(false);
   const [isPhoneError, setIsPhoneError] = useState(false);
@@ -57,6 +64,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
   const [isTempAddrError, setIsTempAddrError] = useState(false);
   const [isAddrError, setIsAddrError] = useState(false);
   const [isDOBError, setIsDOBError] = useState(false);
+  const [isGenderError, setIsGenderError] = useState(false);
 
   const handleFirstNameState = useCallback(
     (state) => {
@@ -73,6 +81,14 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [isLastNameError],
+  );
+  const handlePrefNameState = useCallback(
+    (state) => {
+      setIsPrefNameError(state);
+      // console.log('LastName: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isPrefNameError],
   );
   const handleNRICState = useCallback(
     (state) => {
@@ -134,6 +150,15 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
     [isDOBError],
   );
 
+  const handleGenderState = useCallback(
+    (state) => {
+      setIsGenderError(state);
+      // console.log('LastName: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isGenderError],
+  );
+
   useEffect(() => {
     setIsInputErrors(
       isFirstNameError ||
@@ -145,9 +170,10 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
         isLoginError ||
         isTempAddrError ||
         isAddrError ||
-        isDOBError,
+        isDOBError ||
+        isGenderError ||
+        isPrefNameError,
     );
-    // console.log(isInputErrors);
     onError(i, isInputErrors);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -162,6 +188,8 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
     isAddrError,
     isTempAddrError,
     isDOBError,
+    isPrefNameError,
+    isGenderError,
   ]);
   // To ensure that when the is guardian login required checkbox is checked, guardian email
   // must be filled before continuing. Done by verifying if guardian.Email is empty or not.
@@ -219,6 +247,14 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
             onChildData={handleLastNameState}
           />
 
+          <NameInputField
+            isRequired
+            title={'Guardian Preferred Name'}
+            value={guardian.PreferredName}
+            onChangeText={handleFormData(page, 'PreferredName', i)}
+            onChildData={handlePrefNameState}
+          />
+
           <NRICInputField
             isRequired
             title={'Guardian NRIC'}
@@ -226,6 +262,15 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
             onChangeText={handleFormData(page, 'NRIC', i)}
             onChildData={handleNRICState}
             maxLength={9}
+          />
+
+          <RadioButtonInput
+            isRequired
+            title={'Guardian Gender'}
+            value={guardian.Gender}
+            onChangeData={handleFormData(page, 'Gender', i)}
+            onChildData={handleGenderState}
+            dataArray={listOfGenders}
           />
 
           <View style={styles.dateSelectionContainer}>

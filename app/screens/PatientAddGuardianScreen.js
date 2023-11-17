@@ -59,6 +59,8 @@ function PatientAddGuardianScreen(props) {
       DOB: maximumDOB,
       Address: '',
       TempAddress: '',
+      Gender: 'M',
+      PreferredName: '',
     });
   };
 
