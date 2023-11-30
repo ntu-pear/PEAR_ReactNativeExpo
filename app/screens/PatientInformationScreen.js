@@ -186,8 +186,16 @@ function PatientInformationScreen(props) {
           value: guardianData.guardian.lastName || 'Not Available',
         },
         {
+          label: 'Preferred Name',
+          value: guardianData.guardian.preferredName || 'Not Available',
+        },
+        {
           label: 'NRIC',
           value: guardianData.guardian.nric.replace(/\d{4}(\d{3})/, 'xxxx$1') || 'Not Available',
+        },
+        {
+          label: 'Gender',
+          value: guardianData.guardian.gender || 'Not Available',
         },
         {
           label: 'Email',
@@ -235,8 +243,16 @@ function PatientInformationScreen(props) {
           value: guardianData.additionalGuardian.lastName || 'Not Available',
         },
         {
+          label: 'Preferred Name',
+          value: guardianData.additionalGuardian.preferredName || 'Not Available',
+        },
+        {
           label: 'NRIC',
           value: guardianData.additionalGuardian.nric.replace(/\d{4}(\d{3})/, 'xxxx$1') || 'Not Available',
+        },
+        {
+          label: 'Gender',
+          value: guardianData.additionalGuardian.gender || 'Not Available',
         },
         {
           label: 'Email',

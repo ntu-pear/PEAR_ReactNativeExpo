@@ -23,6 +23,7 @@ import CommonInputField from 'app/components/CommonInputField';
 import DateInputField from 'app/components/DateInputField';
 import AppButton from 'app/components/AppButton';
 import ActivityIndicator from 'app/components/ActivityIndicator';
+import RadioButtonInput from 'app/components/RadioButtonsInput';
 
 function EditPatientGuardianScreen(props) {
   const { navigation, guardianProfile } = props.route.params;
@@ -57,11 +58,18 @@ function EditPatientGuardianScreen(props) {
     { value: 12, label: 'Grandparent' },
   ]);
 
+  const listOfGenders = [
+    { label: 'Male', value: 'M' },
+    { label: 'Female', value: 'F' },
+  ];
+
   const [isInputErrors, setIsInputErrors] = useState(false);
 
   const [isFirstNameError, setIsFirstNameError] = useState(false);
   const [isLastNameError, setIsLastNameError] = useState(false);
+  const [isPrefNameError, setIsPrefNameError] = useState(false);
   const [isNRICError, setIsNRICError] = useState(false);
+  const [isGenderError, setIsGenderError] = useState(false);
   const [isEmailError, setIsEmailError] = useState(false);
   const [isRelationError, setIsRelationError] = useState(false);
   const [isPhoneError, setIsPhoneError] = useState(false);
@@ -86,6 +94,14 @@ function EditPatientGuardianScreen(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [isLastNameError],
   );
+  const handlePrefNameState = useCallback(
+    (state) => {
+      setIsPrefNameError(state);
+      // console.log('LastName: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isPrefNameError],
+  );
   const handleNRICState = useCallback(
     (state) => {
       setIsNRICError(state);
@@ -93,6 +109,14 @@ function EditPatientGuardianScreen(props) {
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [isNRICError],
+  );
+  const handleGenderState = useCallback(
+    (state) => {
+      setIsGenderError(state);
+      // console.log('LastName: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isGenderError],
   );
   const handleEmailState = useCallback(
     (state) => {
@@ -147,7 +171,9 @@ function EditPatientGuardianScreen(props) {
     setIsInputErrors(
       isFirstNameError ||
       isLastNameError ||
+      isPrefNameError ||
       isNRICError ||
+      isGenderError ||
       isEmailError ||
       isPhoneError ||
       isRelationError ||
@@ -160,7 +186,9 @@ function EditPatientGuardianScreen(props) {
   }, [
     isFirstNameError,
     isLastNameError,
+    isPrefNameError,
     isNRICError,
+    isGenderError,
     isEmailError,
     isPhoneError,
     isRelationError,
@@ -175,7 +203,9 @@ function EditPatientGuardianScreen(props) {
     GuardianID: guardianProfile.guardianID,
     FirstName: guardianProfile.firstName,
     LastName: guardianProfile.lastName,
+    PreferredName: guardianProfile.preferredName,
     NRIC: guardianProfile.nric,
+    Gender: guardianProfile.gender,
     Email: guardianProfile.email ? guardianProfile.email : "",
     RelationshipID: guardianProfile.relationshipID,
     isActive: guardianProfile.isActive,
@@ -284,6 +314,14 @@ function EditPatientGuardianScreen(props) {
                   onChildData={handleLastNameState}
                 />
 
+                <NameInputField
+                  isRequired
+                  title={'Guardian Preferred Name'}
+                  value={formData['PreferredName']}
+                  onChangeText={handleFormData('PreferredName')}
+                  onChildData={handlePrefNameState}
+                />
+
                 <NRICInputField
                   isRequired
                   title={'Guardian NRIC'}
@@ -291,6 +329,15 @@ function EditPatientGuardianScreen(props) {
                   onChangeText={handleFormData('NRIC')}
                   onChildData={handleNRICState}
                   maxLength={9}
+                />
+
+                <RadioButtonInput
+                  isRequired
+                  title={'Guardian Gender'}
+                  value={formData['Gender']}
+                  onChangeData={handleFormData('Gender')}
+                  onChildData={handleGenderState}
+                  dataArray={listOfGenders}
                 />
 
                 <SelectionInputField

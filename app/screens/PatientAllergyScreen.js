@@ -6,6 +6,9 @@ import { View } from 'native-base';
 // API
 import patientApi from 'app/api/patient';
 
+// Hooks
+import formatDateTime from 'app/hooks/useFormatDateTime.js';
+
 // Components
 import DynamicTable from 'app/components/DynamicTable';
 import ActivityIndicator from 'app/components/ActivityIndicator';
@@ -25,7 +28,9 @@ function PatientAllergyScreen(props) {
       return;
     }
     
-    const newArray = response.data.data.map(({ allergyListDesc, allergyReaction, allergyRemarks }) => ({
+    const newArray = response.data.data.map(({ createdDate, allergyListDesc, allergyReaction, allergyRemarks }) => ({
+      "Date": `${formatDateTime(createdDate, true)}`,
+      "Time": `${formatDateTime(createdDate, false)}`,
       "Allergic To": allergyListDesc,
       "Reaction": allergyReaction,
       "Notes": allergyRemarks,
@@ -47,7 +52,7 @@ function PatientAllergyScreen(props) {
 
   useEffect(() => {
     retrieveScreenData(patientID);
-    setWidthData([120, 200, 300]);
+    setWidthData([120, 100, 120, 200, 300]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

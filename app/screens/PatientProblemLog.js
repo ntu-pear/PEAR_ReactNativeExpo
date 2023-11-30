@@ -6,6 +6,9 @@ import { View } from 'native-base';
 // API
 import patientApi from 'app/api/patient';
 
+// Hooks
+import formatDateTime from 'app/hooks/useFormatDateTime.js';
+
 // Components
 import DynamicTable from 'app/components/DynamicTable';
 import ActivityIndicator from 'app/components/ActivityIndicator';
@@ -24,7 +27,9 @@ function PatientProblemLog(props) {
       console.log('Request failed with status code: ', response.status);
       return;
     }
-    const newArray = response.data.data.map(({ authorName, problemLogListDesc, problemLogRemarks }) => ({
+    const newArray = response.data.data.map(({ createdDateTime, authorName, problemLogListDesc, problemLogRemarks }) => ({
+      "Date": `${formatDateTime(createdDateTime, true)}`,
+      "Time": `${formatDateTime(createdDateTime, false)}`,
       "Author": authorName,
       "Description": problemLogListDesc,
       "Remarks": problemLogRemarks,
@@ -46,7 +51,7 @@ function PatientProblemLog(props) {
 
   useEffect(() => {
     retrieveScreenData(patientID);
-    setWidthData([120, 200, 300]);
+    setWidthData([120, 100, 120, 200, 300]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

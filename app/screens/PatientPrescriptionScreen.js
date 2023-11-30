@@ -28,8 +28,11 @@ function PatientPrescriptionScreen(props) {
       return;
     }
     const newArray = response.data.data.map(({
-      prescriptionListDesc, dosage, frequencyPerDay, instruction, startDate, endDate, afterMeal, prescriptionRemarks, isChronic
+      date, prescriptionListDesc, dosage, frequencyPerDay, instruction, startDate, endDate, 
+      afterMeal, prescriptionRemarks, isChronic
     }) => ({
+      "Date": `${formatDateTime(date, true)}`,
+      "Time": `${formatDateTime(date, false)}`,
       "Drug Name": prescriptionListDesc,
       "Dosage": dosage,
       "Frequency Per Day": frequencyPerDay,
@@ -57,7 +60,7 @@ function PatientPrescriptionScreen(props) {
 
   useEffect(() => {
     retrieveScreenData(patientID);
-    setWidthData([130, 100, 200, 300, 120, 120, 120, 300, 100]);
+    setWidthData([120, 100, 130, 100, 200, 300, 120, 120, 120, 300, 100]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
