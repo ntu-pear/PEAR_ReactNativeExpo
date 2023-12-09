@@ -1,4 +1,4 @@
-package com.fyppear.PEAR_ReactNativeExpo.newarchitecture;
+package com.fyppear.PEARReactNativeExpo.newarchitecture;
 
 import android.app.Application;
 import androidx.annotation.NonNull;
@@ -19,9 +19,9 @@ import com.facebook.react.fabric.CoreComponentsRegistry;
 import com.facebook.react.fabric.EmptyReactNativeConfig;
 import com.facebook.react.fabric.FabricJSIModuleProvider;
 import com.facebook.react.uimanager.ViewManagerRegistry;
-import com.fyppear.PEAR_ReactNativeExpo.BuildConfig;
-import com.fyppear.PEAR_ReactNativeExpo.newarchitecture.components.MainComponentsRegistry;
-import com.fyppear.PEAR_ReactNativeExpo.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
+import com.fyppear.PEARReactNativeExpo.BuildConfig;
+import com.fyppear.PEARReactNativeExpo.newarchitecture.components.MainComponentsRegistry;
+import com.fyppear.PEARReactNativeExpo.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
 import java.util.ArrayList;
 import java.util.List;
 

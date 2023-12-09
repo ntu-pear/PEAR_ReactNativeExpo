@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "PEAR_ReactNativeExpo",
-    "slug": "PEAR_ReactNativeExpo",
+    "name": "PEARReactNativeExpo",
+    "slug": "PEARReactNativeExpo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./app/assets/icon.png",
@@ -23,7 +23,7 @@
         "foregroundImage": "./app/assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.fyppear.PEAR_ReactNativeExpo"
+      "package": "com.fyppear.PEARReactNativeExpo"
     },
     "web": {
       "favicon": "app/assets/favicon.png"

@@ -1,4 +1,4 @@
-package com.fyppear.PEAR_ReactNativeExpo;
+package com.fyppear.PEARReactNativeExpo;
 
 import android.os.Build;
 import android.os.Bundle;

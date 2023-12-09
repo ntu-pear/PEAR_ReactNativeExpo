@@ -14,7 +14,7 @@ class MainApplicationTurboModuleManagerDelegate
  public:
   // Adapt it to the package you used for your Java class.
   static constexpr auto kJavaDescriptor =
-      "Lcom/fyppear/PEAR_ReactNativeExpo/newarchitecture/modules/MainApplicationTurboModuleManagerDelegate;";
+      "Lcom/fyppear/PEARReactNativeExpo/newarchitecture/modules/MainApplicationTurboModuleManagerDelegate;";
 
   static jni::local_ref<jhybriddata> initHybrid(jni::alias_ref<jhybridobject>);
 

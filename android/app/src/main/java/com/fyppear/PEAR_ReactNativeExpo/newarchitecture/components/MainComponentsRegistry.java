@@ -1,4 +1,4 @@
-package com.fyppear.PEAR_ReactNativeExpo.newarchitecture.components;
+package com.fyppear.PEARReactNativeExpo.newarchitecture.components;
 
 import com.facebook.jni.HybridData;
 import com.facebook.proguard.annotations.DoNotStrip;

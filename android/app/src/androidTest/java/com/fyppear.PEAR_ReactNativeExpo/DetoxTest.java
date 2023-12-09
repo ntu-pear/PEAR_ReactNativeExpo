@@ -1,4 +1,4 @@
-package com.fyppear.PEAR_ReactNativeExpo; // (1)
+package com.fyppear.PEARReactNativeExpo; // (1)
 
 import com.wix.detox.Detox;
 import com.wix.detox.config.DetoxConfig;

@@ -1,4 +1,4 @@
-package com.fyppear.PEAR_ReactNativeExpo.newarchitecture.modules;
+package com.fyppear.PEARReactNativeExpo.newarchitecture.modules;
 
 import com.facebook.jni.HybridData;
 import com.facebook.react.ReactPackage;
