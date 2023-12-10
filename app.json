@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "PEARReactNativeExpo",
-    "slug": "PEARReactNativeExpo",
+    "name": "PEAR_ReactNativeExpo",
+    "slug": "pearreactnativeexpo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./app/assets/icon.png",
