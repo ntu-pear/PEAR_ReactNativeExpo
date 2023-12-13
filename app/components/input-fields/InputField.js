@@ -20,18 +20,18 @@ function InputField({
   isRequired = false,
   hideError = true,
   showTitle = true,
+  autoCapitalize = 'characters',
   title = '',
   value = '',
   onChangeText = () => {},
   InputRightElement = () => {},
   InputLeftElement = () => {},
-  type = 'general',
+  dataType = 'general',
+  type = 'text',
   keyboardType = 'default',
   maxLength = null,
   onChildData = () => {},
-  setErrorState = () => {},
   variant = 'singeLine',
-  style = null,
   color = null,
   borderRadius = null,
 }) { 
@@ -46,7 +46,6 @@ function InputField({
   useEffect(() => {
     onChildData ? onChildData(isFirstRender || errorMsg) : null;
     setIsFirstRender(false);
-    setErrorState(errorMsg);
   }, []);
   
   /* 
@@ -68,27 +67,18 @@ function InputField({
   /* 
   This is used for input validation depending on the type of input data (given by the type prop)
   */
-  const validationFunctions = {
-    'name': [validation.alphaOnly],
-    'nric': [validation.nricFormat],
-    'home phone': [validation.homePhoneNoFormat],
-    'mobile phone': [validation.mobilePhoneNoFormat],
-    'email': [validation.emailFormat],
-  };
-
   const validateInput = () => {
     msg = ''
     if(isRequired) {
       msg = validation.notEmpty(value);
     }
-    if (validationFunctions[type]) {
-      for(const validationFunction of validationFunctions[type]) {
+    const selValidationFunctions = validation.validationFunctions[dataType]
+    if (selValidationFunctions) {
+      for(const validationFunction of selValidationFunctions) {
         msg = msg || validationFunction(value);
       }
     }
-
     setErrorMsg(msg);
-
   }
 
   return (
@@ -106,6 +96,7 @@ function InputField({
           borderColor={
             !errorMsg ? colors.light_gray3 : colors.red
           }
+          autoCapitalize={autoCapitalize}
           textAlignVertical={variant === 'multiLine' ? 'top' : 'center'}
           borderRadius={borderRadius ? borderRadius : "25"}
           height={variant === 'multiLine' ? '150' : '50'}
@@ -118,7 +109,7 @@ function InputField({
           type={type=='password' ? 'password' : 'text'}
           keyboardType={keyboardType}
           maxLength={maxLength}
-          style={[styles.InputField, style]}
+          style={styles.InputField}
         />
         {hideError && !errorMsg ? 
         null : (

@@ -9,6 +9,7 @@ import InputField from './InputField';
 
 function SearchField({
   value = null,
+  autoCapitalize = 'none',
   onChangeText = () => {},
   onPressClear = () => {},
   style = null,
@@ -18,6 +19,7 @@ function SearchField({
     <InputField
       showTitle={false}
       title="Search"
+      autoCapitalize={autoCapitalize}
       value={value}
       onChangeText={onChangeText}
       InputLeftElement={
