@@ -1,7 +1,7 @@
 // Base
 import React, { useState, useEffect } from 'react';
 import { Modal, StyleSheet, Text, Pressable, View } from 'react-native';
-import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
+import { MaterialCommunityIcons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 //Navigation
@@ -13,10 +13,12 @@ import { Platform } from 'react-native';
 
 // Components
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
-import SelectionInputField from 'app/components/SelectionInputField';
+import SelectionInputField from 'app/components/input-fields/SelectionInputField';
 import HighlightsCard from 'app/components/HighlightsCard';
 import { SearchBar } from 'react-native-elements';
-import { FlatList } from 'native-base';
+import { FlatList, Icon } from 'native-base';
+import InputField from './input-fields/InputField';
+import SearchField from './input-fields/SearchField';
 
 function PatientDailyHighlights(props) {
   // Destructure props
@@ -191,31 +193,21 @@ function PatientDailyHighlights(props) {
             />
           </Pressable>
           <View style={styles.searchBarDropDownView}>
-            <View style={styles.searchBarView}>
-              <SearchBar
-                placeholder="Search"
-                lightTheme={true}
-                // round={true}
+            <View style={styles.flex}>
+              <SearchField
                 value={searchValue}
                 onChangeText={setSearchValue}
-                autoCorrect={false}
-                containerStyle={styles.searchBarContainer}
-                inputContainerStyle={{
-                  backgroundColor: colors.white,
-                  borderRadius: 10,
-                }}
-                inputStyle={{ fontSize: Platform.OS === 'web' ? 18 : 14 }}
-                style={styles.searchBar}
+                onPressClear={() => setSearchValue(null)}
               />
             </View>
-            <View style={styles.dropDownView}>
+            <View style={styles.flex}>
               <SelectionInputField
+                showTitle={false}
                 value={filterValue}
                 dataArray={dropdownItems}
                 onDataChange={setFilterValue}
-                placeholderText={'Select Filter'}
+                placeholder={'Select Filter'}
               />
-              {/* Standardized Dropdown component --- Justin */}
             </View>
           </View>
           <FlatList
@@ -247,7 +239,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.1)',
-    // backgroundColor: 'yellow',
   },
   modalView: {
     margin: 20,
@@ -290,39 +281,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     width: '100%',
     zIndex: 1,
+    justifyContent: 'space-between'
   },
-  searchBarView: {
-    flex: 1,
-  },
-  searchBarContainer: {
-    backgroundColor: 'white',
-    borderBottomColor: 'transparent',
-    borderTopColor: 'transparent',
-  },
-  searchBar: {
-    width: '50%',
-    justifyContent: 'flex-start',
-  },
-  dropDownView: {
-    flex: 1,
-    zIndex: 1,
-    marginTop: 5,
-  },
-  dropDown: {
-    justifyContent: 'flex-end',
-    marginTop: 7,
-  },
-  dropDownWeb: {
-    justifyContent: 'flex-end',
-    marginTop: 10,
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 10,
-    borderColor: colors.primary_overlay_color,
-    display: 'flex',
-    flexDirection: 'row',
-    width: '95%',
-  },
+  flex: {
+    flex: 0.49,
+  }, 
 });
 
 export default PatientDailyHighlights;
