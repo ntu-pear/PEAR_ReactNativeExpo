@@ -18,6 +18,7 @@ import RequiredIndicator from '../RequiredIndicator';
 
 function InputField({
   isRequired = false,
+  hideError = true,
   showTitle = true,
   title = '',
   value = '',
@@ -119,7 +120,10 @@ function InputField({
           maxLength={maxLength}
           style={[styles.InputField, style]}
         />
-        <ErrorMessage message={errorMsg}/>        
+        {hideError && !errorMsg ? 
+        null : (
+        <ErrorMessage message={errorMsg}/>
+        )}        
       </VStack>
     </View>
   );
