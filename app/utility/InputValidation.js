@@ -1,5 +1,13 @@
 import errors from "app/config/errors";
 
+export const validationFunctions = {
+  'name': [alphaOnly],
+  'nric': [nricFormat],
+  'home phone': [homePhoneNoFormat],
+  'mobile phone': [mobilePhoneNoFormat],
+  'email': [emailFormat],
+};
+
 export const notEmpty = (value) => {
   if (!value) {
     return errors.notEmptyError;

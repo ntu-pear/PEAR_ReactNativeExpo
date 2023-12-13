@@ -5,14 +5,14 @@ import colors from 'app/config/colors';
 
 function AppButton(props) {
   // Destructure props
-  const { title, onPress, color, isDisabled = false, testingID } = props;
+  const { title, onPress, color, isDisabled = false, testID } = props;
   // replacement of TouchableOpacity with Button to enable isDisabled property - Russell
   return (
     <Button
       style={[styles.button, { backgroundColor: colors[color] }]}
       isDisabled={isDisabled}
       onPress={onPress}
-      testID={testingID}
+      testID={testID}
     >
       <Text style={styles.text}>{title}</Text>
     </Button>
