@@ -147,7 +147,7 @@ function WelcomeScreen(props) {
                 />
                 <Text style={styles.tagLine}>PEAR</Text>
               </View>
-              <View style={[styles.inputContainer, styles.bottomMargin]}>
+              <View style={styles.inputContainer}>
                 <InputField
                   testID="username"
                   isRequired
@@ -165,7 +165,7 @@ function WelcomeScreen(props) {
                   }
                 />
               </View>
-              <View style={[styles.inputContainer, styles.bottomMargin]}>
+              <View style={styles.inputContainer}>
                 <SelectionInputField
                   isRequired
                   showTitle={false}
@@ -227,14 +227,16 @@ function WelcomeScreen(props) {
                     )}
               </View>
               <Box>
+                {isLoginError ? (
                 <ErrorMessage
                   message={isLoginError ? errors.loginError: ''}
                   testID={'loginError'}
                   />
+                ) : null }
               </Box>
               <View>
                 <Text
-                  style={styles.underline}
+                  style={styles.forgotPassword}
                   onPress={() => navigation.navigate(routes.RESET_PASSWORD)}
                   >
                   Forgot Password?
@@ -293,17 +295,16 @@ const styles = StyleSheet.create({
     fontSize: 40,
     color: colors.black,
   },
-  underline: {
+  forgotPassword: {
     textDecorationLine: 'underline',
-    alignSelf: 'center'
+    alignSelf: 'center',
+    marginTop: "3%"
   },
   inputContainer: {
     display: 'flex',
     width: '100%',
     justifyContent: 'flex-start',
-  },
-  bottomMargin: {
-    marginBottom: '0.5%'
+    marginBottom: '3%'
   }
 });
 
