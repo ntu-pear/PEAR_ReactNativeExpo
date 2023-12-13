@@ -104,7 +104,7 @@ function InputField({
           }
           textAlignVertical={variant === 'multiLine' ? 'top' : 'center'}
           borderRadius="25"
-          height={variant === 'multiLine' ? '150' : '55'}
+          height={variant === 'multiLine' ? '150' : '50'}
           value={value}
           onChangeText={onChangeText}
           onEndEditing={validateInput}
