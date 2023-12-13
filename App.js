@@ -15,7 +15,6 @@ import AuthNavigator from 'app/navigation/AuthNavigator';
 import AppNavigator from 'app/navigation/AppNavigator';
 
 import AuthContext from 'app/auth/context';
-import DebugNavigator from 'app/navigation/DebugNavigator';
 
 // Removal of token/user login persistence (see lines 36-37) -- Justin
 // import authStorage from './app/auth/authStorage';
@@ -55,8 +54,7 @@ export default function App() {
       >
         <OfflineNotice />
         <NavigationContainer theme={MyTheme}>
-          {/* {user ? <AppNavigator /> : <AuthNavigator />} */}
-          <DebugNavigator/>
+          {user ? <AppNavigator /> : <AuthNavigator />}
         </NavigationContainer>
       </AuthContext.Provider>
     </NativeBaseProvider>
