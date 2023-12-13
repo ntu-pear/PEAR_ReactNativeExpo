@@ -30,8 +30,6 @@ import SelectionInputField from 'app/components/SelectionInputField';
 import RadioButtonInput from 'app/components/RadioButtonsInput';
 import SingleOptionCheckBox from 'app/components/SingleOptionCheckBox';
 import ActivityIndicator from 'app/components/ActivityIndicator';
-import InputField from 'app/components/input-fields/InputField';
-import SensitiveInputField from 'app/components/input-fields/SensitiveInputField';
 // import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function PatientAddPatientInfoScreen({
@@ -320,31 +318,28 @@ function PatientAddPatientInfoScreen({
                     </Box>
                   </View>
 
-                  <InputField
+                  <NameInputField
                     isRequired
                     title={'First Name'}
                     value={patient.FirstName}
                     onChangeText={handleFormData(page, 'FirstName')}
                     onChildData={handleFirstNameState}
-                    dataType="name"
                   />
 
-                  <InputField
+                  <NameInputField
                     isRequired
                     title={'Last Name'}
                     value={patient.LastName}
                     onChangeText={handleFormData(page, 'LastName')}
                     onChildData={handleLastNameState}
-                    dataType="name"
                   />
 
-                  <InputField
+                  <NameInputField
                     isRequired
                     title={'Preferred Name'}
                     value={patient.PreferredName}
                     onChangeText={handleFormData(page, 'PreferredName')}
-                    onChildData={handlePrefNameState}                    
-                    dataType="name"
+                    onChildData={handlePrefNameState}
                   />
 
                   <SelectionInputField
@@ -360,14 +355,12 @@ function PatientAddPatientInfoScreen({
                     onChildData={handlePrefLanguageState}
                   />
 
-                  <SensitiveInputField
+                  <NRICInputField
                     isRequired
-                    autoCapitalize='characters'
                     title={'NRIC'}
                     value={patient.NRIC}
                     onChangeText={handleFormData(page, 'NRIC')}
                     onChildData={handleNRICState}
-                    type="nric"
                   />
 
                   <RadioButtonInput
