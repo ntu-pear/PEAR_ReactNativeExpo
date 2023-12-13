@@ -7,7 +7,7 @@ export const notEmpty = (value) => {
 }
 
 export const notUnselected = (value) => {
-  if(value == 1) {
+  if(value == 0) {
     return errors.notUnselectedError;
   }
 }
