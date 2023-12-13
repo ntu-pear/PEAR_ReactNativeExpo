@@ -1,7 +1,7 @@
 // Base
 import React, { useState, useEffect } from 'react';
 import { Modal, StyleSheet, Text, Pressable, View } from 'react-native';
-import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
+import { MaterialCommunityIcons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 //Navigation
@@ -16,7 +16,8 @@ import MessageDisplayCard from 'app/components/MessageDisplayCard';
 import SelectionInputField from 'app/components/input-fields/SelectionInputField';
 import HighlightsCard from 'app/components/HighlightsCard';
 import { SearchBar } from 'react-native-elements';
-import { FlatList } from 'native-base';
+import { FlatList, Icon } from 'native-base';
+import InputField from './input-fields/InputField';
 
 function PatientDailyHighlights(props) {
   // Destructure props
@@ -192,20 +193,30 @@ function PatientDailyHighlights(props) {
           </Pressable>
           <View style={styles.searchBarDropDownView}>
             <View style={styles.searchBarView}>
-              <SearchBar
+              <InputField
+                showTitle={false}
                 placeholder="Search"
-                lightTheme={true}
-                round={true}
                 value={searchValue}
                 onChangeText={setSearchValue}
-                autoCorrect={false}
-                containerStyle={styles.searchBarContainer}
-                inputContainerStyle={{
-                  backgroundColor: colors.white,
-                  borderRadius: 10,
-                }}
-                inputStyle={{ fontSize: Platform.OS === 'web' ? 18 : 14 }}
-                style={styles.searchBar}
+                InputLeftElement={
+                  <Icon
+                    as={<MaterialIcons name="search" />}
+                    size={5}
+                    ml="5"
+                    color={colors.black}
+                  />
+                }
+                InputRightElement={
+                  searchValue ? (
+                  <Icon
+                    as={<MaterialIcons name="clear" />}
+                    size={5}
+                    mr="3"
+                    onPress={() => setSearchValue('')}
+
+                  />
+                  ) : null
+                }
               />
             </View>
             <View style={styles.dropDownView}>
@@ -306,8 +317,6 @@ const styles = StyleSheet.create({
   },
   dropDownView: {
     flex: 1,
-    zIndex: 1,
-    marginTop: 5,
   },
   dropDown: {
     justifyContent: 'flex-end',
