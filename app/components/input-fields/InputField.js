@@ -31,6 +31,8 @@ function InputField({
   setErrorState = () => {},
   variant = 'singeLine',
   style = null,
+  color = null,
+  borderRadius = null,
 }) { 
   /*
   This state and subsequent useEffect are used to track if the component is in its first render. This is mainly used to
@@ -99,11 +101,12 @@ function InputField({
           ) : null
         }
         <Input
+          backgroundColor={color? color : null}
           borderColor={
             !errorMsg ? colors.light_gray3 : colors.red
           }
           textAlignVertical={variant === 'multiLine' ? 'top' : 'center'}
-          borderRadius="25"
+          borderRadius={borderRadius ? borderRadius : "25"}
           height={variant === 'multiLine' ? '150' : '50'}
           value={value}
           onChangeText={onChangeText}
