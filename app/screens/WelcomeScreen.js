@@ -27,6 +27,9 @@ import routes from 'app/navigation/routes';
 import AppButton from 'app/components/AppButton';
 import ErrorMessage from 'app/components/ErrorMessage';
 
+// Import from utility
+import { parseSelectOptions } from 'app/utility/miscFunctions'
+
 // Import Api
 import userApi from 'app/api/user';
 import LoadingWheel from 'app/components/LoadingWheel';
@@ -176,7 +179,7 @@ function WelcomeScreen(props) {
                   }
                   placeholder="Supervisor"
                   onDataChange={handleUserRoleChanged}
-                  dataArray={userRoles}
+                  dataArray={parseSelectOptions(userRoles)}
                 />
               </View>
               <View style={styles.inputContainer}>
