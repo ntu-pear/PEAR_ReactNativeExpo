@@ -18,6 +18,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 
 function SensitiveInputField({
   isRequired = false,
+  autoCapitalize = 'none',
   hideError = true,
   showTitle = true,
   title = '',
@@ -41,6 +42,7 @@ function SensitiveInputField({
       <VStack>
       <InputField
         isRequired={isRequired}
+        autoCapitalize={autoCapitalize}
         hideError={hideError}
         showTitle={showTitle}
         title={title}

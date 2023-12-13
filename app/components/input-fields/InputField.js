@@ -20,6 +20,7 @@ function InputField({
   isRequired = false,
   hideError = true,
   showTitle = true,
+  autoCapitalize = 'characters',
   title = '',
   value = '',
   onChangeText = () => {},
@@ -95,6 +96,7 @@ function InputField({
           borderColor={
             !errorMsg ? colors.light_gray3 : colors.red
           }
+          autoCapitalize={autoCapitalize}
           textAlignVertical={variant === 'multiLine' ? 'top' : 'center'}
           borderRadius={borderRadius ? borderRadius : "25"}
           height={variant === 'multiLine' ? '150' : '50'}
