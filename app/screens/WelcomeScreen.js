@@ -1,4 +1,4 @@
-import React, { useState, useContext, useCallback } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   ImageBackground,
   View,
@@ -19,7 +19,6 @@ import authStorage from 'app/auth/authStorage';
 
 // Constant import
 import colors from 'app/config/colors';
-import typography from 'app/config/typography';
 import errors from 'app/config/errors';
 import useApiHandler from 'app/hooks/useApiHandler';
 import routes from 'app/navigation/routes';
@@ -126,6 +125,7 @@ function WelcomeScreen(props) {
       blurRadius={9}
       source={require('../assets/login_background.jpg')}
     >
+      <View style={styles.vignette} />
 
       <TouchableWithoutFeedback
         onPress={() => {
@@ -248,6 +248,14 @@ function WelcomeScreen(props) {
 const styles = StyleSheet.create({
   background: {
     alignItems: 'center',
+  },
+  vignette: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.1)',
   },
   overlay: {
     backgroundColor: colors.secondary_overlay_color
