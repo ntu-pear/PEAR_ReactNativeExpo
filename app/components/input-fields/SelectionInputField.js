@@ -17,6 +17,7 @@ import RequiredIndicator from '../RequiredIndicator';
 
 function SelectionInputField({
   isRequired = false,
+  hideError = true,
   showTitle = true,
   title = '',
   placeholder: placeholder,
@@ -107,8 +108,11 @@ function SelectionInputField({
             <Select.Item key={item} label={item.label} value={item.value} />
           ))}
         </Select>
-        <ErrorMessage message={errorMsg}/>        
-      </VStack>
+        {hideError && !errorMsg ? 
+        null : (
+        <ErrorMessage message={errorMsg}/>
+        )}   
+        </VStack>
     </View>
   );
 }
