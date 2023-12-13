@@ -35,6 +35,7 @@ import userApi from 'app/api/user';
 import LoadingWheel from 'app/components/LoadingWheel';
 import InputField from 'app/components/input-fields/InputField';
 import SelectionInputField from 'app/components/input-fields/SelectionInputField';
+import SensitiveInputField from 'app/components/input-fields/SensitiveInputField';
 
 
 function WelcomeScreen(props) {
@@ -66,6 +67,7 @@ function WelcomeScreen(props) {
 
   const onPressLogin = async () => {
     console.log('Starting login process...\n');
+    Keyboard.dismiss()
     
     setIsLoading(true);
     setIsLoginError(false);    
@@ -183,13 +185,12 @@ function WelcomeScreen(props) {
                 />
               </View>
               <View style={styles.inputContainer}>
-                <InputField
+                <SensitiveInputField
                   testID="password"
                   isRequired
                   showTitle={false}
                   title="Password"
                   value={password}
-                  type={show ? 'general' : 'password'}
                   onChangeText={handlePasswordChanged}
                   onChildData={handlePasswordError}
                   InputLeftElement={
@@ -197,19 +198,6 @@ function WelcomeScreen(props) {
                       as={<MaterialIcons name="lock" />}
                       size={5}
                       ml="5"
-                    />
-                  }
-                  InputRightElement={
-                    <Icon
-                      as={
-                        <MaterialIcons
-                          name={show ? 'visibility' : 'visibility-off'}
-                        />
-                      }
-                      color={colors.black}
-                      mr="5"
-                      onPress={() => setShow(!show)}
-                      size={5}
                     />
                   }
                   />
