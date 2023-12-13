@@ -101,118 +101,61 @@ function PatientAddPatientInfoScreen({
   // Callback functions for error state reporting for the child components
   // Pass these functions into the onChildData prop of the child components. This will allow for
   // the parent component to track the error states of the child.
-  const handleFirstNameState = useCallback(
-    (state) => {
-      setIsFirstNameError(state);
-      // console.log('FirstName: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isFirstNameError],
-  );
-  const handleLastNameState = useCallback(
-    (state) => {
-      setIsLastNameError(state);
-      // console.log('LastName: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isLastNameError],
-  );
-  const handlePrefNameState = useCallback(
-    (state) => {
-      setIsPrefNameError(state);
-      // console.log('prefName: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isPrefNameError],
-  );
-  const handleNRICState = useCallback(
-    (state) => {
-      setIsNRICError(state);
-      // console.log('NRIC: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isNRICError],
-  );
-  const handleAddrState = useCallback(
-    (state) => {
-      setIsAddrError(state);
-      // console.log('Addr: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isAddrError],
-  );
-  const handleTempAddrState = useCallback(
-    (state) => {
-      setIsTempAddrError(state);
-      // console.log('TempAddr: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isTempAddrError],
-  );
-  const handleHomeTeleState = useCallback(
-    (state) => {
-      setIsHomeTeleError(state);
-      // console.log('HomeTele: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isHomeTeleError],
-  );
-  const handleMobileState = useCallback(
-    (state) => {
-      setIsMobileError(state);
-      // console.log('Mobile: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isMobileError],
-  );
-  const handleDOBState = useCallback(
-    (state) => {
-      setIsDOBError(state);
-      // console.log('DOB: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isDOBError],
-  );
-  const handleJoiningState = useCallback(
-    (state) => {
-      setIsJoiningError(state);
-      // console.log('joining: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isJoiningError],
-  );
-  const handleLeavingState = useCallback(
-    (state) => {
-      setIsLeavingError(state);
-      // console.log('leaving: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isLeavingError],
-  );
-  const handlePrefLanguageState = useCallback(
-    (state) => {
-      setPrefLanguageError(state);
-      // console.log('leaving: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isPrefLanguageError],
-  );
-  const handleGenderState = useCallback(
-    (state) => {
-      setIsGenderError(state);
-      // console.log('leaving: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isGenderError],
-  );
-  const handleRespiteState = useCallback(
-    (state) => {
-      setIsRespiteError(state);
-      // console.log('leaving: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isRespiteError],
-  );
+  const handleFirstNameState = (e) => {
+    setIsFirstNameError(e);
+  }
+
+  const handleLastNameState = (e) => {
+    setIsLastNameError(e);
+  }
+  
+  const handlePrefNameState = (e) => {
+    setIsPrefNameError(e);
+  }
+  
+  const handleNRICState = (e) => {
+    setIsNRICError(e);
+  }
+    
+  const handleAddrState = (e) => {
+    setIsAddrError(e);
+  }
+  
+  const handleTempAddrState = (e) => {
+    setIsTempAddrError(e);
+  }
+  
+  const handleHomeTeleState = (e) => {
+    setIsHomeTeleError(e);
+  }
+  
+  const handleMobileState = (e) => {
+    setIsMobileError(e);
+  }
+  
+  const handleDOBState = (e) => {
+    setIsDOBError(e);
+  }
+  
+  const handleJoiningState = (e) => {
+    setIsJoiningError(e);
+  }
+  
+  const handleLeavingState = (e) => {
+    setIsLeavingError(e);
+  }
+  
+  const handlePrefLanguageState = (e) => {
+    setPrefLanguageError(e);
+  }
+  
+  const handleGenderState = (e) => {
+    setIsGenderError(e);
+  }
+
+  const handleRespiteState = (e) => {
+    setIsRespiteError(e);
+  }
 
   // This useEffect enables the page to show correct error checking
   // the main isInputErrors is responsible for the error state of the screen
@@ -389,7 +332,7 @@ function PatientAddPatientInfoScreen({
                     />
                   </View>
 
-                  <CommonInputField
+                  <InputField
                     isRequired
                     title={'Address'}
                     value={patient.Address}
@@ -397,27 +340,29 @@ function PatientAddPatientInfoScreen({
                     onChildData={handleAddrState}
                   />
 
-                  <CommonInputField
-                    title={'Temporary Address (optional)'}
+                  <InputField
+                    title={'Temporary Address'}
                     value={patient.TempAddress}
                     onChangeText={handleFormData(page, 'TempAddress')}
                     onChildData={handleTempAddrState}
                   />
 
-                  <TelephoneInputField
-                    title={'Home Telephone No.(optional)'}
+                  <InputField
+                    title={'Home Telephone No.'}
                     value={patient.HomeNo}
-                    numberType={'home'}
                     onChangeText={handleFormData(page, 'HomeNo')}
                     onChildData={handleHomeTeleState}
+                    dataType={'home phone'}
+                    keyboardType='numeric'
                   />
 
-                  <TelephoneInputField
-                    title={'Mobile No.(optional)'}
+                  <InputField
+                    title={'Mobile No.'}
                     value={patient.HandphoneNo}
-                    numberType={'mobile'}
                     onChangeText={handleFormData(page, 'HandphoneNo')}
                     onChildData={handleMobileState}
+                    dataType={'mobile phone'}
+                    keyboardType='numeric'                    
                   />
 
                   <RadioButtonInput
