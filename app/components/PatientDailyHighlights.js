@@ -13,7 +13,7 @@ import { Platform } from 'react-native';
 
 // Components
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
-import SelectionInputField from 'app/components/SelectionInputField';
+import SelectionInputField from 'app/components/input-fields/SelectionInputField';
 import HighlightsCard from 'app/components/HighlightsCard';
 import { SearchBar } from 'react-native-elements';
 import { FlatList } from 'native-base';
@@ -195,7 +195,7 @@ function PatientDailyHighlights(props) {
               <SearchBar
                 placeholder="Search"
                 lightTheme={true}
-                // round={true}
+                round={true}
                 value={searchValue}
                 onChangeText={setSearchValue}
                 autoCorrect={false}
@@ -210,10 +210,11 @@ function PatientDailyHighlights(props) {
             </View>
             <View style={styles.dropDownView}>
               <SelectionInputField
+                showTitle={false}
                 value={filterValue}
                 dataArray={dropdownItems}
                 onDataChange={setFilterValue}
-                placeholderText={'Select Filter'}
+                placeholder={'Select Filter'}
               />
               {/* Standardized Dropdown component --- Justin */}
             </View>
