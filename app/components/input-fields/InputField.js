@@ -100,7 +100,7 @@ function InputField({
           textAlignVertical={variant === 'multiLine' ? 'top' : 'center'}
           borderRadius={borderRadius ? borderRadius : "25"}
           height={variant === 'multiLine' ? '150' : '50'}
-          value={value}
+          value={autoCapitalize == 'characters' ? value.toUpperCase() : value}
           onChangeText={onChangeText}
           onEndEditing={validateInput}
           placeholder={title}
