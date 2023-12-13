@@ -92,7 +92,7 @@ function SelectionInputField({
           fontFamily={
             Platform.OS === 'ios' ? typography.ios : typography.android
           }
-          height="55"
+          height="50"
           minWidth="full"
           minHeight="3%"
           placeholder={placeholder}
