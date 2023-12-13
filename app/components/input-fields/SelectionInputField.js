@@ -92,7 +92,7 @@ function SelectionInputField({
           fontFamily={
             Platform.OS === 'ios' ? typography.ios : typography.android
           }
-          height="55"
+          height="50"
           minWidth="full"
           minHeight="3%"
           placeholder={placeholder}
@@ -103,8 +103,8 @@ function SelectionInputField({
           InputLeftElement={inputLeftElement}
           inputRightElement={inputRightElement}
         >
-          {dataArray.map((label, value) => (
-            <Select.Item key={{'label': label, 'value': value}} label={label} value={value+1} />
+          {dataArray.map((item) => (
+            <Select.Item key={item} label={item.label} value={item.value} />
           ))}
         </Select>
         <ErrorMessage message={errorMsg}/>        
