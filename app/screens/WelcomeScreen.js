@@ -152,6 +152,7 @@ function WelcomeScreen(props) {
               <View style={styles.inputContainer}>
                 <InputField
                   testID="username"
+                  autoCapitalize='none'
                   isRequired
                   showTitle={false}
                   title="Username/Email"
