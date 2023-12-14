@@ -28,7 +28,7 @@ function SensitiveInputField({
   dataType = 'general',
   keyboardType = 'default',
   maxLength = null,
-  onChildData = () => {},
+  onEndEditing = () => {},
   variant = 'singleLine'
 }) { 
   const [show, setShow] = useState(false);
@@ -66,7 +66,7 @@ function SensitiveInputField({
         type={show ? 'general' : 'password'}
         keyboardType={keyboardType}
         maxLength={maxLength}
-        onChildData={onChildData}
+        onEndEditing={onEndEditing}
         variant={variant}
         />
       </VStack>
