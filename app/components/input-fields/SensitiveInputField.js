@@ -63,7 +63,7 @@ function SensitiveInputField({
             />
           }
         dataType={dataType}
-        type={show ? 'general' : 'password'}
+        type={show ? 'text' : 'password'}
         keyboardType={keyboardType}
         maxLength={maxLength}
         onEndEditing={onEndEditing}
@@ -75,7 +75,7 @@ function SensitiveInputField({
 }
 
 SensitiveInputField.propTypes = {
-  type: PropTypes.oneOf(['general', 'password', 'name', 'nric', 'home phone', 'mobile phone', 'email']),
+  dataType: PropTypes.oneOf(['general', 'password', 'name', 'nric', 'home phone', 'mobile phone', 'email']),
   keyboardType: TextInput.propTypes.keyboardType,
   variant: PropTypes.oneOf(['singleLine', 'multiLine'])
 };
