@@ -158,7 +158,7 @@ function WelcomeScreen(props) {
                   title="Username/Email"
                   value={username}
                   onChangeText={handleUsernameChanged}
-                  onChildData={handleUsernameError}
+                  onEndEditing={handleUsernameError}
                   InputLeftElement={
                     <Icon
                       as={<MaterialIcons name="person" />}
@@ -193,7 +193,7 @@ function WelcomeScreen(props) {
                   title="Password"
                   value={password}
                   onChangeText={handlePasswordChanged}
-                  onChildData={handlePasswordError}
+                  onEndEditing={handlePasswordError}
                   InputLeftElement={
                     <Icon
                       as={<MaterialIcons name="lock" />}
