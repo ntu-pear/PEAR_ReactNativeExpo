@@ -106,7 +106,7 @@ function InputField({
           placeholder={title}
           InputRightElement={InputRightElement}
           InputLeftElement={InputLeftElement}
-          type={type=='password' ? 'password' : 'text'}
+          type={type}
           keyboardType={keyboardType}
           maxLength={maxLength}
           style={styles.InputField}
@@ -121,7 +121,7 @@ function InputField({
 }
 
 InputField.propTypes = {
-  type: PropTypes.oneOf(['general', 'password', 'name', 'nric', 'home phone', 'mobile phone', 'email']),
+  dataType: PropTypes.oneOf(['general', 'password', 'name', 'nric', 'home phone', 'mobile phone', 'email']),
   keyboardType: TextInput.propTypes.keyboardType,
   variant: PropTypes.oneOf(['singleLine', 'multiLine'])
 };
