@@ -30,7 +30,7 @@ function InputField({
   type = 'text',
   keyboardType = 'default',
   maxLength = null,
-  onChildData = () => {},
+  onEndEditing = () => {},
   variant = 'singeLine',
   color = null,
   borderRadius = null,
@@ -44,20 +44,20 @@ function InputField({
   const [isFirstRender, setIsFirstRender] = useState(true);
   
   useEffect(() => {
-    onChildData ? onChildData(isFirstRender || errorMsg) : null;
+    onEndEditing ? onEndEditing(isFirstRender || errorMsg) : null;
     setIsFirstRender(false);
   }, []);
   
   /* 
   This is used to update the parent component that there is a validation error
-  Validation is passed via the onChildData prop.
+  Validation is passed via the onEndEditing prop.
   */
   useEffect(() => {
     if (!isFirstRender) {
-      onChildData ? onChildData(errorMsg) : null;
+      onEndEditing ? onEndEditing(errorMsg) : null;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [errorMsg, onChildData]);
+  }, [errorMsg, onEndEditing]);
   
   /* 
   This state is used to track the error state of this component via validation
