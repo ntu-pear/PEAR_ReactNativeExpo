@@ -43,6 +43,8 @@ function WelcomeScreen(props) {
   const [show, setShow] = useState(false);
   const [username, setUsername] = useState('');
   const [userRole, setUserRole] = useState('Supervisor');
+  const userRolesList = ['Supervisor', 'Guardian', 'Doctor', 'Caregiver', 'Nurse']
+  const [listOfUserRoles, setListOfUserRoles] = useState(parseSelectOptions(userRolesList))
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isUsernameError, setIsUsernameError] = useState(false);
@@ -122,7 +124,6 @@ function WelcomeScreen(props) {
     setIsPasswordError(e)
   }
     
-  const userRoles = ['Supervisor', 'Guardian', 'Doctor', 'Caregiver', 'Nurse']
 
   return (
     <ImageBackground
@@ -182,7 +183,7 @@ function WelcomeScreen(props) {
                   }
                   placeholder="Supervisor"
                   onDataChange={handleUserRoleChanged}
-                  dataArray={parseSelectOptions(userRoles)}
+                  dataArray={listOfUserRoles}
                 />
               </View>
               <View style={styles.inputContainer}>
