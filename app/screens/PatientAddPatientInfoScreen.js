@@ -1,5 +1,5 @@
 // Base
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Platform, View } from 'react-native';
 import {
   Box,
@@ -71,7 +71,7 @@ function PatientAddPatientInfoScreen({
   maximumJoiningDate.setDate(maximumJoiningDate.getDate() + 30); // 30 days later
 
   // set initial value for SelectionInputField dataArray prop -> follow format of "label" and "value"
-  const [listOfLanguages, setListOfLanguages] = useState([
+  const listOfLanguagesArray = [
     'Cantonese',
     'English',
     'Hainanese',
@@ -85,7 +85,8 @@ function PatientAddPatientInfoScreen({
     'Japanese',
     'Spanish',
     'Korean',
-  ]);
+  ]
+  const [listOfLanguages, setListOfLanguages] = useState(parseSelectOptions(listOfLanguagesArray));
 
   // use for the RadioButtonInput dataArray prop -> follow format of "label" and "value"
   const listOfGenders = [
@@ -97,9 +98,9 @@ function PatientAddPatientInfoScreen({
     { label: 'No', value: false },
   ];
 
-  // Callback functions for error state reporting for the child components
-  // Pass these functions into the onChildData prop of the child components. This will allow for
-  // the parent component to track the error states of the child.
+  /*
+  Callback functions for error state reporting for the child components
+  */   
   const handleFirstNameError = (e) => {
     setIsFirstNameError(e);
   }
@@ -156,9 +157,11 @@ function PatientAddPatientInfoScreen({
     setIsRespiteError(e);
   }
 
-  // This useEffect enables the page to show correct error checking
-  // the main isInputErrors is responsible for the error state of the screen
-  // this state will be true whenever any child input components are in error state.
+  /**
+   * This useEffect enables the page to show correct error checking
+   * The main isInputErrors is responsible for the error state of the screen
+   * This state will be true whenever any child input components are in error state.
+   */  
   useEffect(() => {
     setIsInputErrors(
       isFirstNameError ||
@@ -191,8 +194,10 @@ function PatientAddPatientInfoScreen({
     isGenderError,
   ]);
 
-  /* If retrieval from the hook is successful, replace the content in
-     listOfLanguages with the retrieved one. */
+  /*
+  Try to get langugage list from backend. If retrieval from the hook is successful, replace the content in
+  listOfLanguages with the retrieved one. 
+  */
   useEffect(() => {
     if (!isLoading && !isError && data) {
       console.log('selection data!');
@@ -291,15 +296,15 @@ function PatientAddPatientInfoScreen({
 
                   <SensitiveInputField
                     isRequired
-                    autoCapitalize='characters'
                     title={'NRIC'}
-                    value={patient.NRIC}
+                    autoCapitalize='characters'
+                    value={(patient.NRIC).toString().toUpperCase()}
                     onChangeText={handleFormData(page, 'NRIC')}
                     onChildData={handleNRICError}
                     type="nric"
                   />
-
-                  <RadioButtonInput
+                
+                 <RadioButtonInput
                     isRequired
                     title={'Gender'}
                     value={patient.Gender}
@@ -322,13 +327,13 @@ function PatientAddPatientInfoScreen({
                   <SelectionInputField
                     isRequired
                     title={'Preferred Language'}
-                    placeholderText={'Select Language'}
-                    onDataChange={handleFormData(
+                    placeholder={'Select Language'}
+                    onDataChange={handleFormData( 
                       page,
                       'PreferredLanguageListID',
                     )}
                     value={patient.PreferredLanguageListID}
-                    dataArray={parseSelectOptions(listOfLanguages)}
+                    dataArray={listOfLanguages}
                     onChildData={handlePrefLanguageError}
                   />
 
