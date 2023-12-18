@@ -30,7 +30,7 @@ function InputField({
   type = 'text',
   keyboardType = 'default',
   maxLength = null,
-  onChildData = () => {},
+  onEndEditing = () => {},
   variant = 'singeLine',
   color = null,
   borderRadius = null,
@@ -44,20 +44,20 @@ function InputField({
   const [isFirstRender, setIsFirstRender] = useState(true);
   
   useEffect(() => {
-    onChildData ? onChildData(isFirstRender || errorMsg) : null;
+    onEndEditing ? onEndEditing(isFirstRender || errorMsg) : null;
     setIsFirstRender(false);
   }, []);
   
   /* 
   This is used to update the parent component that there is a validation error
-  Validation is passed via the onChildData prop.
+  Validation is passed via the onEndEditing prop.
   */
   useEffect(() => {
     if (!isFirstRender) {
-      onChildData ? onChildData(errorMsg) : null;
+      onEndEditing ? onEndEditing(errorMsg) : null;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [errorMsg, onChildData]);
+  }, [errorMsg, onEndEditing]);
   
   /* 
   This state is used to track the error state of this component via validation
@@ -81,6 +81,19 @@ function InputField({
     setErrorMsg(msg);
   }
 
+  const [inputText, setInputText] = useState(value);
+
+  /**
+   * Function to convert input to upper case. 
+   * Used instead of autoCapitalize prop bc it breaks secureTextEntry when type='password' is used
+   * 
+   * @param {string} value 
+   */
+  const handleOnChangeText = (value) => {
+    autoCapitalize == 'characters' ? setInputText(value.toUpperCase()) : setInputText(value);
+    onChangeText(value);
+  }
+
   return (
     <View style={styles.ComponentContainer}>
       <VStack>
@@ -91,22 +104,21 @@ function InputField({
             </Text>
           ) : null
         }
-        <Input
+        <Input 
           backgroundColor={color? color : null}
           borderColor={
             !errorMsg ? colors.light_gray3 : colors.red
           }
-          autoCapitalize={autoCapitalize}
           textAlignVertical={variant === 'multiLine' ? 'top' : 'center'}
           borderRadius={borderRadius ? borderRadius : "25"}
           height={variant === 'multiLine' ? '150' : '50'}
-          value={autoCapitalize == 'characters' ? value.toString().toUpperCase() : value.toString()}
-          onChangeText={onChangeText}
+          value={inputText}
+          onChangeText={handleOnChangeText}
           onEndEditing={validateInput}
           placeholder={title}
           InputRightElement={InputRightElement}
           InputLeftElement={InputLeftElement}
-          type={type=='password' ? 'password' : 'text'}
+          type={type}
           keyboardType={keyboardType}
           maxLength={maxLength}
           style={styles.InputField}
@@ -121,7 +133,7 @@ function InputField({
 }
 
 InputField.propTypes = {
-  type: PropTypes.oneOf(['general', 'password', 'name', 'nric', 'home phone', 'mobile phone', 'email']),
+  dataType: PropTypes.oneOf(['general', 'password', 'name', 'nric', 'home phone', 'mobile phone', 'email']),
   keyboardType: TextInput.propTypes.keyboardType,
   variant: PropTypes.oneOf(['singleLine', 'multiLine'])
 };

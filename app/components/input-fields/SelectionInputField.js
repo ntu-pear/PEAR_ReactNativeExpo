@@ -24,7 +24,7 @@ function SelectionInputField({
   onDataChange = () => {},
   value = '',
   dataArray = [],
-  onChildData = () => {},
+  onEndEditing = () => {},
   inputLeftElement = null,
   inputRightElement = null,
 }) {
@@ -50,7 +50,7 @@ function SelectionInputField({
 
 
   useEffect(() => {
-    onChildData ? onChildData(isFirstRender || errorMsg.error) : null;
+    onEndEditing ? onEndEditing(isFirstRender || errorMsg.error) : null;
     setIsFirstRender(false);
     if(isRequired) {
       setErrorMsg(notUnselected(selectedValue));
@@ -60,14 +60,14 @@ function SelectionInputField({
 
    /* 
   This is used to update the parent component that there is a validation error
-  Validation is passed via the onChildData prop.
+  Validation is passed via the onEndEditing prop.
   */
   useEffect(() => {
     if (!isFirstRender) {
-      onChildData ? onChildData(errorMsg) : null;
+      onEndEditing ? onEndEditing(errorMsg) : null;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [errorMsg, onChildData]);
+  }, [errorMsg, onEndEditing]);
 
   /*
   This is used to update the selected item
