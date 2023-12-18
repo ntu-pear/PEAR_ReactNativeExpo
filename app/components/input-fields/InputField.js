@@ -81,6 +81,19 @@ function InputField({
     setErrorMsg(msg);
   }
 
+  const [inputText, setInputText] = useState(value);
+
+  /**
+   * Function to convert input to upper case. 
+   * Used instead of autoCapitalize prop bc it breaks secureTextEntry when type='password' is used
+   * 
+   * @param {string} value 
+   */
+  const handleOnChangeText = (value) => {
+    autoCapitalize == 'characters' ? setInputText(value.toUpperCase()) : setInputText(value);
+    onChangeText(value);
+  }
+
   return (
     <View style={styles.ComponentContainer}>
       <VStack>
@@ -91,17 +104,16 @@ function InputField({
             </Text>
           ) : null
         }
-        <Input
+        <Input 
           backgroundColor={color? color : null}
           borderColor={
             !errorMsg ? colors.light_gray3 : colors.red
           }
-          autoCapitalize={autoCapitalize}
           textAlignVertical={variant === 'multiLine' ? 'top' : 'center'}
           borderRadius={borderRadius ? borderRadius : "25"}
           height={variant === 'multiLine' ? '150' : '50'}
-          value={autoCapitalize == 'characters' ? value.toString().toUpperCase() : value.toString()}
-          onChangeText={onChangeText}
+          value={inputText}
+          onChangeText={handleOnChangeText}
           onEndEditing={validateInput}
           placeholder={title}
           InputRightElement={InputRightElement}
