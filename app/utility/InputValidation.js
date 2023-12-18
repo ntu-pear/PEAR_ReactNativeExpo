@@ -1,13 +1,5 @@
 import errors from "app/config/errors";
 
-export const validationFunctions = {
-  'name': [alphaOnly],
-  'nric': [nricFormat],
-  'home phone': [homePhoneNoFormat],
-  'mobile phone': [mobilePhoneNoFormat],
-  'email': [emailFormat],
-};
-
 export const notEmpty = (value) => {
   if (!value) {
     return errors.notEmptyError;
@@ -20,7 +12,7 @@ export const notUnselected = (value) => {
   }
 }
 
-export const alphaOnly = (value) => {
+export const nameFormat = (value) => {
   if (/[!@#$%^&*(),.?":{}|<>]/g.test(value) || /\d+/g.test(value)) {
     return errors.alphaOnlyError;
   }   
@@ -48,4 +40,13 @@ export const emailFormat = (value) => {
   if (!/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/.test(value)) {
     return errors.emailError;
   }
+}
+
+
+export const validationFunctions = {
+  'name': [nameFormat],
+  'nric': [nricFormat],
+  'home phone': [homePhoneNoFormat],
+  'mobile phone': [mobilePhoneNoFormat],
+  'email': [emailFormat]
 }
