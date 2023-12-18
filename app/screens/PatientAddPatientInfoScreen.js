@@ -1,5 +1,5 @@
 // Base
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Platform, View } from 'react-native';
 import {
   Box,
@@ -18,15 +18,14 @@ import typography from 'app/config/typography';
 // Hooks
 import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
+// Utilities
+import { parseSelectOptions } from 'app/utility/miscFunctions';
+
 // Components
 import AddPatientProgress from 'app/components/AddPatientProgress';
 import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
-import NameInputField from 'app/components/NameInputField';
-import NRICInputField from 'app/components/NRICInputField';
-import CommonInputField from 'app/components/CommonInputField';
-import TelephoneInputField from 'app/components/TelephoneInputField';
 import DateInputField from 'app/components/DateInputField';
-import SelectionInputField from 'app/components/SelectionInputField';
+import SelectionInputField from 'app/components/input-fields/SelectionInputField';
 import RadioButtonInput from 'app/components/RadioButtonsInput';
 import SingleOptionCheckBox from 'app/components/SingleOptionCheckBox';
 import ActivityIndicator from 'app/components/ActivityIndicator';
@@ -54,8 +53,8 @@ function PatientAddPatientInfoScreen({
   const [isNRICError, setIsNRICError] = useState(false);
   const [isAddrError, setIsAddrError] = useState(false);
   const [isTempAddrError, setIsTempAddrError] = useState(false);
-  const [isHomeTeleError, setIsHomeTeleError] = useState(false);
-  const [isMobileError, setIsMobileError] = useState(false);
+  const [isHomeTeleError, setIsHomeNoError] = useState(false);
+  const [isMobileError, setIsMobileNoError] = useState(false);
   const [isDOBError, setIsDOBError] = useState(false);
   const [isJoiningError, setIsJoiningError] = useState(false);
   const [isLeavingError, setIsLeavingError] = useState(false);
@@ -70,21 +69,22 @@ function PatientAddPatientInfoScreen({
   maximumJoiningDate.setDate(maximumJoiningDate.getDate() + 30); // 30 days later
 
   // set initial value for SelectionInputField dataArray prop -> follow format of "label" and "value"
-  const [listOfLanguages, setListOfLanguages] = useState([
-    { label: 'Cantonese', value: 1 },
-    { label: 'English', value: 2 },
-    { label: 'Hainanese', value: 3 },
-    { label: 'Hakka', value: 4 },
-    { label: 'Hindi', value: 5 },
-    { label: 'Hokkien', value: 6 },
-    { label: 'Malay', value: 7 },
-    { label: 'Mandarin', value: 8 },
-    { label: 'Tamil', value: 9 },
-    { label: 'Teochew', value: 10 },
-    { label: 'Japanese', value: 11 },
-    { label: 'Spanish', value: 12 },
-    { label: 'Korean', value: 13 },
-  ]);
+  const listOfLanguagesArray = [
+    'Cantonese',
+    'English',
+    'Hainanese',
+    'Hakka',
+    'Hindi',
+    'Hokkien',
+    'Malay',
+    'Mandarin',
+    'Tamil',
+    'Teochew',
+    'Japanese',
+    'Spanish',
+    'Korean',
+  ]
+  const [listOfLanguages, setListOfLanguages] = useState(parseSelectOptions(listOfLanguagesArray));
 
   // use for the RadioButtonInput dataArray prop -> follow format of "label" and "value"
   const listOfGenders = [
@@ -96,125 +96,70 @@ function PatientAddPatientInfoScreen({
     { label: 'No', value: false },
   ];
 
-  // Callback functions for error state reporting for the child components
-  // Pass these functions into the onChildData prop of the child components. This will allow for
-  // the parent component to track the error states of the child.
-  const handleFirstNameState = useCallback(
-    (state) => {
-      setIsFirstNameError(state);
-      // console.log('FirstName: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isFirstNameError],
-  );
-  const handleLastNameState = useCallback(
-    (state) => {
-      setIsLastNameError(state);
-      // console.log('LastName: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isLastNameError],
-  );
-  const handlePrefNameState = useCallback(
-    (state) => {
-      setIsPrefNameError(state);
-      // console.log('prefName: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isPrefNameError],
-  );
-  const handleNRICState = useCallback(
-    (state) => {
-      setIsNRICError(state);
-      // console.log('NRIC: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isNRICError],
-  );
-  const handleAddrState = useCallback(
-    (state) => {
-      setIsAddrError(state);
-      // console.log('Addr: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isAddrError],
-  );
-  const handleTempAddrState = useCallback(
-    (state) => {
-      setIsTempAddrError(state);
-      // console.log('TempAddr: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isTempAddrError],
-  );
-  const handleHomeTeleState = useCallback(
-    (state) => {
-      setIsHomeTeleError(state);
-      // console.log('HomeTele: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isHomeTeleError],
-  );
-  const handleMobileState = useCallback(
-    (state) => {
-      setIsMobileError(state);
-      // console.log('Mobile: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isMobileError],
-  );
-  const handleDOBState = useCallback(
-    (state) => {
-      setIsDOBError(state);
-      // console.log('DOB: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isDOBError],
-  );
-  const handleJoiningState = useCallback(
-    (state) => {
-      setIsJoiningError(state);
-      // console.log('joining: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isJoiningError],
-  );
-  const handleLeavingState = useCallback(
-    (state) => {
-      setIsLeavingError(state);
-      // console.log('leaving: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isLeavingError],
-  );
-  const handlePrefLanguageState = useCallback(
-    (state) => {
-      setPrefLanguageError(state);
-      // console.log('leaving: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isPrefLanguageError],
-  );
-  const handleGenderState = useCallback(
-    (state) => {
-      setIsGenderError(state);
-      // console.log('leaving: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isGenderError],
-  );
-  const handleRespiteState = useCallback(
-    (state) => {
-      setIsRespiteError(state);
-      // console.log('leaving: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isRespiteError],
-  );
+  /*
+  Callback functions for error state reporting for the child components
+  */   
+  const handleFirstNameError = (e) => {
+    setIsFirstNameError(e);
+  }
 
-  // This useEffect enables the page to show correct error checking
-  // the main isInputErrors is responsible for the error state of the screen
-  // this state will be true whenever any child input components are in error state.
+  const handleLastNameError = (e) => {
+    setIsLastNameError(e);
+  }
+  
+  const handlePrefNameError = (e) => {
+    setIsPrefNameError(e);
+  }
+  
+  const handleNRICError = (e) => {
+    setIsNRICError(e);
+  }
+    
+  const handleAddrError = (e) => {
+    setIsAddrError(e);
+  }
+  
+  const handleTempAddrError = (e) => {
+    setIsTempAddrError(e);
+  }
+  
+  const handleHomeNoError = (e) => {
+    setIsHomeNoError(e);
+  }
+  
+  const handleMobileNoError = (e) => {
+    setIsMobileNoError(e);
+  }
+  
+  const handleDOBError = (e) => {
+    setIsDOBError(e);
+  }
+  
+  const handleJoiningError = (e) => {
+    setIsJoiningError(e);
+  }
+  
+  const handleLeavingError = (e) => {
+    setIsLeavingError(e);
+  }
+  
+  const handlePrefLanguageError = (e) => {
+    setPrefLanguageError(e);
+  }
+  
+  const handleGenderError = (e) => {
+    setIsGenderError(e);
+  }
+
+  const handleRespiteError = (e) => {
+    setIsRespiteError(e);
+  }
+
+  /**
+   * This useEffect enables the page to show correct error checking
+   * The main isInputErrors is responsible for the error state of the screen
+   * This state will be true whenever any child input components are in error state.
+   */  
   useEffect(() => {
     setIsInputErrors(
       isFirstNameError ||
@@ -247,12 +192,14 @@ function PatientAddPatientInfoScreen({
     isGenderError,
   ]);
 
-  /* If retrieval from the hook is successful, replace the content in
-     listOfLanguages with the retrieved one. */
+  /*
+  Try to get langugage list from backend. If retrieval from the hook is successful, replace the content in
+  listOfLanguages with the retrieved one. 
+  */
   useEffect(() => {
     if (!isLoading && !isError && data) {
-      // console.log('selection data!');
-      // console.log(data);
+      console.log('selection data!');
+      console.log(data);
       setListOfLanguages(data);
     }
   }, [data, isError, isLoading]);
@@ -323,7 +270,8 @@ function PatientAddPatientInfoScreen({
                     title={'First Name'}
                     value={patient.FirstName}
                     onChangeText={handleFormData(page, 'FirstName')}
-                    onChildData={handleFirstNameState}
+                    onChildData={handleFirstNameError}
+                    dataType="name"
                   />
 
                   <NameInputField
@@ -331,7 +279,8 @@ function PatientAddPatientInfoScreen({
                     title={'Last Name'}
                     value={patient.LastName}
                     onChangeText={handleFormData(page, 'LastName')}
-                    onChildData={handleLastNameState}
+                    onChildData={handleLastNameError}
+                    dataType="name"
                   />
 
                   <NameInputField
@@ -339,38 +288,29 @@ function PatientAddPatientInfoScreen({
                     title={'Preferred Name'}
                     value={patient.PreferredName}
                     onChangeText={handleFormData(page, 'PreferredName')}
-                    onChildData={handlePrefNameState}
+                    onChildData={handlePrefNameError}                    
+                    dataType="name"
                   />
 
-                  <SelectionInputField
-                    isRequired
-                    title={'Preferred Language'}
-                    placeholderText={'Select Language'}
-                    onDataChange={handleFormData(
-                      page,
-                      'PreferredLanguageListID',
-                    )}
-                    value={patient.PreferredLanguageListID}
-                    dataArray={listOfLanguages}
-                    onChildData={handlePrefLanguageState}
-                  />
-
-                  <NRICInputField
+                  <SensitiveInputField
                     isRequired
                     title={'NRIC'}
-                    value={patient.NRIC}
+                    autoCapitalize='characters'
+                    value={(patient.NRIC).toString().toUpperCase()}
                     onChangeText={handleFormData(page, 'NRIC')}
-                    onChildData={handleNRICState}
+                    onChildData={handleNRICError}
+                    type="nric"
                   />
-
-                  <RadioButtonInput
+                
+                 <RadioButtonInput
                     isRequired
                     title={'Gender'}
                     value={patient.Gender}
                     onChangeData={handleFormData(page, 'Gender')}
-                    onChildData={handleGenderState}
+                    onChildData={handleGenderError}
                     dataArray={listOfGenders}
                   />
+
                   <View style={styles.dateSelectionContainer}>
                     <DateInputField
                       isRequired
@@ -378,39 +318,54 @@ function PatientAddPatientInfoScreen({
                       title={'Date of Birth'}
                       value={patient.DOB}
                       handleFormData={handleFormData(page, 'DOB')}
-                      onChildData={handleDOBState}
+                      onChildData={handleDOBError}
                     />
                   </View>
+                  
+                  <SelectionInputField
+                    isRequired
+                    title={'Preferred Language'}
+                    placeholder={'Select Language'}
+                    onDataChange={handleFormData( 
+                      page,
+                      'PreferredLanguageListID',
+                    )}
+                    value={patient.PreferredLanguageListID}
+                    dataArray={listOfLanguages}
+                    onChildData={handlePrefLanguageError}
+                  />
 
-                  <CommonInputField
+                  <InputField
                     isRequired
                     title={'Address'}
                     value={patient.Address}
                     onChangeText={handleFormData(page, 'Address')}
-                    onChildData={handleAddrState}
+                    onChildData={handleAddrError}
                   />
 
-                  <CommonInputField
-                    title={'Temporary Address (optional)'}
+                  <InputField
+                    title={'Temporary Address'}
                     value={patient.TempAddress}
                     onChangeText={handleFormData(page, 'TempAddress')}
-                    onChildData={handleTempAddrState}
+                    onChildData={handleTempAddrError}
                   />
 
-                  <TelephoneInputField
-                    title={'Home Telephone No.(optional)'}
+                  <InputField
+                    title={'Home Telephone No.'}
                     value={patient.HomeNo}
-                    numberType={'home'}
                     onChangeText={handleFormData(page, 'HomeNo')}
-                    onChildData={handleHomeTeleState}
+                    onChildData={handleHomeNoError}
+                    dataType={'home phone'}
+                    keyboardType='numeric'
                   />
 
-                  <TelephoneInputField
-                    title={'Mobile No.(optional)'}
+                  <InputField
+                    title={'Mobile No.'}
                     value={patient.HandphoneNo}
-                    numberType={'mobile'}
                     onChangeText={handleFormData(page, 'HandphoneNo')}
-                    onChildData={handleMobileState}
+                    onChildData={handleMobileNoError}
+                    dataType={'mobile phone'}
+                    keyboardType='numeric'                    
                   />
 
                   <RadioButtonInput
@@ -419,7 +374,7 @@ function PatientAddPatientInfoScreen({
                     value={patient.IsRespiteCare}
                     onChangeData={handleFormData(page, 'IsRespiteCare')}
                     dataArray={listRespiteCare}
-                    onChildData={handleRespiteState}
+                    onChildData={handleRespiteError}
                   />
 
                   <View style={styles.dateSelectionContainer}>
@@ -428,7 +383,7 @@ function PatientAddPatientInfoScreen({
                       title={'Date of Joining'}
                       value={patient.StartDate}
                       handleFormData={handleFormData(page, 'StartDate')}
-                      onChildData={handleJoiningState}
+                      onChildData={handleJoiningError}
                       minimumInputDate={minimumJoiningDate}
                       maximumInputDate={maximumJoiningDate}
                     />
@@ -449,7 +404,7 @@ function PatientAddPatientInfoScreen({
                       title={'Date of Leaving (Optional)'}
                       handleFormData={handleFormData(page, 'EndDate')}
                       value={patient.EndDate}
-                      onChildData={handleLeavingState}
+                      onChildData={handleLeavingError}
                     />
                   ) : null}
                 </View>
