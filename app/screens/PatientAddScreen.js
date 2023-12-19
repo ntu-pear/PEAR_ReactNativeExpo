@@ -19,29 +19,37 @@ import * as ImagePicker from 'expo-image-picker';
 
 function PatientAddScreen() {
   const navigation = useNavigation();
-  // const navigate = Platform.OS === 'web' ? useNavigate() : null;
-  // aquire the setIsReloadPatientList from params
-  // const { isReloadPatientList, setIsReloadPatientList } = route.params;
-  // state for steps
+
+  /*
+  State to keep track of which page of the form is loaded
+  */
   const [step, setStep] = useState(1);
-  // state for datepicker
+  
+  /*
+  State to keep track of whether specific datepicker is open
+  */
   const [show, setShow] = useState({
     DOB: false,
     StartDate: false,
     EndDate: false,
   });
 
-  // state for components
+  /*
+  State for components
+  */
   const [componentList, setComponentList] = useState({
     guardian: [{}],
     allergy: [{}],
   });
 
+  /*
+  Maximum accepted value for date of birth
+  */
   const newDate = new Date();
   const maximumDOB = new Date();
   maximumDOB.setFullYear(maximumDOB.getFullYear() - 15);
 
-  const patientData = {
+  const addPatientData = {
     patientInfo: {
       FirstName: '',
       LastName: '',
@@ -99,10 +107,11 @@ function PatientAddScreen() {
     ],
   };
 
-  const [formData, setFormData] = useState(patientData);
+  const [formData, setFormData] = useState(addPatientData);
 
-  // handle state of components
+  
   const componentHandler = (page = '', list = []) => {
+    console.log(1, list)
     if (list) {
       setComponentList((prevState) => ({
         // eg. componentList: { guardian: [{..}, {..}] }
@@ -112,6 +121,11 @@ function PatientAddScreen() {
     }
   };
 
+  /**
+   * 
+   * @param {*} key 
+   * @param {*} values 
+   */
   const concatFormData = (key, values) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
@@ -128,21 +142,26 @@ function PatientAddScreen() {
     });
   };
 
+  /*
+  Function to load next page of form
+  */
   const nextQuestionHandler = async (formData, page = '', list = []) => {
-    // -- Validation is now real-time no need to have on submit validation - Justin
     componentHandler(page, list);
     setStep((prevStep) => prevStep + 1);
-    // }
   };
 
-  // function for going to previous step by decreasing step state by 1
-  // and to set component list
+  /*
+  Function to load previous step of form
+  */ 
   const prevQuestionHandler = (page = '', list = []) => {
     componentHandler(page, list);
     setStep((prevStep) => prevStep - 1);
   };
 
-  // Reference: https://docs.expo.dev/versions/latest/sdk/imagepicker/
+  /* 
+  Function to launch image picker and handle image picking
+  Reference: https://docs.expo.dev/versions/latest/sdk/imagepicker/
+  */
   const pickImage = (page, input) => async () => {
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -151,7 +170,7 @@ function PatientAddScreen() {
       aspect: [4, 3],
       quality: 1,
     });
-    if (!result.cancelled) {
+    if (!result.canceled) {
       const newImageUri = 'file:///' + result.uri.split('file:/').join('');
 
       var img = formData[page];
@@ -167,9 +186,60 @@ function PatientAddScreen() {
       }));
     }
   };
+  
+  
+  /**
+   * Set show of a field as false when date is selected on a specific datepicker
+   * @param {string} field Field whose datepicker has a date selected
+   */
+  const setShowFalse = (field) => {
+    if (Platform.OS === 'android') {
+      setShow((prevState) => ({
+        ...prevState,
+        [field]: false,
+      }));
+    }
+  }
+  
+  const handlePatientData = (x, field) => 
+    (e, date = null) => {
+      setShowFalse(field)
+      const newData = formData.patientInfo;
+      if (
+        field === 'HomeNo' ||
+        field === 'HandphoneNo' ||
+        field === 'Address' ||
+        field === 'TempAddress'
+      ) {
+        newData[field] = e.toString(); // convert to string
+      } else if (field === 'IsChecked') {
+        newData[field] = !formData.patientInfo.IsChecked; // opposite boolean value of IsChecked
+        if (!newData[field]) {
+          // if IsChecked is false, reset End Date to beginning of epoch time
+          newData.EndDate = new Date(0);
+        }
+      } else {
+        newData[field] = date
+          ? date
+          : e.$d //e['$d']-check if input from MUI date-picker
+          ? e.$d
+          : parseInt(e) // check if integer (for dropdown)
+          ? parseInt(e) // change to integer
+          : e; // eg. guardianInfo[0].FirstName = e
+      }
 
-  // handling form input data by taking onchange value and updating our previous form data state
-  const handleFormData =
+      setFormData((prevState) => ({
+        ...prevState,
+        patientInfo : newData,
+      }));
+
+      console.log(newData)
+    };
+
+  /*
+  Function to handle form input data by taking onchange value and updating our previous form data state
+  */
+  const handleFormData = 
     (page = '', input, index = null) =>
     (e, date = null) => {
       // set show as false when date is selected on datepicker
@@ -238,6 +308,10 @@ function PatientAddScreen() {
       }
     };
 
+  /**
+   * Function to submit form
+   * 
+   */
   const submitForm = async () => {
     // -- Validation is now real-time no need to have on submit validation - Justin
     const result = await patientApi.addPatient(formData);
@@ -283,7 +357,7 @@ function PatientAddScreen() {
       return (
         <PatientAddPatientInfoScreen
           nextQuestionHandler={nextQuestionHandler}
-          handleFormData={handleFormData}
+          handleFormData={handlePatientData}
           formData={formData}
           componentList={componentList}
           pickImage={pickImage}

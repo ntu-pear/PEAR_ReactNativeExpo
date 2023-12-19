@@ -301,7 +301,7 @@ function PatientAddPatientInfoScreen({
                     value={(patient.NRIC).toString().toUpperCase()}
                     onChangeText={handleFormData(page, 'NRIC')}
                     onChildData={handleNRICError}
-                    type="nric"
+                    dataType="nric"
                   />
                 
                  <RadioButtonInput
@@ -403,14 +403,13 @@ function PatientAddPatientInfoScreen({
                   {/* Rendered only when the specify date of leaving checkbox is selected. */}
                   {formData.patientInfo.IsChecked ? (
                     <DateInputField
-                      title={'Date of Leaving (Optional)'}
+                      title={'Date of Leaving'}
                       handleFormData={handleFormData(page, 'EndDate')}
                       value={patient.EndDate}
                       onChildData={handleLeavingError}
                     />
                   ) : null}
                 </View>
-                {/* </Center> */}
               </VStack>
             </Box>
 
