@@ -72,16 +72,16 @@ function PatientAddPatientInfoScreen({
   const [isLastNameError, setIsLastNameError] = useState(false);
   const [isPrefNameError, setIsPrefNameError] = useState(false);
   const [isNRICError, setIsNRICError] = useState(false);
+  const [isGenderError, setIsGenderError] = useState(false);
+  const [isDOBError, setIsDOBError] = useState(false);
   const [isAddrError, setIsAddrError] = useState(false);
+  const [isPrefLanguageError, setPrefLanguageError] = useState(false);
   const [isTempAddrError, setIsTempAddrError] = useState(false);
   const [isHomeTeleError, setIsHomeNoError] = useState(false);
   const [isMobileError, setIsMobileNoError] = useState(false);
-  const [isDOBError, setIsDOBError] = useState(false);
+  const [isRespiteError, setIsRespiteError] = useState(false);
   const [isJoiningError, setIsJoiningError] = useState(false);
   const [isLeavingError, setIsLeavingError] = useState(false);
-  const [isPrefLanguageError, setPrefLanguageError] = useState(false);
-  const [isGenderError, setIsGenderError] = useState(false);
-  const [isRespiteError, setIsRespiteError] = useState(false);
 
   // Maximum and minimum valid joining dates
   const minimumJoiningDate = new Date();
