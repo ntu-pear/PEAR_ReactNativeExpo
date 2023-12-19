@@ -35,28 +35,28 @@ function InputField({
   color = null,
   borderRadius = null,
 }) { 
-  /* 
-  This state is used to track the error state of this component via validation
-  */
+  // Track error state via input validation  
   const [error, setError] = useState({isError: false, errorMsg: ''});
 
-  /*
-  This state and subsequent useEffect are used to track if the component is in its first render. This is mainly used to
-  ensure that the submission blocking in the parent component is active (as it is first rendered, user will not
-  likely have filled anything). This also ensures that since there will be no input, the component error message
-  does not show until the user focuses and violates the validation with their input.
-  */ 
+  // Track whether component is in its first render
   const [isFirstRender, setIsFirstRender] = useState(true);
-  
+ 
+  // In first render of component, set isError to true to ensure submission blocking in the parent component 
+  // is active (as it is first rendered, user will not likely have filled anything).
+  // This also ensures that since there will be no input, the component error message does not show until 
+  // the user focuses and violates the validation with their input.  
   useEffect(() => {
     onEndEditing ? onEndEditing(isFirstRender || error.isError) : null;
     setIsFirstRender(false);
+    setError({
+      ...error,
+      isError: isRequired && value.length === 0,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
-  /* 
-  This is used to update the parent component that there is a validation error
-  Validation is passed via the onEndEditing prop.
-  */
+  // Update the parent component that there is a validation error.
+  // Validation is passed via the onEndEditing prop.
   useEffect(() => {
     if (!isFirstRender) {
       onEndEditing ? onEndEditing(error.isError) : null;
@@ -65,9 +65,7 @@ function InputField({
   }, [error, onEndEditing]);
   
 
-  /* 
-  This is used for input validation depending on the type of input data (given by the type prop)
-  */
+  // Function used for input validation depending on the type of input data (given by the type prop)
   const validateInput = () => {
     msg = ''
     if(isRequired) {
@@ -84,12 +82,8 @@ function InputField({
 
   const [inputText, setInputText] = useState(value);
 
-  /**
-   * Function to convert input to upper case. 
-   * Used instead of autoCapitalize prop bc it breaks secureTextEntry when type='password' is used
-   * 
-   * @param {string} value 
-   */
+  // Function to convert input to upper case. 
+  // Used instead of autoCapitalize prop bc it breaks secureTextEntry when type='password' is used.
   const handleOnChangeText = (value) => {
     value = value.toString();
     autoCapitalize == 'characters' ? setInputText(value.toUpperCase()) : setInputText(value);
@@ -109,7 +103,7 @@ function InputField({
         <Input 
           backgroundColor={color? color : null}
           borderColor={
-            !error.isError ? colors.light_gray3 : colors.red
+            !error.errorMsg ? colors.light_gray3 : colors.red
           }
           textAlignVertical={variant === 'multiLine' ? 'top' : 'center'}
           borderRadius={borderRadius ? borderRadius : "25"}
@@ -125,7 +119,7 @@ function InputField({
           maxLength={maxLength}
           style={styles.inputField}
         />
-        {hideError && !error.isError ? 
+        {hideError && !error.errorMsg ? 
         null : (
         <ErrorMessage message={error.errorMsg}/>
         )}        

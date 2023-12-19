@@ -52,6 +52,10 @@ function SelectionInputField({
   useEffect(() => {
     onEndEditing ? onEndEditing(isFirstRender || error.isError) : null;
     setIsFirstRender(false);
+    setError({
+      ...error,
+      isError: isRequired && value === 0,
+    });
   }, []);
 
    /* 
@@ -104,7 +108,7 @@ function SelectionInputField({
             <Select.Item key={item} label={item.label} value={item.value} />
           ))}
         </Select>
-        {hideError && !error.isError ? 
+        {hideError && !error.errorMsg ? 
         null : (
         <ErrorMessage message={error.errorMsg}/>
         )}   
