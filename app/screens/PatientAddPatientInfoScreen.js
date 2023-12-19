@@ -280,7 +280,7 @@ function PatientAddPatientInfoScreen({
                     isRequired
                     title={'First Name'}
                     value={patient.FirstName}
-                    onChangeText={handleFormData(page, 'FirstName')}
+                    onChangeText={handleFormData('FirstName')}
                     onEndEditing={handleFirstNameError}
                     dataType="name"
                   />
@@ -289,7 +289,7 @@ function PatientAddPatientInfoScreen({
                     isRequired
                     title={'Last Name'}
                     value={patient.LastName}
-                    onChangeText={handleFormData(page, 'LastName')}
+                    onChangeText={handleFormData('LastName')}
                     onEndEditing={handleLastNameError}
                     dataType="name"
                   />
@@ -298,7 +298,7 @@ function PatientAddPatientInfoScreen({
                     isRequired
                     title={'Preferred Name'}
                     value={patient.PreferredName}
-                    onChangeText={handleFormData(page, 'PreferredName')}
+                    onChangeText={handleFormData('PreferredName')}
                     onEndEditing={handlePrefNameError}                    
                     dataType="name"
                   />
@@ -308,7 +308,7 @@ function PatientAddPatientInfoScreen({
                     title={'NRIC'}
                     autoCapitalize='characters'
                     value={patient.NRIC}
-                    onChangeText={handleFormData(page, 'NRIC')}
+                    onChangeText={handleFormData('NRIC')}
                     onEndEditing={handleNRICError}
                     dataType="nric"
                   />
@@ -317,7 +317,7 @@ function PatientAddPatientInfoScreen({
                     isRequired
                     title={'Gender'}
                     value={patient.Gender}
-                    onChangeData={handleFormData(page, 'Gender')}
+                    onChangeData={handleFormData('Gender')}
                     onEndEditing={handleGenderError}
                     dataArray={listOfGenders}
                   />
@@ -328,7 +328,7 @@ function PatientAddPatientInfoScreen({
                       selectionMode={'DOB'}
                       title={'Date of Birth'}
                       value={patient.DOB}
-                      handleFormData={handleFormData(page, 'DOB')}
+                      handleFormData={handleFormData('DOB')}
                       onEndEditing={handleDOBError}
                     />
                   </View>
@@ -337,10 +337,7 @@ function PatientAddPatientInfoScreen({
                     isRequired
                     title={'Preferred Language'}
                     placeholder={'Select Language'}
-                    onDataChange={handleFormData( 
-                      page,
-                      'PreferredLanguageListID',
-                    )}
+                    onDataChange={handleFormData('PreferredLanguageListID')}
                     value={patient.PreferredLanguageListID}
                     dataArray={listOfLanguages}
                     onEndEditing={handlePrefLanguageError}
@@ -350,21 +347,21 @@ function PatientAddPatientInfoScreen({
                     isRequired
                     title={'Address'}
                     value={patient.Address}
-                    onChangeText={handleFormData(page, 'Address')}
+                    onChangeText={handleFormData('Address')}
                     onEndEditing={handleAddrError}
                   />
 
                   <InputField
                     title={'Temporary Address'}
                     value={patient.TempAddress}
-                    onChangeText={handleFormData(page, 'TempAddress')}
+                    onChangeText={handleFormData('TempAddress')}
                     onEndEditing={handleTempAddrError}
                   />
 
                   <InputField
                     title={'Home Telephone No.'}
                     value={patient.HomeNo}
-                    onChangeText={handleFormData(page, 'HomeNo')}
+                    onChangeText={handleFormData('HomeNo')}
                     onEndEditing={handleHomeNoError}
                     dataType={'home phone'}
                     keyboardType='numeric'
@@ -373,7 +370,7 @@ function PatientAddPatientInfoScreen({
                   <InputField
                     title={'Mobile No.'}
                     value={patient.HandphoneNo}
-                    onChangeText={handleFormData(page, 'HandphoneNo')}
+                    onChangeText={handleFormData('HandphoneNo')}
                     onEndEditing={handleMobileNoError}
                     dataType={'mobile phone'}
                     keyboardType='numeric'                    
@@ -383,7 +380,7 @@ function PatientAddPatientInfoScreen({
                     isRequired
                     title={'Respite Care'}
                     value={patient.IsRespiteCare}
-                    onChangeData={handleFormData(page, 'IsRespiteCare')}
+                    onChangeData={handleFormData('IsRespiteCare')}
                     dataArray={listRespiteCare}
                     onEndEditing={handleRespiteError}
                   />
@@ -393,7 +390,7 @@ function PatientAddPatientInfoScreen({
                       isRequired
                       title={'Date of Joining'}
                       value={patient.StartDate}
-                      handleFormData={handleFormData(page, 'StartDate')}
+                      handleFormData={handleFormData('StartDate')}
                       onEndEditing={handleJoiningError}
                       minimumInputDate={minimumJoiningDate}
                       maximumInputDate={maximumJoiningDate}
@@ -403,7 +400,7 @@ function PatientAddPatientInfoScreen({
                   <SingleOptionCheckBox
                     title={'Check this box to specify Date of Leaving'}
                     value={patient.IsChecked}
-                    onChangeData={handleFormData(page, 'IsChecked')}
+                    onChangeData={handleFormData('IsChecked')}
                     accessibilityText={
                       'Do you wish to key in the Date of Leaving?'
                     }
@@ -413,7 +410,7 @@ function PatientAddPatientInfoScreen({
                   {formData.patientInfo.IsChecked ? (
                     <DateInputField
                       title={'Date of Leaving'}
-                      handleFormData={handleFormData(page, 'EndDate')}
+                      handleFormData={handleFormData('EndDate')}
                       value={patient.EndDate}
                       onEndEditing={handleLeavingError}
                     />
