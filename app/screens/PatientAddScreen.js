@@ -222,7 +222,7 @@ function PatientAddScreen() {
         patientInfo : newData,
       }));
 
-      console.log(newData)
+      // console.log(newData)
     };
 
   /*

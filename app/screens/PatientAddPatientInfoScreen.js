@@ -1,5 +1,5 @@
 // Base
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, Platform, View } from 'react-native';
 import {
   Box,
@@ -101,61 +101,175 @@ function PatientAddPatientInfoScreen({
   /*
   Functions for error state reporting for the child components
   */   
-  const handleFirstNameError = (e) => {
-    setIsFirstNameError(e);
-  }
+  // const handleFirstNameError = (e) => {
+  //   console.log(11111, e)
+  //   setIsFirstNameError(e);
+  // }
 
-  const handleLastNameError = (e) => {
-    setIsLastNameError(e);
-  }
+  // const handleLastNameError = (e) => {
+  //   setIsLastNameError(e);
+  // }
   
-  const handlePrefNameError = (e) => {
-    setIsPrefNameError(e);
-  }
+  // const handlePrefNameError = (e) => {
+  //   setIsPrefNameError(e);
+  // }
   
-  const handleNRICError = (e) => {
-    setIsNRICError(e);
-  }
+  // const handleNRICError = (e) => {
+  //   setIsNRICError(e);
+  // }
     
-  const handleAddrError = (e) => {
-    setIsAddrError(e);
-  }
+  // const handleAddrError = (e) => {
+  //   setIsAddrError(e);
+  // }
   
-  const handleTempAddrError = (e) => {
-    setIsTempAddrError(e);
-  }
+  // const handleTempAddrError = (e) => {
+  //   setIsTempAddrError(e);
+  // }
   
-  const handleHomeNoError = (e) => {
-    setIsHomeNoError(e);
-  }
+  // const handleHomeNoError = (e) => {
+  //   setIsHomeNoError(e);
+  // }
   
-  const handleMobileNoError = (e) => {
-    setIsMobileNoError(e);
-  }
+  // const handleMobileNoError = (e) => {
+  //   setIsMobileNoError(e);
+  // }
   
-  const handleDOBError = (e) => {
-    setIsDOBError(e);
-  }
+  // const handleDOBError = (e) => {
+  //   setIsDOBError(e);
+  // }
   
-  const handleJoiningError = (e) => {
-    setIsJoiningError(e);
-  }
+  // const handleJoiningError = (e) => {
+  //   setIsJoiningError(e);
+  // }
   
-  const handleLeavingError = (e) => {
-    setIsLeavingError(e);
-  }
+  // const handleLeavingError = (e) => {
+  //   setIsLeavingError(e);
+  // }
   
-  const handlePrefLanguageError = (e) => {
-    setPrefLanguageError(e);
-  }
+  // const handlePrefLanguageError = (e) => {
+  //   setPrefLanguageError(e);
+  // }
   
-  const handleGenderError = (e) => {
-    setIsGenderError(e);
-  }
+  // const handleGenderError = (e) => {
+  //   setIsGenderError(e);
+  // }
 
-  const handleRespiteError = (e) => {
-    setIsRespiteError(e);
-  }
+  // const handleRespiteError = (e) => {
+  //   setIsRespiteError(e);
+  // }
+
+  const handleFirstNameError = useCallback(
+    (state) => {
+      setIsFirstNameError(state);
+      console.log('FirstName: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isFirstNameError],
+  );
+  const handleLastNameError = useCallback(
+    (state) => {
+      setIsLastNameError(state);
+      // console.log('LastName: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isLastNameError],
+  );
+  const handlePrefNameError = useCallback(
+    (state) => {
+      setIsPrefNameError(state);
+      // console.log('prefName: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isPrefNameError],
+  );
+  const handleNRICError = useCallback(
+    (state) => {
+      setIsNRICError(state);
+      // console.log('NRIC: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isNRICError],
+  );
+  const handleAddrError = useCallback(
+    (state) => {
+      setIsAddrError(state);
+      // console.log('Addr: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isAddrError],
+  );
+  const handleTempAddrError = useCallback(
+    (state) => {
+      setIsTempAddrError(state);
+      // console.log('TempAddr: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isTempAddrError],
+  );
+  const handleHomeNoError = useCallback(
+    (state) => {
+      setIsHomeNoError(state);
+      // console.log('HomeTele: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isHomeTeleError],
+  );
+  const handleMobileNoError = useCallback(
+    (state) => {
+      setIsMobileNoError(state);
+      // console.log('Mobile: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isMobileError],
+  );
+  const handleDOBError = useCallback(
+    (state) => {
+      setIsDOBError(state);
+      // console.log('DOB: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isDOBError],
+  );
+  const handleJoiningError = useCallback(
+    (state) => {
+      setIsJoiningError(state);
+      // console.log('joining: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isJoiningError],
+  );
+  const handleLeavingError = useCallback(
+    (state) => {
+      setIsLeavingError(state);
+      // console.log('leaving: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isLeavingError],
+  );
+  const handlePrefLanguageError = useCallback(
+    (state) => {
+      setPrefLanguageError(state);
+      // console.log('leaving: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isPrefLanguageError],
+  );
+  const handleGenderError = useCallback(
+    (state) => {
+      setIsGenderError(state);
+      // console.log('leaving: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isGenderError],
+  );
+  const handleRespiteError = useCallback(
+    (state) => {
+      setIsRespiteError(state);
+      // console.log('leaving: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isRespiteError],
+  );
 
   /*
   This useEffect enables the page to show correct error checking
@@ -273,7 +387,7 @@ function PatientAddPatientInfoScreen({
                     title={'First Name'}
                     value={patient.FirstName}
                     onChangeText={handleFormData(page, 'FirstName')}
-                    onChildData={handleFirstNameError}
+                    onEndEditing={handleFirstNameError}
                     dataType="name"
                   />
 
@@ -282,7 +396,7 @@ function PatientAddPatientInfoScreen({
                     title={'Last Name'}
                     value={patient.LastName}
                     onChangeText={handleFormData(page, 'LastName')}
-                    onChildData={handleLastNameError}
+                    onEndEditing={handleLastNameError}
                     dataType="name"
                   />
 
@@ -291,7 +405,7 @@ function PatientAddPatientInfoScreen({
                     title={'Preferred Name'}
                     value={patient.PreferredName}
                     onChangeText={handleFormData(page, 'PreferredName')}
-                    onChildData={handlePrefNameError}                    
+                    onEndEditing={handlePrefNameError}                    
                     dataType="name"
                   />
 
@@ -301,7 +415,7 @@ function PatientAddPatientInfoScreen({
                     autoCapitalize='characters'
                     value={patient.NRIC}
                     onChangeText={handleFormData(page, 'NRIC')}
-                    onChildData={handleNRICError}
+                    onEndEditing={handleNRICError}
                     dataType="nric"
                   />
                 
@@ -310,7 +424,7 @@ function PatientAddPatientInfoScreen({
                     title={'Gender'}
                     value={patient.Gender}
                     onChangeData={handleFormData(page, 'Gender')}
-                    onChildData={handleGenderError}
+                    onEndEditing={handleGenderError}
                     dataArray={listOfGenders}
                   />
 
@@ -321,7 +435,7 @@ function PatientAddPatientInfoScreen({
                       title={'Date of Birth'}
                       value={patient.DOB}
                       handleFormData={handleFormData(page, 'DOB')}
-                      onChildData={handleDOBError}
+                      onEndEditing={handleDOBError}
                     />
                   </View>
                   
@@ -335,7 +449,7 @@ function PatientAddPatientInfoScreen({
                     )}
                     value={patient.PreferredLanguageListID}
                     dataArray={listOfLanguages}
-                    onChildData={handlePrefLanguageError}
+                    onEndEditing={handlePrefLanguageError}
                   />
 
                   <InputField
@@ -343,21 +457,21 @@ function PatientAddPatientInfoScreen({
                     title={'Address'}
                     value={patient.Address}
                     onChangeText={handleFormData(page, 'Address')}
-                    onChildData={handleAddrError}
+                    onEndEditing={handleAddrError}
                   />
 
                   <InputField
                     title={'Temporary Address'}
                     value={patient.TempAddress}
                     onChangeText={handleFormData(page, 'TempAddress')}
-                    onChildData={handleTempAddrError}
+                    onEndEditing={handleTempAddrError}
                   />
 
                   <InputField
                     title={'Home Telephone No.'}
                     value={patient.HomeNo}
                     onChangeText={handleFormData(page, 'HomeNo')}
-                    onChildData={handleHomeNoError}
+                    onEndEditing={handleHomeNoError}
                     dataType={'home phone'}
                     keyboardType='numeric'
                   />
@@ -366,7 +480,7 @@ function PatientAddPatientInfoScreen({
                     title={'Mobile No.'}
                     value={patient.HandphoneNo}
                     onChangeText={handleFormData(page, 'HandphoneNo')}
-                    onChildData={handleMobileNoError}
+                    onEndEditing={handleMobileNoError}
                     dataType={'mobile phone'}
                     keyboardType='numeric'                    
                   />
@@ -377,7 +491,7 @@ function PatientAddPatientInfoScreen({
                     value={patient.IsRespiteCare}
                     onChangeData={handleFormData(page, 'IsRespiteCare')}
                     dataArray={listRespiteCare}
-                    onChildData={handleRespiteError}
+                    onEndEditing={handleRespiteError}
                   />
 
                   <View style={styles.dateSelectionContainer}>
@@ -386,7 +500,7 @@ function PatientAddPatientInfoScreen({
                       title={'Date of Joining'}
                       value={patient.StartDate}
                       handleFormData={handleFormData(page, 'StartDate')}
-                      onChildData={handleJoiningError}
+                      onEndEditing={handleJoiningError}
                       minimumInputDate={minimumJoiningDate}
                       maximumInputDate={maximumJoiningDate}
                     />
@@ -407,7 +521,7 @@ function PatientAddPatientInfoScreen({
                       title={'Date of Leaving'}
                       handleFormData={handleFormData(page, 'EndDate')}
                       value={patient.EndDate}
-                      onChildData={handleLeavingError}
+                      onEndEditing={handleLeavingError}
                     />
                   ) : null}
                 </View>
