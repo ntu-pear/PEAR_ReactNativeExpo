@@ -1,6 +1,6 @@
 export const parseSelectOptions = (array) => {
   let options = [];
-  for(i in array){
+  for(i=0; i<array.length; i++){
     options.push({label: array[i], value: i+1})
   }
   return options;
