@@ -143,7 +143,7 @@ function PatientAddScreen() {
 
   // Function to launch image picker and handle image picking.
   // Reference: https://docs.expo.dev/versions/latest/sdk/imagepicker/
-  const pickImage = (page, input) => async () => {
+  const pickImage = (input) => async () => {
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,

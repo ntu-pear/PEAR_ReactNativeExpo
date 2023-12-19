@@ -39,8 +39,8 @@ function PatientAddPatientInfoScreen({
   formData,
   pickImage,
 }) {
-  const page = 'patientInfo';
   const patient = formData.patientInfo;
+
   const { data, isError, isLoading } = useGetSelectionOptions('Language');
 
   // Screen error state: This = true when the child components report error(input fields)
@@ -243,7 +243,7 @@ function PatientAddPatientInfoScreen({
                     <Box mt="3.5" mb="3.5" overflow="hidden" rounded="lg">
                       <Center>
                         <Pressable
-                          onPress={pickImage(page, 'UploadProfilePicture')}
+                          onPress={pickImage('UploadProfilePicture')}
                         >
                           <Image
                             alt="patient_image"
