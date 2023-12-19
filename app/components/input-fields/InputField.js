@@ -90,6 +90,7 @@ function InputField({
    * @param {string} value 
    */
   const handleOnChangeText = (value) => {
+    value = value.toString();
     autoCapitalize == 'characters' ? setInputText(value.toUpperCase()) : setInputText(value);
     onChangeText(value);
   }

@@ -20,7 +20,7 @@ function SelectionInputField({
   hideError = true,
   showTitle = true,
   title = '',
-  placeholder: placeholder,
+  placeholder = '',
   onDataChange = () => {},
   value = '',
   dataArray = [],
