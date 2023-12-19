@@ -39,13 +39,32 @@ function PatientAddPatientInfoScreen({
   formData,
   pickImage,
 }) {
-  const patient = formData.patientInfo;
+  const page = 'patientInfo';
+  const patient = formData[page];
 
+  // variables relatied to retrieving preferred language select options from API
   const { data, isError, isLoading } = useGetSelectionOptions('Language');
+  
+  // set initial value for preferred language select field
+  const [listOfLanguages, setListOfLanguages] = useState(parseSelectOptions([
+    'Cantonese',
+    'English',
+    'Hainanese',
+    'Hakka',
+    'Hindi',
+    'Hokkien',
+    'Malay',
+    'Mandarin',
+    'Tamil',
+    'Teochew',
+    'Japanese',
+    'Spanish',
+    'Korean',
+  ]));
 
   // Screen error state: This = true when the child components report error(input fields)
   // Enables use of dynamic rendering of components when the page error = true/false.
-  const [isInputErrors, setIsInputErrors] = useState(true);
+  const [isInputErrors, setIsInputErrors] = useState(false);
 
   // Input error states (Child components)
   // This records the error states of each child component (ones that require tracking).
@@ -70,25 +89,7 @@ function PatientAddPatientInfoScreen({
   const maximumJoiningDate = new Date();
   maximumJoiningDate.setDate(maximumJoiningDate.getDate() + 30); // 30 days later
 
-  // set initial value for SelectionInputField dataArray prop -> follow format of "label" and "value"
-  const listOfLanguagesArray = [
-    'Cantonese',
-    'English',
-    'Hainanese',
-    'Hakka',
-    'Hindi',
-    'Hokkien',
-    'Malay',
-    'Mandarin',
-    'Tamil',
-    'Teochew',
-    'Japanese',
-    'Spanish',
-    'Korean',
-  ]
-  const [listOfLanguages, setListOfLanguages] = useState(parseSelectOptions(listOfLanguagesArray));
-
-  // use for the RadioButtonInput dataArray prop -> follow format of "label" and "value"
+  // used for the RadioButtonInput dataArray prop -> follow format of "label" and "value"
   const listOfGenders = [
     { label: 'Male', value: 'M' },
     { label: 'Female', value: 'F' },
@@ -118,7 +119,22 @@ function PatientAddPatientInfoScreen({
     setIsNRICError(e);
     // console.log("nric", e)
   }
-    
+      
+  const handleGenderError = (e) => {
+    setIsGenderError(e);
+    // console.log("gender", e)
+  }
+  
+  const handleDOBError = (e) => {
+    setIsDOBError(e);
+    // console.log("dob", e)
+  }
+  
+  const handlePrefLanguageError = (e) => {
+    setPrefLanguageError(e);
+    // console.log("language", e)
+  }
+  
   const handleAddrError = (e) => {
     setIsAddrError(e);
     // console.log("addr", e)
@@ -138,12 +154,12 @@ function PatientAddPatientInfoScreen({
     setIsMobileNoError(e);
     // console.log("mobile", e)
   }
-  
-  const handleDOBError = (e) => {
-    setIsDOBError(e);
-    // console.log("dob", e)
+
+  const handleRespiteError = (e) => {
+    setIsRespiteError(e);
+    // console.log("respite", e)
   }
-  
+
   const handleJoiningError = (e) => {
     setIsJoiningError(e);
     // console.log("joining", e)
@@ -153,21 +169,7 @@ function PatientAddPatientInfoScreen({
     setIsLeavingError(e);
     // console.log("leaving", e)
   }
-  
-  const handlePrefLanguageError = (e) => {
-    setPrefLanguageError(e);
-    // console.log("language", e)
-  }
-  
-  const handleGenderError = (e) => {
-    setIsGenderError(e);
-    // console.log("gender", e)
-  }
 
-  const handleRespiteError = (e) => {
-    setIsRespiteError(e);
-    // console.log("respite", e)
-  }
 
   // This useEffect enables the page to show correct error checking.
   // The main isInputErrors is responsible for the error state of the screen.
@@ -179,14 +181,14 @@ function PatientAddPatientInfoScreen({
       isLastNameError ||
       isPrefNameError ||
       isNRICError ||
+      isGenderError ||
+      isDOBError ||
       isAddrError ||
       isTempAddrError ||
       isHomeTeleError ||
       isMobileError ||
-      isDOBError ||
-      isJoiningError ||
       isRespiteError ||
-      isGenderError ||
+      isJoiningError ||
       isLeavingError,
     );
   }, [
@@ -194,15 +196,15 @@ function PatientAddPatientInfoScreen({
     isLastNameError,
     isPrefNameError,
     isNRICError,
+    isGenderError,
+    isDOBError,
     isAddrError,
     isTempAddrError,
     isHomeTeleError,
     isMobileError,
-    isDOBError,
+    isRespiteError,
     isJoiningError,
     isLeavingError,
-    isRespiteError,
-    isGenderError,
   ]);
 
   // Try to get langugage list from backend. If retrieval from the hook is successful, replace the content in
