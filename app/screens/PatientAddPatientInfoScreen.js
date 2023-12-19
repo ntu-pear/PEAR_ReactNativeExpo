@@ -98,184 +98,80 @@ function PatientAddPatientInfoScreen({
     { label: 'No', value: false },
   ];
 
-  /*
-  Functions for error state reporting for the child components
-  */   
-  // const handleFirstNameError = (e) => {
-  //   console.log(11111, e)
-  //   setIsFirstNameError(e);
-  // }
-
-  // const handleLastNameError = (e) => {
-  //   setIsLastNameError(e);
-  // }
+  // Functions for error state reporting for the child components  
+  const handleFirstNameError = (e) => {
+    setIsFirstNameError(e);
+    // console.log("first name", e)
+  }
   
-  // const handlePrefNameError = (e) => {
-  //   setIsPrefNameError(e);
-  // }
+  const handleLastNameError = (e) => {
+    setIsLastNameError(e);
+    // console.log("last name", e)
+  }
   
-  // const handleNRICError = (e) => {
-  //   setIsNRICError(e);
-  // }
+  const handlePrefNameError = (e) => {
+    setIsPrefNameError(e);
+    // console.log("pref name", e)
+  }
+  
+  const handleNRICError = (e) => {
+    setIsNRICError(e);
+    // console.log("nric", e)
+  }
     
-  // const handleAddrError = (e) => {
-  //   setIsAddrError(e);
-  // }
+  const handleAddrError = (e) => {
+    setIsAddrError(e);
+    // console.log("addr", e)
+  }
   
-  // const handleTempAddrError = (e) => {
-  //   setIsTempAddrError(e);
-  // }
+  const handleTempAddrError = (e) => {
+    setIsTempAddrError(e);
+    // console.log("temp addr", e)
+  }
   
-  // const handleHomeNoError = (e) => {
-  //   setIsHomeNoError(e);
-  // }
+  const handleHomeNoError = (e) => {
+    setIsHomeNoError(e);
+    // console.log("home", e)
+  }
   
-  // const handleMobileNoError = (e) => {
-  //   setIsMobileNoError(e);
-  // }
+  const handleMobileNoError = (e) => {
+    setIsMobileNoError(e);
+    // console.log("mobile", e)
+  }
   
-  // const handleDOBError = (e) => {
-  //   setIsDOBError(e);
-  // }
+  const handleDOBError = (e) => {
+    setIsDOBError(e);
+    // console.log("dob", e)
+  }
   
-  // const handleJoiningError = (e) => {
-  //   setIsJoiningError(e);
-  // }
+  const handleJoiningError = (e) => {
+    setIsJoiningError(e);
+    // console.log("joining", e)
+  }
   
-  // const handleLeavingError = (e) => {
-  //   setIsLeavingError(e);
-  // }
+  const handleLeavingError = (e) => {
+    setIsLeavingError(e);
+    // console.log("leaving", e)
+  }
   
-  // const handlePrefLanguageError = (e) => {
-  //   setPrefLanguageError(e);
-  // }
+  const handlePrefLanguageError = (e) => {
+    setPrefLanguageError(e);
+    // console.log("language", e)
+  }
   
-  // const handleGenderError = (e) => {
-  //   setIsGenderError(e);
-  // }
+  const handleGenderError = (e) => {
+    setIsGenderError(e);
+    // console.log("gender", e)
+  }
 
-  // const handleRespiteError = (e) => {
-  //   setIsRespiteError(e);
-  // }
+  const handleRespiteError = (e) => {
+    setIsRespiteError(e);
+    // console.log("respite", e)
+  }
 
-  const handleFirstNameError = useCallback(
-    (state) => {
-      setIsFirstNameError(state);
-      console.log('FirstName: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isFirstNameError],
-  );
-  const handleLastNameError = useCallback(
-    (state) => {
-      setIsLastNameError(state);
-      // console.log('LastName: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isLastNameError],
-  );
-  const handlePrefNameError = useCallback(
-    (state) => {
-      setIsPrefNameError(state);
-      // console.log('prefName: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isPrefNameError],
-  );
-  const handleNRICError = useCallback(
-    (state) => {
-      setIsNRICError(state);
-      // console.log('NRIC: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isNRICError],
-  );
-  const handleAddrError = useCallback(
-    (state) => {
-      setIsAddrError(state);
-      // console.log('Addr: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isAddrError],
-  );
-  const handleTempAddrError = useCallback(
-    (state) => {
-      setIsTempAddrError(state);
-      // console.log('TempAddr: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isTempAddrError],
-  );
-  const handleHomeNoError = useCallback(
-    (state) => {
-      setIsHomeNoError(state);
-      // console.log('HomeTele: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isHomeTeleError],
-  );
-  const handleMobileNoError = useCallback(
-    (state) => {
-      setIsMobileNoError(state);
-      // console.log('Mobile: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isMobileError],
-  );
-  const handleDOBError = useCallback(
-    (state) => {
-      setIsDOBError(state);
-      // console.log('DOB: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isDOBError],
-  );
-  const handleJoiningError = useCallback(
-    (state) => {
-      setIsJoiningError(state);
-      // console.log('joining: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isJoiningError],
-  );
-  const handleLeavingError = useCallback(
-    (state) => {
-      setIsLeavingError(state);
-      // console.log('leaving: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isLeavingError],
-  );
-  const handlePrefLanguageError = useCallback(
-    (state) => {
-      setPrefLanguageError(state);
-      // console.log('leaving: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isPrefLanguageError],
-  );
-  const handleGenderError = useCallback(
-    (state) => {
-      setIsGenderError(state);
-      // console.log('leaving: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isGenderError],
-  );
-  const handleRespiteError = useCallback(
-    (state) => {
-      setIsRespiteError(state);
-      // console.log('leaving: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isRespiteError],
-  );
-
-  /*
-  This useEffect enables the page to show correct error checking
-  The main isInputErrors is responsible for the error state of the screen
-  This state will be true whenever any child input components are in error state.
-  */  
+  // This useEffect enables the page to show correct error checking.
+  // The main isInputErrors is responsible for the error state of the screen.
+  // This state will be true whenever any child input components are in error state. 
   useEffect(() => {
     console.log("Setting input errors")
     setIsInputErrors(
@@ -309,10 +205,8 @@ function PatientAddPatientInfoScreen({
     isGenderError,
   ]);
 
-  /*
-  Try to get langugage list from backend. If retrieval from the hook is successful, replace the content in
-  listOfLanguages with the retrieved one. 
-  */
+  // Try to get langugage list from backend. If retrieval from the hook is successful, replace the content in
+  // listOfLanguages with the retrieved one. 
   useEffect(() => {
     if (!isLoading && !isError && data) {
       console.log('selection data!');
