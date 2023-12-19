@@ -201,31 +201,20 @@ function PatientAddScreen() {
     }
   }
   
-  const handlePatientData = (x, field) => 
-    (e, date = null) => {
+  const handlePatientData = (page, field) => ( e, date = null) => {
       setShowFalse(field)
+
       const newData = formData.patientInfo;
-      if (
-        field === 'HomeNo' ||
-        field === 'HandphoneNo' ||
-        field === 'Address' ||
-        field === 'TempAddress'
-      ) {
-        newData[field] = e.toString(); // convert to string
-      } else if (field === 'IsChecked') {
-        newData[field] = !formData.patientInfo.IsChecked; // opposite boolean value of IsChecked
+
+      if (field === 'IsChecked') {
+        newData[field] = !formData.patientInfo.IsChecked;
         if (!newData[field]) {
-          // if IsChecked is false, reset End Date to beginning of epoch time
-          newData.EndDate = new Date(0);
+          newData.EndDate = new Date(0); // if IsChecked is false, reset End Date to beginning of epoch time
         }
+      } else if (field === 'PreferredLanguageListID') {
+        newData[field] = parseInt(e);
       } else {
-        newData[field] = date
-          ? date
-          : e.$d //e['$d']-check if input from MUI date-picker
-          ? e.$d
-          : parseInt(e) // check if integer (for dropdown)
-          ? parseInt(e) // change to integer
-          : e; // eg. guardianInfo[0].FirstName = e
+        newData[field] = e; 
       }
 
       setFormData((prevState) => ({

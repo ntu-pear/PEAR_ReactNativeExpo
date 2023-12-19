@@ -45,7 +45,7 @@ function PatientAddPatientInfoScreen({
 
   // Screen error state: This = true when the child components report error(input fields)
   // Enables use of dynamic rendering of components when the page error = true/false.
-  const [isInputErrors, setIsInputErrors] = useState(false);
+  const [isInputErrors, setIsInputErrors] = useState(true);
 
   // Input error states (Child components)
   // This records the error states of each child component (ones that require tracking).
@@ -99,7 +99,7 @@ function PatientAddPatientInfoScreen({
   ];
 
   /*
-  Callback functions for error state reporting for the child components
+  Functions for error state reporting for the child components
   */   
   const handleFirstNameError = (e) => {
     setIsFirstNameError(e);
@@ -157,26 +157,27 @@ function PatientAddPatientInfoScreen({
     setIsRespiteError(e);
   }
 
-  /**
-   * This useEffect enables the page to show correct error checking
-   * The main isInputErrors is responsible for the error state of the screen
-   * This state will be true whenever any child input components are in error state.
-   */  
+  /*
+  This useEffect enables the page to show correct error checking
+  The main isInputErrors is responsible for the error state of the screen
+  This state will be true whenever any child input components are in error state.
+  */  
   useEffect(() => {
+    console.log("Setting input errors")
     setIsInputErrors(
       isFirstNameError ||
-        isLastNameError ||
-        isPrefNameError ||
-        isNRICError ||
-        isAddrError ||
-        isTempAddrError ||
-        isHomeTeleError ||
-        isMobileError ||
-        isDOBError ||
-        isJoiningError ||
-        isRespiteError ||
-        isGenderError ||
-        isLeavingError,
+      isLastNameError ||
+      isPrefNameError ||
+      isNRICError ||
+      isAddrError ||
+      isTempAddrError ||
+      isHomeTeleError ||
+      isMobileError ||
+      isDOBError ||
+      isJoiningError ||
+      isRespiteError ||
+      isGenderError ||
+      isLeavingError,
     );
   }, [
     isFirstNameError,
@@ -298,7 +299,7 @@ function PatientAddPatientInfoScreen({
                     isRequired
                     title={'NRIC'}
                     autoCapitalize='characters'
-                    value={(patient.NRIC).toString().toUpperCase()}
+                    value={patient.NRIC}
                     onChangeText={handleFormData(page, 'NRIC')}
                     onChildData={handleNRICError}
                     dataType="nric"
