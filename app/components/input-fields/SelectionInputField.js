@@ -39,7 +39,7 @@ function SelectionInputField({
   /* 
   This state is used to track the error state of this component via validation
   */
-  const [errorMsg, setErrorMsg] = useState(null);
+  const [error, setError] = useState({isError: false, errorMsg: ''});
 
   /*
   This state is used to track the value of the selected item
@@ -50,12 +50,8 @@ function SelectionInputField({
 
 
   useEffect(() => {
-    onEndEditing ? onEndEditing(isFirstRender || errorMsg.error) : null;
+    onEndEditing ? onEndEditing(isFirstRender || error.isError) : null;
     setIsFirstRender(false);
-    if(isRequired) {
-      setErrorMsg(notUnselected(selectedValue));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
    /* 
@@ -64,10 +60,10 @@ function SelectionInputField({
   */
   useEffect(() => {
     if (!isFirstRender) {
-      onEndEditing ? onEndEditing(errorMsg) : null;
+      onEndEditing ? onEndEditing(error.isError) : null;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [errorMsg, onEndEditing]);
+  }, [error, onEndEditing]);
 
   /*
   This is used to update the selected item
@@ -108,9 +104,9 @@ function SelectionInputField({
             <Select.Item key={item} label={item.label} value={item.value} />
           ))}
         </Select>
-        {hideError && !errorMsg ? 
+        {hideError && !error.isError ? 
         null : (
-        <ErrorMessage message={errorMsg}/>
+        <ErrorMessage message={error.errorMsg}/>
         )}   
         </VStack>
     </View>

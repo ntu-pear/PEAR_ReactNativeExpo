@@ -35,6 +35,11 @@ function InputField({
   color = null,
   borderRadius = null,
 }) { 
+  /* 
+  This state is used to track the error state of this component via validation
+  */
+  const [error, setError] = useState({isError: false, errorMsg: ''});
+
   /*
   This state and subsequent useEffect are used to track if the component is in its first render. This is mainly used to
   ensure that the submission blocking in the parent component is active (as it is first rendered, user will not
@@ -44,7 +49,7 @@ function InputField({
   const [isFirstRender, setIsFirstRender] = useState(true);
   
   useEffect(() => {
-    onEndEditing ? onEndEditing(isFirstRender || errorMsg) : null;
+    onEndEditing ? onEndEditing(isFirstRender || error.isError) : null;
     setIsFirstRender(false);
   }, []);
   
@@ -54,15 +59,11 @@ function InputField({
   */
   useEffect(() => {
     if (!isFirstRender) {
-      onEndEditing ? onEndEditing(errorMsg) : null;
+      onEndEditing ? onEndEditing(error.isError) : null;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [errorMsg, onEndEditing]);
+  }, [error, onEndEditing]);
   
-  /* 
-  This state is used to track the error state of this component via validation
-  */
-  const [errorMsg, setErrorMsg] = useState(null);
 
   /* 
   This is used for input validation depending on the type of input data (given by the type prop)
@@ -78,7 +79,7 @@ function InputField({
         msg = msg || validationFunction(value);
       }
     }
-    setErrorMsg(msg);
+    setError({isError: msg ? true: false, errorMsg: msg});
   }
 
   const [inputText, setInputText] = useState(value);
@@ -96,11 +97,11 @@ function InputField({
   }
 
   return (
-    <View style={styles.ComponentContainer}>
+    <View style={styles.componentContainer}>
       <VStack>
         {
           showTitle ? (
-            <Text style={styles.TitleMsg}>
+            <Text style={styles.titleMsg}>
               {title}:{isRequired ? <RequiredIndicator/> : ''}
             </Text>
           ) : null
@@ -108,7 +109,7 @@ function InputField({
         <Input 
           backgroundColor={color? color : null}
           borderColor={
-            !errorMsg ? colors.light_gray3 : colors.red
+            !error.isError ? colors.light_gray3 : colors.red
           }
           textAlignVertical={variant === 'multiLine' ? 'top' : 'center'}
           borderRadius={borderRadius ? borderRadius : "25"}
@@ -122,11 +123,11 @@ function InputField({
           type={type}
           keyboardType={keyboardType}
           maxLength={maxLength}
-          style={styles.InputField}
+          style={styles.inputField}
         />
-        {hideError && !errorMsg ? 
+        {hideError && !error.isError ? 
         null : (
-        <ErrorMessage message={errorMsg}/>
+        <ErrorMessage message={error.errorMsg}/>
         )}        
       </VStack>
     </View>
@@ -140,13 +141,13 @@ InputField.propTypes = {
 };
 
 const styles = StyleSheet.create({
-  ComponentContainer: {
+  componentContainer: {
     display: 'flex',
     width: '100%',
     marginTop: 5,
     justifyContent: 'flex-start',
   },
-  TitleMsg: {
+  titleMsg: {
     fontSize: 13.5,
     fontWeight: 'bold',
     marginBottom: 5,
@@ -154,16 +155,16 @@ const styles = StyleSheet.create({
     color: colors.light_gray2,
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
   },
-  ErrorMsg: {
+  errorMsg: {
     color: colors.red,
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
     fontSize: 15,
   },
-  RequiredIndicator: {
+  requiredIndicator: {
     color: colors.red,
     fontSize: 18,
   },
-  InputField: {
+  inputField: {
     fontSize: 16,
     width: '100%',
     color: colors.black_var1,
