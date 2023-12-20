@@ -21,7 +21,7 @@ function PatientAddScreen() {
   const navigation = useNavigation();
 
   // State to keep track of which page of the form is loaded
-  const [step, setStep] = useState(3);
+  const [step, setStep] = useState(1);
 
   //  State for components
   const [componentList, setComponentList] = useState({

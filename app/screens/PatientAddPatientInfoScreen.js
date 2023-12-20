@@ -174,7 +174,6 @@ function PatientAddPatientInfoScreen({
   // The main isInputErrors is responsible for the error state of the screen.
   // This state will be true whenever any child input components are in error state. 
   useEffect(() => {
-    console.log("Setting input errors")
     setIsInputErrors(
       isFirstNameError ||
       isLastNameError ||
