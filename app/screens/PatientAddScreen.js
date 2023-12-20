@@ -21,14 +21,7 @@ function PatientAddScreen() {
   const navigation = useNavigation();
 
   // State to keep track of which page of the form is loaded
-  const [step, setStep] = useState(1);
-  
-  // State to keep track of whether specific datepicker is open
-  const [show, setShow] = useState({
-    DOB: false,
-    StartDate: false,
-    EndDate: false,
-  });
+  const [step, setStep] = useState(3);
 
   //  State for components
   const [componentList, setComponentList] = useState({
@@ -101,7 +94,7 @@ function PatientAddScreen() {
 
   const [formData, setFormData] = useState(addPatientData);
 
-  
+  // Function to handle form sections which can have multiple items (like allergies/guardians - can have multiple) 
   const componentHandler = (page = '', list = []) => {
     console.log(1, list)
     if (list) {
@@ -167,22 +160,9 @@ function PatientAddScreen() {
       }));
     }
   };
-  
-  
-  //  Set show of a field as false when date is selected on a specific datepicker
-  const setShowFalse = (field) => {
-    if (Platform.OS === 'android') {
-      setShow((prevState) => ({
-        ...prevState,
-        [field]: false,
-      }));
-    }
-  }
  
   // Function to update patient data
   const handlePatientData = (field) => (e) => {
-    setShowFalse(field)
-
     const newData = formData.patientInfo;
 
     if (field === 'IsChecked') {
@@ -200,100 +180,44 @@ function PatientAddScreen() {
       ...prevState,
       patientInfo : newData,
     }));
+  };
+  
+
+  // Function to update patient data
+  const handleGuardianData = (field, i) => (e) => {
+    const newData = formData.guardianInfo;    
+
+    if (field === 'RelationshipID') {
+      newData[i][field] = parseInt(e);
+    } else {
+      newData[i][field] = e; 
+    }
+
+    setFormData((prevState) => ({
+      ...prevState,
+      guardianInfo : newData,
+    }));
+
+    console.log(newData)
   };
 
   // Function to update patient data
-  const handleGuardianData = (field) => (e) => {
-    setShowFalse(field)
+  const handleAllergyData = (field, i) => (e) => {
+    const newData = formData.allergyInfo;    
 
-    const newData = formData.patientInfo;
-
-    if (field === 'IsChecked') {
-      newData[field] = !formData.patientInfo.IsChecked;
-      if (!newData[field]) {
-        newData.EndDate = new Date(0); // if IsChecked is false, reset End Date to beginning of epoch time
-      }
-    } else if (field === 'PreferredLanguageListID') {
-      newData[field] = parseInt(e);
+    if (field === 'AllergyListID' || field === 'AllergyReactionListID') {
+      newData[i][field] = parseInt(e);
     } else {
-      newData[field] = e; 
+      newData[i][field] = e; 
     }
 
     setFormData((prevState) => ({
       ...prevState,
-      patientInfo : newData,
+      allergyInfo : newData,
     }));
+
+    console.log(newData)
   };
-
-  // Function to handle form input data by taking onchange value and updating our previous form data state
-  const handleFormData = 
-    (page = '', input, index = null) =>
-    (e, date = null) => {
-      // set show as false when date is selected on datepicker
-      // console.log('index: ', page, index);
-      if (Platform.OS === 'android') {
-        setShow((prevState) => ({
-          ...prevState,
-          [input]: false,
-        }));
-      }
-      if (page === 'patientInfo') {
-        const newData = formData[page];
-        // additional check to convert HomeNo and HandphoneNo to string
-        if (
-          input === 'HomeNo' ||
-          input === 'HandphoneNo' ||
-          // BUGFIX: Address not saved properly when number specifed first -- Justin
-          // soln: Address is included: fixes a bug where if number is specified first address will not be captured properly
-          // i.e: '123 abc lane' -- saved as --> '123'
-          input === 'Address' ||
-          input === 'TempAddress'
-        ) {
-          newData[input] = e.toString(); // convert to string
-        } else if (input === 'IsChecked') {
-          newData[input] = !formData.patientInfo.IsChecked; // opposite boolean value of IsChecked
-          if (!newData[input]) {
-            // if IsChecked is false, reset End Date to beginning of epoch time
-            newData.EndDate = new Date(0);
-          }
-        } else {
-          newData[input] = date
-            ? date
-            : e.$d //e['$d']-check if input from MUI date-picker
-            ? e.$d
-            : parseInt(e) // check if integer (for dropdown)
-            ? parseInt(e) // change to integer
-            : e; // eg. guardianInfo[0].FirstName = e
-        }
-
-        setFormData((prevState) => ({
-          ...prevState,
-          [page]: newData,
-        }));
-      } else {
-        // guardianInfo or allergyInfo
-        const newData = formData[page].slice();
-        // additional check to convert ContactNo  to string
-        if (
-          input === 'ContactNo' ||
-          input === 'Address' ||
-          input === 'TempAddress'
-        ) {
-          newData[index][input] = e.toString(); // convert to string
-        } else {
-          newData[index][input] = date
-            ? date
-            : parseInt(e) // check if integer (for dropdown)
-            ? parseInt(e) // change to integer
-            : e; // eg. guardianInfo[0].FirstName = e
-        }
-        setFormData((prevState) => ({
-          ...prevState,
-          [page]: newData,
-        }));
-        // console.log('formData = ', formData);
-      }
-    };
 
   // Function to submit form
   const submitForm = async () => {
@@ -343,7 +267,6 @@ function PatientAddScreen() {
           nextQuestionHandler={nextQuestionHandler}
           handleFormData={handlePatientData}
           formData={formData}
-          componentList={componentList}
           pickImage={pickImage}
         />
       );
@@ -352,7 +275,7 @@ function PatientAddScreen() {
         <PatientAddGuardianScreen
           nextQuestionHandler={nextQuestionHandler}
           prevQuestionHandler={prevQuestionHandler}
-          handleFormData={handleFormData}
+          handleFormData={handleGuardianData}
           formData={formData}
           componentList={componentList}
           concatFormData={concatFormData}
@@ -364,7 +287,7 @@ function PatientAddScreen() {
         <PatientAddAllergyScreen
           nextQuestionHandler={nextQuestionHandler}
           prevQuestionHandler={prevQuestionHandler}
-          handleFormData={handleFormData}
+          handleFormData={handleAllergyData}
           formData={formData}
           componentList={componentList}
           concatFormData={concatFormData}

@@ -1,29 +1,27 @@
-import React, { useState, useCallback } from 'react';
+// Lib
+import React, { useState, useCallback, useEffect } from 'react';
 import { Center, SectionList, View } from 'native-base';
+
+// Components
 import AddPatientAllergy from 'app/components/AddPatientAllergy';
 import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import AddPatientProgress from 'app/components/AddPatientProgress';
 
-function PatientAddAllergyScreen(props) {
-  const {
-    prevQuestionHandler,
-    formData,
-    handleFormData,
-    componentList,
-    concatFormData,
-    removeFormData,
-    onSubmitFunction,
-    // -- Validation is now real-time no need to have on submit validation - Justin
-    // validateStep,
-  } = props;
-
+function PatientAddAllergyScreen({
+  prevQuestionHandler,
+  formData,
+  handleFormData,
+  componentList,
+  concatFormData,
+  removeFormData,
+  onSubmitFunction
+}) {
   const [allergyInfoDisplay, setAllergyInfoDisplay] = useState(
     componentList.allergy,
   );
+  const [errorStates, setErrorStates] = useState([true]);
 
-  const [errorStates, setErrorStates] = useState([false]);
-
-  // Callback function passed to child components. Lets them update their corresponding
+  // Callback function passed to child components to let them update their corresponding
   // error states in ErrorStates state.
   const handleChildError = useCallback(
     (childId, isError) => {
@@ -72,12 +70,14 @@ function PatientAddAllergyScreen(props) {
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item, index }) => (
           <AddPatientAllergy
+            key={item}
             i={index}
             title={index + 1}
             formData={formData}
             handleFormData={handleFormData}
             onError={handleChildError}
           />
+          // <View style={{backgroundColor: "black", height: 20}}/>
         )}
         ListFooterComponent={() => (
           <View style={{ alignItems: 'center', justifyContent: 'center' }}>
@@ -91,7 +91,6 @@ function PatientAddAllergyScreen(props) {
               submit={isSubmitEnabled}
               formData={formData}
               submitFunction={onSubmitFunction}
-              // // -- Validation is now real-time no need to have on submit validation - Justin
             />
           </View>
         )}
