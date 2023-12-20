@@ -1,5 +1,5 @@
 // Base
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, Platform, View } from 'react-native';
 import {
   Box,
@@ -29,7 +29,8 @@ import SelectionInputField from 'app/components/input-fields/SelectionInputField
 import RadioButtonInput from 'app/components/RadioButtonsInput';
 import SingleOptionCheckBox from 'app/components/SingleOptionCheckBox';
 import ActivityIndicator from 'app/components/ActivityIndicator';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
+import InputField from 'app/components/input-fields/InputField';
+import SensitiveInputField from 'app/components/input-fields/SensitiveInputField';
 
 function PatientAddPatientInfoScreen({
   nextQuestionHandler,
@@ -38,38 +39,13 @@ function PatientAddPatientInfoScreen({
   pickImage,
 }) {
   const page = 'patientInfo';
-  const patient = formData.patientInfo;
+  const patient = formData[page];
+
+  // Variables relatied to retrieving preferred language select options from API
   const { data, isError, isLoading } = useGetSelectionOptions('Language');
-
-  // Screen error state: This = true when the child components report error(input fields)
-  // Enables use of dynamic rendering of components when the page error = true/false.
-  const [isInputErrors, setIsInputErrors] = useState(false);
-
-  // Input error states (Child components)
-  // This records the error states of each child component (ones that require tracking).
-  const [isFirstNameError, setIsFirstNameError] = useState(false);
-  const [isLastNameError, setIsLastNameError] = useState(false);
-  const [isPrefNameError, setIsPrefNameError] = useState(false);
-  const [isNRICError, setIsNRICError] = useState(false);
-  const [isAddrError, setIsAddrError] = useState(false);
-  const [isTempAddrError, setIsTempAddrError] = useState(false);
-  const [isHomeTeleError, setIsHomeNoError] = useState(false);
-  const [isMobileError, setIsMobileNoError] = useState(false);
-  const [isDOBError, setIsDOBError] = useState(false);
-  const [isJoiningError, setIsJoiningError] = useState(false);
-  const [isLeavingError, setIsLeavingError] = useState(false);
-  const [isPrefLanguageError, setPrefLanguageError] = useState(false);
-  const [isGenderError, setIsGenderError] = useState(false);
-  const [isRespiteError, setIsRespiteError] = useState(false);
-
-  // Maximum and minimum valid joining dates
-  const minimumJoiningDate = new Date();
-  minimumJoiningDate.setDate(minimumJoiningDate.getDate() - 30); // 30 days ago
-  const maximumJoiningDate = new Date();
-  maximumJoiningDate.setDate(maximumJoiningDate.getDate() + 30); // 30 days later
-
-  // set initial value for SelectionInputField dataArray prop -> follow format of "label" and "value"
-  const listOfLanguagesArray = [
+  
+  // Set initial value for preferred language select field
+  const [listOfLanguages, setListOfLanguages] = useState(parseSelectOptions([
     'Cantonese',
     'English',
     'Hainanese',
@@ -83,10 +59,36 @@ function PatientAddPatientInfoScreen({
     'Japanese',
     'Spanish',
     'Korean',
-  ]
-  const [listOfLanguages, setListOfLanguages] = useState(parseSelectOptions(listOfLanguagesArray));
+  ]));
 
-  // use for the RadioButtonInput dataArray prop -> follow format of "label" and "value"
+  // Screen error state: This = true when the child components report error(input fields)
+  // Enables use of dynamic rendering of components when the page error = true/false.
+  const [isInputErrors, setIsInputErrors] = useState(false);
+
+  // Input error states (Child components)
+  // This records the error states of each child component (ones that require tracking).
+  const [isFirstNameError, setIsFirstNameError] = useState(false);
+  const [isLastNameError, setIsLastNameError] = useState(false);
+  const [isPrefNameError, setIsPrefNameError] = useState(false);
+  const [isNRICError, setIsNRICError] = useState(false);
+  const [isGenderError, setIsGenderError] = useState(false);
+  const [isDOBError, setIsDOBError] = useState(false);
+  const [isAddrError, setIsAddrError] = useState(false);
+  const [isPrefLanguageError, setPrefLanguageError] = useState(false);
+  const [isTempAddrError, setIsTempAddrError] = useState(false);
+  const [isHomeTeleError, setIsHomeNoError] = useState(false);
+  const [isMobileError, setIsMobileNoError] = useState(false);
+  const [isRespiteError, setIsRespiteError] = useState(false);
+  const [isJoiningError, setIsJoiningError] = useState(false);
+  const [isLeavingError, setIsLeavingError] = useState(false);
+
+  // Maximum and minimum valid joining dates
+  const minimumJoiningDate = new Date();
+  minimumJoiningDate.setDate(minimumJoiningDate.getDate() - 30); // 30 days ago
+  const maximumJoiningDate = new Date();
+  maximumJoiningDate.setDate(maximumJoiningDate.getDate() + 30); // 30 days later
+
+  // Used for the RadioButtonInput dataArray prop -> follow format of "label" and "value"
   const listOfGenders = [
     { label: 'Male', value: 'M' },
     { label: 'Female', value: 'F' },
@@ -96,106 +98,116 @@ function PatientAddPatientInfoScreen({
     { label: 'No', value: false },
   ];
 
-  /*
-  Callback functions for error state reporting for the child components
-  */   
+  // Functions for error state reporting for the child components  
   const handleFirstNameError = (e) => {
     setIsFirstNameError(e);
+    // console.log("first name", e)
   }
-
+  
   const handleLastNameError = (e) => {
     setIsLastNameError(e);
+    // console.log("last name", e)
   }
   
   const handlePrefNameError = (e) => {
     setIsPrefNameError(e);
+    // console.log("pref name", e)
   }
   
   const handleNRICError = (e) => {
     setIsNRICError(e);
+    // console.log("nric", e)
   }
-    
-  const handleAddrError = (e) => {
-    setIsAddrError(e);
-  }
-  
-  const handleTempAddrError = (e) => {
-    setIsTempAddrError(e);
-  }
-  
-  const handleHomeNoError = (e) => {
-    setIsHomeNoError(e);
-  }
-  
-  const handleMobileNoError = (e) => {
-    setIsMobileNoError(e);
+      
+  const handleGenderError = (e) => {
+    setIsGenderError(e);
+    // console.log("gender", e)
   }
   
   const handleDOBError = (e) => {
     setIsDOBError(e);
-  }
-  
-  const handleJoiningError = (e) => {
-    setIsJoiningError(e);
-  }
-  
-  const handleLeavingError = (e) => {
-    setIsLeavingError(e);
+    // console.log("dob", e)
   }
   
   const handlePrefLanguageError = (e) => {
     setPrefLanguageError(e);
+    // console.log("language", e)
   }
   
-  const handleGenderError = (e) => {
-    setIsGenderError(e);
+  const handleAddrError = (e) => {
+    setIsAddrError(e);
+    // console.log("addr", e)
+  }
+  
+  const handleTempAddrError = (e) => {
+    setIsTempAddrError(e);
+    // console.log("temp addr", e)
+  }
+  
+  const handleHomeNoError = (e) => {
+    setIsHomeNoError(e);
+    // console.log("home", e)
+  }
+  
+  const handleMobileNoError = (e) => {
+    setIsMobileNoError(e);
+    // console.log("mobile", e)
   }
 
   const handleRespiteError = (e) => {
     setIsRespiteError(e);
+    // console.log("respite", e)
   }
 
-  /**
-   * This useEffect enables the page to show correct error checking
-   * The main isInputErrors is responsible for the error state of the screen
-   * This state will be true whenever any child input components are in error state.
-   */  
+  const handleJoiningError = (e) => {
+    setIsJoiningError(e);
+    // console.log("joining", e)
+  }
+  
+  const handleLeavingError = (e) => {
+    setIsLeavingError(e);
+    // console.log("leaving", e)
+  }
+
+
+  // This useEffect enables the page to show correct error checking.
+  // The main isInputErrors is responsible for the error state of the screen.
+  // This state will be true whenever any child input components are in error state. 
   useEffect(() => {
+    console.log("Setting input errors")
     setIsInputErrors(
       isFirstNameError ||
-        isLastNameError ||
-        isPrefNameError ||
-        isNRICError ||
-        isAddrError ||
-        isTempAddrError ||
-        isHomeTeleError ||
-        isMobileError ||
-        isDOBError ||
-        isJoiningError ||
-        isRespiteError ||
-        isGenderError ||
-        isLeavingError,
+      isLastNameError ||
+      isPrefNameError ||
+      isNRICError ||
+      isGenderError ||
+      isDOBError ||
+      isAddrError ||
+      isTempAddrError ||
+      isHomeTeleError ||
+      isMobileError ||
+      isRespiteError ||
+      isJoiningError ||
+      isLeavingError,
     );
   }, [
     isFirstNameError,
     isLastNameError,
     isPrefNameError,
     isNRICError,
+    isGenderError,
+    isDOBError,
     isAddrError,
     isTempAddrError,
     isHomeTeleError,
     isMobileError,
-    isDOBError,
+    isRespiteError,
     isJoiningError,
     isLeavingError,
-    isRespiteError,
-    isGenderError,
   ]);
 
-  /*
-  Try to get langugage list from backend. If retrieval from the hook is successful, replace the content in
-  listOfLanguages with the retrieved one. 
-  */
+  // Try to get langugage list from backend. If retrieval from the hook is successful, replace the content in
+  // listOfLanguages with the retrieved one. 
   useEffect(() => {
     if (!isLoading && !isError && data) {
       console.log('selection data!');
@@ -232,7 +244,7 @@ function PatientAddPatientInfoScreen({
                     <Box mt="3.5" mb="3.5" overflow="hidden" rounded="lg">
                       <Center>
                         <Pressable
-                          onPress={pickImage(page, 'UploadProfilePicture')}
+                          onPress={pickImage('UploadProfilePicture')}
                         >
                           <Image
                             alt="patient_image"
@@ -269,8 +281,8 @@ function PatientAddPatientInfoScreen({
                     isRequired
                     title={'First Name'}
                     value={patient.FirstName}
-                    onChangeText={handleFormData(page, 'FirstName')}
-                    onChildData={handleFirstNameError}
+                    onChangeText={handleFormData('FirstName')}
+                    onEndEditing={handleFirstNameError}
                     dataType="name"
                   />
 
@@ -278,8 +290,8 @@ function PatientAddPatientInfoScreen({
                     isRequired
                     title={'Last Name'}
                     value={patient.LastName}
-                    onChangeText={handleFormData(page, 'LastName')}
-                    onChildData={handleLastNameError}
+                    onChangeText={handleFormData('LastName')}
+                    onEndEditing={handleLastNameError}
                     dataType="name"
                   />
 
@@ -287,8 +299,8 @@ function PatientAddPatientInfoScreen({
                     isRequired
                     title={'Preferred Name'}
                     value={patient.PreferredName}
-                    onChangeText={handleFormData(page, 'PreferredName')}
-                    onChildData={handlePrefNameError}                    
+                    onChangeText={handleFormData('PreferredName')}
+                    onEndEditing={handlePrefNameError}                    
                     dataType="name"
                   />
 
@@ -296,18 +308,18 @@ function PatientAddPatientInfoScreen({
                     isRequired
                     title={'NRIC'}
                     autoCapitalize='characters'
-                    value={(patient.NRIC).toString().toUpperCase()}
-                    onChangeText={handleFormData(page, 'NRIC')}
-                    onChildData={handleNRICError}
-                    type="nric"
+                    value={patient.NRIC}
+                    onChangeText={handleFormData('NRIC')}
+                    onEndEditing={handleNRICError}
+                    dataType="nric"
                   />
                 
                  <RadioButtonInput
                     isRequired
                     title={'Gender'}
                     value={patient.Gender}
-                    onChangeData={handleFormData(page, 'Gender')}
-                    onChildData={handleGenderError}
+                    onChangeData={handleFormData('Gender')}
+                    onEndEditing={handleGenderError}
                     dataArray={listOfGenders}
                   />
 
@@ -317,8 +329,8 @@ function PatientAddPatientInfoScreen({
                       selectionMode={'DOB'}
                       title={'Date of Birth'}
                       value={patient.DOB}
-                      handleFormData={handleFormData(page, 'DOB')}
-                      onChildData={handleDOBError}
+                      handleFormData={handleFormData('DOB')}
+                      onEndEditing={handleDOBError}
                     />
                   </View>
                   
@@ -326,35 +338,32 @@ function PatientAddPatientInfoScreen({
                     isRequired
                     title={'Preferred Language'}
                     placeholder={'Select Language'}
-                    onDataChange={handleFormData( 
-                      page,
-                      'PreferredLanguageListID',
-                    )}
+                    onDataChange={handleFormData('PreferredLanguageListID')}
                     value={patient.PreferredLanguageListID}
                     dataArray={listOfLanguages}
-                    onChildData={handlePrefLanguageError}
+                    onEndEditing={handlePrefLanguageError}
                   />
 
                   <InputField
                     isRequired
                     title={'Address'}
                     value={patient.Address}
-                    onChangeText={handleFormData(page, 'Address')}
-                    onChildData={handleAddrError}
+                    onChangeText={handleFormData('Address')}
+                    onEndEditing={handleAddrError}
                   />
 
                   <InputField
                     title={'Temporary Address'}
                     value={patient.TempAddress}
-                    onChangeText={handleFormData(page, 'TempAddress')}
-                    onChildData={handleTempAddrError}
+                    onChangeText={handleFormData('TempAddress')}
+                    onEndEditing={handleTempAddrError}
                   />
 
                   <InputField
                     title={'Home Telephone No.'}
                     value={patient.HomeNo}
-                    onChangeText={handleFormData(page, 'HomeNo')}
-                    onChildData={handleHomeNoError}
+                    onChangeText={handleFormData('HomeNo')}
+                    onEndEditing={handleHomeNoError}
                     dataType={'home phone'}
                     keyboardType='numeric'
                   />
@@ -362,8 +371,8 @@ function PatientAddPatientInfoScreen({
                   <InputField
                     title={'Mobile No.'}
                     value={patient.HandphoneNo}
-                    onChangeText={handleFormData(page, 'HandphoneNo')}
-                    onChildData={handleMobileNoError}
+                    onChangeText={handleFormData('HandphoneNo')}
+                    onEndEditing={handleMobileNoError}
                     dataType={'mobile phone'}
                     keyboardType='numeric'                    
                   />
@@ -372,9 +381,9 @@ function PatientAddPatientInfoScreen({
                     isRequired
                     title={'Respite Care'}
                     value={patient.IsRespiteCare}
-                    onChangeData={handleFormData(page, 'IsRespiteCare')}
+                    onChangeData={handleFormData('IsRespiteCare')}
                     dataArray={listRespiteCare}
-                    onChildData={handleRespiteError}
+                    onEndEditing={handleRespiteError}
                   />
 
                   <View style={styles.dateSelectionContainer}>
@@ -382,8 +391,8 @@ function PatientAddPatientInfoScreen({
                       isRequired
                       title={'Date of Joining'}
                       value={patient.StartDate}
-                      handleFormData={handleFormData(page, 'StartDate')}
-                      onChildData={handleJoiningError}
+                      handleFormData={handleFormData('StartDate')}
+                      onEndEditing={handleJoiningError}
                       minimumInputDate={minimumJoiningDate}
                       maximumInputDate={maximumJoiningDate}
                     />
@@ -392,7 +401,7 @@ function PatientAddPatientInfoScreen({
                   <SingleOptionCheckBox
                     title={'Check this box to specify Date of Leaving'}
                     value={patient.IsChecked}
-                    onChangeData={handleFormData(page, 'IsChecked')}
+                    onChangeData={handleFormData('IsChecked')}
                     accessibilityText={
                       'Do you wish to key in the Date of Leaving?'
                     }
@@ -401,14 +410,13 @@ function PatientAddPatientInfoScreen({
                   {/* Rendered only when the specify date of leaving checkbox is selected. */}
                   {formData.patientInfo.IsChecked ? (
                     <DateInputField
-                      title={'Date of Leaving (Optional)'}
-                      handleFormData={handleFormData(page, 'EndDate')}
+                      title={'Date of Leaving'}
+                      handleFormData={handleFormData('EndDate')}
                       value={patient.EndDate}
-                      onChildData={handleLeavingError}
+                      onEndEditing={handleLeavingError}
                     />
                   ) : null}
                 </View>
-                {/* </Center> */}
               </VStack>
             </Box>
 

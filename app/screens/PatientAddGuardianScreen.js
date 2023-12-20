@@ -7,23 +7,20 @@ import AddPatientGuardian from 'app/components/AddPatientGuardian';
 import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import AddPatientProgress from 'app/components/AddPatientProgress';
 
-function PatientAddGuardianScreen(props) {
-  const {
-    nextQuestionHandler,
-    prevQuestionHandler,
-    formData,
-    handleFormData,
-    componentList,
-    concatFormData,
-    removeFormData,
-  } = props;
-
+function PatientAddGuardianScreen({nextQuestionHandler,
+  prevQuestionHandler,
+  formData,
+  handleFormData,
+  componentList,
+  concatFormData,
+  removeFormData
+}) {
   const [guardianInfoDisplay, setGuardianInfoDisplay] = useState(
     componentList.guardian,
   );
   const [errorStates, setErrorStates] = useState([true]);
 
-  // Callback function passed to child components. Lets them update their corresponding
+  // Callback function passed to child components to let them update their corresponding
   // error states in ErrorStates state.
   const handleChildError = useCallback(
     (childId, isError) => {

@@ -19,29 +19,22 @@ import * as ImagePicker from 'expo-image-picker';
 
 function PatientAddScreen() {
   const navigation = useNavigation();
-  // const navigate = Platform.OS === 'web' ? useNavigate() : null;
-  // aquire the setIsReloadPatientList from params
-  // const { isReloadPatientList, setIsReloadPatientList } = route.params;
-  // state for steps
-  const [step, setStep] = useState(1);
-  // state for datepicker
-  const [show, setShow] = useState({
-    DOB: false,
-    StartDate: false,
-    EndDate: false,
-  });
 
-  // state for components
+  // State to keep track of which page of the form is loaded
+  const [step, setStep] = useState(3);
+
+  //  State for components
   const [componentList, setComponentList] = useState({
     guardian: [{}],
     allergy: [{}],
   });
 
+  //  Maximum accepted value for date of birth
   const newDate = new Date();
   const maximumDOB = new Date();
   maximumDOB.setFullYear(maximumDOB.getFullYear() - 15);
 
-  const patientData = {
+  const addPatientData = {
     patientInfo: {
       FirstName: '',
       LastName: '',
@@ -99,10 +92,11 @@ function PatientAddScreen() {
     ],
   };
 
-  const [formData, setFormData] = useState(patientData);
+  const [formData, setFormData] = useState(addPatientData);
 
-  // handle state of components
+  // Function to handle form sections which can have multiple items (like allergies/guardians - can have multiple) 
   const componentHandler = (page = '', list = []) => {
+    console.log(1, list)
     if (list) {
       setComponentList((prevState) => ({
         // eg. componentList: { guardian: [{..}, {..}] }
@@ -119,7 +113,7 @@ function PatientAddScreen() {
     }));
   };
 
-  // remove component from formData
+  // Remove component from formData
   const removeFormData = (key) => {
     setFormData((prevFormData) => {
       const formDataCopy = { ...prevFormData };
@@ -128,22 +122,21 @@ function PatientAddScreen() {
     });
   };
 
+  // Function to load next page of form
   const nextQuestionHandler = async (formData, page = '', list = []) => {
-    // -- Validation is now real-time no need to have on submit validation - Justin
     componentHandler(page, list);
     setStep((prevStep) => prevStep + 1);
-    // }
   };
 
-  // function for going to previous step by decreasing step state by 1
-  // and to set component list
+  // Function to load previous step of form
   const prevQuestionHandler = (page = '', list = []) => {
     componentHandler(page, list);
     setStep((prevStep) => prevStep - 1);
   };
 
+  // Function to launch image picker and handle image picking.
   // Reference: https://docs.expo.dev/versions/latest/sdk/imagepicker/
-  const pickImage = (page, input) => async () => {
+  const pickImage = (input) => async () => {
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -151,7 +144,7 @@ function PatientAddScreen() {
       aspect: [4, 3],
       quality: 1,
     });
-    if (!result.cancelled) {
+    if (!result.canceled) {
       const newImageUri = 'file:///' + result.uri.split('file:/').join('');
 
       var img = formData[page];
@@ -167,77 +160,66 @@ function PatientAddScreen() {
       }));
     }
   };
+ 
+  // Function to update patient data
+  const handlePatientData = (field) => (e) => {
+    const newData = formData.patientInfo;
 
-  // handling form input data by taking onchange value and updating our previous form data state
-  const handleFormData =
-    (page = '', input, index = null) =>
-    (e, date = null) => {
-      // set show as false when date is selected on datepicker
-      // console.log('index: ', page, index);
-      if (Platform.OS === 'android') {
-        setShow((prevState) => ({
-          ...prevState,
-          [input]: false,
-        }));
+    if (field === 'IsChecked') {
+      newData[field] = !formData.patientInfo.IsChecked;
+      if (!newData[field]) {
+        newData.EndDate = new Date(0); // if IsChecked is false, reset End Date to beginning of epoch time
       }
-      if (page === 'patientInfo') {
-        const newData = formData[page];
-        // additional check to convert HomeNo and HandphoneNo to string
-        if (
-          input === 'HomeNo' ||
-          input === 'HandphoneNo' ||
-          // BUGFIX: Address not saved properly when number specifed first -- Justin
-          // soln: Address is included: fixes a bug where if number is specified first address will not be captured properly
-          // i.e: '123 abc lane' -- saved as --> '123'
-          input === 'Address' ||
-          input === 'TempAddress'
-        ) {
-          newData[input] = e.toString(); // convert to string
-        } else if (input === 'IsChecked') {
-          newData[input] = !formData.patientInfo.IsChecked; // opposite boolean value of IsChecked
-          if (!newData[input]) {
-            // if IsChecked is false, reset End Date to beginning of epoch time
-            newData.EndDate = new Date(0);
-          }
-        } else {
-          newData[input] = date
-            ? date
-            : e.$d //e['$d']-check if input from MUI date-picker
-            ? e.$d
-            : parseInt(e) // check if integer (for dropdown)
-            ? parseInt(e) // change to integer
-            : e; // eg. guardianInfo[0].FirstName = e
-        }
+    } else if (field === 'PreferredLanguageListID') {
+      newData[field] = parseInt(e);
+    } else {
+      newData[field] = e; 
+    }
 
-        setFormData((prevState) => ({
-          ...prevState,
-          [page]: newData,
-        }));
-      } else {
-        // guardianInfo or allergyInfo
-        const newData = formData[page].slice();
-        // additional check to convert ContactNo  to string
-        if (
-          input === 'ContactNo' ||
-          input === 'Address' ||
-          input === 'TempAddress'
-        ) {
-          newData[index][input] = e.toString(); // convert to string
-        } else {
-          newData[index][input] = date
-            ? date
-            : parseInt(e) // check if integer (for dropdown)
-            ? parseInt(e) // change to integer
-            : e; // eg. guardianInfo[0].FirstName = e
-        }
-        setFormData((prevState) => ({
-          ...prevState,
-          [page]: newData,
-        }));
-        // console.log('formData = ', formData);
-      }
-    };
+    setFormData((prevState) => ({
+      ...prevState,
+      patientInfo : newData,
+    }));
+  };
+  
 
+  // Function to update patient data
+  const handleGuardianData = (field, i) => (e) => {
+    const newData = formData.guardianInfo;    
+
+    if (field === 'RelationshipID') {
+      newData[i][field] = parseInt(e);
+    } else {
+      newData[i][field] = e; 
+    }
+
+    setFormData((prevState) => ({
+      ...prevState,
+      guardianInfo : newData,
+    }));
+
+    console.log(newData)
+  };
+
+  // Function to update patient data
+  const handleAllergyData = (field, i) => (e) => {
+    const newData = formData.allergyInfo;    
+
+    if (field === 'AllergyListID' || field === 'AllergyReactionListID') {
+      newData[i][field] = parseInt(e);
+    } else {
+      newData[i][field] = e; 
+    }
+
+    setFormData((prevState) => ({
+      ...prevState,
+      allergyInfo : newData,
+    }));
+
+    console.log(newData)
+  };
+
+  // Function to submit form
   const submitForm = async () => {
     // -- Validation is now real-time no need to have on submit validation - Justin
     const result = await patientApi.addPatient(formData);
@@ -283,9 +265,8 @@ function PatientAddScreen() {
       return (
         <PatientAddPatientInfoScreen
           nextQuestionHandler={nextQuestionHandler}
-          handleFormData={handleFormData}
+          handleFormData={handlePatientData}
           formData={formData}
-          componentList={componentList}
           pickImage={pickImage}
         />
       );
@@ -294,7 +275,7 @@ function PatientAddScreen() {
         <PatientAddGuardianScreen
           nextQuestionHandler={nextQuestionHandler}
           prevQuestionHandler={prevQuestionHandler}
-          handleFormData={handleFormData}
+          handleFormData={handleGuardianData}
           formData={formData}
           componentList={componentList}
           concatFormData={concatFormData}
@@ -306,7 +287,7 @@ function PatientAddScreen() {
         <PatientAddAllergyScreen
           nextQuestionHandler={nextQuestionHandler}
           prevQuestionHandler={prevQuestionHandler}
-          handleFormData={handleFormData}
+          handleFormData={handleAllergyData}
           formData={formData}
           componentList={componentList}
           concatFormData={concatFormData}
