@@ -166,13 +166,11 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
   // must be filled before continuing. Done by verifying if guardian.Email is empty or not.
   // console.log(i);
   useEffect(() => {
-    setIsLoginError(() => {
-      if (guardian.IsChecked && guardian.Email === '') {
-        return true;
-      } else {
-        return false;
-      }
-    });
+    setIsLoginError(guardian.IsChecked && !guardian.Email);
+    setIsEmailError(guardian.IsChecked && !guardian.Email);
+    if(!guardian.IsChecked) {
+      handleFormData('Email', i)('')
+    }
   }, [guardian.IsChecked, guardian.Email]);
 
   // Try to get relationships list from backend. If retrieval from the hook is successful, 
@@ -300,14 +298,16 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
             onChangeData={handleFormData('IsChecked', i)}
           />
 
-          <InputField
-            isRequired={guardian.IsChecked}
-            title={'Email'}
-            value={guardian.Email}
-            onChangeText={handleFormData('Email', i)}
-            onEndEditing={handleEmailError}
-            dataType='email'
-          />
+          {guardian.IsChecked ? (
+            <InputField
+              isRequired={guardian.IsChecked}
+              title={'Email'}
+              value={guardian.Email}
+              onChangeText={handleFormData('Email', i)}
+              onEndEditing={handleEmailError}
+              dataType='email'
+            />
+          ) : null}
         
         </View>
       </VStack>
