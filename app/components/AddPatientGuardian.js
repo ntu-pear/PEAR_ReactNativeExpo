@@ -24,10 +24,10 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
   const page = 'guardianInfo';
   const guardian = formData[page][i]; 
 
-  // variables relatied to retrieving relationship select options from API
+  // Variables relatied to retrieving relationship select options from hook
   const { data, isError, isLoading } = useGetSelectionOptions('Relationship');
 
-  // set initial value for relationship select field
+  // Set initial value for relationship select field
   const [listOfRelationships, setListOfRelationships] = useState(parseSelectOptions([
     'Husband',
     'Wife',
@@ -61,7 +61,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
   const [isEmailError, setIsEmailError] = useState(false);
   const [isLoginError, setIsLoginError] = useState(false);
 
-  // used for the RadioButtonInput dataArray prop -> follow format of "label" and "value"
+  // Used for the RadioButtonInput dataArray prop -> follow format of "label" and "value"
   const listOfGenders = [
     { label: 'Male', value: 'M' },
     { label: 'Female', value: 'F' },
@@ -175,8 +175,8 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
     });
   }, [guardian.IsChecked, guardian.Email]);
 
-  /* If retrieval from the hook is successful, replace the content in
-     listOfLanguages with the retrieved one. */
+  // Try to get relationships list from backend. If retrieval from the hook is successful, 
+  // replace the content in listOfRelationships with the retrieved one
   useEffect(() => {
     if (!isLoading && !isError && data) {
       setListOfRelationships(data.sort((a,b) => a.value - b.value)); // sort by value

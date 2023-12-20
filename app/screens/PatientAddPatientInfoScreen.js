@@ -31,7 +31,6 @@ import SingleOptionCheckBox from 'app/components/SingleOptionCheckBox';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import InputField from 'app/components/input-fields/InputField';
 import SensitiveInputField from 'app/components/input-fields/SensitiveInputField';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function PatientAddPatientInfoScreen({
   nextQuestionHandler,
@@ -42,10 +41,10 @@ function PatientAddPatientInfoScreen({
   const page = 'patientInfo';
   const patient = formData[page];
 
-  // variables relatied to retrieving preferred language select options from API
+  // Variables relatied to retrieving preferred language select options from API
   const { data, isError, isLoading } = useGetSelectionOptions('Language');
   
-  // set initial value for preferred language select field
+  // Set initial value for preferred language select field
   const [listOfLanguages, setListOfLanguages] = useState(parseSelectOptions([
     'Cantonese',
     'English',
@@ -89,7 +88,7 @@ function PatientAddPatientInfoScreen({
   const maximumJoiningDate = new Date();
   maximumJoiningDate.setDate(maximumJoiningDate.getDate() + 30); // 30 days later
 
-  // used for the RadioButtonInput dataArray prop -> follow format of "label" and "value"
+  // Used for the RadioButtonInput dataArray prop -> follow format of "label" and "value"
   const listOfGenders = [
     { label: 'Male', value: 'M' },
     { label: 'Female', value: 'F' },
