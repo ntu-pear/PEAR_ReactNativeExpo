@@ -43,14 +43,14 @@ function WelcomeScreen(props) {
   const [show, setShow] = useState(false);
   const [username, setUsername] = useState('');
   const [userRole, setUserRole] = useState('Supervisor');
-  const userRolesList = ['Supervisor', 'Guardian', 'Doctor', 'Caregiver', 'Nurse']
-  const [listOfUserRoles, setListOfUserRoles] = useState(parseSelectOptions(userRolesList))
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isUsernameError, setIsUsernameError] = useState(false);
   const [isPasswordError, setIsPasswordError] = useState(false);
   const [isLoginError, setIsLoginError] = useState(false);
-
+  
+  const listOfUserRoles = parseSelectOptions(['Supervisor', 'Guardian', 'Doctor', 'Caregiver', 'Nurse']);
+  
   const apiHandlerHook = useApiHandler();
 
    /*
@@ -109,7 +109,7 @@ function WelcomeScreen(props) {
   };
   
   const handleUserRoleChanged = (e) => {
-    setUserRole(userRoles[e-1])
+    setUserRole(listOfUserRoles[e-1].label)
   }
 
   const handlePasswordChanged = (e) => {
