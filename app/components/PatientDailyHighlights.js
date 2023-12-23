@@ -1,6 +1,6 @@
 // Base
 import React, { useState, useEffect } from 'react';
-import { Modal, StyleSheet, Text, Pressable, View } from 'react-native';
+import { Modal, StyleSheet, Text, Pressable, View, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import { MaterialCommunityIcons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
@@ -145,7 +145,7 @@ function PatientDailyHighlights(props) {
 
   const noDataMessage = () => {
     if (isLoading) {
-      return <></>;
+      return <View></View>;
     }
 
     // Display error message if API request fails
@@ -179,56 +179,58 @@ function PatientDailyHighlights(props) {
       }}
       testID="highlightsModal"
     >
-      <View style={styles.centeredView}>
-        <View style={styles.modalView}>
-          <Text style={styles.modalHeaderText}>Patients Daily Highlights</Text>
-          <Pressable
-            style={styles.buttonClose}
-            onPress={() => setModalVisible(!modalVisible)}
-            testID="highlightsCloseButton"
-          >
-            <MaterialCommunityIcons
-              name="close"
-              size={Platform.OS === 'web' ? 42 : 20}
+      <TouchableOpacity style={styles.centeredView} activeOpacity={1} onPressOut={() => {setModalVisible(!modalVisible)}} >
+        <TouchableWithoutFeedback style={styles.modalView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalHeaderText}>Patients Daily Highlights</Text>
+            <Pressable
+              style={styles.buttonClose}
+              onPress={() => setModalVisible(!modalVisible)}
+              testID="highlightsCloseButton"
+            >
+              <MaterialCommunityIcons
+                name="close"
+                size={Platform.OS === 'web' ? 42 : 20}
+              />
+            </Pressable>
+            <View style={styles.searchBarDropDownView}>
+              <View style={styles.flex}>
+                <SearchField
+                  value={searchValue}
+                  onChangeText={setSearchValue}
+                  onPressClear={() => setSearchValue(null)}
+                />
+              </View>
+              <View style={styles.flex}>
+                <SelectionInputField
+                  showTitle={false}
+                  value={filterValue}
+                  dataArray={dropdownItems}
+                  onDataChange={setFilterValue}
+                  placeholder={'Select Filter'}
+                />
+              </View>
+            </View>
+            <FlatList
+              w="100%"
+              showsVerticalScrollIndicator={true}
+              data={filteredData}
+              keyExtractor={(item) => item.patientInfo.patientId}
+              onRefresh={handlePullToRefresh}
+              refreshing={isLoading}
+              ListEmptyComponent={noDataMessage}
+              renderItem={({ item }) => (
+                <HighlightsCard
+                  item={item}
+                  navigation={navigation}
+                  setModalVisible={setModalVisible}
+                />
+              )}
+              testID="flatList"
             />
-          </Pressable>
-          <View style={styles.searchBarDropDownView}>
-            <View style={styles.flex}>
-              <SearchField
-                value={searchValue}
-                onChangeText={setSearchValue}
-                onPressClear={() => setSearchValue(null)}
-              />
-            </View>
-            <View style={styles.flex}>
-              <SelectionInputField
-                showTitle={false}
-                value={filterValue}
-                dataArray={dropdownItems}
-                onDataChange={setFilterValue}
-                placeholder={'Select Filter'}
-              />
-            </View>
           </View>
-          <FlatList
-            w="100%"
-            showsVerticalScrollIndicator={true}
-            data={filteredData}
-            keyExtractor={(item) => item.patientInfo.patientId}
-            onRefresh={handlePullToRefresh}
-            refreshing={isLoading}
-            ListEmptyComponent={noDataMessage}
-            renderItem={({ item }) => (
-              <HighlightsCard
-                item={item}
-                navigation={navigation}
-                setModalVisible={setModalVisible}
-              />
-            )}
-            testID="flatList"
-          />
-        </View>
-      </View>
+        </TouchableWithoutFeedback>
+      </TouchableOpacity>
     </Modal>
   );
 }
