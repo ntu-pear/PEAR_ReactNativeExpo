@@ -24,7 +24,7 @@ export default Object.freeze({
   NOTIFICATION_REJECT: 'NotificationReject',
   NOTIFICATION_READ: 'NotificationRead',
   NOTIFICATION_TAB: 'NotificationTab',
-  PATIENTS: 'Patient',
+  PATIENTS: 'Patients',
   PATIENTS_SCREEN: 'PatientScreen',
   PATIENT_PROFILE: 'PatientProfile',
   PATIENT_INFORMATION: 'PatientInformation',
