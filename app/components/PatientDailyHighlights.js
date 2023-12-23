@@ -1,6 +1,6 @@
 // Base
 import React, { useState, useEffect } from 'react';
-import { Modal, StyleSheet, Text, Pressable, View } from 'react-native';
+import { Modal, StyleSheet, Text, Pressable, View, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
@@ -143,7 +143,7 @@ function PatientDailyHighlights(props) {
 
   const noDataMessage = () => {
     if (isLoading) {
-      return <></>;
+      return <View></View>;
     }
 
     // Display error message if API request fails
@@ -177,66 +177,68 @@ function PatientDailyHighlights(props) {
       }}
       testID="highlightsModal"
     >
-      <View style={styles.centeredView}>
-        <View style={styles.modalView}>
-          <Text style={styles.modalHeaderText}>Patients Daily Highlights</Text>
-          <Pressable
-            style={styles.buttonClose}
-            onPress={() => setModalVisible(!modalVisible)}
-            testID="highlightsCloseButton"
-          >
-            <MaterialCommunityIcons
-              name="close"
-              size={Platform.OS === 'web' ? 42 : 20}
+      <TouchableOpacity style={styles.centeredView} activeOpacity={1} onPressOut={() => {setModalVisible(!modalVisible)}} >
+        <TouchableWithoutFeedback>
+          <View style={styles.modalView}>
+            <Text style={styles.modalHeaderText}>Patients Daily Highlights</Text>
+            <Pressable
+              style={styles.buttonClose}
+              onPress={() => setModalVisible(!modalVisible)}
+              testID="highlightsCloseButton"
+            >
+              <MaterialCommunityIcons
+                name="close"
+                size={Platform.OS === 'web' ? 42 : 20}
+              />
+            </Pressable>
+            <View style={styles.searchBarDropDownView}>
+              <View style={styles.searchBarView}>
+                <SearchBar
+                  placeholder="Search"
+                  lightTheme={true}
+                  // round={true}
+                  value={searchValue}
+                  onChangeText={setSearchValue}
+                  autoCorrect={false}
+                  containerStyle={styles.searchBarContainer}
+                  inputContainerStyle={{
+                    backgroundColor: colors.white,
+                    borderRadius: 10,
+                  }}
+                  inputStyle={{ fontSize: Platform.OS === 'web' ? 18 : 14 }}
+                  style={styles.searchBar}
+                />
+              </View>
+              <View style={styles.dropDownView}>
+                <SelectionInputField
+                  value={filterValue}
+                  dataArray={dropdownItems}
+                  onDataChange={setFilterValue}
+                  placeholderText={'Select Filter'}
+                />
+                {/* Standardized Dropdown component --- Justin */}
+              </View>
+            </View>
+            <FlatList
+              w="100%"
+              showsVerticalScrollIndicator={true}
+              data={filteredData}
+              keyExtractor={(item) => item.patientInfo.patientId}
+              onRefresh={handlePullToRefresh}
+              refreshing={isLoading}
+              ListEmptyComponent={noDataMessage}
+              renderItem={({ item }) => (
+                <HighlightsCard
+                  item={item}
+                  navigation={navigation}
+                  setModalVisible={setModalVisible}
+                />
+              )}
+              testID="flatList"
             />
-          </Pressable>
-          <View style={styles.searchBarDropDownView}>
-            <View style={styles.searchBarView}>
-              <SearchBar
-                placeholder="Search"
-                lightTheme={true}
-                // round={true}
-                value={searchValue}
-                onChangeText={setSearchValue}
-                autoCorrect={false}
-                containerStyle={styles.searchBarContainer}
-                inputContainerStyle={{
-                  backgroundColor: colors.white,
-                  borderRadius: 10,
-                }}
-                inputStyle={{ fontSize: Platform.OS === 'web' ? 18 : 14 }}
-                style={styles.searchBar}
-              />
-            </View>
-            <View style={styles.dropDownView}>
-              <SelectionInputField
-                value={filterValue}
-                dataArray={dropdownItems}
-                onDataChange={setFilterValue}
-                placeholderText={'Select Filter'}
-              />
-              {/* Standardized Dropdown component --- Justin */}
-            </View>
           </View>
-          <FlatList
-            w="100%"
-            showsVerticalScrollIndicator={true}
-            data={filteredData}
-            keyExtractor={(item) => item.patientInfo.patientId}
-            onRefresh={handlePullToRefresh}
-            refreshing={isLoading}
-            ListEmptyComponent={noDataMessage}
-            renderItem={({ item }) => (
-              <HighlightsCard
-                item={item}
-                navigation={navigation}
-                setModalVisible={setModalVisible}
-              />
-            )}
-            testID="flatList"
-          />
-        </View>
-      </View>
+        </TouchableWithoutFeedback>
+      </TouchableOpacity>
     </Modal>
   );
 }
