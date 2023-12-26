@@ -1,6 +1,6 @@
 // Libs
 import React, { useState, useEffect, useContext } from 'react';
-import { Center, VStack, HStack, ScrollView, Fab, Icon } from 'native-base';
+import { Center, VStack, HStack, ScrollView, Fab, Icon, Divider } from 'native-base';
 import { RefreshControl, Dimensions, Text } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import AuthContext from 'app/auth/context';
@@ -19,6 +19,7 @@ import colors from 'app/config/colors';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import SelectionInputField from 'app/components/SelectionInputField';
+import typography from 'app/config/typography';
 
 function PatientsScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -168,6 +169,10 @@ function PatientsScreen({ navigation }) {
               />
             </View>
           </HStack>
+          <View style={styles.patientCount}>
+            <Text>{filteredList.length} patients</Text>
+          </View>
+          <Divider/>
           <ScrollView
             w="100%"
             height="93%"
@@ -289,6 +294,13 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: 'bold',
   },
+  patientCount: {
+    fontSize: 13.5,
+    marginLeft: '2%',
+    paddingVertical: '1%',
+    alignSelf: 'flex-start',
+    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+  }
 });
 
 export default PatientsScreen;
