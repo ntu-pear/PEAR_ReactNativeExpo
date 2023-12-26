@@ -32,8 +32,8 @@ function InputField({
   maxLength = null,
   onEndEditing = () => {},
   variant = 'singeLine',
-  color = null,
-  borderRadius = null,
+  style = null,
+  otherProps = null,
 }) { 
   // Track error state via input validation  
   const [error, setError] = useState({isError: false, errorMsg: ''});
@@ -101,12 +101,11 @@ function InputField({
           ) : null
         }
         <Input 
-          backgroundColor={color? color : null}
           borderColor={
             !error.errorMsg ? colors.light_gray3 : colors.red
           }
           textAlignVertical={variant === 'multiLine' ? 'top' : 'center'}
-          borderRadius={borderRadius ? borderRadius : "25"}
+          borderRadius="25"
           height={variant === 'multiLine' ? '150' : '50'}
           value={inputText}
           onChangeText={handleOnChangeText}
@@ -117,7 +116,8 @@ function InputField({
           type={type}
           keyboardType={keyboardType}
           maxLength={maxLength}
-          style={styles.inputField}
+          style={[styles.inputField, style]}
+          {...otherProps}
         />
         {hideError && !error.errorMsg ? 
         null : (
