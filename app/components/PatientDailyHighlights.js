@@ -15,10 +15,9 @@ import { Platform } from 'react-native';
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
 import SelectionInputField from 'app/components/input-fields/SelectionInputField';
 import HighlightsCard from 'app/components/HighlightsCard';
-import { SearchBar } from 'react-native-elements';
 import { FlatList, Icon } from 'native-base';
 import InputField from './input-fields/InputField';
-import SearchField from './input-fields/SearchField';
+import SearchBar from './input-fields/SearchBar';
 
 function PatientDailyHighlights(props) {
   // Destructure props
@@ -194,10 +193,9 @@ function PatientDailyHighlights(props) {
           </Pressable>
           <View style={styles.searchBarDropDownView}>
             <View style={styles.flex}>
-              <SearchField
+              <SearchBar
                 value={searchValue}
                 onChangeText={setSearchValue}
-                onPressClear={() => setSearchValue(null)}
               />
             </View>
             <View style={styles.flex}>
