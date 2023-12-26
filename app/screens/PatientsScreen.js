@@ -26,7 +26,7 @@ function PatientsScreen({ navigation }) {
   const { user, setUser } = useContext(AuthContext);
   const [searchQuery, setSearchQuery] = useState('');
   // set default value to my patients
-  const [filterValue, setFilterValue] = useState('allPatients');
+  const [filterValue, setFilterValue] = useState('myPatients');
   const [originalListOfPatients, setOriginalListOfPatients] = useState([]);
   const [isReloadPatientList, setIsReloadPatientList] = useState(true);
   
