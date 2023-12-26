@@ -1,11 +1,10 @@
 // Libs
 import React, { useState, useEffect, useContext } from 'react';
-import { Center, VStack, HStack, ScrollView, Fab, Icon } from 'native-base';
-import { RefreshControl, Dimensions, Text } from 'react-native';
+import { Center, VStack, HStack, ScrollView, Fab, Icon, Divider } from 'native-base';
+import { RefreshControl, Dimensions, Text, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import AuthContext from 'app/auth/context';
 import { useFocusEffect } from '@react-navigation/native';
-import { SearchBar } from 'react-native-elements';
 import { StyleSheet, View } from 'react-native';
 
 // API
@@ -14,11 +13,12 @@ import patientApi from 'app/api/patient';
 // Configurations
 import routes from 'app/navigation/routes';
 import colors from 'app/config/colors';
+import typography from 'app/config/typography';
 
 // Components
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import ProfileNameButton from 'app/components/ProfileNameButton';
-import SelectionInputField from 'app/components/SelectionInputField';
+import SearchBar from 'app/components/input-fields/SearchBar';
 
 function PatientsScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -26,19 +26,10 @@ function PatientsScreen({ navigation }) {
   const { user, setUser } = useContext(AuthContext);
   const [searchQuery, setSearchQuery] = useState('');
   // set default value to my patients
-  const [filterValue, setFilterValue] = useState('myPatients');
+  const [filterValue, setFilterValue] = useState('allPatients');
   const [originalListOfPatients, setOriginalListOfPatients] = useState([]);
   const [isReloadPatientList, setIsReloadPatientList] = useState(true);
-  const [dropdownItems, setDropdownItems] = useState([
-    {
-      label: 'My Patients',
-      value: 'myPatients',
-    },
-    {
-      label: 'All Patients',
-      value: 'allPatients',
-    },
-  ]);
+  
   const SCREEN_WIDTH = Dimensions.get('window').width;
   // Refreshes every time the user navigates to PatientsScreen - OUTDATED
   // Now refresh only when new patient is added or user requested refresh
@@ -71,7 +62,7 @@ function PatientsScreen({ navigation }) {
     const response =
       filterValue === 'myPatients'
         ? await patientApi.getPatientListByLoggedInCaregiver()
-        : await patientApi.getPatientList();
+        : await patientApi.getPatientList(false,'active');
     if (!response.ok) {
       // Check if token has expired, if yes, proceed to log out
       // checkExpiredLogOutHook.handleLogOut(response);
@@ -138,36 +129,58 @@ function PatientsScreen({ navigation }) {
     navigation.push(routes.PATIENT_PROFILE, { id: patientID });
   };
 
+  const handleTabOnPress = (filterValue) => {
+    setFilterValue(filterValue)
+  }
+
   return (
     <>
       {isLoading ? (
         <ActivityIndicator visible />
       ) : (
         <Center backgroundColor={colors.white_var1}>
-          <HStack style={styles.headerSearchAndDropDownContainer}>
-            <View style={styles.headerContainer}>
-              <SearchBar
-                placeholder="Search"
+          <View style={styles.optionsContainer}>
+            <TouchableOpacity 
+              style={[styles.tab, ...filterValue=='myPatients' ? [styles.selectedTab] : []]}
+              onPress={() => handleTabOnPress('myPatients')}
+              activeOpacity={1}
+              >
+                <Text style={[styles.tabText, ...filterValue=='myPatients' ? [styles.selectedTabText] : []]}>My Patients</Text>
+            </TouchableOpacity>
+            <Divider orientation='vertical' height={5} alignSelf='center'/>
+            <TouchableOpacity 
+              style={[styles.tab, ...filterValue=='allPatients' ? [styles.selectedTab] : []]}
+              onPress={() => handleTabOnPress('allPatients')}
+              activeOpacity={1}
+              >
+                <Text style={[styles.tabText, ...filterValue=='allPatients' ? [styles.selectedTabText] : []]}>All Patients</Text>
+            </TouchableOpacity>            
+          </View>
+          <Divider style={styles.divider}/>
+          <View style={styles.optionsContainer}>
+            <View style={styles.searchBar}>
+              <SearchBar 
                 onChangeText={handleSearch}
                 value={searchQuery}
-                lightTheme={true}
-                containerStyle={styles.searchBarContainer}
-                inputContainerStyle={styles.searchBarInputStyle}
-                inputStyle={{ fontSize: 14 }}
-                style={styles.searchBar}
               />
             </View>
-            <View
-              style={[styles.headerContainer, styles.dropDownOptionsAlignment]}
-            >
-              {/* Standardized Dropdown picker component --- Justin */}
-              <SelectionInputField
-                onDataChange={setFilterValue}
-                value={filterValue}
-                dataArray={dropdownItems}
+            <View style={styles.filterIcon}>
+              <Icon 
+                as={
+                  <MaterialIcons 
+                  name="filter-list" 
+                  />
+                } 
+                size={12}
+                color={colors.black}
               />
             </View>
-          </HStack>
+          </View>
+          <View style={styles.patientCount}>
+            <Text>{filteredList ? filteredList.length : null} patients</Text>
+          </View>
+          <Divider/>
+          
           <ScrollView
             w="100%"
             height="93%"
@@ -217,7 +230,7 @@ function PatientsScreen({ navigation }) {
                 : null}
             </VStack>
           </ScrollView>
-          <Center position="absolute" right="5" bottom="2%">
+          <Center position="absolute" right="5" bottom="5%">
             <Fab
               backgroundColor={colors.pink}
               icon={
@@ -234,7 +247,7 @@ function PatientsScreen({ navigation }) {
               shadow={2}
               size="sm"
             />
-          </Center>{' '}
+          </Center>
         </Center>
       )}
     </>
@@ -242,34 +255,21 @@ function PatientsScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  headerSearchAndDropDownContainer: {
+  optionsContainer: {
     flexDirection: 'row',
-    width: '100%',
-    zIndex: 1,
+    paddingVertical: '1%',
+    paddingHorizontal: '2%',
   },
   dropDownOptionsAlignment: {
     marginTop: 10,
     marginHorizontal: 10,
   },
-  headerContainer: {
-    flex: 1,
-    zIndex: 0,
-  },
-  searchBarContainer: {
-    marginLeft: '2%',
-    width: '100%',
-    backgroundColor: 'white',
-    borderBottomColor: 'transparent',
-    borderTopColor: 'transparent',
-  },
   searchBar: {
-    alignContent: 'flex-start',
-    justifyContent: 'flex-start',
+    flex: 1
   },
-  searchBarInputStyle: {
-    backgroundColor: colors.white,
-    marginTop: 4.5,
-    borderRadius: 10,
+  filterIcon: {
+    flex: 0,
+    marginLeft: '1.5%'
   },
   patientRowContainer: {
     marginLeft: '5%',
@@ -289,6 +289,30 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: 'bold',
   },
+  patientCount: {
+    fontSize: 13.5,
+    marginLeft: '2%',
+    paddingVertical: '1%',
+    alignSelf: 'flex-start',
+    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+  },
+  tab: {
+    padding: '1.5%',
+    flex: 0.5,
+  },
+  tabText: {
+    fontSize: 20,
+    textAlign: 'center',
+    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+  },
+  selectedTab: {
+    borderBottomColor: colors.green,
+    borderBottomWidth: 3,
+  },
+  selectedTabText: {
+    fontWeight: 'bold',
+    color: colors.green,
+  }
 });
 
 export default PatientsScreen;
