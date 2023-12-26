@@ -89,11 +89,10 @@ const getPatient = async (patientID, maskNRIC) => {
   return client.get(endpoint, params);
 };
 
-const getPatientList = async (maskNRIC = true) => {
+const getPatientList = async (maskNRIC = true, patientStatus = null) => {
   // Error Handling
   // maskNRIC ? (maskNRIC = true) : (maskNRIC = false);
-
-  return client.get(patientList, maskNRIC);
+  return client.get(patientList, {maskNRIC, patientStatus});
 };
 
 const getPatientListByLoggedInCaregiver = async (maskNRIC = true) => {
