@@ -24,7 +24,6 @@ import FilterModalCard from 'app/components/FilterModalCard';
 
 function PatientsScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(false);
-  const [listOfPatients, setListOfPatients] = useState();
   const { user, setUser } = useContext(AuthContext);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterValue, setFilterValue] = useState('myPatients');
@@ -34,6 +33,7 @@ function PatientsScreen({ navigation }) {
   const [caregiverList, setCaregiverList] = useState([]);
   const [selectedCaregiver, setSelectedCaregiver] = useState(null);
   const [caregiverFilterList, setCaregiverFilterList] = useState(null);
+  const [filteredList, setFilteredList] = useState([])
 
   const SCREEN_WIDTH = Dimensions.get('window').width;
   // Refreshes every time the user navigates to PatientsScreen - OUTDATED
@@ -41,13 +41,10 @@ function PatientsScreen({ navigation }) {
   useFocusEffect(
     React.useCallback(() => {
       // Reference https://stackoverflow.com/questions/21518381/proper-way-to-wait-for-one-function-to-finish-before-continuing
-      // Resolved the issue of `setListOfPatients` before successfully calling getPatient api.
       if (isReloadPatientList) {
         setIsLoading(true);
         const promiseFunction = async () => {
           await getListOfPatients();
-          // const response = await getListOfPatients();
-          // setListOfPatients(response);
         };
         setIsReloadPatientList(false);
         promiseFunction();
@@ -76,7 +73,6 @@ function PatientsScreen({ navigation }) {
       return;
     }
     setOriginalListOfPatients(response.data.data);
-    setListOfPatients(response.data.data);
     setIsLoading(false);    
 
     setSelectedCaregiver(null)
@@ -87,7 +83,7 @@ function PatientsScreen({ navigation }) {
   };
 
   const setListOfCaregivers = () => {
-    let tempListOfCaregivers = listOfPatients.map(x => x.caregiverName)
+    let tempListOfCaregivers = originalListOfPatients.map(x => x.caregiverName)
     const listOfCaregivers = Array.from(new Set(tempListOfCaregivers))    
     setCaregiverList(listOfCaregivers)
 
@@ -100,18 +96,6 @@ function PatientsScreen({ navigation }) {
     });
 
     setCaregiverFilterList(list);
-
-    // const list = [];
-
-    // for(var i = 0; i<listOfCaregivers.length; i++) {
-    //   console.log("wassup",i)
-    //   list.push({
-    //     id: i.toString(),
-    //     title: listOfCaregivers[i],
-    //   });
-    // }
-
-    // console.log(list)
   }
 
   const handleFabOnPress = () => {
@@ -121,73 +105,37 @@ function PatientsScreen({ navigation }) {
 
   // Show all patients as expected when nothing is keyed into the search
   useEffect(() => {
-    if (!searchQuery) {
-      // console.log(
-      //   'Setting list of patients to original list:',
-      //   originalListOfPatients,
-      // );
-      setListOfPatients(originalListOfPatients);
+    if (!searchQuery && !selectedCaregiver) {
+      setFilteredList(originalListOfPatients);
+    } else {
+      let tempFilteredList = originalListOfPatients.filter((item) => {
+        const fullName = `${item.firstName} ${item.lastName}`;
+        return fullName.toLowerCase().includes(searchQuery.toLowerCase());
+      })
+      selectedCaregiver ? tempFilteredList = tempFilteredList.filter((item) => {
+        return item.caregiverName == selectedCaregiver
+      }) : null
     }
-    // added originalListOfPatients into the dependency
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery]);
+  }, [searchQuery, selectedCaregiver]);
 
   // Set the search query to filter patient list
   const handleSearch = (text) => {
-    // console.log('Handling search query:', text);
     setSearchQuery(text);
-  };
-
-  // Filter patient list with search query by FULL NAME
-  // const filteredList = listOfPatients
-  //   ? listOfPatients.filter((item) => {
-  //       // console.log(item);
-  //       const fullName = `${item.firstName} ${item.lastName}`;
-  //       return fullName.toLowerCase().includes(searchQuery.toLowerCase());
-  //     })
-  //   : null;
-
-  // const handleOnPress = (item) => {
-  //   navigation.push(routes.PATIENT_PROFILE, { patientProfile: item });
-  // };
-
-  // Filter patient list with search query by PREFERRED NAME
-  const filteredList = listOfPatients
-    ? listOfPatients.filter((item) => {
-        return item.preferredName
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase());
-      })
-    : null;
+  };  
 
   const handleOnPress = (patientID) => {
     console.log(patientID);
-    // navigation.push(routes.PATIENT_PROFILE, { patientProfile: item });
     navigation.push(routes.PATIENT_PROFILE, { id: patientID });
   };
 
   const handleTabOnPress = (filterValue) => {
     setFilterValue(filterValue)
+  }  
+
+  const filterData = () => {
+
   }
-
-  const updateFilteredCaregiverData = () => {
-    // const filtered = [];
-    // listOfPatients.forEach((patient) => {
-    //   const caregivers = [];
-      
-    //   );
-
-    //   if (activities.length !== 0) {
-    //     filtered.push({
-    //       patientImage: patient.patientImage,
-    //       patientId: patient.patientId,
-    //       patientName: patient.patientName,
-    //       activities: activities,
-    //     });
-    //   }
-    // });
-    // setFilteredPatientsData(filtered);
-  };
 
   return (
     <>
@@ -238,7 +186,7 @@ function PatientsScreen({ navigation }) {
                   caregiverFilterList={caregiverFilterList}
                   setCaregiverFilterList={setCaregiverFilterList}
                   setSelectedCaregiver={setSelectedCaregiver}
-                  updateFilteredCaregiverData={updateFilteredCaregiverData}                  
+                  filterData={filterData}
                 />
               </Icon>
 

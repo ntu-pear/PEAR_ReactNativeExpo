@@ -5,13 +5,13 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Platform, StyleSheet } from 'react-native';
 import colors from 'app/config/colors';
 import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
+import SearchBar from './input-fields/SearchBar';
 
 
 const FilterModalCard = ({
   modalVisible,
   setModalVisible,
-  updateFilteredCaregiverData,
-  caregiverList = [],
+  filterData,
   setSelectedCaregiver,
   caregiverFilterList,
   setCaregiverFilterList,
@@ -19,22 +19,23 @@ const FilterModalCard = ({
   const initialRef = useRef(null);
   const finalRef = useRef(null);
   const [loading, setLoading] = useState(false);
-  const [selectedCaregiverTemp, setSelectedCaregiverTemp] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const searchRef = useRef(null);
 
   const onChangeCaregiverName = (value) => {
-    setSelectedCaregiverTemp(value);
+    console.log(1111, value)
+    setSelectedItem(value);
   };
 
   const handleApply = () => {
     setModalVisible(false);
-    updateFilteredCaregiverData();
-    setSelectedCaregiver(selectedCaregiverTemp);
+    filterData();
+    setSelectedCaregiver(selectedItem);
   };
 
   const handleReset = () => {
-    setSelectedCaregiverTemp(null);
+    setSelectedItem(null);
     // searchRef.current.clear();
   };
 
@@ -60,12 +61,12 @@ const FilterModalCard = ({
                   closeOnBlur={true}
                   closeOnSubmit={false}
                   dataSet={caregiverFilterList}
-                  onSelectItem={onChangeCaregiverName}
-                  inputHeight={50}
-                  loading={loading}
+                  onSelectItem={(item) => item && setSelectedItem(item.id)}
+                  // inputHeight={50}
+                  // loading={loading}
                   onClear={() => {
                     setCaregiverFilterList(null);
-                    setSelectedCaregiverTemp(null);
+                    setSelectedItem(null);
                   }}
                   textInputProps={{
                     placeholder: 'Enter Caregiver Name',
