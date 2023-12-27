@@ -20,6 +20,34 @@ export const nameFormat = (value) => {
 
 export const nricFormat = (value) => {
   if(!/^[STFGMstfgm]\d{7}[A-Za-z]$/.test(value)) {
+    return errors.nricFormatError;
+  }
+}
+
+export const nricValid = (value) => {
+  const first = value[0];
+  const digits = value.slice(1,-1);
+  const last = value[8];
+
+  const weights = [2,7,6,5,4,3,2];
+  let checksum = 0;
+
+  for(var c in digits) {
+    checksum += digits[c]*weights[c];
+  }
+
+  if(first.toUpperCase() == 'T' || first.toUpperCase() == 'G') {
+    checksum += 4;
+  }
+
+  checksum = checksum%11;
+
+  const checkFG = ['X', 'W', 'U', 'T', 'R', 'Q', 'P', 'N', 'M', 'L', 'K'];
+  const checkST = ['J', 'Z', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A'];
+
+  const valid = ((first.toUpperCase() == 'F' || first.toUpperCase() == 'G') && last.toUpperCase() == checkFG[checksum]) || 
+      ((first.toUpperCase() == 'S' || first.toUpperCase() == 'T') && last.toUpperCase() == checkST[checksum])
+  if (!valid) {
     return errors.nricError;
   }
 }
@@ -42,10 +70,16 @@ export const emailFormat = (value) => {
   }
 }
 
+export const rando = (value) => {
+  if(value.length > 2) {
+    return "huh"
+  }
+}
+
 
 export const validationFunctions = {
   'name': [nameFormat],
-  'nric': [nricFormat],
+  'nric': [nricFormat, nricValid],
   'home phone': [homePhoneNoFormat],
   'mobile phone': [mobilePhoneNoFormat],
   'email': [emailFormat]
