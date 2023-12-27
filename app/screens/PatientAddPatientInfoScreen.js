@@ -276,7 +276,7 @@ function PatientAddPatientInfoScreen({
                     </Box>
                   </View>
 
-                  <NameInputField
+                  <InputField
                     isRequired
                     title={'First Name'}
                     value={patient.FirstName}
@@ -285,7 +285,7 @@ function PatientAddPatientInfoScreen({
                     dataType="name"
                   />
 
-                  <NameInputField
+                  <InputField
                     isRequired
                     title={'Last Name'}
                     value={patient.LastName}
@@ -294,7 +294,7 @@ function PatientAddPatientInfoScreen({
                     dataType="name"
                   />
 
-                  <NameInputField
+                  <InputField
                     isRequired
                     title={'Preferred Name'}
                     value={patient.PreferredName}
