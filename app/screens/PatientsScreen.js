@@ -19,30 +19,30 @@ import typography from 'app/config/typography';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import SearchBar from 'app/components/input-fields/SearchBar';
+import FilterModalCard from 'app/components/FilterModalCard';
 
 function PatientsScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(false);
-  const [listOfPatients, setListOfPatients] = useState();
   const { user, setUser } = useContext(AuthContext);
   const [searchQuery, setSearchQuery] = useState('');
-  // set default value to my patients
   const [filterValue, setFilterValue] = useState('myPatients');
   const [originalListOfPatients, setOriginalListOfPatients] = useState([]);
   const [isReloadPatientList, setIsReloadPatientList] = useState(true);
-  
+  const [modalVisible, setModalVisible] = useState(false);
+  const [caregiverList, setCaregiverList] = useState([]);
+  const [selectedCaregiver, setSelectedCaregiver] = useState(null);
+  const [listOfPatients, setListOfPatients] = useState([])
+
   const SCREEN_WIDTH = Dimensions.get('window').width;
   // Refreshes every time the user navigates to PatientsScreen - OUTDATED
   // Now refresh only when new patient is added or user requested refresh
   useFocusEffect(
     React.useCallback(() => {
       // Reference https://stackoverflow.com/questions/21518381/proper-way-to-wait-for-one-function-to-finish-before-continuing
-      // Resolved the issue of `setListOfPatients` before successfully calling getPatient api.
       if (isReloadPatientList) {
         setIsLoading(true);
         const promiseFunction = async () => {
           await getListOfPatients();
-          // const response = await getListOfPatients();
-          // setListOfPatients(response);
         };
         setIsReloadPatientList(false);
         promiseFunction();
@@ -51,10 +51,17 @@ function PatientsScreen({ navigation }) {
     }, [isReloadPatientList]),
   );
 
+  // Get list of patients from backend when user switches between 'My Patients' and 'All Patients'
   useEffect(() => {
     getListOfPatients();
+    resetSearchAndFilter()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterValue]);
+
+  const resetSearchAndFilter = () => {
+    setSearchQuery('')
+    setSelectedCaregiver(null)
+  }
 
   // Changed patientListByUserId API to new getPatientListByLoggedInCaregiver API -- Justin
   const getListOfPatients = async () => {
@@ -71,66 +78,66 @@ function PatientsScreen({ navigation }) {
       return;
     }
     setOriginalListOfPatients(response.data.data);
-    setListOfPatients(response.data.data);
-    setIsLoading(false);
-    // console.log(filterValue === 'allPatients' ? response : null);
-    // return response.data.data;
+    setListOfPatients(response.data.data)
+    setIsLoading(false);    
+
+    setSelectedCaregiver(null)
+
+    setListOfCaregivers()
+
   };
 
+  // Set list of caregivers for filter dropdown
+  const setListOfCaregivers = () => {
+    if(filterValue === 'myPatients') {
+      setCaregiverList([])
+    } else { 
+      let tempListOfCaregivers = originalListOfPatients.map(x => x.caregiverName)
+      const listOfCaregivers = Array.from(new Set(tempListOfCaregivers))    
+      setCaregiverList(listOfCaregivers)
+    }
+  }
+
+  // On click button to add patient
   const handleFabOnPress = () => {
     navigation.navigate(routes.PATIENT_ADD_PATIENT);
     setIsReloadPatientList(true);
   };
 
-  // Show all patients as expected when nothing is keyed into the search
+  // Show all patients as expected when nothing is keyed into the search and no caregiver is selected
+  // Else filter
   useEffect(() => {
     if (!searchQuery) {
-      // console.log(
-      //   'Setting list of patients to original list:',
-      //   originalListOfPatients,
-      // );
       setListOfPatients(originalListOfPatients);
+    } else {
+      let tempFilteredList = originalListOfPatients.filter((item) => {
+        const fullName = `${item.firstName} ${item.lastName}`;
+        return fullName.toLowerCase().includes(searchQuery.toLowerCase());
+      })
+      selectedCaregiver ? tempFilteredList = tempFilteredList.filter((item) => {
+        return item.caregiverName == selectedCaregiver
+      }) : null
+      setListOfPatients(tempFilteredList);
     }
-    // added originalListOfPatients into the dependency
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery]);
+  }, [searchQuery, selectedCaregiver]);
 
   // Set the search query to filter patient list
   const handleSearch = (text) => {
-    // console.log('Handling search query:', text);
     setSearchQuery(text);
-  };
-
-  // Filter patient list with search query by FULL NAME
-  // const filteredList = listOfPatients
-  //   ? listOfPatients.filter((item) => {
-  //       // console.log(item);
-  //       const fullName = `${item.firstName} ${item.lastName}`;
-  //       return fullName.toLowerCase().includes(searchQuery.toLowerCase());
-  //     })
-  //   : null;
-
-  // const handleOnPress = (item) => {
-  //   navigation.push(routes.PATIENT_PROFILE, { patientProfile: item });
-  // };
-
-  // Filter patient list with search query by PREFERRED NAME
-  const filteredList = listOfPatients
-    ? listOfPatients.filter((item) => {
-        return item.preferredName
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase());
-      })
-    : null;
+  };  
 
   const handleOnPress = (patientID) => {
     console.log(patientID);
-    // navigation.push(routes.PATIENT_PROFILE, { patientProfile: item });
     navigation.push(routes.PATIENT_PROFILE, { id: patientID });
   };
 
   const handleTabOnPress = (filterValue) => {
     setFilterValue(filterValue)
+  }  
+
+  const filterData = () => {
+
   }
 
   return (
@@ -173,11 +180,21 @@ function PatientsScreen({ navigation }) {
                 } 
                 size={12}
                 color={colors.black}
-              />
+                onPress={() => setModalVisible(true)}
+              >
+                {/* <FilterModalCard
+                  modalVisible={modalVisible}
+                  setModalVisible={setModalVisible}
+                  caregiverList={caregiverList}
+                  setSelectedCaregiver={setSelectedCaregiver}
+                  filterData={filterData}
+                /> */}
+              </Icon>
+
             </View>
           </View>
           <View style={styles.patientCount}>
-            <Text>{filteredList ? filteredList.length : null} patients</Text>
+            <Text>{listOfPatients ? listOfPatients.length : null} patients</Text>
           </View>
           <Divider/>
           
@@ -192,8 +209,8 @@ function PatientsScreen({ navigation }) {
             }
           >
             <VStack alignItems="flex-start" backgroundColor={'yellow'}>
-              {filteredList && filteredList.length > 0
-                ? filteredList.map((item, index) => (
+              {listOfPatients && listOfPatients.length > 0
+                ? listOfPatients.map((item, index) => (
                     <View style={styles.patientRowContainer} key={index}>
                       <ProfileNameButton
                         // profileLineOne={`${item.firstName} ${item.lastName}`}
