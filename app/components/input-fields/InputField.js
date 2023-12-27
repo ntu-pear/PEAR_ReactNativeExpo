@@ -86,7 +86,10 @@ function InputField({
   // Used instead of autoCapitalize prop bc it breaks secureTextEntry when type='password' is used.
   const handleOnChangeText = (value) => {
     value = value.toString();
-    autoCapitalize == 'characters' ? setInputText(value.toUpperCase()) : setInputText(value);
+    if (autoCapitalize == 'characters') {
+      value = value.toUpperCase();
+    } 
+    setInputText(value);
     onChangeText(value);
   }
 
