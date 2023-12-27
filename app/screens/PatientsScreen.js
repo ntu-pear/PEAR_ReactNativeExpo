@@ -19,17 +19,22 @@ import typography from 'app/config/typography';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import SearchBar from 'app/components/input-fields/SearchBar';
+import ActivityFilterCard from 'app/components/ActivityFilterCard';
+import FilterModalCard from 'app/components/FilterModalCard';
 
 function PatientsScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(false);
   const [listOfPatients, setListOfPatients] = useState();
   const { user, setUser } = useContext(AuthContext);
   const [searchQuery, setSearchQuery] = useState('');
-  // set default value to my patients
   const [filterValue, setFilterValue] = useState('myPatients');
   const [originalListOfPatients, setOriginalListOfPatients] = useState([]);
   const [isReloadPatientList, setIsReloadPatientList] = useState(true);
-  
+  const [modalVisible, setModalVisible] = useState(false);
+  const [caregiverList, setCaregiverList] = useState([]);
+  const [selectedCaregiver, setSelectedCaregiver] = useState(null);
+  const [caregiverFilterList, setCaregiverFilterList] = useState(null);
+
   const SCREEN_WIDTH = Dimensions.get('window').width;
   // Refreshes every time the user navigates to PatientsScreen - OUTDATED
   // Now refresh only when new patient is added or user requested refresh
@@ -72,10 +77,42 @@ function PatientsScreen({ navigation }) {
     }
     setOriginalListOfPatients(response.data.data);
     setListOfPatients(response.data.data);
-    setIsLoading(false);
-    // console.log(filterValue === 'allPatients' ? response : null);
-    // return response.data.data;
+    setIsLoading(false);    
+
+    setSelectedCaregiver(null)
+    setCaregiverFilterList(null)
+
+    filterValue === 'myPatients' ? setCaregiverList([]) : setListOfCaregivers()
+
   };
+
+  const setListOfCaregivers = () => {
+    let tempListOfCaregivers = listOfPatients.map(x => x.caregiverName)
+    const listOfCaregivers = Array.from(new Set(tempListOfCaregivers))    
+    setCaregiverList(listOfCaregivers)
+
+    const list = [];
+    listOfCaregivers.forEach((item, i) => {
+      list.push({
+        id: i.toString(),
+        title: item,
+      });
+    });
+
+    setCaregiverFilterList(list);
+
+    // const list = [];
+
+    // for(var i = 0; i<listOfCaregivers.length; i++) {
+    //   console.log("wassup",i)
+    //   list.push({
+    //     id: i.toString(),
+    //     title: listOfCaregivers[i],
+    //   });
+    // }
+
+    // console.log(list)
+  }
 
   const handleFabOnPress = () => {
     navigation.navigate(routes.PATIENT_ADD_PATIENT);
@@ -133,6 +170,25 @@ function PatientsScreen({ navigation }) {
     setFilterValue(filterValue)
   }
 
+  const updateFilteredCaregiverData = () => {
+    // const filtered = [];
+    // listOfPatients.forEach((patient) => {
+    //   const caregivers = [];
+      
+    //   );
+
+    //   if (activities.length !== 0) {
+    //     filtered.push({
+    //       patientImage: patient.patientImage,
+    //       patientId: patient.patientId,
+    //       patientName: patient.patientName,
+    //       activities: activities,
+    //     });
+    //   }
+    // });
+    // setFilteredPatientsData(filtered);
+  };
+
   return (
     <>
       {isLoading ? (
@@ -173,7 +229,19 @@ function PatientsScreen({ navigation }) {
                 } 
                 size={12}
                 color={colors.black}
-              />
+                onPress={() => setModalVisible(true)}
+              >
+                <FilterModalCard
+                  modalVisible={modalVisible}
+                  setModalVisible={setModalVisible}
+                  caregiverList={caregiverList}
+                  caregiverFilterList={caregiverFilterList}
+                  setCaregiverFilterList={setCaregiverFilterList}
+                  setSelectedCaregiver={setSelectedCaregiver}
+                  updateFilteredCaregiverData={updateFilteredCaregiverData}                  
+                />
+              </Icon>
+
             </View>
           </View>
           <View style={styles.patientCount}>
