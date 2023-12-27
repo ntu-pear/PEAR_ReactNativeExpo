@@ -287,7 +287,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
 
           <InputField
             title={'Temporary Address'}
-            value={guardian.Address}
+            value={guardian.TempAddress}
             onChangeText={handleFormData('TempAddress', i)}
             onEndEditing={handleTempAddrError}
           />
