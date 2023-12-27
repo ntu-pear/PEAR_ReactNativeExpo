@@ -182,13 +182,13 @@ function PatientsScreen({ navigation }) {
                 color={colors.black}
                 onPress={() => setModalVisible(true)}
               >
-                <FilterModalCard
+                {/* <FilterModalCard
                   modalVisible={modalVisible}
                   setModalVisible={setModalVisible}
                   caregiverList={caregiverList}
                   setSelectedCaregiver={setSelectedCaregiver}
                   filterData={filterData}
-                />
+                /> */}
               </Icon>
 
             </View>

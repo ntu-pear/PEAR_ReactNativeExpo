@@ -5,8 +5,6 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Platform, StyleSheet } from 'react-native';
 import colors from 'app/config/colors';
 import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
-import SearchBar from './input-fields/SearchBar';
-import SearchableDropdown from './input-fields/SearchableSelect';
 
 
 const FilterModalCard = ({
@@ -92,7 +90,6 @@ const FilterModalCard = ({
                   }}
                   suggestionsListMaxHeight={200}
                 /> */}
-                <SearchableDropdown data={['Apple', 'Banana', 'Cherry', 'Date', 'Grape', 'Lemon', 'Orange']}/>
               </View>
             </View>
             ): null}
