@@ -19,7 +19,6 @@ import typography from 'app/config/typography';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import SearchBar from 'app/components/input-fields/SearchBar';
-import ActivityFilterCard from 'app/components/ActivityFilterCard';
 import FilterModalCard from 'app/components/FilterModalCard';
 
 function PatientsScreen({ navigation }) {
@@ -32,8 +31,7 @@ function PatientsScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [caregiverList, setCaregiverList] = useState([]);
   const [selectedCaregiver, setSelectedCaregiver] = useState(null);
-  const [caregiverFilterList, setCaregiverFilterList] = useState(null);
-  const [filteredList, setFilteredList] = useState([])
+  const [listOfPatients, setListOfPatients] = useState([])
 
   const SCREEN_WIDTH = Dimensions.get('window').width;
   // Refreshes every time the user navigates to PatientsScreen - OUTDATED
@@ -53,10 +51,17 @@ function PatientsScreen({ navigation }) {
     }, [isReloadPatientList]),
   );
 
+  // Get list of patients from backend when user switches between 'My Patients' and 'All Patients'
   useEffect(() => {
     getListOfPatients();
+    resetSearchAndFilter()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterValue]);
+
+  const resetSearchAndFilter = () => {
+    setSearchQuery('')
+    setSelectedCaregiver(null)
+  }
 
   // Changed patientListByUserId API to new getPatientListByLoggedInCaregiver API -- Justin
   const getListOfPatients = async () => {
@@ -73,40 +78,37 @@ function PatientsScreen({ navigation }) {
       return;
     }
     setOriginalListOfPatients(response.data.data);
+    setListOfPatients(response.data.data)
     setIsLoading(false);    
 
     setSelectedCaregiver(null)
-    setCaregiverFilterList(null)
 
-    filterValue === 'myPatients' ? setCaregiverList([]) : setListOfCaregivers()
+    setListOfCaregivers()
 
   };
 
+  // Set list of caregivers for filter dropdown
   const setListOfCaregivers = () => {
-    let tempListOfCaregivers = originalListOfPatients.map(x => x.caregiverName)
-    const listOfCaregivers = Array.from(new Set(tempListOfCaregivers))    
-    setCaregiverList(listOfCaregivers)
-
-    const list = [];
-    listOfCaregivers.forEach((item, i) => {
-      list.push({
-        id: i.toString(),
-        title: item,
-      });
-    });
-
-    setCaregiverFilterList(list);
+    if(filterValue === 'myPatients') {
+      setCaregiverList([])
+    } else { 
+      let tempListOfCaregivers = originalListOfPatients.map(x => x.caregiverName)
+      const listOfCaregivers = Array.from(new Set(tempListOfCaregivers))    
+      setCaregiverList(listOfCaregivers)
+    }
   }
 
+  // On click button to add patient
   const handleFabOnPress = () => {
     navigation.navigate(routes.PATIENT_ADD_PATIENT);
     setIsReloadPatientList(true);
   };
 
-  // Show all patients as expected when nothing is keyed into the search
+  // Show all patients as expected when nothing is keyed into the search and no caregiver is selected
+  // Else filter
   useEffect(() => {
-    if (!searchQuery && !selectedCaregiver) {
-      setFilteredList(originalListOfPatients);
+    if (!searchQuery) {
+      setListOfPatients(originalListOfPatients);
     } else {
       let tempFilteredList = originalListOfPatients.filter((item) => {
         const fullName = `${item.firstName} ${item.lastName}`;
@@ -115,6 +117,7 @@ function PatientsScreen({ navigation }) {
       selectedCaregiver ? tempFilteredList = tempFilteredList.filter((item) => {
         return item.caregiverName == selectedCaregiver
       }) : null
+      setListOfPatients(tempFilteredList);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, selectedCaregiver]);
@@ -183,8 +186,6 @@ function PatientsScreen({ navigation }) {
                   modalVisible={modalVisible}
                   setModalVisible={setModalVisible}
                   caregiverList={caregiverList}
-                  caregiverFilterList={caregiverFilterList}
-                  setCaregiverFilterList={setCaregiverFilterList}
                   setSelectedCaregiver={setSelectedCaregiver}
                   filterData={filterData}
                 />
@@ -193,7 +194,7 @@ function PatientsScreen({ navigation }) {
             </View>
           </View>
           <View style={styles.patientCount}>
-            <Text>{filteredList ? filteredList.length : null} patients</Text>
+            <Text>{listOfPatients ? listOfPatients.length : null} patients</Text>
           </View>
           <Divider/>
           
@@ -208,8 +209,8 @@ function PatientsScreen({ navigation }) {
             }
           >
             <VStack alignItems="flex-start" backgroundColor={'yellow'}>
-              {filteredList && filteredList.length > 0
-                ? filteredList.map((item, index) => (
+              {listOfPatients && listOfPatients.length > 0
+                ? listOfPatients.map((item, index) => (
                     <View style={styles.patientRowContainer} key={index}>
                       <ProfileNameButton
                         // profileLineOne={`${item.firstName} ${item.lastName}`}

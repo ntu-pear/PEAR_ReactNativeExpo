@@ -6,6 +6,7 @@ import { Platform, StyleSheet } from 'react-native';
 import colors from 'app/config/colors';
 import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
 import SearchBar from './input-fields/SearchBar';
+import SearchableDropdown from './input-fields/SearchableSelect';
 
 
 const FilterModalCard = ({
@@ -13,13 +14,13 @@ const FilterModalCard = ({
   setModalVisible,
   filterData,
   setSelectedCaregiver,
-  caregiverFilterList,
-  setCaregiverFilterList,
+  caregiverList,
 }) => {
   const initialRef = useRef(null);
   const finalRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [caregiverFilterList, setCaregiverFilterList] = useState(null);
 
   const searchRef = useRef(null);
 
@@ -27,6 +28,18 @@ const FilterModalCard = ({
     console.log(1111, value)
     setSelectedItem(value);
   };
+
+  const onOpenSuggestionsList = () => { 
+    const list = [];
+    caregiverList.forEach((item, i) => {
+      list.push({
+        id: i.toString(),
+        title: item,
+      });
+    });
+
+    setCaregiverFilterList(list);
+  }
 
   const handleApply = () => {
     setModalVisible(false);
@@ -52,18 +65,22 @@ const FilterModalCard = ({
         backgroundColor={colors.white_var1}
       >
         <Modal.Body>
-          {caregiverFilterList ? (
+          {caregiverList.length > 0 ? (
             <View style={styles.caregiverViewStyle} zIndex={6}>
               <Text style={styles.textStyle}>Filter by Caregiver</Text>
               <View>
-                <AutocompleteDropdown
+                {/* <AutocompleteDropdown
                   ref={searchRef}
                   closeOnBlur={true}
                   closeOnSubmit={false}
                   dataSet={caregiverFilterList}
-                  onSelectItem={(item) => item && setSelectedItem(item.id)}
-                  // inputHeight={50}
-                  // loading={loading}
+                  onOpenSuggestionsList={onOpenSuggestionsList}
+                  onSelectItem={(item) => {
+                    console.log('item is',item)
+                    item && setSelectedItem(item.id)
+                  }}
+                  inputHeight={50}
+                  loading={loading}
                   onClear={() => {
                     setCaregiverFilterList(null);
                     setSelectedItem(null);
@@ -74,7 +91,8 @@ const FilterModalCard = ({
                     autoCapitalize: 'none',
                   }}
                   suggestionsListMaxHeight={200}
-                />
+                /> */}
+                <SearchableDropdown data={['Apple', 'Banana', 'Cherry', 'Date', 'Grape', 'Lemon', 'Orange']}/>
               </View>
             </View>
             ): null}
