@@ -33,7 +33,7 @@ function InputField({
   onEndEditing = () => {},
   variant = 'singeLine',
   style = null,
-  otherProps = null,
+  otherProps = {},
 }) { 
   // Track error state via input validation  
   const [error, setError] = useState({isError: false, errorMsg: ''});
@@ -70,6 +70,10 @@ function InputField({
     msg = ''
     if(isRequired) {
       msg = validation.notEmpty(value);
+    }
+    console.log(otherProps)
+    if('prefNameList' in otherProps) {
+      msg = msg || validation.uniquePrefName(value, otherProps['prefNameList']);
     }
     const selValidationFunctions = validation.validationFunctions[dataType]
     if (selValidationFunctions) {
