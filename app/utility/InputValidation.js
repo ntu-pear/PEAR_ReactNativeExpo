@@ -70,11 +70,12 @@ export const emailFormat = (value) => {
   }
 }
 
-export const rando = (value) => {
-  if(value.length > 2) {
-    return "huh"
+export const uniquePrefName = (value, list) => {
+  if (list.map((x) => x.toUpperCase()).includes(value)) {
+    return errors.duplicatePrefNameError;
   }
 }
+
 
 
 export const validationFunctions = {
