@@ -1,5 +1,5 @@
 // Base
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { StyleSheet, Platform, View } from 'react-native';
 import {
   Box,
@@ -31,6 +31,10 @@ import SingleOptionCheckBox from 'app/components/SingleOptionCheckBox';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import InputField from 'app/components/input-fields/InputField';
 import SensitiveInputField from 'app/components/input-fields/SensitiveInputField';
+
+// API
+import patientApi from 'app/api/patient';
+import AuthContext from 'app/auth/context';
 
 function PatientAddPatientInfoScreen({
   nextQuestionHandler,
@@ -210,12 +214,31 @@ function PatientAddPatientInfoScreen({
   useEffect(() => {
     if (!isLoading && !isError && data) {
       console.log('selection data!');
-      console.log(data);
       setListOfLanguages(data);
     }
   }, [data, isError, isLoading]);
 
-  return isLoading ? (
+  // Get patient preferred names from API
+  useEffect(() => {
+    getPrefNames();
+  }, [])
+
+  const [isPrefNamesLoading, setIsPrefNamesLoading] = useState(false);  
+  const { user, setUser } = useContext(AuthContext);
+  const [prefNames, setPrefNames] = useState([]);
+
+  const getPrefNames = async () => {
+    setIsPrefNamesLoading(true);
+    const response = await patientApi.getPatientList(false,'active');
+    if (!response.ok) {
+      setUser(null);
+      return;
+    }
+    setPrefNames(response.data.data.map(x => x.preferredName));
+    setIsPrefNamesLoading(false);    
+  };
+
+  return isLoading || isPrefNamesLoading ? (
     <ActivityIndicator visible />
   ) : (
     <>
@@ -301,6 +324,7 @@ function PatientAddPatientInfoScreen({
                     onChangeText={handleFormData('PreferredName')}
                     onEndEditing={handlePrefNameError}                    
                     dataType="name"
+                    otherProps={{prefNameList: prefNames}}
                   />
 
                   <SensitiveInputField
