@@ -42,7 +42,7 @@ function SelectionInputField({
   This state is used to track the value of the selected item
   */
   const [selectedValue, setSelectedValue] = useState(
-    value ? value : dataArray[0].value,
+    value ? value : Object.keys(isDisabledItems).length > 0 ? null : dataArray[0].value,
   );
 
 
