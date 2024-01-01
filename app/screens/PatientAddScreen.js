@@ -86,7 +86,7 @@ function PatientAddScreen() {
     allergyInfo: [
       {
         AllergyListID: 2,
-        AllergyReactionListID: null,
+        AllergyReactionListID: 1,
         AllergyRemarks: '',
       },
     ],
@@ -216,11 +216,11 @@ function PatientAddScreen() {
       allergyInfo : newData,
     }));
 
-    console.log(newData)
+    // console.log(newData)
   };
 
   // Function to submit form
-  const submitForm = async () => {
+  const onSubmit = async () => {
     // -- Validation is now real-time no need to have on submit validation - Justin
     const result = await patientApi.addPatient(formData);
 
@@ -292,7 +292,7 @@ function PatientAddScreen() {
           componentList={componentList}
           concatFormData={concatFormData}
           removeFormData={removeFormData}
-          onSubmitFunction={submitForm}
+          onSubmit={onSubmit}
         />
       );
     default:
