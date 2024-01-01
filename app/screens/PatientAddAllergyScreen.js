@@ -1,4 +1,4 @@
-// Lib
+// Libs
 import React, { useState, useCallback, useEffect } from 'react';
 import { Center, SectionList, View } from 'native-base';
 
@@ -14,7 +14,7 @@ function PatientAddAllergyScreen({
   componentList,
   concatFormData,
   removeFormData,
-  onSubmitFunction
+  onSubmit
 }) {
   const [allergyInfoDisplay, setAllergyInfoDisplay] = useState(
     componentList.allergy,
@@ -37,14 +37,14 @@ function PatientAddAllergyScreen({
 
   // if errorStates has true(s) within (errors present) => is submit enabled = false
   // if errorStates does not have true(s) (no errors present) false => is submit enabled = true
-  let isSubmitEnabled = !errorStates.includes(true);
+  let isSubmitDisabled = !errorStates.includes(true);
 
   const addNewAllergyComponent = () => {
     setErrorStates((prev) => [...prev, true]);
     setAllergyInfoDisplay([...allergyInfoDisplay, {}]);
     concatFormData('allergyInfo', {
       AllergyListID: 2,
-      AllergyReactionListID: null,
+      AllergyReactionListID: 1,
       AllergyRemarks: '',
     });
   };
@@ -86,11 +86,13 @@ function PatientAddAllergyScreen({
               prevQuestionHandler={() =>
                 prevQuestionHandler('allergy', allergyInfoDisplay)
               }
+              isAddDisabled={!(formData['allergyInfo'][0]['AllergyListID'] > 2)} // disable add if no allergy selected
               addComponent={addNewAllergyComponent}
               removeComponent={removeAllergyComponent}
-              submit={isSubmitEnabled}
+              submit={true}
+              isSubmitDisabled={!isSubmitDisabled}              
               formData={formData}
-              submitFunction={onSubmitFunction}
+              onSubmit={onSubmit}
             />
           </View>
         )}

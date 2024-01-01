@@ -1,5 +1,5 @@
-// Lib
-import React, { useState, useCallback, useEffect } from 'react';
+// Libs
+import React, { useState, useEffect } from 'react';
 import { Box, VStack, Text, Divider } from 'native-base';
 import { StyleSheet, Platform, View } from 'react-native';
 
@@ -10,12 +10,12 @@ import typography from 'app/config/typography';
 // Hooks
 import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
+// Utils
+import { initSelectDisable, parseSelectOptions } from 'app/utility/miscFunctions';
+
 // Components
-import CommonInputField from 'app/components/CommonInputField';
-// import SelectionInputField from 'app/components/SelectionInputField';
 import SelectionInputField from 'app/components/input-fields/SelectionInputField';
 import LoadingWheel from 'app/components/LoadingWheel';
-import { parseSelectOptions } from 'app/utility/miscFunctions';
 import InputField from './input-fields/InputField';
 
 function AddPatientAllergy({ i, title, formData, handleFormData, onError }) {
@@ -23,29 +23,25 @@ function AddPatientAllergy({ i, title, formData, handleFormData, onError }) {
   const allergy = formData[page][i];
 
   // Variables relatied to retrieving allergy and reaction select options from API
-  const { data, isError, isLoading } = useGetSelectionOptions('Allergy');
-  const {
-    data: reactionData,
-    isError: reactionError,
-    isLoading: reactionLoading,
-  } = useGetSelectionOptions('AllergyReaction');
+  const { data: allergies, isError: isAllergiesError, isLoading: isAllergiesLoading } = useGetSelectionOptions('Allergy');
+  const { data: reactions, isError: isReactionsError, isLoading: isReactionsLoading } = useGetSelectionOptions('AllergyReaction');
  
   // Set initial value for allergies select field
-  const [listOfAllergies, setListOfAllergies] = useState([
-    // { list_AllergyID: 1, value: 'To Be Updated' },
-    { value: 2, label: 'None' },
-    { value: 3, label: 'Corn' },
-    { value: 4, label: 'Eggs' },
-    { value: 5, label: 'Fish' },
-    { value: 6, label: 'Meat' },
-    { value: 7, label: 'Milk' },
-    { value: 8, label: 'Peanuts' },
-    { value: 9, label: 'Tree nuts' },
-    { value: 10, label: 'Shellfish' },
-    { value: 11, label: 'Soy' },
-    { value: 12, label: 'Wheat' },
-    { value: 13, label: 'Seafood' },
-  ]);
+  const [listOfAllergies, setListOfAllergies] = useState(parseSelectOptions([
+    'To Be Updated',
+    'None',
+    'Corn',
+    'Eggs',
+    'Fish',
+    'Meat',
+    'Milk',
+    'Peanuts',
+    'Tree nuts',
+    'Shellfish',
+    'Soy',
+    'Wheat',
+    'Seafood',
+  ]).filter(x => {return x.value !== 1;})); // remove "t "
 
   // Set initial value for allergy reactions select field
   const [listOfAllergyReactions, setListOfAllergyReactions] = useState(parseSelectOptions([
@@ -61,21 +57,106 @@ function AddPatientAllergy({ i, title, formData, handleFormData, onError }) {
     'Itching',
     'Hives',
   ]));
-
-  const [isErrors, setIsErrors] = useState([false]);
-
+  
   // Screen error state: This = true when the child components report error(input fields)
   // Enables use of dynamic rendering of components when the page error = true/false.
   const [isInputErrors, setIsInputErrors] = useState(false);
-
+  
   // Input error states (Child components)
   // This records the error states of each child component (ones that require tracking).
   const [isAllergyError, setIsAllergyError] = useState(false);
   const [isReactionError, setIsReactionError] = useState(false);
-  const [isRemarksError, setIsRemarksError] = useState(false);
+  const [isRemarksError, setIsRemarksError] = useState(false);  
+  
+  // Keeps track of which items in the allergy select field are to be disabled
+  // If multiple allergies, "None" and any already selected options are disabled 
+  const [isDisabledItems, setIsDisabledItems] = useState(initSelectDisable(parseSelectOptions([
+    'To Be Updated',
+    'None',
+    'Corn',
+    'Eggs',
+    'Fish',
+    'Meat',
+    'Milk',
+    'Peanuts',
+    'Tree nuts',
+    'Shellfish',
+    'Soy',
+    'Wheat',
+    'Seafood',
+  ]).filter(x => {return x.value !== 1;})))
 
-  const [allergyOption, setAllergyOption] = useState(allergy.AllergyListID);
+  // Set input errors when there is a change in the error values of child components
+  useEffect(() => {
+    setIsInputErrors (
+      isAllergyError ||
+      isReactionError ||
+      isRemarksError
+      )
+    onError(i, isInputErrors);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    isAllergyError,
+    isReactionError,
+    isRemarksError,
+    isInputErrors
+  ]);
+  
+  // Try to get allergy list from backend. If retrieval from the hook is successful, 
+  // replace the content in listOfAllergies with the retrieved one
+  useEffect(() => {
+    if (!isAllergiesLoading && !isAllergiesError && allergies.length > 0) {      
+    let tempListOfAllergies = allergies.sort((a,b) => a.value - b.value)
+    tempListOfAllergies = tempListOfAllergies.filter(x => {return x.value !== 1;}); // remove "To be updated" option
+    setListOfAllergies(tempListOfAllergies);  
+    }
+  }, [allergies, isAllergiesError, isAllergiesLoading]);  
 
+  // Try to get allergy reaction list from backend. If retrieval from the hook is successful, 
+  // replace the content in listOfAllergyReactions with the retrieved one
+  useEffect(() => {
+    if (!isReactionsLoading && !isReactionsError && reactions) {
+      setListOfAllergyReactions(reactions.sort((a,b) => a.value - b.value));
+    }
+  }, [reactions, isReactionsError, isReactionsLoading]);
+
+  // When allergy id is updated, change allerrgy form data accordingly
+  // If "None" selected, reset errors and reset remarks and reactions
+  useEffect(() => {
+    if (allergy.AllergyListID > 2 && !allergy.AllergyReactionListID) {
+      handleFormData('AllergyReactionListID', i)(1);
+    } else if (allergy.AllergyListID === 2) {
+      handleFormData('AllergyReactionListID', i)(null);
+      handleFormData('AllergyRemarks', i)('');
+      setIsAllergyError(false);
+      setIsReactionError(false);
+      setIsRemarksError(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allergy.AllergyListID]);  
+  
+  // Update disabled allergy options when change in form data
+  // When allergy is added or removed, edit list of allergy options
+  // If multiple allergies, "None" option and already selected options are disabled
+  useEffect(() => {
+    if(formData['allergyInfo'].length > 1) {
+      let tempIsDisabledItem = initSelectDisable(listOfAllergies);
+      tempIsDisabledItem[2] = true;
+      
+      const selectedAllergies = formData['allergyInfo'].map(x => x.AllergyListID) 
+      for(var j in selectedAllergies) {
+        if (j != i) {
+          tempIsDisabledItem[selectedAllergies[j]] = true;
+        }        
+      } 
+      setIsDisabledItems(tempIsDisabledItem);
+    } else {
+      // if only 1 allergy, enable all options
+      setIsDisabledItems(initSelectDisable(listOfAllergies));    
+    }
+  }, [formData])
+
+  
   // Functions for error state reporting for the child components
   const handleAllergyError = (e) => {
     setIsAllergyError(e);
@@ -86,74 +167,13 @@ function AddPatientAllergy({ i, title, formData, handleFormData, onError }) {
     setIsReactionError(e);
     // console.log("reaction", e);
   }
-
+  
   const handleRemarksError = (e) => {
     setIsRemarksError(e);
-    // console.log("remarks", e);
+    // console.log("remarks", e); 
   }
 
-  useEffect(() => {
-    setIsInputErrors (
-      isAllergyError ||
-      isReactionError ||
-      isRemarksError
-    )
-    onError(i, isInputErrors);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    isAllergyError,
-    isReactionError,
-    isRemarksError,
-    isInputErrors
-  ]);
-
-  // // Add/Remove the states for the additional components reaction and remarks when
-  // // they are rendered or de-rendered respectively.
-  // useEffect(() => {
-  //   if (allergyOption <= 2 && isErrors.length > 1) {
-  //     setIsAllergyError(false)
-  //     setIsReactionError(false)
-  //     setIsRemarksError(false)
-  //     handleFormData('AllergyReactionListID', i)(null);
-  //     handleFormData('AllergyRemarks', i)('');
-  //   }
-  //   if (allergyOption > 2 && isErrors.length < 3) {
-  //     setIsReactionError(true)
-  //     setIsRemarksError(true)
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [allergyOption]);
-
-  // allergy  ListID is stored in a state to track it for the useEffect above.
-  useEffect(() => {
-    if (allergy.AllergyListID > 2 && !allergy.AllergyReactionListID) {
-      handleFormData('AllergyReactionListID', i)(1);
-    } else if (allergy.AllergyListID === 2) {
-      handleFormData('AllergyReactionListID', i)(null);
-      handleFormData('AllergyRemarks', i)('');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allergy.AllergyListID]);
-
-  // Try to get allergy list from backend. If retrieval from the hook is successful, 
-  // replace the content in listOfAllergies with the retrieved one
-   useEffect(() => {
-    if (!isLoading && !isError && data) {
-      let allergyData = data.sort((a,b) => a.value - b.value)
-      allergyData = allergyData.filter(x => {return x.value !== 1;});
-      setListOfAllergies(allergyData); // splice to remove "to be updated" option
-    }
-  }, [data, isError, isLoading]);
-
-  // Try to get allergy reaction list from backend. If retrieval from the hook is successful, 
-  // replace the content in listOfAllergyReactions with the retrieved one
-  useEffect(() => {
-    if (!reactionLoading && !reactionError && reactionData) {
-      setListOfAllergyReactions(reactionData.sort((a,b) => a.value - b.value));
-    }
-  }, [reactionData, reactionError, reactionLoading]);
-
-  return isLoading || reactionLoading ? (
+  return isAllergiesLoading || isReactionsLoading ? (
     <LoadingWheel />
   ) : (
     <Box w="100%">
@@ -179,6 +199,7 @@ function AddPatientAllergy({ i, title, formData, handleFormData, onError }) {
             value={allergy.AllergyListID}
             dataArray={listOfAllergies}
             onEndEditing={handleAllergyError}
+            isDisabledItems={isDisabledItems}
           />
           {allergy.AllergyListID > 2 ? (
             <>
