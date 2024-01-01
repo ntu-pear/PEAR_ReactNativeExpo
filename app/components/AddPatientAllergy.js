@@ -146,7 +146,9 @@ function AddPatientAllergy({ i, title, formData, handleFormData, onError }) {
       const selectedAllergies = formData['allergyInfo'].map(x => x.AllergyListID) 
       for(var j in selectedAllergies) {
         if (j != i) {
-          tempIsDisabledItem[selectedAllergies[j]] = true;
+          if(selectedAllergies[j] != null) {
+            tempIsDisabledItem[selectedAllergies[j]] = true;
+          }
         }        
       } 
       setIsDisabledItems(tempIsDisabledItem);
