@@ -2,14 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { Platform, StyleSheet, View, Text } from 'react-native';
 import { VStack, Select } from 'native-base';
-import PropTypes from 'prop-types';
 
 // Configurations
 import typography from 'app/config/typography';
 import colors from 'app/config/colors';
-
-// Utils
-import { notEmpty, notUnselected } from 'app/utility/inputValidation';
 
 // Components
 import ErrorMessage from 'app/components/ErrorMessage';
@@ -27,6 +23,7 @@ function SelectionInputField({
   onEndEditing = () => {},
   inputLeftElement = null,
   inputRightElement = null,
+  isDisabledItems = {}
 }) {
   /*
   This state and subsequent useEffect are used to track if the component is in its first render. This is mainly used to
@@ -57,6 +54,15 @@ function SelectionInputField({
       isError: isRequired && value === 0,
     });
   }, []);
+
+  useEffect(() => {
+    if(isDisabledItems.length > 0) {
+      if(isDisabledItems[value] == true) {
+        setSelectedValue(Object.keys(isDisabledItems).find((key) => isDisabledItems[key] === true) || null)
+      }
+    }
+
+  }, [isDisabledItems])
 
    /* 
   This is used to update the parent component that there is a validation error
@@ -105,7 +111,7 @@ function SelectionInputField({
           inputRightElement={inputRightElement}
         >
           {dataArray.map((item) => (
-            <Select.Item key={item} label={item.label} value={item.value} />
+            <Select.Item key={item} label={item.label} value={item.value} isDisabled={isDisabledItems ? isDisabledItems[item.value] : false}/>
           ))}
         </Select>
         {hideError && !error.errorMsg ? 
