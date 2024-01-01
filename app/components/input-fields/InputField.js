@@ -112,6 +112,7 @@ function InputField({
             !error.errorMsg ? colors.light_gray3 : colors.red
           }
           textAlignVertical={variant === 'multiLine' ? 'top' : 'center'}
+          autoCapitalize='none'
           borderRadius="25"
           height={variant === 'multiLine' ? '150' : '50'}
           value={inputText}
