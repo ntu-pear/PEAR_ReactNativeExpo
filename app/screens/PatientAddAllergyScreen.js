@@ -43,7 +43,7 @@ function PatientAddAllergyScreen({
     setErrorStates((prev) => [...prev, true]);
     setAllergyInfoDisplay([...allergyInfoDisplay, {}]);
     concatFormData('allergyInfo', {
-      AllergyListID: 2,
+      AllergyListID: null,
       AllergyReactionListID: 1,
       AllergyRemarks: '',
     });
