@@ -23,18 +23,23 @@ function PatientAllergyScreen(props) {
 
   const retrieveScreenData = async (id) => {
     const response = await patientApi.getPatientAllergy(id);
+    // joel - debugging
+    console.log('Patient Allergy Screen Data: ', response.status);
+    // joel - debugging
     if (!response.ok) {
       console.log('Request failed with status code: ', response.status);
       return;
     }
-    
-    const newArray = response.data.data.map(({ createdDate, allergyListDesc, allergyReaction, allergyRemarks }) => ({
-      "Date": `${formatDateTime(createdDate, true)}`,
-      "Time": `${formatDateTime(createdDate, false)}`,
-      "Allergic To": allergyListDesc,
-      "Reaction": allergyReaction,
-      "Notes": allergyRemarks,
-    }));
+
+    const newArray = response.data.data.map(
+      ({ createdDate, allergyListDesc, allergyReaction, allergyRemarks }) => ({
+        Date: `${formatDateTime(createdDate, true)}`,
+        Time: `${formatDateTime(createdDate, false)}`,
+        'Allergic To': allergyListDesc,
+        Reaction: allergyReaction,
+        Notes: allergyRemarks,
+      }),
+    );
     setTableDataFormated(newArray);
     setIsLoading(false);
   };
@@ -42,7 +47,7 @@ function PatientAllergyScreen(props) {
   useEffect(() => {
     if (tableDataFormated !== undefined && tableDataFormated.length !== 0) {
       setHeaderData(Object.keys(tableDataFormated[0]));
-      
+
       const finalArray = tableDataFormated.map((item) => {
         return Object.values(item).map((value) => value.toString());
       });
