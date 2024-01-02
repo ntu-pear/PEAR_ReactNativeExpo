@@ -20,22 +20,30 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import SearchBar from 'app/components/input-fields/SearchBar';
 import FilterModalCard from 'app/components/FilterModalCard';
+import { parseSelectOptions, sortArray } from 'app/utility/miscFunctions';
 
 function PatientsScreen({ navigation }) {
-  const [isLoading, setIsLoading] = useState(false);
   const { user, setUser } = useContext(AuthContext);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterValue, setFilterValue] = useState('myPatients');
-  const [originalListOfPatients, setOriginalListOfPatients] = useState([]);
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [viewMode, setViewMode] = useState('myPatients');
   const [isReloadPatientList, setIsReloadPatientList] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
+
+  // Patient data
+  const [originalListOfPatients, setOriginalListOfPatients] = useState([]); // list of patients without sort, search, filter
+  const [listOfPatients, setListOfPatients] = useState([]) // list of patients after sort, search, filter
+  
+  // Search, sort, and filter related states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortOption, setSortOption] = useState(1);
+  const [filterOptions, setFilterOptions] = useState({});
   const [caregiverList, setCaregiverList] = useState([]);
   const [selectedCaregiver, setSelectedCaregiver] = useState(null);
-  const [listOfPatients, setListOfPatients] = useState([])
-
+  
   const SCREEN_WIDTH = Dimensions.get('window').width;
-  // Refreshes every time the user navigates to PatientsScreen - OUTDATED
-  // Now refresh only when new patient is added or user requested refresh
+  
+  // Refresh list when new patient is added or user requests refresh
   useFocusEffect(
     React.useCallback(() => {
       // Reference https://stackoverflow.com/questions/21518381/proper-way-to-wait-for-one-function-to-finish-before-continuing
@@ -52,26 +60,50 @@ function PatientsScreen({ navigation }) {
   );
 
   // Get list of patients from backend when user switches between 'My Patients' and 'All Patients'
+  // Reset search and filter options
   useEffect(() => {
     getListOfPatients();
-    resetSearchAndFilter()
+    resetSearchAndFilter();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterValue]);
+  }, [viewMode]);
 
+  // Show all patients as expected when nothing is keyed into the search and no caregiver is selected
+  // Else filter list of patients based on search query
+  useEffect(() => {
+    if (!searchQuery) {
+      setListOfPatients(originalListOfPatients);
+      handleSortFilter(originalListOfPatients);
+    } else {
+      let tempFilteredList = originalListOfPatients.filter((item) => {
+        const fullName = `${item.firstName} ${item.lastName}`;
+        return fullName.toLowerCase().includes(searchQuery.toLowerCase());
+      })
+      selectedCaregiver ? tempFilteredList = tempFilteredList.filter((item) => {
+        return item.caregiverName == selectedCaregiver
+      }) : null
+      setListOfPatients(tempFilteredList);
+      handleSortFilter(tempFilteredList);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery, selectedCaregiver]);
+
+  // Reset search and filter options
   const resetSearchAndFilter = () => {
     setSearchQuery('')
+    setSortOption(1);
     setSelectedCaregiver(null)
   }
 
-  // Changed patientListByUserId API to new getPatientListByLoggedInCaregiver API -- Justin
+  // Retrieve patient list from backend
   const getListOfPatients = async () => {
     setIsLoading(true);
     const response =
-      filterValue === 'myPatients'
+      viewMode === 'myPatients'
         ? await patientApi.getPatientListByLoggedInCaregiver()
         : await patientApi.getPatientList(false,'active');
+
+    // Check if token has expired, if yes, proceed to log out
     if (!response.ok) {
-      // Check if token has expired, if yes, proceed to log out
       // checkExpiredLogOutHook.handleLogOut(response);
       setUser(null);
       // await authStorage.removeToken();
@@ -80,16 +112,13 @@ function PatientsScreen({ navigation }) {
     setOriginalListOfPatients(response.data.data);
     setListOfPatients(response.data.data)
     setIsLoading(false);    
-
     setSelectedCaregiver(null)
-
     setListOfCaregivers()
-
   };
 
   // Set list of caregivers for filter dropdown
   const setListOfCaregivers = () => {
-    if(filterValue === 'myPatients') {
+    if(viewMode === 'myPatients') {
       setCaregiverList([])
     } else { 
       let tempListOfCaregivers = originalListOfPatients.map(x => x.caregiverName)
@@ -104,40 +133,41 @@ function PatientsScreen({ navigation }) {
     setIsReloadPatientList(true);
   };
 
-  // Show all patients as expected when nothing is keyed into the search and no caregiver is selected
-  // Else filter
-  useEffect(() => {
-    if (!searchQuery) {
-      setListOfPatients(originalListOfPatients);
-    } else {
-      let tempFilteredList = originalListOfPatients.filter((item) => {
-        const fullName = `${item.firstName} ${item.lastName}`;
-        return fullName.toLowerCase().includes(searchQuery.toLowerCase());
-      })
-      selectedCaregiver ? tempFilteredList = tempFilteredList.filter((item) => {
-        return item.caregiverName == selectedCaregiver
-      }) : null
-      setListOfPatients(tempFilteredList);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery, selectedCaregiver]);
-
   // Set the search query to filter patient list
   const handleSearch = (text) => {
     setSearchQuery(text);
   };  
 
+  // Navigate to patient profile when patient item is clicked
   const handleOnPress = (patientID) => {
     console.log(patientID);
     navigation.push(routes.PATIENT_PROFILE, { id: patientID });
   };
 
+  // Switch between 'My Patients' and 'All Patients'
   const handleTabOnPress = (filterValue) => {
-    setFilterValue(filterValue)
+    setViewMode(filterValue)
   }  
 
-  const filterData = () => {
+  // Handle sorting and filtering of patient data
+  const handleSortFilter = (tempListOfPatients=listOfPatients) => {    
+    if (sortOption == 1) { 
+      tempListOfPatients = tempListOfPatients.map((obj) => ({
+        ...obj,
+        fullName: `${obj.firstName.trim()} ${obj.lastName.trim()}`
+      }));
+      tempListOfPatients = sortArray(tempListOfPatients, 'fullName');
+    } else if (sortOption == 2) { 
+      tempListOfPatients = sortArray(tempListOfPatients, 'preferredName');
+    } else if (sortOption == 3) { 
+      tempListOfPatients = sortArray(tempListOfPatients, 'caregiverName');
+    }
+    setListOfPatients(tempListOfPatients);
 
+    if(Object.keys(filterOptions).length > 0) {
+      console.log()
+
+    }
   }
 
   return (
@@ -148,19 +178,19 @@ function PatientsScreen({ navigation }) {
         <Center backgroundColor={colors.white_var1}>
           <View style={styles.optionsContainer}>
             <TouchableOpacity 
-              style={[styles.tab, ...filterValue=='myPatients' ? [styles.selectedTab] : []]}
+              style={[styles.tab, ...viewMode=='myPatients' ? [styles.selectedTab] : []]}
               onPress={() => handleTabOnPress('myPatients')}
               activeOpacity={1}
               >
-                <Text style={[styles.tabText, ...filterValue=='myPatients' ? [styles.selectedTabText] : []]}>My Patients</Text>
+                <Text style={[styles.tabText, ...viewMode=='myPatients' ? [styles.selectedTabText] : []]}>My Patients</Text>
             </TouchableOpacity>
             <Divider orientation='vertical' height={5} alignSelf='center'/>
             <TouchableOpacity 
-              style={[styles.tab, ...filterValue=='allPatients' ? [styles.selectedTab] : []]}
+              style={[styles.tab, ...viewMode=='allPatients' ? [styles.selectedTab] : []]}
               onPress={() => handleTabOnPress('allPatients')}
               activeOpacity={1}
               >
-                <Text style={[styles.tabText, ...filterValue=='allPatients' ? [styles.selectedTabText] : []]}>All Patients</Text>
+                <Text style={[styles.tabText, ...viewMode=='allPatients' ? [styles.selectedTabText] : []]}>All Patients</Text>
             </TouchableOpacity>            
           </View>
           <Divider style={styles.divider}/>
@@ -171,7 +201,10 @@ function PatientsScreen({ navigation }) {
                 value={searchQuery}
               />
             </View>
-            <View style={styles.filterIcon}>
+            <TouchableOpacity 
+              style={styles.filterIcon}
+              onPress={() => setModalVisible(true)}
+              >
               <Icon 
                 as={
                   <MaterialIcons 
@@ -180,19 +213,20 @@ function PatientsScreen({ navigation }) {
                 } 
                 size={12}
                 color={colors.black}
-                onPress={() => setModalVisible(true)}
               >
-                {/* <FilterModalCard
-                  modalVisible={modalVisible}
-                  setModalVisible={setModalVisible}
-                  caregiverList={caregiverList}
-                  setSelectedCaregiver={setSelectedCaregiver}
-                  filterData={filterData}
-                /> */}
               </Icon>
-
-            </View>
+            </TouchableOpacity>
           </View>
+          <FilterModalCard
+            modalVisible={modalVisible}
+            sortOptions={parseSelectOptions(['Full Name', 'Preferred Name', ...viewMode==='allPatients' ? ['Caregiver'] : []])}
+            setModalVisible={setModalVisible}
+            caregiverList={caregiverList}
+            setSelectedCaregiver={setSelectedCaregiver}
+            handleSortFilter={handleSortFilter}
+            sortOption={sortOption}
+            setSortOption={setSortOption}
+          />
           <View style={styles.patientCount}>
             <Text>{listOfPatients ? listOfPatients.length : null} patients</Text>
           </View>
@@ -235,7 +269,7 @@ function PatientsScreen({ navigation }) {
                       />
                       <View style={styles.guardianNameContainer}>
                         <Text style={styles.guardianName}>
-                          {filterValue === 'allPatients'
+                          {viewMode === 'allPatients'
                             ? item.caregiverName !== null
                               ? item.caregiverName
                               : 'No Caregivers'
