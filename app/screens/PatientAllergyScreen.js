@@ -23,11 +23,6 @@ function PatientAllergyScreen(props) {
 
   const retrieveScreenData = async (id) => {
     const response = await patientApi.getPatientAllergy(id);
-    // joel - debugging'
-    console.log('response: ', response);
-    console.log('Patient Allergy Screen ID: ', id);
-    console.log('Patient Allergy Screen Data: ', response.data);
-    // joel - debugging
     if (!response.ok) {
       console.log('Request failed with status code: ', response.status);
       return;
