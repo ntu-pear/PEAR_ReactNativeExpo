@@ -335,6 +335,7 @@ function PatientAddPatientInfoScreen({
                     onChangeText={handleFormData('NRIC')}
                     onEndEditing={handleNRICError}
                     dataType="nric"
+                    maxLength={9}
                   />
                 
                  <RadioButtonInput
@@ -389,6 +390,7 @@ function PatientAddPatientInfoScreen({
                     onEndEditing={handleHomeNoError}
                     dataType={'home phone'}
                     keyboardType='numeric'
+                    maxLength={8}
                   />
 
                   <InputField
@@ -397,7 +399,8 @@ function PatientAddPatientInfoScreen({
                     onChangeText={handleFormData('HandphoneNo')}
                     onEndEditing={handleMobileNoError}
                     dataType={'mobile phone'}
-                    keyboardType='numeric'                    
+                    keyboardType='numeric'                      
+                    maxLength={8}
                   />
 
                   <RadioButtonInput
