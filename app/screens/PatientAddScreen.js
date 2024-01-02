@@ -144,11 +144,11 @@ function PatientAddScreen() {
       aspect: [4, 3],
       quality: 1,
     });
-    if (!result.canceled) {
+    if (!result.cancelled) {
       const newImageUri = 'file:///' + result.uri.split('file:/').join('');
 
-      var img = formData[page];
-      img[input] = {
+      var newData = formData['patientInfo'];
+      newData[input] = {
         uri: newImageUri,
         name: newImageUri.split('/').pop(),
         type: mime.getType(newImageUri),
@@ -156,7 +156,7 @@ function PatientAddScreen() {
 
       setFormData((prevState) => ({
         ...prevState,
-        [page]: img,
+        ['patientInfo']: newData,
       }));
     }
   };
