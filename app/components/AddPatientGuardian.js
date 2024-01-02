@@ -235,6 +235,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
             onChangeText={handleFormData('NRIC', i)}
             onEndEditing={handleNRICError}
             dataType="nric"
+            maxLength={9}
           />
 
           <RadioButtonInput
@@ -274,7 +275,8 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
             onChangeText={handleFormData('ContactNo', i)}
             onEndEditing={handleMobileNoError}
             dataType={'mobile phone'}
-            keyboardType='numeric'                    
+            keyboardType='numeric' 
+            maxLength={8}                   
           />
 
           <InputField
