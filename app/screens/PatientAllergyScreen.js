@@ -19,12 +19,14 @@ function PatientAllergyScreen(props) {
   const [rowData, setRowData] = useState([]);
   const [widthData, setWidthData] = useState([]);
   const [tableDataFormated, setTableDataFormated] = useState([]);
-  const [patientID, setPatientID] = useState(props.route.params.patientID);
+  const [patientID, setPatientID] = useState(props.route.params.patientId);
 
   const retrieveScreenData = async (id) => {
     const response = await patientApi.getPatientAllergy(id);
-    // joel - debugging
-    console.log('Patient Allergy Screen Data: ', response.status);
+    // joel - debugging'
+    console.log('response: ', response);
+    console.log('Patient Allergy Screen ID: ', id);
+    console.log('Patient Allergy Screen Data: ', response.data);
     // joel - debugging
     if (!response.ok) {
       console.log('Request failed with status code: ', response.status);
@@ -57,6 +59,7 @@ function PatientAllergyScreen(props) {
 
   useEffect(() => {
     retrieveScreenData(patientID);
+    console.log('patient ID Log from retrieve screen data', patientID);
     setWidthData([120, 100, 120, 200, 300]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
