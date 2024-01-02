@@ -5,22 +5,27 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Platform, StyleSheet } from 'react-native';
 import colors from 'app/config/colors';
 import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
+import typography from 'app/config/typography';
+import { Chip } from 'react-native-elements';
 
 
 const FilterModalCard = ({
   modalVisible,
   setModalVisible,
-  filterData,
+  sortOptions=[],
+  setSortOption,
+  sortOption,
+  handleSortFilter,
   setSelectedCaregiver,
   caregiverList,
 }) => {
-  const initialRef = useRef(null);
-  const finalRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [caregiverFilterList, setCaregiverFilterList] = useState(null);
 
   const searchRef = useRef(null);
+  const initialRef = useRef(null);
+  const finalRef = useRef(null);
 
   const onChangeCaregiverName = (value) => {
     console.log(1111, value)
@@ -41,14 +46,14 @@ const FilterModalCard = ({
 
   const handleApply = () => {
     setModalVisible(false);
-    filterData();
+    handleSortFilter();
     setSelectedCaregiver(selectedItem);
   };
 
   const handleReset = () => {
-    setSelectedItem(null);
-    // searchRef.current.clear();
+    setSortOption(1);
   };
+
 
   return (
     <Modal
@@ -63,6 +68,27 @@ const FilterModalCard = ({
         backgroundColor={colors.white_var1}
       >
         <Modal.Body>
+          <Text style={styles.headerStyle}>Sort and Filter</Text>
+          {sortOptions.length > 0 ? (
+            <View>
+              <Text style={styles.textStyle}>Sort by</Text>
+              <View style={styles.sortOptions}>
+                {
+                  sortOptions.map((item) => (
+                    <Chip
+                      key={item.value}
+                      title={item.label}
+                      onPress={() => setSortOption(item.value)}
+                      type={sortOption == item.value ? 'solid' : 'outline'}
+                      containerStyle={styles.sortOption}
+                      buttonStyle={{backgroundColor: sortOption == item.value ? colors.green : 'transparent', borderColor: colors.green}}
+                      titleStyle={{color: sortOption == item.value ? colors.white : colors.green}}
+                    />
+                  ))
+                }
+              </View>
+            </View>
+            ) : null}
           {caregiverList.length > 0 ? (
             <View style={styles.caregiverViewStyle} zIndex={6}>
               <Text style={styles.textStyle}>Filter by Caregiver</Text>
@@ -93,17 +119,6 @@ const FilterModalCard = ({
               </View>
             </View>
             ): null}
-          <View style={styles.resetViewStyle}>
-            <Text
-              onPress={() => {
-                handleReset();
-              }}
-              textDecorationLine={'underline'}
-              color={colors.black}
-            >
-              Reset
-            </Text>
-          </View>
         </Modal.Body>
         <Modal.Footer backgroundColor={colors.white}>
           <Button.Group space={2}>
@@ -111,11 +126,10 @@ const FilterModalCard = ({
               variant="ghost"
               colorScheme="blueGray"
               onPress={() => {
-                setModalVisible(false);
                 handleReset();
               }}
             >
-              Cancel
+              Reset
             </Button>
             <Button
               backgroundColor={colors.green}
@@ -133,6 +147,12 @@ const FilterModalCard = ({
 };
 
 const styles = StyleSheet.create({
+  sortOptions: {
+    flexDirection: 'row'
+  },
+  sortOption: {
+    marginRight: '2%',
+  },
   caregiverViewStyle: {
     padding: 5,
     paddingBottom: 30,
@@ -140,9 +160,16 @@ const styles = StyleSheet.create({
     resetViewStyle: {
     alignItems: 'center',
   },
-  textStyle: {
+  headerStyle: {
     fontSize: 20,
+    alignSelf: 'center',
     padding: 5,
+    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,    
+  },
+  textStyle: {
+    fontSize: 13.5,
+    padding: 5,
+    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
   },
 });
 
