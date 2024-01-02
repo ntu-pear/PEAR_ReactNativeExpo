@@ -40,6 +40,9 @@ function InputField({
 
   // Track whether component is in its first render
   const [isFirstRender, setIsFirstRender] = useState(true);
+
+  // State for value in input component
+  const [inputText, setInputText] = useState(value);
  
   // In first render of component, set isError to true to ensure submission blocking in the parent component 
   // is active (as it is first rendered, user will not likely have filled anything).
@@ -63,7 +66,25 @@ function InputField({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error, onEndEditing]);
-  
+
+  // Function to convert input to string and update value
+  const handleOnChangeText = (value) => {
+    value = value.toString();
+    setInputText(value);
+    onChangeText(value);
+  }
+
+  // Function to handle what to do after user leaves the input component
+  // Capitalize input if autocap specificied
+  // Validate input
+  const handleOnEndEditing = () => {    
+    if (autoCapitalize == 'characters') {
+      value = value.toUpperCase();
+    } 
+    setInputText(value);
+    validateInput(value);
+    onChangeText(value);
+  }
 
   // Function used for input validation depending on the type of input data (given by the type prop)
   const validateInput = () => {
@@ -71,7 +92,6 @@ function InputField({
     if(isRequired) {
       msg = validation.notEmpty(value);
     }
-    console.log(otherProps)
     if('prefNameList' in otherProps) {
       msg = msg || validation.uniquePrefName(value, otherProps['prefNameList']);
     }
@@ -84,18 +104,6 @@ function InputField({
     setError({isError: msg ? true: false, errorMsg: msg});
   }
 
-  const [inputText, setInputText] = useState(value);
-
-  // Function to convert input to upper case. 
-  // Used instead of autoCapitalize prop bc it breaks secureTextEntry when type='password' is used.
-  const handleOnChangeText = (value) => {
-    value = value.toString();
-    if (autoCapitalize == 'characters') {
-      value = value.toUpperCase();
-    } 
-    setInputText(value);
-    onChangeText(value);
-  }
 
   return (
     <View style={styles.componentContainer}>
@@ -112,11 +120,12 @@ function InputField({
             !error.errorMsg ? colors.light_gray3 : colors.red
           }
           textAlignVertical={variant === 'multiLine' ? 'top' : 'center'}
+          autoCapitalize='none'
           borderRadius="25"
           height={variant === 'multiLine' ? '150' : '50'}
           value={inputText}
           onChangeText={handleOnChangeText}
-          onEndEditing={validateInput}
+          onEndEditing={handleOnEndEditing}
           placeholder={title}
           InputRightElement={InputRightElement}
           InputLeftElement={InputLeftElement}
