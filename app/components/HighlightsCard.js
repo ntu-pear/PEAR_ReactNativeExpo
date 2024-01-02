@@ -5,8 +5,11 @@ import { Text, Box, VStack, HStack } from 'native-base';
 import colors from 'app/config/colors';
 import routes from 'app/navigation/routes';
 import ProfileNameButton from 'app/components/ProfileNameButton';
+import { useNavigation } from '@react-navigation/native';
 
-function HighlightsCard({ item, navigation, setModalVisible }) {
+function HighlightsCard({ item, setModalVisible }) {
+  const navigation = useNavigation();
+
   const goToPatientProfile = () => {
     if (Platform.OS === 'web') {
       // TODO: close modal and navigate
@@ -103,13 +106,72 @@ function HighlightsCard({ item, navigation, setModalVisible }) {
     return icon;
   };
 
+  const handleNavigation = (element) => {
+    switch (element.highlightTypeID) {
+      // new prescription
+      case 1:
+        console.log('1');
+        navigation.navigate(routes.PATIENT_PRESCRIPTION, {
+          patientId: item.patientInfo.patientId,
+        });
+        break;
+      case 2:
+        // new allergy
+        console.log('2');
+        console.log('item.patientInfo.patientId', item.patientInfo.patientId);
+        navigation.navigate(routes.PATIENT_ALLERGY, {
+          patientId: item.patientInfo.patientId,
+        });
+        break;
+      case 3:
+        // new patient activity exclusion
+        console.log('3');
+        navigation.navigate(routes.PATIENT_ROUTINE, {
+          patientId: item.patientInfo.patientId,
+        });
+        break;
+      case 4:
+        // new patients vital
+        console.log('4');
+        navigation.navigate(routes.PATIENT_VITAL, {
+          patientId: item.patientInfo.patientId,
+        });
+        break;
+      case 5:
+        // new problem log
+        console.log('5');
+        navigation.navigate(routes.PATIENT_PROBLEM_LOG, {
+          patientId: item.patientInfo.patientId,
+        });
+        break;
+      case 6:
+        // new medical record
+        console.log('6');
+        navigation.navigate(routes.PATIENT_MEDICAL_HISTORY, {
+          patientId: item.patientInfo.patientId,
+        });
+        break;
+    }
+  };
+
   const list = () => {
     return item.highlights.map((element) => {
       return (
         <View key={element.highlightID} style={styles.highlightsList}>
           <HStack w="100%" space={2} alignItems="center">
             {getIcon(element)}
-            <Text fontSize="13">{getDescription(element)}</Text>
+            {element.highlightTypeID === 1 ||
+            element.highlightTypeID === 2 ||
+            element.highlightTypeID === 3 ||
+            element.highlightTypeID === 4 ||
+            element.highlightTypeID === 5 ||
+            element.highlightTypeID === 6 ? (
+              <TouchableOpacity onPress={() => handleNavigation(element)}>
+                <Text fontSize="13">{getDescription(element)}</Text>
+              </TouchableOpacity>
+            ) : (
+              <Text fontSize="13">{getDescription(element)}</Text>
+            )}
           </HStack>
         </View>
       );
