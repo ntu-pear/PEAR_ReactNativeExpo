@@ -31,3 +31,11 @@ export const sortArray = (arr, property) => {
     (a[property].toString().toLowerCase().trim() > b[property].toString().toLowerCase().trim()) ? 1 :
     (b[property].toString().toLowerCase().trim() > a[property].toString().toLowerCase().trim()) ? -1 : 0)
 }
+
+export const parseAutoCompleteOptions = (array) => {
+  let options = [];
+  for(var i=0; i<array.length; i++){
+    options.push({title: array[i], id: i+1})
+  }
+  return options;
+}

@@ -20,7 +20,7 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import SearchBar from 'app/components/input-fields/SearchBar';
 import FilterModalCard from 'app/components/FilterModalCard';
-import { parseSelectOptions, sortArray } from 'app/utility/miscFunctions';
+import { parseAutoCompleteOptions, parseSelectOptions, sortArray } from 'app/utility/miscFunctions';
 
 function PatientsScreen({ navigation }) {
   const { user, setUser } = useContext(AuthContext);
@@ -36,13 +36,16 @@ function PatientsScreen({ navigation }) {
   
   // Search, sort, and filter related states
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortOption, setSortOption] = useState(1);
-  const [filterOptions, setFilterOptions] = useState({});
-  const [caregiverList, setCaregiverList] = useState([]);
-  const [selectedCaregiver, setSelectedCaregiver] = useState(null);
+  const [filterOptions, setFilterOptions] = useState({}); // {'Caregiver' : [{id: 1, title: name1, ...}], ...}
+  const [selectedSort, setSelectedSort] = useState({});
+  const [selectedFilters, setSelectedFilters] = useState({}); // {'Caregiver': 1, ...}
   
   const SCREEN_WIDTH = Dimensions.get('window').width;
-  
+  const SORT_OPTIONS = parseSelectOptions(
+    ['Full Name', 'Preferred Name', ...viewMode==='allPatients' ? ['Caregiver'] : []]); // {'Caregiver' : [{id: 1, title: name1, ...}], ...}
+  const SORT_MAPPING = {'Full Name': 'fullName', 'Preferred Name': 'preferredName', 'Caregiver': 'caregiverName' }
+  const FILTER_MAPPING = {'Caregiver': 'caregiverName' }
+
   // Refresh list when new patient is added or user requests refresh
   useFocusEffect(
     React.useCallback(() => {
@@ -63,42 +66,22 @@ function PatientsScreen({ navigation }) {
   // Reset search and filter options
   useEffect(() => {
     getListOfPatients();
-    resetSearchAndFilter();
+    resetSearchSortFilter();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewMode]);
 
-  // Show all patients as expected when nothing is keyed into the search and no caregiver is selected
-  // Else filter list of patients based on search query
-  useEffect(() => {
-    if (!searchQuery) {
-      setListOfPatients(originalListOfPatients);
-      handleSortFilter(originalListOfPatients);
-    } else {
-      let tempFilteredList = originalListOfPatients.filter((item) => {
-        const fullName = `${item.firstName} ${item.lastName}`;
-        return fullName.toLowerCase().includes(searchQuery.toLowerCase());
-      })
-      selectedCaregiver ? tempFilteredList = tempFilteredList.filter((item) => {
-        return item.caregiverName == selectedCaregiver
-      }) : null
-      setListOfPatients(tempFilteredList);
-      handleSortFilter(tempFilteredList);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery, selectedCaregiver]);
-
-  // Reset search and filter options
-  const resetSearchAndFilter = () => {
+  // Reset search, sort, and filter options
+  const resetSearchSortFilter = () => {
     setSearchQuery('')
-    setSortOption(1);
-    setSelectedCaregiver(null)
+    setSelectedSort({});
+    setSelectedFilters({})
   }
 
   // Retrieve patient list from backend
   const getListOfPatients = async () => {
     setIsLoading(true);
     const response =
-      viewMode === 'myPatients'
+    viewMode === 'myPatients'
         ? await patientApi.getPatientListByLoggedInCaregiver()
         : await patientApi.getPatientList(false,'active');
 
@@ -111,19 +94,24 @@ function PatientsScreen({ navigation }) {
     }
     setOriginalListOfPatients(response.data.data);
     setListOfPatients(response.data.data)
-    setIsLoading(false);    
-    setSelectedCaregiver(null)
-    setListOfCaregivers()
+    setIsLoading(false);  
+    
+    resetSearchSortFilter();
+    initFilterOptions(response.data.data);
   };
-
-  // Set list of caregivers for filter dropdown
-  const setListOfCaregivers = () => {
+  
+  // Set filter options
+  const initFilterOptions = (data) => {
     if(viewMode === 'myPatients') {
-      setCaregiverList([])
+      setFilterOptions({});
     } else { 
-      let tempListOfCaregivers = originalListOfPatients.map(x => x.caregiverName)
-      const listOfCaregivers = Array.from(new Set(tempListOfCaregivers))    
-      setCaregiverList(listOfCaregivers)
+      let tempFilterOptions = {};
+      for(var filter of Object.keys(FILTER_MAPPING)) {
+        let tempFilterOptionList = data.map(x => x[FILTER_MAPPING[filter]]);
+        tempFilterOptionList = Array.from(new Set(tempFilterOptionList));        
+        tempFilterOptions[filter] = parseAutoCompleteOptions(tempFilterOptionList);
+      }
+      setFilterOptions(tempFilterOptions);
     }
   }
 
@@ -132,42 +120,44 @@ function PatientsScreen({ navigation }) {
     navigation.navigate(routes.PATIENT_ADD_PATIENT);
     setIsReloadPatientList(true);
   };
-
-  // Set the search query to filter patient list
-  const handleSearch = (text) => {
-    setSearchQuery(text);
-  };  
-
+  
   // Navigate to patient profile when patient item is clicked
   const handleOnPress = (patientID) => {
     console.log(patientID);
     navigation.push(routes.PATIENT_PROFILE, { id: patientID });
   };
-
+  
   // Switch between 'My Patients' and 'All Patients'
   const handleTabOnPress = (filterValue) => {
     setViewMode(filterValue)
   }  
 
-  // Handle sorting and filtering of patient data
-  const handleSortFilter = (tempListOfPatients=listOfPatients) => {    
-    if (sortOption == 1) { 
-      tempListOfPatients = tempListOfPatients.map((obj) => ({
-        ...obj,
-        fullName: `${obj.firstName.trim()} ${obj.lastName.trim()}`
-      }));
-      tempListOfPatients = sortArray(tempListOfPatients, 'fullName');
-    } else if (sortOption == 2) { 
-      tempListOfPatients = sortArray(tempListOfPatients, 'preferredName');
-    } else if (sortOption == 3) { 
-      tempListOfPatients = sortArray(tempListOfPatients, 'caregiverName');
-    }
-    setListOfPatients(tempListOfPatients);
+  // Handle searching, sorting, and filtering of patient data
+  const handleSearchSortFilter = (text=searchQuery, tempSelSort=selectedSort, tempSelFilters=selectedFilters) => {       
+    let filteredListOfPatients = originalListOfPatients.map((obj) => ({
+      ...obj,
+      fullName: `${obj.firstName.trim()} ${obj.lastName.trim()}`
+    }));   
 
-    if(Object.keys(filterOptions).length > 0) {
-      console.log()
+    // Search
+    filteredListOfPatients = filteredListOfPatients.filter((item) => {
+      return item.fullName.toLowerCase().includes(text.toLowerCase());
+    })
+      
+    // Sort
+    filteredListOfPatients = sortArray(filteredListOfPatients, 
+      SORT_MAPPING[Object.keys(tempSelSort).length == 0 ? 
+        SORT_OPTIONS[0]['label'] : 
+        tempSelSort['label']]);
 
+  
+    // Filter
+    for (var filter of Object.keys(tempSelFilters)) {
+      filteredListOfPatients = filteredListOfPatients.filter((obj) => (
+        obj[SORT_MAPPING[filter]] === tempSelFilters[filter]['title'])) || []
     }
+
+    setListOfPatients(filteredListOfPatients);
   }
 
   return (
@@ -197,7 +187,10 @@ function PatientsScreen({ navigation }) {
           <View style={styles.optionsContainer}>
             <View style={styles.searchBar}>
               <SearchBar 
-                onChangeText={handleSearch}
+                onChangeText={(text) => {
+                  setSearchQuery(text);
+                  handleSearchSortFilter(text);
+                }}
                 value={searchQuery}
               />
             </View>
@@ -219,13 +212,14 @@ function PatientsScreen({ navigation }) {
           </View>
           <FilterModalCard
             modalVisible={modalVisible}
-            sortOptions={parseSelectOptions(['Full Name', 'Preferred Name', ...viewMode==='allPatients' ? ['Caregiver'] : []])}
+            sortOptions={SORT_OPTIONS}
+            filterOptions={filterOptions}
             setModalVisible={setModalVisible}
-            caregiverList={caregiverList}
-            setSelectedCaregiver={setSelectedCaregiver}
-            handleSortFilter={handleSortFilter}
-            sortOption={sortOption}
-            setSortOption={setSortOption}
+            handleSortFilter={handleSearchSortFilter}
+            selectedSort={selectedSort}
+            setSelectedSort={setSelectedSort}
+            selectedFilters={selectedFilters}
+            setSelectedFilters={setSelectedFilters}
           />
           <View style={styles.patientCount}>
             <Text>{listOfPatients ? listOfPatients.length : null} patients</Text>
@@ -241,13 +235,13 @@ function PatientsScreen({ navigation }) {
                 onRefresh={getListOfPatients}
               />
             }
+            keyboardShouldPersistTaps='handled'
           >
             <VStack alignItems="flex-start" backgroundColor={'yellow'}>
               {listOfPatients && listOfPatients.length > 0
                 ? listOfPatients.map((item, index) => (
                     <View style={styles.patientRowContainer} key={index}>
                       <ProfileNameButton
-                        // profileLineOne={`${item.firstName} ${item.lastName}`}
                         profileLineOne={item.preferredName}
                         // patient Mary does not have patientAllocationDTO object?
                         // add caregiverName into the All Patients option
