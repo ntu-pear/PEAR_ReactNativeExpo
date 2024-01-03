@@ -1,17 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Modal, Text, View, Row, Center } from 'native-base';
+import { Modal, Text, View, Row, Center, Icon } from 'native-base';
 import { Button } from 'native-base';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Keyboard, Platform, StyleSheet } from 'react-native';
+import { Keyboard, Platform, StyleSheet, TouchableOpacity } from 'react-native';
 import colors from 'app/config/colors';
 import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
 import typography from 'app/config/typography';
 import { Chip } from 'react-native-elements';
+import { MaterialIcons } from '@expo/vector-icons';
 
 
 const FilterModalCard = ({
-  modalVisible,
-  setModalVisible,
+  filterIconSize=12,
   sortOptions=[],
   filterOptions={},
   selectedSort,
@@ -24,6 +24,7 @@ const FilterModalCard = ({
   const finalRef = useRef(null);
   const searchRefs = useRef({});
 
+  const [modalVisible, setModalVisible] = useState(false);
   const [tempSelSort, setTempSelSort] = useState({...selectedSort});
   const [tempSelFilters, setTempSelFilters] = useState({...selectedFilters});
 
@@ -60,94 +61,115 @@ const FilterModalCard = ({
   }
     
   return (
-    <Modal
-      size={'lg'}
-      animationPreset={'slide'}
-      isOpen={modalVisible}
-      onClose={() => setModalVisible(false)}
-      initialFocusRef={initialRef}
-      finalFocusRef={finalRef}
-    >
-      <Modal.Content
-        backgroundColor={colors.white_var1}
-      >
-        <Modal.Body>
-          <Text style={styles.headerStyle}>Sort and Filter</Text>
-          {sortOptions.length > 0 ? (
-            <View>
-              <Text style={styles.textStyle}>Sort by</Text>
-              <View style={styles.sortOptions}>
-                {
-                  sortOptions.map((item) => (
-                    <Chip
-                      key={item.value}
-                      title={item.label}
-                      onPress={() => setTempSelSort(item)}
-                      type={tempSelSort.value == item.value ? 'solid' : 'outline'}
-                      containerStyle={styles.sortOption}
-                      buttonStyle={{backgroundColor: tempSelSort.value == item.value ? colors.green : 'transparent', borderColor: colors.green}}
-                      titleStyle={{color: tempSelSort.value == item.value ? colors.white : colors.green}}
-                      />
-                      ))
-                    }
-              </View>
-            </View>
-            ) : null}
-          {Object.keys(filterOptions).length > 0 ? (
-            <View style={styles.filterContainer}>
-              <View>
-                {Object.keys(filterOptions).map((filter) => 
-                  <View key={filter}>
-                    <Text style={styles.textStyle}>{filter}</Text>
-                    <AutocompleteDropdown
-                      ref={searchRefs[filter]}
-                      closeOnBlur={false}
-                      dataSet={filterOptions[filter]}
-                      onSelectItem={(item) => handleOnSelectFilter(item, filter)}
-                      onClear={() => setTempSelFilters({})}
-                      textInputProps={{
-                        placeholder: 'Enter Caregiver Name',
-                        autoCorrect: false,
-                        autoCapitalize: 'none',
-                      }}
+    <View>
+      <TouchableOpacity 
+        style={styles.filterIcon}
+        onPress={() => setModalVisible(true)}
+        >
+        <Icon 
+          as={
+            <MaterialIcons 
+            name="filter-list" 
+            />
+          } 
+          size={filterIconSize}
+          color={colors.green}
+        >
+        </Icon>
+      </TouchableOpacity>
 
-                      initialValue={Object.keys(selectedFilters).includes(filter) ? selectedFilters[filter] : {id: null}}
-                      suggestionsListMaxHeight={150} 
-                      useFilter={true}
-                    />
-                  </View>
-                )}
+      <Modal
+        size={'lg'}
+        animationPreset={'slide'}
+        isOpen={modalVisible}
+        onClose={() => setModalVisible(false)}
+        initialFocusRef={initialRef}
+        finalFocusRef={finalRef}
+      >
+        <Modal.Content
+          backgroundColor={colors.white_var1}
+        >
+          <Modal.Body>
+            <Text style={styles.headerStyle}>Sort and Filter</Text>
+            {sortOptions.length > 0 ? (
+              <View>
+                <Text style={styles.textStyle}>Sort by</Text>
+                <View style={styles.sortOptions}>
+                  {
+                    sortOptions.map((item) => (
+                      <Chip
+                        key={item.value}
+                        title={item.label}
+                        onPress={() => setTempSelSort(item)}
+                        type={tempSelSort.value == item.value ? 'solid' : 'outline'}
+                        containerStyle={styles.sortOption}
+                        buttonStyle={{backgroundColor: tempSelSort.value == item.value ? colors.green : 'transparent', borderColor: colors.green}}
+                        titleStyle={{color: tempSelSort.value == item.value ? colors.white : colors.green}}
+                        />
+                        ))
+                      }
+                </View>
               </View>
-            </View>
-            ): null}
-        </Modal.Body>
-        <Modal.Footer backgroundColor={colors.white}>
-          <Button.Group space={2}>
-            <Button
-              variant="ghost"
-              colorScheme="blueGray"
-              onPress={() => {
-                handleReset();
-              }}
-            >
-              Reset
-            </Button>
-            <Button
-              backgroundColor={colors.green}
-              onPress={() => {
-                handleApply();
-              }}
-            >
-              Apply
-            </Button>
-          </Button.Group>
-        </Modal.Footer>
-      </Modal.Content>
-    </Modal>
+              ) : null}
+            {Object.keys(filterOptions).length > 0 ? (
+              <View style={styles.filterContainer}>
+                <View>
+                  {Object.keys(filterOptions).map((filter) => 
+                    <View key={filter}>
+                      <Text style={styles.textStyle}>{filter}</Text>
+                      <AutocompleteDropdown
+                        ref={searchRefs[filter]}
+                        closeOnBlur={false}
+                        dataSet={filterOptions[filter]}
+                        onSelectItem={(item) => handleOnSelectFilter(item, filter)}
+                        onClear={() => setTempSelFilters({})}
+                        textInputProps={{
+                          placeholder: 'Enter Caregiver Name',
+                          autoCorrect: false,
+                          autoCapitalize: 'none',
+                        }}
+
+                        initialValue={Object.keys(selectedFilters).includes(filter) ? selectedFilters[filter] : {id: null}}
+                        suggestionsListMaxHeight={150} 
+                        useFilter={true}
+                      />
+                    </View>
+                  )}
+                </View>
+              </View>
+              ): null}
+          </Modal.Body>
+          <Modal.Footer backgroundColor={colors.white}>
+            <Button.Group space={2}>
+              <Button
+                variant="ghost"
+                colorScheme="blueGray"
+                onPress={() => {
+                  handleReset();
+                }}
+              >
+                Reset
+              </Button>
+              <Button
+                backgroundColor={colors.green}
+                onPress={() => {
+                  handleApply();
+                }}
+              >
+                Apply
+              </Button>
+            </Button.Group>
+          </Modal.Footer>
+        </Modal.Content>
+      </Modal>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  filterIcon: {
+    marginLeft: 8,
+  },
   sortOptions: {
     flexDirection: 'row'
   },
