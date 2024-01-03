@@ -1,6 +1,6 @@
 // Libs
 import React, { useState, useEffect, useContext } from 'react';
-import { Center, VStack, HStack, ScrollView, Fab, Icon, Divider } from 'native-base';
+import { Center, VStack, ScrollView, Fab, Icon, Divider } from 'native-base';
 import { RefreshControl, Dimensions, Text, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import AuthContext from 'app/auth/context';
@@ -28,7 +28,6 @@ function PatientsScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(false);
   const [viewMode, setViewMode] = useState('myPatients');
   const [isReloadPatientList, setIsReloadPatientList] = useState(true);
-  const [modalVisible, setModalVisible] = useState(false);
 
   // Patient data
   const [originalListOfPatients, setOriginalListOfPatients] = useState([]); // list of patients without sort, search, filter
@@ -194,33 +193,17 @@ function PatientsScreen({ navigation }) {
                 value={searchQuery}
               />
             </View>
-            <TouchableOpacity 
-              style={styles.filterIcon}
-              onPress={() => setModalVisible(true)}
-              >
-              <Icon 
-                as={
-                  <MaterialIcons 
-                  name="filter-list" 
-                  />
-                } 
-                size={12}
-                color={colors.black}
-              >
-              </Icon>
-            </TouchableOpacity>
+            
+            <FilterModalCard
+              sortOptions={SORT_OPTIONS}
+              filterOptions={filterOptions}
+              handleSortFilter={handleSearchSortFilter}
+              selectedSort={selectedSort}
+              setSelectedSort={setSelectedSort}
+              selectedFilters={selectedFilters}
+              setSelectedFilters={setSelectedFilters}
+            />
           </View>
-          <FilterModalCard
-            modalVisible={modalVisible}
-            sortOptions={SORT_OPTIONS}
-            filterOptions={filterOptions}
-            setModalVisible={setModalVisible}
-            handleSortFilter={handleSearchSortFilter}
-            selectedSort={selectedSort}
-            setSelectedSort={setSelectedSort}
-            selectedFilters={selectedFilters}
-            setSelectedFilters={setSelectedFilters}
-          />
           <View style={styles.patientCount}>
             <Text>{listOfPatients ? listOfPatients.length : null} patients</Text>
           </View>
@@ -243,18 +226,10 @@ function PatientsScreen({ navigation }) {
                     <View style={styles.patientRowContainer} key={index}>
                       <ProfileNameButton
                         profileLineOne={item.preferredName}
-                        // patient Mary does not have patientAllocationDTO object?
-                        // add caregiverName into the All Patients option
                         profileLineTwo={
                           `${item.firstName} ${item.lastName}`
-                          // filterValue === 'allPatients'
-                          //   ? item.patientAllocationDTO !== null
-                          //     ? item.patientAllocationDTO.caregiverName
-                          //     : 'No Caregivers'
-                          //   : `${item.firstName} ${item.lastName}`
                         }
                         profilePicture={item.profilePicture}
-                        // navigation done by patientID to avoid receiving unnecessary patient info -- Justin
                         handleOnPress={() => handleOnPress(item.patientID)}
                         isPatient={true}
                         size={SCREEN_WIDTH / 10}
@@ -311,10 +286,6 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     flex: 1
-  },
-  filterIcon: {
-    flex: 0,
-    marginLeft: '1.5%'
   },
   patientRowContainer: {
     marginLeft: '5%',
