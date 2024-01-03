@@ -2,54 +2,63 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Modal, Text, View, Row, Center } from 'native-base';
 import { Button } from 'native-base';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Platform, StyleSheet } from 'react-native';
+import { Keyboard, Platform, StyleSheet } from 'react-native';
 import colors from 'app/config/colors';
 import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
+import typography from 'app/config/typography';
+import { Chip } from 'react-native-elements';
 
 
 const FilterModalCard = ({
   modalVisible,
   setModalVisible,
-  filterData,
-  setSelectedCaregiver,
-  caregiverList,
+  sortOptions=[],
+  filterOptions={},
+  selectedSort,
+  setSelectedSort,
+  selectedFilters,
+  setSelectedFilters,
+  handleSortFilter,
 }) => {
   const initialRef = useRef(null);
   const finalRef = useRef(null);
-  const [loading, setLoading] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [caregiverFilterList, setCaregiverFilterList] = useState(null);
+  const searchRefs = useRef({});
 
-  const searchRef = useRef(null);
+  const [tempSelSort, setTempSelSort] = useState({...selectedSort});
+  const [tempSelFilters, setTempSelFilters] = useState({...selectedFilters});
 
-  const onChangeCaregiverName = (value) => {
-    console.log(1111, value)
-    setSelectedItem(value);
-  };
+  // Re-initialize sort and filter values to currently applied values whenever modal opens
+  useEffect(() => {
+    setTempSelSort(Object.keys(selectedSort).length == 0 ? sortOptions[0] : {...selectedSort});
+    setTempSelFilters({...selectedFilters});
+    Keyboard.dismiss();
+  },[modalVisible])
 
-  const onOpenSuggestionsList = () => { 
-    const list = [];
-    caregiverList.forEach((item, i) => {
-      list.push({
-        id: i.toString(),
-        title: item,
-      });
-    });
-
-    setCaregiverFilterList(list);
-  }
-
+  // Apply sort and filter values and close modal
   const handleApply = () => {
     setModalVisible(false);
-    filterData();
-    setSelectedCaregiver(selectedItem);
+    setSelectedSort({...tempSelSort});
+    setSelectedFilters({...tempSelFilters});
+    handleSortFilter(undefined, {...tempSelSort}, {...tempSelFilters});
   };
-
+  
+  // Reset sort and filter values and close modal
   const handleReset = () => {
-    setSelectedItem(null);
-    // searchRef.current.clear();
+    setModalVisible(false);
+    setSelectedSort(1);
+    setSelectedFilters({});
+    handleSortFilter(undefined, 1, {});
   };
 
+  // Set display value of filter when item is selected
+  const handleOnSelectFilter = (item, filter) => {
+    if(item) {
+      let tempSelectedFilters = tempSelFilters;
+      tempSelectedFilters[filter] = item;
+      item && setTempSelFilters(tempSelectedFilters);
+    }
+  }
+    
   return (
     <Modal
       size={'lg'}
@@ -63,47 +72,54 @@ const FilterModalCard = ({
         backgroundColor={colors.white_var1}
       >
         <Modal.Body>
-          {caregiverList.length > 0 ? (
-            <View style={styles.caregiverViewStyle} zIndex={6}>
-              <Text style={styles.textStyle}>Filter by Caregiver</Text>
+          <Text style={styles.headerStyle}>Sort and Filter</Text>
+          {sortOptions.length > 0 ? (
+            <View>
+              <Text style={styles.textStyle}>Sort by</Text>
+              <View style={styles.sortOptions}>
+                {
+                  sortOptions.map((item) => (
+                    <Chip
+                      key={item.value}
+                      title={item.label}
+                      onPress={() => setTempSelSort(item)}
+                      type={tempSelSort.value == item.value ? 'solid' : 'outline'}
+                      containerStyle={styles.sortOption}
+                      buttonStyle={{backgroundColor: tempSelSort.value == item.value ? colors.green : 'transparent', borderColor: colors.green}}
+                      titleStyle={{color: tempSelSort.value == item.value ? colors.white : colors.green}}
+                      />
+                      ))
+                    }
+              </View>
+            </View>
+            ) : null}
+          {Object.keys(filterOptions).length > 0 ? (
+            <View style={styles.filterContainer}>
               <View>
-                {/* <AutocompleteDropdown
-                  ref={searchRef}
-                  closeOnBlur={true}
-                  closeOnSubmit={false}
-                  dataSet={caregiverFilterList}
-                  onOpenSuggestionsList={onOpenSuggestionsList}
-                  onSelectItem={(item) => {
-                    console.log('item is',item)
-                    item && setSelectedItem(item.id)
-                  }}
-                  inputHeight={50}
-                  loading={loading}
-                  onClear={() => {
-                    setCaregiverFilterList(null);
-                    setSelectedItem(null);
-                  }}
-                  textInputProps={{
-                    placeholder: 'Enter Caregiver Name',
-                    autoCorrect: false,
-                    autoCapitalize: 'none',
-                  }}
-                  suggestionsListMaxHeight={200}
-                /> */}
+                {Object.keys(filterOptions).map((filter) => 
+                  <View key={filter}>
+                    <Text style={styles.textStyle}>{filter}</Text>
+                    <AutocompleteDropdown
+                      ref={searchRefs[filter]}
+                      closeOnBlur={false}
+                      dataSet={filterOptions[filter]}
+                      onSelectItem={(item) => handleOnSelectFilter(item, filter)}
+                      onClear={() => setTempSelFilters({})}
+                      textInputProps={{
+                        placeholder: 'Enter Caregiver Name',
+                        autoCorrect: false,
+                        autoCapitalize: 'none',
+                      }}
+
+                      initialValue={Object.keys(selectedFilters).includes(filter) ? selectedFilters[filter] : {id: null}}
+                      suggestionsListMaxHeight={150} 
+                      useFilter={true}
+                    />
+                  </View>
+                )}
               </View>
             </View>
             ): null}
-          <View style={styles.resetViewStyle}>
-            <Text
-              onPress={() => {
-                handleReset();
-              }}
-              textDecorationLine={'underline'}
-              color={colors.black}
-            >
-              Reset
-            </Text>
-          </View>
         </Modal.Body>
         <Modal.Footer backgroundColor={colors.white}>
           <Button.Group space={2}>
@@ -111,11 +127,10 @@ const FilterModalCard = ({
               variant="ghost"
               colorScheme="blueGray"
               onPress={() => {
-                setModalVisible(false);
                 handleReset();
               }}
             >
-              Cancel
+              Reset
             </Button>
             <Button
               backgroundColor={colors.green}
@@ -133,6 +148,16 @@ const FilterModalCard = ({
 };
 
 const styles = StyleSheet.create({
+  sortOptions: {
+    flexDirection: 'row'
+  },
+  sortOption: {
+    marginRight: '2%',
+  },
+  filterContainer: {
+    marginTop: '3%',
+    paddingBottom: 150
+  },
   caregiverViewStyle: {
     padding: 5,
     paddingBottom: 30,
@@ -140,9 +165,17 @@ const styles = StyleSheet.create({
     resetViewStyle: {
     alignItems: 'center',
   },
-  textStyle: {
+  headerStyle: {
     fontSize: 20,
+    alignSelf: 'center',
     padding: 5,
+    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,    
+  },
+  textStyle: {
+    fontSize: 13.5,
+    padding: 5,
+    paddingBottom: 10,
+    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
   },
 });
 

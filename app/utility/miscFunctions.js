@@ -1,7 +1,7 @@
 // Function that takes array of select options and converts to required [{value, label}, {}, {} ...] format
 export const parseSelectOptions = (array) => {
   let options = [];
-  for(i=0; i<array.length; i++){
+  for(var i=0; i<array.length; i++){
     options.push({label: array[i], value: i+1})
   }
   return options;
@@ -23,4 +23,19 @@ export const initSelectDisable = (list) => {
     isDisabledItems[item['value']] = false;
   }
   return isDisabledItems
+}
+
+// Function to sort array of objects on a property
+export const sortArray = (arr, property) => {
+  return arr.sort((a,b) => 
+    (a[property].toString().toLowerCase().trim() > b[property].toString().toLowerCase().trim()) ? 1 :
+    (b[property].toString().toLowerCase().trim() > a[property].toString().toLowerCase().trim()) ? -1 : 0)
+}
+
+export const parseAutoCompleteOptions = (array) => {
+  let options = [];
+  for(var i=0; i<array.length; i++){
+    options.push({title: array[i], id: i+1})
+  }
+  return options;
 }
