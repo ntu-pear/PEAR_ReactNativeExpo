@@ -58,11 +58,11 @@ function ProfileNameButton({
               style={[styles.DefaultText, styles.NameText]}
               fontSize={size / 4}
             >
-              {profileLineOne}
+              {profileLineOne.trim()}
             </Text>
             {profileLineTwo ? (
               <Text style={styles.DefaultText} fontSize={size / 6}>
-                {profileLineTwo}
+                {profileLineTwo.trim()}
               </Text>
             ) : null}
           </View>
