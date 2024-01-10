@@ -77,10 +77,14 @@ function InputField({
   // Function to handle what to do after user leaves the input component
   // Capitalize input if autocap specificied
   // Validate input
-  const handleOnEndEditing = () => {    
-    if (autoCapitalize == 'characters') {
-      value = value.toUpperCase();
-    } 
+  const handleOnEndEditing = () => {  
+    if(value) {
+      if (autoCapitalize == 'characters') {
+        value = value.toUpperCase();
+      } 
+    } else {
+      value = '';
+    }
     setInputText(value);
     validateInput(value);
     onChangeText(value);
