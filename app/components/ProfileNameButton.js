@@ -62,7 +62,7 @@ function ProfileNameButton({
             </Text>
             {profileLineTwo ? (
               <Text style={styles.DefaultText} fontSize={size / 6}>
-                {`${profileLineTwo}`}
+                {profileLineTwo}
               </Text>
             ) : null}
           </View>
@@ -97,17 +97,16 @@ const styles = StyleSheet.create({
     height: 100,
     width: 100,
     borderRadius: 100,
-    resizeMode: 'contain',
   },
   DefaultText: {
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
-    textAlign: 'center',
+    textAlign: 'left',
   },
   NameText: {
     fontWeight: 'bold',
   },
   TextContainer: {
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     marginLeft: 30,
   },
 });
