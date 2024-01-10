@@ -205,12 +205,13 @@ function PatientsScreen({ navigation }) {
             />
           </View>
           <View style={styles.patientCount}>
-            <Text>{listOfPatients ? listOfPatients.length : null} patients</Text>
+            <Text>No. of patients: {listOfPatients ? listOfPatients.length : null}</Text>
           </View>
           <Divider/>
           
           <ScrollView
             w="100%"
+            style={styles.patientListContainer}
             height="93%"
             refreshControl={
               <RefreshControl
@@ -223,7 +224,11 @@ function PatientsScreen({ navigation }) {
             <VStack alignItems="flex-start" backgroundColor={'yellow'}>
               {listOfPatients && listOfPatients.length > 0
                 ? listOfPatients.map((item, index) => (
-                    <View style={styles.patientRowContainer} key={index}>
+                    <TouchableOpacity 
+                      style={styles.patientRowContainer} 
+                      key={index}
+                      onPress={() => handleOnPress(item.patientID)}
+                      >
                       <ProfileNameButton
                         profileLineOne={item.preferredName}
                         profileLineTwo={
@@ -236,16 +241,16 @@ function PatientsScreen({ navigation }) {
                         key={index}
                         isVertical={false}
                       />
-                      <View style={styles.guardianNameContainer}>
-                        <Text style={styles.guardianName}>
+                      <View style={styles.caregiverNameContainer}>
+                        <Text style={styles.caregiverName}>
                           {viewMode === 'allPatients'
                             ? item.caregiverName !== null
                               ? item.caregiverName
-                              : 'No Caregivers'
+                              : 'No Caregiver'
                             : null}
                         </Text>
                       </View>
-                    </View>
+                    </TouchableOpacity>
                   ))
                 : null}
             </VStack>
@@ -287,21 +292,24 @@ const styles = StyleSheet.create({
   searchBar: {
     flex: 1
   },
+  patientListContainer: {
+    paddingHorizontal: '5%',
+  },
   patientRowContainer: {
-    marginLeft: '5%',
     marginVertical: '3%',
-    width: '90%',
+    width: '100%',
     flex: 2,
     flexDirection: 'row',
     alignItems: 'stretch',
     justifyContent: 'space-between',
+    // backgroundColor: 'black'
   },
-  guardianNameContainer: {
+  caregiverNameContainer: {
     marginLeft: '5%',
     justifyContent: 'center',
     alignItem: 'center',
   },
-  guardianName: {
+  caregiverName: {
     fontSize: 15,
     fontWeight: 'bold',
   },
