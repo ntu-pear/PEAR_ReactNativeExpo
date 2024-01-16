@@ -94,9 +94,9 @@ function PatientAddScreen() {
 
   const [formData, setFormData] = useState(addPatientData);
 
-  // Function to handle form sections which can have multiple items (like allergies/guardians - can have multiple) 
+  // Function to handle form sections which can have multiple items (like allergies/guardians - can have multiple)
   const componentHandler = (page = '', list = []) => {
-    console.log(1, list)
+    console.log(1, list);
     if (list) {
       setComponentList((prevState) => ({
         // eg. componentList: { guardian: [{..}, {..}] }
@@ -160,7 +160,7 @@ function PatientAddScreen() {
       }));
     }
   };
- 
+
   // Function to update patient data
   const handlePatientData = (field) => (e) => {
     const newData = formData.patientInfo;
@@ -173,47 +173,46 @@ function PatientAddScreen() {
     } else if (field === 'PreferredLanguageListID') {
       newData[field] = parseInt(e);
     } else {
-      newData[field] = e; 
+      newData[field] = e;
     }
 
     setFormData((prevState) => ({
       ...prevState,
-      patientInfo : newData,
+      patientInfo: newData,
     }));
   };
-  
 
   // Function to update patient data
   const handleGuardianData = (field, i) => (e) => {
-    const newData = formData.guardianInfo;    
+    const newData = formData.guardianInfo;
 
     if (field === 'RelationshipID') {
       newData[i][field] = parseInt(e);
     } else {
-      newData[i][field] = e; 
+      newData[i][field] = e;
     }
 
     setFormData((prevState) => ({
       ...prevState,
-      guardianInfo : newData,
+      guardianInfo: newData,
     }));
 
-    console.log(newData)
+    console.log(newData);
   };
 
   // Function to update patient data
   const handleAllergyData = (field, i) => (e) => {
-    const newData = formData.allergyInfo;    
+    const newData = formData.allergyInfo;
 
     if (field === 'AllergyListID' || field === 'AllergyReactionListID') {
       newData[i][field] = parseInt(e);
     } else {
-      newData[i][field] = e; 
+      newData[i][field] = e;
     }
 
     setFormData((prevState) => ({
       ...prevState,
-      allergyInfo : newData,
+      allergyInfo: newData,
     }));
 
     // console.log(newData)
