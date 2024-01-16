@@ -22,26 +22,28 @@ import SensitiveInputField from './input-fields/SensitiveInputField';
 
 function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
   const page = 'guardianInfo';
-  const guardian = formData[page][i]; 
+  const guardian = formData[page][i];
 
   // Variables relatied to retrieving relationship select options from hook
   const { data, isError, isLoading } = useGetSelectionOptions('Relationship');
 
   // Set initial value for relationship select field
-  const [listOfRelationships, setListOfRelationships] = useState(parseSelectOptions([
-    'Husband',
-    'Wife',
-    'Child',
-    'Parent',
-    'Sibling',
-    'Grandchild',
-    'Friend',
-    'Nephew',
-    'Niece',
-    'Aunt',
-    'Uncle',
-    'Grandparent'
-  ]));
+  const [listOfRelationships, setListOfRelationships] = useState(
+    parseSelectOptions([
+      'Husband',
+      'Wife',
+      'Child',
+      'Parent',
+      'Sibling',
+      'Grandchild',
+      'Friend',
+      'Nephew',
+      'Niece',
+      'Aunt',
+      'Uncle',
+      'Grandparent',
+    ]),
+  );
 
   // Screen error state: This = true when the child components report error(input fields)
   // Enables use of dynamic rendering of components when the page error = true/false.
@@ -52,7 +54,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
   const [isLastNameError, setIsLastNameError] = useState(false);
   const [isPrefNameError, setIsPrefNameError] = useState(false);
   const [isNRICError, setIsNRICError] = useState(false);
-  const [isGenderError, setIsGenderError] = useState(false); 
+  const [isGenderError, setIsGenderError] = useState(false);
   const [isDOBError, setIsDOBError] = useState(false);
   const [isRelationError, setIsRelationError] = useState(false);
   const [isTempAddrError, setIsTempAddrError] = useState(false);
@@ -67,82 +69,82 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
     { label: 'Female', value: 'F' },
   ];
 
-  // Functions for error state reporting for the child components  
+  // Functions for error state reporting for the child components
 
   const handleFirstNameError = (e) => {
     setIsFirstNameError(e);
     // console.log("first name", e)
-  }
-  
+  };
+
   const handleLastNameError = (e) => {
     setIsLastNameError(e);
     // console.log("last name", e)
-  }
-  
+  };
+
   const handlePrefNameError = (e) => {
     setIsPrefNameError(e);
     // console.log("pref name", e)
-  }
-  
+  };
+
   const handleNRICError = (e) => {
     setIsNRICError(e);
     // console.log("nric", e)
-  }
-      
+  };
+
   const handleGenderError = (e) => {
     setIsGenderError(e);
     // console.log("gender", e)
-  }
-  
+  };
+
   const handleDOBError = (e) => {
     setIsDOBError(e);
     // console.log("dob", e)
-  }
+  };
 
   const handleRelationError = (e) => {
     setIsRelationError(e);
     // console.log("relation", e)
-  }
-  
+  };
+
   const handleAddrError = (e) => {
     setIsAddrError(e);
     // console.log("addr", e)
-  }
-  
+  };
+
   const handleTempAddrError = (e) => {
     setIsTempAddrError(e);
     // console.log("temp addr", e)
-  }
+  };
 
   const handleMobileNoError = (e) => {
     setIsMobileNoError(e);
     // console.log("mobile", e)
-  }
+  };
 
   const handleEmailError = (e) => {
     setIsEmailError(e);
     // console.log("email", e)
-  }
+  };
 
   const handleLoginError = (e) => {
     setIsLoginError(e);
     // console.log("email", e)
-  }
+  };
 
   useEffect(() => {
     setIsInputErrors(
       isFirstNameError ||
-      isLastNameError ||
-      isPrefNameError ||
-      isNRICError ||
-      isGenderError ||
-      isDOBError ||
-      isRelationError ||
-      isAddrError ||
-      isTempAddrError ||
-      isMobileNoError ||
-      isEmailError ||
-      isLoginError
+        isLastNameError ||
+        isPrefNameError ||
+        isNRICError ||
+        isGenderError ||
+        isDOBError ||
+        isRelationError ||
+        isAddrError ||
+        isTempAddrError ||
+        isMobileNoError ||
+        isEmailError ||
+        isLoginError,
     );
     onError(i, isInputErrors);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -161,23 +163,23 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
     isLoginError,
     isInputErrors,
   ]);
-  
+
   // To ensure that when the is guardian login required checkbox is checked, guardian email
   // must be filled before continuing. Done by verifying if guardian.Email is empty or not.
   // console.log(i);
   useEffect(() => {
     setIsLoginError(guardian.IsChecked && !guardian.Email);
     setIsEmailError(guardian.IsChecked && !guardian.Email);
-    if(!guardian.IsChecked) {
-      handleFormData('Email', i)('')
+    if (!guardian.IsChecked) {
+      handleFormData('Email', i)('');
     }
   }, [guardian.IsChecked, guardian.Email]);
 
-  // Try to get relationships list from backend. If retrieval from the hook is successful, 
+  // Try to get relationships list from backend. If retrieval from the hook is successful,
   // replace the content in listOfRelationships with the retrieved one
   useEffect(() => {
     if (!isLoading && !isError && data) {
-      setListOfRelationships(data.sort((a,b) => a.value - b.value)); // sort by value
+      setListOfRelationships(data.sort((a, b) => a.value - b.value)); // sort by value
     }
   }, [data, isError, isLoading]);
 
@@ -223,14 +225,14 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
             title={'Preferred Name'}
             value={guardian.PreferredName}
             onChangeText={handleFormData('PreferredName', i)}
-            onEndEditing={handlePrefNameError}                    
+            onEndEditing={handlePrefNameError}
             dataType="name"
           />
 
           <SensitiveInputField
             isRequired
             title={'NRIC'}
-            autoCapitalize='characters'
+            autoCapitalize="characters"
             value={guardian.NRIC}
             onChangeText={handleFormData('NRIC', i)}
             onEndEditing={handleNRICError}
@@ -251,6 +253,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
             <DateInputField
               isRequired
               selectionMode={'DOB'}
+              hideDayOfWeek={true}
               title={'Date of Birth'}
               value={guardian.DOB}
               handleFormData={handleFormData('DOB', i)}
@@ -275,8 +278,8 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
             onChangeText={handleFormData('ContactNo', i)}
             onEndEditing={handleMobileNoError}
             dataType={'mobile phone'}
-            keyboardType='numeric' 
-            maxLength={8}                   
+            keyboardType="numeric"
+            maxLength={8}
           />
 
           <InputField
@@ -307,10 +310,9 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
               value={guardian.Email}
               onChangeText={handleFormData('Email', i)}
               onEndEditing={handleEmailError}
-              dataType='email'
+              dataType="email"
             />
           ) : null}
-        
         </View>
       </VStack>
     </Box>

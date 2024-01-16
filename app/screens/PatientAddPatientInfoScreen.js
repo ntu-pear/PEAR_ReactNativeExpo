@@ -439,6 +439,7 @@ function PatientAddPatientInfoScreen({
                     <DateInputField
                       title={'Date of Leaving'}
                       handleFormData={handleFormData('EndDate')}
+                      hideDayOfWeek={true}
                       value={patient.EndDate}
                       onEndEditing={handleLeavingError}
                     />

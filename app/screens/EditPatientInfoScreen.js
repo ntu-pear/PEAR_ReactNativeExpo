@@ -57,7 +57,7 @@ function EditPatientInfoScreen(props) {
     { label: 'Spanish', value: 12 },
     { label: 'Korean', value: 13 },
   ];
-  
+
   // Error state handling for child components
   const handleAddrState = useCallback(
     (state) => {
@@ -113,12 +113,12 @@ function EditPatientInfoScreen(props) {
   useEffect(() => {
     setIsInputErrors(
       isAddrError ||
-      isTempAddrError ||
-      isHomeNumberError ||
-      isMobileNumberError ||
-      isJoiningError ||
-      isLeavingError ||
-      isRespiteError,
+        isTempAddrError ||
+        isHomeNumberError ||
+        isMobileNumberError ||
+        isJoiningError ||
+        isLeavingError ||
+        isRespiteError,
     );
     // console.log(isInputErrors);
   }, [
@@ -134,7 +134,9 @@ function EditPatientInfoScreen(props) {
 
   const [formData, setFormData] = useState({
     PatientID: patientProfile.patientID,
-    PreferredLanguageListID: listOfLanguages.find((item) => item.label === patientProfile.preferredLanguage).value,  // convert label to value with listOfLanguages
+    PreferredLanguageListID: listOfLanguages.find(
+      (item) => item.label === patientProfile.preferredLanguage,
+    ).value, // convert label to value with listOfLanguages
     PrefLanguage: patientProfile.preferredLanguage,
     FirstName: patientProfile.firstName,
     LastName: patientProfile.lastName,
@@ -156,17 +158,15 @@ function EditPatientInfoScreen(props) {
   });
 
   useEffect(() => {
-    if (formData['EndDate'] === null){
+    if (formData['EndDate'] === null) {
       let replacedDate = new Date(0);
       replacedDate = replacedDate.toISOString().replace('.000Z', '');
       setFormData((previousState) => ({
         ...previousState,
-        'EndDate': replacedDate,
+        EndDate: replacedDate,
       }));
     }
-  }, [
-    
-  ]);
+  }, []);
 
   // handling form input data by taking onchange value and updating our previous form data state
   const handleFormData =
@@ -220,10 +220,10 @@ function EditPatientInfoScreen(props) {
         : (alertDetails = 'Please try again.');
 
       alertTitle = 'Error in Editing Patient Information';
-      console.log("result error "+JSON.stringify(result));
+      console.log('result error ' + JSON.stringify(result));
     }
     Alert.alert(alertTitle, alertDetails);
-    console.log("formData "+JSON.stringify(formData));
+    console.log('formData ' + JSON.stringify(formData));
   };
 
   return (
@@ -249,7 +249,7 @@ function EditPatientInfoScreen(props) {
                   onChangeText={handleFormData('HandphoneNo')}
                   onChildData={handleMobileNumberState}
                 />
-                
+
                 <CommonInputField
                   isRequired
                   title={'Address'}
@@ -272,6 +272,7 @@ function EditPatientInfoScreen(props) {
                     value={new Date(formData['StartDate'])}
                     handleFormData={handleFormData('StartDate')}
                     onChildData={handleJoiningState}
+                    hideDayOfWeek={true}
                     minimumInputDate={minimumJoiningDate}
                     maximumInputDate={maximumJoiningDate}
                   />
@@ -296,12 +297,18 @@ function EditPatientInfoScreen(props) {
                 />
 
                 <Text style={styles.redText}>
-                  Note: To edit other information, please contact system administrator.
+                  Note: To edit other information, please contact system
+                  administrator.
                 </Text>
               </View>
               <View style={styles.saveButtonContainer}>
-                <Box width='70%'>
-                  <AppButton title="Save" color="green" onPress={submitForm} isDisabled={isInputErrors} />
+                <Box width="70%">
+                  <AppButton
+                    title="Save"
+                    color="green"
+                    onPress={submitForm}
+                    isDisabled={isInputErrors}
+                  />
                 </Box>
               </View>
             </VStack>
@@ -335,7 +342,7 @@ const styles = StyleSheet.create({
   },
   redText: {
     marginBottom: 4,
-    alignSelf: "center",
+    alignSelf: 'center',
     color: colors.red,
   },
 });

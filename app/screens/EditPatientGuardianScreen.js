@@ -1,7 +1,7 @@
 // Libs
 import React, { useState, useEffect, useCallback } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
-import { Box, VStack, FlatList } from 'native-base'
+import { Box, VStack, FlatList } from 'native-base';
 
 // Configurations
 import routes from 'app/navigation/routes';
@@ -34,7 +34,7 @@ function EditPatientGuardianScreen(props) {
   minimumJoiningDate.setDate(minimumJoiningDate.getDate() - 30); // 30 days ago
   const maximumJoiningDate = new Date();
   maximumJoiningDate.setDate(maximumJoiningDate.getDate() + 30); // 30 days later
-  
+
   // retrive list data from database using useGetSelectionOptions
   const {
     data: relationshipData,
@@ -170,17 +170,17 @@ function EditPatientGuardianScreen(props) {
   useEffect(() => {
     setIsInputErrors(
       isFirstNameError ||
-      isLastNameError ||
-      isPrefNameError ||
-      isNRICError ||
-      isGenderError ||
-      isEmailError ||
-      isPhoneError ||
-      isRelationError ||
-      isDOBError ||
-      isAddrError ||
-      isTempAddrError ||
-      isGuardianLoginError,
+        isLastNameError ||
+        isPrefNameError ||
+        isNRICError ||
+        isGenderError ||
+        isEmailError ||
+        isPhoneError ||
+        isRelationError ||
+        isDOBError ||
+        isAddrError ||
+        isTempAddrError ||
+        isGuardianLoginError,
     );
     // console.log(isInputErrors);
   }, [
@@ -206,13 +206,13 @@ function EditPatientGuardianScreen(props) {
     PreferredName: guardianProfile.preferredName,
     NRIC: guardianProfile.nric,
     Gender: guardianProfile.gender,
-    Email: guardianProfile.email ? guardianProfile.email : "",
+    Email: guardianProfile.email ? guardianProfile.email : '',
     RelationshipID: guardianProfile.relationshipID,
     isActive: guardianProfile.isActive,
     ContactNo: guardianProfile.contactNo,
     DOB: guardianProfile.dob ? guardianProfile.dob : minimumJoiningDate,
-    Address: guardianProfile.address ? guardianProfile.address : "",
-    TempAddress: guardianProfile.tempAddress ? guardianProfile.tempAddress : "",
+    Address: guardianProfile.address ? guardianProfile.address : '',
+    TempAddress: guardianProfile.tempAddress ? guardianProfile.tempAddress : '',
   });
 
   // To ensure that when the is guardian login required checkbox is checked, guardian email
@@ -220,7 +220,7 @@ function EditPatientGuardianScreen(props) {
   // console.log(i);
   //useEffect(() => {
   //  setIsGuardianLoginError(() => {
-  //    if ((formData['isActive'] !== undefined && formData['isActive']) && 
+  //    if ((formData['isActive'] !== undefined && formData['isActive']) &&
   //    (formData['Email'] !== undefined && formData['Email'] === '')) {
   //      return true;
   //    } else {
@@ -229,29 +229,28 @@ function EditPatientGuardianScreen(props) {
   //  });
   //}, [formData['isActive'], formData['Email']]);
 
-
   // handling form input data by taking onchange value and updating our previous form data state
   const handleFormData =
-  (input = null) =>
-  (e) => {
-    if (input === 'ContactNo') {
-      e.toString(); // convert to string
-      setFormData((prevData) => ({
-        ...prevData,
-        [input]: e,
-      }));
-    } else if (input === 'Relationship') {
-      setFormData((prevData) => ({
-        ...prevData,
-        RelationshipID: e,
-      }));
-    } else {
-      setFormData((prevData) => ({
-        ...prevData,
-        [input]: e,
-      }));
-    }
-  };
+    (input = null) =>
+    (e) => {
+      if (input === 'ContactNo') {
+        e.toString(); // convert to string
+        setFormData((prevData) => ({
+          ...prevData,
+          [input]: e,
+        }));
+      } else if (input === 'Relationship') {
+        setFormData((prevData) => ({
+          ...prevData,
+          RelationshipID: e,
+        }));
+      } else {
+        setFormData((prevData) => ({
+          ...prevData,
+          [input]: e,
+        }));
+      }
+    };
 
   // form submission when save button is pressed
   const submitForm = async () => {
@@ -274,7 +273,7 @@ function EditPatientGuardianScreen(props) {
         : (alertDetails = 'Please try again.');
 
       alertTitle = 'Error in Editing Guardian Info';
-      console.log("result error "+JSON.stringify(result));
+      console.log('result error ' + JSON.stringify(result));
     }
     Alert.alert(alertTitle, alertDetails);
   };
@@ -364,6 +363,7 @@ function EditPatientGuardianScreen(props) {
                     isRequired
                     selectionMode={'DOB'}
                     title={'Date of Birth'}
+                    hideDayOfWeek={true}
                     value={new Date(formData['DOB'])}
                     handleFormData={handleFormData('DOB')}
                     onChildData={handleDOBState}
@@ -392,7 +392,6 @@ function EditPatientGuardianScreen(props) {
                   //  onChangeData={handleFormData('isActive')}
                   ///>
                 }
-                
 
                 <EmailInputField
                   title={'Guardian Email'}
@@ -402,8 +401,13 @@ function EditPatientGuardianScreen(props) {
                 />
               </View>
               <View style={styles.saveButtonContainer}>
-                <Box width='70%'>
-                  <AppButton title="Save" color="green" onPress={submitForm} isDisabled={isInputErrors} />
+                <Box width="70%">
+                  <AppButton
+                    title="Save"
+                    color="green"
+                    onPress={submitForm}
+                    isDisabled={isInputErrors}
+                  />
                 </Box>
               </View>
             </VStack>
