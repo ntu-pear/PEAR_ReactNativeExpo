@@ -20,7 +20,7 @@ function PatientProfileCard(props) {
   const handleOnPressToNextScreen = () => {
     if (Platform.OS === 'web') {
       console.log('route to: ' + '/' + routes);
-      navigate('/' + routes, { state: { ...patientProfile }});
+      navigate('/' + routes, { state: { ...patientProfile } });
     } else {
       navigation.push(routes, { ...patientProfile });
     }
