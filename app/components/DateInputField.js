@@ -26,6 +26,7 @@ function DateInputField({
   minimumInputDate,
   maximumInputDate,
   onChildData,
+  hideDayOfWeek,
 }) {
   const [show, setShow] = useState(false);
 
@@ -83,7 +84,9 @@ function DateInputField({
     date = date.toString().padStart(2, '0');
     month = month.toString().padStart(2, '0');
 
-    return `${listOfDays[day]}, ${date}/${month}/${year}`;
+    return hideDayOfWeek
+      ? `${date}/${month}/${year}`
+      : `${listOfDays[day]}, ${date}/${month}/${year}`;
   };
 
   const showPicker = () => {

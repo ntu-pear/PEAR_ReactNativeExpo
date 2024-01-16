@@ -47,23 +47,25 @@ function PatientAddPatientInfoScreen({
 
   // Variables relatied to retrieving preferred language select options from API
   const { data, isError, isLoading } = useGetSelectionOptions('Language');
-  
+
   // Set initial value for preferred language select field
-  const [listOfLanguages, setListOfLanguages] = useState(parseSelectOptions([
-    'Cantonese',
-    'English',
-    'Hainanese',
-    'Hakka',
-    'Hindi',
-    'Hokkien',
-    'Malay',
-    'Mandarin',
-    'Tamil',
-    'Teochew',
-    'Japanese',
-    'Spanish',
-    'Korean',
-  ]));
+  const [listOfLanguages, setListOfLanguages] = useState(
+    parseSelectOptions([
+      'Cantonese',
+      'English',
+      'Hainanese',
+      'Hakka',
+      'Hindi',
+      'Hokkien',
+      'Malay',
+      'Mandarin',
+      'Tamil',
+      'Teochew',
+      'Japanese',
+      'Spanish',
+      'Korean',
+    ]),
+  );
 
   // Screen error state: This = true when the child components report error(input fields)
   // Enables use of dynamic rendering of components when the page error = true/false.
@@ -102,96 +104,95 @@ function PatientAddPatientInfoScreen({
     { label: 'No', value: false },
   ];
 
-  // Functions for error state reporting for the child components  
+  // Functions for error state reporting for the child components
   const handleFirstNameError = (e) => {
     setIsFirstNameError(e);
     // console.log("first name", e)
-  }
-  
+  };
+
   const handleLastNameError = (e) => {
     setIsLastNameError(e);
     // console.log("last name", e)
-  }
-  
+  };
+
   const handlePrefNameError = (e) => {
     setIsPrefNameError(e);
     // console.log("pref name", e)
-  }
-  
+  };
+
   const handleNRICError = (e) => {
     setIsNRICError(e);
     // console.log("nric", e)
-  }
-      
+  };
+
   const handleGenderError = (e) => {
     setIsGenderError(e);
     // console.log("gender", e)
-  }
-  
+  };
+
   const handleDOBError = (e) => {
     setIsDOBError(e);
     // console.log("dob", e)
-  }
-  
+  };
+
   const handlePrefLanguageError = (e) => {
     setPrefLanguageError(e);
     // console.log("language", e)
-  }
-  
+  };
+
   const handleAddrError = (e) => {
     setIsAddrError(e);
     // console.log("addr", e)
-  }
-  
+  };
+
   const handleTempAddrError = (e) => {
     setIsTempAddrError(e);
     // console.log("temp addr", e)
-  }
-  
+  };
+
   const handleHomeNoError = (e) => {
     setIsHomeNoError(e);
     // console.log("home", e)
-  }
-  
+  };
+
   const handleMobileNoError = (e) => {
     setIsMobileNoError(e);
     // console.log("mobile", e)
-  }
+  };
 
   const handleRespiteError = (e) => {
     setIsRespiteError(e);
     // console.log("respite", e)
-  }
+  };
 
   const handleJoiningError = (e) => {
     setIsJoiningError(e);
     // console.log("joining", e)
-  }
-  
+  };
+
   const handleLeavingError = (e) => {
     setIsLeavingError(e);
     // console.log("leaving", e)
-  }
-
+  };
 
   // This useEffect enables the page to show correct error checking.
   // The main isInputErrors is responsible for the error state of the screen.
-  // This state will be true whenever any child input components are in error state. 
+  // This state will be true whenever any child input components are in error state.
   useEffect(() => {
     setIsInputErrors(
       isFirstNameError ||
-      isLastNameError ||
-      isPrefNameError ||
-      isNRICError ||
-      isGenderError ||
-      isDOBError ||
-      isAddrError ||
-      isTempAddrError ||
-      isHomeTeleError ||
-      isMobileError ||
-      isRespiteError ||
-      isJoiningError ||
-      isLeavingError,
+        isLastNameError ||
+        isPrefNameError ||
+        isNRICError ||
+        isGenderError ||
+        isDOBError ||
+        isAddrError ||
+        isTempAddrError ||
+        isHomeTeleError ||
+        isMobileError ||
+        isRespiteError ||
+        isJoiningError ||
+        isLeavingError,
     );
   }, [
     isFirstNameError,
@@ -210,7 +211,7 @@ function PatientAddPatientInfoScreen({
   ]);
 
   // Try to get langugage list from backend. If retrieval from the hook is successful, replace the content in
-  // listOfLanguages with the retrieved one. 
+  // listOfLanguages with the retrieved one.
   useEffect(() => {
     if (!isLoading && !isError && data) {
       console.log('selection data!');
@@ -221,21 +222,21 @@ function PatientAddPatientInfoScreen({
   // Get patient preferred names from API
   useEffect(() => {
     getPrefNames();
-  }, [])
+  }, []);
 
-  const [isPrefNamesLoading, setIsPrefNamesLoading] = useState(false);  
+  const [isPrefNamesLoading, setIsPrefNamesLoading] = useState(false);
   const { user, setUser } = useContext(AuthContext);
   const [prefNames, setPrefNames] = useState([]);
 
   const getPrefNames = async () => {
     setIsPrefNamesLoading(true);
-    const response = await patientApi.getPatientList(false,'active');
+    const response = await patientApi.getPatientList(false, 'active');
     if (!response.ok) {
       setUser(null);
       return;
     }
-    setPrefNames(response.data.data.map(x => x.preferredName));
-    setIsPrefNamesLoading(false);    
+    setPrefNames(response.data.data.map((x) => x.preferredName));
+    setIsPrefNamesLoading(false);
   };
 
   return isLoading || isPrefNamesLoading ? (
@@ -265,9 +266,7 @@ function PatientAddPatientInfoScreen({
 
                     <Box mt="3.5" mb="3.5" overflow="hidden" rounded="lg">
                       <Center>
-                        <Pressable
-                          onPress={pickImage('UploadProfilePicture')}
-                        >
+                        <Pressable onPress={pickImage('UploadProfilePicture')}>
                           <Image
                             alt="patient_image"
                             borderRadius="full"
@@ -322,23 +321,23 @@ function PatientAddPatientInfoScreen({
                     title={'Preferred Name'}
                     value={patient.PreferredName}
                     onChangeText={handleFormData('PreferredName')}
-                    onEndEditing={handlePrefNameError}                    
+                    onEndEditing={handlePrefNameError}
                     dataType="name"
-                    otherProps={{prefNameList: prefNames}}
+                    otherProps={{ prefNameList: prefNames }}
                   />
 
                   <SensitiveInputField
                     isRequired
                     title={'NRIC'}
-                    autoCapitalize='characters'
+                    autoCapitalize="characters"
                     value={patient.NRIC}
                     onChangeText={handleFormData('NRIC')}
                     onEndEditing={handleNRICError}
                     dataType="nric"
                     maxLength={9}
                   />
-                
-                 <RadioButtonInput
+
+                  <RadioButtonInput
                     isRequired
                     title={'Gender'}
                     value={patient.Gender}
@@ -353,11 +352,12 @@ function PatientAddPatientInfoScreen({
                       selectionMode={'DOB'}
                       title={'Date of Birth'}
                       value={patient.DOB}
+                      hideDayOfWeek={true}
                       handleFormData={handleFormData('DOB')}
                       onEndEditing={handleDOBError}
                     />
                   </View>
-                  
+
                   <SelectionInputField
                     isRequired
                     title={'Preferred Language'}
@@ -389,7 +389,7 @@ function PatientAddPatientInfoScreen({
                     onChangeText={handleFormData('HomeNo')}
                     onEndEditing={handleHomeNoError}
                     dataType={'home phone'}
-                    keyboardType='numeric'
+                    keyboardType="numeric"
                     maxLength={8}
                   />
 
@@ -399,7 +399,7 @@ function PatientAddPatientInfoScreen({
                     onChangeText={handleFormData('HandphoneNo')}
                     onEndEditing={handleMobileNoError}
                     dataType={'mobile phone'}
-                    keyboardType='numeric'                      
+                    keyboardType="numeric"
                     maxLength={8}
                   />
 
