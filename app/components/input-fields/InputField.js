@@ -9,7 +9,7 @@ import typography from 'app/config/typography';
 import colors from 'app/config/colors';
 
 // Utils
-import * as validation from 'app/utility/inputValidation'
+import * as validation from 'app/utility/InputValidation';
 
 // Components
 import ErrorMessage from 'app/components/ErrorMessage';
@@ -34,20 +34,20 @@ function InputField({
   variant = 'singeLine',
   style = null,
   otherProps = {},
-}) { 
-  // Track error state via input validation  
-  const [error, setError] = useState({isError: false, errorMsg: ''});
+}) {
+  // Track error state via input validation
+  const [error, setError] = useState({ isError: false, errorMsg: '' });
 
   // Track whether component is in its first render
   const [isFirstRender, setIsFirstRender] = useState(true);
 
   // State for value in input component
   const [inputText, setInputText] = useState(value);
- 
-  // In first render of component, set isError to true to ensure submission blocking in the parent component 
+
+  // In first render of component, set isError to true to ensure submission blocking in the parent component
   // is active (as it is first rendered, user will not likely have filled anything).
-  // This also ensures that since there will be no input, the component error message does not show until 
-  // the user focuses and violates the validation with their input.  
+  // This also ensures that since there will be no input, the component error message does not show until
+  // the user focuses and violates the validation with their input.
   useEffect(() => {
     onEndEditing ? onEndEditing(isFirstRender || error.isError) : null;
     setIsFirstRender(false);
@@ -57,7 +57,7 @@ function InputField({
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  
+
   // Update the parent component that there is a validation error.
   // Validation is passed via the onEndEditing prop.
   useEffect(() => {
@@ -72,55 +72,50 @@ function InputField({
     value = value.toString();
     setInputText(value);
     onChangeText(value);
-  }
+  };
 
   // Function to handle what to do after user leaves the input component
   // Capitalize input if autocap specificied
   // Validate input
-  const handleOnEndEditing = () => {    
+  const handleOnEndEditing = () => {
     if (autoCapitalize == 'characters') {
       value = value.toUpperCase();
-    } 
+    }
     setInputText(value);
     validateInput(value);
     onChangeText(value);
-  }
+  };
 
   // Function used for input validation depending on the type of input data (given by the type prop)
   const validateInput = () => {
-    msg = ''
-    if(isRequired) {
+    msg = '';
+    if (isRequired) {
       msg = validation.notEmpty(value);
     }
-    if('prefNameList' in otherProps) {
+    if ('prefNameList' in otherProps) {
       msg = msg || validation.uniquePrefName(value, otherProps['prefNameList']);
     }
-    const selValidationFunctions = validation.validationFunctions[dataType]
+    const selValidationFunctions = validation.validationFunctions[dataType];
     if (selValidationFunctions) {
-      for(const validationFunction of selValidationFunctions) {
+      for (const validationFunction of selValidationFunctions) {
         msg = msg || validationFunction(value);
       }
     }
-    setError({isError: msg ? true: false, errorMsg: msg});
-  }
-
+    setError({ isError: msg ? true : false, errorMsg: msg });
+  };
 
   return (
     <View style={styles.componentContainer}>
       <VStack>
-        {
-          showTitle ? (
-            <Text style={styles.titleMsg}>
-              {title}:{isRequired ? <RequiredIndicator/> : ''}
-            </Text>
-          ) : null
-        }
-        <Input 
-          borderColor={
-            !error.errorMsg ? colors.light_gray3 : colors.red
-          }
+        {showTitle ? (
+          <Text style={styles.titleMsg}>
+            {title}:{isRequired ? <RequiredIndicator /> : ''}
+          </Text>
+        ) : null}
+        <Input
+          borderColor={!error.errorMsg ? colors.light_gray3 : colors.red}
           textAlignVertical={variant === 'multiLine' ? 'top' : 'center'}
-          autoCapitalize='none'
+          autoCapitalize="none"
           borderRadius="25"
           height={variant === 'multiLine' ? '150' : '50'}
           value={inputText}
@@ -135,19 +130,26 @@ function InputField({
           style={[styles.inputField, style]}
           {...otherProps}
         />
-        {hideError && !error.errorMsg ? 
-        null : (
-        <ErrorMessage message={error.errorMsg}/>
-        )}        
+        {hideError && !error.errorMsg ? null : (
+          <ErrorMessage message={error.errorMsg} />
+        )}
       </VStack>
     </View>
   );
 }
 
 InputField.propTypes = {
-  dataType: PropTypes.oneOf(['general', 'password', 'name', 'nric', 'home phone', 'mobile phone', 'email']),
+  dataType: PropTypes.oneOf([
+    'general',
+    'password',
+    'name',
+    'nric',
+    'home phone',
+    'mobile phone',
+    'email',
+  ]),
   keyboardType: TextInput.propTypes.keyboardType,
-  variant: PropTypes.oneOf(['singleLine', 'multiLine'])
+  variant: PropTypes.oneOf(['singleLine', 'multiLine']),
 };
 
 const styles = StyleSheet.create({

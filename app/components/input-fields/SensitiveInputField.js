@@ -9,7 +9,7 @@ import typography from 'app/config/typography';
 import colors from 'app/config/colors';
 
 // Utils
-import * as validation from 'app/utility/inputValidation'
+import * as validation from 'app/utility/InputValidation';
 
 // Components
 import { TextInput } from 'react-native';
@@ -29,45 +29,43 @@ function SensitiveInputField({
   keyboardType = 'default',
   maxLength = null,
   onEndEditing = () => {},
-  variant = 'singleLine'
-}) { 
+  variant = 'singleLine',
+}) {
   const [show, setShow] = useState(false);
 
   const handleVisibilityToggle = () => {
     setShow(!show);
-  }
+  };
 
   return (
     <View style={styles.ComponentContainer}>
       <VStack>
-      <InputField
-        isRequired={isRequired}
-        autoCapitalize={autoCapitalize}
-        hideError={hideError}
-        showTitle={showTitle}
-        title={title}
-        value={value}
-        onChangeText={onChangeText}
-        InputLeftElement={InputLeftElement}
-        InputRightElement={
-          <Icon
-          as={
-              <MaterialIcons
-              name={show ? 'visibility' : 'visibility-off'}
-              />
-            }
-            color={colors.black}
-            mr="5"
-            onPress={handleVisibilityToggle}
-            size={5}
+        <InputField
+          isRequired={isRequired}
+          autoCapitalize={autoCapitalize}
+          hideError={hideError}
+          showTitle={showTitle}
+          title={title}
+          value={value}
+          onChangeText={onChangeText}
+          InputLeftElement={InputLeftElement}
+          InputRightElement={
+            <Icon
+              as={
+                <MaterialIcons name={show ? 'visibility' : 'visibility-off'} />
+              }
+              color={colors.black}
+              mr="5"
+              onPress={handleVisibilityToggle}
+              size={5}
             />
           }
-        dataType={dataType}
-        type={show ? 'text' : 'password'}
-        keyboardType={keyboardType}
-        maxLength={maxLength}
-        onEndEditing={onEndEditing}
-        variant={variant}
+          dataType={dataType}
+          type={show ? 'text' : 'password'}
+          keyboardType={keyboardType}
+          maxLength={maxLength}
+          onEndEditing={onEndEditing}
+          variant={variant}
         />
       </VStack>
     </View>
@@ -75,9 +73,17 @@ function SensitiveInputField({
 }
 
 SensitiveInputField.propTypes = {
-  dataType: PropTypes.oneOf(['general', 'password', 'name', 'nric', 'home phone', 'mobile phone', 'email']),
+  dataType: PropTypes.oneOf([
+    'general',
+    'password',
+    'name',
+    'nric',
+    'home phone',
+    'mobile phone',
+    'email',
+  ]),
   keyboardType: TextInput.propTypes.keyboardType,
-  variant: PropTypes.oneOf(['singleLine', 'multiLine'])
+  variant: PropTypes.oneOf(['singleLine', 'multiLine']),
 };
 
 const styles = StyleSheet.create({
