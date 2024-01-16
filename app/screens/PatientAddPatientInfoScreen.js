@@ -417,6 +417,7 @@ function PatientAddPatientInfoScreen({
                       isRequired
                       title={'Date of Joining'}
                       value={patient.StartDate}
+                      hideDayOfWeek={true}
                       handleFormData={handleFormData('StartDate')}
                       onEndEditing={handleJoiningError}
                       minimumInputDate={minimumJoiningDate}
