@@ -26,7 +26,8 @@ function PatientsScreen({ navigation }) {
   const { user, setUser } = useContext(AuthContext);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [viewMode, setViewMode] = useState('myPatients');
+  const [viewMode, setViewMode] = useState('myPatients'); // myPatients, allPatients
+  const [patientStatus, setPatientStatus] = useState('Active'); // Active, Inactive, All
   const [isReloadPatientList, setIsReloadPatientList] = useState(true);
 
   // Patient data
@@ -35,15 +36,29 @@ function PatientsScreen({ navigation }) {
   
   // Search, sort, and filter related states
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterOptions, setFilterOptions] = useState({}); // {'Caregiver' : [{id: 1, title: name1, ...}], ...}
   const [selectedSort, setSelectedSort] = useState({});
-  const [selectedFilters, setSelectedFilters] = useState({}); // {'Caregiver': 1, ...}
+  const [dropdownFilterOptions, setDropdownFilterOptions] = useState({}); // {'Caregiver' : [{id: 1, title: name1, ...}], ...}
+  const [selectedDropdownFilters, setSelectedDropdownFilters] = useState({}); // {'Caregiver': 1, ...}
+  const [chipFilterOptions, setChipFilterOptions] = useState({}); 
+  const [selectedChipFilters, setSelectedChipFilters] = useState({}); 
   
   const SCREEN_WIDTH = Dimensions.get('window').width;
   const SORT_OPTIONS = parseSelectOptions(
     ['Full Name', 'Preferred Name', ...viewMode==='allPatients' ? ['Caregiver'] : []]); // {'Caregiver' : [{id: 1, title: name1, ...}], ...}
   const SORT_MAPPING = {'Full Name': 'fullName', 'Preferred Name': 'preferredName', 'Caregiver': 'caregiverName' }
-  const FILTER_MAPPING = {'Caregiver': 'caregiverName' }
+  const FILTER_MAPPING = {
+    'Caregiver': {
+      'id': 'caregiverName', 
+      'type': 'dropdown', 
+      'options': []
+    },
+    'Patient Status': {
+      'id': 'isActive', 
+      'type': 'chip',
+      'options': {'Active': true, 'Inactive': false, 'All': undefined},
+      'isFilter': false
+    } 
+  }
 
   // Refresh list when new patient is added or user requests refresh
   useFocusEffect(
@@ -64,25 +79,34 @@ function PatientsScreen({ navigation }) {
   // Get list of patients from backend when user switches between 'My Patients' and 'All Patients'
   // Reset search and filter options
   useEffect(() => {
+    setIsLoading(true);
     getListOfPatients();
     resetSearchSortFilter();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewMode]);
 
+  // Get list of patients based on patient status when it changes
+  useEffect(() => {
+    setIsLoading(true);
+    getListOfPatients(patientStatus);
+    handleSearchSortFilter();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [patientStatus]);
+
   // Reset search, sort, and filter options
   const resetSearchSortFilter = () => {
     setSearchQuery('')
     setSelectedSort({});
-    setSelectedFilters({})
+    setSelectedDropdownFilters({})
+    setSelectedChipFilters({})
   }
 
   // Retrieve patient list from backend
-  const getListOfPatients = async () => {
-    setIsLoading(true);
+  const getListOfPatients = async (status='active') => {
     const response =
     viewMode === 'myPatients'
         ? await patientApi.getPatientListByLoggedInCaregiver()
-        : await patientApi.getPatientList(false,'active');
+        : await patientApi.getPatientList(false, status);
 
     // Check if token has expired, if yes, proceed to log out
     if (!response.ok) {
@@ -91,27 +115,37 @@ function PatientsScreen({ navigation }) {
       // await authStorage.removeToken();
       return;
     }
-    setOriginalListOfPatients(response.data.data);
-    setListOfPatients(response.data.data)
+    setOriginalListOfPatients([...response.data.data]);
+    setListOfPatients([...response.data.data])
     setIsLoading(false);  
-    
-    resetSearchSortFilter();
     initFilterOptions(response.data.data);
   };
   
   // Set filter options
   const initFilterOptions = (data) => {
+    let tempDropdownFilterOptions = {};
+    let tempChipFilterOptions = {};
     if(viewMode === 'myPatients') {
-      setFilterOptions({});
+      tempChipFilterOptions['Patient Status'] = parseSelectOptions(Object.keys(FILTER_MAPPING['Patient Status']['options']));
     } else { 
-      let tempFilterOptions = {};
       for(var filter of Object.keys(FILTER_MAPPING)) {
-        let tempFilterOptionList = data.map(x => x[FILTER_MAPPING[filter]]);
-        tempFilterOptionList = Array.from(new Set(tempFilterOptionList));        
-        tempFilterOptions[filter] = parseAutoCompleteOptions(tempFilterOptionList);
+        let tempFilterOptionList;
+        if (Object.keys(FILTER_MAPPING[filter]['options']).length == 0) {
+          tempFilterOptionList = data.map(x => x[FILTER_MAPPING[filter]['id']]);
+          tempFilterOptionList = Array.from(new Set(tempFilterOptionList));        
+        } else {
+          tempFilterOptionList = Object.keys(FILTER_MAPPING[filter]['options'])
+        }
+
+        if(FILTER_MAPPING[filter]['type'] == 'dropdown') {
+          tempDropdownFilterOptions[filter] = parseAutoCompleteOptions(tempFilterOptionList);
+        } else if (FILTER_MAPPING[filter]['type'] == 'chip') {
+          tempChipFilterOptions[filter] = parseSelectOptions(tempFilterOptionList);
+        }
       }
-      setFilterOptions(tempFilterOptions);
     }
+    setDropdownFilterOptions(tempDropdownFilterOptions);
+    setChipFilterOptions(tempChipFilterOptions);
   }
 
   // On click button to add patient
@@ -122,7 +156,6 @@ function PatientsScreen({ navigation }) {
   
   // Navigate to patient profile when patient item is clicked
   const handleOnPress = (patientID) => {
-    console.log(patientID);
     navigation.push(routes.PATIENT_PROFILE, { id: patientID });
   };
   
@@ -132,7 +165,18 @@ function PatientsScreen({ navigation }) {
   }  
 
   // Handle searching, sorting, and filtering of patient data
-  const handleSearchSortFilter = (text=searchQuery, tempSelSort=selectedSort, tempSelFilters=selectedFilters) => {       
+  const handleSearchSortFilter = (text=searchQuery, tempSelSort=selectedSort, tempSelDropdownFilters=selectedDropdownFilters, tempSelChipFilters=selectedChipFilters) => {       
+    // Set patient status according to selected patient status
+    if(Object.keys(tempSelChipFilters).length > 0) {
+      let tempPatientStatus = tempSelChipFilters['Patient Status']['label'];
+      if(tempPatientStatus == 'All') {
+        tempPatientStatus = '';
+      }
+      setPatientStatus(tempPatientStatus.toLowerCase());
+    } else {
+      setPatientStatus('active')
+    }
+
     let filteredListOfPatients = originalListOfPatients.map((obj) => ({
       ...obj,
       fullName: `${obj.firstName.trim()} ${obj.lastName.trim()}`
@@ -148,14 +192,25 @@ function PatientsScreen({ navigation }) {
       SORT_MAPPING[Object.keys(tempSelSort).length == 0 ? 
         SORT_OPTIONS[0]['label'] : 
         tempSelSort['label']]);
-
   
     // Filter
-    for (var filter of Object.keys(tempSelFilters)) {
+    for (var filter of Object.keys(tempSelDropdownFilters)) {
       filteredListOfPatients = filteredListOfPatients.filter((obj) => (
-        obj[SORT_MAPPING[filter]] === tempSelFilters[filter]['title'])) || []
+        obj[FILTER_MAPPING[filter]['id']] === tempSelDropdownFilters[filter]['title'])) || []
     }
-
+    for (var filter of Object.keys(tempSelChipFilters)) {
+      if(FILTER_MAPPING[filter]['isFilter']){
+        if(Object.keys(FILTER_MAPPING[filter]['options']).length == 0) {
+          filteredListOfPatients = filteredListOfPatients.filter((obj) => (
+            obj[FILTER_MAPPING[filter]['id']] === tempSelChipFilters[filter]['label'])) || []
+        } else {
+          filteredListOfPatients = filteredListOfPatients.filter((obj) => (
+            obj[FILTER_MAPPING[filter]['id']] === FILTER_MAPPING[filter]['options'][tempSelChipFilters[filter]['label']])) || []
+        }
+      }
+    }
+    
+    console.log("setting", tempSelSort['label'])
     setListOfPatients(filteredListOfPatients);
   }
 
@@ -196,12 +251,15 @@ function PatientsScreen({ navigation }) {
             
             <FilterModalCard
               sortOptions={SORT_OPTIONS}
-              filterOptions={filterOptions}
-              handleSortFilter={handleSearchSortFilter}
               selectedSort={selectedSort}
               setSelectedSort={setSelectedSort}
-              selectedFilters={selectedFilters}
-              setSelectedFilters={setSelectedFilters}
+              dropdownFilterOptions={dropdownFilterOptions}
+              selectedDropdownFilters={selectedDropdownFilters}
+              setSelectedDropdownFilters={setSelectedDropdownFilters}
+              chipFilterOptions={chipFilterOptions}
+              selectedChipFilters={selectedChipFilters}
+              setSelectedChipFilters={setSelectedChipFilters}
+              handleSortFilter={handleSearchSortFilter}
             />
           </View>
           <View style={styles.patientCount}>
