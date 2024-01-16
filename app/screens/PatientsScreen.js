@@ -221,7 +221,7 @@ function PatientsScreen({ navigation }) {
             }
             keyboardShouldPersistTaps='handled'
           >
-            <VStack alignItems="flex-start" backgroundColor={'yellow'}>
+            <VStack alignItems="flex-start" backgroundColor={'yellow'} marginBottom='10%'>
               {listOfPatients && listOfPatients.length > 0
                 ? listOfPatients.map((item, index) => (
                     <TouchableOpacity 
