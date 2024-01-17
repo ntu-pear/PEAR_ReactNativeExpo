@@ -13,11 +13,14 @@ import { MaterialIcons } from '@expo/vector-icons';
 const FilterModalCard = ({
   filterIconSize=12,
   sortOptions=[],
-  filterOptions={},
   selectedSort,
   setSelectedSort,
-  selectedFilters,
-  setSelectedFilters,
+  dropdownFilterOptions={},
+  selectedDropdownFilters,
+  setSelectedDropdownFilters,
+  chipFilterOptions={},
+  selectedChipFilters,
+  setSelectedChipFilters,
   handleSortFilter,
 }) => {
   const initialRef = useRef(null);
@@ -25,39 +28,62 @@ const FilterModalCard = ({
   const searchRefs = useRef({});
 
   const [modalVisible, setModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [tempSelSort, setTempSelSort] = useState({...selectedSort});
-  const [tempSelFilters, setTempSelFilters] = useState({...selectedFilters});
+  const [tempSelDropdownFilters, setTempSelDropdownFilters] = useState({...selectedDropdownFilters});
+  const [tempSelChipFilters, setTempSelChipFilters] = useState({...selectedChipFilters});
 
   // Re-initialize sort and filter values to currently applied values whenever modal opens
   useEffect(() => {
+    setIsLoading(true);
     setTempSelSort(Object.keys(selectedSort).length == 0 ? sortOptions[0] : {...selectedSort});
-    setTempSelFilters({...selectedFilters});
+    setTempSelDropdownFilters({...selectedDropdownFilters});
+
+    var tempSelChipFilters = {...selectedChipFilters};
+    for (var filter of Object.keys(chipFilterOptions)) {
+      if(!Object.keys(selectedChipFilters).includes(filter)) {
+        tempSelChipFilters[filter] = chipFilterOptions[filter][0];
+      }
+    }
+    setTempSelChipFilters(tempSelChipFilters);
+    // setTempSelChipFilters({...chipFilterOptions});
+
     Keyboard.dismiss();
+    setIsLoading(false);
   },[modalVisible])
 
   // Apply sort and filter values and close modal
   const handleApply = () => {
     setModalVisible(false);
     setSelectedSort({...tempSelSort});
-    setSelectedFilters({...tempSelFilters});
-    handleSortFilter(undefined, {...tempSelSort}, {...tempSelFilters});
+    setSelectedDropdownFilters({...tempSelDropdownFilters});
+    setSelectedChipFilters({...tempSelChipFilters});
+    handleSortFilter(undefined, {...tempSelSort}, {...tempSelDropdownFilters}, {...tempSelChipFilters});
   };
   
   // Reset sort and filter values and close modal
   const handleReset = () => {
     setModalVisible(false);
     setSelectedSort(1);
-    setSelectedFilters({});
-    handleSortFilter(undefined, 1, {});
+    setSelectedDropdownFilters({});
+    setSelectedChipFilters({});
+    handleSortFilter(undefined, 1, {}, {});
   };
 
-  // Set display value of filter when item is selected
-  const handleOnSelectFilter = (item, filter) => {
+  // Set display value of dropdown filter when item is selected
+  const handleOnSelectDropdownFilter = (item, filter) => {
     if(item) {
-      let tempSelectedFilters = tempSelFilters;
+      let tempSelectedFilters = tempSelDropdownFilters;
       tempSelectedFilters[filter] = item;
-      item && setTempSelFilters(tempSelectedFilters);
+      item && setTempSelDropdownFilters(tempSelectedFilters);      
     }
+  }
+
+  // Set display value of chip filter when item is selected
+  const handleOnSelectChipFilter = (item, filter) => {
+    let temp = {...tempSelChipFilters};
+    temp[filter] = item;
+    setTempSelChipFilters(temp); 
   }
     
   return (
@@ -77,91 +103,116 @@ const FilterModalCard = ({
         >
         </Icon>
       </TouchableOpacity>
-
-      <Modal
-        size={'lg'}
-        animationPreset={'slide'}
-        isOpen={modalVisible}
-        onClose={() => setModalVisible(false)}
-        initialFocusRef={initialRef}
-        finalFocusRef={finalRef}
-      >
-        <Modal.Content
-          backgroundColor={colors.white_var1}
+      {!isLoading ? 
+        <Modal
+          size={'lg'}
+          animationPreset={'slide'}
+          isOpen={modalVisible}
+          onClose={() => setModalVisible(false)}
+          initialFocusRef={initialRef}
+          finalFocusRef={finalRef}
         >
-          <Modal.Body>
-            <Text style={styles.headerStyle}>Sort and Filter</Text>
-            {sortOptions.length > 0 ? (
-              <View>
-                <Text style={styles.textStyle}>Sort by</Text>
-                <View style={styles.sortOptions}>
-                  {
-                    sortOptions.map((item) => (
-                      <Chip
-                        key={item.value}
-                        title={item.label}
-                        onPress={() => setTempSelSort(item)}
-                        type={tempSelSort.value == item.value ? 'solid' : 'outline'}
-                        containerStyle={styles.sortOption}
-                        buttonStyle={{backgroundColor: tempSelSort.value == item.value ? colors.green : 'transparent', borderColor: colors.green}}
-                        titleStyle={{color: tempSelSort.value == item.value ? colors.white : colors.green}}
-                        />
-                        ))
-                      }
-                </View>
-              </View>
-              ) : null}
-            {Object.keys(filterOptions).length > 0 ? (
-              <View style={styles.filterContainer}>
+          <Modal.Content
+            backgroundColor={colors.white_var1}
+            >
+            <Modal.Body>
+              <Text style={styles.headerStyle}>Sort and Filter</Text>
+              {sortOptions.length > 0 ? (
                 <View>
-                  {Object.keys(filterOptions).map((filter) => 
+                  <Text style={styles.textStyle}>Sort by</Text>
+                  <View style={styles.chipOptions}>
+                    {
+                      sortOptions.map((item) => (
+                        <Chip
+                          key={item.value}
+                          title={item.label}
+                          onPress={() => setTempSelSort(item)}
+                          type={tempSelSort.value == item.value ? 'solid' : 'outline'}
+                          containerStyle={styles.chipOption}
+                          buttonStyle={{backgroundColor: tempSelSort.value == item.value ? colors.green : 'transparent', borderColor: colors.green}}
+                          titleStyle={{color: tempSelSort.value == item.value ? colors.white : colors.green}}
+                          />
+                          ))
+                        }
+                  </View>
+                </View>
+                ) : null}
+              {Object.keys(chipFilterOptions).length > 0 ? (
+                <View marginTop={'3%'}>
+                  {Object.keys(chipFilterOptions).map((filter) => 
                     <View key={filter}>
                       <Text style={styles.textStyle}>{filter}</Text>
-                      <AutocompleteDropdown
-                        ref={searchRefs[filter]}
-                        closeOnBlur={false}
-                        dataSet={filterOptions[filter]}
-                        onSelectItem={(item) => handleOnSelectFilter(item, filter)}
-                        onClear={() => setTempSelFilters({})}
-                        textInputProps={{
-                          placeholder: 'Enter Caregiver Name',
-                          autoCorrect: false,
-                          autoCapitalize: 'none',
-                        }}
-
-                        initialValue={Object.keys(selectedFilters).includes(filter) ? selectedFilters[filter] : {id: null}}
-                        suggestionsListMaxHeight={150} 
-                        useFilter={true}
-                      />
+                      <View style={styles.chipOptions}>
+                        {
+                          chipFilterOptions[filter].map((item) => (
+                            <Chip
+                              key={item.value}
+                              title={item.label}
+                              onPress={() => handleOnSelectChipFilter(item, filter)}
+                              type={tempSelChipFilters[filter] ? tempSelChipFilters[filter].value == item.value ? 'solid' : 'outline' : chipFilterOptions[filter][0].value == item.value ? 'solid' : 'outline'}
+                              containerStyle={styles.chipOption}
+                              buttonStyle={{backgroundColor: tempSelChipFilters[filter] ? tempSelChipFilters[filter].value == item.value ? colors.green : 'transparent' : chipFilterOptions[filter][0].value == item.value ? colors.green : 'transparent', borderColor: colors.green}}
+                              titleStyle={{color: tempSelChipFilters[filter] ? tempSelChipFilters[filter].value == item.value ? colors.white : colors.green  : chipFilterOptions[filter][0].value == item.value ? colors.white : colors.green}}
+                              />
+                              ))
+                            }
+                      </View>
                     </View>
-                  )}
+                  )}                
+                  </View>                
+                ): null}
+              {Object.keys(dropdownFilterOptions).length > 0 ? (
+                <View style={styles.filterContainer}>
+                  <View>
+                    {Object.keys(dropdownFilterOptions).map((filter) => 
+                      <View key={filter}>
+                        <Text style={styles.textStyle}>{filter}</Text>
+                        <AutocompleteDropdown
+                          ref={searchRefs[filter]}
+                          closeOnBlur={false}
+                          dataSet={dropdownFilterOptions[filter]}
+                          onSelectItem={(item) => handleOnSelectDropdownFilter(item, filter)}
+                          onClear={() => setTempSelDropdownFilters({})}
+                          textInputProps={{
+                            placeholder: 'Enter Caregiver Name',
+                            autoCorrect: false,
+                            autoCapitalize: 'none',
+                          }}
+                          
+                          initialValue={Object.keys(selectedDropdownFilters).includes(filter) ? selectedDropdownFilters[filter] : {id: null}}
+                          suggestionsListMaxHeight={150} 
+                          useFilter={true}
+                          />
+                      </View>
+                    )}
+                  </View>
                 </View>
-              </View>
-              ): null}
-          </Modal.Body>
-          <Modal.Footer backgroundColor={colors.white}>
-            <Button.Group space={2}>
-              <Button
-                variant="ghost"
-                colorScheme="blueGray"
-                onPress={() => {
-                  handleReset();
-                }}
-              >
-                Reset
-              </Button>
-              <Button
-                backgroundColor={colors.green}
-                onPress={() => {
-                  handleApply();
-                }}
-              >
-                Apply
-              </Button>
-            </Button.Group>
-          </Modal.Footer>
-        </Modal.Content>
-      </Modal>
+                ): null}
+            </Modal.Body>
+            <Modal.Footer backgroundColor={colors.white}>
+              <Button.Group space={2}>
+                <Button
+                  variant="ghost"
+                  colorScheme="blueGray"
+                  onPress={() => {
+                    handleReset();
+                  }}
+                >
+                  Reset
+                </Button>
+                <Button
+                  backgroundColor={colors.green}
+                  onPress={() => {
+                    handleApply();
+                  }}
+                >
+                  Apply
+                </Button>
+              </Button.Group>
+            </Modal.Footer>
+          </Modal.Content>
+        </Modal>
+      : null}
     </View>
   );
 };
@@ -170,10 +221,10 @@ const styles = StyleSheet.create({
   filterIcon: {
     marginLeft: 8,
   },
-  sortOptions: {
+  chipOptions: {
     flexDirection: 'row'
   },
-  sortOption: {
+  chipOption: {
     marginRight: '2%',
   },
   filterContainer: {
