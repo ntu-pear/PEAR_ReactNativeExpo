@@ -70,15 +70,6 @@ const FilterModalCard = ({
     handleSortFilter(undefined, 1, {}, {});
   };
 
-  // // Reset chip filter values to first item
-  // const resetChipFilters = () => {
-  //   var tempSelChipFilters = {...selectedChipFilters};
-  //   for (var filter of Object.keys(chipFilterOptions)) {
-  //     tempSelChipFilters[filter] = chipFilterOptions[filter][0];
-  //   }
-  //   setTempSelChipFilters(tempSelChipFilters);
-  // }
-
   // Set display value of dropdown filter when item is selected
   const handleOnSelectDropdownFilter = (item, filter) => {
     if(item) {
