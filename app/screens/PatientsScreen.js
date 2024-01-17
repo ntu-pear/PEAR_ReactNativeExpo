@@ -1,6 +1,6 @@
 // Libs
 import React, { useState, useEffect, useContext } from 'react';
-import { Center, VStack, ScrollView, Fab, Icon, Divider } from 'native-base';
+import { Center, VStack, ScrollView, Fab, Icon, Divider, HStack } from 'native-base';
 import { RefreshControl, Dimensions, Text, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import AuthContext from 'app/auth/context';
@@ -22,6 +22,7 @@ import SearchBar from 'app/components/input-fields/SearchBar';
 import FilterModalCard from 'app/components/FilterModalCard';
 import { parseAutoCompleteOptions, parseSelectOptions, sortArray } from 'app/utility/miscFunctions';
 import patient from 'app/api/patient';
+import { Chip } from 'react-native-elements';
 
 function PatientsScreen({ navigation }) {
   const { user, setUser } = useContext(AuthContext);
@@ -308,6 +309,35 @@ function PatientsScreen({ navigation }) {
               handleSortFilter={handleSearchSortFilter}
             />
           </View>
+          <View
+            style={styles.optionsContainer}
+          >
+            <Chip
+              title={"Sort by: " + (Object.keys(selectedSort).length > 0 ? selectedSort['label'] : SORT_OPTIONS[0]['label'])}
+              type="solid"
+              buttonStyle={{backgroundColor: colors.green}} 
+            />
+
+            {Object.keys(chipFilterOptions).map((filter) => (
+              <Chip
+                key={filter}
+                title={filter + ": " + (Object.keys(selectedChipFilters).includes(filter) ? selectedChipFilters[filter]['label'] : chipFilterOptions[filter][0]['label'])}
+                type="solid"
+                buttonStyle={{backgroundColor: colors.green}}
+                containerStyle={{marginLeft: '1%'}} 
+              />
+            ))}
+
+            {Object.keys(selectedDropdownFilters).map((filter) => (
+              <Chip
+                key={filter}
+                title={filter + ": " + selectedDropdownFilters[filter]['title']}
+                type="solid"
+                buttonStyle={{backgroundColor: colors.green}}
+                containerStyle={{marginLeft: '1%'}} 
+              />
+            ))}
+          </View>
           <View style={styles.patientCount}>
             <Text>No. of patients: {listOfPatients ? listOfPatients.length : null}</Text>
           </View>
@@ -389,6 +419,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingVertical: '1%',
     paddingHorizontal: '2%',
+    alignSelf: 'flex-start',
+    flexWrap: 'wrap'
   },
   dropDownOptionsAlignment: {
     marginTop: 10,
