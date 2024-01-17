@@ -112,7 +112,7 @@ function HighlightsCard({ item, setModalVisible }) {
       case 1:
         console.log('1');
         navigation.navigate(routes.PATIENT_PRESCRIPTION, {
-          patientId: item.patientInfo.patientId,
+          patientID: item.patientInfo.patientId,
         });
         break;
       case 2:
@@ -127,28 +127,28 @@ function HighlightsCard({ item, setModalVisible }) {
         // new patient activity exclusion
         console.log('3');
         navigation.navigate(routes.PATIENT_ROUTINE, {
-          patientId: item.patientInfo.patientId,
+          patientID: item.patientInfo.patientId,
         });
         break;
       case 4:
         // new patients vital
         console.log('4');
         navigation.navigate(routes.PATIENT_VITAL, {
-          patientId: item.patientInfo.patientId,
+          patientID: item.patientInfo.patientId,
         });
         break;
       case 5:
         // new problem log
         console.log('5');
         navigation.navigate(routes.PATIENT_PROBLEM_LOG, {
-          patientId: item.patientInfo.patientId,
+          patientID: item.patientInfo.patientId,
         });
         break;
       case 6:
         // new medical record
         console.log('6');
         navigation.navigate(routes.PATIENT_MEDICAL_HISTORY, {
-          patientId: item.patientInfo.patientId,
+          patientID: item.patientInfo.patientId,
         });
         break;
     }
