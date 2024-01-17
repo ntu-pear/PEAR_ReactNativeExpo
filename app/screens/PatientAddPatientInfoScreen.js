@@ -317,14 +317,13 @@ function PatientAddPatientInfoScreen({
                     dataType="name"
                   />
 
-                  <InputField
+                   <RadioButtonInput
                     isRequired
-                    title={'Preferred Name'}
-                    value={patient.PreferredName}
-                    onChangeText={handleFormData('PreferredName')}
-                    onEndEditing={handlePrefNameError}                    
-                    dataType="name"
-                    otherProps={{prefNameList: prefNames}}
+                    title={'Gender'}
+                    value={patient.Gender}
+                    onChangeData={handleFormData('Gender')}
+                    onEndEditing={handleGenderError}
+                    dataArray={listOfGenders}
                   />
 
                   <SensitiveInputField
@@ -336,16 +335,7 @@ function PatientAddPatientInfoScreen({
                     onEndEditing={handleNRICError}
                     dataType="nric"
                     maxLength={9}
-                  />
-                
-                 <RadioButtonInput
-                    isRequired
-                    title={'Gender'}
-                    value={patient.Gender}
-                    onChangeData={handleFormData('Gender')}
-                    onEndEditing={handleGenderError}
-                    dataArray={listOfGenders}
-                  />
+                  />               
 
                   <View style={styles.dateSelectionContainer}>
                     <DateInputField
@@ -357,16 +347,6 @@ function PatientAddPatientInfoScreen({
                       onEndEditing={handleDOBError}
                     />
                   </View>
-                  
-                  <SelectionInputField
-                    isRequired
-                    title={'Preferred Language'}
-                    placeholder={'Select Language'}
-                    onDataChange={handleFormData('PreferredLanguageListID')}
-                    value={patient.PreferredLanguageListID}
-                    dataArray={listOfLanguages}
-                    onEndEditing={handlePrefLanguageError}
-                  />
 
                   <InputField
                     isRequired
@@ -374,13 +354,6 @@ function PatientAddPatientInfoScreen({
                     value={patient.Address}
                     onChangeText={handleFormData('Address')}
                     onEndEditing={handleAddrError}
-                  />
-
-                  <InputField
-                    title={'Temporary Address'}
-                    value={patient.TempAddress}
-                    onChangeText={handleFormData('TempAddress')}
-                    onEndEditing={handleTempAddrError}
                   />
 
                   <InputField
@@ -402,6 +375,33 @@ function PatientAddPatientInfoScreen({
                     keyboardType='numeric'                      
                     maxLength={8}
                   />
+
+                  <InputField
+                    title={'Temporary Address'}
+                    value={patient.TempAddress}
+                    onChangeText={handleFormData('TempAddress')}
+                    onEndEditing={handleTempAddrError}
+                  />
+
+                  <InputField
+                    isRequired
+                    title={'Preferred Name'}
+                    value={patient.PreferredName}
+                    onChangeText={handleFormData('PreferredName')}
+                    onEndEditing={handlePrefNameError}                    
+                    dataType="name"
+                    otherProps={{prefNameList: prefNames}}
+                  />
+                  
+                  <SelectionInputField
+                    isRequired
+                    title={'Preferred Language'}
+                    placeholder={'Select Language'}
+                    onDataChange={handleFormData('PreferredLanguageListID')}
+                    value={patient.PreferredLanguageListID}
+                    dataArray={listOfLanguages}
+                    onEndEditing={handlePrefLanguageError}
+                  />                 
 
                   <RadioButtonInput
                     isRequired
