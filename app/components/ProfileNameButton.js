@@ -56,14 +56,17 @@ function ProfileNameButton({
             }
           />
           <View style={customTextContainerStyle}>
-            <Text
-              style={[styles.DefaultText, styles.NameText]}
-              fontSize={size / 4}
-            >
-              {profileLineOne.trim()}
-            </Text>
+            {profileLineOne ? (
+              <Text
+                style={[styles.DefaultText, styles.NameText, ...isVertical ? [{textAlign: 'center'}] : []]}
+                fontSize={size / 4}
+              >
+                {profileLineOne.trim()}
+              </Text>
+            ) 
+            : null}
             {profileLineTwo ? (
-              <Text style={styles.DefaultText} fontSize={size / 6}>
+              <Text style={[styles.DefaultText, ...isVertical ? [{textAlign: 'center'}] : []]} fontSize={size / 6}>
                 {profileLineTwo.trim()}
               </Text>
             ) : null}
@@ -107,7 +110,6 @@ const styles = StyleSheet.create({
   },
   DefaultText: {
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
-    textAlign: 'left',
   },
   NameText: {
     fontWeight: 'bold',
