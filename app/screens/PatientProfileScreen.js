@@ -18,20 +18,13 @@ function PatientProfileScreen(props) {
   const { navigation, route } = props;
   const [patientProfile, setPatientProfile] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [patientID, setPatientID] = useState(route.params.id);
 
   useEffect(() => {
-    if (route.params.patientProfile == null) {
-      // navigated from Highlights Modal or Dashboard Screen
-      // Fetch patient's data from patient api
-      console.log('id');
-      getPatient(route.params.id);
-    } else {
-      // may be depreciated as patientScreen no longer passes by patientProfile. passes PatientID -- Justin
-      // navigated from Patients List Screen
-      console.log('profile');
-      setPatientProfile(route.params.patientProfile);
-      setIsLoading(false);
-    }
+    // navigated from Highlights Modal or Dashboard Screen
+    // Fetch patient's data from patient api
+    console.log('id', route.params.id);
+    getPatient(route.params.id);
   }, [route.params.id, route.params.patientProfile]);
 
   const getPatient = async (id) => {
@@ -105,6 +98,7 @@ function PatientProfileScreen(props) {
                       navigation={navigation}
                       routes={routes.PATIENT_ALLERGY}
                       patientProfile={patientProfile}
+                      patientId={patientID}
                     />
                   </View>
                   <View w="30%" h="100%">
@@ -120,6 +114,7 @@ function PatientProfileScreen(props) {
                       navigation={navigation}
                       routes={routes.PATIENT_VITAL}
                       patientProfile={patientProfile}
+                      patientId={patientID}
                     />
                   </View>
                   <View w="30%" h="100%">

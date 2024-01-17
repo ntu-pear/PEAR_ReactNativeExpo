@@ -8,22 +8,27 @@ import {
 } from 'react-native';
 import { Box, Text } from 'native-base';
 import colors from 'app/config/colors';
-import { useNavigate } from 'react-router-dom';
+import { useNavigation } from '@react-navigation/native';
 
 function PatientProfileCard(props) {
-  const { vectorIconComponent, text, navigation, routes, patientProfile } =
+  const { vectorIconComponent, text, routes, patientProfile, patientId } =
     props;
 
   // useNavigate() hook cannot work on mobile
-  const navigate = Platform.OS === 'web' ? useNavigate() : null;
+  // const navigate = Platform.OS === 'web' ? useNavigate() : null;
+  const navigation = useNavigation();
 
   const handleOnPressToNextScreen = () => {
-    if (Platform.OS === 'web') {
-      console.log('route to: ' + '/' + routes);
-      navigate('/' + routes, { state: { ...patientProfile } });
-    } else {
-      navigation.push(routes, { ...patientProfile });
-    }
+    // if (Platform.OS === 'web') {
+    //   console.log('route to: ' + '/' + routes);
+    //   navigate('/' + routes, { state: { ...patientProfile } });
+    // } else {
+    //   navigation.push(routes, { ...patientProfile });
+    // }
+    navigation.navigate(routes, {
+      patientId: patientId,
+      ...patientProfile,
+    });
   };
 
   const SCREEN_HEIGHT = Dimensions.get('window').height;
