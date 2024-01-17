@@ -47,8 +47,8 @@ function PatientsScreen({ navigation }) {
   // Constants  
   const SCREEN_WIDTH = Dimensions.get('window').width;
   const SORT_OPTIONS = parseSelectOptions(
-    ['Full Name', 'Preferred Name', ...viewMode==='allPatients' ? ['Caregiver'] : []]); // {'Caregiver' : [{id: 1, title: name1, ...}], ...}
-  const SORT_MAPPING = {'Full Name': 'fullName', 'Preferred Name': 'preferredName', 'Caregiver': 'caregiverName' }
+    ['Full Name', 'Preferred Name', 'Start Date', ...viewMode==='allPatients' ? ['Caregiver'] : []]); // {'Caregiver' : [{id: 1, title: name1, ...}], ...}
+  const SORT_MAPPING = {'Full Name': 'fullName', 'Preferred Name': 'preferredName', 'Caregiver': 'caregiverName', 'Start Date': 'startDate' }
   const FILTER_MAPPING = {
     'Caregiver': {
       'id': 'caregiverName', 
@@ -133,7 +133,6 @@ function PatientsScreen({ navigation }) {
 
   // Initiaize filter options (dropdown and chip) based on view mode
   const initFilterOptions = (data) => {
-    console.log('initializing filters')
     let tempDropdownFilterOptions = {};
     let tempChipFilterOptions = {};
 
@@ -196,6 +195,7 @@ function PatientsScreen({ navigation }) {
 
   // Handle searching, sorting, and filtering of patient data based on patient status
   const handleSearchSortFilter = async (text=searchQuery, tempSelSort=selectedSort, tempSelDropdownFilters=selectedDropdownFilters, tempSelChipFilters=selectedChipFilters) => {       
+    setIsLoading(true);
     // Set patient status according to selected patient status
     if(Object.keys(tempSelChipFilters).length > 0) {
       let tempPatientStatus = tempSelChipFilters['Patient Status']['label'];
@@ -215,6 +215,7 @@ function PatientsScreen({ navigation }) {
     } else {
       setFilteredPatientList(text, tempSelSort, tempSelDropdownFilters, tempSelChipFilters);
     }  
+    setIsLoading(false);
   }
 
   // Update patient list based on search, sort, and filter criteria
@@ -312,7 +313,13 @@ function PatientsScreen({ navigation }) {
           <View
             style={styles.optionsContainer}
           >
-            <Chip
+            <View style={styles.patientCount}>
+              <Text>No. of patients: {listOfPatients ? listOfPatients.length : null}</Text>
+            </View>
+
+            <Divider orientation='vertical' marginHorizontal='2%'height={'60%'} alignSelf={'center'}/>
+
+            <Chip              
               title={"Sort by: " + (Object.keys(selectedSort).length > 0 ? selectedSort['label'] : SORT_OPTIONS[0]['label'])}
               type="solid"
               buttonStyle={{backgroundColor: colors.green}} 
@@ -334,19 +341,25 @@ function PatientsScreen({ navigation }) {
                 title={filter + ": " + selectedDropdownFilters[filter]['title']}
                 type="solid"
                 buttonStyle={{backgroundColor: colors.green}}
-                containerStyle={{marginLeft: '1%'}} 
+                containerStyle={{marginLeft: '1%'}}
+                icon={{
+                  name: "close",
+                  type: "material",
+                  size: 20,
+                  color: "white",
+                  }}
+                iconRight
+                onPress={()=>{}}
               />
             ))}
           </View>
-          <View style={styles.patientCount}>
-            <Text>No. of patients: {listOfPatients ? listOfPatients.length : null}</Text>
-          </View>
+          
           <Divider/>
           
           <ScrollView
             w="100%"
             style={styles.patientListContainer}
-            height="93%"
+            height="90%"
             refreshControl={
               <RefreshControl
                 refreshing={isReloadPatientList}
