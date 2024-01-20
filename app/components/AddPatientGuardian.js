@@ -220,13 +220,13 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
             dataType="name"
           />
 
-          <InputField
+          <RadioButtonInput
             isRequired
-            title={'Preferred Name'}
-            value={guardian.PreferredName}
-            onChangeText={handleFormData('PreferredName', i)}
-            onEndEditing={handlePrefNameError}
-            dataType="name"
+            title={'Gender'}
+            value={guardian.Gender}
+            onChangeData={handleFormData('Gender', i)}
+            onChildData={handleGenderError}
+            dataArray={listOfGenders}
           />
 
           <SensitiveInputField
@@ -238,16 +238,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
             onEndEditing={handleNRICError}
             dataType="nric"
             maxLength={9}
-          />
-
-          <RadioButtonInput
-            isRequired
-            title={'Gender'}
-            value={guardian.Gender}
-            onChangeData={handleFormData('Gender', i)}
-            onChildData={handleGenderError}
-            dataArray={listOfGenders}
-          />
+          />          
 
           <View style={styles.dateSelectionContainer}>
             <DateInputField
@@ -261,27 +252,6 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
             />
           </View>
 
-          <SelectionInputField
-            isRequired
-            title={'Relationship'}
-            placeholder={'Select Relationship'}
-            onDataChange={handleFormData('RelationshipID', i)}
-            value={guardian.RelationshipID}
-            dataArray={listOfRelationships}
-            onChildData={handleRelationError}
-          />
-
-          <InputField
-            isRequired
-            title={'Mobile No.'}
-            value={guardian.ContactNo}
-            onChangeText={handleFormData('ContactNo', i)}
-            onEndEditing={handleMobileNoError}
-            dataType={'mobile phone'}
-            keyboardType="numeric"
-            maxLength={8}
-          />
-
           <InputField
             isRequired
             title={'Address'}
@@ -291,11 +261,41 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
           />
 
           <InputField
+            isRequired
+            title={'Mobile No.'}
+            value={guardian.ContactNo}
+            onChangeText={handleFormData('ContactNo', i)}
+            onEndEditing={handleMobileNoError}
+            dataType={'mobile phone'}
+            keyboardType='numeric' 
+            maxLength={8}                   
+          />
+
+          <InputField
             title={'Temporary Address'}
             value={guardian.TempAddress}
             onChangeText={handleFormData('TempAddress', i)}
             onEndEditing={handleTempAddrError}
           />
+
+          <InputField
+            isRequired
+            title={'Preferred Name'}
+            value={guardian.PreferredName}
+            onChangeText={handleFormData('PreferredName', i)}
+            onEndEditing={handlePrefNameError}                    
+            dataType="name"
+          />
+
+          <SelectionInputField
+            isRequired
+            title={'Relationship'}
+            placeholder={'Select Relationship'}
+            onDataChange={handleFormData('RelationshipID', i)}
+            value={guardian.RelationshipID}
+            dataArray={listOfRelationships}
+            onChildData={handleRelationError}
+          />         
 
           <SingleOptionCheckBox
             title={'Check this box to specify Guardian wants to log in'}

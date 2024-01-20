@@ -9,6 +9,7 @@ import {
 import { Text, VStack } from 'native-base';
 import typography from 'app/config/typography';
 import DefaultImage from 'app/assets/placeholder.png';
+import colors from 'app/config/colors';
 
 function ProfileNameButton({
   profilePicture,
@@ -18,6 +19,7 @@ function ProfileNameButton({
   size,
   isVertical,
   handleOnPress,
+  isActive=null
 }) {
   // const defaultImage = Image.resolveAssetSource(DefaultImage).uri;
 
@@ -54,15 +56,23 @@ function ProfileNameButton({
             }
           />
           <View style={customTextContainerStyle}>
-            <Text
-              style={[styles.DefaultText, styles.NameText]}
-              fontSize={size / 4}
-            >
-              {profileLineOne}
-            </Text>
+            {profileLineOne ? (
+              <Text
+                style={[styles.DefaultText, styles.NameText, ...isVertical ? [{textAlign: 'center'}] : []]}
+                fontSize={size / 4}
+              >
+                {profileLineOne.trim()}
+              </Text>
+            ) 
+            : null}
             {profileLineTwo ? (
-              <Text style={styles.DefaultText} fontSize={size / 6}>
-                {`${profileLineTwo}`}
+              <Text style={[styles.DefaultText, ...isVertical ? [{textAlign: 'center'}] : []]} fontSize={size / 6}>
+                {profileLineTwo.trim()}
+              </Text>
+            ) : null}
+            {isActive != null ? (
+              <Text style={styles.DefaultText} fontSize={size / 6} color={isActive ? colors.green : colors.red}>
+                {isActive ? 'Active' : 'Inactive'}
               </Text>
             ) : null}
           </View>
@@ -97,17 +107,15 @@ const styles = StyleSheet.create({
     height: 100,
     width: 100,
     borderRadius: 100,
-    resizeMode: 'contain',
   },
   DefaultText: {
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
-    textAlign: 'center',
   },
   NameText: {
     fontWeight: 'bold',
   },
   TextContainer: {
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     marginLeft: 30,
   },
 });

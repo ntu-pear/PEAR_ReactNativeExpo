@@ -316,14 +316,13 @@ function PatientAddPatientInfoScreen({
                     dataType="name"
                   />
 
-                  <InputField
+                   <RadioButtonInput
                     isRequired
-                    title={'Preferred Name'}
-                    value={patient.PreferredName}
-                    onChangeText={handleFormData('PreferredName')}
-                    onEndEditing={handlePrefNameError}
-                    dataType="name"
-                    otherProps={{ prefNameList: prefNames }}
+                    title={'Gender'}
+                    value={patient.Gender}
+                    onChangeData={handleFormData('Gender')}
+                    onEndEditing={handleGenderError}
+                    dataArray={listOfGenders}
                   />
 
                   <SensitiveInputField
@@ -335,16 +334,7 @@ function PatientAddPatientInfoScreen({
                     onEndEditing={handleNRICError}
                     dataType="nric"
                     maxLength={9}
-                  />
-
-                  <RadioButtonInput
-                    isRequired
-                    title={'Gender'}
-                    value={patient.Gender}
-                    onChangeData={handleFormData('Gender')}
-                    onEndEditing={handleGenderError}
-                    dataArray={listOfGenders}
-                  />
+                  />               
 
                   <View style={styles.dateSelectionContainer}>
                     <DateInputField
@@ -358,22 +348,32 @@ function PatientAddPatientInfoScreen({
                     />
                   </View>
 
-                  <SelectionInputField
-                    isRequired
-                    title={'Preferred Language'}
-                    placeholder={'Select Language'}
-                    onDataChange={handleFormData('PreferredLanguageListID')}
-                    value={patient.PreferredLanguageListID}
-                    dataArray={listOfLanguages}
-                    onEndEditing={handlePrefLanguageError}
-                  />
-
                   <InputField
                     isRequired
                     title={'Address'}
                     value={patient.Address}
                     onChangeText={handleFormData('Address')}
                     onEndEditing={handleAddrError}
+                  />
+
+                  <InputField
+                    title={'Home Telephone No.'}
+                    value={patient.HomeNo}
+                    onChangeText={handleFormData('HomeNo')}
+                    onEndEditing={handleHomeNoError}
+                    dataType={'home phone'}
+                    keyboardType='numeric'
+                    maxLength={8}
+                  />
+
+                  <InputField
+                    title={'Mobile No.'}
+                    value={patient.HandphoneNo}
+                    onChangeText={handleFormData('HandphoneNo')}
+                    onEndEditing={handleMobileNoError}
+                    dataType={'mobile phone'}
+                    keyboardType='numeric'                      
+                    maxLength={8}
                   />
 
                   <InputField
@@ -384,24 +384,24 @@ function PatientAddPatientInfoScreen({
                   />
 
                   <InputField
-                    title={'Home Telephone No.'}
-                    value={patient.HomeNo}
-                    onChangeText={handleFormData('HomeNo')}
-                    onEndEditing={handleHomeNoError}
-                    dataType={'home phone'}
-                    keyboardType="numeric"
-                    maxLength={8}
+                    isRequired
+                    title={'Preferred Name'}
+                    value={patient.PreferredName}
+                    onChangeText={handleFormData('PreferredName')}
+                    onEndEditing={handlePrefNameError}                    
+                    dataType="name"
+                    otherProps={{prefNameList: prefNames}}
                   />
-
-                  <InputField
-                    title={'Mobile No.'}
-                    value={patient.HandphoneNo}
-                    onChangeText={handleFormData('HandphoneNo')}
-                    onEndEditing={handleMobileNoError}
-                    dataType={'mobile phone'}
-                    keyboardType="numeric"
-                    maxLength={8}
-                  />
+                  
+                  <SelectionInputField
+                    isRequired
+                    title={'Preferred Language'}
+                    placeholder={'Select Language'}
+                    onDataChange={handleFormData('PreferredLanguageListID')}
+                    value={patient.PreferredLanguageListID}
+                    dataArray={listOfLanguages}
+                    onEndEditing={handlePrefLanguageError}
+                  />                 
 
                   <RadioButtonInput
                     isRequired

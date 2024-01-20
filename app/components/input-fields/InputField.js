@@ -9,7 +9,7 @@ import typography from 'app/config/typography';
 import colors from 'app/config/colors';
 
 // Utils
-import * as validation from 'app/utility/InputValidation';
+import * as validation from 'app/utility/inputValidation';
 
 // Components
 import ErrorMessage from 'app/components/ErrorMessage';
@@ -77,9 +77,13 @@ function InputField({
   // Function to handle what to do after user leaves the input component
   // Capitalize input if autocap specificied
   // Validate input
-  const handleOnEndEditing = () => {
-    if (autoCapitalize == 'characters') {
-      value = value.toUpperCase();
+  const handleOnEndEditing = () => {  
+    if(value) {
+      if (autoCapitalize == 'characters') {
+        value = value.toUpperCase();
+      } 
+    } else {
+      value = '';
     }
     setInputText(value);
     validateInput(value);
