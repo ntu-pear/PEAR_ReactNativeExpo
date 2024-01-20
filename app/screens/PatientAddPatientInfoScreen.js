@@ -317,15 +317,6 @@ function PatientAddPatientInfoScreen({
                     dataType="name"
                   />
 
-                   <RadioButtonInput
-                    isRequired
-                    title={'Gender'}
-                    value={patient.Gender}
-                    onChangeData={handleFormData('Gender')}
-                    onEndEditing={handleGenderError}
-                    dataArray={listOfGenders}
-                  />
-
                   <SensitiveInputField
                     isRequired
                     title={'NRIC'}
@@ -335,7 +326,7 @@ function PatientAddPatientInfoScreen({
                     onEndEditing={handleNRICError}
                     dataType="nric"
                     maxLength={9}
-                  />               
+                  />  
 
                   <View style={styles.dateSelectionContainer}>
                     <DateInputField
@@ -346,7 +337,16 @@ function PatientAddPatientInfoScreen({
                       handleFormData={handleFormData('DOB')}
                       onEndEditing={handleDOBError}
                     />
-                  </View>
+                  </View>             
+
+                  <RadioButtonInput
+                    isRequired
+                    title={'Gender'}
+                    value={patient.Gender}
+                    onChangeData={handleFormData('Gender')}
+                    onEndEditing={handleGenderError}
+                    dataArray={listOfGenders}
+                  />
 
                   <InputField
                     isRequired
@@ -354,6 +354,13 @@ function PatientAddPatientInfoScreen({
                     value={patient.Address}
                     onChangeText={handleFormData('Address')}
                     onEndEditing={handleAddrError}
+                  />
+
+                  <InputField
+                    title={'Temporary Address'}
+                    value={patient.TempAddress}
+                    onChangeText={handleFormData('TempAddress')}
+                    onEndEditing={handleTempAddrError}
                   />
 
                   <InputField
@@ -374,14 +381,7 @@ function PatientAddPatientInfoScreen({
                     dataType={'mobile phone'}
                     keyboardType='numeric'                      
                     maxLength={8}
-                  />
-
-                  <InputField
-                    title={'Temporary Address'}
-                    value={patient.TempAddress}
-                    onChangeText={handleFormData('TempAddress')}
-                    onEndEditing={handleTempAddrError}
-                  />
+                  />                  
 
                   <InputField
                     isRequired
