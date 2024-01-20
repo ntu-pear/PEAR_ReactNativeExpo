@@ -218,15 +218,6 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
             dataType="name"
           />
 
-          <RadioButtonInput
-            isRequired
-            title={'Gender'}
-            value={guardian.Gender}
-            onChangeData={handleFormData('Gender', i)}
-            onChildData={handleGenderError}
-            dataArray={listOfGenders}
-          />
-
           <SensitiveInputField
             isRequired
             title={'NRIC'}
@@ -249,12 +240,28 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
             />
           </View>
 
+          <RadioButtonInput
+            isRequired
+            title={'Gender'}
+            value={guardian.Gender}
+            onChangeData={handleFormData('Gender', i)}
+            onChildData={handleGenderError}
+            dataArray={listOfGenders}
+          />
+
           <InputField
             isRequired
             title={'Address'}
             value={guardian.Address}
             onChangeText={handleFormData('Address', i)}
             onEndEditing={handleAddrError}
+          />
+
+          <InputField
+            title={'Temporary Address'}
+            value={guardian.TempAddress}
+            onChangeText={handleFormData('TempAddress', i)}
+            onEndEditing={handleTempAddrError}
           />
 
           <InputField
@@ -266,13 +273,6 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
             dataType={'mobile phone'}
             keyboardType='numeric' 
             maxLength={8}                   
-          />
-
-          <InputField
-            title={'Temporary Address'}
-            value={guardian.TempAddress}
-            onChangeText={handleFormData('TempAddress', i)}
-            onEndEditing={handleTempAddrError}
           />
 
           <InputField
