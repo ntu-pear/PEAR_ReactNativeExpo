@@ -189,8 +189,10 @@ function PatientsScreen({ navigation }) {
   
   // Switch between 'My Patients' and 'All Patients'
   const handleOnToggleTab = (filterValue) => {
-    setIsLoading(true);
-    setViewMode(filterValue)
+    if(filterValue!=viewMode) {
+      setIsLoading(true);
+      setViewMode(filterValue)
+    }
   }
 
   // Handle searching, sorting, and filtering of patient data based on patient status
