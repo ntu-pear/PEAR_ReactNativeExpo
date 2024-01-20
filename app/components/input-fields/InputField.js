@@ -174,10 +174,6 @@ const styles = StyleSheet.create({
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
     fontSize: 15,
   },
-  requiredIndicator: {
-    color: colors.red,
-    fontSize: 18,
-  },
   inputField: {
     fontSize: 16,
     width: '100%',
