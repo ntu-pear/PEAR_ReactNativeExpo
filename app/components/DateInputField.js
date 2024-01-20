@@ -16,6 +16,7 @@ import colors from 'app/config/colors';
 
 // Components
 import ErrorMessage from 'app/components/ErrorMessage';
+import RequiredIndicator from './RequiredIndicator';
 
 function DateInputField({
   isRequired,
@@ -47,8 +48,6 @@ function DateInputField({
   // Latest year user can be born (15 years ago)
   const maximumDOB = new Date();
   maximumDOB.setFullYear(maximumDOB.getFullYear() - 15);
-
-  const requiredIndicator = <Text style={styles.RequiredIndicator}> *</Text>;
 
   // Validation function for user input:
   // Error if:
@@ -115,11 +114,11 @@ function DateInputField({
   }, [isError, onChildData]);
 
   return (
-    <View style={styles.ComponentContainer}>
+    <View style={styles.componentContainer}>
       <VStack>
         {title ? (
-          <Text style={styles.TitleMsg}>
-            {title}:{isRequired ? requiredIndicator : ''}
+          <Text style={styles.titleMsg}>
+            {title}:{isRequired ? <RequiredIndicator/> : ''}
           </Text>
         ) : (
           <></>
@@ -162,13 +161,13 @@ DateInputField.defaultProps = {
 };
 
 const styles = StyleSheet.create({
-  ComponentContainer: {
+  componentContainer: {
     display: 'flex',
     width: '80%',
-    // marginTop: 5,
+    marginTop: 5,
     justifyContent: 'flex-start',
   },
-  TitleMsg: {
+  titleMsg: {
     fontSize: 13.5,
     fontWeight: 'bold',
     marginBottom: 5,
@@ -190,10 +189,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: colors.black_var1,
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
-  },
-  RequiredIndicator: {
-    color: colors.red,
-    fontSize: 18,
   },
 });
 
