@@ -155,19 +155,8 @@ function PatientsScreen({ navigation }) {
         // Parse filter options based on dropdown/chip type
         if(FILTER_MAPPING[filter]['type'] == 'dropdown') {
           tempDropdownFilterOptions[filter] = parseAutoCompleteOptions(tempFilterOptionList);
-          // if(Object.keys(selectedDropdownFilters).includes(filter)) {
-          //   console.log(selectedDropdownFilters[filter], tempFilterOptionList);
-          //   if(!tempFilterOptionList.includes(selectedDropdownFilters[filter]['title'])) {
-          //     delete selectedDropdownFilters[filter];
-          //   }     
-          // }
         } else if (FILTER_MAPPING[filter]['type'] == 'chip') {
           tempChipFilterOptions[filter] = parseSelectOptions(tempFilterOptionList);
-          // if(Object.keys(selectedChipFilters).includes(filter)) {
-          //   if(!tempFilterOptionList.includes(selectedChipFilters[filter]['label'])) {
-          //     delete selectedChipFilters[filter];
-          //   }           
-          // }
         }
 
       }
@@ -197,7 +186,7 @@ function PatientsScreen({ navigation }) {
 
   // Handle searching, sorting, and filtering of patient data based on patient status
   const handleSearchSortFilter = async (text=searchQuery, tempSelSort=selectedSort, tempSelDropdownFilters=selectedDropdownFilters, tempSelChipFilters=selectedChipFilters) => {       
-    setIsLoading(true);
+    // setIsLoading(true);
     // Set patient status according to selected patient status
     if(Object.keys(tempSelChipFilters).length > 0) {
       let tempPatientStatus = tempSelChipFilters['Patient Status']['label'];
@@ -217,7 +206,7 @@ function PatientsScreen({ navigation }) {
     } else {
       setFilteredPatientList(text, tempSelSort, tempSelDropdownFilters, tempSelChipFilters);
     }  
-    setIsLoading(false);
+    // setIsLoading(false);
   }
 
   // Update patient list based on search, sort, and filter criteria

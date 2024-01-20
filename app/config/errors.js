@@ -7,6 +7,7 @@ export default {
   nricError: 'Invalid NRIC',
   homePhoneNoError: 'Home telephone no. must start with the digit 6, and must have 8 digits.',
   mobilePhoneNoError: 'Mobile no. must start with the digit 8 or 9, and must have 8 digits.',
+  postalCodeError: 'Postal code must have 6 digits',
   emailError: 'Invalid Email',
   duplicatePrefNameError: 'Preferred name is already in use. Please enter a different value.'
 };

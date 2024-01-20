@@ -75,15 +75,17 @@ function PatientAddPatientInfoScreen({
   // This records the error states of each child component (ones that require tracking).
   const [isFirstNameError, setIsFirstNameError] = useState(false);
   const [isLastNameError, setIsLastNameError] = useState(false);
-  const [isPrefNameError, setIsPrefNameError] = useState(false);
   const [isNRICError, setIsNRICError] = useState(false);
-  const [isGenderError, setIsGenderError] = useState(false);
   const [isDOBError, setIsDOBError] = useState(false);
+  const [isGenderError, setIsGenderError] = useState(false);
   const [isAddrError, setIsAddrError] = useState(false);
-  const [isPrefLanguageError, setPrefLanguageError] = useState(false);
+  const [isPostalCodeError, setIsPostalCodeError] = useState(false);
   const [isTempAddrError, setIsTempAddrError] = useState(false);
+  const [isTempPostalCodeError, setIsTempPostalCodeError] = useState(false);
   const [isHomeTeleError, setIsHomeNoError] = useState(false);
   const [isMobileError, setIsMobileNoError] = useState(false);
+  const [isPrefNameError, setIsPrefNameError] = useState(false);
+  const [isPrefLanguageError, setPrefLanguageError] = useState(false);
   const [isRespiteError, setIsRespiteError] = useState(false);
   const [isJoiningError, setIsJoiningError] = useState(false);
   const [isLeavingError, setIsLeavingError] = useState(false);
@@ -113,43 +115,44 @@ function PatientAddPatientInfoScreen({
   const handleLastNameError = (e) => {
     setIsLastNameError(e);
     // console.log("last name", e)
-  };
-
-  const handlePrefNameError = (e) => {
-    setIsPrefNameError(e);
-    // console.log("pref name", e)
-  };
-
+  }
+    
   const handleNRICError = (e) => {
     setIsNRICError(e);
     // console.log("nric", e)
-  };
+  }
+  
+  const handleDOBError = (e) => {
+    setIsDOBError(e);
+    // console.log("dob", e)
+  }
 
   const handleGenderError = (e) => {
     setIsGenderError(e);
     // console.log("gender", e)
-  };
+  }  
 
-  const handleDOBError = (e) => {
-    setIsDOBError(e);
-    // console.log("dob", e)
-  };
-
-  const handlePrefLanguageError = (e) => {
-    setPrefLanguageError(e);
-    // console.log("language", e)
-  };
-
+  
   const handleAddrError = (e) => {
     setIsAddrError(e);
     // console.log("addr", e)
-  };
+  }
 
+  const handlePostalCodeError = (e) => {
+    setIsPostalCodeError(e);
+    // console.log("addr", e)
+  }
+  
   const handleTempAddrError = (e) => {
     setIsTempAddrError(e);
     // console.log("temp addr", e)
-  };
+  }
 
+  const handleTempPostalCodeError = (e) => {
+    setIsTempPostalCodeError(e);
+    // console.log("addr", e)
+  }
+  
   const handleHomeNoError = (e) => {
     setIsHomeNoError(e);
     // console.log("home", e)
@@ -158,7 +161,17 @@ function PatientAddPatientInfoScreen({
   const handleMobileNoError = (e) => {
     setIsMobileNoError(e);
     // console.log("mobile", e)
-  };
+  }
+  
+  const handlePrefNameError = (e) => {
+    setIsPrefNameError(e);
+    // console.log("pref name", e)
+  }
+  
+  const handlePrefLanguageError = (e) => {
+    setPrefLanguageError(e);
+    // console.log("language", e)
+  }
 
   const handleRespiteError = (e) => {
     setIsRespiteError(e);
@@ -181,30 +194,34 @@ function PatientAddPatientInfoScreen({
   useEffect(() => {
     setIsInputErrors(
       isFirstNameError ||
-        isLastNameError ||
-        isPrefNameError ||
-        isNRICError ||
-        isGenderError ||
-        isDOBError ||
-        isAddrError ||
-        isTempAddrError ||
-        isHomeTeleError ||
-        isMobileError ||
-        isRespiteError ||
-        isJoiningError ||
-        isLeavingError,
+      isLastNameError ||
+      isNRICError ||
+      isDOBError ||
+      isGenderError ||
+      isAddrError ||
+      isPostalCodeError ||
+      isTempAddrError ||
+      isTempPostalCodeError ||
+      isHomeTeleError ||
+      isMobileError ||
+      isPrefNameError ||
+      isRespiteError ||
+      isJoiningError ||
+      isLeavingError,
     );
   }, [
     isFirstNameError,
     isLastNameError,
-    isPrefNameError,
     isNRICError,
-    isGenderError,
     isDOBError,
+    isGenderError,
     isAddrError,
+    isPostalCodeError,
     isTempAddrError,
+    isTempPostalCodeError,
     isHomeTeleError,
     isMobileError,
+    isPrefNameError,
     isRespiteError,
     isJoiningError,
     isLeavingError,
@@ -214,7 +231,7 @@ function PatientAddPatientInfoScreen({
   // listOfLanguages with the retrieved one.
   useEffect(() => {
     if (!isLoading && !isError && data) {
-      console.log('selection data!');
+      // console.log('selection data!');
       setListOfLanguages(data);
     }
   }, [data, isError, isLoading]);
@@ -354,6 +371,17 @@ function PatientAddPatientInfoScreen({
                     value={patient.Address}
                     onChangeText={handleFormData('Address')}
                     onEndEditing={handleAddrError}
+                  />
+                  
+                  <InputField
+                    isRequired
+                    title={'Postal Code'}
+                    value={patient.PostalCode}
+                    onChangeText={handleFormData('PostalCode')}
+                    onEndEditing={handlePostalCodeError}
+                    dataType='postal code'
+                    keyboardType='numeric'
+                    maxLength={6}
                   />
 
                   <InputField

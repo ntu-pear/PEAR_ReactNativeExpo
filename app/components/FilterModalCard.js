@@ -222,7 +222,8 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   chipOptions: {
-    flexDirection: 'row'
+    flexDirection: 'row',
+    flexWrap: 'wrap'
   },
   chipOption: {
     marginRight: '2%',

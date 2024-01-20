@@ -42,6 +42,7 @@ function PatientAddScreen() {
       PreferredLanguageListID: 1,
       NRIC: '',
       Address: '',
+      PostalCode: '',
       TempAddress: '',
       HomeNo: '',
       HandphoneNo: '',
@@ -77,6 +78,7 @@ function PatientAddScreen() {
         ContactNo: '',
         DOB: maximumDOB,
         Address: '',
+        PostalCode: '',
         TempAddress: '',
         Gender: 'M',
         PreferredName: '',
@@ -196,8 +198,6 @@ function PatientAddScreen() {
       ...prevState,
       guardianInfo: newData,
     }));
-
-    console.log(newData);
   };
 
   // Function to update patient data
@@ -214,20 +214,30 @@ function PatientAddScreen() {
       ...prevState,
       allergyInfo: newData,
     }));
-
-    // console.log(newData)
   };
 
   // Function to submit form
   const onSubmit = async () => {
-    // -- Validation is now real-time no need to have on submit validation - Justin
-    const result = await patientApi.addPatient(formData);
+    // temp solution to add postal code as separate field without BE implementation
+    var tempPatientInfo = {...formData.patientInfo}
+    var tempGuardianInfoList = []
+    var tempAllergyInfo = {...formData.allergyInfo}
 
-    // let alertTxt = '';
+    tempPatientInfo['Address'] = tempPatientInfo['Address'] + ' SINGAPORE ' + tempPatientInfo['PostalCode'];
+    delete tempPatientInfo['PostalCode'];
+
+    for(var i in formData.guardianInfo) {
+      var tempGuardianInfo = {...formData.guardianInfo[i]}
+      tempGuardianInfo['Address'] = tempGuardianInfo['Address'] + ' SINGAPORE ' + tempGuardianInfo['PostalCode'];
+      delete tempGuardianInfo['PostalCode'];
+      tempGuardianInfoList.push(tempGuardianInfo);
+    }
+
+    // console.log({'patientInfo': tempPatientInfo, 'guardianInfo': tempGuardianInfoList, 'allergyInfo': tempAllergyInfo})
+    const result = await patientApi.addPatient({'patientInfo': tempPatientInfo, 'guardianInfo': tempGuardianInfoList, 'allergyInfo': tempAllergyInfo});
+
     let alertTitle = '';
     let alertDetails = '';
-
-    // console.log('response: ', result);
 
     if (result.ok) {
       const allocations = result.data.data.patientAllocationDTO;
@@ -237,10 +247,7 @@ function PatientAddScreen() {
 
       alertTitle = 'Successfully added Patient';
       alertDetails = `Patient has been allocated to\nCaregiver: ${caregiver}\nDoctor: ${doctor}\nGame Therapist: ${gameTherapist}`;
-      // alertTxt = alertTitle + alertDetails;
-      // Platform.OS === 'web'
-      //   ? navigate('/' + routes.PATIENTS)
-      //   : navigation.navigate(routes.PATIENTS_SCREEN);
+
       navigation.navigate(routes.PATIENTS_SCREEN);
     } else {
       const errors = result.data?.message;
@@ -250,12 +257,7 @@ function PatientAddScreen() {
         : (alertDetails = 'Please try again.');
 
       alertTitle = 'Error in Adding Patient';
-      // alertTxt = alertTitle + alertDetails;
     }
-    // Platform.OS === 'web'
-    //   ? alert(alertTxt)
-    //   : Alert.alert(alertTitle, alertDetails);
-    // }
     Alert.alert(alertTitle, alertDetails);
   };
 

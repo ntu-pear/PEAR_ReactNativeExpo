@@ -59,6 +59,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
   const [isRelationError, setIsRelationError] = useState(false);
   const [isTempAddrError, setIsTempAddrError] = useState(false);
   const [isAddrError, setIsAddrError] = useState(false);
+  const [isPostalCodeError, setIsPostalCodeError] = useState(false);
   const [isMobileNoError, setIsMobileNoError] = useState(false);
   const [isEmailError, setIsEmailError] = useState(false);
   const [isLoginError, setIsLoginError] = useState(false);
@@ -108,6 +109,11 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
 
   const handleAddrError = (e) => {
     setIsAddrError(e);
+    // console.log("addr", e)
+  };
+
+  const handlePostalCodeError = (e) => {
+    setIsPostalCodeError(e);
     // console.log("addr", e)
   };
 
@@ -258,6 +264,17 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
             value={guardian.Address}
             onChangeText={handleFormData('Address', i)}
             onEndEditing={handleAddrError}
+          />
+
+          <InputField
+            isRequired
+            title={'Postal Code'}
+            value={guardian.PostalCode}
+            onChangeText={handleFormData('PostalCode', i)}
+            onEndEditing={handlePostalCodeError}
+            dataType='postal code'
+            keyboardType='numeric'
+            maxLength={6}
           />
 
           <InputField
