@@ -10,6 +10,7 @@ import colors from 'app/config/colors';
 
 // Components
 import ErrorMessage from 'app/components/ErrorMessage';
+import RequiredIndicator from './RequiredIndicator';
 
 function RadioButtonInput({
   isRequired,
@@ -19,7 +20,6 @@ function RadioButtonInput({
   onChangeData,
   onChildData,
 }) {
-  const requiredIndicator = <Text style={styles.RequiredIndicator}> *</Text>;
 
   // This state is used to track if the component is in its first render
   const [isFirstRender, setIsFirstRender] = useState(true);
@@ -71,21 +71,21 @@ function RadioButtonInput({
   }, [isError, onChildData]);
 
   return (
-    <View style={styles.ComponentContainer}>
+    <View style={styles.componentContainer}>
       <VStack>
-        <Text style={styles.TitleMsg}>
-          {title}:{isRequired ? requiredIndicator : ''}
+        <Text style={styles.titleMsg}>
+        {title}:{isRequired ? <RequiredIndicator/> : ''}
         </Text>
         <RadioButton.Group value={value} onValueChange={onChangeSelection}>
           <HStack space={1} flexWrap="wrap">
             {dataArray.map((item) => (
-              <View style={styles.RadioButtonContainer} key={item.value}>
+              <View style={styles.radioButtonContainer} key={item.value}>
                 <RadioButton.Item
                   key={item.value}
                   value={item.value}
                   label={item.label}
                   color={colors.green}
-                  style={styles.RadioButton}
+                  style={styles.radioButton}
                 />
               </View>
             ))}
@@ -100,13 +100,13 @@ function RadioButtonInput({
 }
 
 const styles = StyleSheet.create({
-  ComponentContainer: {
+  componentContainer: {
     display: 'flex',
     width: '100%',
     marginTop: 5,
     justifyContent: 'flex-start',
   },
-  TitleMsg: {
+  titleMsg: {
     fontSize: 13.5,
     fontWeight: 'bold',
     marginBottom: 5,
@@ -114,20 +114,16 @@ const styles = StyleSheet.create({
     color: colors.light_gray2,
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
   },
-  RequiredIndicator: {
-    color: colors.red,
-    fontSize: 18,
-  },
-  RadioButtonContainer: {
+  radioButtonContainer: {
     flexShrink: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingBottom: 10,
   },
-  RadioButton: {
+  radioButton: {
     paddingLeft: 10,
     paddingRight: 0,
+    paddingVertical: 0,
   },
 });
 

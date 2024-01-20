@@ -64,6 +64,12 @@ export const mobilePhoneNoFormat = (value) => {
   }
 }
 
+export const postalCodeFormat = (value) => {
+  if (!/^$|[0-9]{6}$/.test(value)) {
+    return errors.postalCodeError;
+  }
+}
+
 export const emailFormat = (value) => {
   if (!/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/.test(value)) {
     return errors.emailError;
@@ -83,5 +89,6 @@ export const validationFunctions = {
   'nric': [nricFormat, nricValid],
   'home phone': [homePhoneNoFormat],
   'mobile phone': [mobilePhoneNoFormat],
-  'email': [emailFormat]
+  'email': [emailFormat],
+  'postal code': [postalCodeFormat]
 }
