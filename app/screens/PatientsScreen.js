@@ -186,14 +186,16 @@ function PatientsScreen({ navigation }) {
 
   // Handle searching, sorting, and filtering of patient data based on patient status
   const handleSearchSortFilter = async (text=searchQuery, tempSelSort=selectedSort, tempSelDropdownFilters=selectedDropdownFilters, tempSelChipFilters=selectedChipFilters) => {       
-    // setIsLoading(true);
+    setIsLoading(true);
     // Set patient status according to selected patient status
-    if(Object.keys(tempSelChipFilters).length > 0) {
-      let tempPatientStatus = tempSelChipFilters['Patient Status']['label'];
+    // if(Object.keys(tempSelChipFilters).length > 0) {
+      let tempPatientStatus = Object.keys(tempSelChipFilters).length > 0 ? tempSelChipFilters['Patient Status']['label'] : 'active';
       if(tempPatientStatus == 'All') {
         tempPatientStatus = '';
       } 
       tempPatientStatus = tempPatientStatus.toLowerCase();
+
+      console.log(tempPatientStatus)
       
       // If patient status has been updated, get patient list from api
       // Otherwise filter the list of patients
@@ -203,10 +205,11 @@ function PatientsScreen({ navigation }) {
       } else {
         setFilteredPatientList(text, tempSelSort, tempSelDropdownFilters, tempSelChipFilters);
       }      
-    } else {
-      setFilteredPatientList(text, tempSelSort, tempSelDropdownFilters, tempSelChipFilters);
-    }  
-    // setIsLoading(false);
+    // } 
+    // else {
+    //   setFilteredPatientList(text, tempSelSort, tempSelDropdownFilters, tempSelChipFilters);
+    // }  
+    setIsLoading(false);
   }
 
   // Update patient list based on search, sort, and filter criteria
