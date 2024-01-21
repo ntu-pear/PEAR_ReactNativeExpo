@@ -77,11 +77,11 @@ function InputField({
   // Function to handle what to do after user leaves the input component
   // Capitalize input if autocap specificied
   // Validate input
-  const handleOnEndEditing = () => {  
-    if(value) {
+  const handleOnEndEditing = () => {
+    if (value) {
       if (autoCapitalize == 'characters') {
         value = value.toUpperCase();
-      } 
+      }
     } else {
       value = '';
     }
@@ -143,7 +143,16 @@ function InputField({
 }
 
 InputField.propTypes = {
-  dataType: PropTypes.oneOf(['general', 'password', 'name', 'nric', 'home phone', 'mobile phone', 'email', 'postal code']),
+  dataType: PropTypes.oneOf([
+    'general',
+    'password',
+    'name',
+    'nric',
+    'home phone',
+    'mobile phone',
+    'email',
+    'postal code',
+  ]),
   keyboardType: TextInput.propTypes.keyboardType,
   variant: PropTypes.oneOf(['singleLine', 'multiLine']),
 };

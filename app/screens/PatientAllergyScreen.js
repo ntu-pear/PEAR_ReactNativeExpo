@@ -12,6 +12,7 @@ import formatDateTime from 'app/hooks/useFormatDateTime.js';
 // Components
 import DynamicTable from 'app/components/DynamicTable';
 import ActivityIndicator from 'app/components/ActivityIndicator';
+import AddButton from 'app/components/AddButton';
 
 function PatientAllergyScreen(props) {
   const [isLoading, setIsLoading] = useState(true);
@@ -41,6 +42,12 @@ function PatientAllergyScreen(props) {
     setIsLoading(false);
   };
 
+  // TODO JOEL : Add the function to add allergy
+  const handleAddAllergy = () => {
+    console.log('hi hi add');
+    // props.navigation.navigate('AddPatientAllergy', {});
+  };
+
   useEffect(() => {
     if (tableDataFormated !== undefined && tableDataFormated.length !== 0) {
       setHeaderData(Object.keys(tableDataFormated[0]));
@@ -53,22 +60,34 @@ function PatientAllergyScreen(props) {
   }, [tableDataFormated]);
 
   useEffect(() => {
-    retrieveScreenData(patientID);
-    console.log('patient ID Log from retrieve screen data', patientID);
-    setWidthData([120, 100, 120, 200, 300]);
+    if (props.route.params.patientId) {
+      retrieveScreenData(patientID);
+      console.log('patient ID Log from retrieve screen data', patientID);
+      setWidthData([120, 100, 120, 200, 300]);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return isLoading ? (
-    <ActivityIndicator visible />
-  ) : (
-    <View style={styles.cardContainer}>
-      <DynamicTable
-        headerData={headerData}
-        rowData={rowData}
-        widthData={widthData}
-        screenName={'patient allergy'}
-      />
+  return (
+    <View style={styles.container}>
+      {isLoading ? (
+        <ActivityIndicator visible />
+      ) : (
+        <View style={styles.cardContainer}>
+          <DynamicTable
+            headerData={headerData}
+            rowData={rowData}
+            widthData={widthData}
+            screenName={'patient allergy'}
+          />
+        </View>
+      )}
+      {/* "Add Allergy" button */}
+      <AddButton
+        title="Add Allergy"
+        onPress={handleAddAllergy}
+        // color="green"
+      ></AddButton>
     </View>
   );
 }

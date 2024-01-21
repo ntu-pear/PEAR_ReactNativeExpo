@@ -12,6 +12,7 @@ import formatDateTime from 'app/hooks/useFormatDateTime.js';
 // Components
 import DynamicTable from 'app/components/DynamicTable';
 import ActivityIndicator from 'app/components/ActivityIndicator';
+import AddButton from 'app/components/AddButton';
 
 function PatientVitalScreen(props) {
   const [isLoading, setIsLoading] = useState(true);
@@ -28,19 +29,28 @@ function PatientVitalScreen(props) {
       return;
     }
 
-    const newArray = response.data.data.map(({ 
-      updatedDateTime, temperature, systolicBP, diastolicBP, heartRate, spO2, bloodSugarlevel, vitalRemarks
-    }) => ({
-      "Date": `${formatDateTime(updatedDateTime, true)}`,
-      "Time": `${formatDateTime(updatedDateTime, false)}`,
-      "Temperature (C)": temperature,
-      "Systolic BP": systolicBP,
-      "Diastolic BP": diastolicBP,
-      "Heart Rate": heartRate,
-      "SpO2": spO2,
-      "Blood Sugar Level": bloodSugarlevel,
-      "Notes": vitalRemarks,
-    }));
+    const newArray = response.data.data.map(
+      ({
+        updatedDateTime,
+        temperature,
+        systolicBP,
+        diastolicBP,
+        heartRate,
+        spO2,
+        bloodSugarlevel,
+        vitalRemarks,
+      }) => ({
+        Date: `${formatDateTime(updatedDateTime, true)}`,
+        Time: `${formatDateTime(updatedDateTime, false)}`,
+        'Temperature (C)': temperature,
+        'Systolic BP': systolicBP,
+        'Diastolic BP': diastolicBP,
+        'Heart Rate': heartRate,
+        SpO2: spO2,
+        'Blood Sugar Level': bloodSugarlevel,
+        Notes: vitalRemarks,
+      }),
+    );
     setTableDataFormated(newArray);
     setIsLoading(false);
   };
@@ -48,7 +58,7 @@ function PatientVitalScreen(props) {
   useEffect(() => {
     if (tableDataFormated !== undefined && tableDataFormated.length !== 0) {
       setHeaderData(Object.keys(tableDataFormated[0]));
-      
+
       const finalArray = tableDataFormated.map((item) => {
         return Object.values(item).map((value) => value.toString());
       });
@@ -62,6 +72,12 @@ function PatientVitalScreen(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // TODO JOEL : Add the function to add Vital
+  const handleAddVitals = () => {
+    console.log('hi hi add');
+    // props.navigation.navigate('AddPatientVitals', {});
+  };
+
   return isLoading ? (
     <ActivityIndicator visible />
   ) : (
@@ -72,6 +88,12 @@ function PatientVitalScreen(props) {
         widthData={widthData}
         screenName={'patient vital'}
       />
+      {/* "Add Vitals" button */}
+      <AddButton
+        title="Add Vitals"
+        onPress={handleAddVitals}
+        // color="green"
+      ></AddButton>
     </View>
   );
 }
