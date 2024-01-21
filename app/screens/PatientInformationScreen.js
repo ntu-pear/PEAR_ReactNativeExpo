@@ -12,8 +12,10 @@ import {
   VStack,
 } from 'native-base';
 import React, { useEffect, useState } from 'react';
-import { Platform, StyleSheet } from 'react-native';
+import { View, Platform, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import Accordion from 'react-native-collapsible/Accordion';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 // API
 import patientApi from 'app/api/patient';
@@ -60,6 +62,7 @@ function PatientInformationScreen(props) {
       return;
     }
     setPatientProfile(response.data.data);
+    console.log(patientProfile.firstName);
     setUnMaskedPatientNRIC(response.data.data.nric)
   };
 
@@ -431,82 +434,167 @@ function PatientInformationScreen(props) {
     })
   };
 
+  const handleOnPress = (title) => {
+    switch(title) {
+      case 'Patient Information':
+        return handlePatientInfoOnPress;
+        break;
+      case 'Patient Preferences':
+        return handlePatientPrefOnPress;
+        break;
+      case 'Guardian(s) Information':
+        return handlePatientGuardianOnPress;
+        break;
+      case 'Guardian 2':
+        return handlePatientSecondGuardianOnPress;
+        break;
+      case 'Social History':
+        return handlePatientSocialHistOnPress;
+        break;
+      default:
+        return null;
+    }
+  };
+
+  const unmaskedNRIC = (title) => {
+    switch(title) {
+      case 'Patient Information':
+        return unMaskedPatientNRIC;
+        break;
+      case 'Guardian(s) Information':
+        return unMaskedGuardianNRIC;
+        break;
+      case 'Guardian 2':
+        return unMasked2ndGuardianNRIC;
+        break;
+      default:
+        return null;
+    }
+  };
+
+  const [ activeSections, setActiveSections ] = useState([]);
+  const [ sections, setSections ] = useState([]);
+
+  // const sections = [
+  //   {
+  //     title: 'Patient Information',
+  //     content: patientData
+  //   },
+  //   {
+  //     title: 'Patient Preferences',
+  //     content: preferenceData
+  //   },
+  //   {
+  //     title: 'Doctor\'s Notes',
+  //     content: doctorsNoteInfo
+  //   },
+  //   {
+  //     title: 'Guardian(s) Information',
+  //     content: guardianInfoData
+  //   },
+  //   {
+  //     title: 'Social History',
+  //     content: socialHistoryInfo
+  //   }
+  // ];
+
+  useEffect(() => {
+    if(isSecondGuardian) {
+      setSections([
+        {
+          title: 'Patient Information',
+          content: patientData
+        },
+        {
+          title: 'Patient Preferences',
+          content: preferenceData
+        },
+        {
+          title: 'Doctor\'s Notes',
+          content: doctorsNoteInfo
+        },
+        {
+          title: 'Guardian(s) Information',
+          content: guardianInfoData
+        },
+        {
+          title: 'Guardian 2',
+          content: secondGuardianInfoData
+        },
+        {
+          title: 'Social History',
+          content: socialHistoryInfo
+        }
+      ]);
+      console.log('added Guardian 2 to sections');
+      console.log('')
+    } else {
+      setSections([
+        {
+          title: 'Patient Information',
+          content: patientData
+        },
+        {
+          title: 'Patient Preferences',
+          content: preferenceData
+        },
+        {
+          title: 'Doctor\'s Notes',
+          content: doctorsNoteInfo
+        },
+        {
+          title: 'Guardian(s) Information',
+          content: guardianInfoData
+        },
+        {
+          title: 'Social History',
+          content: socialHistoryInfo
+        }
+      ]);
+      console.log('no Guardian 2');
+    }
+  }, [isSecondGuardian]);
+
+  function renderHeader(section, _, isActive) {
+    return (
+      <View style={styles.accordHeader}>
+        <Text style={styles.accordTitle}>{section.title}</Text>
+        <Icon name={ isActive ? 'chevron-up' : 'chevron-down' } size={30} color="#bbb" />
+      </View>
+    );
+  };
+
+  function renderContent(section, _, isActive) {
+    return (
+      <View style={styles.accordBody}>
+        <InformationCard 
+          // title={section.title}
+          subtitle={section.title == 'Guardian(s) Information' ? 'Guardian 1' : null}
+          displayData={section.content}
+          handleOnPress={handleOnPress(section.title)}
+          unMaskedNRIC={unmaskedNRIC(section.title)}
+        />
+      </View>
+    );
+  };
+
   return isLoading ? (
     <ActivityIndicator visible />
   ) : (
     <Center minH="100%" backgroundColor={colors.white_var1}>
-      <ScrollView>
-        <Box>
-          <AspectRatio w="100%" ratio={16 / 9}>
-            <Image
-              source={{ uri: `${displayPicUrl}` }}
-              alt="patientInformationImage"
-            />
-          </AspectRatio>
-          <Center
-            position="absolute"
-            bg={colors.primary_overlay_color}
-            width="100%"
-            height="100%"
-          />
-          <Center position="absolute" px="5%" py="10%">
-            <Text style={styles.pictureText}>
-              You're caring for
-            </Text>
-            <Text style={styles.pictureText}>
-              {`${firstName} ${lastName}`}
-            </Text>
-          </Center>
-        </Box>
-        <VStack maxW="100%" mt="2.5" mb="8">
-          <Stack ml="5" mr="5" space={5}>
-            <Divider mt="2" />
+      <ScrollView width="100%">
 
-            <InformationCard
-              title={'Patient Information'}
-              displayData={patientData}
-              handleOnPress={handlePatientInfoOnPress}
-              unMaskedNRIC={unMaskedPatientNRIC}
-            />
-            <Divider />
+        <Accordion 
+          align="bottom" 
+          sections={sections}
+          activeSections={activeSections}
+          renderHeader={renderHeader}
+          renderContent={renderContent}
+          onChange={ (sections) => setActiveSections(sections) }
+          sectionContainerStyle={styles.accordContainer}
+        />
 
-            <InformationCard
-              title={'Patient Preferences'}
-              displayData={preferenceData}
-              handleOnPress={handlePatientPrefOnPress}
-            />
-            <Divider />
-
-            <InformationCard
-              title={"Doctor's Notes"}
-              displayData={doctorsNoteInfo}
-            />
-            <Divider />
-
-            <InformationCard
-              title={'Guardian(s) Information'}
-              subtitle={'Guardian 1'}
-              displayData={guardianInfoData}
-              handleOnPress={handlePatientGuardianOnPress}
-              unMaskedNRIC={unMaskedGuardianNRIC}
-            />
-            {isSecondGuardian ? (
-              <InformationCard
-                subtitle={'Guardian 2'}
-                displayData={secondGuardianInfoData}
-                handleOnPress={handlePatientSecondGuardianOnPress}
-                unMaskedNRIC={unMasked2ndGuardianNRIC}
-              />
-            ) : null}
-            <Divider />
-            
-            <InformationCard
-              title={'Social History'}
-              displayData={socialHistoryInfo}
-              handleOnPress={handlePatientSocialHistOnPress}
-            />
-          </Stack>
-        </VStack>
+        
       </ScrollView>
     </Center>
   );
@@ -519,6 +607,26 @@ const styles = StyleSheet.create({
     fontSize: 24,
     paddingTop: 15,
   },
+  accordContainer: {
+    paddingBottom: 4
+  },
+  accordHeader: {
+    padding: 12,
+    backgroundColor: '#eee',
+    color: '#eee',
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  accordTitle: {
+    fontSize: 30,
+    paddingTop: 15,
+    fontWeight: 'bold',
+  },
+  accordBody: {
+    padding: 12,
+    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android
+  }
 });
 
 export default PatientInformationScreen;
