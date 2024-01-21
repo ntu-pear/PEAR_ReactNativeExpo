@@ -64,10 +64,10 @@ const FilterModalCard = ({
   // Reset sort and filter values and close modal
   const handleReset = () => {
     setModalVisible(false);
-    setSelectedSort(1);
+    setSelectedSort({});
     setSelectedDropdownFilters({});
     setSelectedChipFilters({});
-    handleSortFilter(undefined, 1, {}, {});
+    handleSortFilter(undefined, {}, {}, {});
   };
 
   // Set display value of dropdown filter when item is selected
