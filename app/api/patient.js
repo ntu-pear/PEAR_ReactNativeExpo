@@ -92,7 +92,7 @@ const getPatient = async (patientID, maskNRIC) => {
 const getPatientList = async (maskNRIC = true, patientStatus = null) => {
   // Error Handling
   // maskNRIC ? (maskNRIC = true) : (maskNRIC = false);
-  return client.get(patientList, {maskNRIC, patientStatus});
+  return client.get(patientList, { maskNRIC, patientStatus });
 };
 
 const getPatientListByLoggedInCaregiver = async (maskNRIC = true) => {
@@ -102,7 +102,7 @@ const getPatientListByLoggedInCaregiver = async (maskNRIC = true) => {
 const getPatientAllergy = async (patientID) => {
   let params;
   params = {
-    patientID
+    patientID,
   };
 
   return client.get(patientAllergy, params);
@@ -111,7 +111,7 @@ const getPatientAllergy = async (patientID) => {
 const getPatientVitalList = async (patientID) => {
   let params;
   params = {
-    patientID
+    patientID,
   };
 
   return client.get(patientVitalList, params);
@@ -120,7 +120,7 @@ const getPatientVitalList = async (patientID) => {
 const getPatientPrescriptionList = async (patientID) => {
   let params;
   params = {
-    patientID
+    patientID,
   };
 
   return client.get(patientPrescriptionList, params);
@@ -129,16 +129,16 @@ const getPatientPrescriptionList = async (patientID) => {
 const getPatientProblemLog = async (patientID) => {
   let params;
   params = {
-    patientID
+    patientID,
   };
 
   return client.get(patientProblemLog, params);
 };
 
-const getPatientMedicalHistory= async (patientID) => {
+const getPatientMedicalHistory = async (patientID) => {
   let params;
   params = {
-    patientID
+    patientID,
   };
 
   return client.get(patientMedicalHistory, params);
@@ -147,7 +147,7 @@ const getPatientMedicalHistory= async (patientID) => {
 const getPatientRoutine = async (patientID) => {
   let params;
   params = {
-    patientID
+    patientID,
   };
 
   return client.get(patientRoutine, params);
@@ -201,6 +201,18 @@ const addPatient = (patientFormData) => {
   return client.post(patientAdd, patientData, { headers });
 };
 
+// AddPatientAllergy is used in AddPatientAllergyModal.js - Joel
+const AddPatientAllergy = async (data) => {
+  //TODO JOEL : Process allergyData
+  // const formData = new FormData();
+  // for (const key in data) {
+  //   var value = data[key];
+  //   formData.append(key, value);
+  // }
+  // const headers = { 'Content-Type': 'multipart/form-data' };
+  // return client.post(patientAllergy, formData, { headers });
+};
+
 // ************************* UPDATE REQUESTS *************************
 const updatePatient = async (data) => {
   const formData = new FormData();
@@ -228,5 +240,6 @@ export default {
   getPatientMedicalHistory,
   getPatientRoutine,
   addPatient,
+  AddPatientAllergy,
   updatePatient,
 };

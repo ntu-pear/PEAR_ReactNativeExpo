@@ -34,7 +34,8 @@ function PatientAllergyScreen(props) {
   };
 
   const handleModalSubmit = async (allergyData) => {
-    //TODO : Process allergyData
+    //TODO JOEL : Process allergyData
+    await patientApi.AddPatientAllergy(patientID, allergyData);
     setShowModal(false);
   };
 
