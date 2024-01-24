@@ -37,6 +37,7 @@ function PatientAllergyScreen(props) {
     //TODO JOEL : Process allergyData
     await patientApi.AddPatientAllergy(patientID, allergyData);
     setShowModal(false);
+    console.log('submitting allergy data', allergyData);
   };
 
   const retrieveScreenData = async (id) => {

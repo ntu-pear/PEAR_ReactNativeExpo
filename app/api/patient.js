@@ -27,7 +27,7 @@ const patientPrescriptionList = `${prescriptionEndpoint}/PatientPrescription`; /
 const patientProblemLog = `${problemLogEndpoint}/PatientProblemLog`; //eslint-disable-line no-unused-vars
 const patientMedicalHistory = `${medicalHistorypoint}/list`; //eslint-disable-line no-unused-vars
 const patientRoutine = `${activityEndpoint}${routineEndpoint}/PatientRoutine`; //eslint-disable-line no-unused-vars
-
+const patientAllergyAdd = `${allergyEndpoint}/add`; //eslint-disable-line no-unused-vars
 /*
  * List all functions here
  * Refer to this api doc: https://github.com/infinitered/apisauce
@@ -202,15 +202,14 @@ const addPatient = (patientFormData) => {
 };
 
 // AddPatientAllergy is used in AddPatientAllergyModal.js - Joel
-const AddPatientAllergy = async (data) => {
-  //TODO JOEL : Process allergyData
-  // const formData = new FormData();
-  // for (const key in data) {
-  //   var value = data[key];
-  //   formData.append(key, value);
-  // }
-  // const headers = { 'Content-Type': 'multipart/form-data' };
-  // return client.post(patientAllergy, formData, { headers });
+const AddPatientAllergy = async (patientID, allergyData) => {
+  const payload = {
+    patientID: patientID,
+    allergyListID: allergyData.AllergyListID,
+    allergyReactionListID: allergyData.AllergyReactionListID,
+    allergyRemarks: allergyData.AllergyRemarks,
+  };
+  return client.post(patientAllergyAdd, payload);
 };
 
 // ************************* UPDATE REQUESTS *************************
