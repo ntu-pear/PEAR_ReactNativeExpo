@@ -8,11 +8,13 @@ import patientApi from 'app/api/patient';
 
 // Hooks
 import formatDateTime from 'app/hooks/useFormatDateTime.js';
+import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
 // Components
 import DynamicTable from 'app/components/DynamicTable';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import AddButton from 'app/components/AddButton';
+import AllergyFormModal from 'app/components/AddPatientAllergyModal';
 
 function PatientAllergyScreen(props) {
   const [isLoading, setIsLoading] = useState(true);
@@ -21,6 +23,20 @@ function PatientAllergyScreen(props) {
   const [widthData, setWidthData] = useState([]);
   const [tableDataFormated, setTableDataFormated] = useState([]);
   const [patientID, setPatientID] = useState(props.route.params.patientId);
+
+  // Modal states
+  const [showModal, setShowModal] = useState(false);
+  const { data: allergies } = useGetSelectionOptions('Allergy');
+  const { data: reactions } = useGetSelectionOptions('AllergyReaction');
+
+  const handleAddAllergy = () => {
+    setShowModal(true);
+  };
+
+  const handleModalSubmit = async (allergyData) => {
+    //TODO : Process allergyData
+    setShowModal(false);
+  };
 
   const retrieveScreenData = async (id) => {
     const response = await patientApi.getPatientAllergy(id);
@@ -40,12 +56,6 @@ function PatientAllergyScreen(props) {
     );
     setTableDataFormated(newArray);
     setIsLoading(false);
-  };
-
-  // TODO JOEL : Add the function to add allergy
-  const handleAddAllergy = () => {
-    console.log('hi hi add');
-    // props.navigation.navigate('AddPatientAllergy', {});
   };
 
   useEffect(() => {
@@ -87,7 +97,14 @@ function PatientAllergyScreen(props) {
         title="Add Allergy"
         onPress={handleAddAllergy}
         // color="green"
-      ></AddButton>
+      />
+      <AllergyFormModal
+        showModal={showModal}
+        onClose={() => setShowModal(false)}
+        onSubmit={handleModalSubmit}
+        allergies={allergies}
+        reactions={reactions}
+      />
     </View>
   );
 }
