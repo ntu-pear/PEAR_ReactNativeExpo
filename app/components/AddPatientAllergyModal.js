@@ -1,17 +1,20 @@
 // Libs
-import React, { useState } from 'react';
-import { Modal, Button, VStack } from 'native-base';
+import React, { useEffect, useState } from 'react';
+import { Modal, Button, VStack, Text } from 'native-base';
+import { StyleSheet, View } from 'react-native';
 
 // Components
 import SelectionInputField from 'app/components/input-fields/SelectionInputField';
 import InputField from './input-fields/InputField';
 
-function AllergyFormModal({
+// Hooks
+import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
+
+function AddPatientAllergyModal({
   showModal,
   onClose,
   onSubmit,
-  allergies,
-  reactions,
+  existingAllergyIDs,
 }) {
   const [allergyData, setAllergyData] = useState({
     AllergyListID: null,
@@ -22,6 +25,9 @@ function AllergyFormModal({
   const [isAllergyError, setIsAllergyError] = useState(false);
   const [isReactionError, setIsReactionError] = useState(false);
   const [isRemarksError, setIsRemarksError] = useState(false);
+
+  const { data: allergies } = useGetSelectionOptions('Allergy');
+  const { data: reactions } = useGetSelectionOptions('AllergyReaction');
 
   // Update field values
   const handleAllergyChange = (value) => {
@@ -49,7 +55,9 @@ function AllergyFormModal({
     <Modal isOpen={showModal} onClose={onClose}>
       <Modal.Content maxWidth="400px">
         <Modal.CloseButton />
-        <Modal.Header>Add Allergy</Modal.Header>
+        <Modal.Header style={styles.modalHeader}>
+          <Text style={styles.modalHeaderText}>Add Allergy</Text>
+        </Modal.Header>
         <Modal.Body>
           <VStack space={3}>
             <SelectionInputField
@@ -60,24 +68,29 @@ function AllergyFormModal({
               dataArray={allergies}
               onEndEditing={setIsAllergyError}
             />
+            {allergyData.AllergyListID > 2 ? (
+              <>
+                <SelectionInputField
+                  isRequired={allergyData.AllergyListID > 2}
+                  title={'Reaction'}
+                  onDataChange={handleReactionChange}
+                  value={allergyData.AllergyReactionListID}
+                  dataArray={reactions}
+                  onEndEditing={setIsReactionError}
+                />
 
-            <SelectionInputField
-              isRequired={allergyData.AllergyListID > 2}
-              title={'Reaction'}
-              onDataChange={handleReactionChange}
-              value={allergyData.AllergyReactionListID}
-              dataArray={reactions}
-              onEndEditing={setIsReactionError}
-            />
-
-            <InputField
-              isRequired={allergyData.AllergyListID > 2}
-              title={'Remarks'}
-              value={allergyData.AllergyRemarks}
-              onChangeText={handleRemarksChange}
-              variant={'multiLine'}
-              onEndEditing={setIsRemarksError}
-            />
+                <InputField
+                  isRequired={allergyData.AllergyListID > 2}
+                  title={'Remarks'}
+                  value={allergyData.AllergyRemarks}
+                  onChangeText={handleRemarksChange}
+                  variant={'multiLine'}
+                  onEndEditing={setIsRemarksError}
+                />
+              </>
+            ) : (
+              <View style={{ backgroundColor: 'black', height: 20 }} />
+            )}
           </VStack>
         </Modal.Body>
         <Modal.Footer>
@@ -93,4 +106,18 @@ function AllergyFormModal({
   );
 }
 
-export default AllergyFormModal;
+const styles = StyleSheet.create({
+  modalHeader: {
+    backgroundColor: 'green', // Change to your preferred green color
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalHeaderText: {
+    color: 'white', // Text color
+    fontSize: 18, // Adjust font size as needed
+    fontWeight: 'bold', // Optional: if you want the text to be bold
+    textTransform: 'uppercase',
+  },
+});
+
+export default AddPatientAllergyModal;

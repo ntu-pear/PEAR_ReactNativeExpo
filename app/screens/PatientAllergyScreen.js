@@ -8,13 +8,12 @@ import patientApi from 'app/api/patient';
 
 // Hooks
 import formatDateTime from 'app/hooks/useFormatDateTime.js';
-import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
 // Components
 import DynamicTable from 'app/components/DynamicTable';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import AddButton from 'app/components/AddButton';
-import AllergyFormModal from 'app/components/AddPatientAllergyModal';
+import AddPatientAllergyModal from 'app/components/AddPatientAllergyModal';
 
 function PatientAllergyScreen(props) {
   const [isLoading, setIsLoading] = useState(true);
@@ -26,8 +25,7 @@ function PatientAllergyScreen(props) {
 
   // Modal states
   const [showModal, setShowModal] = useState(false);
-  const { data: allergies } = useGetSelectionOptions('Allergy');
-  const { data: reactions } = useGetSelectionOptions('AllergyReaction');
+  const [patientAllergyIDs, setPatientAllergyIDs] = useState([]);
 
   const handleAddAllergy = () => {
     setShowModal(true);
@@ -37,10 +35,12 @@ function PatientAllergyScreen(props) {
     //TODO JOEL : Process allergyData
     await patientApi.AddPatientAllergy(patientID, allergyData);
     setShowModal(false);
+
+    // debugging - joel
     console.log('submitting allergy data', allergyData);
   };
 
-  const retrieveScreenData = async (id) => {
+  const retrieveAllergyData = async (id) => {
     const response = await patientApi.getPatientAllergy(id);
     if (!response.ok) {
       console.log('Request failed with status code: ', response.status);
@@ -57,6 +57,16 @@ function PatientAllergyScreen(props) {
       }),
     );
     setTableDataFormated(newArray);
+
+    // Get the allergy IDs
+    const allergyIDs = response.data.data.map(
+      (allergy) => allergy.allergyListID,
+    );
+    setPatientAllergyIDs(allergyIDs);
+
+    // debugging - joel
+    console.log('Existing Allergy IDs passed', allergyIDs);
+
     setIsLoading(false);
   };
 
@@ -73,7 +83,7 @@ function PatientAllergyScreen(props) {
 
   useEffect(() => {
     if (props.route.params.patientId) {
-      retrieveScreenData(patientID);
+      retrieveAllergyData(patientID);
       console.log('patient ID Log from retrieve screen data', patientID);
       setWidthData([120, 100, 120, 200, 300]);
     }
@@ -95,17 +105,12 @@ function PatientAllergyScreen(props) {
         </View>
       )}
       {/* "Add Allergy" button */}
-      <AddButton
-        title="Add Allergy"
-        onPress={handleAddAllergy}
-        // color="green"
-      />
-      <AllergyFormModal
+      <AddButton title="Add Allergy" onPress={handleAddAllergy} />
+      <AddPatientAllergyModal
         showModal={showModal}
         onClose={() => setShowModal(false)}
         onSubmit={handleModalSubmit}
-        allergies={allergies}
-        reactions={reactions}
+        existingAllergyIDs={patientAllergyIDs}
       />
     </View>
   );
