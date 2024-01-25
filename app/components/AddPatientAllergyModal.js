@@ -6,9 +6,13 @@ import { StyleSheet, View } from 'react-native';
 // Components
 import SelectionInputField from 'app/components/input-fields/SelectionInputField';
 import InputField from './input-fields/InputField';
+import AppButton from './AppButton';
 
 // Hooks
 import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
+
+// Configurations
+import colors from 'app/config/colors';
 
 function AddPatientAllergyModal({
   showModal,
@@ -16,6 +20,7 @@ function AddPatientAllergyModal({
   onSubmit,
   existingAllergyIDs,
 }) {
+  // Variables relatied to retrieving allergy and reaction select options from API
   const [allergyData, setAllergyData] = useState({
     AllergyListID: null,
     AllergyReactionListID: null,
@@ -25,6 +30,7 @@ function AddPatientAllergyModal({
   const [isAllergyError, setIsAllergyError] = useState(false);
   const [isReactionError, setIsReactionError] = useState(false);
   const [isRemarksError, setIsRemarksError] = useState(false);
+  const [disabledAllergyOptions, setDisabledAllergyOptions] = useState({});
 
   const { data: allergies } = useGetSelectionOptions('Allergy');
   const { data: reactions } = useGetSelectionOptions('AllergyReaction');
@@ -41,6 +47,14 @@ function AddPatientAllergyModal({
   const handleRemarksChange = (value) => {
     setAllergyData({ ...allergyData, AllergyRemarks: value });
   };
+
+  useEffect(() => {
+    const newDisabledOptions = {};
+    existingAllergyIDs.forEach((id) => {
+      newDisabledOptions[id] = true;
+    });
+    setDisabledAllergyOptions(newDisabledOptions);
+  }, [existingAllergyIDs, allergies]);
 
   // Handle form submission
   // there is some problem with the allergydata format - Joel
@@ -67,11 +81,12 @@ function AddPatientAllergyModal({
               value={allergyData.AllergyListID}
               dataArray={allergies}
               onEndEditing={setIsAllergyError}
+              isDisabledItems={disabledAllergyOptions}
             />
             {allergyData.AllergyListID > 2 ? (
               <>
                 <SelectionInputField
-                  isRequired={allergyData.AllergyListID > 2}
+                  isRequired={allergyData.AllergyListID > 2 ? true : false}
                   title={'Reaction'}
                   onDataChange={handleReactionChange}
                   value={allergyData.AllergyReactionListID}
@@ -80,25 +95,26 @@ function AddPatientAllergyModal({
                 />
 
                 <InputField
-                  isRequired={allergyData.AllergyListID > 2}
+                  isRequired={allergyData.AllergyListID > 2 ? true : false}
                   title={'Remarks'}
                   value={allergyData.AllergyRemarks}
                   onChangeText={handleRemarksChange}
                   variant={'multiLine'}
                   onEndEditing={setIsRemarksError}
+                  hideError={true}
                 />
               </>
-            ) : (
-              <View style={{ backgroundColor: 'black', height: 20 }} />
-            )}
+            ) : null}
           </VStack>
         </Modal.Body>
         <Modal.Footer>
           <Button.Group space={2}>
-            <Button variant="ghost" colorScheme="blueGray" onPress={onClose}>
-              Cancel
-            </Button>
-            <Button onPress={handleSubmit}>Save</Button>
+            <AppButton color="red" title="Cancel" onPress={onClose}></AppButton>
+            <AppButton
+              onPress={handleSubmit}
+              title="Submit"
+              color="green"
+            ></AppButton>
           </Button.Group>
         </Modal.Footer>
       </Modal.Content>
