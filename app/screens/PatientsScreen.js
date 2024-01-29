@@ -382,6 +382,7 @@ function PatientsScreen({ navigation }) {
                         key={index}
                         isVertical={false}
                         isActive={patientStatus == '' ? item.isActive : null}
+                        startDate={selectedSort.label == 'Start Date' ? item.startDate : null}
                       />
                       <View style={styles.caregiverNameContainer}>
                         <Text style={styles.caregiverName}>

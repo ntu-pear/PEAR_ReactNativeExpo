@@ -19,7 +19,8 @@ function ProfileNameButton({
   size,
   isVertical,
   handleOnPress,
-  isActive=null
+  isActive=null,
+  startDate=null,
 }) {
   // const defaultImage = Image.resolveAssetSource(DefaultImage).uri;
 
@@ -68,6 +69,11 @@ function ProfileNameButton({
             {profileLineTwo ? (
               <Text style={[styles.DefaultText, ...isVertical ? [{textAlign: 'center'}] : []]} fontSize={size / 6}>
                 {profileLineTwo.trim()}
+              </Text>
+            ) : null}
+            {startDate != null ? (
+              <Text style={styles.DefaultText} fontSize={size / 6}>
+                Start date: {startDate.split('T')[0]}
               </Text>
             ) : null}
             {isActive != null ? (
