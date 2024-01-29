@@ -1,5 +1,5 @@
 // Libs
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { Center, VStack, ScrollView, Fab, Icon, Divider, HStack } from 'native-base';
 import { RefreshControl, Dimensions, Text, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -26,6 +26,7 @@ import { Chip } from 'react-native-elements';
 
 function PatientsScreen({ navigation }) {
   const { user, setUser } = useContext(AuthContext);
+  const patientListRef = useRef(null);
 
   const [isLoading, setIsLoading] = useState(false);
   const [viewMode, setViewMode] = useState('myPatients'); // myPatients, allPatients
@@ -194,8 +195,6 @@ function PatientsScreen({ navigation }) {
         tempPatientStatus = '';
       } 
       tempPatientStatus = tempPatientStatus.toLowerCase();
-
-      console.log(tempPatientStatus)
       
       // If patient status has been updated, get patient list from api
       // Otherwise filter the list of patients
@@ -209,6 +208,7 @@ function PatientsScreen({ navigation }) {
     // else {
     //   setFilteredPatientList(text, tempSelSort, tempSelDropdownFilters, tempSelChipFilters);
     // }  
+
     setIsLoading(false);
   }
 
@@ -253,6 +253,9 @@ function PatientsScreen({ navigation }) {
     }  
 
     setListOfPatients(filteredListOfPatients);
+
+    // Scroll to top of list
+    patientListRef.current?.scrollTo({x: 0, y: 0, animated: true});
   }
 
   return (
@@ -351,6 +354,7 @@ function PatientsScreen({ navigation }) {
           <Divider/>
           
           <ScrollView
+            ref={patientListRef}
             w="100%"
             style={styles.patientListContainer}
             height="90%"
