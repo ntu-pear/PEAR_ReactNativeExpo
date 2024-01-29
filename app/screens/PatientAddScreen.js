@@ -16,12 +16,17 @@ import PatientAddPatientInfoScreen from 'app/screens/PatientAddPatientInfoScreen
 import PatientAddGuardianScreen from 'app/screens/PatientAddGuardianScreen';
 import PatientAddAllergyScreen from 'app/screens/PatientAddAllergyScreen';
 import * as ImagePicker from 'expo-image-picker';
+import { ActivityIndicator } from 'react-native-paper';
+import LoadingWheel from 'app/components/LoadingWheel';
 
 function PatientAddScreen() {
   const navigation = useNavigation();
 
   // State to keep track of which page of the form is loaded
   const [step, setStep] = useState(1);
+
+  // State to keep track of whether user pressed subnmit button
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   //  State for components
   const [componentList, setComponentList] = useState({
@@ -218,23 +223,8 @@ function PatientAddScreen() {
 
   // Function to submit form
   const onSubmit = async () => {
-    // temp solution to add postal code as separate field without BE implementation
-    var tempPatientInfo = {...formData.patientInfo}
-    var tempGuardianInfoList = []
-    var tempAllergyInfo = {...formData.allergyInfo}
-
-    tempPatientInfo['Address'] = tempPatientInfo['Address'] + ' SINGAPORE ' + tempPatientInfo['PostalCode'];
-    delete tempPatientInfo['PostalCode'];
-
-    for(var i in formData.guardianInfo) {
-      var tempGuardianInfo = {...formData.guardianInfo[i]}
-      tempGuardianInfo['Address'] = tempGuardianInfo['Address'] + ' SINGAPORE ' + tempGuardianInfo['PostalCode'];
-      delete tempGuardianInfo['PostalCode'];
-      tempGuardianInfoList.push(tempGuardianInfo);
-    }
-
-    // console.log({'patientInfo': tempPatientInfo, 'guardianInfo': tempGuardianInfoList, 'allergyInfo': tempAllergyInfo})
-    const result = await patientApi.addPatient({'patientInfo': tempPatientInfo, 'guardianInfo': tempGuardianInfoList, 'allergyInfo': tempAllergyInfo});
+    setIsSubmitting(true);
+    const result = await patientApi.addPatient(formData);
 
     let alertTitle = '';
     let alertDetails = '';
@@ -259,6 +249,7 @@ function PatientAddScreen() {
       alertTitle = 'Error in Adding Patient';
     }
     Alert.alert(alertTitle, alertDetails);
+    setIsSubmitting(false);
   };
 
   switch (step) {
@@ -284,6 +275,9 @@ function PatientAddScreen() {
         />
       );
     case 3:
+      if(isSubmitting) {
+        return (<LoadingWheel visible/>)  
+      } 
       return (
         <PatientAddAllergyScreen
           nextQuestionHandler={nextQuestionHandler}
