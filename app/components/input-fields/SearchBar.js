@@ -16,6 +16,7 @@ function SearchBar({
   containerStyle = null,
   inputContainerStyle = null,
   style = null,
+  autoCapitalize='none'
 }) {
   return (
     <Search
@@ -28,6 +29,7 @@ function SearchBar({
       inputContainerStyle={[styles.inputContainerStyle, inputContainerStyle]}
       inputStyle={styles.inputStyle}
       style={style}
+      autoCapitalize={autoCapitalize}
     />
   );
 }

@@ -291,6 +291,7 @@ function PatientsScreen({ navigation }) {
                 }}
                 value={searchQuery}
                 placeholder='Search by full name'
+                autoCapitalize='characters'
               />
             </View>
             
