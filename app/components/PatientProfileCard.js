@@ -14,17 +14,9 @@ function PatientProfileCard(props) {
   const { vectorIconComponent, text, routes, patientProfile, patientId } =
     props;
 
-  // useNavigate() hook cannot work on mobile
-  // const navigate = Platform.OS === 'web' ? useNavigate() : null;
   const navigation = useNavigation();
 
   const handleOnPressToNextScreen = () => {
-    // if (Platform.OS === 'web') {
-    //   console.log('route to: ' + '/' + routes);
-    //   navigate('/' + routes, { state: { ...patientProfile } });
-    // } else {
-    //   navigation.push(routes, { ...patientProfile });
-    // }
     navigation.navigate(routes, {
       patientId: patientId,
       ...patientProfile,
