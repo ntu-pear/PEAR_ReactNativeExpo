@@ -41,7 +41,7 @@ export const sortArray = (arr, property, asc) => {
 export const parseAutoCompleteOptions = (array) => {
   let options = [];
   for(var i=0; i<array.length; i++){
-    options.push({title: array[i], id: i+1})
+    options.push({title: array[i], id: (i+1).toString()})
   }
   return options;
 }

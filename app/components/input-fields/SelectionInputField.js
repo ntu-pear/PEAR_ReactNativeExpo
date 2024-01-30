@@ -84,10 +84,10 @@ function SelectionInputField({
   };  
 
   return (
-    <View style={styles.ComponentContainer}>
+    <View style={styles.componentContainer}>
       <VStack>
         {showTitle ? (
-          <Text style={styles.TitleMsg}>
+          <Text style={styles.titleMsg}>
             {title}:{isRequired ? <RequiredIndicator/> : ''}
           </Text>
         ) : (
@@ -128,23 +128,19 @@ SelectionInputField.defaultProps = {
 };
 
 const styles = StyleSheet.create({
-  ComponentContainer: {
+  componentContainer: {
     display: 'flex',
     width: '100%',
     marginTop: 5,
     justifyContent: 'flex-start',
   },
-  TitleMsg: {
+  titleMsg: {
     fontSize: 13.5,
     fontWeight: 'bold',
     marginBottom: 5,
     marginTop: 10,
     color: colors.light_gray2,
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
-  },
-  RequiredIndicator: {
-    color: colors.red,
-    fontSize: 18,
   },
 });
 

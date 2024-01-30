@@ -24,6 +24,8 @@ import { parseAutoCompleteOptions, parseSelectOptions, sortArray } from 'app/uti
 import { Chip } from 'react-native-elements';
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
 import FilterIndicator from 'app/components/FilterIndicator';
+import SelectionInputField from 'app/components/input-fields/SelectionInputField';
+import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
 
 function PatientsScreen({ navigation }) {
   const { user, setUser } = useContext(AuthContext);
@@ -40,6 +42,7 @@ function PatientsScreen({ navigation }) {
   
   // Search, sort, and filter related states
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchMode, setSearchMode] = useState('Full Name');
   const [selectedSort, setSelectedSort] = useState({});
   const [dropdownFilterOptions, setDropdownFilterOptions] = useState({}); // {'Caregiver' : [{id: 1, title: name1, ...}], ...}
   const [selectedDropdownFilters, setSelectedDropdownFilters] = useState({}); // {'Caregiver': 1, ...}
@@ -186,8 +189,16 @@ function PatientsScreen({ navigation }) {
     }
   }
 
+  // Switch between search modes (full name, preferred name)
+  const handleSearchMode = (item) => {
+    if(item) {      
+      item && setSearchMode(item['title']);   
+      handleSearchSortFilter(undefined, undefined, undefined, undefined, item['title']);   
+    }
+  }
+
   // Handle searching, sorting, and filtering of patient data based on patient status
-  const handleSearchSortFilter = async (text=searchQuery, tempSelSort=selectedSort, tempSelDropdownFilters=selectedDropdownFilters, tempSelChipFilters=selectedChipFilters) => {       
+  const handleSearchSortFilter = async (text=searchQuery, tempSelSort=selectedSort, tempSelDropdownFilters=selectedDropdownFilters, tempSelChipFilters=selectedChipFilters, tempSearchMode=searchMode) => {       
     setIsLoading(true);
     // Set patient status according to selected patient status
     // if(Object.keys(tempSelChipFilters).length > 0) {
@@ -203,7 +214,7 @@ function PatientsScreen({ navigation }) {
         await getListOfPatients(tempPatientStatus);
         setPatientStatus(tempPatientStatus);       
       } else {
-        setFilteredPatientList(text, tempSelSort, tempSelDropdownFilters, tempSelChipFilters);
+        setFilteredPatientList(text, tempSelSort, tempSelDropdownFilters, tempSelChipFilters, tempSearchMode);
       }      
     // } 
     // else {
@@ -214,7 +225,7 @@ function PatientsScreen({ navigation }) {
   }
 
   // Update patient list based on search, sort, and filter criteria
-  const setFilteredPatientList = (text, tempSelSort, tempSelDropdownFilters, tempSelChipFilters) => {
+  const setFilteredPatientList = (text, tempSelSort, tempSelDropdownFilters, tempSelChipFilters, tempSearchMode) => {
     let filteredListOfPatients = originalListOfPatients.map((obj) => ({
       ...obj,
       fullName: `${obj.firstName.trim()} ${obj.lastName.trim()}`
@@ -222,7 +233,7 @@ function PatientsScreen({ navigation }) {
 
     // Search
     filteredListOfPatients = filteredListOfPatients.filter((item) => {
-      return item.fullName.toLowerCase().includes(text.toLowerCase());
+      return item[SORT_MAPPING[tempSearchMode]].toLowerCase().includes(text.toLowerCase());
     })
       
     // Sort
@@ -292,23 +303,50 @@ function PatientsScreen({ navigation }) {
                   handleSearchSortFilter(text);
                 }}
                 value={searchQuery}
-                placeholder='Search by full name'
                 autoCapitalize='characters'
+                inputContainerStyle={{borderTopRightRadius: 0, borderBottomRightRadius: 0, height: 47}}
               />
             </View>
-            
-            <FilterModalCard
-              sortOptions={SORT_OPTIONS}
-              selectedSort={selectedSort}
-              setSelectedSort={setSelectedSort}
-              dropdownFilterOptions={dropdownFilterOptions}
-              selectedDropdownFilters={selectedDropdownFilters}
-              setSelectedDropdownFilters={setSelectedDropdownFilters}
-              chipFilterOptions={chipFilterOptions}
-              selectedChipFilters={selectedChipFilters}
-              setSelectedChipFilters={setSelectedChipFilters}
-              handleSortFilter={handleSearchSortFilter}
-            />
+            <View style={{flex: 0.4}}>
+              <AutocompleteDropdown
+                dataSet={parseAutoCompleteOptions(['Full Name', 'Preferred Name'])}
+                closeOnBlur={true}              
+                initialValue='1'
+                useFilter={false}
+                showClear={false}
+                inputHeight={47}
+                onSelectItem={(item) => handleSearchMode(item)}
+                inputContainerStyle={{backgroundColor: colors.green, color: colors.white, borderTopLeftRadius: 0, borderBottomLeftRadius: 0}}
+                textInputProps={{color: colors.white, fontSize: 13.5, fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,}}
+                suggestionsListContainerStyle={{zIndex: 100}}
+                ChevronIconComponent={(
+                <Icon 
+                  as={
+                    <MaterialIcons 
+                    name="keyboard-arrow-down" 
+                    />
+                  } 
+                  size={7}
+                  color={colors.white}
+                >
+                </Icon>)}
+
+              />
+            </View>
+            <View style={{marginTop: 5}}>
+              <FilterModalCard
+                sortOptions={SORT_OPTIONS}
+                selectedSort={selectedSort}
+                setSelectedSort={setSelectedSort}
+                dropdownFilterOptions={dropdownFilterOptions}
+                selectedDropdownFilters={selectedDropdownFilters}
+                setSelectedDropdownFilters={setSelectedDropdownFilters}
+                chipFilterOptions={chipFilterOptions}
+                selectedChipFilters={selectedChipFilters}
+                setSelectedChipFilters={setSelectedChipFilters}
+                handleSortFilter={handleSearchSortFilter}
+              />
+            </View>
           </View>
           <View
             style={styles.optionsContainer}
@@ -429,7 +467,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   searchBar: {
-    flex: 1
+    flex: 1,    
   },
   patientListContainer: {
     paddingHorizontal: '5%',
