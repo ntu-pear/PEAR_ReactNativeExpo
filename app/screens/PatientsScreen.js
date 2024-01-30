@@ -228,7 +228,8 @@ function PatientsScreen({ navigation }) {
     filteredListOfPatients = sortArray(filteredListOfPatients, 
       SORT_MAPPING[Object.keys(tempSelSort).length == 0 ? 
         SORT_OPTIONS[0]['label'] : 
-        tempSelSort['label']]);
+        tempSelSort['option']['label']],
+      tempSelSort['order'] != null ? tempSelSort['order'] : true);
   
     // Dropdown filters
     for (var filter of Object.keys(tempSelDropdownFilters)) {
@@ -331,7 +332,7 @@ function PatientsScreen({ navigation }) {
                 style={{flexDirection: 'row'}}
               >
                 <Chip              
-                  title={"Sort by: " + (Object.keys(selectedSort).length > 0 ? selectedSort['label'] : SORT_OPTIONS[0]['label'])}
+                  title={"Sort by: " + (Object.keys(selectedSort).length > 0 ? selectedSort['option']['label'] : SORT_OPTIONS[0]['label'])}
                   type="solid"
                   buttonStyle={{backgroundColor: colors.green}} 
                 />
@@ -402,7 +403,7 @@ function PatientsScreen({ navigation }) {
                         key={index}
                         isVertical={false}
                         isActive={patientStatus == '' ? item.isActive : null}
-                        startDate={selectedSort.label == 'Start Date' ? item.startDate : null}
+                        startDate={Object.keys(selectedSort).length > 0 ? selectedSort['option']['label'] == 'Start Date' ? item.startDate : null : null}
                       />
                       <View style={styles.caregiverNameContainer}>
                         <Text style={styles.caregiverName}>

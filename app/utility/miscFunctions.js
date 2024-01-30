@@ -26,10 +26,16 @@ export const initSelectDisable = (list) => {
 }
 
 // Function to sort array of objects on a property
-export const sortArray = (arr, property) => {
-  return arr.sort((a,b) => 
-    (a[property].toString().toLowerCase().trim() > b[property].toString().toLowerCase().trim()) ? 1 :
-    (b[property].toString().toLowerCase().trim() > a[property].toString().toLowerCase().trim()) ? -1 : 0)
+export const sortArray = (arr, property, asc) => {
+  if(asc) {
+    return arr.sort((a,b) => 
+      (a[property].toString().toLowerCase().trim() > b[property].toString().toLowerCase().trim()) ? 1 :
+      (b[property].toString().toLowerCase().trim() > a[property].toString().toLowerCase().trim()) ? -1 : 0)
+  } else {    
+    return arr.sort((a,b) => 
+      (a[property].toString().toLowerCase().trim() < b[property].toString().toLowerCase().trim()) ? 1 :
+      (b[property].toString().toLowerCase().trim() < a[property].toString().toLowerCase().trim()) ? -1 : 0)
+  }
 }
 
 export const parseAutoCompleteOptions = (array) => {

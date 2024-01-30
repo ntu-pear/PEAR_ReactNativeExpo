@@ -36,7 +36,7 @@ const FilterModalCard = ({
   // Re-initialize sort and filter values to currently applied values whenever modal opens
   useEffect(() => {
     setIsLoading(true);
-    setTempSelSort(Object.keys(selectedSort).length == 0 ? sortOptions[0] : {...selectedSort});
+    setTempSelSort(Object.keys(selectedSort).length == 0 ? {'option': sortOptions[0], 'order': true} : {...selectedSort});
     setTempSelDropdownFilters({...selectedDropdownFilters});
 
     var tempSelChipFilters = {...selectedChipFilters};
@@ -69,6 +69,15 @@ const FilterModalCard = ({
     setSelectedChipFilters({});
     handleSortFilter(undefined, {}, {}, {});
   };
+
+  // Set display value of sort item is selected
+  const handleOnSelectChipSort = (item) => {
+    let asc = true;
+    if(tempSelSort['option']['value'] == item.value) {
+      asc = !tempSelSort['order'];
+    }
+    setTempSelSort({'option': item, 'order': asc});
+  }
 
   // Set display value of dropdown filter when item is selected
   const handleOnSelectDropdownFilter = (item, filter) => {
@@ -131,11 +140,22 @@ const FilterModalCard = ({
                           <Chip
                             key={item.value}
                             title={item.label}
-                            onPress={() => setTempSelSort(item)}
-                            type={tempSelSort.value == item.value ? 'solid' : 'outline'}
+                            onPress={() => handleOnSelectChipSort(item)}
+                            type={tempSelSort['option'].value == item.value ? 'solid' : 'outline'}
                             containerStyle={styles.chipOption}
-                            buttonStyle={{backgroundColor: tempSelSort.value == item.value ? colors.green : 'transparent', borderColor: colors.green}}
-                            titleStyle={{color: tempSelSort.value == item.value ? colors.white : colors.green}}
+                            buttonStyle={{backgroundColor: tempSelSort['option'].value == item.value ? colors.green : 'transparent', borderColor: colors.green}}
+                            titleStyle={{color: tempSelSort['option'].value == item.value ? colors.white : colors.green}}
+                            iconRight
+                            icon={{
+                              name: tempSelSort['option'].value == item.value 
+                              ? tempSelSort['order']
+                                ? 'long-arrow-down' 
+                                : 'long-arrow-up' 
+                              : '',
+                              type: "font-awesome",
+                              size: 13.5,
+                              color: 'white',
+                              }}
                             />
                             ))
                           }
@@ -165,8 +185,8 @@ const FilterModalCard = ({
                                 buttonStyle={{backgroundColor: tempSelChipFilters[filter] ? tempSelChipFilters[filter].value == item.value ? colors.green : 'transparent' : chipFilterOptions[filter][0].value == item.value ? colors.green : 'transparent', borderColor: colors.green}}
                                 titleStyle={{color: tempSelChipFilters[filter] ? tempSelChipFilters[filter].value == item.value ? colors.white : colors.green  : chipFilterOptions[filter][0].value == item.value ? colors.white : colors.green}}
                                 />
-                                ))
-                              }
+                              ))
+                            }
                         </View>
                       </ScrollView>
                     </View>
