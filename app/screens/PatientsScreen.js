@@ -23,6 +23,7 @@ import FilterModalCard from 'app/components/FilterModalCard';
 import { parseAutoCompleteOptions, parseSelectOptions, sortArray } from 'app/utility/miscFunctions';
 import { Chip } from 'react-native-elements';
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
+import FilterIndicator from 'app/components/FilterIndicator';
 
 function PatientsScreen({ navigation }) {
   const { user, setUser } = useContext(AuthContext);
@@ -322,50 +323,17 @@ function PatientsScreen({ navigation }) {
               height={'60%'} 
               alignSelf={'center'}
             />
-            
-            <ScrollView
-              horizontal={true}
-              flex={1}
-              showsHorizontalScrollIndicator={false}
-            >
-              <View
-                style={{flexDirection: 'row'}}
-              >
-                <Chip              
-                  title={"Sort by: " + (Object.keys(selectedSort).length > 0 ? selectedSort['option']['label'] : SORT_OPTIONS[0]['label'])}
-                  type="solid"
-                  buttonStyle={{backgroundColor: colors.green}} 
-                />
-                
-                {Object.keys(chipFilterOptions).map((filter) => (
-                    <Chip
-                      key={filter}
-                      title={filter + ": " + (Object.keys(selectedChipFilters).includes(filter) ? selectedChipFilters[filter]['label'] : chipFilterOptions[filter][0]['label'])}
-                      type="solid"
-                      buttonStyle={{backgroundColor: colors.green}}
-                      containerStyle={{marginLeft: 5}} 
-                    /> 
-                ))}
 
-                {Object.keys(selectedDropdownFilters).map((filter) => (
-                  <Chip
-                    key={filter}
-                    title={filter + ": " + selectedDropdownFilters[filter]['title']}
-                    type="solid"
-                    buttonStyle={{backgroundColor: colors.green}}
-                    containerStyle={{marginLeft: 5}}
-                    icon={{
-                      name: "close",
-                      type: "material",
-                      size: 20,
-                      color: "white",
-                      }}
-                    iconRight
-                    onPress={()=>{}}
-                  />
-                ))}
-              </View>
-            </ScrollView>
+            <FilterIndicator
+              selectedSort={selectedSort}
+              setSelectedSort={setSelectedSort}
+              SORT_OPTIONS={SORT_OPTIONS}
+              chipFilterOptions={chipFilterOptions}
+              selectedChipFilters={selectedChipFilters}
+              selectedDropdownFilters={selectedDropdownFilters}
+              setSelectedDropdownFilters={setDropdownFilterOptions}
+              handleSortFilter={handleSearchSortFilter}
+            />
           </View>
           
           <Divider/>
