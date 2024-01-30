@@ -315,41 +315,56 @@ function PatientsScreen({ navigation }) {
               <Text>No. of patients: {listOfPatients ? listOfPatients.length : null}</Text>
             </View>
 
-            <Divider orientation='vertical' marginHorizontal='2%'height={'60%'} alignSelf={'center'}/>
-
-            <Chip              
-              title={"Sort by: " + (Object.keys(selectedSort).length > 0 ? selectedSort['label'] : SORT_OPTIONS[0]['label'])}
-              type="solid"
-              buttonStyle={{backgroundColor: colors.green}} 
+            <Divider 
+              orientation='vertical' 
+              marginHorizontal='2%'
+              height={'60%'} 
+              alignSelf={'center'}
             />
+            
+            <ScrollView
+              horizontal={true}
+              flex={1}
+              showsHorizontalScrollIndicator={false}
+            >
+              <View
+                style={{flexDirection: 'row'}}
+              >
+                <Chip              
+                  title={"Sort by: " + (Object.keys(selectedSort).length > 0 ? selectedSort['label'] : SORT_OPTIONS[0]['label'])}
+                  type="solid"
+                  buttonStyle={{backgroundColor: colors.green}} 
+                />
+                
+                {Object.keys(chipFilterOptions).map((filter) => (
+                    <Chip
+                      key={filter}
+                      title={filter + ": " + (Object.keys(selectedChipFilters).includes(filter) ? selectedChipFilters[filter]['label'] : chipFilterOptions[filter][0]['label'])}
+                      type="solid"
+                      buttonStyle={{backgroundColor: colors.green}}
+                      containerStyle={{marginLeft: 5}} 
+                    /> 
+                ))}
 
-            {Object.keys(chipFilterOptions).map((filter) => (
-              <Chip
-                key={filter}
-                title={filter + ": " + (Object.keys(selectedChipFilters).includes(filter) ? selectedChipFilters[filter]['label'] : chipFilterOptions[filter][0]['label'])}
-                type="solid"
-                buttonStyle={{backgroundColor: colors.green}}
-                containerStyle={{marginLeft: '1%'}} 
-              />
-            ))}
-
-            {Object.keys(selectedDropdownFilters).map((filter) => (
-              <Chip
-                key={filter}
-                title={filter + ": " + selectedDropdownFilters[filter]['title']}
-                type="solid"
-                buttonStyle={{backgroundColor: colors.green}}
-                containerStyle={{marginLeft: '1%'}}
-                icon={{
-                  name: "close",
-                  type: "material",
-                  size: 20,
-                  color: "white",
-                  }}
-                iconRight
-                onPress={()=>{}}
-              />
-            ))}
+                {Object.keys(selectedDropdownFilters).map((filter) => (
+                  <Chip
+                    key={filter}
+                    title={filter + ": " + selectedDropdownFilters[filter]['title']}
+                    type="solid"
+                    buttonStyle={{backgroundColor: colors.green}}
+                    containerStyle={{marginLeft: 5}}
+                    icon={{
+                      name: "close",
+                      type: "material",
+                      size: 20,
+                      color: "white",
+                      }}
+                    iconRight
+                    onPress={()=>{}}
+                  />
+                ))}
+              </View>
+            </ScrollView>
           </View>
           
           <Divider/>
@@ -457,7 +472,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'stretch',
     justifyContent: 'space-between',
-    // backgroundColor: 'black'
   },
   caregiverNameContainer: {
     marginLeft: '5%',

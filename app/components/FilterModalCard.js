@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Modal, Text, View, Row, Center, Icon } from 'native-base';
+import { Modal, Text, View, Row, Center, Icon, ScrollView } from 'native-base';
 import { Button } from 'native-base';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Keyboard, Platform, StyleSheet, TouchableOpacity } from 'react-native';
@@ -120,21 +120,27 @@ const FilterModalCard = ({
               {sortOptions.length > 0 ? (
                 <View>
                   <Text style={styles.textStyle}>Sort by</Text>
-                  <View style={styles.chipOptions}>
-                    {
-                      sortOptions.map((item) => (
-                        <Chip
-                          key={item.value}
-                          title={item.label}
-                          onPress={() => setTempSelSort(item)}
-                          type={tempSelSort.value == item.value ? 'solid' : 'outline'}
-                          containerStyle={styles.chipOption}
-                          buttonStyle={{backgroundColor: tempSelSort.value == item.value ? colors.green : 'transparent', borderColor: colors.green}}
-                          titleStyle={{color: tempSelSort.value == item.value ? colors.white : colors.green}}
-                          />
-                          ))
-                        }
-                  </View>
+                  <ScrollView
+                    horizontal={true}
+                    flex={1}
+                    showsHorizontalScrollIndicator={false}
+                    >
+                    <View style={styles.chipOptions}>
+                      {
+                        sortOptions.map((item) => (
+                          <Chip
+                            key={item.value}
+                            title={item.label}
+                            onPress={() => setTempSelSort(item)}
+                            type={tempSelSort.value == item.value ? 'solid' : 'outline'}
+                            containerStyle={styles.chipOption}
+                            buttonStyle={{backgroundColor: tempSelSort.value == item.value ? colors.green : 'transparent', borderColor: colors.green}}
+                            titleStyle={{color: tempSelSort.value == item.value ? colors.white : colors.green}}
+                            />
+                            ))
+                          }
+                    </View>
+                  </ScrollView>
                 </View>
                 ) : null}
               {Object.keys(chipFilterOptions).length > 0 ? (
@@ -142,21 +148,27 @@ const FilterModalCard = ({
                   {Object.keys(chipFilterOptions).map((filter) => 
                     <View key={filter}>
                       <Text style={styles.textStyle}>{filter}</Text>
-                      <View style={styles.chipOptions}>
-                        {
-                          chipFilterOptions[filter].map((item) => (
-                            <Chip
-                              key={item.value}
-                              title={item.label}
-                              onPress={() => handleOnSelectChipFilter(item, filter)}
-                              type={tempSelChipFilters[filter] ? tempSelChipFilters[filter].value == item.value ? 'solid' : 'outline' : chipFilterOptions[filter][0].value == item.value ? 'solid' : 'outline'}
-                              containerStyle={styles.chipOption}
-                              buttonStyle={{backgroundColor: tempSelChipFilters[filter] ? tempSelChipFilters[filter].value == item.value ? colors.green : 'transparent' : chipFilterOptions[filter][0].value == item.value ? colors.green : 'transparent', borderColor: colors.green}}
-                              titleStyle={{color: tempSelChipFilters[filter] ? tempSelChipFilters[filter].value == item.value ? colors.white : colors.green  : chipFilterOptions[filter][0].value == item.value ? colors.white : colors.green}}
-                              />
-                              ))
-                            }
-                      </View>
+                      <ScrollView
+                        horizontal={true}
+                        flex={1}
+                        showsHorizontalScrollIndicator={false}
+                      >
+                        <View style={styles.chipOptions}>
+                          {
+                            chipFilterOptions[filter].map((item) => (
+                              <Chip
+                                key={item.value}
+                                title={item.label}
+                                onPress={() => handleOnSelectChipFilter(item, filter)}
+                                type={tempSelChipFilters[filter] ? tempSelChipFilters[filter].value == item.value ? 'solid' : 'outline' : chipFilterOptions[filter][0].value == item.value ? 'solid' : 'outline'}
+                                containerStyle={styles.chipOption}
+                                buttonStyle={{backgroundColor: tempSelChipFilters[filter] ? tempSelChipFilters[filter].value == item.value ? colors.green : 'transparent' : chipFilterOptions[filter][0].value == item.value ? colors.green : 'transparent', borderColor: colors.green}}
+                                titleStyle={{color: tempSelChipFilters[filter] ? tempSelChipFilters[filter].value == item.value ? colors.white : colors.green  : chipFilterOptions[filter][0].value == item.value ? colors.white : colors.green}}
+                                />
+                                ))
+                              }
+                        </View>
+                      </ScrollView>
                     </View>
                   )}                
                   </View>                
@@ -226,7 +238,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap'
   },
   chipOption: {
-    marginRight: '2%',
+    marginRight: 5,
   },
   filterContainer: {
     marginTop: '3%',
