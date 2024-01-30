@@ -95,8 +95,8 @@ const getPatientList = async (maskNRIC = true, patientStatus = null) => {
   return client.get(patientList, {maskNRIC, patientStatus});
 };
 
-const getPatientListByLoggedInCaregiver = async (maskNRIC = true) => {
-  return client.get(patientListByUserId, maskNRIC);
+const getPatientListByLoggedInCaregiver = async (maskNRIC = true, patientStatus = null) => {
+  return client.get(patientListByUserId, {maskNRIC, patientStatus});
 };
 
 const getPatientAllergy = async (patientID) => {

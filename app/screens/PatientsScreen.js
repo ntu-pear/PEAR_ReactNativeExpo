@@ -21,8 +21,8 @@ import ProfileNameButton from 'app/components/ProfileNameButton';
 import SearchBar from 'app/components/input-fields/SearchBar';
 import FilterModalCard from 'app/components/FilterModalCard';
 import { parseAutoCompleteOptions, parseSelectOptions, sortArray } from 'app/utility/miscFunctions';
-import patient from 'app/api/patient';
 import { Chip } from 'react-native-elements';
+import MessageDisplayCard from 'app/components/MessageDisplayCard';
 
 function PatientsScreen({ navigation }) {
   const { user, setUser } = useContext(AuthContext);
@@ -107,8 +107,8 @@ function PatientsScreen({ navigation }) {
   const getListOfPatients = async (status='active') => {
     const response =
     viewMode === 'myPatients'
-        ? await patientApi.getPatientListByLoggedInCaregiver()
-        : await patientApi.getPatientList(false, status);
+        ? await patientApi.getPatientListByLoggedInCaregiver(undefined, status)
+        : await patientApi.getPatientList(undefined, status);
 
     // Check if token has expired, if yes, proceed to log out
     if (!response.ok) {
@@ -400,7 +400,12 @@ function PatientsScreen({ navigation }) {
                       </View>
                     </TouchableOpacity>
                   ))
-                : null}
+                : (
+                  <MessageDisplayCard
+                    TextMessage='No patients found'
+                    topPaddingSize={'42%'}
+                  />
+                )}
             </VStack>
           </ScrollView>
           <Center position="absolute" right="5" bottom="5%">
