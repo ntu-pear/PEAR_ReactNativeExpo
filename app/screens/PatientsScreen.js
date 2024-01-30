@@ -333,7 +333,7 @@ function PatientsScreen({ navigation }) {
 
               />
             </View>
-            <View style={{marginTop: 5}}>
+            <View>
               <FilterModalCard
                 sortOptions={SORT_OPTIONS}
                 selectedSort={selectedSort}
@@ -349,7 +349,7 @@ function PatientsScreen({ navigation }) {
             </View>
           </View>
           <View
-            style={styles.optionsContainer}
+            style={[styles.optionsContainer, {paddingTop: 0}]}
           >
             <View style={styles.patientCount}>
               <Text>No. of patients: {listOfPatients ? listOfPatients.length : null}</Text>
