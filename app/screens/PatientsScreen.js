@@ -21,57 +21,64 @@ import ProfileNameButton from 'app/components/ProfileNameButton';
 import SearchBar from 'app/components/input-fields/SearchBar';
 import FilterModalCard from 'app/components/FilterModalCard';
 import { parseAutoCompleteOptions, parseSelectOptions, sortArray } from 'app/utility/miscFunctions';
-import { Chip } from 'react-native-elements';
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
 import FilterIndicator from 'app/components/FilterIndicator';
-import SelectionInputField from 'app/components/input-fields/SelectionInputField';
 import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
 
 function PatientsScreen({ navigation }) {
-  const { user, setUser } = useContext(AuthContext);
   const patientListRef = useRef(null);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [viewMode, setViewMode] = useState('myPatients'); // myPatients, allPatients
-  const [patientStatus, setPatientStatus] = useState('Active'); // Active, Inactive, All
-  const [isReloadPatientList, setIsReloadPatientList] = useState(true);
-
-  // Patient data
+  
+  // Patient data related states
   const [originalListOfPatients, setOriginalListOfPatients] = useState([]); // list of patients without sort, search, filter
   const [listOfPatients, setListOfPatients] = useState([]) // list of patients after sort, search, filter
+  const [patientStatus, setPatientStatus] = useState('Active'); // Active, Inactive, All
+  const [viewMode, setViewMode] = useState('myPatients'); // myPatients, allPatients
+  const [isReloadPatientList, setIsReloadPatientList] = useState(true);
   
-  // Search, sort, and filter related states
+  // Search related states
+  const [searchOptions, setSearchOptions] = useState('Full Name');
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchMode, setSearchMode] = useState('Full Name');
+
+  // Sort related states
+  const [sortOptions, setSortOptions] = useState(parseSelectOptions(['Full Name', 'Preferred Name', 'Start Date']));
   const [selectedSort, setSelectedSort] = useState({});
-  const [dropdownFilterOptions, setDropdownFilterOptions] = useState({}); // {'Caregiver' : [{id: 1, title: name1, ...}], ...}
-  const [selectedDropdownFilters, setSelectedDropdownFilters] = useState({}); // {'Caregiver': 1, ...}
+
+  // Dropdown filter related states
+  const [dropdownFilterOptions, setDropdownFilterOptions] = useState({});
+  const [selectedDropdownFilters, setSelectedDropdownFilters] = useState({});
+  
+  // Chip filter related states
   const [chipFilterOptions, setChipFilterOptions] = useState({}); 
   const [selectedChipFilters, setSelectedChipFilters] = useState({}); 
 
-  // Constants  
-  const SCREEN_WIDTH = Dimensions.get('window').width;
-  const SORT_OPTIONS = parseSelectOptions(
-    ['Full Name', 'Preferred Name', 'Start Date', ...viewMode==='allPatients' ? ['Caregiver'] : []]); // {'Caregiver' : [{id: 1, title: name1, ...}], ...}
-  const SORT_MAPPING = {'Full Name': 'fullName', 'Preferred Name': 'preferredName', 'Caregiver': 'caregiverName', 'Start Date': 'startDate' }
+  // Constants to map sort/filter names to respective fields in patient data
+  const SORT_MAPPING = {
+    'Full Name': 'fullName', 
+    'Preferred Name': 'preferredName', 
+    'Caregiver': 'caregiverName', 
+    'Start Date': 'startDate' 
+  }
   const FILTER_MAPPING = {
     'Caregiver': {
       'id': 'caregiverName', 
       'type': 'dropdown', 
-      'options': []
+      'options': {},
+      'isFilter': true,
     },
     'Patient Status': {
       'id': 'isActive', 
       'type': 'chip',
-      'options': {'Active': true, 'Inactive': false, 'All': undefined},
+      'options': {'Active': true, 'Inactive': false, 'All': undefined}, // define custom options and map to corresponding values in patient data
       'isFilter': false
     } 
   }
 
   // Refresh list when new patient is added or user requests refresh
+  // Reference https://stackoverflow.com/questions/21518381/proper-way-to-wait-for-one-function-to-finish-before-continuing
   useFocusEffect(
     React.useCallback(() => {
-      // Reference https://stackoverflow.com/questions/21518381/proper-way-to-wait-for-one-function-to-finish-before-continuing
       if (isReloadPatientList) {
         refreshListOfPatients();
         setIsReloadPatientList(false);
@@ -82,6 +89,7 @@ function PatientsScreen({ navigation }) {
 
   // Get list of patients from backend when user switches between 'My Patients' and 'All Patients'
   // Reset search and filter options
+  // Note: not done with function that handles view mode toggling bc of state update latency
   useEffect(() => {
     refreshListOfPatients();
     resetSearchSortFilter();
@@ -96,16 +104,13 @@ function PatientsScreen({ navigation }) {
       setIsLoading(false);    
     };
     promiseFunction();
-  }, [originalListOfPatients])
-
-  // Reset search, sort, and filter options
-  const resetSearchSortFilter = () => {
-    setPatientStatus('active');
-    setSearchQuery('')
-    setSelectedSort({});
-    setSelectedDropdownFilters({})
-    setSelectedChipFilters({})
-  }
+  }, [originalListOfPatients,
+    searchOptions,
+    searchQuery,
+    // selectedChipFilters,
+    // selectedDropdownFilters,
+    // selectedSort
+  ])
 
   // Retrieve patient list from backend
   const getListOfPatients = async (status='active') => {
@@ -114,16 +119,9 @@ function PatientsScreen({ navigation }) {
         ? await patientApi.getPatientListByLoggedInCaregiver(undefined, status)
         : await patientApi.getPatientList(undefined, status);
 
-    // Check if token has expired, if yes, proceed to log out
-    if (!response.ok) {
-      // checkExpiredLogOutHook.handleLogOut(response);
-      setUser(null);
-      // await authStorage.removeToken();
-      return;
-    }
     setOriginalListOfPatients([...response.data.data]);
     setListOfPatients([...response.data.data])
-    initFilterOptions(response.data.data);    
+    initSortFilter(response.data.data);    
   };
     
   // Set screen to loading wheel when retrieving patient list from backend
@@ -135,14 +133,23 @@ function PatientsScreen({ navigation }) {
     };
     promiseFunction();
   }
+  
+  // Reset selected search, sort, and filter options
+  const resetSearchSortFilter = () => {
+    setPatientStatus('active');
+    setSearchOptions('Full Name');
+    setSearchQuery('');
+    setSelectedSort({});
+    setSelectedDropdownFilters({});
+    setSelectedChipFilters({});
+  }
 
-  // Initiaize filter options (dropdown and chip) based on view mode
-  const initFilterOptions = (data) => {
+  // Initialize sort and filter options based on view mode
+  const initSortFilter = (data) => {
     let tempDropdownFilterOptions = {};
     let tempChipFilterOptions = {};
 
     if(viewMode === 'myPatients') {
-      // Set patient status filter
       tempChipFilterOptions['Patient Status'] = parseSelectOptions(Object.keys(FILTER_MAPPING['Patient Status']['options']));
     } else { 
       for(var filter of Object.keys(FILTER_MAPPING)) {
@@ -159,7 +166,7 @@ function PatientsScreen({ navigation }) {
 
         // Parse filter options based on dropdown/chip type
         if(FILTER_MAPPING[filter]['type'] == 'dropdown') {
-          tempDropdownFilterOptions[filter] = parseAutoCompleteOptions(tempFilterOptionList);
+          tempDropdownFilterOptions[filter] = parseSelectOptions(tempFilterOptionList);
         } else if (FILTER_MAPPING[filter]['type'] == 'chip') {
           tempChipFilterOptions[filter] = parseSelectOptions(tempFilterOptionList);
         }
@@ -168,6 +175,7 @@ function PatientsScreen({ navigation }) {
     }
     setDropdownFilterOptions(tempDropdownFilterOptions);
     setChipFilterOptions(tempChipFilterOptions);
+    setSortOptions(parseSelectOptions(['Full Name', 'Preferred Name', 'Start Date', ...viewMode==='allPatients' ? ['Caregiver'] : []]))
   }
 
   // On click button to add patient
@@ -182,44 +190,39 @@ function PatientsScreen({ navigation }) {
   };
   
   // Switch between 'My Patients' and 'All Patients'
-  const handleOnToggleTab = (filterValue) => {
-    if(filterValue!=viewMode) {
+  const handleOnToggleViewMode = (mode) => {
+    if(mode!=viewMode) {
       setIsLoading(true);
-      setViewMode(filterValue)
+      setViewMode(mode);
     }
   }
 
   // Switch between search modes (full name, preferred name)
-  const handleSearchMode = (item) => {
+  const handleOnToggleSearchOptions = (item) => {
     if(item) {      
-      item && setSearchMode(item['title']);   
-      handleSearchSortFilter(undefined, undefined, undefined, undefined, item['title']);   
+      item && setSearchOptions(item['title']);   
+      // handleSearchSortFilter(undefined, undefined, undefined, undefined, item['title']);   
     }
   }
 
   // Handle searching, sorting, and filtering of patient data based on patient status
-  const handleSearchSortFilter = async (text=searchQuery, tempSelSort=selectedSort, tempSelDropdownFilters=selectedDropdownFilters, tempSelChipFilters=selectedChipFilters, tempSearchMode=searchMode) => {       
+  const handleSearchSortFilter = async (text=searchQuery, tempSelSort=selectedSort, tempSelDropdownFilters=selectedDropdownFilters, tempSelChipFilters=selectedChipFilters, tempSearchMode=searchOptions) => {       
     setIsLoading(true);
-    // Set patient status according to selected patient status
-    // if(Object.keys(tempSelChipFilters).length > 0) {
-      let tempPatientStatus = Object.keys(tempSelChipFilters).length > 0 ? tempSelChipFilters['Patient Status']['label'] : 'active';
-      if(tempPatientStatus == 'All') {
-        tempPatientStatus = '';
-      } 
-      tempPatientStatus = tempPatientStatus.toLowerCase();
-      
-      // If patient status has been updated, get patient list from api
-      // Otherwise filter the list of patients
-      if(tempPatientStatus != patientStatus) {
-        await getListOfPatients(tempPatientStatus);
-        setPatientStatus(tempPatientStatus);       
-      } else {
-        setFilteredPatientList(text, tempSelSort, tempSelDropdownFilters, tempSelChipFilters, tempSearchMode);
-      }      
-    // } 
-    // else {
-    //   setFilteredPatientList(text, tempSelSort, tempSelDropdownFilters, tempSelChipFilters);
-    // }  
+
+    let tempPatientStatus = Object.keys(tempSelChipFilters).length > 0 ? tempSelChipFilters['Patient Status']['label'] : 'active';
+    if(tempPatientStatus == 'All') {
+      tempPatientStatus = '';
+    } 
+    tempPatientStatus = tempPatientStatus.toLowerCase();
+    
+    // If patient status has been updated, get patient list from api
+    // Otherwise filter the list of patients
+    if(tempPatientStatus != patientStatus) {
+      await getListOfPatients(tempPatientStatus);
+      setPatientStatus(tempPatientStatus);       
+    } else {
+      setFilteredPatientList(text, tempSelSort, tempSelDropdownFilters, tempSelChipFilters, tempSearchMode);
+    }   
 
     setIsLoading(false);
   }
@@ -239,7 +242,7 @@ function PatientsScreen({ navigation }) {
     // Sort
     filteredListOfPatients = sortArray(filteredListOfPatients, 
       SORT_MAPPING[Object.keys(tempSelSort).length == 0 ? 
-        SORT_OPTIONS[0]['label'] : 
+        sortOptions[0]['label'] : 
         tempSelSort['option']['label']],
       tempSelSort['order'] != null ? tempSelSort['order'] : true);
   
@@ -280,7 +283,7 @@ function PatientsScreen({ navigation }) {
           <View style={styles.optionsContainer}>
             <TouchableOpacity 
               style={[styles.tab, ...viewMode=='myPatients' ? [styles.selectedTab] : []]}
-              onPress={() => handleOnToggleTab('myPatients')}
+              onPress={() => handleOnToggleViewMode('myPatients')}
               activeOpacity={1}
               >
                 <Text style={[styles.tabText, ...viewMode=='myPatients' ? [styles.selectedTabText] : []]}>My Patients</Text>
@@ -288,7 +291,7 @@ function PatientsScreen({ navigation }) {
             <Divider orientation='vertical' height={5} alignSelf='center'/>
             <TouchableOpacity 
               style={[styles.tab, ...viewMode=='allPatients' ? [styles.selectedTab] : []]}
-              onPress={() => handleOnToggleTab('allPatients')}
+              onPress={() => handleOnToggleViewMode('allPatients')}
               activeOpacity={1}
               >
                 <Text style={[styles.tabText, ...viewMode=='allPatients' ? [styles.selectedTabText] : []]}>All Patients</Text>
@@ -298,10 +301,7 @@ function PatientsScreen({ navigation }) {
           <View style={styles.optionsContainer}>
             <View style={styles.searchBar}>
               <SearchBar 
-                onChangeText={(text) => {
-                  setSearchQuery(text);
-                  handleSearchSortFilter(text);
-                }}
+                onChangeText={setSearchQuery}
                 value={searchQuery}
                 autoCapitalize='characters'
                 inputContainerStyle={{borderTopRightRadius: 0, borderBottomRightRadius: 0, height: 47}}
@@ -315,7 +315,7 @@ function PatientsScreen({ navigation }) {
                 useFilter={false}
                 showClear={false}
                 inputHeight={47}
-                onSelectItem={(item) => handleSearchMode(item)}
+                onSelectItem={(item) => handleOnToggleSearchOptions(item)}
                 inputContainerStyle={{backgroundColor: colors.green, color: colors.white, borderTopLeftRadius: 0, borderBottomLeftRadius: 0}}
                 textInputProps={{color: colors.white, fontSize: 13.5, fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,}}
                 suggestionsListContainerStyle={{zIndex: 100}}
@@ -335,7 +335,7 @@ function PatientsScreen({ navigation }) {
             </View>
             <View>
               <FilterModalCard
-                sortOptions={SORT_OPTIONS}
+                sortOptions={sortOptions}
                 selectedSort={selectedSort}
                 setSelectedSort={setSelectedSort}
                 dropdownFilterOptions={dropdownFilterOptions}
@@ -365,7 +365,7 @@ function PatientsScreen({ navigation }) {
             <FilterIndicator
               selectedSort={selectedSort}
               setSelectedSort={setSelectedSort}
-              SORT_OPTIONS={SORT_OPTIONS}
+              SORT_OPTIONS={sortOptions}
               chipFilterOptions={chipFilterOptions}
               selectedChipFilters={selectedChipFilters}
               selectedDropdownFilters={selectedDropdownFilters}
@@ -405,7 +405,7 @@ function PatientsScreen({ navigation }) {
                         profilePicture={item.profilePicture}
                         handleOnPress={() => handleOnClickPatientItem(item.patientID)}
                         isPatient={true}
-                        size={SCREEN_WIDTH / 10}
+                        size={Dimensions.get('window').width / 10}
                         key={index}
                         isVertical={false}
                         isActive={patientStatus == '' ? item.isActive : null}
