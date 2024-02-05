@@ -12,7 +12,6 @@ import AppButton from './AppButton';
 import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
 // Configurations
-import colors from 'app/config/colors';
 
 function AddPatientAllergyModal({
   showModal,
@@ -22,8 +21,8 @@ function AddPatientAllergyModal({
 }) {
   // Variables relatied to retrieving allergy and reaction select options from API
   const [allergyData, setAllergyData] = useState({
-    AllergyListID: null,
-    AllergyReactionListID: null,
+    AllergyListID: 14,
+    AllergyReactionListID: 13,
     AllergyRemarks: '',
   });
 
@@ -33,11 +32,25 @@ function AddPatientAllergyModal({
   const [disabledAllergyOptions, setDisabledAllergyOptions] = useState({});
 
   const { data: allergies } = useGetSelectionOptions('Allergy');
+  const sortedAllergies = allergies.sort((a, b) => a.value - b.value);
+
   const { data: reactions } = useGetSelectionOptions('AllergyReaction');
+  const sortedReactions = reactions.sort((a, b) => a.value - b.value);
 
   // Update field values
   const handleAllergyChange = (value) => {
-    setAllergyData({ ...allergyData, AllergyListID: value });
+    if (value < 3) {
+      setAllergyData({
+        ...allergyData,
+        AllergyListID: value,
+        AllergyReactionListID: 13,
+        AllergyRemarks: '',
+      });
+      setIsReactionError(false);
+      setIsRemarksError(false);
+    } else {
+      setAllergyData({ ...allergyData, AllergyListID: value });
+    }
   };
 
   const handleReactionChange = (value) => {
@@ -79,7 +92,7 @@ function AddPatientAllergyModal({
               title={'Allergy'}
               onDataChange={handleAllergyChange}
               value={allergyData.AllergyListID}
-              dataArray={allergies}
+              dataArray={sortedAllergies}
               onEndEditing={setIsAllergyError}
               isDisabledItems={disabledAllergyOptions}
             />
@@ -90,7 +103,7 @@ function AddPatientAllergyModal({
                   title={'Reaction'}
                   onDataChange={handleReactionChange}
                   value={allergyData.AllergyReactionListID}
-                  dataArray={reactions}
+                  dataArray={sortedReactions}
                   onEndEditing={setIsReactionError}
                 />
 
