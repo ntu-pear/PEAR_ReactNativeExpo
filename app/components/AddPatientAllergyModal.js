@@ -61,6 +61,24 @@ function AddPatientAllergyModal({
     setAllergyData({ ...allergyData, AllergyRemarks: value });
   };
 
+  const resetForm = () => {
+    setAllergyData({
+      AllergyListID: null,
+      AllergyReactionListID: null,
+      AllergyRemarks: '',
+    });
+    setIsAllergyError(false);
+    setIsReactionError(false);
+    setIsRemarksError(false);
+    // Reset any other state related to the form here
+  };
+
+  useEffect(() => {
+    if (!showModal) {
+      resetForm();
+    }
+  }, [showModal]);
+
   useEffect(() => {
     const newDisabledOptions = {};
     existingAllergyIDs.forEach((id) => {
