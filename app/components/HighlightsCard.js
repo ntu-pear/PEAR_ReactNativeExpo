@@ -153,30 +153,46 @@ function HighlightsCard({ item, setModalVisible }) {
         break;
     }
   };
-
   const list = () => {
-    return item.highlights.map((element) => {
-      return (
-        <View key={element.highlightID} style={styles.highlightsList}>
-          <HStack w="100%" space={2} alignItems="center">
-            {getIcon(element)}
-            {element.highlightTypeID === 1 ||
-            element.highlightTypeID === 2 ||
-            element.highlightTypeID === 3 ||
-            element.highlightTypeID === 4 ||
-            element.highlightTypeID === 5 ||
-            element.highlightTypeID === 6 ? (
-              <TouchableOpacity onPress={() => handleNavigation(element)}>
-                <Text fontSize="13">{getDescription(element)}</Text>
-              </TouchableOpacity>
-            ) : (
-              <Text fontSize="13">{getDescription(element)}</Text>
-            )}
-          </HStack>
-        </View>
-      );
-    });
+    return item.highlights.map((element) => (
+      <View key={element.highlightID} style={styles.highlightsList}>
+        <HStack w="100%" space={2} alignItems="center">
+          {getIcon(element)}
+          <TouchableOpacity onPress={() => handleNavigation(element)}>
+            {/* Show description with count if more than 1 */}
+            <Text fontSize="13">
+              {getDescription(element)}
+              {element.count > 1 ? ` (x${element.count})` : ''}
+            </Text>
+          </TouchableOpacity>
+        </HStack>
+      </View>
+    ));
   };
+
+  // const list = () => {
+  //   return item.highlights.map((element) => {
+  //     return (
+  //       <View key={element.highlightID} style={styles.highlightsList}>
+  //         <HStack w="100%" space={2} alignItems="center">
+  //           {getIcon(element)}
+  //           {element.highlightTypeID === 1 ||
+  //           element.highlightTypeID === 2 ||
+  //           element.highlightTypeID === 3 ||
+  //           element.highlightTypeID === 4 ||
+  //           element.highlightTypeID === 5 ||
+  //           element.highlightTypeID === 6 ? (
+  //             <TouchableOpacity onPress={() => handleNavigation(element)}>
+  //               <Text fontSize="13">{getDescription(element)}</Text>
+  //             </TouchableOpacity>
+  //           ) : (
+  //             <Text fontSize="13">{getDescription(element)}</Text>
+  //           )}
+  //         </HStack>
+  //       </View>
+  //     );
+  //   });
+  // };
 
   return (
     <TouchableOpacity testID="highlightsCard" onPress={goToPatientProfile}>

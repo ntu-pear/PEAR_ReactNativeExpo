@@ -110,12 +110,16 @@ function PatientDailyHighlights(props) {
       setIsRetry(true);
       setStatusCode(response.status);
       return;
+    } else {
+      const aggregatedData = aggregateHighlightsByType(response.data.data);
+      setHighlightsData(aggregatedData);
+      setFilteredData(aggregatedData);
+      setIsLoading(false);
+      setStatusCode(response.status);
+      setIsError(false);
+      setIsRetry(false);
     }
-    setIsLoading(false);
-    setStatusCode(response.status);
-    setHighlightsData(response.data.data);
-    setIsError(false);
-    setIsRetry(false);
+
     // console.log('Request successful with response: ', response);
   };
 
@@ -152,6 +156,30 @@ function PatientDailyHighlights(props) {
   const handlePullToRefresh = async () => {
     await getAllHighlights();
     return;
+  };
+
+  const aggregateHighlightsByType = (highlights) => {
+    const aggregatedHighlights = [];
+
+    highlights.forEach((highlight) => {
+      const { highlights } = highlight; // Assuming this is an array of highlight objects
+      const aggregated = {};
+
+      highlights.forEach((h) => {
+        if (!aggregated[h.highlightType]) {
+          aggregated[h.highlightType] = { ...h, count: 1 }; // Copy the highlight and add a count
+        } else {
+          aggregated[h.highlightType].count += 1; // Increment the count
+        }
+      });
+
+      aggregatedHighlights.push({
+        ...highlight,
+        highlights: Object.values(aggregated), // Replace with aggregated highlights
+      });
+    });
+
+    return aggregatedHighlights;
   };
 
   const noDataMessage = () => {
