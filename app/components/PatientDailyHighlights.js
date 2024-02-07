@@ -1,7 +1,19 @@
 // Base
 import React, { useState, useEffect } from 'react';
-import { Modal, StyleSheet, Text, Pressable, View, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
-import { MaterialCommunityIcons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
+import {
+  Modal,
+  StyleSheet,
+  Text,
+  Pressable,
+  View,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+} from 'react-native';
+import {
+  MaterialCommunityIcons,
+  FontAwesome5,
+  MaterialIcons,
+} from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 //Navigation
@@ -178,10 +190,18 @@ function PatientDailyHighlights(props) {
       }}
       testID="highlightsModal"
     >
-      <TouchableOpacity style={styles.centeredView} activeOpacity={1} onPressOut={() => {setModalVisible(!modalVisible)}} >
+      <TouchableOpacity
+        style={styles.centeredView}
+        activeOpacity={1}
+        onPressOut={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
         <TouchableWithoutFeedback>
           <View style={styles.modalView}>
-            <Text style={styles.modalHeaderText}>Patients Daily Highlights</Text>
+            <Text style={styles.modalHeaderText}>
+              Patients Daily Highlights
+            </Text>
             <Pressable
               style={styles.buttonClose}
               onPress={() => setModalVisible(!modalVisible)}
@@ -194,10 +214,7 @@ function PatientDailyHighlights(props) {
             </Pressable>
             <View style={styles.searchBarDropDownView}>
               <View style={styles.flex}>
-                <SearchBar
-                  value={searchValue}
-                  onChangeText={setSearchValue}
-                />
+                <SearchBar value={searchValue} onChangeText={setSearchValue} />
               </View>
               <View style={styles.flex}>
                 <SelectionInputField
@@ -281,11 +298,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     width: '100%',
     zIndex: 1,
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
   },
   flex: {
     flex: 0.49,
-  }, 
+  },
 });
 
 export default PatientDailyHighlights;
