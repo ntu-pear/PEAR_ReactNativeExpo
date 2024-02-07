@@ -21,7 +21,7 @@ function AddPatientAllergyModal({
 }) {
   // Variables relatied to retrieving allergy and reaction select options from API
   const [allergyData, setAllergyData] = useState({
-    AllergyListID: 14,
+    AllergyListID: 0,
     AllergyReactionListID: 13,
     AllergyRemarks: '',
   });
@@ -49,7 +49,11 @@ function AddPatientAllergyModal({
       setIsReactionError(false);
       setIsRemarksError(false);
     } else {
-      setAllergyData({ ...allergyData, AllergyListID: value });
+      setAllergyData({
+        ...allergyData,
+        AllergyListID: value,
+        AllergyReactionListID: 13,
+      });
     }
   };
 
