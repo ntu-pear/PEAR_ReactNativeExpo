@@ -147,10 +147,12 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: 18,
     color: colors.light_gray2,
+    textTransform: 'uppercase',
   },
   fieldValue: {
     fontSize: 18,
     maxWidth: '58%',
+    fontWeight: 'bold',
   },
   fieldContainer: {
     flexDirection: 'row',

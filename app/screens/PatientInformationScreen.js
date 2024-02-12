@@ -48,11 +48,15 @@ function PatientInformationScreen(props) {
   const [socialHistoryData, setSocialHistoryData] = useState([]);
   const [socialHistoryInfo, setSocialHistoryInfo] = useState([]);
   const [patientProfile, setPatientProfile] = useState({});
+  const [patientData, setPatientData] = useState([]);
   const [doctorsNoteData, setDoctorNoteData] = useState([]);
   const [doctorsNoteInfo, setDoctorNoteInfo] = useState([]);
   const [unMaskedPatientNRIC, setUnMaskedPatientNRIC] = useState('');
   const [unMaskedGuardianNRIC, setUnMaskedGuardianNRIC] = useState('');
   const [unMasked2ndGuardianNRIC, setUnMasked2ndGuardianNRIC] = useState('');
+
+  const [ activeSections, setActiveSections ] = useState([]);
+  const [ sections, setSections ] = useState([]);
 
   // Used to retrieve the patient since after an editing of the patients particulars it will need to be refreshed - Russell
   const retrievePatient = async (id) => {
@@ -62,8 +66,7 @@ function PatientInformationScreen(props) {
       return;
     }
     setPatientProfile(response.data.data);
-    console.log(patientProfile.firstName);
-    setUnMaskedPatientNRIC(response.data.data.nric)
+    setUnMaskedPatientNRIC(response.data.data.nric);
   };
 
   const retrieveSocialHistory = async (id) => {
@@ -86,6 +89,7 @@ function PatientInformationScreen(props) {
       return;
     }
     setGuardianData(response.data.data);
+    console.log(response.data.data);
   };
 
   const retrieveDoctorsNote = async (id) => {
@@ -98,58 +102,107 @@ function PatientInformationScreen(props) {
   };
 
   // Data used for display, sent to InformationCard
-  const patientData = [
-    { label: 'First Name', value: patientProfile.firstName },
-    { label: 'Last Name', value: patientProfile.lastName },
-    { label: 'NRIC', value: unMaskedPatientNRIC.replace(/\d{4}(\d{3})/, 'xxxx$1') },
-    {
-      label: 'Gender',
-      value: patientProfile.gender === 'F' ? 'Female' : 'Male',
-    },
-    {
-      label: 'DOB',
-      value: patientProfile.dob || 'Not available',
-    },
-    {
-      label: 'Home Number',
-      value: patientProfile.homeNo || 'Not available',
-    },
-    {
-      label: 'Mobile Number',
-      value: patientProfile.handphoneNo || 'Not available',
-    },
-    {
-      label: 'Address',
-      value: patientProfile.address || 'Not available',
-    },
-    {
-      label: 'Temp. Address',
-      value: patientProfile.tempAddress || 'Not available',
-    },
-    {
-      label: 'Start Date',
-      value: patientProfile.startDate || 'Not available',
-    },
-    {
-      label: 'End Date',
-      value: patientProfile.endDate || 'Not available',
-    },
-    {
-      label: 'Respite Care',
-      value: patientProfile.isRespiteCare ? 'Yes' : 'No',
-    },
-  ];
+  // const patientData = [
+  //   { label: 'First Name', value: patientProfile.firstName },
+  //   { label: 'Last Name', value: patientProfile.lastName },
+  //   { label: 'NRIC', value: unMaskedPatientNRIC.replace(/\d{4}(\d{3})/, 'xxxx$1') },
+  //   {
+  //     label: 'Gender',
+  //     value: patientProfile.gender === 'F' ? 'Female' : 'Male',
+  //   },
+  //   {
+  //     label: 'DOB',
+  //     value: patientProfile.dob || '-',
+  //   },
+  //   {
+  //     label: 'Home Number',
+  //     value: patientProfile.homeNo || '-',
+  //   },
+  //   {
+  //     label: 'Mobile Number',
+  //     value: patientProfile.handphoneNo || '-',
+  //   },
+  //   {
+  //     label: 'Address',
+  //     value: patientProfile.address || '-',
+  //   },
+  //   {
+  //     label: 'Temp. Address',
+  //     value: patientProfile.tempAddress || '-',
+  //   },
+  //   {
+  //     label: 'Start Date',
+  //     value: patientProfile.startDate || '-',
+  //   },
+  //   {
+  //     label: 'End Date',
+  //     value: patientProfile.endDate || '-',
+  //   },
+  //   {
+  //     label: 'Respite Care',
+  //     value: patientProfile.isRespiteCare ? 'Yes' : 'No',
+  //   },
+  // ];
 
   const preferenceData = [
     {
       label: 'Preferred name',
-      value: patientProfile.preferredName || 'Not available',
+      value: patientProfile.preferredName || '-',
     },
     {
       label: 'Preferred language',
-      value: patientProfile.preferredLanguage || 'Not available',
+      value: patientProfile.preferredLanguage || '-',
     },
   ];
+
+  useEffect(() => {
+    let isMounted = true;
+    if (isMounted) {
+      if (patientProfile !== undefined && Object.keys(patientProfile).length>0) {
+        setPatientData([
+          { label: 'First Name', value: patientProfile.firstName },
+          { label: 'Last Name', value: patientProfile.lastName },
+          { label: 'NRIC', value: unMaskedPatientNRIC.replace(/\d{4}(\d{3})/, 'xxxx$1') },
+          {
+            label: 'Gender',
+            value: patientProfile.gender === 'F' ? 'Female' : 'Male',
+          },
+          {
+            label: 'DOB',
+            value: patientProfile.dob || '-',
+          },
+          {
+            label: 'Home Number',
+            value: patientProfile.homeNo || '-',
+          },
+          {
+            label: 'Mobile Number',
+            value: patientProfile.handphoneNo || '-',
+          },
+          {
+            label: 'Address',
+            value: patientProfile.address || '-',
+          },
+          {
+            label: 'Temp. Address',
+            value: patientProfile.tempAddress || '-',
+          },
+          {
+            label: 'Start Date',
+            value: patientProfile.startDate || '-',
+          },
+          {
+            label: 'End Date',
+            value: patientProfile.endDate || '-',
+          },
+          {
+            label: 'Respite Care',
+            value: patientProfile.isRespiteCare ? 'Yes' : 'No',
+          }
+        ]);
+      }
+    }
+  }, [patientProfile]);
 
   useEffect(() => {
     if (doctorsNoteData !== null && Object.keys(doctorsNoteData).length>0) {
@@ -157,19 +210,19 @@ function PatientInformationScreen(props) {
       setDoctorNoteInfo([
         {
           label: "Date",
-          value: lastItem.date || 'Not Available',
+          value: lastItem.date || '-',
         },
         {
           label: "Doctor's Name",
-          value: lastItem.doctorName || 'Not Available',
+          value: lastItem.doctorName || '-',
         },
         {
           label: "Doctor's ID",
-          value: lastItem.doctorId || 'Not Available',
+          value: lastItem.doctorId || '-',
         },
         {
           label: "Doctor's Remarks",
-          value: lastItem.doctorRemarks || 'Not Available',
+          value: lastItem.doctorRemarks || '-',
         },
       ]);
     }
@@ -182,47 +235,47 @@ function PatientInformationScreen(props) {
       setGuardianInfoData([
         {
           label: 'First Name',
-          value: guardianData.guardian.firstName || 'Not Available',
+          value: guardianData.guardian.firstName || '-',
         },
         {
           label: 'Last Name',
-          value: guardianData.guardian.lastName || 'Not Available',
+          value: guardianData.guardian.lastName || '-',
         },
         {
           label: 'Preferred Name',
-          value: guardianData.guardian.preferredName || 'Not Available',
+          value: guardianData.guardian.preferredName || '-',
         },
         {
           label: 'NRIC',
-          value: guardianData.guardian.nric.replace(/\d{4}(\d{3})/, 'xxxx$1') || 'Not Available',
+          value: guardianData.guardian.nric.replace(/\d{4}(\d{3})/, 'xxxx$1') || '-',
         },
         {
           label: 'Gender',
-          value: guardianData.guardian.gender || 'Not Available',
+          value: guardianData.guardian.gender || '-',
         },
         {
           label: 'Email',
-          value: guardianData.guardian.email || 'Not Available',
+          value: guardianData.guardian.email || '-',
         },
         {
-          label: "Patient's",
-          value: guardianData.guardian.relationship || 'Not Available',
+          label: "Relationship",
+          value: guardianData.guardian.relationship || '-',
         },
         {
           label: 'Contact Number',
-          value: guardianData.guardian.contactNo || 'Not Available',
+          value: guardianData.guardian.contactNo || '-',
         },
         {
           label: 'DOB',
-          value: guardianData.guardian.dob || 'Not Available',
+          value: guardianData.guardian.dob || '-',
         },
         {
           label: 'Address',
-          value: guardianData.guardian.address || 'Not Available',
+          value: guardianData.guardian.address || '-',
         },
         {
           label: 'Temp. Address',
-          value: guardianData.guardian.tempAddress || 'Not Available',
+          value: guardianData.guardian.tempAddress || '-',
         },
       ]);
     }
@@ -239,47 +292,47 @@ function PatientInformationScreen(props) {
       setSecondGuardianInfoData([
         {
           label: 'First Name',
-          value: guardianData.additionalGuardian.firstName || 'Not Available',
+          value: guardianData.additionalGuardian.firstName || '-',
         },
         {
           label: 'Last Name',
-          value: guardianData.additionalGuardian.lastName || 'Not Available',
+          value: guardianData.additionalGuardian.lastName || '-',
         },
         {
           label: 'Preferred Name',
-          value: guardianData.additionalGuardian.preferredName || 'Not Available',
+          value: guardianData.additionalGuardian.preferredName || '-',
         },
         {
           label: 'NRIC',
-          value: guardianData.additionalGuardian.nric.replace(/\d{4}(\d{3})/, 'xxxx$1') || 'Not Available',
+          value: guardianData.additionalGuardian.nric.replace(/\d{4}(\d{3})/, 'xxxx$1') || '-',
         },
         {
           label: 'Gender',
-          value: guardianData.additionalGuardian.gender || 'Not Available',
+          value: guardianData.additionalGuardian.gender || '-',
         },
         {
           label: 'Email',
-          value: guardianData.additionalGuardian.email || 'Not Available',
+          value: guardianData.additionalGuardian.email || '-',
         },
         {
-          label: "Patient's",
-          value: guardianData.additionalGuardian.relationship || 'Not Available',
+          label: "Relationship",
+          value: guardianData.additionalGuardian.relationship || '-',
         },
         {
           label: 'Contact Number',
-          value: guardianData.additionalGuardian.contactNo || 'Not Available',
+          value: guardianData.additionalGuardian.contactNo || '-',
         },
         {
           label: 'DOB',
-          value: guardianData.additionalGuardian.dob || 'Not Available',
+          value: guardianData.additionalGuardian.dob || '-',
         },
         {
           label: 'Address',
-          value: guardianData.additionalGuardian.address || 'Not Available',
+          value: guardianData.additionalGuardian.address || '-',
         },
         {
           label: 'Temp. Address',
-          value: guardianData.additionalGuardian.tempAddress || 'Not Available',
+          value: guardianData.additionalGuardian.tempAddress || '-',
         },
       ]);
     }
@@ -290,27 +343,27 @@ function PatientInformationScreen(props) {
       setSocialHistoryInfo([
         {
           label: 'Live with',
-          value: socialHistoryData.liveWithDescription || 'Not Available',
+          value: socialHistoryData.liveWithDescription || '-',
         },
         {
           label: 'Education',
-          value: socialHistoryData.educationDescription || 'Not Available',
+          value: socialHistoryData.educationDescription || '-',
         },
         {
           label: 'Occupation',
-          value: socialHistoryData.occupationDescription || 'Not Available',
+          value: socialHistoryData.occupationDescription || '-',
         },
         {
           label: 'Religion',
-          value: socialHistoryData.religionDescription || 'Not Available',
+          value: socialHistoryData.religionDescription || '-',
         },
         {
           label: 'Pet',
-          value: socialHistoryData.petDescription || 'Not Available',
+          value: socialHistoryData.petDescription || '-',
         },
         {
           label: 'Diet',
-          value: socialHistoryData.dietDescription || 'Not Available',
+          value: socialHistoryData.dietDescription || '-',
         },
         {
           label: 'Exercise',
@@ -361,7 +414,7 @@ function PatientInformationScreen(props) {
     if(socialHistoryData !== undefined){
       setIsSocialHistoryLoading(false);
     }
-    if(guardianData !== undefined){
+    if(guardianData !== undefined && guardianData.length !== 0){
       setIsGuardianLoading(false);
     }
     if(doctorsNoteData !== undefined){
@@ -443,6 +496,7 @@ function PatientInformationScreen(props) {
         return handlePatientPrefOnPress;
         break;
       case 'Guardian(s) Information':
+      case 'Guardian 1':
         return handlePatientGuardianOnPress;
         break;
       case 'Guardian 2':
@@ -462,6 +516,7 @@ function PatientInformationScreen(props) {
         return unMaskedPatientNRIC;
         break;
       case 'Guardian(s) Information':
+      case 'Guardian 1':
         return unMaskedGuardianNRIC;
         break;
       case 'Guardian 2':
@@ -471,9 +526,6 @@ function PatientInformationScreen(props) {
         return null;
     }
   };
-
-  const [ activeSections, setActiveSections ] = useState([]);
-  const [ sections, setSections ] = useState([]);
 
   // const sections = [
   //   {
@@ -510,11 +562,11 @@ function PatientInformationScreen(props) {
           content: preferenceData
         },
         {
-          title: 'Doctor\'s Notes',
+          title: "Doctor's Notes",
           content: doctorsNoteInfo
         },
         {
-          title: 'Guardian(s) Information',
+          title: 'Guardian 1',
           content: guardianInfoData
         },
         {
@@ -526,8 +578,7 @@ function PatientInformationScreen(props) {
           content: socialHistoryInfo
         }
       ]);
-      console.log('added Guardian 2 to sections');
-      console.log('')
+      // change the guardians information display
     } else {
       setSections([
         {
@@ -539,7 +590,7 @@ function PatientInformationScreen(props) {
           content: preferenceData
         },
         {
-          title: 'Doctor\'s Notes',
+          title: "Doctor's Notes",
           content: doctorsNoteInfo
         },
         {
@@ -551,15 +602,14 @@ function PatientInformationScreen(props) {
           content: socialHistoryInfo
         }
       ]);
-      console.log('no Guardian 2');
     }
-  }, [isSecondGuardian]);
+  }, [patientData]);
 
   function renderHeader(section, _, isActive) {
     return (
       <View style={styles.accordHeader}>
         <Text style={styles.accordTitle}>{section.title}</Text>
-        <Icon name={ isActive ? 'chevron-up' : 'chevron-down' } size={30} color="#bbb" />
+        <Icon name={ isActive ? 'chevron-up' : 'chevron-down' } size={30} color={colors.black} />
       </View>
     );
   };
@@ -569,11 +619,20 @@ function PatientInformationScreen(props) {
       <View style={styles.accordBody}>
         <InformationCard 
           // title={section.title}
-          subtitle={section.title == 'Guardian(s) Information' ? 'Guardian 1' : null}
+          // subtitle={section.title == 'Guardian(s) Information' ? 'Guardian 1' : null}
           displayData={section.content}
           handleOnPress={handleOnPress(section.title)}
           unMaskedNRIC={unmaskedNRIC(section.title)}
         />
+        {section.title === "Guardian 1" ? (
+          <InformationCard 
+            // title={section.title}
+            subtitle='Guardian 2'
+            displayData={secondGuardianInfoData}
+            handleOnPress={handlePatientSecondGuardianOnPress}
+            unMaskedNRIC={unmaskedNRIC('Guardian 2')}
+          />
+        ) : null }
       </View>
     );
   };
@@ -594,19 +653,18 @@ function PatientInformationScreen(props) {
           sectionContainerStyle={styles.accordContainer}
         />
 
-        
       </ScrollView>
     </Center>
   );
 }
 
 const styles = StyleSheet.create({
-  pictureText: {
-    color: colors.white_var1,
-    fontFamily: Platform.OS === 'ios' ? 'Helvetica' : typography.android,
-    fontSize: 24,
-    paddingTop: 15,
-  },
+  // pictureText: {
+  //   color: colors.white_var1,
+  //   fontFamily: Platform.OS === 'ios' ? 'Helvetica' : typography.android,
+  //   fontSize: 24,
+  //   paddingTop: 15,
+  // },
   accordContainer: {
     paddingBottom: 4
   },
@@ -617,6 +675,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    backgroundColor: colors.green_lighter,
   },
   accordTitle: {
     fontSize: 30,

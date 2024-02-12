@@ -51,7 +51,7 @@ function PatientsNavigator() {
         options={{
           headerShown: true,
           headerBackTitleVisible: false,
-          title: 'Patient Information',
+          title: 'Patient Particulars',
         }}
       />
       <Stack.Screen
