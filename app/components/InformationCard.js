@@ -141,8 +141,9 @@ const styles = StyleSheet.create({
     marginRight: 0,
   },
   subtitleText: {
-    fontSize: 22,
+    fontSize: 25,
     color: colors.black_var1,
+    fontWeight: 'bold',
   },
   fieldLabel: {
     fontSize: 18,
