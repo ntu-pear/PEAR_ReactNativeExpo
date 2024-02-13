@@ -40,7 +40,7 @@ function InformationCard({ displayData, title, subtitle, handleOnPress=null, unM
     }
   };
 
-  useEffect(() =>{
+  useEffect(() => {
     if (itemizedData.length === 0){
       setItemizedData(displayData);
     }
@@ -49,21 +49,7 @@ function InformationCard({ displayData, title, subtitle, handleOnPress=null, unM
   return (
     <View style={styles.cardContainer}>
       <VStack>
-        <HStack style={styles.buttonContainer}>
-          {title ? (
-            <Text style={[styles.TextContent, styles.titleText]}>{title}</Text>
-          ) : null}
-          {(handleOnPress !== null && title !== null && title !== "Guardian(s) Information") ? ( // editing button will appear if the title is not null
-            <IconButton                                                                          // or "Guardian(s) Information"
-              _icon={{
-                as: MaterialCommunityIcons,
-                name: 'pencil',
-              }}
-              size="lg"
-              onPress={handleOnPress}
-            />
-          ) : null}
-        </HStack>
+
         <HStack style={styles.buttonContainer}>
           {subtitle ? (
             <Text style={[styles.TextContent, styles.subtitleText]}>
@@ -161,10 +147,12 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: 18,
     color: colors.light_gray2,
+    textTransform: 'uppercase',
   },
   fieldValue: {
     fontSize: 18,
     maxWidth: '58%',
+    fontWeight: 'bold',
   },
   fieldContainer: {
     flexDirection: 'row',
