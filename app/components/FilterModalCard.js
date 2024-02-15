@@ -8,19 +8,22 @@ import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
 import typography from 'app/config/typography';
 import { Chip } from 'react-native-elements';
 import { MaterialIcons } from '@expo/vector-icons';
+import { parseSelectOptions } from 'app/utility/miscFunctions';
+import SelectionInputField from './input-fields/SelectionInputField';
 
 
 const FilterModalCard = ({
   filterIconSize=12,
   sortOptions=[],
-  selectedSort,
-  setSelectedSort,
+  setSortOptions=()=>{},
+  selectedSort={},
+  setSelectedSort=()=>{},
   dropdownFilterOptions={},
-  selectedDropdownFilters,
-  setSelectedDropdownFilters,
+  selectedDropdownFilters={},
+  setSelectedDropdownFilters=()=>{},
   chipFilterOptions={},
-  selectedChipFilters,
-  setSelectedChipFilters,
+  selectedChipFilters={},
+  setSelectedChipFilters=()=>{},
   handleSortFilter,
 }) => {
   const initialRef = useRef(null);
@@ -50,10 +53,11 @@ const FilterModalCard = ({
 
     Keyboard.dismiss();
     setIsLoading(false);
-  },[modalVisible])
+  }, [modalVisible])
 
   // Apply sort and filter values and close modal
   const handleApply = () => {
+    console.log(tempSelDropdownFilters)
     setModalVisible(false);
     setSelectedSort({...tempSelSort});
     setSelectedDropdownFilters({...tempSelDropdownFilters});
@@ -80,13 +84,21 @@ const FilterModalCard = ({
   }
 
   // Set display value of dropdown filter when item is selected
-  const handleOnSelectDropdownFilter = (item, filter) => {
-    if(item) {
-      let tempSelectedFilters = tempSelDropdownFilters;
-      tempSelectedFilters[filter] = item;
-      item && setTempSelDropdownFilters(tempSelectedFilters);      
-    }
+  const handleOnSelectDropdownFilter = (index, filter) => {
+    console.log(index, filter, dropdownFilterOptions[filter].filter(x=>x.value == index)[0])
+    let tempSelectedFilters = tempSelDropdownFilters;
+    tempSelectedFilters[filter] = dropdownFilterOptions[filter].filter(x=>x.value == index)[0];
+    setTempSelDropdownFilters(tempSelectedFilters);      
   }
+
+  // // Set display value of dropdown filter when item is selected
+  // const handleOnSelectDropdownFilter = (item, filter) => {
+  //   if(item) {
+  //     let tempSelectedFilters = tempSelDropdownFilters;
+  //     tempSelectedFilters[filter] = item;
+  //     item && setTempSelDropdownFilters(tempSelectedFilters);      
+  //   }
+  // }
 
   // Set display value of chip filter when item is selected
   const handleOnSelectChipFilter = (item, filter) => {
@@ -149,8 +161,8 @@ const FilterModalCard = ({
                             icon={{
                               name: tempSelSort['option'].value == item.value 
                               ? tempSelSort['order']
-                                ? 'long-arrow-down' 
-                                : 'long-arrow-up' 
+                                ? 'long-arrow-up' 
+                                : 'long-arrow-down' 
                               : '',
                               type: "font-awesome",
                               size: 13.5,
@@ -199,7 +211,14 @@ const FilterModalCard = ({
                     {Object.keys(dropdownFilterOptions).map((filter) => 
                       <View key={filter}>
                         <Text style={styles.textStyle}>{filter}</Text>
-                        <AutocompleteDropdown
+                        <SelectionInputField
+                          dataArray={dropdownFilterOptions[filter]}
+                          showTitle={false}
+                          onDataChange={(item) => handleOnSelectDropdownFilter(item, filter)}
+                          placeholder='Select caregiver'
+                          value={selectedDropdownFilters[filter][value]}
+                        />
+                        {/* <AutocompleteDropdown
                           ref={searchRefs[filter]}
                           closeOnBlur={false}
                           dataSet={dropdownFilterOptions[filter]}
@@ -214,7 +233,8 @@ const FilterModalCard = ({
                           initialValue={Object.keys(selectedDropdownFilters).includes(filter) ? selectedDropdownFilters[filter] : {id: null}}
                           suggestionsListMaxHeight={150} 
                           useFilter={true}
-                          />
+                          /> */}
+                          
                       </View>
                     )}
                   </View>

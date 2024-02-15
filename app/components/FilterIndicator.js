@@ -56,9 +56,9 @@ function FilterIndicator({
             icon={{
               name: Object.keys(selectedSort).length > 0 
                 ? selectedSort['order']
-                  ? 'long-arrow-down' 
-                  : 'long-arrow-up'
-                : 'long-arrow-down', 
+                  ? 'long-arrow-up' 
+                  : 'long-arrow-down'
+                : 'long-arrow-up', 
               type: "font-awesome",
               size: 13.5,
               color: 'white',
@@ -79,7 +79,7 @@ function FilterIndicator({
         {Object.keys(selectedDropdownFilters).map((filter) => (
           <Chip
             key={filter}
-            title={filter + ": " + selectedDropdownFilters[filter]['title']}
+            title={filter + ": " + selectedDropdownFilters[filter]['label']}
             type="solid"
             buttonStyle={{backgroundColor: colors.green}}
             containerStyle={{marginLeft: 5}}

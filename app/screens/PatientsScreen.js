@@ -54,21 +54,22 @@ function PatientsScreen({ navigation }) {
   const [selectedChipFilters, setSelectedChipFilters] = useState({}); 
 
   // Constants to map sort/filter names to respective fields in patient data
-  const SORT_MAPPING = {
+  const SORTFILTER_MAPPING = {
     'Full Name': 'fullName', 
     'Preferred Name': 'preferredName', 
     'Caregiver': 'caregiverName', 
-    'Start Date': 'startDate' 
+    'Start Date': 'startDate',
+    'Patient Status': 'isActive' 
   }
-  const FILTER_MAPPING = {
+
+  // Details related to filter options
+  const filterOptionDetails = {
     'Caregiver': {
-      'id': 'caregiverName', 
       'type': 'dropdown', 
       'options': {},
       'isFilter': true,
     },
     'Patient Status': {
-      'id': 'isActive', 
       'type': 'chip',
       'options': {'Active': true, 'Inactive': false, 'All': undefined}, // define custom options and map to corresponding values in patient data
       'isFilter': false
@@ -150,24 +151,24 @@ function PatientsScreen({ navigation }) {
     let tempChipFilterOptions = {};
 
     if(viewMode === 'myPatients') {
-      tempChipFilterOptions['Patient Status'] = parseSelectOptions(Object.keys(FILTER_MAPPING['Patient Status']['options']));
+      tempChipFilterOptions['Patient Status'] = parseSelectOptions(Object.keys(filterOptionDetails['Patient Status']['options']));
     } else { 
-      for(var filter of Object.keys(FILTER_MAPPING)) {
+      for(var filter of Object.keys(filterOptionDetails)) {
         let tempFilterOptionList;
         
         // If no custom options for a filter, get options from patient list by taking distinct values of the filter property
         // Else use custom options
-        if (Object.keys(FILTER_MAPPING[filter]['options']).length == 0) {
-          tempFilterOptionList = data.map(x => x[FILTER_MAPPING[filter]['id']]);
+        if (Object.keys(filterOptionDetails[filter]['options']).length == 0) {
+          tempFilterOptionList = data.map(x => x[SORTFILTER_MAPPING[filter]]);
           tempFilterOptionList = Array.from(new Set(tempFilterOptionList));        
         } else {
-          tempFilterOptionList = Object.keys(FILTER_MAPPING[filter]['options'])
+          tempFilterOptionList = Object.keys(filterOptionDetails[filter]['options'])
         }
 
         // Parse filter options based on dropdown/chip type
-        if(FILTER_MAPPING[filter]['type'] == 'dropdown') {
+        if(filterOptionDetails[filter]['type'] == 'dropdown') {
           tempDropdownFilterOptions[filter] = parseSelectOptions(tempFilterOptionList);
-        } else if (FILTER_MAPPING[filter]['type'] == 'chip') {
+        } else if (filterOptionDetails[filter]['type'] == 'chip') {
           tempChipFilterOptions[filter] = parseSelectOptions(tempFilterOptionList);
         }
 
@@ -236,12 +237,12 @@ function PatientsScreen({ navigation }) {
 
     // Search
     filteredListOfPatients = filteredListOfPatients.filter((item) => {
-      return item[SORT_MAPPING[tempSearchMode]].toLowerCase().includes(text.toLowerCase());
+      return item[SORTFILTER_MAPPING[tempSearchMode]].toLowerCase().includes(text.toLowerCase());
     })
       
     // Sort
     filteredListOfPatients = sortArray(filteredListOfPatients, 
-      SORT_MAPPING[Object.keys(tempSelSort).length == 0 ? 
+      SORTFILTER_MAPPING[Object.keys(tempSelSort).length == 0 ? 
         sortOptions[0]['label'] : 
         tempSelSort['option']['label']],
       tempSelSort['order'] != null ? tempSelSort['order'] : true);
@@ -249,7 +250,7 @@ function PatientsScreen({ navigation }) {
     // Dropdown filters
     for (var filter of Object.keys(tempSelDropdownFilters)) {
       filteredListOfPatients = filteredListOfPatients.filter((obj) => (
-        obj[FILTER_MAPPING[filter]['id']] === tempSelDropdownFilters[filter]['title'])) || []
+        obj[SORTFILTER_MAPPING[filter]] === tempSelDropdownFilters[filter]['label'])) || []
     }
 
     // Chip Filters
@@ -257,13 +258,13 @@ function PatientsScreen({ navigation }) {
     // For example, patient status is not meant for filtering - it requires new API call, so do not filter
     // Use custom options if declared in FILTER_MAPPING 
     for (var filter of Object.keys(tempSelChipFilters)) {
-      if(FILTER_MAPPING[filter]['isFilter']){
-        if(Object.keys(FILTER_MAPPING[filter]['options']).length == 0) {
+      if(filterOptionDetails[filter]['isFilter']){
+        if(Object.keys(filterOptionDetails[filter]['options']).length == 0) {
           filteredListOfPatients = filteredListOfPatients.filter((obj) => (
-            obj[FILTER_MAPPING[filter]['id']] === tempSelChipFilters[filter]['label'])) || []
+            obj[SORTFILTER_MAPPING[filter]] === tempSelChipFilters[filter]['label'])) || []
         } else {
           filteredListOfPatients = filteredListOfPatients.filter((obj) => (
-            obj[FILTER_MAPPING[filter]['id']] === FILTER_MAPPING[filter]['options'][tempSelChipFilters[filter]['label']])) || []
+            obj[SORTFILTER_MAPPING[filter]] === filterOptionDetails[filter]['options'][tempSelChipFilters[filter]['label']])) || []
         }
       }
     }  
@@ -336,6 +337,7 @@ function PatientsScreen({ navigation }) {
             <View>
               <FilterModalCard
                 sortOptions={sortOptions}
+                setSortOptions={setSortOptions}
                 selectedSort={selectedSort}
                 setSelectedSort={setSelectedSort}
                 dropdownFilterOptions={dropdownFilterOptions}
