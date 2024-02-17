@@ -69,7 +69,7 @@ function PatientsScreen({ navigation }) {
   // Details related to filter options
   const filterOptionDetails = {
     'Caregiver': {
-      'type': 'autocomplete', 
+      'type': 'dropdown', 
       'options': {},
       'isFilter': true,
     },
