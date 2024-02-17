@@ -1,9 +1,8 @@
 // Libs
-import React, { useState, useEffect, useContext, useRef } from 'react';
-import { Center, VStack, ScrollView, Fab, Icon, Divider, HStack } from 'native-base';
+import React, { useState, useEffect, useRef } from 'react';
+import { Center, VStack, ScrollView, Fab, Icon, Divider } from 'native-base';
 import { RefreshControl, Dimensions, Text, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import AuthContext from 'app/auth/context';
 import { useFocusEffect } from '@react-navigation/native';
 import { StyleSheet, View } from 'react-native';
 
@@ -19,10 +18,10 @@ import typography from 'app/config/typography';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import SearchBar from 'app/components/input-fields/SearchBar';
-import FilterModalCard from 'app/components/FilterModalCard';
+import FilterModalCard from 'app/components/filter/FilterModalCard';
 import { parseAutoCompleteOptions, parseSelectOptions, sortArray } from 'app/utility/miscFunctions';
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
-import FilterIndicator from 'app/components/FilterIndicator';
+import FilterIndicator from 'app/components/filter/FilterIndicator';
 import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
 
 function PatientsScreen({ navigation }) {
@@ -351,19 +350,26 @@ function PatientsScreen({ navigation }) {
             </View>
             <View>
               <FilterModalCard
-                sortOptions={sortOptions}
-                setSortOptions={setSortOptions}
-                selectedSort={selectedSort}
-                setSelectedSort={setSelectedSort}
-                dropdownFilterOptions={dropdownFilterOptions}
-                selectedDropdownFilters={selectedDropdownFilters}
-                setSelectedDropdownFilters={setSelectedDropdownFilters}
-                autocompleteFilterOptions={autocompleteFilterOptions}
-                selectedAutocompleteFilters={selectedAutocompleteFilters}
-                setSelectedAutocompleteFilters={setSelectedAutocompleteFilters}
-                chipFilterOptions={chipFilterOptions}
-                selectedChipFilters={selectedChipFilters}
-                setSelectedChipFilters={setSelectedChipFilters}
+                sort={{
+                  sortOptions: sortOptions,
+                  selectedSort: selectedSort,
+                  setSelectedSort: setSelectedSort,
+                }}
+                autoCompleteFilter={{
+                  autocompleteFilterOptions:autocompleteFilterOptions,
+                  selectedAutocompleteFilters:selectedAutocompleteFilters,
+                  setSelectedAutocompleteFilters:setSelectedAutocompleteFilters,
+                }}
+                dropdownFilter={{
+                  dropdownFilterOptions: dropdownFilterOptions,
+                  selectedDropdownFilters: selectedDropdownFilters,
+                  setSelectedDropdownFilters: setSelectedDropdownFilters,
+                }}
+                chipFilter={{
+                  chipFilterOptions: chipFilterOptions,
+                  selectedChipFilters: selectedChipFilters,
+                  setSelectedChipFilters: setSelectedChipFilters,
+                }}
                 handleSortFilter={handleSearchSortFilter}
               />
             </View>
