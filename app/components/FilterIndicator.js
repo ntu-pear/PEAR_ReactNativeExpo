@@ -76,23 +76,28 @@ function FilterIndicator({
             />
         ))}
 
-        {Object.keys(selectedDropdownFilters).map((filter) => (
-          <Chip
-            key={filter}
-            title={filter + ": " + selectedDropdownFilters[filter]['label']}
-            type="solid"
-            buttonStyle={{backgroundColor: colors.green}}
-            containerStyle={{marginLeft: 5}}
-            // icon={{
-            //   name: "close",
-            //   type: "material",
-            //   size: 20,
-            //   color: "white",
-            //   }}
-            // iconRight
-            // onPress={()=>deleteDropdownFilter(filter)}
-          />
-        ))}
+        {Object.keys(selectedDropdownFilters).map((filter) => {
+          if(selectedDropdownFilters[filter]['label'] != 'All') {
+            return (
+              <Chip
+                key={filter}
+                title={filter + ": " + selectedDropdownFilters[filter]['label']}
+                type="solid"
+                buttonStyle={{backgroundColor: colors.green}}
+                containerStyle={{marginLeft: 5}}
+                // icon={{
+                //   name: "close",
+                //   type: "material",
+                //   size: 20,
+                //   color: "white",
+                //   }}
+                // iconRight
+                // onPress={()=>deleteDropdownFilter(filter)}
+              />
+            )
+          } else {
+            return null;
+          }})}
       </View>
     </ScrollView>          
   );

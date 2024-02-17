@@ -24,6 +24,9 @@ const FilterModalCard = ({
   chipFilterOptions={},
   selectedChipFilters={},
   setSelectedChipFilters=()=>{},
+  autocompleteFilterOptions={},
+  selectedAutocompleteFilters={},
+  setSelectedAutocompleteFilters=()=>{},
   handleSortFilter,
 }) => {
   const initialRef = useRef(null);
@@ -35,12 +38,14 @@ const FilterModalCard = ({
   const [tempSelSort, setTempSelSort] = useState({...selectedSort});
   const [tempSelDropdownFilters, setTempSelDropdownFilters] = useState({...selectedDropdownFilters});
   const [tempSelChipFilters, setTempSelChipFilters] = useState({...selectedChipFilters});
+  const [tempSelAutocompleteFilters, setTempSelAutocompleteFilters] = useState({...selectedAutocompleteFilters});
 
   // Re-initialize sort and filter values to currently applied values whenever modal opens
   useEffect(() => {
     setIsLoading(true);
     setTempSelSort(Object.keys(selectedSort).length == 0 ? {'option': sortOptions[0], 'order': true} : {...selectedSort});
     setTempSelDropdownFilters({...selectedDropdownFilters});
+    setTempSelDropdownFilters({...selectedAutocompleteFilters});
 
     var tempSelChipFilters = {...selectedChipFilters};
     for (var filter of Object.keys(chipFilterOptions)) {
@@ -49,7 +54,6 @@ const FilterModalCard = ({
       }
     }
     setTempSelChipFilters(tempSelChipFilters);
-    // setTempSelChipFilters({...chipFilterOptions});
 
     Keyboard.dismiss();
     setIsLoading(false);
@@ -57,10 +61,10 @@ const FilterModalCard = ({
 
   // Apply sort and filter values and close modal
   const handleApply = () => {
-    console.log(tempSelDropdownFilters)
     setModalVisible(false);
     setSelectedSort({...tempSelSort});
     setSelectedDropdownFilters({...tempSelDropdownFilters});
+    setSelectedAutocompleteFilters({...tempSelAutocompleteFilters});
     setSelectedChipFilters({...tempSelChipFilters});
     handleSortFilter(undefined, {...tempSelSort}, {...tempSelDropdownFilters}, {...tempSelChipFilters});
   };
@@ -71,6 +75,7 @@ const FilterModalCard = ({
     setSelectedSort({});
     setSelectedDropdownFilters({});
     setSelectedChipFilters({});
+    setSelectedAutocompleteFilters({});
     handleSortFilter(undefined, {}, {}, {});
   };
 
@@ -91,14 +96,14 @@ const FilterModalCard = ({
     setTempSelDropdownFilters(tempSelectedFilters);      
   }
 
-  // // Set display value of dropdown filter when item is selected
-  // const handleOnSelectDropdownFilter = (item, filter) => {
-  //   if(item) {
-  //     let tempSelectedFilters = tempSelDropdownFilters;
-  //     tempSelectedFilters[filter] = item;
-  //     item && setTempSelDropdownFilters(tempSelectedFilters);      
-  //   }
-  // }
+  // Set display value of dropdown filter when item is selected
+  const handleOnSelectAutocompleteFilter = (item, filter) => {
+    if(item) {
+      let tempSelectedFilters = tempSelAutocompleteFilters;
+      tempSelectedFilters[filter] = item;
+      item && setTempSelAutocompleteFilters(tempSelectedFilters);      
+    }
+  }
 
   // Set display value of chip filter when item is selected
   const handleOnSelectChipFilter = (item, filter) => {
@@ -216,25 +221,34 @@ const FilterModalCard = ({
                           showTitle={false}
                           onDataChange={(item) => handleOnSelectDropdownFilter(item, filter)}
                           placeholder='Select caregiver'
-                          value={selectedDropdownFilters[filter][value]}
-                        />
-                        {/* <AutocompleteDropdown
+                          value={Object.keys(selectedDropdownFilters).includes(filter) ? selectedDropdownFilters[filter].value : null}
+                        />                          
+                      </View>
+                    )}
+                  </View>
+                </View>
+                ): null}
+              {Object.keys(autocompleteFilterOptions).length > 0 ? (
+                <View style={styles.filterContainer}>
+                  <View>
+                    {Object.keys(autocompleteFilterOptions).map((filter) => 
+                      <View key={filter}>
+                        <Text style={styles.textStyle}>{filter}</Text>
+                        <AutocompleteDropdown
                           ref={searchRefs[filter]}
                           closeOnBlur={false}
-                          dataSet={dropdownFilterOptions[filter]}
-                          onSelectItem={(item) => handleOnSelectDropdownFilter(item, filter)}
-                          onClear={() => setTempSelDropdownFilters({})}
+                          dataSet={autocompleteFilterOptions[filter]}
+                          onSelectItem={(item) => handleOnSelectAutocompleteFilter(item, filter)}
+                          onClear={() => setTempSelAutocompleteFilters({})}
                           textInputProps={{
-                            placeholder: 'Enter Caregiver Name',
                             autoCorrect: false,
                             autoCapitalize: 'none',
                           }}
                           
-                          initialValue={Object.keys(selectedDropdownFilters).includes(filter) ? selectedDropdownFilters[filter] : {id: null}}
+                          initialValue={Object.keys(selectedAutcompleteFilters).includes(filter) ? selectedAutocompleteFilters[filter] : {id: null}}
                           suggestionsListMaxHeight={150} 
                           useFilter={true}
-                          /> */}
-                          
+                          />                        
                       </View>
                     )}
                   </View>

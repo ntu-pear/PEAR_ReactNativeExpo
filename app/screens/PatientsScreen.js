@@ -167,7 +167,7 @@ function PatientsScreen({ navigation }) {
 
         // Parse filter options based on dropdown/chip type
         if(filterOptionDetails[filter]['type'] == 'dropdown') {
-          tempDropdownFilterOptions[filter] = parseSelectOptions(tempFilterOptionList);
+          tempDropdownFilterOptions[filter] = parseSelectOptions(['All', ...tempFilterOptionList]);
         } else if (filterOptionDetails[filter]['type'] == 'chip') {
           tempChipFilterOptions[filter] = parseSelectOptions(tempFilterOptionList);
         }
@@ -249,8 +249,10 @@ function PatientsScreen({ navigation }) {
   
     // Dropdown filters
     for (var filter of Object.keys(tempSelDropdownFilters)) {
-      filteredListOfPatients = filteredListOfPatients.filter((obj) => (
-        obj[SORTFILTER_MAPPING[filter]] === tempSelDropdownFilters[filter]['label'])) || []
+      if(tempSelDropdownFilters[filter]['label'] != 'All') {
+        filteredListOfPatients = filteredListOfPatients.filter((obj) => (
+          obj[SORTFILTER_MAPPING[filter]] === tempSelDropdownFilters[filter]['label'])) || []
+      }
     }
 
     // Chip Filters
