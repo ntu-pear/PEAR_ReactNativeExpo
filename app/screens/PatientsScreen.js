@@ -193,8 +193,10 @@ function PatientsScreen({ navigation }) {
   // Switch between search modes (full name, preferred name)
   const handleOnToggleSearchOptions = async(item) => {
     if(item) {      
-      item && setSearchOptions(item['title']);   
-      handleSearchSortFilter({tempSearchMode: item['title']});
+      item && setSearchOptions(item['title']);
+      if(searchQuery != '') {
+        handleSearchSortFilter({tempSearchMode: item['title']});
+      }   
     }
   }
 
