@@ -45,7 +45,7 @@ const FilterModalCard = ({
     setIsLoading(true);
     setTempSelSort(Object.keys(selectedSort).length == 0 ? {'option': sortOptions[0], 'order': true} : {...selectedSort});
     setTempSelDropdownFilters({...selectedDropdownFilters});
-    setTempSelDropdownFilters({...selectedAutocompleteFilters});
+    setTempSelAutocompleteFilters({...selectedAutocompleteFilters});
 
     var tempSelChipFilters = {...selectedChipFilters};
     for (var filter of Object.keys(chipFilterOptions)) {
@@ -66,7 +66,12 @@ const FilterModalCard = ({
     setSelectedDropdownFilters({...tempSelDropdownFilters});
     setSelectedAutocompleteFilters({...tempSelAutocompleteFilters});
     setSelectedChipFilters({...tempSelChipFilters});
-    handleSortFilter(undefined, {...tempSelSort}, {...tempSelDropdownFilters}, {...tempSelChipFilters});
+    handleSortFilter({
+      'tempSelSort': {...tempSelSort}, 
+      'tempSelDropdownFilters': {...tempSelDropdownFilters}, 
+      'tempSelChipFilters': {...tempSelChipFilters},
+      'tempSelAutocompleteFilters': {...tempSelAutocompleteFilters}
+    });
   };
   
   // Reset sort and filter values and close modal
@@ -76,8 +81,12 @@ const FilterModalCard = ({
     setSelectedDropdownFilters({});
     setSelectedChipFilters({});
     setSelectedAutocompleteFilters({});
-    handleSortFilter(undefined, {}, {}, {});
-  };
+    handleSortFilter({
+      'tempSelSort': {}, 
+      'tempSelDropdownFilters': {}, 
+      'tempSelChipFilters': {},
+      'tempSelAutoCompleteFilters': {}
+    });  };
 
   // Set display value of sort item is selected
   const handleOnSelectChipSort = (item) => {
@@ -90,7 +99,6 @@ const FilterModalCard = ({
 
   // Set display value of dropdown filter when item is selected
   const handleOnSelectDropdownFilter = (index, filter) => {
-    console.log(index, filter, dropdownFilterOptions[filter].filter(x=>x.value == index)[0])
     let tempSelectedFilters = tempSelDropdownFilters;
     tempSelectedFilters[filter] = dropdownFilterOptions[filter].filter(x=>x.value == index)[0];
     setTempSelDropdownFilters(tempSelectedFilters);      
@@ -111,7 +119,7 @@ const FilterModalCard = ({
     temp[filter] = item;
     setTempSelChipFilters(temp); 
   }
-    
+  
   return (
     <View>
       <TouchableOpacity 
@@ -230,9 +238,8 @@ const FilterModalCard = ({
                 ): null}
               {Object.keys(autocompleteFilterOptions).length > 0 ? (
                 <View style={styles.filterContainer}>
-                  <View>
                     {Object.keys(autocompleteFilterOptions).map((filter) => 
-                      <View key={filter}>
+                      (<View key={filter}>
                         <Text style={styles.textStyle}>{filter}</Text>
                         <AutocompleteDropdown
                           ref={searchRefs[filter]}
@@ -241,17 +248,16 @@ const FilterModalCard = ({
                           onSelectItem={(item) => handleOnSelectAutocompleteFilter(item, filter)}
                           onClear={() => setTempSelAutocompleteFilters({})}
                           textInputProps={{
+                            placeholder: 'Enter value',
                             autoCorrect: false,
                             autoCapitalize: 'none',
                           }}
-                          
-                          initialValue={Object.keys(selectedAutcompleteFilters).includes(filter) ? selectedAutocompleteFilters[filter] : {id: null}}
+                          initialValue={Object.keys(selectedAutocompleteFilters).includes(filter) ? selectedAutocompleteFilters[filter] : {id: null}}
                           suggestionsListMaxHeight={150} 
                           useFilter={true}
                           />                        
-                      </View>
+                      </View>)
                     )}
-                  </View>
                 </View>
                 ): null}
             </Modal.Body>

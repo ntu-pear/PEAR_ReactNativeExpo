@@ -13,30 +13,23 @@ import { Chip } from 'react-native-elements';
 function FilterIndicator({
   selectedSort={},
   setSelectedSort=()=>{},
-  SORT_OPTIONS=[],
   chipFilterOptions={},
   selectedChipFilters={},
   selectedDropdownFilters={},
-  setSelectedDropdownFilters=()=>{},
+  selectedAutocompleteFilters={},
   handleSortFilter=()=>{}
 }) {
 
   // Toggle sort order (asc/desc) 
   const toggleSortOrder = () => {
-    let tempSelSort = Object.keys(selectedSort).length > 0 ? selectedSort : {'option': SORT_OPTIONS[0], 'order': true};
+    let tempSelSort = selectedSort;
     tempSelSort['order'] = !tempSelSort['order']
     setSelectedSort(tempSelSort);
-    handleSortFilter(undefined, {...tempSelSort});
+    handleSortFilter({
+      'tempSelSort': {...tempSelSort}, 
+    });  
   }
   
-  // Delete dropdown filter when user clicks on it
-  const deleteDropdownFilter = (filter) => {
-    let tempSelDropdownFilters = {...selectedDropdownFilters};
-    delete tempSelDropdownFilters[filter];
-    setSelectedDropdownFilters({...tempSelDropdownFilters});
-    handleSortFilter(undefined, undefined, {...tempSelDropdownFilters});    
-  }
-
   return (    
     <ScrollView
       horizontal={true}
@@ -46,9 +39,9 @@ function FilterIndicator({
       <View
         style={{flexDirection: 'row'}}
       >
-        {SORT_OPTIONS.length > 0 ? (
+        {Object.keys(selectedSort).length > 0  ? (
           <Chip              
-            title={"Sort by: " + (Object.keys(selectedSort).length > 0 ? selectedSort['option']['label'] : SORT_OPTIONS[0]['label'])}
+            title={"Sort by: " + selectedSort['option']['label']}
             type="solid"
             buttonStyle={{backgroundColor: colors.green}} 
             onPress={toggleSortOrder}
@@ -85,19 +78,21 @@ function FilterIndicator({
                 type="solid"
                 buttonStyle={{backgroundColor: colors.green}}
                 containerStyle={{marginLeft: 5}}
-                // icon={{
-                //   name: "close",
-                //   type: "material",
-                //   size: 20,
-                //   color: "white",
-                //   }}
-                // iconRight
-                // onPress={()=>deleteDropdownFilter(filter)}
               />
             )
           } else {
             return null;
           }})}
+
+        {Object.keys(selectedAutocompleteFilters).map((filter) => (
+          <Chip
+            key={filter}
+            title={filter + ": " + selectedAutocompleteFilters[filter]['title']}
+            type="solid"
+            buttonStyle={{backgroundColor: colors.green}}
+            containerStyle={{marginLeft: 5}}
+          />
+        ))}
       </View>
     </ScrollView>          
   );

@@ -48,6 +48,10 @@ function PatientsScreen({ navigation }) {
   // Dropdown filter related states
   const [dropdownFilterOptions, setDropdownFilterOptions] = useState({});
   const [selectedDropdownFilters, setSelectedDropdownFilters] = useState({});
+
+  // Autocomplete filter related states
+  const [autocompleteFilterOptions, setAutocompleteFilterOptions] = useState({});
+  const [selectedAutocompleteFilters, setSelectedAutocompleteFilters] = useState({});
   
   // Chip filter related states
   const [chipFilterOptions, setChipFilterOptions] = useState({}); 
@@ -65,7 +69,7 @@ function PatientsScreen({ navigation }) {
   // Details related to filter options
   const filterOptionDetails = {
     'Caregiver': {
-      'type': 'dropdown', 
+      'type': 'autocomplete', 
       'options': {},
       'isFilter': true,
     },
@@ -97,22 +101,6 @@ function PatientsScreen({ navigation }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewMode]);
 
-  // When user changes patient status filter, update list of patients
-  useEffect(() => {
-    setIsLoading(true);
-    const promiseFunction = async () => {
-      await handleSearchSortFilter();
-      setIsLoading(false);    
-    };
-    promiseFunction();
-  }, [originalListOfPatients,
-    searchOptions,
-    searchQuery,
-    // selectedChipFilters,
-    // selectedDropdownFilters,
-    // selectedSort
-  ])
-
   // Retrieve patient list from backend
   const getListOfPatients = async (status='active') => {
     const response =
@@ -142,12 +130,14 @@ function PatientsScreen({ navigation }) {
     setSearchQuery('');
     setSelectedSort({});
     setSelectedDropdownFilters({});
+    setSelectedAutocompleteFilters({});
     setSelectedChipFilters({});
   }
 
   // Initialize sort and filter options based on view mode
   const initSortFilter = (data) => {
     let tempDropdownFilterOptions = {};
+    let tempAutocompleteFilterOptions = {};
     let tempChipFilterOptions = {};
 
     if(viewMode === 'myPatients') {
@@ -170,11 +160,13 @@ function PatientsScreen({ navigation }) {
           tempDropdownFilterOptions[filter] = parseSelectOptions(['All', ...tempFilterOptionList]);
         } else if (filterOptionDetails[filter]['type'] == 'chip') {
           tempChipFilterOptions[filter] = parseSelectOptions(tempFilterOptionList);
+        } else if (filterOptionDetails[filter]['type'] == 'autocomplete') {
+          tempAutocompleteFilterOptions[filter] = parseAutoCompleteOptions(tempFilterOptionList);
         }
-
       }
     }
     setDropdownFilterOptions(tempDropdownFilterOptions);
+    setAutocompleteFilterOptions(tempAutocompleteFilterOptions);
     setChipFilterOptions(tempChipFilterOptions);
     setSortOptions(parseSelectOptions(['Full Name', 'Preferred Name', 'Start Date', ...viewMode==='allPatients' ? ['Caregiver'] : []]))
   }
@@ -199,15 +191,28 @@ function PatientsScreen({ navigation }) {
   }
 
   // Switch between search modes (full name, preferred name)
-  const handleOnToggleSearchOptions = (item) => {
+  const handleOnToggleSearchOptions = async(item) => {
     if(item) {      
       item && setSearchOptions(item['title']);   
-      // handleSearchSortFilter(undefined, undefined, undefined, undefined, item['title']);   
+      handleSearchSortFilter({tempSearchMode: item['title']});
     }
   }
 
+  // Update search state and handle searching when user changes search query
+  const handleSearch = (text) => {
+    setSearchQuery(text); 
+    handleSearchSortFilter({'text': text})
+  }
+
   // Handle searching, sorting, and filtering of patient data based on patient status
-  const handleSearchSortFilter = async (text=searchQuery, tempSelSort=selectedSort, tempSelDropdownFilters=selectedDropdownFilters, tempSelChipFilters=selectedChipFilters, tempSearchMode=searchOptions) => {       
+  const handleSearchSortFilter = async ({
+    text=searchQuery, 
+    tempSelSort=selectedSort, 
+    tempSelDropdownFilters=selectedDropdownFilters,
+    tempSelChipFilters=selectedChipFilters, 
+    tempSelAutocompleteFilters=selectedAutocompleteFilters, 
+    tempSearchMode=searchOptions
+  }) => {       
     setIsLoading(true);
 
     let tempPatientStatus = Object.keys(tempSelChipFilters).length > 0 ? tempSelChipFilters['Patient Status']['label'] : 'active';
@@ -222,14 +227,14 @@ function PatientsScreen({ navigation }) {
       await getListOfPatients(tempPatientStatus);
       setPatientStatus(tempPatientStatus);       
     } else {
-      setFilteredPatientList(text, tempSelSort, tempSelDropdownFilters, tempSelChipFilters, tempSearchMode);
+      setFilteredPatientList(text, tempSelSort, tempSelDropdownFilters, tempSelChipFilters, tempSelAutocompleteFilters, tempSearchMode);
     }   
 
     setIsLoading(false);
   }
 
   // Update patient list based on search, sort, and filter criteria
-  const setFilteredPatientList = (text, tempSelSort, tempSelDropdownFilters, tempSelChipFilters, tempSearchMode) => {
+  const setFilteredPatientList = (text, tempSelSort, tempSelDropdownFilters, tempSelChipFilters, tempSelAutocompleteFilters, tempSearchMode) => {
     let filteredListOfPatients = originalListOfPatients.map((obj) => ({
       ...obj,
       fullName: `${obj.firstName.trim()} ${obj.lastName.trim()}`
@@ -253,6 +258,12 @@ function PatientsScreen({ navigation }) {
         filteredListOfPatients = filteredListOfPatients.filter((obj) => (
           obj[SORTFILTER_MAPPING[filter]] === tempSelDropdownFilters[filter]['label'])) || []
       }
+    }
+
+    // Autocomplete filters
+    for (var filter of Object.keys(tempSelAutocompleteFilters)) {
+      filteredListOfPatients = filteredListOfPatients.filter((obj) => (
+        obj[SORTFILTER_MAPPING[filter]] === tempSelAutocompleteFilters[filter]['title'])) || []
     }
 
     // Chip Filters
@@ -304,7 +315,7 @@ function PatientsScreen({ navigation }) {
           <View style={styles.optionsContainer}>
             <View style={styles.searchBar}>
               <SearchBar 
-                onChangeText={setSearchQuery}
+                onChangeText={handleSearch}
                 value={searchQuery}
                 autoCapitalize='characters'
                 inputContainerStyle={{borderTopRightRadius: 0, borderBottomRightRadius: 0, height: 47}}
@@ -345,6 +356,9 @@ function PatientsScreen({ navigation }) {
                 dropdownFilterOptions={dropdownFilterOptions}
                 selectedDropdownFilters={selectedDropdownFilters}
                 setSelectedDropdownFilters={setSelectedDropdownFilters}
+                autocompleteFilterOptions={autocompleteFilterOptions}
+                selectedAutocompleteFilters={selectedAutocompleteFilters}
+                setSelectedAutocompleteFilters={setSelectedAutocompleteFilters}
                 chipFilterOptions={chipFilterOptions}
                 selectedChipFilters={selectedChipFilters}
                 setSelectedChipFilters={setSelectedChipFilters}
@@ -367,9 +381,8 @@ function PatientsScreen({ navigation }) {
             />
 
             <FilterIndicator
-              selectedSort={selectedSort}
+              selectedSort={Object.keys(selectedSort).length > 0 ? selectedSort : {'option': sortOptions[0], 'order': true}}
               setSelectedSort={setSelectedSort}
-              SORT_OPTIONS={sortOptions}
               chipFilterOptions={chipFilterOptions}
               selectedChipFilters={selectedChipFilters}
               selectedDropdownFilters={selectedDropdownFilters}
