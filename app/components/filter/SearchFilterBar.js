@@ -54,29 +54,10 @@ function SearchFilterBar({
     setSearchQuery=()=>{}
   },
   handleSearchSortFilter=()=>{},
-  itemCount=null,
-   
+  itemCount=null,   
 }) {  
-
-  // Ref to store selectRefs of select components in FilterModal
-  const selectRefs = useRef({}); 
-
   // Default state to control modal visibility
   const [modalVisible, setModalVisible] = useState(false);
-
-
-  const openSelect = (ref, identifier) => {
-    selectRefs.current[identifier] = ref; // Store the selectRef by identifier
-    if (ref.current) {
-      ref.current.open();
-    }
-  };
-
-  const onButtonPress = (identifier) => {
-    if (selectRefs.current[identifier]) {
-      selectRefs.current[identifier].current.open(); // Open the corresponding selectRef
-    }
-  };
 
   // Whenever data changes, reinitialize sort and filter options
   useEffect(() => {
@@ -233,7 +214,6 @@ function SearchFilterBar({
               setSelectedChipFilters: setSelectedChipFilters,
             }}
             handleSortFilter={handleSearchSortFilter}
-            openSelect={openSelect}
           />
         </View>
       </View>
@@ -261,7 +241,6 @@ function SearchFilterBar({
           selectedDropdownFilters={selectedDropdownFilters}
           selectedAutocompleteFilters={selectedAutocompleteFilters}
           handleSortFilter={handleSearchSortFilter}
-          onButtonPress={onButtonPress}
         />
       </View>
       

@@ -20,7 +20,6 @@ function FilterIndicator({
   selectedDropdownFilters={},
   selectedAutocompleteFilters={},
   handleSortFilter=()=>{},
-  onButtonPress=()=>{}
 }) {
 
   // Toggle sort order (asc/desc) 
