@@ -14,6 +14,7 @@ import { parseAutoCompleteOptions, parseSelectOptions, sortArray } from 'app/uti
 import FilterIndicator from 'app/components/filter/FilterIndicator';
 import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
 import { useEffect, useRef, useState } from 'react';
+import SelectionInputField from '../input-fields/SelectionInputField';
 
 function SearchFilterBar({
   data={},
@@ -49,7 +50,7 @@ function SearchFilterBar({
     setSelectedAutocompleteFilters=()=>{},
   },
   search: {
-    setSearchOptions=()=>{},
+    setSearchOption=()=>{},
     searchQuery='',
     setSearchQuery=()=>{}
   },
@@ -59,6 +60,9 @@ function SearchFilterBar({
   // Default state to control modal visibility
   const [modalVisible, setModalVisible] = useState(false);
 
+  // Constant search options
+  const searchOptions = parseSelectOptions(['Full Name', 'Preferred Name']);
+
   // Whenever data changes, reinitialize sort and filter options
   useEffect(() => {
     initSortFilter();
@@ -66,8 +70,6 @@ function SearchFilterBar({
 
   // Initialize sort and filter options based on view mode
   const initSortFilter = () => {
-    console.log(4)
-
     let tempDropdownFilterOptions = {};
     let tempAutocompleteFilterOptions = {};
     let tempChipFilterOptions = {};
@@ -101,7 +103,7 @@ function SearchFilterBar({
     
   // Reset selected search, sort, and filter options
   const resetSearchSortFilter = () => {
-    setSearchOptions('Full Name');
+    setSearchOption('Full Name');
     setSearchQuery('');
     setSelectedSort({});
     setSelectedDropdownFilters({});
@@ -111,12 +113,11 @@ function SearchFilterBar({
 
   // Switch between search modes (full name, preferred name)
   const handleOnToggleSearchOptions = async(item) => {
-    if(item) {      
-      item && setSearchOptions(item['title']);
-      if(searchQuery != '') {
-        handleSearchSortFilter({tempSearchMode: item['title']});
-      }   
-    }
+    const label = searchOptions.filter(x=>x.value == item)[0]['label'];
+    setSearchOption(label);
+    if(searchQuery != '') {
+      handleSearchSortFilter({tempSearchMode: label});
+    }   
   }
 
   // Switch between 'My Patients' and 'All Patients'
@@ -135,7 +136,7 @@ function SearchFilterBar({
   }
 
   return (
-    <Center backgroundColor={colors.white_var1}>
+    <Center backgroundColor={colors.white_var1} zindex={1}>
       <View style={styles.optionsContainer}>
         <TouchableOpacity 
           style={[styles.tab, ...viewMode=='myPatients' ? [styles.selectedTab] : []]}
@@ -163,8 +164,8 @@ function SearchFilterBar({
             inputContainerStyle={{borderTopRightRadius: 0, borderBottomRightRadius: 0, height: 47}}
           />
         </View>
-        <View style={{flex: 0.4}}>
-          <AutocompleteDropdown
+        <View style={{flex: 0.4, zIndex: 1}}>
+          {/* <AutocompleteDropdown
             dataSet={parseAutoCompleteOptions(['Full Name', 'Preferred Name'])}
             closeOnBlur={true}              
             initialValue='1'
@@ -174,7 +175,8 @@ function SearchFilterBar({
             onSelectItem={(item) => handleOnToggleSearchOptions(item)}
             inputContainerStyle={{backgroundColor: colors.green, color: colors.white, borderTopLeftRadius: 0, borderBottomLeftRadius: 0}}
             textInputProps={{color: colors.white, fontSize: 13.5, fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android}}
-            // suggestionsListContainerStyle={{zIndex: 100}}
+            suggestionsListContainerStyle={{zIndex: 2}}
+            flatListProps={{zIndex: 2}}
             ChevronIconComponent={(
             <Icon 
               as={
@@ -187,7 +189,21 @@ function SearchFilterBar({
             >
             </Icon>)}
 
+          /> */}
+          <SelectionInputField
+            dataArray={searchOptions}
+            showTitle={false}
+            otherProps={{
+              backgroundColor: colors.green,
+              color: colors.white,
+              borderTopLeftRadius: 0,
+              borderBottomLeftRadius: 0,
+              borderTopRightRadius: 10, 
+              borderBottomRightRadius: 10,
+            }}
+            onDataChange={handleOnToggleSearchOptions}                        
           />
+
         </View>
         <View>
           <FilterModalCard
@@ -263,6 +279,7 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     flex: 1,    
+    marginTop: 5
   },
   patientListContainer: {
     paddingHorizontal: '5%',

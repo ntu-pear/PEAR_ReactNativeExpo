@@ -85,7 +85,7 @@ function PatientsScreen({ navigation }) {
   const [isReloadPatientList, setIsReloadPatientList] = useState(false);
   
   // Search related states
-  const [searchOptions, setSearchOptions] = useState('Full Name');
+  const [searchOption, setSearchOption] = useState('Full Name');
   const [searchQuery, setSearchQuery] = useState('');
   
   // Sort related states
@@ -163,7 +163,7 @@ function PatientsScreen({ navigation }) {
     tempSelDropdownFilters=selectedDropdownFilters,
     tempSelChipFilters=selectedChipFilters, 
     tempSelAutocompleteFilters=selectedAutocompleteFilters, 
-    tempSearchMode=searchOptions
+    tempSearchMode=searchOption
   }) => {       
     setIsLoading(true);
 
@@ -281,7 +281,7 @@ function PatientsScreen({ navigation }) {
               setSelectedAutocompleteFilters: setAutocompleteFilterOptions,
             }}
             search={{
-              setSearchOptions: setSearchOptions,
+              setSearchOption: setSearchOption,
               searchQuery: searchQuery,
               setSearchQuery: setSearchQuery
             }}
@@ -384,6 +384,7 @@ const styles = StyleSheet.create({
   },
   patientListContainer: {
     paddingHorizontal: '5%',
+    zIndex: -1,
   },
   patientRowContainer: {
     marginVertical: '3%',

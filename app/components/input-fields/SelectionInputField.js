@@ -23,7 +23,8 @@ function SelectionInputField({
   onEndEditing = () => {},
   inputLeftElement = null,
   inputRightElement = null,
-  isDisabledItems = {}
+  isDisabledItems = {},
+  otherProps={},
 }) {
   /*
   This state and subsequent useEffect are used to track if the component is in its first render. This is mainly used to
@@ -109,6 +110,7 @@ function SelectionInputField({
           onValueChange={handleValueChanged}
           InputLeftElement={inputLeftElement}
           inputRightElement={inputRightElement}
+          {...otherProps}
         >
           {dataArray.map((item) => (
             <Select.Item key={item} label={item.label} value={item.value} isDisabled={isDisabledItems ? isDisabledItems[item.value] : false}/>
