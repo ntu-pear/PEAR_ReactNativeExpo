@@ -19,7 +19,8 @@ function FilterIndicator({
   selectedChipFilters={},
   selectedDropdownFilters={},
   selectedAutocompleteFilters={},
-  handleSortFilter=()=>{}
+  handleSortFilter=()=>{},
+  onButtonPress=()=>{}
 }) {
 
   // Toggle sort order (asc/desc) 
@@ -31,7 +32,7 @@ function FilterIndicator({
       'tempSelSort': {...tempSelSort}, 
     });  
   }
-  
+
   return (    
     <ScrollView
       horizontal={true}
@@ -68,6 +69,10 @@ function FilterIndicator({
             type="solid"
             buttonStyle={{backgroundColor: colors.green}}
             containerStyle={{marginLeft: 5}}
+            onPress={modalVisible != undefined ? () => setModalVisible(true) : () => {}}
+            disabled={modalVisible == undefined} 
+            disabledStyle={{backgroundColor: colors.green}}
+            disabledTitleStyle={{color: colors.white_var1}}
             />
         ))}
 
@@ -80,6 +85,10 @@ function FilterIndicator({
                 type="solid"
                 buttonStyle={{backgroundColor: colors.green}}
                 containerStyle={{marginLeft: 5}}
+                onPress={modalVisible != undefined ? () => setModalVisible(true) : () => {}}
+                disabled={modalVisible == undefined} 
+                disabledStyle={{backgroundColor: colors.green}}
+                disabledTitleStyle={{color: colors.white_var1}}
               />
             )
           } else {
@@ -93,6 +102,10 @@ function FilterIndicator({
             type="solid"
             buttonStyle={{backgroundColor: colors.green}}
             containerStyle={{marginLeft: 5}}
+            onPress={modalVisible != undefined ? () => setModalVisible(true) : () => {}}
+            disabled={modalVisible == undefined} 
+            disabledStyle={{backgroundColor: colors.green}}
+            disabledTitleStyle={{color: colors.white_var1}}
           />
         ))}
       </View>

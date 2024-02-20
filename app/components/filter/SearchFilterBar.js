@@ -13,7 +13,7 @@ import FilterModalCard from 'app/components/filter/FilterModalCard';
 import { parseAutoCompleteOptions, parseSelectOptions, sortArray } from 'app/utility/miscFunctions';
 import FilterIndicator from 'app/components/filter/FilterIndicator';
 import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 function SearchFilterBar({
   data={},
@@ -58,7 +58,25 @@ function SearchFilterBar({
    
 }) {  
 
+  // Ref to store selectRefs of select components in FilterModal
+  const selectRefs = useRef({}); 
+
+  // Default state to control modal visibility
   const [modalVisible, setModalVisible] = useState(false);
+
+
+  const openSelect = (ref, identifier) => {
+    selectRefs.current[identifier] = ref; // Store the selectRef by identifier
+    if (ref.current) {
+      ref.current.open();
+    }
+  };
+
+  const onButtonPress = (identifier) => {
+    if (selectRefs.current[identifier]) {
+      selectRefs.current[identifier].current.open(); // Open the corresponding selectRef
+    }
+  };
 
   // Whenever data changes, reinitialize sort and filter options
   useEffect(() => {
@@ -215,6 +233,7 @@ function SearchFilterBar({
               setSelectedChipFilters: setSelectedChipFilters,
             }}
             handleSortFilter={handleSearchSortFilter}
+            openSelect={openSelect}
           />
         </View>
       </View>
@@ -233,6 +252,8 @@ function SearchFilterBar({
         />
 
         <FilterIndicator
+          modalVisible={modalVisible}
+          setModalVisible={setModalVisible}
           selectedSort={Object.keys(selectedSort).length > 0 ? selectedSort : {'option': sortOptions[0], 'asc': true}}
           setSelectedSort={setSelectedSort}
           chipFilterOptions={chipFilterOptions}
@@ -240,6 +261,7 @@ function SearchFilterBar({
           selectedDropdownFilters={selectedDropdownFilters}
           selectedAutocompleteFilters={selectedAutocompleteFilters}
           handleSortFilter={handleSearchSortFilter}
+          onButtonPress={onButtonPress}
         />
       </View>
       
