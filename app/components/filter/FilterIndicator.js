@@ -10,7 +10,9 @@ import colors from 'app/config/colors';
 // Components
 import { Chip } from 'react-native-elements';
 
-function FilterIndicator({
+function FilterIndicator({  
+  modalVisible,
+  setModalVisible,
   selectedSort={},
   setSelectedSort=()=>{},
   chipFilterOptions={},
@@ -23,7 +25,7 @@ function FilterIndicator({
   // Toggle sort order (asc/desc) 
   const toggleSortOrder = () => {
     let tempSelSort = selectedSort;
-    tempSelSort['order'] = !tempSelSort['order']
+    tempSelSort['asc'] = !tempSelSort['asc']
     setSelectedSort(tempSelSort);
     handleSortFilter({
       'tempSelSort': {...tempSelSort}, 
@@ -48,7 +50,7 @@ function FilterIndicator({
             iconRight
             icon={{
               name: Object.keys(selectedSort).length > 0 
-                ? selectedSort['order']
+                ? selectedSort['asc']
                   ? 'long-arrow-up' 
                   : 'long-arrow-down'
                 : 'long-arrow-up', 

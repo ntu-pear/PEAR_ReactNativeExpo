@@ -13,6 +13,8 @@ import SelectionInputField from '../input-fields/SelectionInputField';
 
 
 const FilterModalCard = ({
+  modalVisible,
+  setModalVisible,
   sort: {
     sortOptions=[],
     selectedSort={},
@@ -40,7 +42,7 @@ const FilterModalCard = ({
   const finalRef = useRef(null);
   const searchRefs = useRef({});
 
-  const [modalVisible, setModalVisible] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState( false);
   const [isLoading, setIsLoading] = useState(true);
   const [tempSelSort, setTempSelSort] = useState({...selectedSort});
   const [tempSelDropdownFilters, setTempSelDropdownFilters] = useState({...selectedDropdownFilters});
@@ -50,7 +52,7 @@ const FilterModalCard = ({
   // Re-initialize sort and filter values to currently applied values whenever modal opens
   useEffect(() => {
     setIsLoading(true);
-    setTempSelSort(Object.keys(selectedSort).length == 0 ? {'option': sortOptions[0], 'order': true} : {...selectedSort});
+    setTempSelSort(Object.keys(selectedSort).length == 0 ? {'option': sortOptions[0], 'asc': true} : {...selectedSort});
     setTempSelDropdownFilters({...selectedDropdownFilters});
     setTempSelAutocompleteFilters({...selectedAutocompleteFilters});
 
@@ -64,11 +66,20 @@ const FilterModalCard = ({
 
     Keyboard.dismiss();
     setIsLoading(false);
-  }, [modalVisible])
+  }, [modalVisible != undefined ? modalVisible : isModalVisible])
+
+  // Update state that controls modal visibility depending on whether parent component controls it or child
+  const updateModalVisibility = (val) => {
+    if(setModalVisible) {
+      setModalVisible(val);
+    } else {
+      setIsModalVisible(val);
+    }
+  }
 
   // Apply sort and filter values and close modal
   const handleApply = () => {
-    setModalVisible(false);
+    updateModalVisibility(false);
     setSelectedSort({...tempSelSort});
     setSelectedDropdownFilters({...tempSelDropdownFilters});
     setSelectedAutocompleteFilters({...tempSelAutocompleteFilters});
@@ -83,7 +94,7 @@ const FilterModalCard = ({
   
   // Reset sort and filter values and close modal
   const handleReset = () => {
-    setModalVisible(false);
+    updateModalVisibility(false);
     setSelectedSort({});
     setSelectedDropdownFilters({});
     setSelectedChipFilters({});
@@ -99,9 +110,9 @@ const FilterModalCard = ({
   const handleOnSelectChipSort = (item) => {
     let asc = true;
     if(tempSelSort['option']['value'] == item.value) {
-      asc = !tempSelSort['order'];
+      asc = !tempSelSort['asc'];
     }
-    setTempSelSort({'option': item, 'order': asc});
+    setTempSelSort({'option': item, 'asc': asc});
   }
 
   // Set display value of dropdown filter when item is selected
@@ -126,12 +137,12 @@ const FilterModalCard = ({
     temp[filter] = item;
     setTempSelChipFilters(temp); 
   }
-  
-  return (
+
+    return (
     <View>
       <TouchableOpacity 
         style={styles.filterIcon}
-        onPress={() => setModalVisible(true)}
+        onPress={() => updateModalVisibility(true)}
         >
         <Icon 
           as={
@@ -148,8 +159,8 @@ const FilterModalCard = ({
         <Modal
           size={'lg'}
           animationPreset={'slide'}
-          isOpen={modalVisible}
-          onClose={() => setModalVisible(false)}
+          isOpen={modalVisible != undefined ? modalVisible : isModalVisible}
+          onClose={() => updateModalVisibility(false)}
           initialFocusRef={initialRef}
           finalFocusRef={finalRef}
         >
@@ -180,7 +191,7 @@ const FilterModalCard = ({
                             iconRight
                             icon={{
                               name: tempSelSort['option'].value == item.value 
-                              ? tempSelSort['order']
+                              ? tempSelSort['asc']
                                 ? 'long-arrow-up' 
                                 : 'long-arrow-down' 
                               : '',

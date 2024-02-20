@@ -17,31 +17,79 @@ import typography from 'app/config/typography';
 // Components
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import ProfileNameButton from 'app/components/ProfileNameButton';
-import SearchBar from 'app/components/input-fields/SearchBar';
-import FilterModalCard from 'app/components/filter/FilterModalCard';
-import { parseAutoCompleteOptions, parseSelectOptions, sortArray } from 'app/utility/miscFunctions';
+import {parseSelectOptions, sortArray } from 'app/utility/miscFunctions';
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
-import FilterIndicator from 'app/components/filter/FilterIndicator';
-import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
+import SearchFilterBar from 'app/components/filter/SearchFilterBar';
 
 function PatientsScreen({ navigation }) {
   const patientListRef = useRef(null);
 
-  const [isLoading, setIsLoading] = useState(false);
-  
+  // Quick guide to adding sort/filter options
+  // 1. Sort options:
+  // - Add name of sort option to SORT_OPTIONS under the respective viewmode (allPatients/myPatients)
+  // - Update SORT_FILTER_MAPPING with mapping between the sort name and the corresponding data field (if required) 
+  // 2. Filter options:
+  // - Add name of filter option to FILTER_OPTIONS under the respective viewmode (allPatients/myPatients)
+  // - Update SORT_FILTER_MAPPING with mapping between the filter name and the corresponding data field (if required) 
+  // - Update FILTER_OPTION_DETAILS with the type, options if any, and isFilter
+
+  // Sort options based on view mode
+  const SORT_OPTIONS = {
+    'myPatients': ['Full Name', 'Preferred Name', 'Start Date'],
+    'allPatients': ['Full Name', 'Preferred Name', 'Start Date','Caregiver']
+  };
+
+  // Filter options based on view mode
+  const FILTER_OPTIONS = {
+    'myPatients': ['Patient Status'],
+    'allPatients': ['Patient Status', 'Caregiver']
+  }
+
+  // Mapping between sort/filter names and the respective field in the patient data retrieved from the backend
+  const SORT_FILTER_MAPPING = {
+    'Full Name': 'fullName', 
+    'Preferred Name': 'preferredName', 
+    'Caregiver': 'caregiverName', 
+    'Start Date': 'startDate',
+    'Patient Status': 'isActive' 
+  }
+
+  // Details of filter options
+  // --------------------------
+  // type - chip | dropdown | autocomplete (what kind of UI/component to use to display the filter)
+  // options - {} | custom dict that maps options for filtering to corresponding values in the patient data
+  //                e.g.: {'Active': true, 'Inactive': false, 'All': undefined} for filter corresponding to isActive
+  //                      where 'Active' filter option corresponds to isActive=true etc.
+  // isFilter - whether the filter is actually to be used for filtering,
+  //            since some filters like patient status may be used to make an API call instead of norma; filtering
+  // --------------------------
+  const FILTER_OPTION_DETAILS = {
+    'Caregiver': {
+      'type': 'dropdown', 
+      'options': {},
+      'isFilter': true,
+    },
+    'Patient Status': {
+      'type': 'chip',
+      'options': {'Active': true, 'Inactive': false, 'All': undefined}, // define custom options and map to corresponding values in patient data
+      'isFilter': false
+    } 
+  }
+
   // Patient data related states
+  const [isLoading, setIsLoading] = useState(false);
   const [originalListOfPatients, setOriginalListOfPatients] = useState([]); // list of patients without sort, search, filter
   const [listOfPatients, setListOfPatients] = useState([]) // list of patients after sort, search, filter
   const [patientStatus, setPatientStatus] = useState('Active'); // Active, Inactive, All
   const [viewMode, setViewMode] = useState('myPatients'); // myPatients, allPatients
-  const [isReloadPatientList, setIsReloadPatientList] = useState(true);
+  const [isReloadPatientList, setIsReloadPatientList] = useState(false);
   
   // Search related states
   const [searchOptions, setSearchOptions] = useState('Full Name');
   const [searchQuery, setSearchQuery] = useState('');
-
+  
   // Sort related states
-  const [sortOptions, setSortOptions] = useState(parseSelectOptions(['Full Name', 'Preferred Name', 'Start Date']));
+  const [sortOptions, setSortOptions] = useState(parseSelectOptions(SORT_OPTIONS[viewMode]))
   const [selectedSort, setSelectedSort] = useState({});
 
   // Dropdown filter related states
@@ -55,29 +103,6 @@ function PatientsScreen({ navigation }) {
   // Chip filter related states
   const [chipFilterOptions, setChipFilterOptions] = useState({}); 
   const [selectedChipFilters, setSelectedChipFilters] = useState({}); 
-
-  // Constants to map sort/filter names to respective fields in patient data
-  const SORTFILTER_MAPPING = {
-    'Full Name': 'fullName', 
-    'Preferred Name': 'preferredName', 
-    'Caregiver': 'caregiverName', 
-    'Start Date': 'startDate',
-    'Patient Status': 'isActive' 
-  }
-
-  // Details related to filter options
-  const filterOptionDetails = {
-    'Caregiver': {
-      'type': 'dropdown', 
-      'options': {},
-      'isFilter': true,
-    },
-    'Patient Status': {
-      'type': 'chip',
-      'options': {'Active': true, 'Inactive': false, 'All': undefined}, // define custom options and map to corresponding values in patient data
-      'isFilter': false
-    } 
-  }
 
   // Refresh list when new patient is added or user requests refresh
   // Reference https://stackoverflow.com/questions/21518381/proper-way-to-wait-for-one-function-to-finish-before-continuing
@@ -96,12 +121,11 @@ function PatientsScreen({ navigation }) {
   // Note: not done with function that handles view mode toggling bc of state update latency
   useEffect(() => {
     refreshListOfPatients();
-    resetSearchSortFilter();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewMode]);
 
   // Retrieve patient list from backend
-  const getListOfPatients = async (status='active') => {
+  const getListOfPatients = async (status='active') => {   
     const response =
     viewMode === 'myPatients'
         ? await patientApi.getPatientListByLoggedInCaregiver(undefined, status)
@@ -109,7 +133,6 @@ function PatientsScreen({ navigation }) {
 
     setOriginalListOfPatients([...response.data.data]);
     setListOfPatients([...response.data.data])
-    initSortFilter(response.data.data);    
   };
     
   // Set screen to loading wheel when retrieving patient list from backend
@@ -120,55 +143,7 @@ function PatientsScreen({ navigation }) {
       setIsLoading(false);
     };
     promiseFunction();
-  }
-  
-  // Reset selected search, sort, and filter options
-  const resetSearchSortFilter = () => {
-    setPatientStatus('active');
-    setSearchOptions('Full Name');
-    setSearchQuery('');
-    setSelectedSort({});
-    setSelectedDropdownFilters({});
-    setSelectedAutocompleteFilters({});
-    setSelectedChipFilters({});
-  }
-
-  // Initialize sort and filter options based on view mode
-  const initSortFilter = (data) => {
-    let tempDropdownFilterOptions = {};
-    let tempAutocompleteFilterOptions = {};
-    let tempChipFilterOptions = {};
-
-    if(viewMode === 'myPatients') {
-      tempChipFilterOptions['Patient Status'] = parseSelectOptions(Object.keys(filterOptionDetails['Patient Status']['options']));
-    } else { 
-      for(var filter of Object.keys(filterOptionDetails)) {
-        let tempFilterOptionList;
-        
-        // If no custom options for a filter, get options from patient list by taking distinct values of the filter property
-        // Else use custom options
-        if (Object.keys(filterOptionDetails[filter]['options']).length == 0) {
-          tempFilterOptionList = data.map(x => x[SORTFILTER_MAPPING[filter]]);
-          tempFilterOptionList = Array.from(new Set(tempFilterOptionList));        
-        } else {
-          tempFilterOptionList = Object.keys(filterOptionDetails[filter]['options'])
-        }
-
-        // Parse filter options based on dropdown/chip type
-        if(filterOptionDetails[filter]['type'] == 'dropdown') {
-          tempDropdownFilterOptions[filter] = parseSelectOptions(['All', ...tempFilterOptionList]);
-        } else if (filterOptionDetails[filter]['type'] == 'chip') {
-          tempChipFilterOptions[filter] = parseSelectOptions(tempFilterOptionList);
-        } else if (filterOptionDetails[filter]['type'] == 'autocomplete') {
-          tempAutocompleteFilterOptions[filter] = parseAutoCompleteOptions(tempFilterOptionList);
-        }
-      }
-    }
-    setDropdownFilterOptions(tempDropdownFilterOptions);
-    setAutocompleteFilterOptions(tempAutocompleteFilterOptions);
-    setChipFilterOptions(tempChipFilterOptions);
-    setSortOptions(parseSelectOptions(['Full Name', 'Preferred Name', 'Start Date', ...viewMode==='allPatients' ? ['Caregiver'] : []]))
-  }
+  }  
 
   // On click button to add patient
   const handleOnClickAddPatient = () => {
@@ -180,30 +155,6 @@ function PatientsScreen({ navigation }) {
   const handleOnClickPatientItem = (patientID) => {
     navigation.push(routes.PATIENT_PROFILE, { id: patientID });
   };
-  
-  // Switch between 'My Patients' and 'All Patients'
-  const handleOnToggleViewMode = (mode) => {
-    if(mode!=viewMode) {
-      setIsLoading(true);
-      setViewMode(mode);
-    }
-  }
-
-  // Switch between search modes (full name, preferred name)
-  const handleOnToggleSearchOptions = async(item) => {
-    if(item) {      
-      item && setSearchOptions(item['title']);
-      if(searchQuery != '') {
-        handleSearchSortFilter({tempSearchMode: item['title']});
-      }   
-    }
-  }
-
-  // Update search state and handle searching when user changes search query
-  const handleSearch = (text) => {
-    setSearchQuery(text); 
-    handleSearchSortFilter({'text': text})
-  }
 
   // Handle searching, sorting, and filtering of patient data based on patient status
   const handleSearchSortFilter = async ({
@@ -224,7 +175,8 @@ function PatientsScreen({ navigation }) {
     
     // If patient status has been updated, get patient list from api
     // Otherwise filter the list of patients
-    if(tempPatientStatus != patientStatus) {
+    if(tempPatientStatus != patientStatus.toLowerCase()) {
+      console.log(tempPatientStatus, patientStatus)
       await getListOfPatients(tempPatientStatus);
       setPatientStatus(tempPatientStatus);       
     } else {
@@ -243,28 +195,28 @@ function PatientsScreen({ navigation }) {
 
     // Search
     filteredListOfPatients = filteredListOfPatients.filter((item) => {
-      return item[SORTFILTER_MAPPING[tempSearchMode]].toLowerCase().includes(text.toLowerCase());
+      return item[SORT_FILTER_MAPPING[tempSearchMode]].toLowerCase().includes(text.toLowerCase());
     })
       
     // Sort
     filteredListOfPatients = sortArray(filteredListOfPatients, 
-      SORTFILTER_MAPPING[Object.keys(tempSelSort).length == 0 ? 
+      SORT_FILTER_MAPPING[Object.keys(tempSelSort).length == 0 ? 
         sortOptions[0]['label'] : 
         tempSelSort['option']['label']],
-      tempSelSort['order'] != null ? tempSelSort['order'] : true);
+      tempSelSort['asc'] != null ? tempSelSort['asc'] : true);
   
     // Dropdown filters
     for (var filter of Object.keys(tempSelDropdownFilters)) {
       if(tempSelDropdownFilters[filter]['label'] != 'All') {
         filteredListOfPatients = filteredListOfPatients.filter((obj) => (
-          obj[SORTFILTER_MAPPING[filter]] === tempSelDropdownFilters[filter]['label'])) || []
+          obj[SORT_FILTER_MAPPING[filter]] === tempSelDropdownFilters[filter]['label'])) || []
       }
     }
 
     // Autocomplete filters
     for (var filter of Object.keys(tempSelAutocompleteFilters)) {
       filteredListOfPatients = filteredListOfPatients.filter((obj) => (
-        obj[SORTFILTER_MAPPING[filter]] === tempSelAutocompleteFilters[filter]['title'])) || []
+        obj[SORT_FILTER_MAPPING[filter]] === tempSelAutocompleteFilters[filter]['title'])) || []
     }
 
     // Chip Filters
@@ -272,13 +224,13 @@ function PatientsScreen({ navigation }) {
     // For example, patient status is not meant for filtering - it requires new API call, so do not filter
     // Use custom options if declared in FILTER_MAPPING 
     for (var filter of Object.keys(tempSelChipFilters)) {
-      if(filterOptionDetails[filter]['isFilter']){
-        if(Object.keys(filterOptionDetails[filter]['options']).length == 0) {
+      if(FILTER_OPTION_DETAILS[filter]['isFilter']){
+        if(Object.keys(FILTER_OPTION_DETAILS[filter]['options']).length == 0) {
           filteredListOfPatients = filteredListOfPatients.filter((obj) => (
-            obj[SORTFILTER_MAPPING[filter]] === tempSelChipFilters[filter]['label'])) || []
+            obj[SORT_FILTER_MAPPING[filter]] === tempSelChipFilters[filter]['label'])) || []
         } else {
           filteredListOfPatients = filteredListOfPatients.filter((obj) => (
-            obj[SORTFILTER_MAPPING[filter]] === filterOptionDetails[filter]['options'][tempSelChipFilters[filter]['label']])) || []
+            obj[SORT_FILTER_MAPPING[filter]] === FILTER_OPTION_DETAILS[filter]['options'][tempSelChipFilters[filter]['label']])) || []
         }
       }
     }  
@@ -294,113 +246,49 @@ function PatientsScreen({ navigation }) {
       {isLoading ? (
         <ActivityIndicator visible />
       ) : (
-        <Center backgroundColor={colors.white_var1}>
-          <View style={styles.optionsContainer}>
-            <TouchableOpacity 
-              style={[styles.tab, ...viewMode=='myPatients' ? [styles.selectedTab] : []]}
-              onPress={() => handleOnToggleViewMode('myPatients')}
-              activeOpacity={1}
-              >
-                <Text style={[styles.tabText, ...viewMode=='myPatients' ? [styles.selectedTabText] : []]}>My Patients</Text>
-            </TouchableOpacity>
-            <Divider orientation='vertical' height={5} alignSelf='center'/>
-            <TouchableOpacity 
-              style={[styles.tab, ...viewMode=='allPatients' ? [styles.selectedTab] : []]}
-              onPress={() => handleOnToggleViewMode('allPatients')}
-              activeOpacity={1}
-              >
-                <Text style={[styles.tabText, ...viewMode=='allPatients' ? [styles.selectedTabText] : []]}>All Patients</Text>
-            </TouchableOpacity>            
-          </View>
-          <Divider style={styles.divider}/>
-          <View style={styles.optionsContainer}>
-            <View style={styles.searchBar}>
-              <SearchBar 
-                onChangeText={handleSearch}
-                value={searchQuery}
-                autoCapitalize='characters'
-                inputContainerStyle={{borderTopRightRadius: 0, borderBottomRightRadius: 0, height: 47}}
-              />
-            </View>
-            <View style={{flex: 0.4}}>
-              <AutocompleteDropdown
-                dataSet={parseAutoCompleteOptions(['Full Name', 'Preferred Name'])}
-                closeOnBlur={true}              
-                initialValue='1'
-                useFilter={false}
-                showClear={false}
-                inputHeight={47}
-                onSelectItem={(item) => handleOnToggleSearchOptions(item)}
-                inputContainerStyle={{backgroundColor: colors.green, color: colors.white, borderTopLeftRadius: 0, borderBottomLeftRadius: 0}}
-                textInputProps={{color: colors.white, fontSize: 13.5, fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,}}
-                suggestionsListContainerStyle={{zIndex: 100}}
-                ChevronIconComponent={(
-                <Icon 
-                  as={
-                    <MaterialIcons 
-                    name="keyboard-arrow-down" 
-                    />
-                  } 
-                  size={7}
-                  color={colors.white}
-                >
-                </Icon>)}
-
-              />
-            </View>
-            <View>
-              <FilterModalCard
-                sort={{
-                  sortOptions: sortOptions,
-                  selectedSort: selectedSort,
-                  setSelectedSort: setSelectedSort,
-                }}
-                autoCompleteFilter={{
-                  autocompleteFilterOptions:autocompleteFilterOptions,
-                  selectedAutocompleteFilters:selectedAutocompleteFilters,
-                  setSelectedAutocompleteFilters:setSelectedAutocompleteFilters,
-                }}
-                dropdownFilter={{
-                  dropdownFilterOptions: dropdownFilterOptions,
-                  selectedDropdownFilters: selectedDropdownFilters,
-                  setSelectedDropdownFilters: setSelectedDropdownFilters,
-                }}
-                chipFilter={{
-                  chipFilterOptions: chipFilterOptions,
-                  selectedChipFilters: selectedChipFilters,
-                  setSelectedChipFilters: setSelectedChipFilters,
-                }}
-                handleSortFilter={handleSearchSortFilter}
-              />
-            </View>
-          </View>
-          <View
-            style={[styles.optionsContainer, {paddingTop: 0}]}
-          >
-            <View style={styles.patientCount}>
-              <Text>No. of patients: {listOfPatients ? listOfPatients.length : null}</Text>
-            </View>
-
-            <Divider 
-              orientation='vertical' 
-              marginHorizontal='2%'
-              height={'60%'} 
-              alignSelf={'center'}
+        <View backgroundColor={colors.white_var1}>
+          <SearchFilterBar
+            data={originalListOfPatients}
+            SORT_OPTIONS={SORT_OPTIONS}
+            FILTER_OPTIONS={FILTER_OPTIONS}
+            FILTER_OPTION_DETAILS={FILTER_OPTION_DETAILS}
+            SORT_FILTER_MAPPING={SORT_FILTER_MAPPING}
+            setIsLoading={setIsLoading}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            sort= {{
+              sortOptions: sortOptions,
+              setSortOptions: setSortOptions,
+              selectedSort: selectedSort,
+              setSelectedSort: setSelectedSort
+            }}
+            chipFilter={{    
+              chipFilterOptions: chipFilterOptions,
+              setChipFilterOptions: setChipFilterOptions,
+              selectedChipFilters: selectedChipFilters,
+              setSelectedChipFilters: setSelectedChipFilters,
+            }}
+            dropdownFilter={{
+              dropdownFilterOptions: dropdownFilterOptions,
+              setDropdownFilterOptions: setDropdownFilterOptions,
+              selectedDropdownFilters: selectedDropdownFilters,
+              setSelectedDropdownFilters: setSelectedDropdownFilters
+            }}
+            autoCompleteFilter={{
+              autocompleteFilterOptions: autocompleteFilterOptions,
+              setAutocompleteFilterOptions: setAutocompleteFilterOptions,
+              selectedAutocompleteFilters: selectedAutocompleteFilters,
+              setSelectedAutocompleteFilters: setAutocompleteFilterOptions,
+            }}
+            search={{
+              setSearchOptions: setSearchOptions,
+              searchQuery: searchQuery,
+              setSearchQuery: setSearchQuery
+            }}
+            handleSearchSortFilter={handleSearchSortFilter}
+            itemCount={listOfPatients ? listOfPatients.length : null}
+            refreshList={refreshListOfPatients}
             />
-
-            <FilterIndicator
-              selectedSort={Object.keys(selectedSort).length > 0 ? selectedSort : {'option': sortOptions[0], 'order': true}}
-              setSelectedSort={setSelectedSort}
-              chipFilterOptions={chipFilterOptions}
-              selectedChipFilters={selectedChipFilters}
-              selectedDropdownFilters={selectedDropdownFilters}
-              setSelectedDropdownFilters={setDropdownFilterOptions}
-              handleSortFilter={handleSearchSortFilter}
-            />
-          </View>
-          
-          <Divider/>
-          
           <ScrollView
             ref={patientListRef}
             w="100%"
@@ -473,7 +361,7 @@ function PatientsScreen({ navigation }) {
               size="sm"
             />
           </Center>
-        </Center>
+        </View>
       )}
     </>
   );
