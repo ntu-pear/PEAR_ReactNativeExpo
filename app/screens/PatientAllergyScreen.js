@@ -50,7 +50,11 @@ function PatientAllergyScreen(props) {
       return;
     }
 
-    const newArray = response.data.data.map(
+    const sortedData = response.data.data.sort(
+      (a, b) => new Date(b.createdDate) - new Date(a.createdDate),
+    );
+
+    const newArray = sortedData.map(
       ({ createdDate, allergyListDesc, allergyReaction, allergyRemarks }) => ({
         Date: `${formatDateTime(createdDate, true)}`,
         Time: `${formatDateTime(createdDate, false)}`,
