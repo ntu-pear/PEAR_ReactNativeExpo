@@ -33,6 +33,15 @@ function PatientsScreen({ navigation }) {
   // - Update SORT_FILTER_MAPPING with mapping between the filter name and the corresponding data field (if required) 
   // - Update FILTER_OPTION_DETAILS with the type, options if any, and isFilter
 
+ 
+  // View modes user can switch between (displayed as tab on top)
+  const VIEW_MODES = {
+    'My Patients': 'myPatients',
+    'All Patients': 'allPatients'
+  }
+
+  const SEARCH_OPTIONS = parseSelectOptions(['Full Name', 'Preferred Name']);
+
   // Sort options based on view mode
   const SORT_OPTIONS = {
     'myPatients': ['Full Name', 'Preferred Name', 'Start Date'],
@@ -46,7 +55,7 @@ function PatientsScreen({ navigation }) {
   }
 
   // Mapping between sort/filter names and the respective field in the patient data retrieved from the backend
-  const SORT_FILTER_MAPPING = {
+  const FIELD_MAPPING = {
     'Full Name': 'fullName', 
     'Preferred Name': 'preferredName', 
     'Caregiver': 'caregiverName', 
@@ -195,12 +204,12 @@ function PatientsScreen({ navigation }) {
 
     // Search
     filteredListOfPatients = filteredListOfPatients.filter((item) => {
-      return item[SORT_FILTER_MAPPING[tempSearchMode]].toLowerCase().includes(text.toLowerCase());
+      return item[FIELD_MAPPING[tempSearchMode]].toLowerCase().includes(text.toLowerCase());
     })
       
     // Sort
     filteredListOfPatients = sortArray(filteredListOfPatients, 
-      SORT_FILTER_MAPPING[Object.keys(tempSelSort).length == 0 ? 
+      FIELD_MAPPING[Object.keys(tempSelSort).length == 0 ? 
         sortOptions[0]['label'] : 
         tempSelSort['option']['label']],
       tempSelSort['asc'] != null ? tempSelSort['asc'] : true);
@@ -209,14 +218,14 @@ function PatientsScreen({ navigation }) {
     for (var filter of Object.keys(tempSelDropdownFilters)) {
       if(tempSelDropdownFilters[filter]['label'] != 'All') {
         filteredListOfPatients = filteredListOfPatients.filter((obj) => (
-          obj[SORT_FILTER_MAPPING[filter]] === tempSelDropdownFilters[filter]['label'])) || []
+          obj[FIELD_MAPPING[filter]] === tempSelDropdownFilters[filter]['label'])) || []
       }
     }
 
     // Autocomplete filters
     for (var filter of Object.keys(tempSelAutocompleteFilters)) {
       filteredListOfPatients = filteredListOfPatients.filter((obj) => (
-        obj[SORT_FILTER_MAPPING[filter]] === tempSelAutocompleteFilters[filter]['title'])) || []
+        obj[FIELD_MAPPING[filter]] === tempSelAutocompleteFilters[filter]['title'])) || []
     }
 
     // Chip Filters
@@ -227,10 +236,10 @@ function PatientsScreen({ navigation }) {
       if(FILTER_OPTION_DETAILS[filter]['isFilter']){
         if(Object.keys(FILTER_OPTION_DETAILS[filter]['options']).length == 0) {
           filteredListOfPatients = filteredListOfPatients.filter((obj) => (
-            obj[SORT_FILTER_MAPPING[filter]] === tempSelChipFilters[filter]['label'])) || []
+            obj[FIELD_MAPPING[filter]] === tempSelChipFilters[filter]['label'])) || []
         } else {
           filteredListOfPatients = filteredListOfPatients.filter((obj) => (
-            obj[SORT_FILTER_MAPPING[filter]] === FILTER_OPTION_DETAILS[filter]['options'][tempSelChipFilters[filter]['label']])) || []
+            obj[FIELD_MAPPING[filter]] === FILTER_OPTION_DETAILS[filter]['options'][tempSelChipFilters[filter]['label']])) || []
         }
       }
     }  
@@ -249,13 +258,19 @@ function PatientsScreen({ navigation }) {
         <View backgroundColor={colors.white_var1}>
           <SearchFilterBar
             data={originalListOfPatients}
-            SORT_OPTIONS={SORT_OPTIONS}
-            FILTER_OPTIONS={FILTER_OPTIONS}
-            FILTER_OPTION_DETAILS={FILTER_OPTION_DETAILS}
-            SORT_FILTER_MAPPING={SORT_FILTER_MAPPING}
             setIsLoading={setIsLoading}
             viewMode={viewMode}
             setViewMode={setViewMode}
+            handleSearchSortFilter={handleSearchSortFilter}
+            itemCount={listOfPatients ? listOfPatients.length : null}
+            constants={{
+              VIEW_MODES: VIEW_MODES,
+              SEARCH_OPTIONS: SEARCH_OPTIONS,
+              SORT_OPTIONS: SORT_OPTIONS,
+              FILTER_OPTIONS: FILTER_OPTIONS,
+              FILTER_OPTION_DETAILS: FILTER_OPTION_DETAILS,
+              FIELD_MAPPING: FIELD_MAPPING,
+            }}
             sort= {{
               sortOptions: sortOptions,
               setSortOptions: setSortOptions,
@@ -285,9 +300,6 @@ function PatientsScreen({ navigation }) {
               searchQuery: searchQuery,
               setSearchQuery: setSearchQuery
             }}
-            handleSearchSortFilter={handleSearchSortFilter}
-            itemCount={listOfPatients ? listOfPatients.length : null}
-            refreshList={refreshListOfPatients}
             />
           <ScrollView
             ref={patientListRef}

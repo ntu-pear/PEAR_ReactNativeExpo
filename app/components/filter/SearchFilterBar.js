@@ -1,9 +1,9 @@
 // Libs
-import { Center, Icon, Divider } from 'native-base';
-import { Text, TouchableOpacity } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import { StyleSheet, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Center, Divider } from 'native-base';
+import { Text, StyleSheet, View } from 'react-native';
 
+// Configurations
 import colors from 'app/config/colors';
 import typography from 'app/config/typography';
 
@@ -12,19 +12,23 @@ import SearchBar from 'app/components/input-fields/SearchBar';
 import FilterModalCard from 'app/components/filter/FilterModalCard';
 import { parseAutoCompleteOptions, parseSelectOptions, sortArray } from 'app/utility/miscFunctions';
 import FilterIndicator from 'app/components/filter/FilterIndicator';
-import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
-import { useEffect, useRef, useState } from 'react';
-import SelectionInputField from '../input-fields/SelectionInputField';
+import TabBar from '../TabBar';
 
 function SearchFilterBar({
   data={},
-  SORT_OPTIONS={},
-  FILTER_OPTIONS={},
-  FILTER_OPTION_DETAILS={},
-  SORT_FILTER_MAPPING={},
   setIsLoading=()=>{},
-  viewMode='myPatients',
+  viewMode='',
   setViewMode=()=>{},
+  handleSearchSortFilter=()=>{},
+  itemCount=null,   
+  constants: {
+    VIEW_MODES={},
+    SEARCH_OPTIONS={},
+    SORT_OPTIONS={},
+    FILTER_OPTIONS={},
+    FILTER_OPTION_DETAILS={},
+    FIELD_MAPPING={},
+  },
   sort: {
     sortOptions={},
     setSortOptions=()=>{},
@@ -54,14 +58,9 @@ function SearchFilterBar({
     searchQuery='',
     setSearchQuery=()=>{}
   },
-  handleSearchSortFilter=()=>{},
-  itemCount=null,   
 }) {  
   // Default state to control modal visibility
   const [modalVisible, setModalVisible] = useState(false);
-
-  // Constant search options
-  const searchOptions = parseSelectOptions(['Full Name', 'Preferred Name']);
 
   // Whenever data changes, reinitialize sort and filter options
   useEffect(() => {
@@ -80,7 +79,7 @@ function SearchFilterBar({
       // If no custom options for a filter, get options from patient list by taking distinct values of the filter property
       // Else use custom options
       if (Object.keys(FILTER_OPTION_DETAILS[filter]['options']).length == 0) {
-        tempFilterOptionList = data.map(x => x[SORT_FILTER_MAPPING[filter]]);
+        tempFilterOptionList = data.map(x => x[FIELD_MAPPING[filter]]);
         tempFilterOptionList = Array.from(new Set(tempFilterOptionList));        
       } else {
         tempFilterOptionList = Object.keys(FILTER_OPTION_DETAILS[filter]['options'])
@@ -113,7 +112,7 @@ function SearchFilterBar({
 
   // Switch between search modes (full name, preferred name)
   const handleOnToggleSearchOptions = async(item) => {
-    const label = searchOptions.filter(x=>x.value == item)[0]['label'];
+    const label = SEARCH_OPTIONS.filter(x=>x.value == item)[0]['label'];
     setSearchOption(label);
     if(searchQuery != '') {
       handleSearchSortFilter({tempSearchMode: label});
@@ -124,7 +123,6 @@ function SearchFilterBar({
   const handleOnToggleViewMode = (mode) => {
     if(mode!=viewMode) {
       setIsLoading(true);
-      setViewMode(mode);    
       resetSearchSortFilter();
     }
   }
@@ -136,75 +134,27 @@ function SearchFilterBar({
   }
 
   return (
-    <Center backgroundColor={colors.white_var1} zindex={1}>
-      <View style={styles.optionsContainer}>
-        <TouchableOpacity 
-          style={[styles.tab, ...viewMode=='myPatients' ? [styles.selectedTab] : []]}
-          onPress={() => handleOnToggleViewMode('myPatients')}
-          activeOpacity={1}
-          >
-            <Text style={[styles.tabText, ...viewMode=='myPatients' ? [styles.selectedTabText] : []]}>My Patients</Text>
-        </TouchableOpacity>
-        <Divider orientation='vertical' height={5} alignSelf='center'/>
-        <TouchableOpacity 
-          style={[styles.tab, ...viewMode=='allPatients' ? [styles.selectedTab] : []]}
-          onPress={() => handleOnToggleViewMode('allPatients')}
-          activeOpacity={1}
-          >
-            <Text style={[styles.tabText, ...viewMode=='allPatients' ? [styles.selectedTabText] : []]}>All Patients</Text>
-        </TouchableOpacity>            
-      </View>
-      <Divider />
-      <View style={styles.optionsContainer}>
-        <View style={styles.searchBar}>
-          <SearchBar 
-            onChangeText={handleSearch}
-            value={searchQuery}
-            autoCapitalize='characters'
-            inputContainerStyle={{borderTopRightRadius: 0, borderBottomRightRadius: 0, height: 47}}
+    <Center backgroundColor={colors.white_var1} zindex={1}> 
+      {Object.keys(VIEW_MODES).length > 0 ? (
+        <>
+          <TabBar
+            TABS={VIEW_MODES}
+            curTab={viewMode}
+            setCurTab={setViewMode}
+            handleSwitchTab={handleOnToggleViewMode}
           />
-        </View>
-        <View style={{flex: 0.4, zIndex: 1}}>
-          {/* <AutocompleteDropdown
-            dataSet={parseAutoCompleteOptions(['Full Name', 'Preferred Name'])}
-            closeOnBlur={true}              
-            initialValue='1'
-            useFilter={false}
-            showClear={false}
-            inputHeight={47}
-            onSelectItem={(item) => handleOnToggleSearchOptions(item)}
-            inputContainerStyle={{backgroundColor: colors.green, color: colors.white, borderTopLeftRadius: 0, borderBottomLeftRadius: 0}}
-            textInputProps={{color: colors.white, fontSize: 13.5, fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android}}
-            suggestionsListContainerStyle={{zIndex: 2}}
-            flatListProps={{zIndex: 2}}
-            ChevronIconComponent={(
-            <Icon 
-              as={
-                <MaterialIcons 
-                name="keyboard-arrow-down" 
-                />
-              } 
-              size={7}
-              color={colors.white}
-            >
-            </Icon>)}
-
-          /> */}
-          <SelectionInputField
-            dataArray={searchOptions}
-            showTitle={false}
-            otherProps={{
-              backgroundColor: colors.green,
-              color: colors.white,
-              borderTopLeftRadius: 0,
-              borderBottomLeftRadius: 0,
-              borderTopRightRadius: 10, 
-              borderBottomRightRadius: 10,
-            }}
-            onDataChange={handleOnToggleSearchOptions}                        
-          />
-
-        </View>
+          <Divider />
+        </>
+      ) : null}
+      <View style={styles.optionsContainer}>
+        <SearchBar 
+          onChangeText={handleSearch}
+          value={searchQuery}
+          autoCapitalize='characters'
+          inputContainerStyle={{borderTopRightRadius: 0, borderBottomRightRadius: 0, height: 47}}
+          handleOnToggleSearchOptions={handleOnToggleSearchOptions}
+          SEARCH_OPTIONS={SEARCH_OPTIONS}
+        />
         <View>
           <FilterModalCard
             modalVisible={modalVisible}
@@ -236,17 +186,20 @@ function SearchFilterBar({
       <View
         style={[styles.optionsContainer, {paddingTop: 0}]}
       >
-        <View style={styles.patientCount}>
-          <Text>No. of patients: {itemCount}</Text>
-        </View>
+        {itemCount ? (
+          <>
+            <View style={styles.itemCount}>
+              <Text>No. of patients: {itemCount}</Text>
+            </View>
 
-        <Divider 
-          orientation='vertical' 
-          marginHorizontal='2%'
-          height={'60%'} 
-          alignSelf={'center'}
-        />
-
+            <Divider 
+              orientation='vertical' 
+              marginHorizontal='2%'
+              height={'60%'} 
+              alignSelf={'center'}
+            />
+          </>
+        ) : null}
         <FilterIndicator
           modalVisible={modalVisible}
           setModalVisible={setModalVisible}
@@ -301,7 +254,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: 'bold',
   },
-  patientCount: {
+  itemCount: {
     fontSize: 13.5,
     marginLeft: '2%',
     paddingVertical: '1%',
