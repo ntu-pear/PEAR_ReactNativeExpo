@@ -15,11 +15,12 @@ import FilterIndicator from 'app/components/filter/FilterIndicator';
 import TabBar from '../TabBar';
 
 function SearchFilterBar({
-  data={},
+  originalList={},
+  setList=()=>{},
   setIsLoading=()=>{},
   viewMode='',
   setViewMode=()=>{},
-  handleSearchSortFilter=()=>{},
+  handleSearchSortFilterCustom,
   itemCount=null,   
   constants: {
     VIEW_MODES={},
@@ -54,6 +55,7 @@ function SearchFilterBar({
     setSelectedAutocompleteFilters=()=>{},
   },
   search: {
+    searchOption='',
     setSearchOption=()=>{},
     searchQuery='',
     setSearchQuery=()=>{}
@@ -65,7 +67,7 @@ function SearchFilterBar({
   // Whenever data changes, reinitialize sort and filter options
   useEffect(() => {
     initSortFilter();
-  }, [data])
+  }, [originalList])
 
   // Initialize sort and filter options based on view mode
   const initSortFilter = () => {
@@ -79,7 +81,7 @@ function SearchFilterBar({
       // If no custom options for a filter, get options from patient list by taking distinct values of the filter property
       // Else use custom options
       if (Object.keys(FILTER_OPTION_DETAILS[filter]['options']).length == 0) {
-        tempFilterOptionList = data.map(x => x[FIELD_MAPPING[filter]]);
+        tempFilterOptionList = originalList.map(x => x[FIELD_MAPPING[filter]]);
         tempFilterOptionList = Array.from(new Set(tempFilterOptionList));        
       } else {
         tempFilterOptionList = Object.keys(FILTER_OPTION_DETAILS[filter]['options'])
@@ -99,7 +101,96 @@ function SearchFilterBar({
     setChipFilterOptions(tempChipFilterOptions);
     setSortOptions(parseSelectOptions(SORT_OPTIONS[viewMode]))
   }
-    
+
+  const handleSearchSortFilter = ({
+    text=searchQuery, 
+    tempSelSort=selectedSort, 
+    tempSelDropdownFilters=selectedDropdownFilters,
+    tempSelChipFilters=selectedChipFilters, 
+    tempSelAutocompleteFilters=selectedAutocompleteFilters, 
+    tempSearchMode=searchOption,
+  }) => {
+    // console.log(tempSearchMode)
+    if(handleSearchSortFilterCustom) {
+      handleSearchSortFilterCustom({
+        text: text, 
+        tempSelSort: tempSelSort, 
+        tempSelDropdownFilters: tempSelDropdownFilters,
+        tempSelChipFilters: tempSelChipFilters, 
+        tempSelAutocompleteFilters: tempSelAutocompleteFilters, 
+        tempSearchMode: tempSearchMode,
+        setFilteredList
+      });
+    } else {
+      setFilteredList(
+        text, 
+        tempSelSort, 
+        tempSelDropdownFilters,
+        tempSelChipFilters, 
+        tempSelAutocompleteFilters, 
+        tempSearchMode
+      )
+    }
+  }
+  
+  // Update list based on search, sort, and filter criteria
+  const setFilteredList = (
+    text, 
+    tempSelSort, 
+    tempSelDropdownFilters, 
+    tempSelChipFilters, 
+    tempSelAutocompleteFilters, 
+    tempSearchMode
+  ) => {
+    let filteredListOfPatients = originalList.map((obj) => ({
+      ...obj,
+      fullName: `${obj.firstName.trim()} ${obj.lastName.trim()}`
+    }));   
+
+    // Search
+    filteredListOfPatients = filteredListOfPatients.filter((item) => {
+      return item[FIELD_MAPPING[tempSearchMode]].toLowerCase().includes(text.toLowerCase());
+    })
+      
+    // Sort
+    filteredListOfPatients = sortArray(filteredListOfPatients, 
+      FIELD_MAPPING[Object.keys(tempSelSort).length == 0 ? 
+        sortOptions[0]['label'] : 
+        tempSelSort['option']['label']],
+      tempSelSort['asc'] != null ? tempSelSort['asc'] : true);
+  
+    // Dropdown filters
+    for (var filter of Object.keys(tempSelDropdownFilters)) {
+      if(tempSelDropdownFilters[filter]['label'] != 'All') {
+        filteredListOfPatients = filteredListOfPatients.filter((obj) => (
+          obj[FIELD_MAPPING[filter]] === tempSelDropdownFilters[filter]['label'])) || []
+      }
+    }
+
+    // Autocomplete filters
+    for (var filter of Object.keys(tempSelAutocompleteFilters)) {
+      filteredListOfPatients = filteredListOfPatients.filter((obj) => (
+        obj[FIELD_MAPPING[filter]] === tempSelAutocompleteFilters[filter]['title'])) || []
+    }
+
+    // Chip Filters
+    // Only filter if required
+    // For example, patient status is not meant for filtering - it requires new API call, so do not filter
+    // Use custom options if declared in FILTER_MAPPING 
+    for (var filter of Object.keys(tempSelChipFilters)) {
+      if(FILTER_OPTION_DETAILS[filter]['isFilter']){
+        if(Object.keys(FILTER_OPTION_DETAILS[filter]['options']).length == 0) {
+          filteredListOfPatients = filteredListOfPatients.filter((obj) => (
+            obj[FIELD_MAPPING[filter]] === tempSelChipFilters[filter]['label'])) || []
+        } else {
+          filteredListOfPatients = filteredListOfPatients.filter((obj) => (
+            obj[FIELD_MAPPING[filter]] === FILTER_OPTION_DETAILS[filter]['options'][tempSelChipFilters[filter]['label']])) || []
+        }
+      }
+    }  
+
+    setList(filteredListOfPatients);
+  }
   // Reset selected search, sort, and filter options
   const resetSearchSortFilter = () => {
     setSearchOption('Full Name');

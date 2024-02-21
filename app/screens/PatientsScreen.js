@@ -32,7 +32,6 @@ function PatientsScreen({ navigation }) {
   // - Add name of filter option to FILTER_OPTIONS under the respective viewmode (allPatients/myPatients)
   // - Update SORT_FILTER_MAPPING with mapping between the filter name and the corresponding data field (if required) 
   // - Update FILTER_OPTION_DETAILS with the type, options if any, and isFilter
-
  
   // View modes user can switch between (displayed as tab on top)
   const VIEW_MODES = {
@@ -40,6 +39,7 @@ function PatientsScreen({ navigation }) {
     'All Patients': 'allPatients'
   }
 
+  // Options for user to search by
   const SEARCH_OPTIONS = parseSelectOptions(['Full Name', 'Preferred Name']);
 
   // Sort options based on view mode
@@ -54,7 +54,7 @@ function PatientsScreen({ navigation }) {
     'allPatients': ['Patient Status', 'Caregiver']
   }
 
-  // Mapping between sort/filter names and the respective field in the patient data retrieved from the backend
+  // Mapping between sort/filter/search names and the respective field in the patient data retrieved from the backend
   const FIELD_MAPPING = {
     'Full Name': 'fullName', 
     'Preferred Name': 'preferredName', 
@@ -85,11 +85,23 @@ function PatientsScreen({ navigation }) {
     } 
   }
 
+  // Patient status names (what is displayed to the user) mapped to the actual values in the patient data
+  const PATIENT_STATUSES = {
+    'Active': 'active',
+    'Inactive': 'inactive',
+    'All': ''
+  }
+  // const PATIENT_STATUSES = {
+  //   'active': 'Active',
+  //   'inactive': 'Inactive',
+  //   '': 'All'
+  // }
+
   // Patient data related states
   const [isLoading, setIsLoading] = useState(false);
   const [originalListOfPatients, setOriginalListOfPatients] = useState([]); // list of patients without sort, search, filter
   const [listOfPatients, setListOfPatients] = useState([]) // list of patients after sort, search, filter
-  const [patientStatus, setPatientStatus] = useState('Active'); // Active, Inactive, All
+  const [patientStatus, setPatientStatus] = useState('active'); // active, inactive, ''
   const [viewMode, setViewMode] = useState('myPatients'); // myPatients, allPatients
   const [isReloadPatientList, setIsReloadPatientList] = useState(false);
   
@@ -106,6 +118,7 @@ function PatientsScreen({ navigation }) {
   const [selectedDropdownFilters, setSelectedDropdownFilters] = useState({});
 
   // Autocomplete filter related states
+  // NOTE: currently not used, but provided in case developers want to add autocomplete options
   const [autocompleteFilterOptions, setAutocompleteFilterOptions] = useState({});
   const [selectedAutocompleteFilters, setSelectedAutocompleteFilters] = useState({});
   
@@ -165,89 +178,42 @@ function PatientsScreen({ navigation }) {
     navigation.push(routes.PATIENT_PROFILE, { id: patientID });
   };
 
-  // Handle searching, sorting, and filtering of patient data based on patient status
+  // Handle searching, sorting, and filtering of patient data based on patient status  
+  // If patient status has been updated, get patient list from api
+  // Otherwise filter the list of patients
   const handleSearchSortFilter = async ({
     text=searchQuery, 
     tempSelSort=selectedSort, 
     tempSelDropdownFilters=selectedDropdownFilters,
     tempSelChipFilters=selectedChipFilters, 
     tempSelAutocompleteFilters=selectedAutocompleteFilters, 
-    tempSearchMode=searchOption
+    tempSearchMode=searchOption,
+    setFilteredList
   }) => {       
     setIsLoading(true);
 
-    let tempPatientStatus = Object.keys(tempSelChipFilters).length > 0 ? tempSelChipFilters['Patient Status']['label'] : 'active';
-    if(tempPatientStatus == 'All') {
-      tempPatientStatus = '';
-    } 
-    tempPatientStatus = tempPatientStatus.toLowerCase();
-    
-    // If patient status has been updated, get patient list from api
-    // Otherwise filter the list of patients
-    if(tempPatientStatus != patientStatus.toLowerCase()) {
-      console.log(tempPatientStatus, patientStatus)
+    let tempPatientStatus = PATIENT_STATUSES[
+      Object.keys(tempSelChipFilters).length > 0 
+        ? tempSelChipFilters['Patient Status']['label'] 
+        : 'Active'
+    ]
+    // // console.log(tempPatientStatus, patientStatus)
+    // console.log(Object.keys(tempSelChipFilters).length > 0 
+    // ? tempSelChipFilters['Patient Status']['label'] 
+    // : 'active')
+    // console.log(Object.keys(tempSelChipFilters).length > 0)
+
+    if(tempPatientStatus != patientStatus) {
       await getListOfPatients(tempPatientStatus);
       setPatientStatus(tempPatientStatus);       
     } else {
-      setFilteredPatientList(text, tempSelSort, tempSelDropdownFilters, tempSelChipFilters, tempSelAutocompleteFilters, tempSearchMode);
+      setFilteredList(text, tempSelSort, tempSelDropdownFilters, tempSelChipFilters, tempSelAutocompleteFilters, tempSearchMode);
+      
+      // Scroll to top of list
+      patientListRef.current?.scrollTo({x: 0, y: 0, animated: true});
     }   
 
-    setIsLoading(false);
-  }
-
-  // Update patient list based on search, sort, and filter criteria
-  const setFilteredPatientList = (text, tempSelSort, tempSelDropdownFilters, tempSelChipFilters, tempSelAutocompleteFilters, tempSearchMode) => {
-    let filteredListOfPatients = originalListOfPatients.map((obj) => ({
-      ...obj,
-      fullName: `${obj.firstName.trim()} ${obj.lastName.trim()}`
-    }));   
-
-    // Search
-    filteredListOfPatients = filteredListOfPatients.filter((item) => {
-      return item[FIELD_MAPPING[tempSearchMode]].toLowerCase().includes(text.toLowerCase());
-    })
-      
-    // Sort
-    filteredListOfPatients = sortArray(filteredListOfPatients, 
-      FIELD_MAPPING[Object.keys(tempSelSort).length == 0 ? 
-        sortOptions[0]['label'] : 
-        tempSelSort['option']['label']],
-      tempSelSort['asc'] != null ? tempSelSort['asc'] : true);
-  
-    // Dropdown filters
-    for (var filter of Object.keys(tempSelDropdownFilters)) {
-      if(tempSelDropdownFilters[filter]['label'] != 'All') {
-        filteredListOfPatients = filteredListOfPatients.filter((obj) => (
-          obj[FIELD_MAPPING[filter]] === tempSelDropdownFilters[filter]['label'])) || []
-      }
-    }
-
-    // Autocomplete filters
-    for (var filter of Object.keys(tempSelAutocompleteFilters)) {
-      filteredListOfPatients = filteredListOfPatients.filter((obj) => (
-        obj[FIELD_MAPPING[filter]] === tempSelAutocompleteFilters[filter]['title'])) || []
-    }
-
-    // Chip Filters
-    // Only filter if required
-    // For example, patient status is not meant for filtering - it requires new API call, so do not filter
-    // Use custom options if declared in FILTER_MAPPING 
-    for (var filter of Object.keys(tempSelChipFilters)) {
-      if(FILTER_OPTION_DETAILS[filter]['isFilter']){
-        if(Object.keys(FILTER_OPTION_DETAILS[filter]['options']).length == 0) {
-          filteredListOfPatients = filteredListOfPatients.filter((obj) => (
-            obj[FIELD_MAPPING[filter]] === tempSelChipFilters[filter]['label'])) || []
-        } else {
-          filteredListOfPatients = filteredListOfPatients.filter((obj) => (
-            obj[FIELD_MAPPING[filter]] === FILTER_OPTION_DETAILS[filter]['options'][tempSelChipFilters[filter]['label']])) || []
-        }
-      }
-    }  
-
-    setListOfPatients(filteredListOfPatients);
-
-    // Scroll to top of list
-    patientListRef.current?.scrollTo({x: 0, y: 0, animated: true});
+    setIsLoading(false);    
   }
 
   return (
@@ -257,11 +223,12 @@ function PatientsScreen({ navigation }) {
       ) : (
         <View backgroundColor={colors.white_var1}>
           <SearchFilterBar
-            data={originalListOfPatients}
+            originalList={originalListOfPatients}
+            setList={setListOfPatients}
             setIsLoading={setIsLoading}
             viewMode={viewMode}
             setViewMode={setViewMode}
-            handleSearchSortFilter={handleSearchSortFilter}
+            handleSearchSortFilterCustom={handleSearchSortFilter}
             itemCount={listOfPatients ? listOfPatients.length : null}
             constants={{
               VIEW_MODES: VIEW_MODES,
@@ -296,6 +263,7 @@ function PatientsScreen({ navigation }) {
               setSelectedAutocompleteFilters: setAutocompleteFilterOptions,
             }}
             search={{
+              searchOption: searchOption,
               setSearchOption: setSearchOption,
               searchQuery: searchQuery,
               setSearchQuery: setSearchQuery
