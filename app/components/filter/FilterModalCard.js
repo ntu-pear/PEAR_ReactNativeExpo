@@ -1,16 +1,17 @@
+// Libs
 import React, { useEffect, useRef, useState } from 'react';
-import { Modal, Text, View, Row, Center, Icon, ScrollView } from 'native-base';
-import { Button } from 'native-base';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { Keyboard, Platform, StyleSheet, TouchableOpacity } from 'react-native';
-import colors from 'app/config/colors';
 import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
-import typography from 'app/config/typography';
+import { Modal, Text, View, Icon, ScrollView, Button } from 'native-base';
+import { Keyboard, Platform, StyleSheet, TouchableOpacity } from 'react-native';
 import { Chip } from 'react-native-elements';
 import { MaterialIcons } from '@expo/vector-icons';
-import { parseSelectOptions } from 'app/utility/miscFunctions';
-import SelectionInputField from '../input-fields/SelectionInputField';
 
+// Configurations
+import colors from 'app/config/colors';
+import typography from 'app/config/typography';
+
+// Components
+import SelectionInputField from '../input-fields/SelectionInputField';
 
 const FilterModalCard = ({
   modalVisible,
@@ -18,22 +19,30 @@ const FilterModalCard = ({
   sort: {
     sortOptions=[],
     selectedSort={},
-    setSelectedSort=()=>{}
+    setSelectedSort=()=>{},
+    tempSelectedSort={},
+    setTempSelectedSort=()=>{},
   },
   chipFilter: {    
     chipFilterOptions={},
     selectedChipFilters={},
     setSelectedChipFilters=()=>{},
+    tempSelectedChipFilters={},
+    setTempSelectedChipFilters=()=>{},
   },
   dropdownFilter: {
     dropdownFilterOptions={},
     selectedDropdownFilters={},
-    setSelectedDropdownFilters=()=>{}
+    setSelectedDropdownFilters=()=>{},
+    tempSelectedDropdownFilters={},
+    setTempSelectedDropdownFilters=()=>{},
   },
   autoCompleteFilter: {
     autocompleteFilterOptions={},
     selectedAutocompleteFilters={},
     setSelectedAutocompleteFilters=()=>{},
+    tempSelectedAutocompleteFilters={},
+    setTempSelectedAutocompleteFilters=()=>{},
   },
   filterIconSize=12,  
   handleSortFilter,
@@ -44,17 +53,13 @@ const FilterModalCard = ({
 
   const [isModalVisible, setIsModalVisible] = useState( false);
   const [isLoading, setIsLoading] = useState(true);
-  const [tempSelSort, setTempSelSort] = useState({...selectedSort});
-  const [tempSelDropdownFilters, setTempSelDropdownFilters] = useState({...selectedDropdownFilters});
-  const [tempSelChipFilters, setTempSelChipFilters] = useState({...selectedChipFilters});
-  const [tempSelAutocompleteFilters, setTempSelAutocompleteFilters] = useState({...selectedAutocompleteFilters});
 
   // Re-initialize sort and filter values to currently applied values whenever modal opens
   useEffect(() => {
     setIsLoading(true);
-    setTempSelSort(Object.keys(selectedSort).length == 0 ? {'option': sortOptions[0], 'asc': true} : {...selectedSort});
-    setTempSelDropdownFilters({...selectedDropdownFilters});
-    setTempSelAutocompleteFilters({...selectedAutocompleteFilters});
+    setTempSelectedSort(Object.keys(selectedSort).length == 0 ? {'option': sortOptions[0], 'asc': true} : {...selectedSort});
+    setTempSelectedDropdownFilters({...selectedDropdownFilters});
+    setTempSelectedAutocompleteFilters({...selectedAutocompleteFilters});
 
     var tempSelChipFilters = {...selectedChipFilters};
     for (var filter of Object.keys(chipFilterOptions)) {
@@ -62,7 +67,7 @@ const FilterModalCard = ({
         tempSelChipFilters[filter] = chipFilterOptions[filter][0];
       }
     }
-    setTempSelChipFilters(tempSelChipFilters);
+    setTempSelectedChipFilters(tempSelChipFilters);
 
     Keyboard.dismiss();
     setIsLoading(false);
@@ -80,15 +85,15 @@ const FilterModalCard = ({
   // Apply sort and filter values and close modal
   const handleApply = () => {
     updateModalVisibility(false);
-    setSelectedSort({...tempSelSort});
-    setSelectedDropdownFilters({...tempSelDropdownFilters});
-    setSelectedAutocompleteFilters({...tempSelAutocompleteFilters});
-    setSelectedChipFilters({...tempSelChipFilters});
+    setSelectedSort({...tempSelectedSort});
+    setSelectedDropdownFilters({...tempSelectedDropdownFilters});
+    setSelectedAutocompleteFilters({...tempSelectedAutocompleteFilters});
+    setSelectedChipFilters({...tempSelectedChipFilters});
     handleSortFilter({
-      'tempSelSort': {...tempSelSort}, 
-      'tempSelDropdownFilters': {...tempSelDropdownFilters}, 
-      'tempSelChipFilters': {...tempSelChipFilters},
-      'tempSelAutocompleteFilters': {...tempSelAutocompleteFilters}
+      'tempSelSort': {...tempSelectedSort}, 
+      'tempSelDropdownFilters': {...tempSelectedDropdownFilters}, 
+      'tempSelChipFilters': {...tempSelectedChipFilters},
+      'tempSelAutocompleteFilters': {...tempSelectedAutocompleteFilters}
     });
   };
   
@@ -109,33 +114,33 @@ const FilterModalCard = ({
   // Set display value of sort item is selected
   const handleOnSelectChipSort = (item) => {
     let asc = true;
-    if(tempSelSort['option']['value'] == item.value) {
-      asc = !tempSelSort['asc'];
+    if(tempSelectedSort['option']['value'] == item.value) {
+      asc = !tempSelectedSort['asc'];
     }
-    setTempSelSort({'option': item, 'asc': asc});
+    setTempSelectedSort({'option': item, 'asc': asc});
   }
 
   // Set display value of dropdown filter when item is selected
   const handleOnSelectDropdownFilter = (index, filter) => {
-    let tempSelectedFilters = tempSelDropdownFilters;
+    let tempSelectedFilters = tempSelectedDropdownFilters;
     tempSelectedFilters[filter] = dropdownFilterOptions[filter].filter(x=>x.value == index)[0];
-    setTempSelDropdownFilters(tempSelectedFilters);      
+    setTempSelectedDropdownFilters(tempSelectedFilters);      
   }
 
   // Set display value of dropdown filter when item is selected
   const handleOnSelectAutocompleteFilter = (item, filter) => {
     if(item) {
-      let tempSelectedFilters = tempSelAutocompleteFilters;
+      let tempSelectedFilters = tempSelectedAutocompleteFilters;
       tempSelectedFilters[filter] = item;
-      item && setTempSelAutocompleteFilters(tempSelectedFilters);      
+      item && setTempSelectedAutocompleteFilters(tempSelectedFilters);      
     }
   }
 
   // Set display value of chip filter when item is selected
   const handleOnSelectChipFilter = (item, filter) => {
-    let temp = {...tempSelChipFilters};
+    let temp = {...tempSelectedChipFilters};
     temp[filter] = item;
-    setTempSelChipFilters(temp); 
+    setTempSelectedChipFilters(temp); 
   }
 
     return (
@@ -184,14 +189,14 @@ const FilterModalCard = ({
                             key={item.value}
                             title={item.label}
                             onPress={() => handleOnSelectChipSort(item)}
-                            type={tempSelSort['option'].value == item.value ? 'solid' : 'outline'}
+                            type={tempSelectedSort['option'].value == item.value ? 'solid' : 'outline'}
                             containerStyle={styles.chipOption}
-                            buttonStyle={{backgroundColor: tempSelSort['option'].value == item.value ? colors.green : 'transparent', borderColor: colors.green}}
-                            titleStyle={{color: tempSelSort['option'].value == item.value ? colors.white : colors.green}}
+                            buttonStyle={{backgroundColor: tempSelectedSort['option'].value == item.value ? colors.green : 'transparent', borderColor: colors.green}}
+                            titleStyle={{color: tempSelectedSort['option'].value == item.value ? colors.white : colors.green}}
                             iconRight
                             icon={{
-                              name: tempSelSort['option'].value == item.value 
-                              ? tempSelSort['asc']
+                              name: tempSelectedSort['option'].value == item.value 
+                              ? tempSelectedSort['asc']
                                 ? 'long-arrow-up' 
                                 : 'long-arrow-down' 
                               : '',
@@ -223,10 +228,10 @@ const FilterModalCard = ({
                                 key={item.value}
                                 title={item.label}
                                 onPress={() => handleOnSelectChipFilter(item, filter)}
-                                type={tempSelChipFilters[filter] ? tempSelChipFilters[filter].value == item.value ? 'solid' : 'outline' : chipFilterOptions[filter][0].value == item.value ? 'solid' : 'outline'}
+                                type={tempSelectedChipFilters[filter] ? tempSelectedChipFilters[filter].value == item.value ? 'solid' : 'outline' : chipFilterOptions[filter][0].value == item.value ? 'solid' : 'outline'}
                                 containerStyle={styles.chipOption}
-                                buttonStyle={{backgroundColor: tempSelChipFilters[filter] ? tempSelChipFilters[filter].value == item.value ? colors.green : 'transparent' : chipFilterOptions[filter][0].value == item.value ? colors.green : 'transparent', borderColor: colors.green}}
-                                titleStyle={{color: tempSelChipFilters[filter] ? tempSelChipFilters[filter].value == item.value ? colors.white : colors.green  : chipFilterOptions[filter][0].value == item.value ? colors.white : colors.green}}
+                                buttonStyle={{backgroundColor: tempSelectedChipFilters[filter] ? tempSelectedChipFilters[filter].value == item.value ? colors.green : 'transparent' : chipFilterOptions[filter][0].value == item.value ? colors.green : 'transparent', borderColor: colors.green}}
+                                titleStyle={{color: tempSelectedChipFilters[filter] ? tempSelectedChipFilters[filter].value == item.value ? colors.white : colors.green  : chipFilterOptions[filter][0].value == item.value ? colors.white : colors.green}}
                                 />
                               ))
                             }
@@ -264,7 +269,7 @@ const FilterModalCard = ({
                           closeOnBlur={false}
                           dataSet={autocompleteFilterOptions[filter]}
                           onSelectItem={(item) => handleOnSelectAutocompleteFilter(item, filter)}
-                          onClear={() => setTempSelAutocompleteFilters({})}
+                          onClear={() => setTempSelectedAutocompleteFilters({})}
                           textInputProps={{
                             placeholder: 'Enter value',
                             autoCorrect: false,

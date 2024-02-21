@@ -22,37 +22,45 @@ function SearchFilterBar({
   setViewMode=()=>{},
   handleSearchSortFilterCustom,
   itemCount=null,   
+  filterOptionDetails={},
   constants: {
     VIEW_MODES={},
-    SEARCH_OPTIONS={},
+    SEARCH_OPTIONS=[],
     SORT_OPTIONS={},
     FILTER_OPTIONS={},
-    FILTER_OPTION_DETAILS={},
     FIELD_MAPPING={},
   },
   sort: {
     sortOptions={},
     setSortOptions=()=>{},
     selectedSort={},
-    setSelectedSort=()=>{}
+    setSelectedSort=()=>{},
+    tempSelectedSort={},
+    setTempSelectedSort=()=>{},
   },
   chipFilter: {    
     chipFilterOptions={},
     setChipFilterOptions=()=>{},
     selectedChipFilters={},
     setSelectedChipFilters=()=>{},
+    tempSelectedChipFilters={},
+    setTempSelectedChipFilters=()=>{},
   },
   dropdownFilter: {
     dropdownFilterOptions={},
     setDropdownFilterOptions=()=>{},
     selectedDropdownFilters={},
-    setSelectedDropdownFilters=()=>{}
+    setSelectedDropdownFilters=()=>{},
+    tempSelectedDropdownFilters={},
+    setTempSelectedDropdownFilters=()=>{},
   },
   autoCompleteFilter: {
     autocompleteFilterOptions={},
     setAutocompleteFilterOptions=()=>{},
     selectedAutocompleteFilters={},
     setSelectedAutocompleteFilters=()=>{},
+    tempSelectedAutocompleteFilters={},
+    setTempSelectedAutocompleteFilters=()=>{},
   },
   search: {
     searchOption='',
@@ -67,7 +75,7 @@ function SearchFilterBar({
   // Whenever data changes, reinitialize sort and filter options
   useEffect(() => {
     initSortFilter();
-  }, [originalList])
+  }, [originalList, filterOptionDetails])
 
   // Initialize sort and filter options based on view mode
   const initSortFilter = () => {
@@ -80,19 +88,19 @@ function SearchFilterBar({
       
       // If no custom options for a filter, get options from patient list by taking distinct values of the filter property
       // Else use custom options
-      if (Object.keys(FILTER_OPTION_DETAILS[filter]['options']).length == 0) {
+      if (Object.keys(filterOptionDetails[filter]['options']).length == 0) {
         tempFilterOptionList = originalList.map(x => x[FIELD_MAPPING[filter]]);
         tempFilterOptionList = Array.from(new Set(tempFilterOptionList));        
       } else {
-        tempFilterOptionList = Object.keys(FILTER_OPTION_DETAILS[filter]['options'])
+        tempFilterOptionList = Object.keys(filterOptionDetails[filter]['options'])
       }
 
       // Parse filter options based on dropdown/chip type
-      if(FILTER_OPTION_DETAILS[filter]['type'] == 'dropdown') {
+      if(filterOptionDetails[filter]['type'] == 'dropdown') {
         tempDropdownFilterOptions[filter] = parseSelectOptions(['All', ...tempFilterOptionList]);
-      } else if (FILTER_OPTION_DETAILS[filter]['type'] == 'chip') {
+      } else if (filterOptionDetails[filter]['type'] == 'chip') {
         tempChipFilterOptions[filter] = parseSelectOptions(tempFilterOptionList);
-      } else if (FILTER_OPTION_DETAILS[filter]['type'] == 'autocomplete') {
+      } else if (filterOptionDetails[filter]['type'] == 'autocomplete') {
         tempAutocompleteFilterOptions[filter] = parseAutoCompleteOptions(tempFilterOptionList);
       }
     }
@@ -110,7 +118,6 @@ function SearchFilterBar({
     tempSelAutocompleteFilters=selectedAutocompleteFilters, 
     tempSearchMode=searchOption,
   }) => {
-    // console.log(tempSearchMode)
     if(handleSearchSortFilterCustom) {
       handleSearchSortFilterCustom({
         text: text, 
@@ -142,54 +149,58 @@ function SearchFilterBar({
     tempSelAutocompleteFilters, 
     tempSearchMode
   ) => {
-    let filteredListOfPatients = originalList.map((obj) => ({
+    let filteredList = originalList.map((obj) => ({
       ...obj,
       fullName: `${obj.firstName.trim()} ${obj.lastName.trim()}`
     }));   
 
     // Search
-    filteredListOfPatients = filteredListOfPatients.filter((item) => {
+    filteredList = filteredList.filter((item) => {
       return item[FIELD_MAPPING[tempSearchMode]].toLowerCase().includes(text.toLowerCase());
     })
       
     // Sort
-    filteredListOfPatients = sortArray(filteredListOfPatients, 
+    filteredList = sortArray(filteredList, 
       FIELD_MAPPING[Object.keys(tempSelSort).length == 0 ? 
         sortOptions[0]['label'] : 
         tempSelSort['option']['label']],
       tempSelSort['asc'] != null ? tempSelSort['asc'] : true);
   
     // Dropdown filters
-    for (var filter of Object.keys(tempSelDropdownFilters)) {
+    for (var filter of Object.keys(tempSelDropdownFilters)) {   
       if(tempSelDropdownFilters[filter]['label'] != 'All') {
-        filteredListOfPatients = filteredListOfPatients.filter((obj) => (
-          obj[FIELD_MAPPING[filter]] === tempSelDropdownFilters[filter]['label'])) || []
-      }
+        filteredList = getSubFilteredList(filteredList, filter, 'label', tempSelDropdownFilters);
+      }      
     }
 
     // Autocomplete filters
     for (var filter of Object.keys(tempSelAutocompleteFilters)) {
-      filteredListOfPatients = filteredListOfPatients.filter((obj) => (
-        obj[FIELD_MAPPING[filter]] === tempSelAutocompleteFilters[filter]['title'])) || []
+      filteredList = getSubFilteredList(filteredList, filter, 'title', tempSelAutocompleteFilters);
     }
 
     // Chip Filters
-    // Only filter if required
-    // For example, patient status is not meant for filtering - it requires new API call, so do not filter
-    // Use custom options if declared in FILTER_MAPPING 
     for (var filter of Object.keys(tempSelChipFilters)) {
-      if(FILTER_OPTION_DETAILS[filter]['isFilter']){
-        if(Object.keys(FILTER_OPTION_DETAILS[filter]['options']).length == 0) {
-          filteredListOfPatients = filteredListOfPatients.filter((obj) => (
-            obj[FIELD_MAPPING[filter]] === tempSelChipFilters[filter]['label'])) || []
-        } else {
-          filteredListOfPatients = filteredListOfPatients.filter((obj) => (
-            obj[FIELD_MAPPING[filter]] === FILTER_OPTION_DETAILS[filter]['options'][tempSelChipFilters[filter]['label']])) || []
-        }
-      }
+      filteredList = getSubFilteredList(filteredList, filter, 'label', tempSelChipFilters);
     }  
 
-    setList(filteredListOfPatients);
+    setList(filteredList);
+  }
+
+  // Apply filters
+  // Only filter if required (isFilter is true)
+  // For example, patient status is not meant for filtering - it requires new API call, so do not filter
+  // Use custom options if declared in FILTER_MAPPING 
+  const getSubFilteredList = (filteredList, filter, id, tempSelFilters) => {
+    if(filterOptionDetails[filter]['isFilter']){
+      if(Object.keys(filterOptionDetails[filter]['options']).length == 0) {
+        filteredList = filteredList.filter((obj) => (
+          obj[FIELD_MAPPING[filter]] === tempSelFilters[filter][id])) || []
+      } else {
+        filteredList = filteredList.filter((obj) => (
+          obj[FIELD_MAPPING[filter]] === filterOptionDetails[filter]['options'][tempSelFilters[filter][id]])) || []
+      }
+    }
+    return filteredList;
   }
   // Reset selected search, sort, and filter options
   const resetSearchSortFilter = () => {
@@ -203,14 +214,14 @@ function SearchFilterBar({
 
   // Switch between search modes (full name, preferred name)
   const handleOnToggleSearchOptions = async(item) => {
-    const label = SEARCH_OPTIONS.filter(x=>x.value == item)[0]['label'];
+    const label = SEARCH_OPTIONS[item-1];
     setSearchOption(label);
     if(searchQuery != '') {
       handleSearchSortFilter({tempSearchMode: label});
     }   
   }
 
-  // Switch between 'My Patients' and 'All Patients'
+  // Switch between tabs
   const handleOnToggleViewMode = (mode) => {
     if(mode!=viewMode) {
       setIsLoading(true);
@@ -244,7 +255,7 @@ function SearchFilterBar({
           autoCapitalize='characters'
           inputContainerStyle={{borderTopRightRadius: 0, borderBottomRightRadius: 0, height: 47}}
           handleOnToggleSearchOptions={handleOnToggleSearchOptions}
-          SEARCH_OPTIONS={SEARCH_OPTIONS}
+          SEARCH_OPTIONS={parseSelectOptions(SEARCH_OPTIONS)}
         />
         <View>
           <FilterModalCard
@@ -254,21 +265,29 @@ function SearchFilterBar({
               sortOptions: sortOptions,
               selectedSort: selectedSort,
               setSelectedSort: setSelectedSort,
+              tempSelectedSort: tempSelectedSort,
+              setTempSelectedSort: setTempSelectedSort,
             }}
             autoCompleteFilter={{
-              autocompleteFilterOptions:autocompleteFilterOptions,
-              selectedAutocompleteFilters:selectedAutocompleteFilters,
-              setSelectedAutocompleteFilters:setSelectedAutocompleteFilters,
+              autocompleteFilterOptions: autocompleteFilterOptions,
+              selectedAutocompleteFilters: selectedAutocompleteFilters,
+              setSelectedAutocompleteFilters: setSelectedAutocompleteFilters,
+              tempSelectedAutocompleteFilters: tempSelectedAutocompleteFilters,
+              setTempSelectedAutocompleteFilters: setTempSelectedAutocompleteFilters,
             }}
             dropdownFilter={{
               dropdownFilterOptions: dropdownFilterOptions,
               selectedDropdownFilters: selectedDropdownFilters,
               setSelectedDropdownFilters: setSelectedDropdownFilters,
+              tempSelectedDropdownFilters: tempSelectedDropdownFilters,
+              setTempSelectedDropdownFilters: setTempSelectedDropdownFilters,
             }}
             chipFilter={{
               chipFilterOptions: chipFilterOptions,
               selectedChipFilters: selectedChipFilters,
               setSelectedChipFilters: setSelectedChipFilters,
+              tempSelectedChipFilters: tempSelectedChipFilters,
+              setTempSelectedChipFilters: setTempSelectedChipFilters,
             }}
             handleSortFilter={handleSearchSortFilter}
           />
@@ -277,7 +296,7 @@ function SearchFilterBar({
       <View
         style={[styles.optionsContainer, {paddingTop: 0}]}
       >
-        {itemCount ? (
+        {itemCount != null ? (
           <>
             <View style={styles.itemCount}>
               <Text>No. of patients: {itemCount}</Text>
@@ -325,26 +344,6 @@ const styles = StyleSheet.create({
     flex: 1,    
     marginTop: 5
   },
-  patientListContainer: {
-    paddingHorizontal: '5%',
-  },
-  patientRowContainer: {
-    marginVertical: '3%',
-    width: '100%',
-    flex: 2,
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    justifyContent: 'space-between',
-  },
-  caregiverNameContainer: {
-    marginLeft: '5%',
-    justifyContent: 'center',
-    alignItem: 'center',
-  },
-  caregiverName: {
-    fontSize: 15,
-    fontWeight: 'bold',
-  },
   itemCount: {
     fontSize: 13.5,
     marginLeft: '2%',
@@ -352,23 +351,6 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
   },
-  tab: {
-    padding: '1.5%',
-    flex: 0.5,
-  },
-  tabText: {
-    fontSize: 20,
-    textAlign: 'center',
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
-  },
-  selectedTab: {
-    borderBottomColor: colors.green,
-    borderBottomWidth: 3,
-  },
-  selectedTabText: {
-    fontWeight: 'bold',
-    color: colors.green,
-  }
 });
 
 export default SearchFilterBar;
