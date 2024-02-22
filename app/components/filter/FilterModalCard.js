@@ -16,34 +16,34 @@ import SelectionInputField from '../input-fields/SelectionInputField';
 const FilterModalCard = ({
   modalVisible,
   setModalVisible,
-  sort: {
+  // sort: {
     sortOptions=[],
     selectedSort={},
     setSelectedSort=()=>{},
     tempSelectedSort={},
     setTempSelectedSort=()=>{},
-  },
-  chipFilter: {    
+  // },
+  // chipFilter: {    
     chipFilterOptions={},
     selectedChipFilters={},
     setSelectedChipFilters=()=>{},
     tempSelectedChipFilters={},
     setTempSelectedChipFilters=()=>{},
-  },
-  dropdownFilter: {
+  // },
+  // dropdownFilter: {
     dropdownFilterOptions={},
     selectedDropdownFilters={},
     setSelectedDropdownFilters=()=>{},
     tempSelectedDropdownFilters={},
     setTempSelectedDropdownFilters=()=>{},
-  },
-  autoCompleteFilter: {
+  // },
+  // autoCompleteFilter: {
     autocompleteFilterOptions={},
     selectedAutocompleteFilters={},
     setSelectedAutocompleteFilters=()=>{},
     tempSelectedAutocompleteFilters={},
     setTempSelectedAutocompleteFilters=()=>{},
-  },
+  // },
   filterIconSize=12,  
   handleSortFilter,
 }) => {

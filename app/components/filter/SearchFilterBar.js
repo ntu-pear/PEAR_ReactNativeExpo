@@ -25,43 +25,37 @@ function SearchFilterBar({
   filterOptionDetails={},
   initializeData=true,
   onInitialize=()=>{},
-  constants: {
-    VIEW_MODES={},
-    SEARCH_OPTIONS=[],
-    SORT_OPTIONS={},
-    FILTER_OPTIONS={},
-    FIELD_MAPPING={},
-  },
-  sort: {
-    selectedSort={},
-    setSelectedSort=()=>{},
-    tempSelectedSort={},
-    setTempSelectedSort=()=>{},
-  },
-  chipFilter: {    
-    selectedChipFilters={},
-    setSelectedChipFilters=()=>{},
-    tempSelectedChipFilters={},
-    setTempSelectedChipFilters=()=>{},
-  },
-  dropdownFilter: {
-    selectedDropdownFilters={},
-    setSelectedDropdownFilters=()=>{},
-    tempSelectedDropdownFilters={},
-    setTempSelectedDropdownFilters=()=>{},
-  },
-  autoCompleteFilter: {
-    selectedAutocompleteFilters={},
-    setSelectedAutocompleteFilters=()=>{},
-    tempSelectedAutocompleteFilters={},
-    setTempSelectedAutocompleteFilters=()=>{},
-  },
-  search: {
-    searchQuery='',
-    setSearchQuery=()=>{},
-    searchOption='',
-    setSearchOption=()=>{},
-  },
+  
+  VIEW_MODES={},
+  SEARCH_OPTIONS=[],
+  SORT_OPTIONS={},
+  FILTER_OPTIONS={},
+  FIELD_MAPPING={},
+
+  selectedSort={},
+  setSelectedSort=()=>{},
+  tempSelectedSort={},
+  setTempSelectedSort=()=>{},
+  
+  selectedChipFilters={},
+  setSelectedChipFilters=()=>{},
+  tempSelectedChipFilters={},
+  setTempSelectedChipFilters=()=>{},
+
+  selectedDropdownFilters={},
+  setSelectedDropdownFilters=()=>{},
+  tempSelectedDropdownFilters={},
+  setTempSelectedDropdownFilters=()=>{},
+
+  selectedAutocompleteFilters={},
+  setSelectedAutocompleteFilters=()=>{},
+  tempSelectedAutocompleteFilters={},
+  setTempSelectedAutocompleteFilters=()=>{},
+
+  searchQuery='',
+  setSearchQuery=()=>{},
+  searchOption='',
+  setSearchOption=()=>{},
 }) {  
   // Default state to control modal visibility
   const [modalVisible, setModalVisible] = useState(false);
@@ -281,34 +275,31 @@ function SearchFilterBar({
           <FilterModalCard
             modalVisible={modalVisible}
             setModalVisible={setModalVisible}
-            sort={{
-              sortOptions: sortOptions,
-              selectedSort: selectedSort,
-              setSelectedSort: setSelectedSort,
-              tempSelectedSort: tempSelectedSort,
-              setTempSelectedSort: setTempSelectedSort,
-            }}
-            autoCompleteFilter={{
-              autocompleteFilterOptions: autocompleteFilterOptions,
-              selectedAutocompleteFilters: selectedAutocompleteFilters,
-              setSelectedAutocompleteFilters: setSelectedAutocompleteFilters,
-              tempSelectedAutocompleteFilters: tempSelectedAutocompleteFilters,
-              setTempSelectedAutocompleteFilters: setTempSelectedAutocompleteFilters,
-            }}
-            dropdownFilter={{
-              dropdownFilterOptions: dropdownFilterOptions,
-              selectedDropdownFilters: selectedDropdownFilters,
-              setSelectedDropdownFilters: setSelectedDropdownFilters,
-              tempSelectedDropdownFilters: tempSelectedDropdownFilters,
-              setTempSelectedDropdownFilters: setTempSelectedDropdownFilters,
-            }}
-            chipFilter={{
-              chipFilterOptions: chipFilterOptions,
-              selectedChipFilters: selectedChipFilters,
-              setSelectedChipFilters: setSelectedChipFilters,
-              tempSelectedChipFilters: tempSelectedChipFilters,
-              setTempSelectedChipFilters: setTempSelectedChipFilters,
-            }}
+            
+            sortOptions={sortOptions}
+            selectedSort={selectedSort}
+            setSelectedSort={setSelectedSort}
+            tempSelectedSort={tempSelectedSort}
+            setTempSelectedSort={setTempSelectedSort}
+          
+            autocompleteFilterOptions={autocompleteFilterOptions}
+            selectedAutocompleteFilters={selectedAutocompleteFilters}
+            setSelectedAutocompleteFilters={setSelectedAutocompleteFilters}
+            tempSelectedAutocompleteFilters={tempSelectedAutocompleteFilters}
+            setTempSelectedAutocompleteFilters={setTempSelectedAutocompleteFilters}
+          
+            dropdownFilterOptions={dropdownFilterOptions}
+            selectedDropdownFilters={selectedDropdownFilters}
+            setSelectedDropdownFilters={setSelectedDropdownFilters}
+            tempSelectedDropdownFilters={tempSelectedDropdownFilters}
+            setTempSelectedDropdownFilters={setTempSelectedDropdownFilters}
+          
+            chipFilterOptions={chipFilterOptions}
+            selectedChipFilters={selectedChipFilters}
+            setSelectedChipFilters={setSelectedChipFilters}
+            tempSelectedChipFilters={tempSelectedChipFilters}
+            setTempSelectedChipFilters={setTempSelectedChipFilters}
+
             handleSortFilter={handleSearchSortFilter}
           />
         </View>

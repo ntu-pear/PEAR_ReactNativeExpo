@@ -281,43 +281,38 @@ function PatientsScreen({ navigation }) {
             filterOptionDetails={filterOptionDetails}
             initializeData={isDataInitialized}
             onInitialize={() => setIsDataInitialized(false)}
-            constants={{
-              VIEW_MODES: VIEW_MODES,
-              SEARCH_OPTIONS: SEARCH_OPTIONS,
-              SORT_OPTIONS: SORT_OPTIONS,
-              FILTER_OPTIONS: FILTER_OPTIONS,
-              FIELD_MAPPING: FIELD_MAPPING,
-            }}
-            sort= {{
-              selectedSort: selectedSort,
-              setSelectedSort: setSelectedSort,
-              tempSelectedSort: tempSelectedSort,
-              setTempSelectedSort: setTempSelectedSort,
-            }}
-            chipFilter={{    
-              selectedChipFilters: selectedChipFilters,
-              setSelectedChipFilters: setSelectedChipFilters,
-              tempSelectedChipFilters: tempSelectedChipFilters,
-              setTempSelectedChipFilters: setTempSelectedChipFilters,
-            }}
-            dropdownFilter={{
-              selectedDropdownFilters: selectedDropdownFilters,
-              setSelectedDropdownFilters: setSelectedDropdownFilters,
-              tempSelectedDropdownFilters: tempSelectedDropdownFilters,
-              setTempSelectedDropdownFilters: setTempSelectedDropdownFilters,
-            }}
-            autoCompleteFilter={{
-              selectedAutocompleteFilters: selectedAutocompleteFilters,
-              setSelectedAutocompleteFilters: setSelectedAutocompleteFilters,
-              tempSelectedAutocompleteFilters: tempSelectedAutocompleteFilters,
-              setTempSelectedAutocompleteFilters: setTempSelectedAutocompleteFilters,
-            }}
-            search={{
-              searchQuery: searchQuery,
-              setSearchQuery: setSearchQuery,
-              searchOption: searchOption,
-              setSearchOption: setSearchOption,
-            }}
+
+            VIEW_MODES={VIEW_MODES}
+            SEARCH_OPTIONS={SEARCH_OPTIONS}
+            FILTER_OPTIONS={FILTER_OPTIONS}
+            SORT_OPTIONS={SORT_OPTIONS}
+            FIELD_MAPPING={FIELD_MAPPING}
+          
+            selectedSort={selectedSort}
+            setSelectedSort={setSelectedSort}
+            tempSelectedSort={tempSelectedSort}
+            setTempSelectedSort={setTempSelectedSort}
+              
+            selectedChipFilters={selectedChipFilters}
+            setSelectedChipFilters={setSelectedChipFilters}
+            tempSelectedChipFilters={tempSelectedChipFilters}
+            setTempSelectedChipFilters={setTempSelectedChipFilters}
+          
+            selectedDropdownFilters={selectedDropdownFilters}
+            setSelectedDropdownFilters={setSelectedDropdownFilters}
+            tempSelectedDropdownFilters={tempSelectedDropdownFilters}
+            setTempSelectedDropdownFilters={setTempSelectedDropdownFilters}
+          
+            selectedAutocompleteFilters={selectedAutocompleteFilters}
+            setSelectedAutocompleteFilters={setSelectedAutocompleteFilters}
+            tempSelectedAutocompleteFilters={tempSelectedAutocompleteFilters}
+            setTempSelectedAutocompleteFilters={setTempSelectedAutocompleteFilters}
+          
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            searchOption={searchOption}
+            setSearchOption={setSearchOption}
+
             />
           <ScrollView
             ref={patientListRef}
