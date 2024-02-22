@@ -79,20 +79,17 @@ function PatientsScreen({ navigation }) {
   
   // Sort related states
   const [selectedSort, setSelectedSort] = useState({});
-  const [tempSelectedSort, setTempSelectedSort] = useState({});
 
   // Dropdown filter related states
   const [selectedDropdownFilters, setSelectedDropdownFilters] = useState({});
-  const [tempSelectedDropdownFilters, setTempSelectedDropdownFilters] = useState({});
-
-  // Autocomplete filter related states
-  // NOTE: currently not used, but provided in case developers want to add autocomplete options
-  const [selectedAutocompleteFilters, setSelectedAutocompleteFilters] = useState({});
-  const [tempSelectedAutocompleteFilters, setTempSelectedAutocompleteFilters] = useState({});
   
   // Chip filter related states
   const [selectedChipFilters, setSelectedChipFilters] = useState({}); 
   const [tempSelectedChipFilters, setTempSelectedChipFilters] = useState({}); 
+  
+  // Autocomplete filter related states
+  // NOTE: currently not used, but provided in case developers want to add autocomplete options
+  const [selectedAutocompleteFilters, setSelectedAutocompleteFilters] = useState({});
 
   // Filter details related state
   // Details of filter options
@@ -194,7 +191,6 @@ function PatientsScreen({ navigation }) {
 
   // Update filter options for Caregiver filter based on patient count data from backend
   const updateCaregiverFilterOptions = (tempPatientStatus=patientStatus) => {
-    // console.log(1, tempPatientStatus)
     let caregiverPatientCount = {};
     for (var caregiverID of Object.keys(patientCountInfo)) {
       const caregiverName = patientCountInfo[caregiverID]['fullName']
@@ -248,7 +244,6 @@ function PatientsScreen({ navigation }) {
       patientListRef.current?.scrollTo({x: 0, y: 0, animated: true});
       setIsLoading(false);    
     }   
-
   }
   
   // On click button to add patient
@@ -261,7 +256,6 @@ function PatientsScreen({ navigation }) {
   const handleOnClickPatientItem = (patientID) => {
     navigation.push(routes.PATIENT_PROFILE, { id: patientID });
   };
-
 
   return (
     <>
@@ -289,8 +283,6 @@ function PatientsScreen({ navigation }) {
           
             selectedSort={selectedSort}
             setSelectedSort={setSelectedSort}
-            tempSelectedSort={tempSelectedSort}
-            setTempSelectedSort={setTempSelectedSort}
               
             selectedChipFilters={selectedChipFilters}
             setSelectedChipFilters={setSelectedChipFilters}
@@ -299,19 +291,14 @@ function PatientsScreen({ navigation }) {
           
             selectedDropdownFilters={selectedDropdownFilters}
             setSelectedDropdownFilters={setSelectedDropdownFilters}
-            tempSelectedDropdownFilters={tempSelectedDropdownFilters}
-            setTempSelectedDropdownFilters={setTempSelectedDropdownFilters}
           
             selectedAutocompleteFilters={selectedAutocompleteFilters}
             setSelectedAutocompleteFilters={setSelectedAutocompleteFilters}
-            tempSelectedAutocompleteFilters={tempSelectedAutocompleteFilters}
-            setTempSelectedAutocompleteFilters={setTempSelectedAutocompleteFilters}
           
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
             searchOption={searchOption}
             setSearchOption={setSearchOption}
-
             />
           <ScrollView
             ref={patientListRef}

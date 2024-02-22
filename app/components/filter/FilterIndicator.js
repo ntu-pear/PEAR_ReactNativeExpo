@@ -1,14 +1,11 @@
 // Libs
-import React, { useState, useEffect, useContext, useRef } from 'react';
-import { Center, VStack, ScrollView, Fab, Icon, Divider, HStack } from 'native-base';
-import { StyleSheet, View } from 'react-native';
-
+import React from 'react';
+import { ScrollView } from 'native-base';
+import { View } from 'react-native';
+import { Chip } from 'react-native-elements';
 
 // Configurations
 import colors from 'app/config/colors';
-
-// Components
-import { Chip } from 'react-native-elements';
 
 function FilterIndicator({  
   modalVisible,

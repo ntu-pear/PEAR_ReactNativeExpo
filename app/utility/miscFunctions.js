@@ -45,3 +45,13 @@ export const parseAutoCompleteOptions = (array) => {
   }
   return options;
 }
+
+// Used to update state when a component declares a state only if the state is not a prop from the parent
+// If prop state passed, update prop state
+// Otherwise update state that is declared in the component
+export const updateState = (setInternalState, setExternalState, value) => {
+  if(setExternalState) {
+    setExternalState(value);
+  }
+  setInternalState(value);  
+}

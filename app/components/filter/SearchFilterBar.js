@@ -35,33 +35,33 @@ function SearchFilterBar({
   selectedSort={},
   setSelectedSort=()=>{},
   tempSelectedSort={},
-  setTempSelectedSort=()=>{},
+  setTempSelectedSort,
   
   selectedChipFilters={},
   setSelectedChipFilters=()=>{},
   tempSelectedChipFilters={},
-  setTempSelectedChipFilters=()=>{},
+  setTempSelectedChipFilters,
 
   selectedDropdownFilters={},
   setSelectedDropdownFilters=()=>{},
   tempSelectedDropdownFilters={},
-  setTempSelectedDropdownFilters=()=>{},
+  setTempSelectedDropdownFilters,
 
   selectedAutocompleteFilters={},
   setSelectedAutocompleteFilters=()=>{},
   tempSelectedAutocompleteFilters={},
-  setTempSelectedAutocompleteFilters=()=>{},
+  setTempSelectedAutocompleteFilters,
 
   searchQuery='',
-  setSearchQuery=()=>{},
+  setSearchQuery,
   searchOption='',
-  setSearchOption=()=>{},
+  setSearchOption,
 }) {  
   // Default state to control modal visibility
   const [modalVisible, setModalVisible] = useState(false);
 
   // Search, sort, and filter related states
-  const [sortOptions, setSortOptions] = useState(parseSelectOptions(SORT_OPTIONS[viewMode]));
+  const [sortOptions, setSortOptions] = useState(Object.keys(SORT_OPTIONS).length > 0 ? parseSelectOptions(SORT_OPTIONS[viewMode]) : {});
   const [dropdownFilterOptions, setDropdownFilterOptions] = useState({});
   const [autocompleteFilterOptions, setAutocompleteFilterOptions] = useState({});
   const [chipFilterOptions, setChipFilterOptions] = useState({}); 
@@ -70,9 +70,7 @@ function SearchFilterBar({
   useEffect(() => {
     initSortFilter();
     onInitialize();
-    // if(sortOptions) {
     handleSearchSortFilter({});
-      // }
   }, [initializeData])
 
   // Initialize sort and filter options based on view mode
@@ -105,8 +103,7 @@ function SearchFilterBar({
     setDropdownFilterOptions(tempDropdownFilterOptions);
     setAutocompleteFilterOptions(tempAutocompleteFilterOptions);
     setChipFilterOptions(tempChipFilterOptions);
-    setSortOptions(parseSelectOptions(SORT_OPTIONS[viewMode]))
-
+    setSortOptions(Object.keys(SORT_OPTIONS).length > 0 ? parseSelectOptions(SORT_OPTIONS[viewMode]) : {})
   }
 
   const handleSearchSortFilter = ({
@@ -159,11 +156,13 @@ function SearchFilterBar({
     })
   
     // Sort
-    filteredList = sortArray(filteredList, 
-      FIELD_MAPPING[Object.keys(tempSelSort).length == 0 ? 
-        sortOptions[0]['label'] : 
-        tempSelSort['option']['label']],
-      tempSelSort['asc'] != null ? tempSelSort['asc'] : true);
+    if(Object.keys(SORT_OPTIONS).length > 0) {
+      filteredList = sortArray(filteredList, 
+        FIELD_MAPPING[Object.keys(tempSelSort).length == 0 ? 
+          sortOptions[0]['label'] : 
+          tempSelSort['option']['label']],
+        tempSelSort['asc'] != null ? tempSelSort['asc'] : true);
+    }
   
     // Dropdown filters
     for (var filter of Object.keys(tempSelDropdownFilters)) {   
@@ -218,8 +217,10 @@ function SearchFilterBar({
       setIsLoading(true);
 
       // Delete/Reset any sort options/filters that should not be applied to the current tab 
-      if(!SORT_OPTIONS[mode].includes(Object.keys(selectedSort).length > 0 ? selectedSort['option']['label'] : sortOptions[0]['label'])) {
-        setSelectedSort({});
+      if(Object.keys(SORT_OPTIONS).length > 0) {
+        if(!SORT_OPTIONS[mode].includes(Object.keys(selectedSort).length > 0 ? selectedSort['option']['label'] : sortOptions[0]['label'])) {
+          setSelectedSort({});
+        }
       }
 
       for(var filter of Object.keys(selectedDropdownFilters)) {

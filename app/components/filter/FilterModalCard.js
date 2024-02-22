@@ -12,35 +12,36 @@ import typography from 'app/config/typography';
 
 // Components
 import SelectionInputField from '../input-fields/SelectionInputField';
+import { updateState } from 'app/utility/miscFunctions';
 
 const FilterModalCard = ({
   modalVisible,
   setModalVisible,
   
-  sortOptions=[],
+  sortOptions={},
   selectedSort={},
   setSelectedSort=()=>{},
-  tempSelectedSort={},
-  setTempSelectedSort=()=>{},
+  tempSelectedSort,
+  setTempSelectedSort,
   
   chipFilterOptions={},
   selectedChipFilters={},
   setSelectedChipFilters=()=>{},
-  tempSelectedChipFilters={},
-  setTempSelectedChipFilters=()=>{},
+  tempSelectedChipFilters,
+  setTempSelectedChipFilters,
 
   dropdownFilterOptions={},
   selectedDropdownFilters={},
   setSelectedDropdownFilters=()=>{},
-  tempSelectedDropdownFilters={},
-  setTempSelectedDropdownFilters=()=>{},
+  tempSelectedDropdownFilters,
+  setTempSelectedDropdownFilters,
 
   autocompleteFilterOptions={},
   selectedAutocompleteFilters={},
   setSelectedAutocompleteFilters=()=>{},
-  tempSelectedAutocompleteFilters={},
-  setTempSelectedAutocompleteFilters=()=>{},
-  
+  tempSelectedAutocompleteFilters,
+  setTempSelectedAutocompleteFilters,
+
   filterIconSize=12,  
   handleSortFilter,
 }) => {
@@ -50,15 +51,21 @@ const FilterModalCard = ({
 
   const [isModalVisible, setIsModalVisible] = useState( false);
   const [isLoading, setIsLoading] = useState(true);
-  
+
+  const [tempSelSort, setTempSelSort] = useState(tempSelectedSort || {});
+  const [tempSelChip, setTempSelChip] = useState(tempSelectedChipFilters || {});
+  const [tempSelDropdown, setTempSelDropdown] = useState(tempSelectedDropdownFilters || {});
+  const [tempSelAutocomplete, setTempSelAutocomplete] = useState(tempSelectedAutocompleteFilters || {});
+
   // Re-initialize sort and filter values to currently applied values whenever modal opens
   useEffect(() => {
     setIsLoading(true);
 
     setSelectedSort(Object.keys(selectedSort).length == 0 ? {'option': sortOptions[0], 'asc': true} : {...selectedSort});
-    setTempSelectedSort(Object.keys(selectedSort).length == 0 ? {'option': sortOptions[0], 'asc': true} : {...selectedSort});
-    setTempSelectedDropdownFilters({...selectedDropdownFilters});
-    setTempSelectedAutocompleteFilters({...selectedAutocompleteFilters});
+
+    updateState(setTempSelSort, setTempSelectedSort, Object.keys(selectedSort).length == 0 ? {'option': sortOptions[0], 'asc': true} : {...selectedSort})
+    updateState(setTempSelDropdown, setTempSelectedDropdownFilters, {...selectedDropdownFilters});
+    updateState(setTempSelAutocomplete, setTempSelectedAutocompleteFilters, {...selectedAutocompleteFilters});
 
     var tempSelChipFilters = {...selectedChipFilters};
     for (var filter of Object.keys(chipFilterOptions)) {
@@ -67,7 +74,7 @@ const FilterModalCard = ({
       }
     }
     setSelectedChipFilters(tempSelChipFilters);
-    setTempSelectedChipFilters(tempSelChipFilters);
+    updateState(setTempSelChip, setTempSelectedChipFilters, tempSelChipFilters);
 
     Keyboard.dismiss();
 
@@ -86,15 +93,15 @@ const FilterModalCard = ({
   // Apply sort and filter values and close modal
   const handleApply = () => {
     updateModalVisibility(false);
-    setSelectedSort({...tempSelectedSort});
-    setSelectedDropdownFilters({...tempSelectedDropdownFilters});
-    setSelectedAutocompleteFilters({...tempSelectedAutocompleteFilters});
-    setSelectedChipFilters({...tempSelectedChipFilters});
+    setSelectedSort({...tempSelSort});
+    setSelectedDropdownFilters({...tempSelDropdown});
+    setSelectedAutocompleteFilters({...tempSelAutocomplete});
+    setSelectedChipFilters({...tempSelChip});
     handleSortFilter({
-      'tempSelSort': {...tempSelectedSort}, 
-      'tempSelDropdownFilters': {...tempSelectedDropdownFilters}, 
-      'tempSelChipFilters': {...tempSelectedChipFilters},
-      'tempSelAutocompleteFilters': {...tempSelectedAutocompleteFilters}
+      'tempSelSort': {...tempSelSort}, 
+      'tempSelDropdownFilters': {...tempSelDropdown}, 
+      'tempSelChipFilters': {...tempSelChip},
+      'tempSelAutocompleteFilters': {...tempSelAutocomplete}
     });
   };
   
@@ -115,33 +122,33 @@ const FilterModalCard = ({
   // Set display value of sort item is selected
   const handleOnSelectChipSort = (item) => {
     let asc = true;
-    if(tempSelectedSort['option']['value'] == item.value) {
-      asc = !tempSelectedSort['asc'];
+    if(tempSelSort['option']['value'] == item.value) {
+      asc = !tempSelSort['asc'];
     }
-    setTempSelectedSort({'option': item, 'asc': asc});
+    setTempSelSort({'option': item, 'asc': asc});
   }
 
   // Set display value of dropdown filter when item is selected
   const handleOnSelectDropdownFilter = (index, filter) => {
-    let tempSelectedFilters = tempSelectedDropdownFilters;
+    let tempSelectedFilters = tempSelDropdown;
     tempSelectedFilters[filter] = dropdownFilterOptions[filter].filter(x=>x.value == index)[0];
-    setTempSelectedDropdownFilters(tempSelectedFilters);      
+    updateState(setTempSelDropdown, setTempSelectedDropdownFilters, tempSelectedFilters);      
   }
 
   // Set display value of dropdown filter when item is selected
   const handleOnSelectAutocompleteFilter = (item, filter) => {
     if(item) {
-      let tempSelectedFilters = tempSelectedAutocompleteFilters;
+      let tempSelectedFilters = tempSelAutocomplete;
       tempSelectedFilters[filter] = item;
-      item && setTempSelectedAutocompleteFilters(tempSelectedFilters);      
+      item && updateState(setTempSelAutocomplete, setTempSelectedAutocompleteFilters, tempSelectedFilters);      
     }
   }
 
   // Set display value of chip filter when item is selected
   const handleOnSelectChipFilter = (item, filter) => {
-    let temp = {...tempSelectedChipFilters};
+    let temp = {...tempSelChip};
     temp[filter] = item;
-    setTempSelectedChipFilters(temp); 
+    updateState(setTempSelChip, setTempSelectedChipFilters, temp); 
   }
 
     return (
@@ -190,14 +197,14 @@ const FilterModalCard = ({
                             key={item.value}
                             title={item.label}
                             onPress={() => handleOnSelectChipSort(item)}
-                            type={tempSelectedSort['option'].value == item.value ? 'solid' : 'outline'}
+                            type={tempSelSort['option'].value == item.value ? 'solid' : 'outline'}
                             containerStyle={styles.chipOption}
-                            buttonStyle={{backgroundColor: tempSelectedSort['option'].value == item.value ? colors.green : 'transparent', borderColor: colors.green}}
-                            titleStyle={{color: tempSelectedSort['option'].value == item.value ? colors.white : colors.green}}
+                            buttonStyle={{backgroundColor: tempSelSort['option'].value == item.value ? colors.green : 'transparent', borderColor: colors.green}}
+                            titleStyle={{color: tempSelSort['option'].value == item.value ? colors.white : colors.green}}
                             iconRight
                             icon={{
-                              name: tempSelectedSort['option'].value == item.value 
-                              ? tempSelectedSort['asc']
+                              name: tempSelSort['option'].value == item.value 
+                              ? tempSelSort['asc']
                                 ? 'long-arrow-up' 
                                 : 'long-arrow-down' 
                               : '',
@@ -229,10 +236,10 @@ const FilterModalCard = ({
                                 key={item.value}
                                 title={item.label}
                                 onPress={() => handleOnSelectChipFilter(item, filter)}
-                                type={tempSelectedChipFilters[filter] ? tempSelectedChipFilters[filter].value == item.value ? 'solid' : 'outline' : chipFilterOptions[filter][0].value == item.value ? 'solid' : 'outline'}
+                                type={tempSelChip[filter] ? tempSelChip[filter].value == item.value ? 'solid' : 'outline' : chipFilterOptions[filter][0].value == item.value ? 'solid' : 'outline'}
                                 containerStyle={styles.chipOption}
-                                buttonStyle={{backgroundColor: tempSelectedChipFilters[filter] ? tempSelectedChipFilters[filter].value == item.value ? colors.green : 'transparent' : chipFilterOptions[filter][0].value == item.value ? colors.green : 'transparent', borderColor: colors.green}}
-                                titleStyle={{color: tempSelectedChipFilters[filter] ? tempSelectedChipFilters[filter].value == item.value ? colors.white : colors.green  : chipFilterOptions[filter][0].value == item.value ? colors.white : colors.green}}
+                                buttonStyle={{backgroundColor: tempSelChip[filter] ? tempSelChip[filter].value == item.value ? colors.green : 'transparent' : chipFilterOptions[filter][0].value == item.value ? colors.green : 'transparent', borderColor: colors.green}}
+                                titleStyle={{color: tempSelChip[filter] ? tempSelChip[filter].value == item.value ? colors.white : colors.green  : chipFilterOptions[filter][0].value == item.value ? colors.white : colors.green}}
                                 />
                               ))
                             }
@@ -270,7 +277,7 @@ const FilterModalCard = ({
                           closeOnBlur={false}
                           dataSet={autocompleteFilterOptions[filter]}
                           onSelectItem={(item) => handleOnSelectAutocompleteFilter(item, filter)}
-                          onClear={() => setTempSelectedAutocompleteFilters({})}
+                          onClear={() => updateState(setTempSelAutocomplete, setTempSelectedAutocompleteFilters, {})}
                           textInputProps={{
                             placeholder: 'Enter value',
                             autoCorrect: false,
