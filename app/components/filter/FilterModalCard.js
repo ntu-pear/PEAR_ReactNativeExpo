@@ -16,34 +16,31 @@ import SelectionInputField from '../input-fields/SelectionInputField';
 const FilterModalCard = ({
   modalVisible,
   setModalVisible,
-  // sort: {
-    sortOptions=[],
-    selectedSort={},
-    setSelectedSort=()=>{},
-    tempSelectedSort={},
-    setTempSelectedSort=()=>{},
-  // },
-  // chipFilter: {    
-    chipFilterOptions={},
-    selectedChipFilters={},
-    setSelectedChipFilters=()=>{},
-    tempSelectedChipFilters={},
-    setTempSelectedChipFilters=()=>{},
-  // },
-  // dropdownFilter: {
-    dropdownFilterOptions={},
-    selectedDropdownFilters={},
-    setSelectedDropdownFilters=()=>{},
-    tempSelectedDropdownFilters={},
-    setTempSelectedDropdownFilters=()=>{},
-  // },
-  // autoCompleteFilter: {
-    autocompleteFilterOptions={},
-    selectedAutocompleteFilters={},
-    setSelectedAutocompleteFilters=()=>{},
-    tempSelectedAutocompleteFilters={},
-    setTempSelectedAutocompleteFilters=()=>{},
-  // },
+  
+  sortOptions=[],
+  selectedSort={},
+  setSelectedSort=()=>{},
+  tempSelectedSort={},
+  setTempSelectedSort=()=>{},
+  
+  chipFilterOptions={},
+  selectedChipFilters={},
+  setSelectedChipFilters=()=>{},
+  tempSelectedChipFilters={},
+  setTempSelectedChipFilters=()=>{},
+
+  dropdownFilterOptions={},
+  selectedDropdownFilters={},
+  setSelectedDropdownFilters=()=>{},
+  tempSelectedDropdownFilters={},
+  setTempSelectedDropdownFilters=()=>{},
+
+  autocompleteFilterOptions={},
+  selectedAutocompleteFilters={},
+  setSelectedAutocompleteFilters=()=>{},
+  tempSelectedAutocompleteFilters={},
+  setTempSelectedAutocompleteFilters=()=>{},
+  
   filterIconSize=12,  
   handleSortFilter,
 }) => {

@@ -151,7 +151,6 @@ function PatientsScreen({ navigation }) {
         ? tempSelectedChipFilters['Patient Status']['label'] 
         : 'Active'
       ]
-      // console.log(tempPatientStatus, patientStatus)
       updateCaregiverFilterOptions(tempPatientStatus);
     }
 
