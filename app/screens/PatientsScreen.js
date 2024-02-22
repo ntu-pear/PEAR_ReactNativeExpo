@@ -219,17 +219,6 @@ function PatientsScreen({ navigation }) {
         }
       }));
   }    
-  
-  // On click button to add patient
-  const handleOnClickAddPatient = () => {
-    navigation.navigate(routes.PATIENT_ADD_PATIENT);
-    setIsReloadPatientList(true);
-  };
-  
-  // Navigate to patient profile when patient item is clicked
-  const handleOnClickPatientItem = (patientID) => {
-    navigation.push(routes.PATIENT_PROFILE, { id: patientID });
-  };
 
   // Handle searching, sorting, and filtering of patient data based on patient status  
   // If patient status has been updated, get patient list from api
@@ -263,6 +252,18 @@ function PatientsScreen({ navigation }) {
 
     setIsLoading(false);    
   }
+  
+  // On click button to add patient
+  const handleOnClickAddPatient = () => {
+    navigation.navigate(routes.PATIENT_ADD_PATIENT);
+    setIsReloadPatientList(true);
+  };
+  
+  // Navigate to patient profile when patient item is clicked
+  const handleOnClickPatientItem = (patientID) => {
+    navigation.push(routes.PATIENT_PROFILE, { id: patientID });
+  };
+
 
   return (
     <>
