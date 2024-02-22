@@ -53,10 +53,12 @@ const FilterModalCard = ({
 
   const [isModalVisible, setIsModalVisible] = useState( false);
   const [isLoading, setIsLoading] = useState(true);
-
+  
   // Re-initialize sort and filter values to currently applied values whenever modal opens
   useEffect(() => {
     setIsLoading(true);
+
+    setSelectedSort(Object.keys(selectedSort).length == 0 ? {'option': sortOptions[0], 'asc': true} : {...selectedSort});
     setTempSelectedSort(Object.keys(selectedSort).length == 0 ? {'option': sortOptions[0], 'asc': true} : {...selectedSort});
     setTempSelectedDropdownFilters({...selectedDropdownFilters});
     setTempSelectedAutocompleteFilters({...selectedAutocompleteFilters});
@@ -67,9 +69,11 @@ const FilterModalCard = ({
         tempSelChipFilters[filter] = chipFilterOptions[filter][0];
       }
     }
+    setSelectedChipFilters(tempSelChipFilters);
     setTempSelectedChipFilters(tempSelChipFilters);
 
     Keyboard.dismiss();
+
     setIsLoading(false);
   }, [modalVisible != undefined ? modalVisible : isModalVisible])
 

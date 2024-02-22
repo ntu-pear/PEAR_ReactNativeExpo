@@ -12,7 +12,6 @@ import patientApi from 'app/api/patient';
 // Configurations
 import routes from 'app/navigation/routes';
 import colors from 'app/config/colors';
-import typography from 'app/config/typography';
 
 // Components
 import ActivityIndicator from 'app/components/ActivityIndicator';
@@ -75,29 +74,25 @@ function PatientsScreen({ navigation }) {
   const [isReloadPatientList, setIsReloadPatientList] = useState(false);
   
   // Search related states
-  const [searchOption, setSearchOption] = useState('Full Name');
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchOption, setSearchOption] = useState('Full Name');
   
   // Sort related states
-  const [sortOptions, setSortOptions] = useState(SORT_OPTIONS[viewMode]);
   const [selectedSort, setSelectedSort] = useState({});
-  const [tempSelectedSort, setTempSelectedSort] = useState({...selectedSort});
+  const [tempSelectedSort, setTempSelectedSort] = useState({});
 
   // Dropdown filter related states
-  const [dropdownFilterOptions, setDropdownFilterOptions] = useState({});
   const [selectedDropdownFilters, setSelectedDropdownFilters] = useState({});
-  const [tempSelectedDropdownFilters, setTempSelectedDropdownFilters] = useState({...selectedDropdownFilters});
+  const [tempSelectedDropdownFilters, setTempSelectedDropdownFilters] = useState({});
 
   // Autocomplete filter related states
   // NOTE: currently not used, but provided in case developers want to add autocomplete options
-  const [autocompleteFilterOptions, setAutocompleteFilterOptions] = useState({});
   const [selectedAutocompleteFilters, setSelectedAutocompleteFilters] = useState({});
-  const [tempSelectedAutocompleteFilters, setTempSelectedAutocompleteFilters] = useState({...selectedAutocompleteFilters});
+  const [tempSelectedAutocompleteFilters, setTempSelectedAutocompleteFilters] = useState({});
   
   // Chip filter related states
-  const [chipFilterOptions, setChipFilterOptions] = useState({}); 
   const [selectedChipFilters, setSelectedChipFilters] = useState({}); 
-  const [tempSelectedChipFilters, setTempSelectedChipFilters] = useState({...selectedChipFilters}); 
+  const [tempSelectedChipFilters, setTempSelectedChipFilters] = useState({}); 
 
   // Filter details related state
   // Details of filter options
@@ -294,42 +289,34 @@ function PatientsScreen({ navigation }) {
               FIELD_MAPPING: FIELD_MAPPING,
             }}
             sort= {{
-              sortOptions: sortOptions,
-              setSortOptions: setSortOptions,
               selectedSort: selectedSort,
               setSelectedSort: setSelectedSort,
               tempSelectedSort: tempSelectedSort,
               setTempSelectedSort: setTempSelectedSort,
             }}
             chipFilter={{    
-              chipFilterOptions: chipFilterOptions,
-              setChipFilterOptions: setChipFilterOptions,
               selectedChipFilters: selectedChipFilters,
               setSelectedChipFilters: setSelectedChipFilters,
               tempSelectedChipFilters: tempSelectedChipFilters,
               setTempSelectedChipFilters: setTempSelectedChipFilters,
             }}
             dropdownFilter={{
-              dropdownFilterOptions: dropdownFilterOptions,
-              setDropdownFilterOptions: setDropdownFilterOptions,
               selectedDropdownFilters: selectedDropdownFilters,
               setSelectedDropdownFilters: setSelectedDropdownFilters,
               tempSelectedDropdownFilters: tempSelectedDropdownFilters,
               setTempSelectedDropdownFilters: setTempSelectedDropdownFilters,
             }}
             autoCompleteFilter={{
-              autocompleteFilterOptions: autocompleteFilterOptions,
-              setAutocompleteFilterOptions: setAutocompleteFilterOptions,
               selectedAutocompleteFilters: selectedAutocompleteFilters,
-              setSelectedAutocompleteFilters: setAutocompleteFilterOptions,
+              setSelectedAutocompleteFilters: setSelectedAutocompleteFilters,
               tempSelectedAutocompleteFilters: tempSelectedAutocompleteFilters,
               setTempSelectedAutocompleteFilters: setTempSelectedAutocompleteFilters,
             }}
             search={{
+              searchQuery: searchQuery,
+              setSearchQuery: setSearchQuery,
               searchOption: searchOption,
               setSearchOption: setSearchOption,
-              searchQuery: searchQuery,
-              setSearchQuery: setSearchQuery
             }}
             />
           <ScrollView

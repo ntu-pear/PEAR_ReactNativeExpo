@@ -13,6 +13,7 @@ import { Chip } from 'react-native-elements';
 function FilterIndicator({  
   modalVisible,
   setModalVisible,
+  sortOptions={},
   selectedSort={},
   setSelectedSort=()=>{},
   chipFilterOptions={},
@@ -23,7 +24,7 @@ function FilterIndicator({
 }) {
 
   // Toggle sort order (asc/desc) 
-  const toggleSortOrder = () => {
+  const toggleSortOrder = () => {    
     let tempSelSort = selectedSort;
     tempSelSort['asc'] = !tempSelSort['asc']
     setSelectedSort(tempSelSort);
@@ -41,9 +42,9 @@ function FilterIndicator({
       <View
         style={{flexDirection: 'row'}}
       >
-        {Object.keys(selectedSort).length > 0  ? (
+        {Object.keys(sortOptions).length > 0  ? (
           <Chip              
-            title={"Sort by: " + selectedSort['option']['label']}
+            title={"Sort by: " + (Object.keys(selectedSort).length > 0 ? selectedSort['option']['label'] : sortOptions[0]['label'])}
             type="solid"
             buttonStyle={{backgroundColor: colors.green}} 
             onPress={toggleSortOrder}

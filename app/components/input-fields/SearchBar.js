@@ -11,6 +11,7 @@ import SelectionInputField from './SelectionInputField';
 function SearchBar({
   placeholder="Search",
   SEARCH_OPTIONS={},
+  searchOption=null,
   value = null,
   onChangeText = () => {},
   containerStyle = null,
@@ -43,6 +44,7 @@ function SearchBar({
               borderTopRightRadius: 10, 
               borderBottomRightRadius: 10,
             }}
+            value={searchOption}
             onDataChange={handleOnToggleSearchOptions}                        
           />
         </View>

@@ -33,52 +33,52 @@ function SearchFilterBar({
     FIELD_MAPPING={},
   },
   sort: {
-    sortOptions={},
-    setSortOptions=()=>{},
     selectedSort={},
     setSelectedSort=()=>{},
     tempSelectedSort={},
     setTempSelectedSort=()=>{},
   },
   chipFilter: {    
-    chipFilterOptions={},
-    setChipFilterOptions=()=>{},
     selectedChipFilters={},
     setSelectedChipFilters=()=>{},
     tempSelectedChipFilters={},
     setTempSelectedChipFilters=()=>{},
   },
   dropdownFilter: {
-    dropdownFilterOptions={},
-    setDropdownFilterOptions=()=>{},
     selectedDropdownFilters={},
     setSelectedDropdownFilters=()=>{},
     tempSelectedDropdownFilters={},
     setTempSelectedDropdownFilters=()=>{},
   },
   autoCompleteFilter: {
-    autocompleteFilterOptions={},
-    setAutocompleteFilterOptions=()=>{},
     selectedAutocompleteFilters={},
     setSelectedAutocompleteFilters=()=>{},
     tempSelectedAutocompleteFilters={},
     setTempSelectedAutocompleteFilters=()=>{},
   },
   search: {
+    searchQuery='',
+    setSearchQuery=()=>{},
     searchOption='',
     setSearchOption=()=>{},
-    searchQuery='',
-    setSearchQuery=()=>{}
   },
 }) {  
   // Default state to control modal visibility
   const [modalVisible, setModalVisible] = useState(false);
 
+  // Search, sort, and filter related states
+  const [sortOptions, setSortOptions] = useState(parseSelectOptions(SORT_OPTIONS[viewMode]));
+  const [dropdownFilterOptions, setDropdownFilterOptions] = useState({});
+  const [autocompleteFilterOptions, setAutocompleteFilterOptions] = useState({});
+  const [chipFilterOptions, setChipFilterOptions] = useState({}); 
+
   // Whenever data changes, reinitialize sort and filter options and apply search, sort, filter
   useEffect(() => {
     initSortFilter();
     onInitialize();
+    // if(sortOptions) {
     handleSearchSortFilter({});
+      // }
   }, [initializeData])
 
   // Initialize sort and filter options based on view mode
@@ -112,6 +112,7 @@ function SearchFilterBar({
     setAutocompleteFilterOptions(tempAutocompleteFilterOptions);
     setChipFilterOptions(tempChipFilterOptions);
     setSortOptions(parseSelectOptions(SORT_OPTIONS[viewMode]))
+
   }
 
   const handleSearchSortFilter = ({
@@ -162,7 +163,7 @@ function SearchFilterBar({
     filteredList = filteredList.filter((item) => {
       return item[FIELD_MAPPING[tempSearchMode]].toLowerCase().includes(text.toLowerCase());
     })
-      
+  
     // Sort
     filteredList = sortArray(filteredList, 
       FIELD_MAPPING[Object.keys(tempSelSort).length == 0 ? 
@@ -206,13 +207,6 @@ function SearchFilterBar({
     }
     return filteredList;
   }
-  // Reset selected sort and filter options if not applicable to current tab
-  const resetSearchSortFilter = () => {
-    setSelectedSort({});
-    setSelectedDropdownFilters({});
-    setSelectedAutocompleteFilters({});
-    setSelectedChipFilters({});
-  }
 
   // Switch between search modes (full name, preferred name)
   const handleOnToggleSearchOptions = async(item) => {
@@ -224,11 +218,12 @@ function SearchFilterBar({
   }
 
   // Switch between tabs
+  // If user clicks on same tab, reset all search/sort/filter options
   const handleOnToggleViewMode = (mode) => {
     if(mode!=viewMode) {
       setIsLoading(true);
-      // resetSearchSortFilter();
 
+      // Delete/Reset any sort options/filters that should not be applied to the current tab 
       if(!SORT_OPTIONS[mode].includes(Object.keys(selectedSort).length > 0 ? selectedSort['option']['label'] : sortOptions[0]['label'])) {
         setSelectedSort({});
       }
@@ -250,7 +245,7 @@ function SearchFilterBar({
           delete selectedChipFilters[filter];
         }
       }
-    }
+    }     
   }
 
   // Update search state and handle searching when user changes search query
@@ -279,7 +274,8 @@ function SearchFilterBar({
           autoCapitalize='characters'
           inputContainerStyle={{borderTopRightRadius: 0, borderBottomRightRadius: 0, height: 47}}
           handleOnToggleSearchOptions={handleOnToggleSearchOptions}
-          SEARCH_OPTIONS={parseSelectOptions(SEARCH_OPTIONS)}
+          SEARCH_OPTIONS={parseSelectOptions([...SEARCH_OPTIONS])}
+          searchOption={SEARCH_OPTIONS.indexOf(searchOption)+1}
         />
         <View>
           <FilterModalCard
@@ -337,7 +333,8 @@ function SearchFilterBar({
         <FilterIndicator
           modalVisible={modalVisible}
           setModalVisible={setModalVisible}
-          selectedSort={Object.keys(selectedSort).length > 0 ? selectedSort : {'option': sortOptions[0], 'asc': true}}
+          sortOptions={sortOptions}
+          selectedSort={selectedSort}
           setSelectedSort={setSelectedSort}
           chipFilterOptions={chipFilterOptions}
           selectedChipFilters={selectedChipFilters}
