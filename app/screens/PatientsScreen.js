@@ -65,7 +65,8 @@ function PatientsScreen({ navigation }) {
   const patientListRef = useRef(null);
 
   // Patient data related states
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDataInitialized, setIsDataInitialized] = useState(false);
   const [originalListOfPatients, setOriginalListOfPatients] = useState([]); // list of patients without sort, search, filter
   const [listOfPatients, setListOfPatients] = useState([]); // list of patients after sort, search, filter
   const [patientCountInfo, setPatientCountInfo] = useState({}); // list of patients for each caregiver (differentiated by patient status)
@@ -184,14 +185,15 @@ function PatientsScreen({ navigation }) {
   }
 
   // Set screen to loading wheel when retrieving patient list from backend
-  const refreshPatientData = () => {
+  const refreshPatientData = (tempPatientStatus=patientStatus) => {
     setIsLoading(true);
     const promiseFunction = async () => {
-      await getListOfPatients(patientStatus);
+      await getListOfPatients(tempPatientStatus);
       if(viewMode === 'allPatients') {
         await getPatientCountInfo();
       }
-      setIsLoading(false);
+      setIsLoading(false);        
+      setIsDataInitialized(true);
     };
     promiseFunction();
   }  
@@ -218,6 +220,8 @@ function PatientsScreen({ navigation }) {
           options: caregiverPatientCount
         }
       }));
+    
+    setIsDataInitialized(true);
   }    
 
   // Handle searching, sorting, and filtering of patient data based on patient status  
@@ -241,16 +245,16 @@ function PatientsScreen({ navigation }) {
     ]
 
     if(tempPatientStatus != patientStatus) {
-      await getListOfPatients(tempPatientStatus);
+      refreshPatientData(tempPatientStatus);
       setPatientStatus(tempPatientStatus);       
     } else {
       setFilteredList(text, tempSelSort, tempSelDropdownFilters, tempSelChipFilters, tempSelAutocompleteFilters, tempSearchMode);
       
       // Scroll to top of list
       patientListRef.current?.scrollTo({x: 0, y: 0, animated: true});
+      setIsLoading(false);    
     }   
 
-    setIsLoading(false);    
   }
   
   // On click button to add patient
@@ -280,6 +284,8 @@ function PatientsScreen({ navigation }) {
             handleSearchSortFilterCustom={handleSearchSortFilter}
             itemCount={listOfPatients ? listOfPatients.length : null}
             filterOptionDetails={filterOptionDetails}
+            initializeData={isDataInitialized}
+            onInitialize={() => setIsDataInitialized(false)}
             constants={{
               VIEW_MODES: VIEW_MODES,
               SEARCH_OPTIONS: SEARCH_OPTIONS,
@@ -405,20 +411,6 @@ function PatientsScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  optionsContainer: {
-    flexDirection: 'row',
-    paddingVertical: '1%',
-    paddingHorizontal: '2%',
-    alignSelf: 'flex-start',
-    flexWrap: 'wrap'
-  },
-  dropDownOptionsAlignment: {
-    marginTop: 10,
-    marginHorizontal: 10,
-  },
-  searchBar: {
-    flex: 1,    
-  },
   patientListContainer: {
     paddingHorizontal: '5%',
     zIndex: -1,
@@ -439,30 +431,6 @@ const styles = StyleSheet.create({
   caregiverName: {
     fontSize: 15,
     fontWeight: 'bold',
-  },
-  patientCount: {
-    fontSize: 13.5,
-    marginLeft: '2%',
-    paddingVertical: '1%',
-    alignSelf: 'flex-start',
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
-  },
-  tab: {
-    padding: '1.5%',
-    flex: 0.5,
-  },
-  tabText: {
-    fontSize: 20,
-    textAlign: 'center',
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
-  },
-  selectedTab: {
-    borderBottomColor: colors.green,
-    borderBottomWidth: 3,
-  },
-  selectedTabText: {
-    fontWeight: 'bold',
-    color: colors.green,
   }
 });
 

@@ -23,6 +23,8 @@ function SearchFilterBar({
   handleSearchSortFilterCustom,
   itemCount=null,   
   filterOptionDetails={},
+  initializeData=true,
+  onInitialize=()=>{},
   constants: {
     VIEW_MODES={},
     SEARCH_OPTIONS=[],
@@ -72,10 +74,12 @@ function SearchFilterBar({
   // Default state to control modal visibility
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Whenever data changes, reinitialize sort and filter options
+  // Whenever data changes, reinitialize sort and filter options and apply search, sort, filter
   useEffect(() => {
     initSortFilter();
-  }, [originalList, filterOptionDetails])
+    onInitialize();
+    handleSearchSortFilter({});
+  }, [initializeData])
 
   // Initialize sort and filter options based on view mode
   const initSortFilter = () => {
@@ -202,10 +206,8 @@ function SearchFilterBar({
     }
     return filteredList;
   }
-  // Reset selected search, sort, and filter options
+  // Reset selected sort and filter options if not applicable to current tab
   const resetSearchSortFilter = () => {
-    setSearchOption('Full Name');
-    setSearchQuery('');
     setSelectedSort({});
     setSelectedDropdownFilters({});
     setSelectedAutocompleteFilters({});
@@ -225,7 +227,29 @@ function SearchFilterBar({
   const handleOnToggleViewMode = (mode) => {
     if(mode!=viewMode) {
       setIsLoading(true);
-      resetSearchSortFilter();
+      // resetSearchSortFilter();
+
+      if(!SORT_OPTIONS[mode].includes(Object.keys(selectedSort).length > 0 ? selectedSort['option']['label'] : sortOptions[0]['label'])) {
+        setSelectedSort({});
+      }
+
+      for(var filter of Object.keys(selectedDropdownFilters)) {
+        if(!FILTER_OPTIONS[mode].includes(filter)) {
+          delete selectedDropdownFilters[filter];
+        }
+      }
+
+      for(var filter of Object.keys(selectedAutocompleteFilters)) {
+        if(!FILTER_OPTIONS[mode].includes(filter)) {
+          delete selectedAutocompleteFilters[filter];
+        }
+      }
+
+      for(var filter of Object.keys(selectedChipFilters)) {
+        if(!FILTER_OPTIONS[mode].includes(filter)) {
+          delete selectedChipFilters[filter];
+        }
+      }
     }
   }
 
