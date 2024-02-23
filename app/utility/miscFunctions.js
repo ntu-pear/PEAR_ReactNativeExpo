@@ -55,3 +55,7 @@ export const updateState = (setInternalState, setExternalState, value) => {
   }
   setInternalState(value);  
 }
+
+export const isEmptyObject = (object) => {
+  return Object.keys(object).length == 0;
+}

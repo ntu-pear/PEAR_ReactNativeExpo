@@ -6,6 +6,7 @@ import { Chip } from 'react-native-elements';
 
 // Configurations
 import colors from 'app/config/colors';
+import { isEmptyObject } from 'app/utility/miscFunctions';
 
 function FilterIndicator({  
   modalVisible,
@@ -21,7 +22,9 @@ function FilterIndicator({
 }) {
 
   // Toggle sort order (asc/desc) 
-  const toggleSortOrder = () => {    
+  const toggleSortOrder = () => {
+    console.log('IND -', 1, 'toggleSortOrder')
+
     let tempSelSort = selectedSort;
     tempSelSort['asc'] = !tempSelSort['asc']
     setSelectedSort(tempSelSort);
@@ -39,15 +42,15 @@ function FilterIndicator({
       <View
         style={{flexDirection: 'row'}}
       >
-        {Object.keys(sortOptions).length > 0  ? (
+        {!isEmptyObject(sortOptions) ? (
           <Chip              
-            title={"Sort by: " + (Object.keys(selectedSort).length > 0 ? selectedSort['option']['label'] : sortOptions[0]['label'])}
+            title={"Sort by: " + (!isEmptyObject(selectedSort) ? selectedSort['option']['label'] : sortOptions[0]['label'])}
             type="solid"
             buttonStyle={{backgroundColor: colors.green}} 
             onPress={toggleSortOrder}
             iconRight
             icon={{
-              name: Object.keys(selectedSort).length > 0 
+              name: !isEmptyObject(selectedSort) 
                 ? selectedSort['asc']
                   ? 'long-arrow-up' 
                   : 'long-arrow-down'
@@ -62,7 +65,7 @@ function FilterIndicator({
         {Object.keys(chipFilterOptions).map((filter) => (
           <Chip
             key={filter}
-            title={filter + ": " + (Object.keys(selectedChipFilters).includes(filter) ? selectedChipFilters[filter]['label'] : chipFilterOptions[filter][0]['label'])}
+            title={filter + ": " + (filter in selectedChipFilters ? selectedChipFilters[filter]['label'] : chipFilterOptions[filter][0]['label'])}
             type="solid"
             buttonStyle={{backgroundColor: colors.green}}
             containerStyle={{marginLeft: 5}}

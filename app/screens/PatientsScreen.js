@@ -18,6 +18,7 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
 import SearchFilterBar from 'app/components/filter/SearchFilterBar';
+import { isEmptyObject } from 'app/utility/miscFunctions';
 
 function PatientsScreen({ navigation }) {
   
@@ -82,6 +83,7 @@ function PatientsScreen({ navigation }) {
 
   // Dropdown filter related states
   const [selectedDropdownFilters, setSelectedDropdownFilters] = useState({});
+  const [tempSelectedDropdownFilters, setTempSelectedDropdownFilters] = useState({});
   
   // Chip filter related states
   const [selectedChipFilters, setSelectedChipFilters] = useState({}); 
@@ -125,7 +127,9 @@ function PatientsScreen({ navigation }) {
   // Reference https://stackoverflow.com/questions/21518381/proper-way-to-wait-for-one-function-to-finish-before-continuing
   useFocusEffect(
     React.useCallback(() => {
+      console.log('PATIENTS -', 1, 'useFocusEffect [isReloadPatientList]', isReloadPatientList);
       if (isReloadPatientList) {
+        console.log('PATIENTS -', 2, 'useFocusEffect if [isReloadPatientList]', isReloadPatientList);
         refreshPatientData();
         setIsReloadPatientList(false);
       }
@@ -136,30 +140,40 @@ function PatientsScreen({ navigation }) {
   // Refresh patient data from backend when user switches between 'My Patients' and 'All Patients'
   // Note: not done with function that handles view mode toggling bc of state update latency
   useEffect(() => {
+    console.log('PATIENTS -', 3, 'useEffect [viemode]', viewMode);
     refreshPatientData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewMode]);
 
   // When user toggles patient status filter, update caregiver filter options
   useEffect(() => {
-    if(Object.keys(tempSelectedChipFilters).includes('Patient Status')) {
+    console.log('PATIENTS -', 4, 'useEffect [tempSelectedChipFilters]', tempSelectedChipFilters);
+
+    if(tempSelectedChipFilters['Patient Status'] != undefined && viewMode == 'allPatients') {
+      console.log('PATIENTS -', 4.5, 'useEffect [tempSelectedChipFilters]');
       let tempPatientStatus = PATIENT_STATUSES[
-        Object.keys(tempSelectedChipFilters).length > 0 
+        !isEmptyObject(tempSelectedChipFilters) 
         ? tempSelectedChipFilters['Patient Status']['label'] 
         : 'Active'
       ]
-      updateCaregiverFilterOptions(tempPatientStatus);
+      updateCaregiverFilterOptions({tempPatientStatus: tempPatientStatus});
+      setIsDataInitialized(true);
     }
-
-  }, [tempSelectedChipFilters])
+  }, [tempSelectedChipFilters['Patient Status']])
 
   // Whenever patient count is updated, update the relevant filter options
-  useEffect(() => {    
-    updateCaregiverFilterOptions();
-  }, [patientCountInfo])
+  // useEffect(() => { 
+  //   console.log('PATIENTS -', 5, 'useEffect [patientCountInfo]', patientCountInfo);
+
+  //   if(viewMode == 'allPatients') {
+  //     updateCaregiverFilterOptions();
+  //   }  
+  // }, [patientCountInfo])
 
   // Retrieve patient list from backend
   const getListOfPatients = async (status='active') => {   
+    console.log('PATIENTS -', 6, 'getListOfPatients');
+
     const response =
     viewMode === 'myPatients'
         ? await patientApi.getPatientListByLoggedInCaregiver(undefined, status)
@@ -170,48 +184,77 @@ function PatientsScreen({ navigation }) {
   };
 
   // Retrieve cargivers patient count list from backend
-  const getPatientCountInfo = async() => {
+  const getPatientCountInfo = async(tempPatientStatus=patientStatus) => {
+    console.log('PATIENTS -', 7, 'getPatientCountInfo');
+
     const response = await patientApi.getPatientStatusCountList();
     setPatientCountInfo(response.data);
+    updateCaregiverFilterOptions({tempPatientCountInfo: response.data, tempPatientStatus: tempPatientStatus});
+
   }
 
   // Set screen to loading wheel when retrieving patient list from backend
+  // Note: 
+  // Once the data is retrieved from backend, setIsLoading is set to false momentarily so SearchFilterBar can render and initialize data
   const refreshPatientData = (tempPatientStatus=patientStatus) => {
+    console.log('PATIENTS -', 8, 'refreshPatientData');
+
     setIsLoading(true);
     const promiseFunction = async () => {
       await getListOfPatients(tempPatientStatus);
       if(viewMode === 'allPatients') {
-        await getPatientCountInfo();
+        await getPatientCountInfo(tempPatientStatus);
       }
       setIsLoading(false);        
       setIsDataInitialized(true);
+      setIsLoading(true);        
     };
     promiseFunction();
   }  
 
   // Update filter options for Caregiver filter based on patient count data from backend
-  const updateCaregiverFilterOptions = (tempPatientStatus=patientStatus) => {
+  const updateCaregiverFilterOptions = ({tempPatientCountInfo=patientCountInfo, tempPatientStatus=patientStatus}) => {
+    
     let caregiverPatientCount = {};
-    for (var caregiverID of Object.keys(patientCountInfo)) {
-      const caregiverName = patientCountInfo[caregiverID]['fullName']
+    for (var caregiverID of Object.keys(tempPatientCountInfo)) {
+      const caregiverName = tempPatientCountInfo[caregiverID]['fullName']
       const patientCount = tempPatientStatus == 'active' 
-        ? patientCountInfo[caregiverID]['activePatients']
-        : tempPatientStatus == 'inactive'
-          ? patientCountInfo[caregiverID]['inactivePatients']
-          : patientCountInfo[caregiverID]['activePatients'] + patientCountInfo[caregiverID]['inactivePatients']
+      ? tempPatientCountInfo[caregiverID]['activePatients']
+      : tempPatientStatus == 'inactive'
+      ? tempPatientCountInfo[caregiverID]['inactivePatients']
+      : tempPatientCountInfo[caregiverID]['activePatients'] + tempPatientCountInfo[caregiverID]['inactivePatients']
       
       caregiverPatientCount[`${caregiverName} (${patientCount})`] = caregiverName
     }
+    
+    console.log('PATIENTS -', 9, 'updateCaregiverFilterOptions', caregiverPatientCount);
 
     setFilterOptionDetails(prevState => ({
+      ...prevState,
+      Caregiver: {
+        ...prevState.Caregiver,
+        options: caregiverPatientCount
+      }
+    }));
+
+    // If a caregiver filter is already selected, update tempSelectedDropdownFilters
+    if('Caregiver' in tempSelectedDropdownFilters) {
+      // Get name of caregiver by removing patient count from current dropdown selection
+      // E.g.: selected item is {label: 'Caregiver Three (9)', value: 4} => remove the ' (9)'
+      let curSelection = 
+      tempSelectedDropdownFilters['Caregiver']['label'] != undefined &&
+      tempSelectedDropdownFilters['Caregiver']['label'] != ''
+        ? tempSelectedDropdownFilters['Caregiver']['label'].split(/ \([0-9]*\)/)[0]
+        : tempSelectedDropdownFilters['Caregiver']['label']
+
+      setTempSelectedDropdownFilters(prevState => ({
         ...prevState,
         Caregiver: {
           ...prevState.Caregiver,
-          options: caregiverPatientCount
+          label: Object.keys(caregiverPatientCount).find(x=>caregiverPatientCount[x] == curSelection)
         }
-      }));
-    
-    setIsDataInitialized(true);
+      }))
+    }
   }    
 
   // Handle searching, sorting, and filtering of patient data based on patient status  
@@ -226,10 +269,12 @@ function PatientsScreen({ navigation }) {
     tempSearchMode,
     setFilteredList
   }) => {       
+    console.log('PATIENTS -', 10, 'handleSearchSortFilter');
+
     setIsLoading(true);
 
     let tempPatientStatus = PATIENT_STATUSES[
-      Object.keys(tempSelChipFilters).length > 0 
+      !isEmptyObject(tempSelChipFilters) 
         ? tempSelChipFilters['Patient Status']['label'] 
         : 'Active'
     ]
@@ -248,12 +293,16 @@ function PatientsScreen({ navigation }) {
   
   // On click button to add patient
   const handleOnClickAddPatient = () => {
+    console.log('PATIENTS -', 11, 'handleOnClickAddPatient');
+
     navigation.navigate(routes.PATIENT_ADD_PATIENT);
     setIsReloadPatientList(true);
   };
   
   // Navigate to patient profile when patient item is clicked
   const handleOnClickPatientItem = (patientID) => {
+    console.log('PATIENTS -', 12, 'handleOnClickPatientItem');
+
     navigation.push(routes.PATIENT_PROFILE, { id: patientID });
   };
 
@@ -291,6 +340,8 @@ function PatientsScreen({ navigation }) {
           
             selectedDropdownFilters={selectedDropdownFilters}
             setSelectedDropdownFilters={setSelectedDropdownFilters}
+            tempSelectedDropdownFilters={tempSelectedDropdownFilters}
+            setTempSelectedDropdownFilters={setTempSelectedDropdownFilters}
           
             selectedAutocompleteFilters={selectedAutocompleteFilters}
             setSelectedAutocompleteFilters={setSelectedAutocompleteFilters}
@@ -333,7 +384,7 @@ function PatientsScreen({ navigation }) {
                         key={index}
                         isVertical={false}
                         isActive={patientStatus == '' ? item.isActive : null}
-                        startDate={Object.keys(selectedSort).length > 0 ? selectedSort['option']['label'] == 'Start Date' ? item.startDate : null : null}
+                        startDate={!isEmptyObject(selectedSort) ? selectedSort['option']['label'] == 'Start Date' ? item.startDate : null : null}
                       />
                       <View style={styles.caregiverNameContainer}>
                         <Text style={styles.caregiverName}>

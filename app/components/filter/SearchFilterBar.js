@@ -10,7 +10,7 @@ import typography from 'app/config/typography';
 // Components
 import SearchBar from 'app/components/input-fields/SearchBar';
 import FilterModalCard from 'app/components/filter/FilterModalCard';
-import { parseAutoCompleteOptions, parseSelectOptions, sortArray } from 'app/utility/miscFunctions';
+import { isEmptyObject, parseAutoCompleteOptions, parseSelectOptions, sortArray } from 'app/utility/miscFunctions';
 import FilterIndicator from 'app/components/filter/FilterIndicator';
 import TabBar from '../TabBar';
 
@@ -60,21 +60,35 @@ function SearchFilterBar({
   // Default state to control modal visibility
   const [modalVisible, setModalVisible] = useState(false);
 
+  // State used to keep track of whether initializeData state has changed
+  const [localFilterOptionDetails, setLocalFilterOptionDetails] = useState(filterOptionDetails);
+
   // Search, sort, and filter related states
-  const [sortOptions, setSortOptions] = useState(Object.keys(SORT_OPTIONS).length > 0 ? parseSelectOptions(SORT_OPTIONS[viewMode]) : {});
+  const [sortOptions, setSortOptions] = useState(!isEmptyObject(SORT_OPTIONS) ? parseSelectOptions(SORT_OPTIONS[viewMode]) : {});
   const [dropdownFilterOptions, setDropdownFilterOptions] = useState({});
   const [autocompleteFilterOptions, setAutocompleteFilterOptions] = useState({});
   const [chipFilterOptions, setChipFilterOptions] = useState({}); 
 
   // Whenever data changes, reinitialize sort and filter options and apply search, sort, filter
   useEffect(() => {
-    initSortFilter();
-    onInitialize();
-    handleSearchSortFilter({});
-  }, [initializeData])
+    console.log('BAR -', 1, 'useEffect [initializeData, filterOptionDetails]', initializeData)
+    if (initializeData) {
+      initSortFilter();
+      onInitialize();
+      
+      // Only apply sort filter if no change to filterOptionDetails
+      if(filterOptionDetails == localFilterOptionDetails ) {
+        handleSearchSortFilter({});
+      } else {
+        setLocalFilterOptionDetails(filterOptionDetails);
+      }
+    }
+  }, [initializeData, filterOptionDetails])
 
   // Initialize sort and filter options based on view mode
   const initSortFilter = () => {
+    console.log('BAR -', 2, 'initSortFilter')
+
     let tempDropdownFilterOptions = {};
     let tempAutocompleteFilterOptions = {};
     let tempChipFilterOptions = {};
@@ -84,7 +98,7 @@ function SearchFilterBar({
       
       // If no custom options for a filter, get options from patient list by taking distinct values of the filter property
       // Else use custom options
-      if (Object.keys(filterOptionDetails[filter]['options']).length == 0) {
+      if (isEmptyObject(filterOptionDetails[filter]['options'])) {
         tempFilterOptionList = originalList.map(x => x[FIELD_MAPPING[filter]]);
         tempFilterOptionList = Array.from(new Set(tempFilterOptionList));        
       } else {
@@ -103,7 +117,7 @@ function SearchFilterBar({
     setDropdownFilterOptions(tempDropdownFilterOptions);
     setAutocompleteFilterOptions(tempAutocompleteFilterOptions);
     setChipFilterOptions(tempChipFilterOptions);
-    setSortOptions(Object.keys(SORT_OPTIONS).length > 0 ? parseSelectOptions(SORT_OPTIONS[viewMode]) : {})
+    setSortOptions(!isEmptyObject(SORT_OPTIONS) ? parseSelectOptions(SORT_OPTIONS[viewMode]) : {})
   }
 
   const handleSearchSortFilter = ({
@@ -114,6 +128,8 @@ function SearchFilterBar({
     tempSelAutocompleteFilters=selectedAutocompleteFilters, 
     tempSearchMode=searchOption,
   }) => {
+    console.log('BAR -', 3, 'handleSearchSortFilter')
+
     if(handleSearchSortFilterCustom) {
       handleSearchSortFilterCustom({
         text: text, 
@@ -145,6 +161,8 @@ function SearchFilterBar({
     tempSelAutocompleteFilters, 
     tempSearchMode
   ) => {
+    console.log('BAR -', 4, 'setFilteredList')
+
     let filteredList = originalList.map((obj) => ({
       ...obj,
       fullName: `${obj.firstName.trim()} ${obj.lastName.trim()}`
@@ -156,9 +174,9 @@ function SearchFilterBar({
     })
   
     // Sort
-    if(Object.keys(SORT_OPTIONS).length > 0) {
+    if(!isEmptyObject(SORT_OPTIONS)) {
       filteredList = sortArray(filteredList, 
-        FIELD_MAPPING[Object.keys(tempSelSort).length == 0 ? 
+        FIELD_MAPPING[isEmptyObject(tempSelSort) ? 
           sortOptions[0]['label'] : 
           tempSelSort['option']['label']],
         tempSelSort['asc'] != null ? tempSelSort['asc'] : true);
@@ -189,8 +207,9 @@ function SearchFilterBar({
   // For example, patient status is not meant for filtering - it requires new API call, so do not filter
   // Use custom options if declared in FILTER_MAPPING 
   const getSubFilteredList = (filteredList, filter, id, tempSelFilters) => {
+    console.log('BAR -', 5, 'getSubFilteredList')
     if(filterOptionDetails[filter]['isFilter']){
-      if(Object.keys(filterOptionDetails[filter]['options']).length == 0) {
+      if(isEmptyObject(filterOptionDetails[filter]['options'])) {
         filteredList = filteredList.filter((obj) => (
           obj[FIELD_MAPPING[filter]] === tempSelFilters[filter][id])) || []
       } else {
@@ -203,6 +222,8 @@ function SearchFilterBar({
 
   // Switch between search modes (full name, preferred name)
   const handleOnToggleSearchOptions = async(item) => {
+    console.log('BAR -', 6, 'handleOnToggleSearchOptions')
+
     const label = SEARCH_OPTIONS[item-1];
     setSearchOption(label);
     if(searchQuery != '') {
@@ -213,12 +234,14 @@ function SearchFilterBar({
   // Switch between tabs
   // If user clicks on same tab, reset all search/sort/filter options
   const handleOnToggleViewMode = (mode) => {
+    console.log('BAR -', 7, 'handleOnToggleViewMode')
+
     if(mode!=viewMode) {
       setIsLoading(true);
 
       // Delete/Reset any sort options/filters that should not be applied to the current tab 
-      if(Object.keys(SORT_OPTIONS).length > 0) {
-        if(!SORT_OPTIONS[mode].includes(Object.keys(selectedSort).length > 0 ? selectedSort['option']['label'] : sortOptions[0]['label'])) {
+      if(!isEmptyObject(SORT_OPTIONS)) {
+        if(!SORT_OPTIONS[mode].includes(!isEmptyObject(selectedSort) ? selectedSort['option']['label'] : sortOptions[0]['label'])) {
           setSelectedSort({});
         }
       }
@@ -245,13 +268,15 @@ function SearchFilterBar({
 
   // Update search state and handle searching when user changes search query
   const handleSearch = (text) => {
+    console.log('BAR -', 8, 'handleSearch')
+
     setSearchQuery(text); 
     handleSearchSortFilter({'text': text})
   }
 
   return (
     <Center backgroundColor={colors.white_var1} zindex={1}> 
-      {Object.keys(VIEW_MODES).length > 0 ? (
+      {!isEmptyObject(VIEW_MODES) ? (
         <>
           <TabBar
             TABS={VIEW_MODES}

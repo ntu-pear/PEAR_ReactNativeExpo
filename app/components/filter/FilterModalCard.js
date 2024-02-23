@@ -13,6 +13,7 @@ import typography from 'app/config/typography';
 // Components
 import SelectionInputField from '../input-fields/SelectionInputField';
 import { updateState } from 'app/utility/miscFunctions';
+import { isEmptyObject } from 'app/utility/miscFunctions';
 
 const FilterModalCard = ({
   modalVisible,
@@ -49,7 +50,7 @@ const FilterModalCard = ({
   const finalRef = useRef(null);
   const searchRefs = useRef({});
 
-  const [isModalVisible, setIsModalVisible] = useState( false);
+  const [isModalVisible, setIsModalVisible] = useState(modalVisible || false);
   const [isLoading, setIsLoading] = useState(true);
 
   const [tempSelSort, setTempSelSort] = useState(tempSelectedSort || {});
@@ -59,11 +60,12 @@ const FilterModalCard = ({
 
   // Re-initialize sort and filter values to currently applied values whenever modal opens
   useEffect(() => {
+    console.log('MODAL -', 1, 'useEffect [isModalVisible]', isModalVisible)
     setIsLoading(true);
 
-    setSelectedSort(Object.keys(selectedSort).length == 0 ? {'option': sortOptions[0], 'asc': true} : {...selectedSort});
+    setSelectedSort(isEmptyObject(selectedSort) ? {'option': sortOptions[0], 'asc': true} : {...selectedSort});
 
-    updateState(setTempSelSort, setTempSelectedSort, Object.keys(selectedSort).length == 0 ? {'option': sortOptions[0], 'asc': true} : {...selectedSort})
+    updateState(setTempSelSort, setTempSelectedSort, isEmptyObject(selectedSort) ? {'option': sortOptions[0], 'asc': true} : {...selectedSort})
     updateState(setTempSelDropdown, setTempSelectedDropdownFilters, {...selectedDropdownFilters});
     updateState(setTempSelAutocomplete, setTempSelectedAutocompleteFilters, {...selectedAutocompleteFilters});
 
@@ -79,20 +81,17 @@ const FilterModalCard = ({
     Keyboard.dismiss();
 
     setIsLoading(false);
-  }, [modalVisible != undefined ? modalVisible : isModalVisible])
+  }, [isModalVisible])
 
-  // Update state that controls modal visibility depending on whether parent component controls it or child
-  const updateModalVisibility = (val) => {
-    if(setModalVisible) {
-      setModalVisible(val);
-    } else {
-      setIsModalVisible(val);
-    }
-  }
+  useEffect(() => {
+    console.log("CHANGED VALUE", tempSelDropdown)
+  }, [tempSelDropdown])
 
   // Apply sort and filter values and close modal
   const handleApply = () => {
-    updateModalVisibility(false);
+    console.log('MODAL -', 2, 'handleApply', tempSelDropdown)
+
+    updateState(setIsModalVisible, setModalVisible, false);
     setSelectedSort({...tempSelSort});
     setSelectedDropdownFilters({...tempSelDropdown});
     setSelectedAutocompleteFilters({...tempSelAutocomplete});
@@ -107,7 +106,9 @@ const FilterModalCard = ({
   
   // Reset sort and filter values and close modal
   const handleReset = () => {
-    updateModalVisibility(false);
+    console.log('MODAL -', 3, 'handleReset')
+
+    updateState(setIsModalVisible, setModalVisible, false);
     setSelectedSort({});
     setSelectedDropdownFilters({});
     setSelectedChipFilters({});
@@ -121,6 +122,8 @@ const FilterModalCard = ({
 
   // Set display value of sort item is selected
   const handleOnSelectChipSort = (item) => {
+    console.log('MODAL -', 4, 'handleOnSelectChipSort')
+
     let asc = true;
     if(tempSelSort['option']['value'] == item.value) {
       asc = !tempSelSort['asc'];
@@ -130,6 +133,8 @@ const FilterModalCard = ({
 
   // Set display value of dropdown filter when item is selected
   const handleOnSelectDropdownFilter = (index, filter) => {
+    console.log('MODAL -', 5, 'handleOnSelectDropdownFilter')
+
     let tempSelectedFilters = tempSelDropdown;
     tempSelectedFilters[filter] = dropdownFilterOptions[filter].filter(x=>x.value == index)[0];
     updateState(setTempSelDropdown, setTempSelectedDropdownFilters, tempSelectedFilters);      
@@ -137,6 +142,8 @@ const FilterModalCard = ({
 
   // Set display value of dropdown filter when item is selected
   const handleOnSelectAutocompleteFilter = (item, filter) => {
+    console.log('MODAL -', 6, 'handleOnSelectAutocompleteFilter')
+
     if(item) {
       let tempSelectedFilters = tempSelAutocomplete;
       tempSelectedFilters[filter] = item;
@@ -146,6 +153,8 @@ const FilterModalCard = ({
 
   // Set display value of chip filter when item is selected
   const handleOnSelectChipFilter = (item, filter) => {
+    console.log('MODAL -', 7, 'handleOnSelectChipFilter')
+
     let temp = {...tempSelChip};
     temp[filter] = item;
     updateState(setTempSelChip, setTempSelectedChipFilters, temp); 
@@ -155,7 +164,7 @@ const FilterModalCard = ({
     <View>
       <TouchableOpacity 
         style={styles.filterIcon}
-        onPress={() => updateModalVisibility(true)}
+        onPress={() => updateState(setIsModalVisible, setModalVisible, true)}
         >
         <Icon 
           as={
@@ -173,7 +182,7 @@ const FilterModalCard = ({
           size={'lg'}
           animationPreset={'slide'}
           isOpen={modalVisible != undefined ? modalVisible : isModalVisible}
-          onClose={() => updateModalVisibility(false)}
+          onClose={() => updateState(setIsModalVisible, setModalVisible, false)}
           initialFocusRef={initialRef}
           finalFocusRef={finalRef}
         >
@@ -219,7 +228,7 @@ const FilterModalCard = ({
                   </ScrollView>
                 </View>
                 ) : null}
-              {Object.keys(chipFilterOptions).length > 0 ? (
+              {!isEmptyObject(chipFilterOptions) ? (
                 <View marginTop={'3%'}>
                   {Object.keys(chipFilterOptions).map((filter) => 
                     <View key={filter}>
@@ -249,7 +258,7 @@ const FilterModalCard = ({
                   )}                
                   </View>                
                 ): null}
-              {Object.keys(dropdownFilterOptions).length > 0 ? (
+              {!isEmptyObject(dropdownFilterOptions) ? (
                 <View style={styles.filterContainer}>
                   <View>
                     {Object.keys(dropdownFilterOptions).map((filter) => 
@@ -260,14 +269,14 @@ const FilterModalCard = ({
                           showTitle={false}
                           onDataChange={(item) => handleOnSelectDropdownFilter(item, filter)}
                           placeholder='Select caregiver'
-                          value={Object.keys(selectedDropdownFilters).includes(filter) ? selectedDropdownFilters[filter].value : null}
+                          value={filter in tempSelDropdown ? tempSelDropdown[filter].value : null}
                         />                          
                       </View>
                     )}
                   </View>
                 </View>
                 ): null}
-              {Object.keys(autocompleteFilterOptions).length > 0 ? (
+              {!isEmptyObject(autocompleteFilterOptions) ? (
                 <View style={styles.filterContainer}>
                     {Object.keys(autocompleteFilterOptions).map((filter) => 
                       (<View key={filter}>
@@ -283,7 +292,7 @@ const FilterModalCard = ({
                             autoCorrect: false,
                             autoCapitalize: 'none',
                           }}
-                          initialValue={Object.keys(selectedAutocompleteFilters).includes(filter) ? selectedAutocompleteFilters[filter] : {id: null}}
+                          initialValue={filter in selectedAutocompleteFilters ? selectedAutocompleteFilters[filter] : {id: null}}
                           suggestionsListMaxHeight={150} 
                           useFilter={true}
                           />                        
