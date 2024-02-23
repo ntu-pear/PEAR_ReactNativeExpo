@@ -154,27 +154,27 @@ function SearchFilterBar({
         setFilteredList
       });
     } else {
-      setFilteredList(
-        text, 
-        tempSelSort, 
-        tempSelDropdownFilters,
-        tempSelChipFilters, 
-        tempSelAutocompleteFilters, 
-        tempSearchMode
-      )
+      setFilteredList({
+        text: text, 
+        tempSelSort: tempSelSort, 
+        tempSelDropdownFilters: tempSelDropdownFilters,
+        tempSelChipFilters: tempSelChipFilters, 
+        tempSelAutocompleteFilters: tempSelAutocompleteFilters, 
+        tempSearchMode: tempSearchMode,
+      })
       setIsLoading(false);
     }
   }
   
   // Update list based on search, sort, and filter criteria
-  const setFilteredList = (
-    text, 
-    tempSelSort, 
-    tempSelDropdownFilters, 
-    tempSelChipFilters, 
-    tempSelAutocompleteFilters, 
-    tempSearchMode
-  ) => {
+  const setFilteredList = ({
+    text=searchQuery, 
+    tempSelSort=selectedSort, 
+    tempSelDropdownFilters=selectedDropdownFilters,
+    tempSelChipFilters=selectedChipFilters, 
+    tempSelAutocompleteFilters=selectedAutocompleteFilters, 
+    tempSearchMode=searchOption,
+  }) => {
     // console.log('BAR -', 4, 'setFilteredList')
 
     let filteredList = originalList.map((obj) => ({

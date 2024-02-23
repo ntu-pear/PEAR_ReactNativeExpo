@@ -43,6 +43,12 @@ const FilterModalCard = ({
   tempSelectedAutocompleteFilters,
   setTempSelectedAutocompleteFilters,
 
+  dateFilterOptions={},
+  selectedDateFilters={},
+  setSelectedDateFilters=()=>{},
+  tempSelectedDateFilters,
+  setTempSelectedDateFilters,
+
   filterIconSize=12,  
   handleSortFilter,
 }) => {
@@ -57,6 +63,7 @@ const FilterModalCard = ({
   const [tempSelChip, setTempSelChip] = useState(tempSelectedChipFilters || {});
   const [tempSelDropdown, setTempSelDropdown] = useState(tempSelectedDropdownFilters || {});
   const [tempSelAutocomplete, setTempSelAutocomplete] = useState(tempSelectedAutocompleteFilters || {});
+  const [tempSelDate, setTempSelDate] = useState(tempSelectedDateFilters || {});
 
   // Re-initialize sort and filter values to currently applied values whenever modal opens
   useEffect(() => {
@@ -78,6 +85,8 @@ const FilterModalCard = ({
     setSelectedChipFilters(tempSelChipFilters);
     updateState(setTempSelChip, setTempSelectedChipFilters, tempSelChipFilters);
 
+    updateState(setTempSelDate, setTempSelectedDateFilters, {...selectedDateFilters});
+
     Keyboard.dismiss();
 
     setIsLoading(false);
@@ -91,12 +100,14 @@ const FilterModalCard = ({
     setSelectedSort({...tempSelSort});
     setSelectedDropdownFilters({...tempSelDropdown});
     setSelectedAutocompleteFilters({...tempSelAutocomplete});
+    setSelectedDateFilters({...tempSelDate});
     setSelectedChipFilters({...tempSelChip});
     handleSortFilter({
       'tempSelSort': {...tempSelSort}, 
       'tempSelDropdownFilters': {...tempSelDropdown}, 
       'tempSelChipFilters': {...tempSelChip},
-      'tempSelAutocompleteFilters': {...tempSelAutocomplete}
+      'tempSelAutocompleteFilters': {...tempSelAutocomplete},
+      'tempSelDateFilters': {...tempSelDate},
     });
   };
   
@@ -109,11 +120,13 @@ const FilterModalCard = ({
     setSelectedDropdownFilters({});
     setSelectedChipFilters({});
     setSelectedAutocompleteFilters({});
+    setSelectedDateFilters({});
     handleSortFilter({
       'tempSelSort': {}, 
       'tempSelDropdownFilters': {}, 
       'tempSelChipFilters': {},
-      'tempSelAutoCompleteFilters': {}
+      'tempSelAutoCompleteFilters': {},
+      'tempSelDateFilters': {},
     });  };
 
   // Set display value of sort item is selected

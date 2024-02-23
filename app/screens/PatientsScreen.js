@@ -89,10 +89,6 @@ function PatientsScreen({ navigation }) {
   // Chip filter related states
   const [selectedChipFilters, setSelectedChipFilters] = useState({}); 
   const [tempSelectedChipFilters, setTempSelectedChipFilters] = useState({}); 
-  
-  // Autocomplete filter related states
-  // NOTE: currently not used, but provided in case developers want to add autocomplete options
-  const [selectedAutocompleteFilters, setSelectedAutocompleteFilters] = useState({});
 
   // Filter details related state
   // Details of filter options
@@ -262,7 +258,6 @@ function PatientsScreen({ navigation }) {
     tempSelSort, 
     tempSelDropdownFilters,
     tempSelChipFilters, 
-    tempSelAutocompleteFilters, 
     tempSearchMode,
     setFilteredList
   }) => {       
@@ -280,7 +275,13 @@ function PatientsScreen({ navigation }) {
       refreshPatientData(tempPatientStatus);
       setPatientStatus(tempPatientStatus);       
     } else {
-      setFilteredList(text, tempSelSort, tempSelDropdownFilters, tempSelChipFilters, tempSelAutocompleteFilters, tempSearchMode);
+      setFilteredList({
+        text: text, 
+        tempSelSort: tempSelSort, 
+        tempSelDropdownFilters: tempSelDropdownFilters,
+        tempSelChipFilters: tempSelChipFilters, 
+        tempSearchMode: tempSearchMode,
+      });
       
       // Scroll to top of list
       patientListRef.current?.scrollTo({x: 0, y: 0, animated: true});
@@ -342,9 +343,6 @@ function PatientsScreen({ navigation }) {
             setSelectedDropdownFilters={setSelectedDropdownFilters}
             tempSelectedDropdownFilters={tempSelectedDropdownFilters}
             setTempSelectedDropdownFilters={setTempSelectedDropdownFilters}
-            
-            selectedAutocompleteFilters={selectedAutocompleteFilters}
-            setSelectedAutocompleteFilters={setSelectedAutocompleteFilters}
             
             SEARCH_OPTIONS={SEARCH_OPTIONS}
             searchOption={searchOption}
