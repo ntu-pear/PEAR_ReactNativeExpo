@@ -18,44 +18,48 @@ function SearchFilterBar({
   originalList={},
   setList=()=>{},
   setIsLoading=()=>{},
-  viewMode='',
-  setViewMode=()=>{},
-  handleSearchSortFilterCustom,
-  itemCount=null,   
-  filterOptionDetails={},
+
   initializeData=true,
   onInitialize=()=>{},
+
+  itemCount=null,   
+  handleSearchSortFilterCustom,
   
   VIEW_MODES={},
-  SEARCH_OPTIONS=[],
-  SORT_OPTIONS={},
-  FILTER_OPTIONS={},
+  viewMode=null,
+  setViewMode=()=>{},
+  
   FIELD_MAPPING={},
-
+  
+  SORT_OPTIONS={},
   selectedSort={},
   setSelectedSort=()=>{},
   tempSelectedSort={},
   setTempSelectedSort,
   
+  FILTER_OPTIONS={},
+  filterOptionDetails={},
+
   selectedChipFilters={},
   setSelectedChipFilters=()=>{},
   tempSelectedChipFilters={},
   setTempSelectedChipFilters,
-
+  
   selectedDropdownFilters={},
   setSelectedDropdownFilters=()=>{},
   tempSelectedDropdownFilters={},
   setTempSelectedDropdownFilters,
-
+  
   selectedAutocompleteFilters={},
   setSelectedAutocompleteFilters=()=>{},
   tempSelectedAutocompleteFilters={},
   setTempSelectedAutocompleteFilters,
-
-  searchQuery='',
-  setSearchQuery,
+  
+  SEARCH_OPTIONS=[],
   searchOption='',
   setSearchOption,
+  searchQuery='',
+  setSearchQuery,
 }) {  
   // Default state to control modal visibility
   const [modalVisible, setModalVisible] = useState(false);
@@ -64,7 +68,10 @@ function SearchFilterBar({
   const [localFilterOptionDetails, setLocalFilterOptionDetails] = useState(filterOptionDetails);
 
   // Search, sort, and filter related states
-  const [sortOptions, setSortOptions] = useState(!isEmptyObject(SORT_OPTIONS) ? parseSelectOptions(SORT_OPTIONS[viewMode]) : {});
+  const [sortOptions, setSortOptions] = useState(!isEmptyObject(SORT_OPTIONS) 
+    ? parseSelectOptions(isEmptyObject(VIEW_MODES) ? SORT_OPTIONS : SORT_OPTIONS[viewMode]) 
+    : {}
+  );
   const [dropdownFilterOptions, setDropdownFilterOptions] = useState({});
   const [autocompleteFilterOptions, setAutocompleteFilterOptions] = useState({});
   const [chipFilterOptions, setChipFilterOptions] = useState({}); 
@@ -93,31 +100,37 @@ function SearchFilterBar({
     let tempAutocompleteFilterOptions = {};
     let tempChipFilterOptions = {};
 
-    for(var filter of FILTER_OPTIONS[viewMode]) {
-      let tempFilterOptionList;
-      
-      // If no custom options for a filter, get options from patient list by taking distinct values of the filter property
-      // Else use custom options
-      if (isEmptyObject(filterOptionDetails[filter]['options'])) {
-        tempFilterOptionList = originalList.map(x => x[FIELD_MAPPING[filter]]);
-        tempFilterOptionList = Array.from(new Set(tempFilterOptionList));        
-      } else {
-        tempFilterOptionList = Object.keys(filterOptionDetails[filter]['options'])
-      }
+    if(!isEmptyObject(FILTER_OPTIONS)) {
 
-      // Parse filter options based on dropdown/chip type
-      if(filterOptionDetails[filter]['type'] == 'dropdown') {
-        tempDropdownFilterOptions[filter] = parseSelectOptions(['All', ...tempFilterOptionList]);
-      } else if (filterOptionDetails[filter]['type'] == 'chip') {
-        tempChipFilterOptions[filter] = parseSelectOptions(tempFilterOptionList);
-      } else if (filterOptionDetails[filter]['type'] == 'autocomplete') {
-        tempAutocompleteFilterOptions[filter] = parseAutoCompleteOptions(tempFilterOptionList);
+      for(var filter of isEmptyObject(VIEW_MODES) ? FILTER_OPTIONS : FILTER_OPTIONS[viewMode]) {
+        let tempFilterOptionList;
+        
+        // If no custom options for a filter, get options from patient list by taking distinct values of the filter property
+        // Else use custom options
+        if (isEmptyObject(filterOptionDetails[filter]['options'])) {
+          tempFilterOptionList = originalList.map(x => x[FIELD_MAPPING[filter]]);
+          tempFilterOptionList = Array.from(new Set(tempFilterOptionList));        
+        } else {
+          tempFilterOptionList = Object.keys(filterOptionDetails[filter]['options'])
+        }
+  
+        // Parse filter options based on dropdown/chip type
+        if(filterOptionDetails[filter]['type'] == 'dropdown') {
+          tempDropdownFilterOptions[filter] = parseSelectOptions(['All', ...tempFilterOptionList]);
+        } else if (filterOptionDetails[filter]['type'] == 'chip') {
+          tempChipFilterOptions[filter] = parseSelectOptions(tempFilterOptionList);
+        } else if (filterOptionDetails[filter]['type'] == 'autocomplete') {
+          tempAutocompleteFilterOptions[filter] = parseAutoCompleteOptions(tempFilterOptionList);
+        }
       }
+      setDropdownFilterOptions(tempDropdownFilterOptions);
+      setAutocompleteFilterOptions(tempAutocompleteFilterOptions);
+      setChipFilterOptions(tempChipFilterOptions);
     }
-    setDropdownFilterOptions(tempDropdownFilterOptions);
-    setAutocompleteFilterOptions(tempAutocompleteFilterOptions);
-    setChipFilterOptions(tempChipFilterOptions);
-    setSortOptions(!isEmptyObject(SORT_OPTIONS) ? parseSelectOptions(SORT_OPTIONS[viewMode]) : {})
+    setSortOptions(!isEmptyObject(SORT_OPTIONS) 
+      ? parseSelectOptions(isEmptyObject(VIEW_MODES) ? SORT_OPTIONS : SORT_OPTIONS[viewMode]) 
+      : {}
+    )
   }
 
   const handleSearchSortFilter = ({
@@ -149,6 +162,7 @@ function SearchFilterBar({
         tempSelAutocompleteFilters, 
         tempSearchMode
       )
+      setIsLoading(false);
     }
   }
   

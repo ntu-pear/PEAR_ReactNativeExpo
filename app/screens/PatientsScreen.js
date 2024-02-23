@@ -313,41 +313,45 @@ function PatientsScreen({ navigation }) {
             originalList={originalListOfPatients}
             setList={setListOfPatients}
             setIsLoading={setIsLoading}
-            viewMode={viewMode}
-            setViewMode={setViewMode}
-            handleSearchSortFilterCustom={handleSearchSortFilter}
-            itemCount={listOfPatients ? listOfPatients.length : null}
-            filterOptionDetails={filterOptionDetails}
+
             initializeData={isDataInitialized}
             onInitialize={() => setIsDataInitialized(false)}
 
+            itemCount={listOfPatients ? listOfPatients.length : null}
+            handleSearchSortFilterCustom={handleSearchSortFilter}
+            
             VIEW_MODES={VIEW_MODES}
-            SEARCH_OPTIONS={SEARCH_OPTIONS}
-            FILTER_OPTIONS={FILTER_OPTIONS}
-            SORT_OPTIONS={SORT_OPTIONS}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+
             FIELD_MAPPING={FIELD_MAPPING}
-          
+            
+            SORT_OPTIONS={SORT_OPTIONS}
             selectedSort={selectedSort}
             setSelectedSort={setSelectedSort}
-              
+            
+            FILTER_OPTIONS={FILTER_OPTIONS}
+            filterOptionDetails={filterOptionDetails}
+            
             selectedChipFilters={selectedChipFilters}
             setSelectedChipFilters={setSelectedChipFilters}
             tempSelectedChipFilters={tempSelectedChipFilters}
             setTempSelectedChipFilters={setTempSelectedChipFilters}
-          
+            
             selectedDropdownFilters={selectedDropdownFilters}
             setSelectedDropdownFilters={setSelectedDropdownFilters}
             tempSelectedDropdownFilters={tempSelectedDropdownFilters}
             setTempSelectedDropdownFilters={setTempSelectedDropdownFilters}
-          
+            
             selectedAutocompleteFilters={selectedAutocompleteFilters}
             setSelectedAutocompleteFilters={setSelectedAutocompleteFilters}
-          
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
+            
+            SEARCH_OPTIONS={SEARCH_OPTIONS}
             searchOption={searchOption}
             setSearchOption={setSearchOption}
-            />
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
           <ScrollView
             ref={patientListRef}
             w="100%"
