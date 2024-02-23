@@ -1,10 +1,9 @@
 // Libs
 import React, { useState, useEffect, useRef } from 'react';
 import { Center, VStack, ScrollView, Fab, Icon } from 'native-base';
-import { RefreshControl, Dimensions, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, View , RefreshControl, Dimensions, Text, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
-import { StyleSheet, View } from 'react-native';
 
 // API
 import patientApi from 'app/api/patient';
@@ -18,6 +17,8 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
 import SearchFilterBar from 'app/components/filter/SearchFilterBar';
+
+// Utilities
 import { isEmptyObject } from 'app/utility/miscFunctions';
 
 function PatientsScreen({ navigation }) {
@@ -127,9 +128,9 @@ function PatientsScreen({ navigation }) {
   // Reference https://stackoverflow.com/questions/21518381/proper-way-to-wait-for-one-function-to-finish-before-continuing
   useFocusEffect(
     React.useCallback(() => {
-      console.log('PATIENTS -', 1, 'useFocusEffect [isReloadPatientList]', isReloadPatientList);
+      // console.log('PATIENTS -', 1, 'useFocusEffect [isReloadPatientList]', isReloadPatientList);
       if (isReloadPatientList) {
-        console.log('PATIENTS -', 2, 'useFocusEffect if [isReloadPatientList]', isReloadPatientList);
+        // console.log('PATIENTS -', 2, 'useFocusEffect if [isReloadPatientList]', isReloadPatientList);
         refreshPatientData();
         setIsReloadPatientList(false);
       }
@@ -140,17 +141,17 @@ function PatientsScreen({ navigation }) {
   // Refresh patient data from backend when user switches between 'My Patients' and 'All Patients'
   // Note: not done with function that handles view mode toggling bc of state update latency
   useEffect(() => {
-    console.log('PATIENTS -', 3, 'useEffect [viemode]', viewMode);
+    // console.log('PATIENTS -', 3, 'useEffect [viemode]', viewMode);
     refreshPatientData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewMode]);
 
   // When user toggles patient status filter, update caregiver filter options
   useEffect(() => {
-    console.log('PATIENTS -', 4, 'useEffect [tempSelectedChipFilters]', tempSelectedChipFilters);
+    // console.log('PATIENTS -', 4, 'useEffect [tempSelectedChipFilters]', tempSelectedChipFilters);
 
     if(tempSelectedChipFilters['Patient Status'] != undefined && viewMode == 'allPatients') {
-      console.log('PATIENTS -', 4.5, 'useEffect [tempSelectedChipFilters]');
+      // console.log('PATIENTS -', 4.5, 'useEffect [tempSelectedChipFilters]');
       let tempPatientStatus = PATIENT_STATUSES[
         !isEmptyObject(tempSelectedChipFilters) 
         ? tempSelectedChipFilters['Patient Status']['label'] 
@@ -163,7 +164,7 @@ function PatientsScreen({ navigation }) {
 
   // Whenever patient count is updated, update the relevant filter options
   // useEffect(() => { 
-  //   console.log('PATIENTS -', 5, 'useEffect [patientCountInfo]', patientCountInfo);
+    // console.log('PATIENTS -', 5, 'useEffect [patientCountInfo]', patientCountInfo);
 
   //   if(viewMode == 'allPatients') {
   //     updateCaregiverFilterOptions();
@@ -172,7 +173,7 @@ function PatientsScreen({ navigation }) {
 
   // Retrieve patient list from backend
   const getListOfPatients = async (status='active') => {   
-    console.log('PATIENTS -', 6, 'getListOfPatients');
+    // console.log('PATIENTS -', 6, 'getListOfPatients');
 
     const response =
     viewMode === 'myPatients'
@@ -185,7 +186,7 @@ function PatientsScreen({ navigation }) {
 
   // Retrieve cargivers patient count list from backend
   const getPatientCountInfo = async(tempPatientStatus=patientStatus) => {
-    console.log('PATIENTS -', 7, 'getPatientCountInfo');
+    // console.log('PATIENTS -', 7, 'getPatientCountInfo');
 
     const response = await patientApi.getPatientStatusCountList();
     setPatientCountInfo(response.data);
@@ -197,7 +198,7 @@ function PatientsScreen({ navigation }) {
   // Note: 
   // Once the data is retrieved from backend, setIsLoading is set to false momentarily so SearchFilterBar can render and initialize data
   const refreshPatientData = (tempPatientStatus=patientStatus) => {
-    console.log('PATIENTS -', 8, 'refreshPatientData');
+    // console.log('PATIENTS -', 8, 'refreshPatientData');
 
     setIsLoading(true);
     const promiseFunction = async () => {
@@ -227,7 +228,7 @@ function PatientsScreen({ navigation }) {
       caregiverPatientCount[`${caregiverName} (${patientCount})`] = caregiverName
     }
     
-    console.log('PATIENTS -', 9, 'updateCaregiverFilterOptions', caregiverPatientCount);
+    // console.log('PATIENTS -', 9, 'updateCaregiverFilterOptions', caregiverPatientCount);
 
     setFilterOptionDetails(prevState => ({
       ...prevState,
@@ -246,14 +247,10 @@ function PatientsScreen({ navigation }) {
       tempSelectedDropdownFilters['Caregiver']['label'] != ''
         ? tempSelectedDropdownFilters['Caregiver']['label'].split(/ \([0-9]*\)/)[0]
         : tempSelectedDropdownFilters['Caregiver']['label']
-
-      setTempSelectedDropdownFilters(prevState => ({
-        ...prevState,
-        Caregiver: {
-          ...prevState.Caregiver,
-          label: Object.keys(caregiverPatientCount).find(x=>caregiverPatientCount[x] == curSelection)
-        }
-      }))
+      
+      let tempSelDropdown = tempSelectedDropdownFilters;
+      tempSelDropdown['Caregiver']['label'] = Object.keys(caregiverPatientCount).find(x=>caregiverPatientCount[x] == curSelection);
+      setTempSelectedDropdownFilters(tempSelDropdown);
     }
   }    
 
@@ -269,7 +266,7 @@ function PatientsScreen({ navigation }) {
     tempSearchMode,
     setFilteredList
   }) => {       
-    console.log('PATIENTS -', 10, 'handleSearchSortFilter');
+    // console.log('PATIENTS -', 10, 'handleSearchSortFilter');
 
     setIsLoading(true);
 
@@ -293,7 +290,7 @@ function PatientsScreen({ navigation }) {
   
   // On click button to add patient
   const handleOnClickAddPatient = () => {
-    console.log('PATIENTS -', 11, 'handleOnClickAddPatient');
+    // console.log('PATIENTS -', 11, 'handleOnClickAddPatient');
 
     navigation.navigate(routes.PATIENT_ADD_PATIENT);
     setIsReloadPatientList(true);
@@ -301,7 +298,7 @@ function PatientsScreen({ navigation }) {
   
   // Navigate to patient profile when patient item is clicked
   const handleOnClickPatientItem = (patientID) => {
-    console.log('PATIENTS -', 12, 'handleOnClickPatientItem');
+    // console.log('PATIENTS -', 12, 'handleOnClickPatientItem');
 
     navigation.push(routes.PATIENT_PROFILE, { id: patientID });
   };

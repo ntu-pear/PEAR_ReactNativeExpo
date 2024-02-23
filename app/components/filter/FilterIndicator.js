@@ -23,7 +23,7 @@ function FilterIndicator({
 
   // Toggle sort order (asc/desc) 
   const toggleSortOrder = () => {
-    console.log('IND -', 1, 'toggleSortOrder')
+    // console.log('IND -', 1, 'toggleSortOrder')
 
     let tempSelSort = selectedSort;
     tempSelSort['asc'] = !tempSelSort['asc']

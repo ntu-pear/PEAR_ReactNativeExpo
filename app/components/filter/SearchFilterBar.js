@@ -71,7 +71,7 @@ function SearchFilterBar({
 
   // Whenever data changes, reinitialize sort and filter options and apply search, sort, filter
   useEffect(() => {
-    console.log('BAR -', 1, 'useEffect [initializeData, filterOptionDetails]', initializeData)
+    // console.log('BAR -', 1, 'useEffect [initializeData, filterOptionDetails]', initializeData)
     if (initializeData) {
       initSortFilter();
       onInitialize();
@@ -87,7 +87,7 @@ function SearchFilterBar({
 
   // Initialize sort and filter options based on view mode
   const initSortFilter = () => {
-    console.log('BAR -', 2, 'initSortFilter')
+    // console.log('BAR -', 2, 'initSortFilter')
 
     let tempDropdownFilterOptions = {};
     let tempAutocompleteFilterOptions = {};
@@ -128,7 +128,7 @@ function SearchFilterBar({
     tempSelAutocompleteFilters=selectedAutocompleteFilters, 
     tempSearchMode=searchOption,
   }) => {
-    console.log('BAR -', 3, 'handleSearchSortFilter')
+    // console.log('BAR -', 3, 'handleSearchSortFilter')
 
     if(handleSearchSortFilterCustom) {
       handleSearchSortFilterCustom({
@@ -161,7 +161,7 @@ function SearchFilterBar({
     tempSelAutocompleteFilters, 
     tempSearchMode
   ) => {
-    console.log('BAR -', 4, 'setFilteredList')
+    // console.log('BAR -', 4, 'setFilteredList')
 
     let filteredList = originalList.map((obj) => ({
       ...obj,
@@ -207,7 +207,7 @@ function SearchFilterBar({
   // For example, patient status is not meant for filtering - it requires new API call, so do not filter
   // Use custom options if declared in FILTER_MAPPING 
   const getSubFilteredList = (filteredList, filter, id, tempSelFilters) => {
-    console.log('BAR -', 5, 'getSubFilteredList')
+    // console.log('BAR -', 5, 'getSubFilteredList')
     if(filterOptionDetails[filter]['isFilter']){
       if(isEmptyObject(filterOptionDetails[filter]['options'])) {
         filteredList = filteredList.filter((obj) => (
@@ -222,7 +222,7 @@ function SearchFilterBar({
 
   // Switch between search modes (full name, preferred name)
   const handleOnToggleSearchOptions = async(item) => {
-    console.log('BAR -', 6, 'handleOnToggleSearchOptions')
+    // console.log('BAR -', 6, 'handleOnToggleSearchOptions')
 
     const label = SEARCH_OPTIONS[item-1];
     setSearchOption(label);
@@ -234,7 +234,7 @@ function SearchFilterBar({
   // Switch between tabs
   // If user clicks on same tab, reset all search/sort/filter options
   const handleOnToggleViewMode = (mode) => {
-    console.log('BAR -', 7, 'handleOnToggleViewMode')
+    // console.log('BAR -', 7, 'handleOnToggleViewMode')
 
     if(mode!=viewMode) {
       setIsLoading(true);
@@ -268,7 +268,7 @@ function SearchFilterBar({
 
   // Update search state and handle searching when user changes search query
   const handleSearch = (text) => {
-    console.log('BAR -', 8, 'handleSearch')
+    // console.log('BAR -', 8, 'handleSearch')
 
     setSearchQuery(text); 
     handleSearchSortFilter({'text': text})

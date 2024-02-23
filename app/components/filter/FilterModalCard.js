@@ -60,7 +60,7 @@ const FilterModalCard = ({
 
   // Re-initialize sort and filter values to currently applied values whenever modal opens
   useEffect(() => {
-    console.log('MODAL -', 1, 'useEffect [isModalVisible]', isModalVisible)
+    // console.log('MODAL -', 1, 'useEffect [isModalVisible]', isModalVisible)
     setIsLoading(true);
 
     setSelectedSort(isEmptyObject(selectedSort) ? {'option': sortOptions[0], 'asc': true} : {...selectedSort});
@@ -83,13 +83,9 @@ const FilterModalCard = ({
     setIsLoading(false);
   }, [isModalVisible])
 
-  useEffect(() => {
-    console.log("CHANGED VALUE", tempSelDropdown)
-  }, [tempSelDropdown])
-
   // Apply sort and filter values and close modal
   const handleApply = () => {
-    console.log('MODAL -', 2, 'handleApply', tempSelDropdown)
+    // console.log('MODAL -', 2, 'handleApply', tempSelDropdown)
 
     updateState(setIsModalVisible, setModalVisible, false);
     setSelectedSort({...tempSelSort});
@@ -106,7 +102,7 @@ const FilterModalCard = ({
   
   // Reset sort and filter values and close modal
   const handleReset = () => {
-    console.log('MODAL -', 3, 'handleReset')
+    // console.log('MODAL -', 3, 'handleReset')
 
     updateState(setIsModalVisible, setModalVisible, false);
     setSelectedSort({});
@@ -122,7 +118,7 @@ const FilterModalCard = ({
 
   // Set display value of sort item is selected
   const handleOnSelectChipSort = (item) => {
-    console.log('MODAL -', 4, 'handleOnSelectChipSort')
+    // console.log('MODAL -', 4, 'handleOnSelectChipSort')
 
     let asc = true;
     if(tempSelSort['option']['value'] == item.value) {
@@ -133,7 +129,7 @@ const FilterModalCard = ({
 
   // Set display value of dropdown filter when item is selected
   const handleOnSelectDropdownFilter = (index, filter) => {
-    console.log('MODAL -', 5, 'handleOnSelectDropdownFilter')
+    // console.log('MODAL -', 5, 'handleOnSelectDropdownFilter')
 
     let tempSelectedFilters = tempSelDropdown;
     tempSelectedFilters[filter] = dropdownFilterOptions[filter].filter(x=>x.value == index)[0];
@@ -142,7 +138,7 @@ const FilterModalCard = ({
 
   // Set display value of dropdown filter when item is selected
   const handleOnSelectAutocompleteFilter = (item, filter) => {
-    console.log('MODAL -', 6, 'handleOnSelectAutocompleteFilter')
+    // console.log('MODAL -', 6, 'handleOnSelectAutocompleteFilter')
 
     if(item) {
       let tempSelectedFilters = tempSelAutocomplete;
@@ -153,7 +149,7 @@ const FilterModalCard = ({
 
   // Set display value of chip filter when item is selected
   const handleOnSelectChipFilter = (item, filter) => {
-    console.log('MODAL -', 7, 'handleOnSelectChipFilter')
+    // console.log('MODAL -', 7, 'handleOnSelectChipFilter')
 
     let temp = {...tempSelChip};
     temp[filter] = item;
