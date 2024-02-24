@@ -5,6 +5,7 @@ import { Modal, Text, View, Icon, ScrollView, Button } from 'native-base';
 import { Keyboard, Platform, StyleSheet, TouchableOpacity } from 'react-native';
 import { Chip } from 'react-native-elements';
 import { MaterialIcons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 // Configurations
 import colors from 'app/config/colors';
@@ -14,6 +15,10 @@ import typography from 'app/config/typography';
 import SelectionInputField from '../input-fields/SelectionInputField';
 import { updateState } from 'app/utility/miscFunctions';
 import { isEmptyObject } from 'app/utility/miscFunctions';
+import { LocalizationProvider, TimePicker } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import DateInputField from '../DateInputField';
+
 
 const FilterModalCard = ({
   modalVisible,
@@ -43,7 +48,18 @@ const FilterModalCard = ({
   tempSelectedAutocompleteFilters,
   setTempSelectedAutocompleteFilters,
 
-  dateFilterOptions={},
+  dateFilterOptions={'Date Filter Test': {
+    'min': {
+      'default': new Date(),
+      'limit': null,
+      'value': null,
+    },
+    'max': {
+      'default': null,
+      'limit': null,
+      'value': null,
+    }
+  }},
   selectedDateFilters={},
   setSelectedDateFilters=()=>{},
   tempSelectedDateFilters,
@@ -56,7 +72,7 @@ const FilterModalCard = ({
   const finalRef = useRef(null);
   const searchRefs = useRef({});
 
-  const [isModalVisible, setIsModalVisible] = useState(modalVisible || false);
+  const [isModalVisible, setIsModalVisible] = useState(modalVisible || true);
   const [isLoading, setIsLoading] = useState(true);
 
   const [tempSelSort, setTempSelSort] = useState(tempSelectedSort || {});
@@ -64,6 +80,7 @@ const FilterModalCard = ({
   const [tempSelDropdown, setTempSelDropdown] = useState(tempSelectedDropdownFilters || {});
   const [tempSelAutocomplete, setTempSelAutocomplete] = useState(tempSelectedAutocompleteFilters || {});
   const [tempSelDate, setTempSelDate] = useState(tempSelectedDateFilters || {});
+  const [datePickerDisplay, setDatePickerDisplay] = useState({})
 
   // Re-initialize sort and filter values to currently applied values whenever modal opens
   useEffect(() => {
@@ -169,7 +186,25 @@ const FilterModalCard = ({
     updateState(setTempSelChip, setTempSelectedChipFilters, temp); 
   }
 
-    return (
+  // Open start time picker component
+  const showStartDatePicker = (filter) => {
+    let tempDatePickerDisplay = datePickerDisplay;
+    if(!(filter in tempDatePickerDisplay)) {
+      tempDatePickerDisplay[filter] = {};
+    }
+    tempDatePickerDisplay[filter]['min'] = true;
+  };
+
+  const setStartTime = (datetime, filter) => {
+    let tempSelectedDate = tempSelDate;
+    if(!(filter in tempSelectedDate)) {
+      tempSelectedDate[filter] = {};
+    } 
+    tempSelectedDate['min'] = datetime;
+    setTempSelDate(tempSelectedDate);
+  }
+
+  return (
     <View>
       <TouchableOpacity 
         style={styles.filterIcon}
@@ -236,7 +271,7 @@ const FilterModalCard = ({
                     </View>
                   </ScrollView>
                 </View>
-                ) : null}
+              ) : null}
               {!isEmptyObject(chipFilterOptions) ? (
                 <View marginTop={'3%'}>
                   {Object.keys(chipFilterOptions).map((filter) => 
@@ -258,15 +293,15 @@ const FilterModalCard = ({
                                 containerStyle={styles.chipOption}
                                 buttonStyle={{backgroundColor: tempSelChip[filter] ? tempSelChip[filter].value == item.value ? colors.green : 'transparent' : chipFilterOptions[filter][0].value == item.value ? colors.green : 'transparent', borderColor: colors.green}}
                                 titleStyle={{color: tempSelChip[filter] ? tempSelChip[filter].value == item.value ? colors.white : colors.green  : chipFilterOptions[filter][0].value == item.value ? colors.white : colors.green}}
-                                />
+                              />
                               ))
                             }
                         </View>
                       </ScrollView>
                     </View>
                   )}                
-                  </View>                
-                ): null}
+                </View>                
+              ): null}
               {!isEmptyObject(dropdownFilterOptions) ? (
                 <View style={styles.filterContainer}>
                   <View>
@@ -284,7 +319,7 @@ const FilterModalCard = ({
                     )}
                   </View>
                 </View>
-                ): null}
+              ): null}
               {!isEmptyObject(autocompleteFilterOptions) ? (
                 <View style={styles.filterContainer}>
                     {Object.keys(autocompleteFilterOptions).map((filter) => 
@@ -308,7 +343,41 @@ const FilterModalCard = ({
                       </View>)
                     )}
                 </View>
-                ): null}
+              ): null}
+            {!isEmptyObject(dateFilterOptions) ? (
+              <View>
+                {Object.keys(dateFilterOptions).map((filter) => (
+                  <View key={filter}>
+                    <Text style={styles.textStyle}>{filter}</Text>
+                    <View style={styles.dateFilterContainer}>
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        {!'max' in dateFilterOptions[filter] ? (
+                          <Text style={[styles.textStyle]}>Before</Text>
+                          ) : null}
+                        {'min' in dateFilterOptions[filter] ? (              
+                          
+                          <View style={{flex: 0.5}}>
+                            <DateInputField
+                            hideDayOfWeek
+                            mode='time'
+                            />                            
+                          </View>   
+                        ) : null}
+                        {'min' in dateFilterOptions[filter] && 'max' in dateFilterOptions[filter] ? (
+                          <Text style={styles.textStyle}>To</Text>
+                          ) : null}
+                        {!'min' in dateFilterOptions[filter] ? (
+                          <Text style={styles.textStyle}>After</Text>
+                          ) : null}
+                        {'max' in dateFilterOptions[filter] ? (                      
+                          <Text style={styles.textStyle}>MAX DATE HERE</Text>
+                          ) : null}
+                          </LocalizationProvider>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            ) : null}
             </Modal.Body>
             <Modal.Footer backgroundColor={colors.white}>
               <Button.Group space={2}>
@@ -372,6 +441,14 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
   },
+  dateFilterContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around'
+  },
+  dateText: {
+    fontSize: 17
+  }
 });
 
 export default FilterModalCard;

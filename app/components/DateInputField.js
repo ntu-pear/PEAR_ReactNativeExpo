@@ -28,6 +28,7 @@ function DateInputField({
   maximumInputDate,
   onChildData,
   hideDayOfWeek,
+  mode='date',
 }) {
   const [show, setShow] = useState(false);
 
@@ -136,7 +137,7 @@ function DateInputField({
             testID="dateTimePicker"
             value={value}
             display="default"
-            mode="date"
+            mode={mode}
             onChange={onChangeData}
             // if the selection mode is set to Date of Birth (DOB), fixed max and min years will be specified
             // else, the minimumInputDate and maximumInputDate will be used.
