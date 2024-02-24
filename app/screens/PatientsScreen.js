@@ -158,15 +158,6 @@ function PatientsScreen({ navigation }) {
     }
   }, [tempSelectedChipFilters['Patient Status']])
 
-  // Whenever patient count is updated, update the relevant filter options
-  // useEffect(() => { 
-    // console.log('PATIENTS -', 5, 'useEffect [patientCountInfo]', patientCountInfo);
-
-  //   if(viewMode == 'allPatients') {
-  //     updateCaregiverFilterOptions();
-  //   }  
-  // }, [patientCountInfo])
-
   // Retrieve patient list from backend
   const getListOfPatients = async (status='active') => {   
     // console.log('PATIENTS -', 6, 'getListOfPatients');

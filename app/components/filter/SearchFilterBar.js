@@ -64,74 +64,15 @@ function SearchFilterBar({
   // Default state to control modal visibility
   const [modalVisible, setModalVisible] = useState(false);
 
-  // State used to keep track of whether initializeData state has changed
-  const [localFilterOptionDetails, setLocalFilterOptionDetails] = useState(filterOptionDetails);
-
+  
   // Search, sort, and filter related states
   const [sortOptions, setSortOptions] = useState(!isEmptyObject(SORT_OPTIONS) 
-    ? parseSelectOptions(isEmptyObject(VIEW_MODES) ? SORT_OPTIONS : SORT_OPTIONS[viewMode]) 
-    : {}
+  ? parseSelectOptions(isEmptyObject(VIEW_MODES) ? SORT_OPTIONS : SORT_OPTIONS[viewMode]) 
+  : {}
   );
   const [dropdownFilterOptions, setDropdownFilterOptions] = useState({});
   const [autocompleteFilterOptions, setAutocompleteFilterOptions] = useState({});
   const [chipFilterOptions, setChipFilterOptions] = useState({}); 
-
-  // Whenever data changes, reinitialize sort and filter options and apply search, sort, filter
-  useEffect(() => {
-    // console.log('BAR -', 1, 'useEffect [initializeData, filterOptionDetails]', initializeData)
-    if (initializeData) {
-      initSortFilter();
-      onInitialize();
-      
-      // Only apply sort filter if no change to filterOptionDetails
-      if(filterOptionDetails == localFilterOptionDetails ) {
-        handleSearchSortFilter({});
-      } else {
-        setLocalFilterOptionDetails(filterOptionDetails);
-      }
-    }
-  }, [initializeData, filterOptionDetails])
-
-  // Initialize sort and filter options based on view mode
-  const initSortFilter = () => {
-    // console.log('BAR -', 2, 'initSortFilter')
-
-    let tempDropdownFilterOptions = {};
-    let tempAutocompleteFilterOptions = {};
-    let tempChipFilterOptions = {};
-
-    if(!isEmptyObject(FILTER_OPTIONS)) {
-
-      for(var filter of isEmptyObject(VIEW_MODES) ? FILTER_OPTIONS : FILTER_OPTIONS[viewMode]) {
-        let tempFilterOptionList;
-        
-        // If no custom options for a filter, get options from patient list by taking distinct values of the filter property
-        // Else use custom options
-        if (isEmptyObject(filterOptionDetails[filter]['options'])) {
-          tempFilterOptionList = originalList.map(x => x[FIELD_MAPPING[filter]]);
-          tempFilterOptionList = Array.from(new Set(tempFilterOptionList));        
-        } else {
-          tempFilterOptionList = Object.keys(filterOptionDetails[filter]['options'])
-        }
-  
-        // Parse filter options based on dropdown/chip type
-        if(filterOptionDetails[filter]['type'] == 'dropdown') {
-          tempDropdownFilterOptions[filter] = parseSelectOptions(['All', ...tempFilterOptionList]);
-        } else if (filterOptionDetails[filter]['type'] == 'chip') {
-          tempChipFilterOptions[filter] = parseSelectOptions(tempFilterOptionList);
-        } else if (filterOptionDetails[filter]['type'] == 'autocomplete') {
-          tempAutocompleteFilterOptions[filter] = parseAutoCompleteOptions(tempFilterOptionList);
-        }
-      }
-      setDropdownFilterOptions(tempDropdownFilterOptions);
-      setAutocompleteFilterOptions(tempAutocompleteFilterOptions);
-      setChipFilterOptions(tempChipFilterOptions);
-    }
-    setSortOptions(!isEmptyObject(SORT_OPTIONS) 
-      ? parseSelectOptions(isEmptyObject(VIEW_MODES) ? SORT_OPTIONS : SORT_OPTIONS[viewMode]) 
-      : {}
-    )
-  }
 
   const handleSearchSortFilter = ({
     text=searchQuery, 
@@ -315,6 +256,18 @@ function SearchFilterBar({
           <FilterModalCard
             modalVisible={modalVisible}
             setModalVisible={setModalVisible}
+
+            SORT_OPTIONS={viewMode ? SORT_OPTIONS[viewMode] : SORT_OPTIONS}
+            FILTER_OPTIONS={viewMode ? FILTER_OPTIONS[viewMode] : FILTER_OPTIONS}
+            filterOptionDetails={filterOptionDetails}
+            originalList={originalList}
+            initializeData={initializeData}
+            onInitialize={onInitialize}
+
+            setSortOptions={setSortOptions}
+            setDropdownFilterOptions={setDropdownFilterOptions}
+            setChipFilterOptions={setChipFilterOptions}
+            setAutocompleteFilterOptions={setAutocompleteFilterOptions}
             
             sortOptions={sortOptions}
             selectedSort={selectedSort}

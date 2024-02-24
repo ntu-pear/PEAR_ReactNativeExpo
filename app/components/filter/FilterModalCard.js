@@ -13,7 +13,7 @@ import typography from 'app/config/typography';
 
 // Components
 import SelectionInputField from '../input-fields/SelectionInputField';
-import { updateState } from 'app/utility/miscFunctions';
+import { parseAutoCompleteOptions, parseSelectOptions, updateState } from 'app/utility/miscFunctions';
 import { isEmptyObject } from 'app/utility/miscFunctions';
 import { LocalizationProvider, TimePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -23,6 +23,18 @@ import DateInputField from '../DateInputField';
 const FilterModalCard = ({
   modalVisible,
   setModalVisible,
+
+  SORT_OPTIONS,
+  FILTER_OPTIONS,
+  filterOptionDetails,
+  originalList,
+  initializeData,
+  onInitialize,
+
+  setSortOptions,
+  setDropdownFilterOptions,
+  setChipFilterOptions,
+  setAutocompleteFilterOptions,
   
   sortOptions={},
   selectedSort={},
@@ -48,18 +60,19 @@ const FilterModalCard = ({
   tempSelectedAutocompleteFilters,
   setTempSelectedAutocompleteFilters,
 
-  dateFilterOptions={'Date Filter Test': {
-    'min': {
-      'default': new Date(),
-      'limit': null,
-      'value': null,
-    },
-    'max': {
-      'default': null,
-      'limit': null,
-      'value': null,
-    }
-  }},
+  dateFilterOptions={},
+  // {'Date Filter Test': {
+  //   'min': {
+  //     'default': new Date(),
+  //     'limit': null,
+  //     'value': null,
+  //   },
+  //   'max': {
+  //     'default': null,
+  //     'limit': null,
+  //     'value': null,
+  //   }
+  // }},
   selectedDateFilters={},
   setSelectedDateFilters=()=>{},
   tempSelectedDateFilters,
@@ -81,6 +94,25 @@ const FilterModalCard = ({
   const [tempSelAutocomplete, setTempSelAutocomplete] = useState(tempSelectedAutocompleteFilters || {});
   const [tempSelDate, setTempSelDate] = useState(tempSelectedDateFilters || {});
   const [datePickerDisplay, setDatePickerDisplay] = useState({})
+  
+  // State used to keep track of whether initializeData state has changed
+  const [localFilterOptionDetails, setLocalFilterOptionDetails] = useState(filterOptionDetails);
+    
+  // Whenever data changes, reinitialize sort and filter options and apply search, sort, filter
+  useEffect(() => {
+    // console.log('BAR -', 1, 'useEffect [initializeData, filterOptionDetails]', initializeData)
+    if (initializeData) {
+      initSortFilter();
+      onInitialize();
+      
+      // Only apply sort filter if no change to filterOptionDetails
+      if(filterOptionDetails == localFilterOptionDetails ) {
+        handleSortFilter({});
+      } else {
+        setLocalFilterOptionDetails(filterOptionDetails);
+      }
+    }
+  }, [initializeData, filterOptionDetails])
 
   // Re-initialize sort and filter values to currently applied values whenever modal opens
   useEffect(() => {
@@ -108,6 +140,42 @@ const FilterModalCard = ({
 
     setIsLoading(false);
   }, [isModalVisible])
+
+  
+  // Initialize sort and filter options based on view mode
+  const initSortFilter = () => {
+    // console.log('BAR -', 2, 'initSortFilter')
+
+    let tempDropdownFilterOptions = {};
+    let tempAutocompleteFilterOptions = {};
+    let tempChipFilterOptions = {};
+    
+    for(var filter of FILTER_OPTIONS) {
+      let tempFilterOptionList;
+      
+      // If no custom options for a filter, get options from patient list by taking distinct values of the filter property
+      // Else use custom options
+      if (isEmptyObject(filterOptionDetails[filter]['options'])) {
+        tempFilterOptionList = originalList.map(x => x[FIELD_MAPPING[filter]]);
+        tempFilterOptionList = Array.from(new Set(tempFilterOptionList));        
+      } else {
+        tempFilterOptionList = Object.keys(filterOptionDetails[filter]['options'])
+      }
+
+      // Parse filter options based on dropdown/chip type
+      if(filterOptionDetails[filter]['type'] == 'dropdown') {
+        tempDropdownFilterOptions[filter] = parseSelectOptions(['All', ...tempFilterOptionList]);
+      } else if (filterOptionDetails[filter]['type'] == 'chip') {
+        tempChipFilterOptions[filter] = parseSelectOptions(tempFilterOptionList);
+      } else if (filterOptionDetails[filter]['type'] == 'autocomplete') {
+        tempAutocompleteFilterOptions[filter] = parseAutoCompleteOptions(tempFilterOptionList);
+      }
+    }
+    setDropdownFilterOptions(tempDropdownFilterOptions);
+    setAutocompleteFilterOptions(tempAutocompleteFilterOptions);
+    setChipFilterOptions(tempChipFilterOptions);
+    setSortOptions(parseSelectOptions(SORT_OPTIONS));
+  }
 
   // Apply sort and filter values and close modal
   const handleApply = () => {
