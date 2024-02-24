@@ -11,6 +11,12 @@ import { isEmptyObject } from 'app/utility/miscFunctions';
 function FilterIndicator({  
   modalVisible,
   setModalVisible,
+
+  sort,
+  setSort,
+  filters,
+  setFilters,
+  
   sortOptions={},
   selectedSort={},
   setSelectedSort=()=>{},

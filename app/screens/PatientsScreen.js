@@ -90,6 +90,10 @@ function PatientsScreen({ navigation }) {
   const [selectedChipFilters, setSelectedChipFilters] = useState({}); 
   const [tempSelectedChipFilters, setTempSelectedChipFilters] = useState({}); 
 
+  // Sort/filter related states
+  const [sort, setSort] = useState({});
+  const [filters, setFilters] = useState({});
+
   // Filter details related state
   // Details of filter options
   // --------------------------
@@ -317,6 +321,11 @@ function PatientsScreen({ navigation }) {
             setViewMode={setViewMode}
 
             FIELD_MAPPING={FIELD_MAPPING}
+
+            sort={sort}
+            setSort={setSort}
+            filters={filters}
+            setFilters={setFilters}
             
             SORT_OPTIONS={SORT_OPTIONS}
             selectedSort={selectedSort}

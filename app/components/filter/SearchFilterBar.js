@@ -30,6 +30,11 @@ function SearchFilterBar({
   setViewMode=()=>{},
   
   FIELD_MAPPING={},
+
+  sort,
+  setSort,
+  filters,
+  setFilters,
   
   SORT_OPTIONS={},
   selectedSort={},
@@ -264,6 +269,11 @@ function SearchFilterBar({
             initializeData={initializeData}
             onInitialize={onInitialize}
 
+            sort={sort}
+            setSort={setSort}
+            filters={filters}
+            setFilters={setFilters}
+
             setSortOptions={setSortOptions}
             setDropdownFilterOptions={setDropdownFilterOptions}
             setChipFilterOptions={setChipFilterOptions}
@@ -317,6 +327,11 @@ function SearchFilterBar({
         <FilterIndicator
           modalVisible={modalVisible}
           setModalVisible={setModalVisible}
+
+          sort={sort}
+          setSort={setSort}
+          filters={filters}
+          setFilters={filters}
 
           sortOptions={sortOptions}
           selectedSort={selectedSort}

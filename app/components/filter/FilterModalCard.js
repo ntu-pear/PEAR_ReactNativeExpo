@@ -24,12 +24,18 @@ const FilterModalCard = ({
   modalVisible,
   setModalVisible,
 
-  SORT_OPTIONS,
-  FILTER_OPTIONS,
+  SORT_OPTIONS=[],
+  FILTER_OPTIONS=[],
   filterOptionDetails,
   originalList,
   initializeData,
   onInitialize,
+
+  sort,
+  setSort,
+  filters,
+  setFilters,
+
 
   setSortOptions,
   setDropdownFilterOptions,
@@ -81,6 +87,9 @@ const FilterModalCard = ({
   filterIconSize=12,  
   handleSortFilter,
 }) => {
+  // Types of filter display options
+  const FILTER_TYPES = ['chip', 'dropdown', 'autocomplete'];
+
   const initialRef = useRef(null);
   const finalRef = useRef(null);
   const searchRefs = useRef({});
@@ -100,7 +109,7 @@ const FilterModalCard = ({
     
   // Whenever data changes, reinitialize sort and filter options and apply search, sort, filter
   useEffect(() => {
-    // console.log('BAR -', 1, 'useEffect [initializeData, filterOptionDetails]', initializeData)
+    // console.log('MODAL -', 1, 'useEffect [initializeData, filterOptionDetails]', initializeData)
     if (initializeData) {
       initSortFilter();
       onInitialize();
@@ -116,7 +125,7 @@ const FilterModalCard = ({
 
   // Re-initialize sort and filter values to currently applied values whenever modal opens
   useEffect(() => {
-    // console.log('MODAL -', 1, 'useEffect [isModalVisible]', isModalVisible)
+    // console.log('MODAL -', 2, 'useEffect [isModalVisible]', isModalVisible)
     setIsLoading(true);
 
     setSelectedSort(isEmptyObject(selectedSort) ? {'option': sortOptions[0], 'asc': true} : {...selectedSort});
@@ -144,42 +153,82 @@ const FilterModalCard = ({
   
   // Initialize sort and filter options based on view mode
   const initSortFilter = () => {
-    // console.log('BAR -', 2, 'initSortFilter')
+    // console.log('BAR -', 3, 'initSortFilter')
+
+    let filterOptions = {};
+    let sel = {}
+    let tempSel = {}
 
     let tempDropdownFilterOptions = {};
     let tempAutocompleteFilterOptions = {};
     let tempChipFilterOptions = {};
-    
-    for(var filter of FILTER_OPTIONS) {
-      let tempFilterOptionList;
-      
-      // If no custom options for a filter, get options from patient list by taking distinct values of the filter property
-      // Else use custom options
-      if (isEmptyObject(filterOptionDetails[filter]['options'])) {
-        tempFilterOptionList = originalList.map(x => x[FIELD_MAPPING[filter]]);
-        tempFilterOptionList = Array.from(new Set(tempFilterOptionList));        
-      } else {
-        tempFilterOptionList = Object.keys(filterOptionDetails[filter]['options'])
-      }
 
-      // Parse filter options based on dropdown/chip type
-      if(filterOptionDetails[filter]['type'] == 'dropdown') {
-        tempDropdownFilterOptions[filter] = parseSelectOptions(['All', ...tempFilterOptionList]);
-      } else if (filterOptionDetails[filter]['type'] == 'chip') {
-        tempChipFilterOptions[filter] = parseSelectOptions(tempFilterOptionList);
-      } else if (filterOptionDetails[filter]['type'] == 'autocomplete') {
-        tempAutocompleteFilterOptions[filter] = parseAutoCompleteOptions(tempFilterOptionList);
+    if(FILTER_OPTIONS.length > 0) {
+      // Initialize filter data by filter type
+      for (var filterType of FILTER_TYPES) {
+        filterOptions[filterType] = {};
+        sel[filterType] = filters['sel'] ? filters['sel'][filterType] : {};
+        tempSel[filterType] = filters['tempSel'] ? filters['tempSel'][filterType] : {};
+      }
+      
+      
+      for(var filter of FILTER_OPTIONS) {
+        let tempFilterOptionList;
+        
+        // If no custom options for a filter, get options from patient list by taking distinct values of the filter property
+        // Else use custom options
+        if (isEmptyObject(filterOptionDetails[filter]['options'])) {
+          tempFilterOptionList = originalList.map(x => x[FIELD_MAPPING[filter]]);
+          tempFilterOptionList = Array.from(new Set(tempFilterOptionList));        
+        } else {
+          tempFilterOptionList = Object.keys(filterOptionDetails[filter]['options'])
+        }
+        
+        // Set default selected filter values if not selected
+        const setSel = (filterType) => {
+          if(!sel[filterType][filter]) {
+            sel[filterType][filter] = filterOptions[filterType][filter][0];
+            tempSel[filterType][filter] = filterOptions[filterType][filter][0];
+          }
+
+
+          // might need different implementation for date
+        }
+
+        // Parse filter options based on dropdown/chip type
+        switch(filterOptionDetails[filter]['type']) {
+          case 'chip':
+            filterOptions['chip'][filter] = parseSelectOptions(tempFilterOptionList);
+            tempChipFilterOptions[filter] = parseSelectOptions(tempFilterOptionList);
+            break;
+            case 'dropdown':
+            tempDropdownFilterOptions[filter] = parseSelectOptions(['All', ...tempFilterOptionList]);
+            filterOptions['dropdown'][filter] = parseSelectOptions(['All', ...tempFilterOptionList]);
+            break;
+          case 'autocomplete':
+            filterOptions['autocomplete'][filter] = parseAutoCompleteOptions(tempFilterOptionList);
+            tempAutocompleteFilterOptions[filter] = parseAutoCompleteOptions(tempFilterOptionList);
+            break;
+        }
+        setSel(filterOptionDetails[filter]['type']);
       }
     }
     setDropdownFilterOptions(tempDropdownFilterOptions);
     setAutocompleteFilterOptions(tempAutocompleteFilterOptions);
     setChipFilterOptions(tempChipFilterOptions);
+    
+    setFilters({
+      'sel': sel,
+      'tempSel': tempSel,
+      'filterOptions': filterOptions,
+    })
+
     setSortOptions(parseSelectOptions(SORT_OPTIONS));
   }
 
   // Apply sort and filter values and close modal
   const handleApply = () => {
-    // console.log('MODAL -', 2, 'handleApply', tempSelDropdown)
+    // console.log('MODAL -', 4, 'handleApply', tempSelDropdown)
 
     updateState(setIsModalVisible, setModalVisible, false);
     setSelectedSort({...tempSelSort});
@@ -198,7 +247,7 @@ const FilterModalCard = ({
   
   // Reset sort and filter values and close modal
   const handleReset = () => {
-    // console.log('MODAL -', 3, 'handleReset')
+    // console.log('MODAL -', 5, 'handleReset')
 
     updateState(setIsModalVisible, setModalVisible, false);
     setSelectedSort({});
@@ -216,7 +265,7 @@ const FilterModalCard = ({
 
   // Set display value of sort item is selected
   const handleOnSelectChipSort = (item) => {
-    // console.log('MODAL -', 4, 'handleOnSelectChipSort')
+    // console.log('MODAL -', 6, 'handleOnSelectChipSort')
 
     let asc = true;
     if(tempSelSort['option']['value'] == item.value) {
@@ -227,7 +276,7 @@ const FilterModalCard = ({
 
   // Set display value of dropdown filter when item is selected
   const handleOnSelectDropdownFilter = (index, filter) => {
-    // console.log('MODAL -', 5, 'handleOnSelectDropdownFilter')
+    // console.log('MODAL -', 7, 'handleOnSelectDropdownFilter')
 
     let tempSelectedFilters = tempSelDropdown;
     tempSelectedFilters[filter] = dropdownFilterOptions[filter].filter(x=>x.value == index)[0];
@@ -236,7 +285,7 @@ const FilterModalCard = ({
 
   // Set display value of dropdown filter when item is selected
   const handleOnSelectAutocompleteFilter = (item, filter) => {
-    // console.log('MODAL -', 6, 'handleOnSelectAutocompleteFilter')
+    // console.log('MODAL -', 8, 'handleOnSelectAutocompleteFilter')
 
     if(item) {
       let tempSelectedFilters = tempSelAutocomplete;
@@ -247,7 +296,7 @@ const FilterModalCard = ({
 
   // Set display value of chip filter when item is selected
   const handleOnSelectChipFilter = (item, filter) => {
-    // console.log('MODAL -', 7, 'handleOnSelectChipFilter')
+    // console.log('MODAL -', 9, 'handleOnSelectChipFilter')
 
     let temp = {...tempSelChip};
     temp[filter] = item;
