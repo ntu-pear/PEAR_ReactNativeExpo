@@ -1,47 +1,36 @@
+
+// Function used to format date data into dd-mm-yyyy
 export default function useFormatDateTime(strDate, boolDate) {
   function formatAMPM(date) {
-    let hours = date.getUTCHours() + 8; // Adjust for GMT+8
-    let minutes = date.getUTCMinutes();
-
-    // Handle rollover of hours past midnight
-    if (hours >= 24) {
-      hours -= 24;
-    }
-
-    let ampm = hours >= 12 ? 'PM' : 'AM';
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var ampm = hours >= 12 ? 'PM' : 'AM';
     hours = hours % 12;
     hours = hours ? hours : 12; // the hour '0' should be '12'
-    minutes = minutes < 10 ? '0' + minutes : minutes;
-    let strTime = `${hours}:${minutes} ${ampm}`;
-
-    console.log(`Formatted Time: ${strTime}`); // Debugging statement
+    if (hours.toString().length !== 2){
+      hours = '0' + hours;
+    }
+    minutes = minutes < 10 ? '0'+minutes : minutes;
+    var strTime = hours + ':' + minutes + ' ' + ampm;
     return strTime;
   }
 
-  const originalDate = new Date(strDate);
-  console.log(`Original UTC Time: ${originalDate.toISOString()}`); // Debugging statement
-
-  if (boolDate) {
-    // Adjust for GMT+8 and format date as dd-mm-yyyy
-    let day = originalDate.getUTCDate();
-    let month = originalDate.getUTCMonth() + 1; // getMonth() returns 0-11
-    let year = originalDate.getUTCFullYear();
-    originalDate.setUTCHours(originalDate.getUTCHours() + 8); // Adjust hours for GMT+8
-    // Check if the day has changed after adjustment
-    if (originalDate.getUTCDate() !== day) {
-      day = originalDate.getUTCDate();
-      month = originalDate.getUTCMonth() + 1;
-      year = originalDate.getUTCFullYear();
-    }
-    const formattedDate = `${day < 10 ? '0' : ''}${day}-${
-      month < 10 ? '0' : ''
-    }${month}-${year}`;
-
-    console.log(`Formatted Date: ${formattedDate}`); // Debugging statement
+  if (boolDate){
+    const originalDate = new Date(strDate);
+    const adjustedDateTime = new Date(originalDate.getTime() - 8 * 60 * 60 * 1000);
+    
+    const day = originalDate.getDate();
+    const month = originalDate.getMonth() + 1;
+    const year = originalDate.getFullYear();
+    
+    const formattedDate = `${day < 10 ? "0" : ""}${day}-${month < 10 ? "0" : ""}${month}-${year}`;
     return formattedDate;
   } else {
-    // Directly format time considering GMT+8 adjustment within formatAMPM
-    const formattedTime = formatAMPM(originalDate);
+    const originalDateTime = new Date(strDate);
+    const adjustedDateTime = new Date(originalDateTime.getTime() - 8 * 60 * 60 * 1000);
+
+    // Format the time as "h:mm A" (e.g., "10:24 AM")
+    const formattedTime = formatAMPM(adjustedDateTime);
     return formattedTime;
   }
 }
