@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   TouchableOpacity,
   Platform,
   StyleSheet,
   Image,
+  ToastAndroid,
 } from 'react-native';
 import { Text, VStack } from 'native-base';
 import typography from 'app/config/typography';
@@ -22,7 +23,9 @@ function ProfileNameButton({
   isActive=null,
   startDate=null,
 }) {
-  // const defaultImage = Image.resolveAssetSource(DefaultImage).uri;
+  const defaultImageUri = Image.resolveAssetSource(DefaultImage).uri;
+
+  const [isError, setIsError] = useState(false);
 
   const containerStyle = isVertical
     ? styles.ContentWrapperVertical
@@ -43,6 +46,11 @@ function ProfileNameButton({
     marginLeft: isVertical ? null : 30,
   };
 
+  const handleProfilePicError = () => {
+    ToastAndroid.show(('Error loading profile picture for patient ' + profileLineOne.trim()), ToastAndroid.SHORT)
+    setIsError(true);
+  }
+
   return (
     <VStack alignItems="center">
       <TouchableOpacity onPress={handleOnPress}>
@@ -50,10 +58,14 @@ function ProfileNameButton({
           <Image
             style={customProfilePictureStyle}
             alt={isPatient === true ? 'patient_image' : 'user_image'}
+            onError={handleProfilePicError}
             // Note: This is a fall-back uri. Will only be used if source fails to render the image.
-            fallbackSource={DefaultImage}
             source={
-              profilePicture ? { uri: `${profilePicture}` } : DefaultImage
+              profilePicture 
+                ? isError 
+                  ? DefaultImage
+                  : { uri: `${profilePicture}` } 
+                : DefaultImage
             }
           />
           <View style={customTextContainerStyle}>
