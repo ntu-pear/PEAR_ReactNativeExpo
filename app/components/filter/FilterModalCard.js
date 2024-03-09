@@ -40,10 +40,11 @@ const FilterModalCard = ({
 
   chip={'filterOptions': {}, 'sel': {}, 'tempSel': {}},
   setChip=()=>{},
-
+  
+  autocomplete={'filterOptions': {}, 'sel': {}, 'tempSel': {}},
+  setAutocomplete=()=>{},
 
   setSortOptions,
-  setAutocompleteFilterOptions,
   setDateFilterOptions,
   
   sortOptions={},
@@ -51,12 +52,6 @@ const FilterModalCard = ({
   setSelectedSort=()=>{},
   tempSelectedSort,
   setTempSelectedSort,
-
-  autocompleteFilterOptions={},
-  selectedAutocompleteFilters={},
-  setSelectedAutocompleteFilters=()=>{},
-  tempSelectedAutocompleteFilters,
-  setTempSelectedAutocompleteFilters,
 
   dateFilterOptions={},
   selectedDateFilters={},
@@ -78,7 +73,6 @@ const FilterModalCard = ({
   const [isLoading, setIsLoading] = useState(true);
 
   const [tempSelSort, setTempSelSort] = useState(tempSelectedSort || {});
-  const [tempSelAutocomplete, setTempSelAutocomplete] = useState(tempSelectedAutocompleteFilters || {});
   const [tempSelDate, setTempSelDate] = useState(tempSelectedDateFilters || {});
   
   // State used to keep track of whether initializeData state has changed
@@ -109,16 +103,20 @@ const FilterModalCard = ({
 
     setDropdown(prevState => ({
       ...prevState,
-      tempSel: prevState.sel
+      tempSel: {...prevState.sel}
     }))
 
     setChip(prevState => ({
       ...prevState,
-      tempSel: prevState.sel
+      tempSel: {...prevState.sel}
+    }))
+
+    setAutocomplete(prevState => ({
+      ...prevState,
+      tempSel: {...prevState.sel}
     }))
 
     updateState(setTempSelSort, setTempSelectedSort, isEmptyObject(selectedSort) ? {'option': sortOptions[0], 'asc': true} : {...selectedSort})
-    updateState(setTempSelAutocomplete, setTempSelectedAutocompleteFilters, {...selectedAutocompleteFilters});
 
    
     updateState(setTempSelDate, setTempSelectedDateFilters, {...selectedDateFilters});
@@ -133,11 +131,11 @@ const FilterModalCard = ({
   const initSortFilter = () => {
     // console.log('BAR -', 3, 'initSortFilter')
 
-    let tempAutocompleteFilterOptions = {};
     let tempDateFilterOptions = {};
 
     let tempDropdown = {'filterOptions': {}, 'sel': {}, 'tempSel': {}};
     let tempChip = {'filterOptions': {}, 'sel': {}, 'tempSel': {}};
+    let tempAutcomplete = {'filterOptions': {}, 'sel': {}, 'tempSel': {}};
 
     if(FILTER_OPTIONS.length > 0) {     
       
@@ -152,12 +150,13 @@ const FilterModalCard = ({
 
         // If filter already selected, set to new filter with same value if exists
         // Otherwise set to first option
-        const setSel = (temp, filter, og) => {          
+        // Note: real time update of tempsel value will not be reflected in autocomplete
+        const setSel = (temp, filter, og, key='value') => {          
           if(filter in og['tempSel']) {
-            let value = og['sel'][filter]['value'];
-            temp['sel'][filter] = temp['filterOptions'][filter].find(x => x.value == value) || temp['filterOptions'][filter][0];
-            value = og['tempSel'][filter]['value'];
-            temp['tempSel'][filter] = temp['filterOptions'][filter].find(x => x.value == value) || temp['filterOptions'][filter][0];
+            let sel = og['sel'][filter][key];
+            temp['sel'][filter] = temp['filterOptions'][filter].find(x => x[key] == sel) || temp['filterOptions'][filter][0];
+            let tempSel = og['tempSel'][filter][key];
+            temp['tempSel'][filter] = temp['filterOptions'][filter].find(x => x[key] == tempSel) || temp['filterOptions'][filter][0];
           } else {
             temp['sel'][filter] = temp['filterOptions'][filter][0];
             temp['tempSel'][filter] = temp['filterOptions'][filter][0];
@@ -176,7 +175,7 @@ const FilterModalCard = ({
             break;
           case 'dropdown':
             if(!isEmptyObject(filterOptionDetails[filter]['options'])) {
-              tempDropdown.filterOptions[filter] = tempFilterOptionList = [{'label': 'All', 'value': 'All'}, ...Object.entries(filterOptionDetails[filter]['options'])
+              tempDropdown.filterOptions[filter] = [{'label': 'All', 'value': 'All'}, ...Object.entries(filterOptionDetails[filter]['options'])
               .map(([key, label]) => ({
                 value: label,
                 label: key,
@@ -187,7 +186,16 @@ const FilterModalCard = ({
             tempDropdown = setSel(tempDropdown, filter, dropdown);            
             break;
           case 'autocomplete':
-            tempAutocompleteFilterOptions[filter] = parseAutoCompleteOptions(tempFilterOptionList);
+            if(!isEmptyObject(filterOptionDetails[filter]['options'])) {
+              tempAutcomplete.filterOptions[filter] = [{'title': 'All', 'id': 'All'}, ...Object.entries(filterOptionDetails[filter]['options'])
+              .map(([key, value]) => ({
+                id: value,
+                title: key,
+              }))];
+            } else {
+              tempAutcomplete['filterOptions'][filter] = parseAutoCompleteOptions(['All', ...tempFilterOptionList]);
+            }            
+            tempAutcomplete = setSel(tempAutcomplete, filter, autocomplete, 'id');            
             break;
           case 'date': 
             tempDateFilterOptions[filter] = filterOptionDetails[filter]['options'];
@@ -197,8 +205,8 @@ const FilterModalCard = ({
     }
     setDropdown(tempDropdown);
     setChip(tempChip);
+    setAutocomplete(tempAutcomplete);
 
-    setAutocompleteFilterOptions(tempAutocompleteFilterOptions);
     setDateFilterOptions(tempDateFilterOptions);
     setSortOptions(parseSelectOptions(SORT_OPTIONS));
   }
@@ -209,29 +217,36 @@ const FilterModalCard = ({
 
     setDropdown(prevState => ({
       ...prevState,
-      sel: prevState.tempSel
+      sel: {...prevState.tempSel}
     }))
 
     setChip(prevState => ({
       ...prevState,
-      sel: prevState.tempSel
+      sel: {...prevState.tempSel}
     }))
+
+    setAutocomplete(prevState => ({
+      ...prevState,
+      sel: {...prevState.tempSel}
+    }))
+
+    console.log(1, autocomplete['tempSel'], autocomplete['sel'])
 
     updateState(setIsModalVisible, setModalVisible, false);
     setSelectedSort({...tempSelSort});
-    setSelectedAutocompleteFilters({...tempSelAutocomplete});
     setSelectedDateFilters({...tempSelDate});
     handleSortFilter({
       'tempSelSort': {...tempSelSort}, 
       'tempSelDropdownFilters': dropdown['tempSel'], 
       'tempSelChipFilters': chip['tempSel'],
-      'tempSelAutocompleteFilters': {...tempSelAutocomplete},
+      'tempSelAutocompleteFilters': autocomplete['tempSel'],
       'tempSelDateFilters': {...tempSelDate},
     });
   };
   
-  const resetFilters = (temp) => {
-    for (var filter in temp['filterOptions']) {
+  const resetFilters = (temp, filters) => {
+
+    for (var filter in filters ? {[filters]: null} : temp['filterOptions']) {
       temp['sel'][filter] = temp['filterOptions'][filter][0];
       temp['tempSel'][filter] = temp['filterOptions'][filter][0];
     }
@@ -243,18 +258,22 @@ const FilterModalCard = ({
   const handleReset = () => {
     // console.log('MODAL -', 5, 'handleReset')
 
-    setDropdown(resetFilters({...dropdown}));
-    setChip(resetFilters({...chip}));
+    let tempDropdown = resetFilters({...dropdown});
+    let tempChip = resetFilters({...chip});
+    let tempAutcomplete = resetFilters({...autocomplete});
+
+    setDropdown(tempDropdown);
+    setChip(tempChip);
+    setAutocomplete(tempAutcomplete);
 
     updateState(setIsModalVisible, setModalVisible, false);
     setSelectedSort({});
-    setSelectedAutocompleteFilters({});
     setSelectedDateFilters({});
     handleSortFilter({
       'tempSelSort': {}, 
-      'tempSelDropdownFilters': dropdown['tempSel'], 
-      'tempSelChipFilters': chip['tempSel'],
-      'tempSelAutoCompleteFilters': {},
+      'tempSelDropdownFilters': tempDropdown['tempSel'], 
+      'tempSelChipFilters': tempChip['tempSel'],
+      'tempSelAutoCompleteFilters': tempAutcomplete['tempSel'],
       'tempSelDateFilters': {},
     });  };
 
@@ -286,9 +305,12 @@ const FilterModalCard = ({
     // console.log('MODAL -', 8, 'handleOnSelectAutocompleteFilter')
 
     if(item) {
-      let tempSelectedFilters = tempSelAutocomplete;
+      let tempSelectedFilters = autocomplete['tempSel'];
       tempSelectedFilters[filter] = item;
-      item && updateState(setTempSelAutocomplete, setTempSelectedAutocompleteFilters, tempSelectedFilters);      
+      item && setAutocomplete(prevState => ({
+        ...prevState,
+        tempSel: tempSelectedFilters
+      }))
     }
   }
 
@@ -434,23 +456,23 @@ const FilterModalCard = ({
                   </View>
                 </View>
               ): null}
-              {!isEmptyObject(autocompleteFilterOptions) ? (
+              {!isEmptyObject(autocomplete['filterOptions']) ? (
                 <View style={styles.filterContainer}>
-                    {Object.keys(autocompleteFilterOptions).map((filter) => 
+                    {Object.keys(autocomplete['filterOptions']).map((filter) => 
                       (<View key={filter}>
                         <Text style={styles.textStyle}>{filter}</Text>
                         <AutocompleteDropdown
                           ref={searchRefs[filter]}
                           closeOnBlur={false}
-                          dataSet={autocompleteFilterOptions[filter]}
+                          dataSet={autocomplete['filterOptions'][filter]}
                           onSelectItem={(item) => handleOnSelectAutocompleteFilter(item, filter)}
-                          onClear={() => updateState(setTempSelAutocomplete, setTempSelectedAutocompleteFilters, {})}
+                          onClear={() => resetFilters(autocomplete, filter)}
                           textInputProps={{
                             placeholder: 'Enter value',
                             autoCorrect: false,
                             autoCapitalize: 'none',
                           }}
-                          initialValue={filter in selectedAutocompleteFilters ? selectedAutocompleteFilters[filter] : {id: null}}
+                          initialValue={autocomplete['sel'][filter]}
                           suggestionsListMaxHeight={150} 
                           useFilter={true}
                           />                        

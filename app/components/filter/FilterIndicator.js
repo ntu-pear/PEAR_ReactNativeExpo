@@ -18,11 +18,11 @@ function FilterIndicator({
   setFilters,
   dropdown={},
   chip={},
+  autocomplete={},
   
   sortOptions={},
   selectedSort={},
   setSelectedSort=()=>{},
-  selectedAutocompleteFilters={},
   handleSortFilter=()=>{},
 }) {
 
@@ -81,7 +81,7 @@ function FilterIndicator({
             />
         ))}
 
-        {!isEmptyObject(dropdown) && Object.keys(dropdown['sel']).map((filter) => {
+        {Object.keys(dropdown['sel']).map((filter) => {
           if(dropdown['sel'][filter]['label'] != 'All') {
             return (
               <Chip
@@ -98,21 +98,28 @@ function FilterIndicator({
             )
           } else {
             return null;
-          }})}
+          }})
+        }
 
-        {Object.keys(selectedAutocompleteFilters).map((filter) => (
-          <Chip
-            key={filter}
-            title={filter + ": " + selectedAutocompleteFilters[filter]['title']}
-            type="solid"
-            buttonStyle={{backgroundColor: colors.green}}
-            containerStyle={{marginLeft: 5}}
-            onPress={modalVisible != undefined ? () => setModalVisible(true) : () => {}}
-            disabled={modalVisible == undefined} 
-            disabledStyle={{backgroundColor: colors.green}}
-            disabledTitleStyle={{color: colors.white_var1}}
-          />
-        ))}
+        {Object.keys(autocomplete['sel']).map((filter) => {
+          if(autocomplete['sel'][filter]['title'] != 'All') {
+            return (
+              <Chip
+                key={filter}
+                title={filter + ": " + autocomplete['sel'][filter]['title']}
+                type="solid"
+                buttonStyle={{backgroundColor: colors.green}}
+                containerStyle={{marginLeft: 5}}
+                onPress={modalVisible != undefined ? () => setModalVisible(true) : () => {}}
+                disabled={modalVisible == undefined} 
+                disabledStyle={{backgroundColor: colors.green}}
+                disabledTitleStyle={{color: colors.white_var1}}
+              />
+            )
+          } else {
+            return null;
+          }})
+        }
       </View>
     </ScrollView>          
   );

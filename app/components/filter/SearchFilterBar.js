@@ -42,6 +42,9 @@ function SearchFilterBar({
   chip,
   setChip,
   
+  autocomplete,
+  setAutocomplete,
+  
   SORT_OPTIONS={},
   selectedSort={},
   setSelectedSort=()=>{},
@@ -50,11 +53,6 @@ function SearchFilterBar({
   
   FILTER_OPTIONS={},
   filterOptionDetails={},
-  
-  selectedAutocompleteFilters={},
-  setSelectedAutocompleteFilters=()=>{},
-  tempSelectedAutocompleteFilters={},
-  setTempSelectedAutocompleteFilters,
 
   selectedDateFilters={},
   setSelectedDateFilters=()=>{},
@@ -76,7 +74,6 @@ function SearchFilterBar({
   ? parseSelectOptions(isEmptyObject(VIEW_MODES) ? SORT_OPTIONS : SORT_OPTIONS[viewMode]) 
   : {}
   );
-  const [autocompleteFilterOptions, setAutocompleteFilterOptions] = useState({});
   const [dateFilterOptions, setDateFilterOptions] = useState({}); 
 
   const handleSearchSortFilter = ({
@@ -84,10 +81,10 @@ function SearchFilterBar({
     tempSelSort=selectedSort, 
     tempSelDropdownFilters=dropdown['tempSel'],
     tempSelChipFilters=chip['tempSel'], 
-    tempSelAutocompleteFilters=selectedAutocompleteFilters, 
+    tempSelAutocompleteFilters=autocomplete['tempSel'], 
     tempSearchMode=searchOption,
   }) => {
-    // console.log('BAR -', 3, 'handleSearchSortFilter')
+    // console.log('BAR -', 3, 'handleSearchSortFilter',tempSelAutocompleteFilters)
 
     if(handleSearchSortFilterCustom) {
       handleSearchSortFilterCustom({
@@ -116,9 +113,9 @@ function SearchFilterBar({
   const setFilteredList = ({
     text=searchQuery, 
     tempSelSort=selectedSort, 
-    tempSelDropdownFilters=dropdown['sel'],
-    tempSelChipFilters=chip['sel'], 
-    tempSelAutocompleteFilters=selectedAutocompleteFilters, 
+    tempSelDropdownFilters=dropdown['tempSel'],
+    tempSelChipFilters=chip['tempSel'], 
+    tempSelAutocompleteFilters=autocomplete['tempSel'], 
     tempSearchMode=searchOption,
   }) => {
     // console.log('BAR -', 4, 'setFilteredList')
@@ -151,7 +148,9 @@ function SearchFilterBar({
 
     // Autocomplete filters
     for (var filter of Object.keys(tempSelAutocompleteFilters)) {
-      filteredList = getSubFilteredList(filteredList, filter, 'title', tempSelAutocompleteFilters);
+      if(tempSelAutocompleteFilters[filter]['title'] != 'All') {
+        filteredList = getSubFilteredList(filteredList, filter, 'title', tempSelAutocompleteFilters);
+      }      
     }
 
     // Chip Filters
@@ -278,14 +277,17 @@ function SearchFilterBar({
             setSort={setSort}
             filters={filters}
             setFilters={setFilters}
+            
             dropdown={dropdown}
             setDropdown={setDropdown}
-
+            
             chip={chip}
             setChip={setChip}
 
+            autocomplete={autocomplete}
+            setAutocomplete={setAutocomplete}
+            
             setSortOptions={setSortOptions}
-            setAutocompleteFilterOptions={setAutocompleteFilterOptions}
             setDateFilterOptions={setDateFilterOptions}
             
             sortOptions={sortOptions}
@@ -293,12 +295,6 @@ function SearchFilterBar({
             setSelectedSort={setSelectedSort}
             tempSelectedSort={tempSelectedSort}
             setTempSelectedSort={setTempSelectedSort}
-          
-            autocompleteFilterOptions={autocompleteFilterOptions}
-            selectedAutocompleteFilters={selectedAutocompleteFilters}
-            setSelectedAutocompleteFilters={setSelectedAutocompleteFilters}
-            tempSelectedAutocompleteFilters={tempSelectedAutocompleteFilters}
-            setTempSelectedAutocompleteFilters={setTempSelectedAutocompleteFilters}
 
             dateFilterOptions={dateFilterOptions}
             selectedDateFilters={selectedDateFilters}
@@ -338,13 +334,11 @@ function SearchFilterBar({
 
           dropdown={dropdown}
           chip={chip}
+          autocomplete={autocomplete}
 
           sortOptions={sortOptions}
           selectedSort={selectedSort}
           setSelectedSort={setSelectedSort}
-          
-                    
-          selectedAutocompleteFilters={selectedAutocompleteFilters}
           
           handleSortFilter={handleSearchSortFilter}
         />

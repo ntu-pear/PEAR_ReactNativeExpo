@@ -83,13 +83,12 @@ function PatientsScreen({ navigation }) {
   // Sort related states
   const [selectedSort, setSelectedSort] = useState({});
   
-  const [tempSelectedChipFilters, setTempSelectedChipFilters] = useState({}); 
-
   // Sort/filter related states
   const [sort, setSort] = useState({});
   const [filters, setFilters] = useState({});
   const [dropdown, setDropdown] = useState({'filterOptions': {}, 'sel': {}, 'tempSel': {}});
   const [chip, setChip] = useState({'filterOptions': {}, 'sel': {}, 'tempSel': {}});
+  const [autocomplete, setAutocomplete] = useState({'filterOptions': {}, 'sel': {}, 'tempSel': {}});
 
   // Filter details related state
   // Details of filter options
@@ -150,7 +149,7 @@ function PatientsScreen({ navigation }) {
 
   // When user toggles patient status filter, update caregiver filter options
   useEffect(() => {
-    // console.log('PATIENTS -', 4, 'useEffect [tempSelectedChipFilters]', tempSelectedChipFilters);
+    // console.log('PATIENTS -', 4, 'useEffect [tempSelectedChipFilters]');
 
     if(chip['tempSel']['Patient Status'] != undefined && viewMode == 'allPatients' && !justUpdated) {
       // console.log('PATIENTS -', 4.5, 'useEffect [tempSelectedChipFilters]');
@@ -190,8 +189,7 @@ function PatientsScreen({ navigation }) {
   }
 
   // Set screen to loading wheel when retrieving patient list from backend
-  // Note: 
-  // Once the data is retrieved from backend, setIsLoading is set to false momentarily so SearchFilterBar can render and initialize data
+  // Note: Once the data is retrieved from backend, setIsLoading is set to false momentarily so SearchFilterBar can render and initialize data
   const refreshPatientData = (tempPatientStatus=patientStatus) => {
     // console.log('PATIENTS -', 8, 'refreshPatientData');
 
@@ -323,6 +321,9 @@ function PatientsScreen({ navigation }) {
             
             chip={chip}
             setChip={setChip}
+
+            autocomplete={autocomplete}
+            setAutocomplete={setAutocomplete}
             
             SORT_OPTIONS={SORT_OPTIONS}
             selectedSort={selectedSort}
