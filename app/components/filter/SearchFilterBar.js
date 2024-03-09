@@ -35,6 +35,12 @@ function SearchFilterBar({
   setSort,
   filters,
   setFilters,
+
+  dropdown,
+  setDropdown,
+
+  chip,
+  setChip,
   
   SORT_OPTIONS={},
   selectedSort={},
@@ -44,21 +50,16 @@ function SearchFilterBar({
   
   FILTER_OPTIONS={},
   filterOptionDetails={},
-
-  selectedChipFilters={},
-  setSelectedChipFilters=()=>{},
-  tempSelectedChipFilters={},
-  setTempSelectedChipFilters,
-  
-  selectedDropdownFilters={},
-  setSelectedDropdownFilters=()=>{},
-  tempSelectedDropdownFilters={},
-  setTempSelectedDropdownFilters,
   
   selectedAutocompleteFilters={},
   setSelectedAutocompleteFilters=()=>{},
   tempSelectedAutocompleteFilters={},
   setTempSelectedAutocompleteFilters,
+
+  selectedDateFilters={},
+  setSelectedDateFilters=()=>{},
+  tempSelectedDateFilters={},
+  setTempSelectedDateFilters,
   
   SEARCH_OPTIONS=[],
   searchOption='',
@@ -75,15 +76,14 @@ function SearchFilterBar({
   ? parseSelectOptions(isEmptyObject(VIEW_MODES) ? SORT_OPTIONS : SORT_OPTIONS[viewMode]) 
   : {}
   );
-  const [dropdownFilterOptions, setDropdownFilterOptions] = useState({});
   const [autocompleteFilterOptions, setAutocompleteFilterOptions] = useState({});
-  const [chipFilterOptions, setChipFilterOptions] = useState({}); 
+  const [dateFilterOptions, setDateFilterOptions] = useState({}); 
 
   const handleSearchSortFilter = ({
     text=searchQuery, 
     tempSelSort=selectedSort, 
-    tempSelDropdownFilters=selectedDropdownFilters,
-    tempSelChipFilters=selectedChipFilters, 
+    tempSelDropdownFilters=dropdown['tempSel'],
+    tempSelChipFilters=chip['tempSel'], 
     tempSelAutocompleteFilters=selectedAutocompleteFilters, 
     tempSearchMode=searchOption,
   }) => {
@@ -116,8 +116,8 @@ function SearchFilterBar({
   const setFilteredList = ({
     text=searchQuery, 
     tempSelSort=selectedSort, 
-    tempSelDropdownFilters=selectedDropdownFilters,
-    tempSelChipFilters=selectedChipFilters, 
+    tempSelDropdownFilters=dropdown['sel'],
+    tempSelChipFilters=chip['sel'], 
     tempSelAutocompleteFilters=selectedAutocompleteFilters, 
     tempSearchMode=searchOption,
   }) => {
@@ -143,7 +143,7 @@ function SearchFilterBar({
     }
   
     // Dropdown filters
-    for (var filter of Object.keys(tempSelDropdownFilters)) {   
+    for (var filter of Object.keys(dropdown['tempSel'])) {   
       if(tempSelDropdownFilters[filter]['label'] != 'All') {
         filteredList = getSubFilteredList(filteredList, filter, 'label', tempSelDropdownFilters);
       }      
@@ -200,29 +200,33 @@ function SearchFilterBar({
       setIsLoading(true);
 
       // Delete/Reset any sort options/filters that should not be applied to the current tab 
-      if(!isEmptyObject(SORT_OPTIONS)) {
-        if(!SORT_OPTIONS[mode].includes(!isEmptyObject(selectedSort) ? selectedSort['option']['label'] : sortOptions[0]['label'])) {
-          setSelectedSort({});
-        }
-      }
+      // if(!isEmptyObject(SORT_OPTIONS)) {
+      //   if(!SORT_OPTIONS[mode].includes(!isEmptyObject(selectedSort) ? selectedSort['option']['label'] : sortOptions[0]['label'])) {
+      //     setSelectedSort({});
+      //   }
+      // }
 
-      for(var filter of Object.keys(selectedDropdownFilters)) {
-        if(!FILTER_OPTIONS[mode].includes(filter)) {
-          delete selectedDropdownFilters[filter];
-        }
-      }
+      // for(var filter of Object.keys(dropdown['sel'])) {
+      //   if(!FILTER_OPTIONS[mode].includes(filter)) {
+      //     delete dropdown['sel'][filter];
+      //     delete dropdown['tempSel'][filter];
+      //     delete dropdown['filterOptions'][filter];
+      //   }
+      // }
 
-      for(var filter of Object.keys(selectedAutocompleteFilters)) {
-        if(!FILTER_OPTIONS[mode].includes(filter)) {
-          delete selectedAutocompleteFilters[filter];
-        }
-      }
+      // for(var filter of Object.keys(selectedAutocompleteFilters)) {
+      //   if(!FILTER_OPTIONS[mode].includes(filter)) {
+      //     delete selectedAutocompleteFilters[filter];
+      //   }
+      // }
 
-      for(var filter of Object.keys(selectedChipFilters)) {
-        if(!FILTER_OPTIONS[mode].includes(filter)) {
-          delete selectedChipFilters[filter];
-        }
-      }
+      // for(var filter of Object.keys(chip['sel'])) {
+      //   if(!FILTER_OPTIONS[mode].includes(filter)) {
+      //     delete chip['sel'][filter];
+      //     delete chip['tempSel'][filter];
+      //     delete chip['filterOptions'][filter];
+      //   }
+      // }
     }     
   }
 
@@ -264,6 +268,7 @@ function SearchFilterBar({
 
             SORT_OPTIONS={viewMode ? SORT_OPTIONS[viewMode] : SORT_OPTIONS}
             FILTER_OPTIONS={viewMode ? FILTER_OPTIONS[viewMode] : FILTER_OPTIONS}
+            FIELD_MAPPING={FIELD_MAPPING}
             filterOptionDetails={filterOptionDetails}
             originalList={originalList}
             initializeData={initializeData}
@@ -273,11 +278,15 @@ function SearchFilterBar({
             setSort={setSort}
             filters={filters}
             setFilters={setFilters}
+            dropdown={dropdown}
+            setDropdown={setDropdown}
+
+            chip={chip}
+            setChip={setChip}
 
             setSortOptions={setSortOptions}
-            setDropdownFilterOptions={setDropdownFilterOptions}
-            setChipFilterOptions={setChipFilterOptions}
             setAutocompleteFilterOptions={setAutocompleteFilterOptions}
+            setDateFilterOptions={setDateFilterOptions}
             
             sortOptions={sortOptions}
             selectedSort={selectedSort}
@@ -290,18 +299,12 @@ function SearchFilterBar({
             setSelectedAutocompleteFilters={setSelectedAutocompleteFilters}
             tempSelectedAutocompleteFilters={tempSelectedAutocompleteFilters}
             setTempSelectedAutocompleteFilters={setTempSelectedAutocompleteFilters}
-          
-            dropdownFilterOptions={dropdownFilterOptions}
-            selectedDropdownFilters={selectedDropdownFilters}
-            setSelectedDropdownFilters={setSelectedDropdownFilters}
-            tempSelectedDropdownFilters={tempSelectedDropdownFilters}
-            setTempSelectedDropdownFilters={setTempSelectedDropdownFilters}
-          
-            chipFilterOptions={chipFilterOptions}
-            selectedChipFilters={selectedChipFilters}
-            setSelectedChipFilters={setSelectedChipFilters}
-            tempSelectedChipFilters={tempSelectedChipFilters}
-            setTempSelectedChipFilters={setTempSelectedChipFilters}
+
+            dateFilterOptions={dateFilterOptions}
+            selectedDateFilters={selectedDateFilters}
+            setSelectedDateFilters={setSelectedDateFilters}
+            tempSelectedDateFilters={tempSelectedDateFilters}
+            setTempSelectedDateFilters={setTempSelectedDateFilters}
 
             handleSortFilter={handleSearchSortFilter}
           />
@@ -333,15 +336,14 @@ function SearchFilterBar({
           filters={filters}
           setFilters={filters}
 
+          dropdown={dropdown}
+          chip={chip}
+
           sortOptions={sortOptions}
           selectedSort={selectedSort}
           setSelectedSort={setSelectedSort}
           
-          chipFilterOptions={chipFilterOptions}
-          selectedChipFilters={selectedChipFilters}
-          
-          selectedDropdownFilters={selectedDropdownFilters}
-          
+                    
           selectedAutocompleteFilters={selectedAutocompleteFilters}
           
           handleSortFilter={handleSearchSortFilter}

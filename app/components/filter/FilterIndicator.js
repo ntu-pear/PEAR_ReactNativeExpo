@@ -16,13 +16,12 @@ function FilterIndicator({
   setSort,
   filters,
   setFilters,
+  dropdown={},
+  chip={},
   
   sortOptions={},
   selectedSort={},
   setSelectedSort=()=>{},
-  chipFilterOptions={},
-  selectedChipFilters={},
-  selectedDropdownFilters={},
   selectedAutocompleteFilters={},
   handleSortFilter=()=>{},
 }) {
@@ -68,10 +67,10 @@ function FilterIndicator({
           />
         ) : null}
         
-        {Object.keys(chipFilterOptions).map((filter) => (
+        {Object.keys(chip['filterOptions']).map((filter) => (
           <Chip
             key={filter}
-            title={filter + ": " + (filter in selectedChipFilters ? selectedChipFilters[filter]['label'] : chipFilterOptions[filter][0]['label'])}
+            title={filter + ": " + (chip['sel'][filter]['label'])}
             type="solid"
             buttonStyle={{backgroundColor: colors.green}}
             containerStyle={{marginLeft: 5}}
@@ -82,12 +81,12 @@ function FilterIndicator({
             />
         ))}
 
-        {Object.keys(selectedDropdownFilters).map((filter) => {
-          if(selectedDropdownFilters[filter]['label'] != 'All') {
+        {!isEmptyObject(dropdown) && Object.keys(dropdown['sel']).map((filter) => {
+          if(dropdown['sel'][filter]['label'] != 'All') {
             return (
               <Chip
                 key={filter}
-                title={filter + ": " + selectedDropdownFilters[filter]['label']}
+                title={filter + ": " + dropdown['sel'][filter]['label']}
                 type="solid"
                 buttonStyle={{backgroundColor: colors.green}}
                 containerStyle={{marginLeft: 5}}

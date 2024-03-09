@@ -49,8 +49,8 @@ function PatientsScreen({ navigation }) {
   
   // Filter options based on view mode
   const FILTER_OPTIONS = {
-    'myPatients': ['Patient Status'],
-    'allPatients': ['Patient Status', 'Caregiver']
+    'myPatients': ['Patient Status', 'Start Date'],
+    'allPatients': ['Patient Status', 'Caregiver', 'Start Date']
   };
   
   // Mapping between sort/filter/search names and the respective field in the patient data retrieved from the backend
@@ -71,6 +71,7 @@ function PatientsScreen({ navigation }) {
   const [originalListOfPatients, setOriginalListOfPatients] = useState([]); // list of patients without sort, search, filter
   const [listOfPatients, setListOfPatients] = useState([]); // list of patients after sort, search, filter
   const [patientCountInfo, setPatientCountInfo] = useState({}); // list of patients for each caregiver (differentiated by patient status)
+  const [justUpdated, setJustUpdated] = useState(false); 
   const [patientStatus, setPatientStatus] = useState('active'); // active, inactive, ''
   const [viewMode, setViewMode] = useState('myPatients'); // myPatients, allPatients
   const [isReloadPatientList, setIsReloadPatientList] = useState(false);
@@ -81,18 +82,14 @@ function PatientsScreen({ navigation }) {
   
   // Sort related states
   const [selectedSort, setSelectedSort] = useState({});
-
-  // Dropdown filter related states
-  const [selectedDropdownFilters, setSelectedDropdownFilters] = useState({});
-  const [tempSelectedDropdownFilters, setTempSelectedDropdownFilters] = useState({});
   
-  // Chip filter related states
-  const [selectedChipFilters, setSelectedChipFilters] = useState({}); 
   const [tempSelectedChipFilters, setTempSelectedChipFilters] = useState({}); 
 
   // Sort/filter related states
   const [sort, setSort] = useState({});
   const [filters, setFilters] = useState({});
+  const [dropdown, setDropdown] = useState({'filterOptions': {}, 'sel': {}, 'tempSel': {}});
+  const [chip, setChip] = useState({'filterOptions': {}, 'sel': {}, 'tempSel': {}});
 
   // Filter details related state
   // Details of filter options
@@ -114,6 +111,11 @@ function PatientsScreen({ navigation }) {
       'type': 'chip',
       'options': {'Active': true, 'Inactive': false, 'All': undefined}, // define custom options and map to corresponding values in patient data
       'isFilter': false
+    },
+    'Start Date': {
+      'type': 'date',
+      'options': {'min': {}, 'max': {}},
+      'isFilter': true
     } 
   });
 
@@ -150,17 +152,19 @@ function PatientsScreen({ navigation }) {
   useEffect(() => {
     // console.log('PATIENTS -', 4, 'useEffect [tempSelectedChipFilters]', tempSelectedChipFilters);
 
-    if(tempSelectedChipFilters['Patient Status'] != undefined && viewMode == 'allPatients') {
+    if(chip['tempSel']['Patient Status'] != undefined && viewMode == 'allPatients' && !justUpdated) {
       // console.log('PATIENTS -', 4.5, 'useEffect [tempSelectedChipFilters]');
       let tempPatientStatus = PATIENT_STATUSES[
-        !isEmptyObject(tempSelectedChipFilters) 
-        ? tempSelectedChipFilters['Patient Status']['label'] 
+        !isEmptyObject(chip['tempSel']) 
+        ? chip['tempSel']['Patient Status']['label'] 
         : 'Active'
       ]
       updateCaregiverFilterOptions({tempPatientStatus: tempPatientStatus});
       setIsDataInitialized(true);
+    } else {
+      setJustUpdated(false);
     }
-  }, [tempSelectedChipFilters['Patient Status']])
+  }, [chip['tempSel']['Patient Status']])
 
   // Retrieve patient list from backend
   const getListOfPatients = async (status='active') => {   
@@ -229,20 +233,7 @@ function PatientsScreen({ navigation }) {
       }
     }));
 
-    // If a caregiver filter is already selected, update tempSelectedDropdownFilters
-    if('Caregiver' in tempSelectedDropdownFilters) {
-      // Get name of caregiver by removing patient count from current dropdown selection
-      // E.g.: selected item is {label: 'Caregiver Three (9)', value: 4} => remove the ' (9)'
-      let curSelection = 
-      tempSelectedDropdownFilters['Caregiver']['label'] != undefined &&
-      tempSelectedDropdownFilters['Caregiver']['label'] != ''
-        ? tempSelectedDropdownFilters['Caregiver']['label'].split(/ \([0-9]*\)/)[0]
-        : tempSelectedDropdownFilters['Caregiver']['label']
-      
-      let tempSelDropdown = tempSelectedDropdownFilters;
-      tempSelDropdown['Caregiver']['label'] = Object.keys(caregiverPatientCount).find(x=>caregiverPatientCount[x] == curSelection);
-      setTempSelectedDropdownFilters(tempSelDropdown);
-    }
+    setJustUpdated(true);
   }    
 
   // Handle searching, sorting, and filtering of patient data based on patient status  
@@ -326,6 +317,12 @@ function PatientsScreen({ navigation }) {
             setSort={setSort}
             filters={filters}
             setFilters={setFilters}
+
+            dropdown={dropdown}
+            setDropdown={setDropdown}
+            
+            chip={chip}
+            setChip={setChip}
             
             SORT_OPTIONS={SORT_OPTIONS}
             selectedSort={selectedSort}
@@ -333,16 +330,6 @@ function PatientsScreen({ navigation }) {
             
             FILTER_OPTIONS={FILTER_OPTIONS}
             filterOptionDetails={filterOptionDetails}
-            
-            selectedChipFilters={selectedChipFilters}
-            setSelectedChipFilters={setSelectedChipFilters}
-            tempSelectedChipFilters={tempSelectedChipFilters}
-            setTempSelectedChipFilters={setTempSelectedChipFilters}
-            
-            selectedDropdownFilters={selectedDropdownFilters}
-            setSelectedDropdownFilters={setSelectedDropdownFilters}
-            tempSelectedDropdownFilters={tempSelectedDropdownFilters}
-            setTempSelectedDropdownFilters={setTempSelectedDropdownFilters}
             
             SEARCH_OPTIONS={SEARCH_OPTIONS}
             searchOption={searchOption}

@@ -26,6 +26,7 @@ const FilterModalCard = ({
 
   SORT_OPTIONS=[],
   FILTER_OPTIONS=[],
+  FIELD_MAPPING={},
   filterOptionDetails,
   originalList,
   initializeData,
@@ -33,32 +34,23 @@ const FilterModalCard = ({
 
   sort,
   setSort,
-  filters,
-  setFilters,
+
+  dropdown={'filterOptions': {}, 'sel': {}, 'tempSel': {}},
+  setDropdown=()=>{},
+
+  chip={'filterOptions': {}, 'sel': {}, 'tempSel': {}},
+  setChip=()=>{},
 
 
   setSortOptions,
-  setDropdownFilterOptions,
-  setChipFilterOptions,
   setAutocompleteFilterOptions,
+  setDateFilterOptions,
   
   sortOptions={},
   selectedSort={},
   setSelectedSort=()=>{},
   tempSelectedSort,
   setTempSelectedSort,
-  
-  chipFilterOptions={},
-  selectedChipFilters={},
-  setSelectedChipFilters=()=>{},
-  tempSelectedChipFilters,
-  setTempSelectedChipFilters,
-
-  dropdownFilterOptions={},
-  selectedDropdownFilters={},
-  setSelectedDropdownFilters=()=>{},
-  tempSelectedDropdownFilters,
-  setTempSelectedDropdownFilters,
 
   autocompleteFilterOptions={},
   selectedAutocompleteFilters={},
@@ -67,18 +59,6 @@ const FilterModalCard = ({
   setTempSelectedAutocompleteFilters,
 
   dateFilterOptions={},
-  // {'Date Filter Test': {
-  //   'min': {
-  //     'default': new Date(),
-  //     'limit': null,
-  //     'value': null,
-  //   },
-  //   'max': {
-  //     'default': null,
-  //     'limit': null,
-  //     'value': null,
-  //   }
-  // }},
   selectedDateFilters={},
   setSelectedDateFilters=()=>{},
   tempSelectedDateFilters,
@@ -88,7 +68,7 @@ const FilterModalCard = ({
   handleSortFilter,
 }) => {
   // Types of filter display options
-  const FILTER_TYPES = ['chip', 'dropdown', 'autocomplete'];
+  const FILTER_TYPES = ['chip', 'dropdown', 'autocomplete', 'date'];
 
   const initialRef = useRef(null);
   const finalRef = useRef(null);
@@ -98,11 +78,8 @@ const FilterModalCard = ({
   const [isLoading, setIsLoading] = useState(true);
 
   const [tempSelSort, setTempSelSort] = useState(tempSelectedSort || {});
-  const [tempSelChip, setTempSelChip] = useState(tempSelectedChipFilters || {});
-  const [tempSelDropdown, setTempSelDropdown] = useState(tempSelectedDropdownFilters || {});
   const [tempSelAutocomplete, setTempSelAutocomplete] = useState(tempSelectedAutocompleteFilters || {});
   const [tempSelDate, setTempSelDate] = useState(tempSelectedDateFilters || {});
-  const [datePickerDisplay, setDatePickerDisplay] = useState({})
   
   // State used to keep track of whether initializeData state has changed
   const [localFilterOptionDetails, setLocalFilterOptionDetails] = useState(filterOptionDetails);
@@ -130,19 +107,20 @@ const FilterModalCard = ({
 
     setSelectedSort(isEmptyObject(selectedSort) ? {'option': sortOptions[0], 'asc': true} : {...selectedSort});
 
+    setDropdown(prevState => ({
+      ...prevState,
+      tempSel: prevState.sel
+    }))
+
+    setChip(prevState => ({
+      ...prevState,
+      tempSel: prevState.sel
+    }))
+
     updateState(setTempSelSort, setTempSelectedSort, isEmptyObject(selectedSort) ? {'option': sortOptions[0], 'asc': true} : {...selectedSort})
-    updateState(setTempSelDropdown, setTempSelectedDropdownFilters, {...selectedDropdownFilters});
     updateState(setTempSelAutocomplete, setTempSelectedAutocompleteFilters, {...selectedAutocompleteFilters});
 
-    var tempSelChipFilters = {...selectedChipFilters};
-    for (var filter of Object.keys(chipFilterOptions)) {
-      if(!Object.keys(selectedChipFilters).includes(filter)) {
-        tempSelChipFilters[filter] = chipFilterOptions[filter][0];
-      }
-    }
-    setSelectedChipFilters(tempSelChipFilters);
-    updateState(setTempSelChip, setTempSelectedChipFilters, tempSelChipFilters);
-
+   
     updateState(setTempSelDate, setTempSelectedDateFilters, {...selectedDateFilters});
 
     Keyboard.dismiss();
@@ -155,74 +133,73 @@ const FilterModalCard = ({
   const initSortFilter = () => {
     // console.log('BAR -', 3, 'initSortFilter')
 
-    let filterOptions = {};
-    let sel = {}
-    let tempSel = {}
-
-    let tempDropdownFilterOptions = {};
     let tempAutocompleteFilterOptions = {};
-    let tempChipFilterOptions = {};
+    let tempDateFilterOptions = {};
 
-    if(FILTER_OPTIONS.length > 0) {
-      // Initialize filter data by filter type
-      for (var filterType of FILTER_TYPES) {
-        filterOptions[filterType] = {};
-        sel[filterType] = filters['sel'] ? filters['sel'][filterType] : {};
-        tempSel[filterType] = filters['tempSel'] ? filters['tempSel'][filterType] : {};
-      }
-      
+    let tempDropdown = {'filterOptions': {}, 'sel': {}, 'tempSel': {}};
+    let tempChip = {'filterOptions': {}, 'sel': {}, 'tempSel': {}};
+
+    if(FILTER_OPTIONS.length > 0) {     
       
       for(var filter of FILTER_OPTIONS) {
         let tempFilterOptionList;
         
         // If no custom options for a filter, get options from patient list by taking distinct values of the filter property
-        // Else use custom options
         if (isEmptyObject(filterOptionDetails[filter]['options'])) {
           tempFilterOptionList = originalList.map(x => x[FIELD_MAPPING[filter]]);
           tempFilterOptionList = Array.from(new Set(tempFilterOptionList));        
-        } else {
-          tempFilterOptionList = Object.keys(filterOptionDetails[filter]['options'])
+        }
+
+        // If filter already selected, set to new filter with same value if exists
+        // Otherwise set to first option
+        const setSel = (temp, filter, og) => {          
+          if(filter in og['tempSel']) {
+            let value = og['sel'][filter]['value'];
+            temp['sel'][filter] = temp['filterOptions'][filter].find(x => x.value == value) || temp['filterOptions'][filter][0];
+            value = og['tempSel'][filter]['value'];
+            temp['tempSel'][filter] = temp['filterOptions'][filter].find(x => x.value == value) || temp['filterOptions'][filter][0];
+          } else {
+            temp['sel'][filter] = temp['filterOptions'][filter][0];
+            temp['tempSel'][filter] = temp['filterOptions'][filter][0];
+          }
+          return temp;
         }
         
-        // Set default selected filter values if not selected
-        const setSel = (filterType) => {
-          if(!sel[filterType][filter]) {
-            sel[filterType][filter] = filterOptions[filterType][filter][0];
-            tempSel[filterType][filter] = filterOptions[filterType][filter][0];
-          }
-
-
-          // might need different implementation for date
-        }
-
         // Parse filter options based on dropdown/chip type
         switch(filterOptionDetails[filter]['type']) {
           case 'chip':
-            filterOptions['chip'][filter] = parseSelectOptions(tempFilterOptionList);
-            tempChipFilterOptions[filter] = parseSelectOptions(tempFilterOptionList);
+            if(!isEmptyObject(filterOptionDetails[filter]['options'])) {
+              tempFilterOptionList = Object.keys(filterOptionDetails[filter]['options'])
+            }            
+            tempChip['filterOptions'][filter] = parseSelectOptions(tempFilterOptionList);
+            tempChip = setSel(tempChip, filter, chip);           
             break;
-            case 'dropdown':
-            tempDropdownFilterOptions[filter] = parseSelectOptions(['All', ...tempFilterOptionList]);
-            filterOptions['dropdown'][filter] = parseSelectOptions(['All', ...tempFilterOptionList]);
+          case 'dropdown':
+            if(!isEmptyObject(filterOptionDetails[filter]['options'])) {
+              tempDropdown.filterOptions[filter] = tempFilterOptionList = [{'label': 'All', 'value': 'All'}, ...Object.entries(filterOptionDetails[filter]['options'])
+              .map(([key, label]) => ({
+                value: label,
+                label: key,
+              }))];
+            } else {
+              tempDropdown['filterOptions'][filter] = parseSelectOptions(['All', ...tempFilterOptionList]);
+            }            
+            tempDropdown = setSel(tempDropdown, filter, dropdown);            
             break;
           case 'autocomplete':
-            filterOptions['autocomplete'][filter] = parseAutoCompleteOptions(tempFilterOptionList);
             tempAutocompleteFilterOptions[filter] = parseAutoCompleteOptions(tempFilterOptionList);
             break;
+          case 'date': 
+            tempDateFilterOptions[filter] = filterOptionDetails[filter]['options'];
+            break;
         }
-        setSel(filterOptionDetails[filter]['type']);
       }
     }
-    setDropdownFilterOptions(tempDropdownFilterOptions);
-    setAutocompleteFilterOptions(tempAutocompleteFilterOptions);
-    setChipFilterOptions(tempChipFilterOptions);
-    
-    setFilters({
-      'sel': sel,
-      'tempSel': tempSel,
-      'filterOptions': filterOptions,
-    })
+    setDropdown(tempDropdown);
+    setChip(tempChip);
 
+    setAutocompleteFilterOptions(tempAutocompleteFilterOptions);
+    setDateFilterOptions(tempDateFilterOptions);
     setSortOptions(parseSelectOptions(SORT_OPTIONS));
   }
 
@@ -230,35 +207,53 @@ const FilterModalCard = ({
   const handleApply = () => {
     // console.log('MODAL -', 4, 'handleApply', tempSelDropdown)
 
+    setDropdown(prevState => ({
+      ...prevState,
+      sel: prevState.tempSel
+    }))
+
+    setChip(prevState => ({
+      ...prevState,
+      sel: prevState.tempSel
+    }))
+
     updateState(setIsModalVisible, setModalVisible, false);
     setSelectedSort({...tempSelSort});
-    setSelectedDropdownFilters({...tempSelDropdown});
     setSelectedAutocompleteFilters({...tempSelAutocomplete});
     setSelectedDateFilters({...tempSelDate});
-    setSelectedChipFilters({...tempSelChip});
     handleSortFilter({
       'tempSelSort': {...tempSelSort}, 
-      'tempSelDropdownFilters': {...tempSelDropdown}, 
-      'tempSelChipFilters': {...tempSelChip},
+      'tempSelDropdownFilters': dropdown['tempSel'], 
+      'tempSelChipFilters': chip['tempSel'],
       'tempSelAutocompleteFilters': {...tempSelAutocomplete},
       'tempSelDateFilters': {...tempSelDate},
     });
   };
   
+  const resetFilters = (temp) => {
+    for (var filter in temp['filterOptions']) {
+      temp['sel'][filter] = temp['filterOptions'][filter][0];
+      temp['tempSel'][filter] = temp['filterOptions'][filter][0];
+    }
+    return temp;
+  }
+  
+  
   // Reset sort and filter values and close modal
   const handleReset = () => {
     // console.log('MODAL -', 5, 'handleReset')
 
+    setDropdown(resetFilters({...dropdown}));
+    setChip(resetFilters({...chip}));
+
     updateState(setIsModalVisible, setModalVisible, false);
     setSelectedSort({});
-    setSelectedDropdownFilters({});
-    setSelectedChipFilters({});
     setSelectedAutocompleteFilters({});
     setSelectedDateFilters({});
     handleSortFilter({
       'tempSelSort': {}, 
-      'tempSelDropdownFilters': {}, 
-      'tempSelChipFilters': {},
+      'tempSelDropdownFilters': dropdown['tempSel'], 
+      'tempSelChipFilters': chip['tempSel'],
       'tempSelAutoCompleteFilters': {},
       'tempSelDateFilters': {},
     });  };
@@ -278,9 +273,12 @@ const FilterModalCard = ({
   const handleOnSelectDropdownFilter = (index, filter) => {
     // console.log('MODAL -', 7, 'handleOnSelectDropdownFilter')
 
-    let tempSelectedFilters = tempSelDropdown;
-    tempSelectedFilters[filter] = dropdownFilterOptions[filter].filter(x=>x.value == index)[0];
-    updateState(setTempSelDropdown, setTempSelectedDropdownFilters, tempSelectedFilters);      
+    let tempSelectedFilters = {...dropdown['tempSel']};
+    tempSelectedFilters[filter] = dropdown['filterOptions'][filter].filter(x=>x.value == index)[0];
+    setDropdown(prevState => ({
+      ...prevState,
+      tempSel: tempSelectedFilters
+    }))
   }
 
   // Set display value of dropdown filter when item is selected
@@ -298,27 +296,26 @@ const FilterModalCard = ({
   const handleOnSelectChipFilter = (item, filter) => {
     // console.log('MODAL -', 9, 'handleOnSelectChipFilter')
 
-    let temp = {...tempSelChip};
-    temp[filter] = item;
-    updateState(setTempSelChip, setTempSelectedChipFilters, temp); 
+    let tempSelectedFilters = {...chip['tempSel']};
+    tempSelectedFilters[filter] = item;
+    setChip(prevState => ({
+      ...prevState,
+      tempSel: {...tempSelectedFilters}
+    }))
   }
 
-  // Open start time picker component
-  const showStartDatePicker = (filter) => {
-    let tempDatePickerDisplay = datePickerDisplay;
-    if(!(filter in tempDatePickerDisplay)) {
-      tempDatePickerDisplay[filter] = {};
-    }
-    tempDatePickerDisplay[filter]['min'] = true;
-  };
-
-  const setStartTime = (datetime, filter) => {
+  const handleOnSelectDateFilter = (date, filter, type) => {
     let tempSelectedDate = tempSelDate;
     if(!(filter in tempSelectedDate)) {
       tempSelectedDate[filter] = {};
     } 
-    tempSelectedDate['min'] = datetime;
-    setTempSelDate(tempSelectedDate);
+    if(type == 'min') {
+      tempSelectedDate[filter]['min'] = date;
+    } else {
+      tempSelectedDate[filter]['max'] = date;      
+    }
+    // console.log(tempSelectedDate)
+    updateState(setTempSelDate, setTempSelectedDateFilters, tempSelectedDate);      
   }
 
   return (
@@ -389,9 +386,9 @@ const FilterModalCard = ({
                   </ScrollView>
                 </View>
               ) : null}
-              {!isEmptyObject(chipFilterOptions) ? (
+              {!isEmptyObject(chip['filterOptions']) ? (
                 <View marginTop={'3%'}>
-                  {Object.keys(chipFilterOptions).map((filter) => 
+                  {Object.keys(chip['sel']).map((filter) => 
                     <View key={filter}>
                       <Text style={styles.textStyle}>{filter}</Text>
                       <ScrollView
@@ -401,15 +398,15 @@ const FilterModalCard = ({
                       >
                         <View style={styles.chipOptions}>
                           {
-                            chipFilterOptions[filter].map((item) => (
+                            chip['filterOptions'][filter].map((item) => (
                               <Chip
                                 key={item.value}
                                 title={item.label}
                                 onPress={() => handleOnSelectChipFilter(item, filter)}
-                                type={tempSelChip[filter] ? tempSelChip[filter].value == item.value ? 'solid' : 'outline' : chipFilterOptions[filter][0].value == item.value ? 'solid' : 'outline'}
+                                type={chip['tempSel'][filter] ? chip['tempSel'][filter].value == item.value ? 'solid' : 'outline' : chip['filterOptions'][filter][0].value == item.value ? 'solid' : 'outline'}
                                 containerStyle={styles.chipOption}
-                                buttonStyle={{backgroundColor: tempSelChip[filter] ? tempSelChip[filter].value == item.value ? colors.green : 'transparent' : chipFilterOptions[filter][0].value == item.value ? colors.green : 'transparent', borderColor: colors.green}}
-                                titleStyle={{color: tempSelChip[filter] ? tempSelChip[filter].value == item.value ? colors.white : colors.green  : chipFilterOptions[filter][0].value == item.value ? colors.white : colors.green}}
+                                buttonStyle={{backgroundColor: chip['tempSel'][filter] ? chip['tempSel'][filter].value == item.value ? colors.green : 'transparent' : chip['filterOptions'][filter][0].value == item.value ? colors.green : 'transparent', borderColor: colors.green}}
+                                titleStyle={{color: chip['tempSel'][filter] ? chip['tempSel'][filter].value == item.value ? colors.white : colors.green  : chip['filterOptions'][filter][0].value == item.value ? colors.white : colors.green}}
                               />
                               ))
                             }
@@ -419,18 +416,18 @@ const FilterModalCard = ({
                   )}                
                 </View>                
               ): null}
-              {!isEmptyObject(dropdownFilterOptions) ? (
+              {!isEmptyObject(dropdown['filterOptions']) ? (
                 <View style={styles.filterContainer}>
                   <View>
-                    {Object.keys(dropdownFilterOptions).map((filter) => 
+                    {Object.keys(dropdown['filterOptions']).map((filter) => 
                       <View key={filter}>
                         <Text style={styles.textStyle}>{filter}</Text>
                         <SelectionInputField
-                          dataArray={dropdownFilterOptions[filter]}
+                          dataArray={dropdown['filterOptions'][filter]}
                           showTitle={false}
                           onDataChange={(item) => handleOnSelectDropdownFilter(item, filter)}
                           placeholder='Select caregiver'
-                          value={filter in tempSelDropdown ? tempSelDropdown[filter].value : null}
+                          value={dropdown['tempSel'][filter].value}
                         />                          
                       </View>
                     )}
@@ -462,7 +459,7 @@ const FilterModalCard = ({
                 </View>
               ): null}
             {!isEmptyObject(dateFilterOptions) ? (
-              <View>
+              <View style={styles.filterContainer}>
                 {Object.keys(dateFilterOptions).map((filter) => (
                   <View key={filter}>
                     <Text style={styles.textStyle}>{filter}</Text>
@@ -471,12 +468,13 @@ const FilterModalCard = ({
                         {!'max' in dateFilterOptions[filter] ? (
                           <Text style={[styles.textStyle]}>Before</Text>
                           ) : null}
-                        {'min' in dateFilterOptions[filter] ? (              
-                          
+                        {'min' in dateFilterOptions[filter] ? (
                           <View style={{flex: 0.5}}>
                             <DateInputField
-                            hideDayOfWeek
-                            mode='time'
+                            mode='date'
+                            // placeholder={filter in tempSelDate ? null : 'Select date'}
+                            value={filter in tempSelDate ? tempSelDate[filter]['min'] : undefined}
+                            handleFormData={(date) => handleOnSelectDateFilter(date, filter, 'min')}
                             />                            
                           </View>   
                         ) : null}
@@ -537,7 +535,6 @@ const styles = StyleSheet.create({
   },
   filterContainer: {
     marginTop: '3%',
-    paddingBottom: 150
   },
   caregiverViewStyle: {
     padding: 5,

@@ -29,6 +29,7 @@ function DateInputField({
   onChildData,
   hideDayOfWeek,
   mode='date',
+  placeholder=null
 }) {
   const [show, setShow] = useState(false);
 
@@ -76,17 +77,21 @@ function DateInputField({
 
   // Used to format the date to DD/MM/YYYY for display in the input field.
   const formatDate = (inputDate) => {
-    let day, date, month, year;
-    day = inputDate.getDay();
-    date = inputDate.getDate();
-    month = inputDate.getMonth() + 1;
-    year = inputDate.getFullYear();
-    date = date.toString().padStart(2, '0');
-    month = month.toString().padStart(2, '0');
-
-    return hideDayOfWeek
-      ? `${date}/${month}/${year}`
-      : `${listOfDays[day]}, ${date}/${month}/${year}`;
+    if(!placeholder) {
+      let day, date, month, year;
+      day = inputDate.getDay();
+      date = inputDate.getDate();
+      month = inputDate.getMonth() + 1;
+      year = inputDate.getFullYear();
+      date = date.toString().padStart(2, '0');
+      month = month.toString().padStart(2, '0');
+  
+      return hideDayOfWeek
+        ? `${date}/${month}/${year}`
+        : `${listOfDays[day]}, ${date}/${month}/${year}`;
+    } else {
+      return placeholder;
+    }
   };
 
   const showPicker = () => {
