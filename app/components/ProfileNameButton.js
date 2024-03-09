@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -23,6 +23,12 @@ function ProfileNameButton({
   isActive=null,
   startDate=null,
 }) {
+
+  // Reset error if profile picture uri changes
+  useEffect(() => {
+    setIsError(false);
+  }, [profilePicture])
+
   const defaultImageUri = Image.resolveAssetSource(DefaultImage).uri;
 
   const [isError, setIsError] = useState(false);
@@ -46,11 +52,12 @@ function ProfileNameButton({
     marginLeft: isVertical ? null : 30,
   };
 
-  const handleProfilePicError = () => {
+  const handleProfilePicError = (e) => {
+    console.log(profileLineOne)
     ToastAndroid.show(('Error loading profile picture for patient ' + profileLineOne.trim()), ToastAndroid.SHORT)
     setIsError(true);
   }
-
+  
   return (
     <VStack alignItems="center">
       <TouchableOpacity onPress={handleOnPress}>
