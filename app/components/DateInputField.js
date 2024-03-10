@@ -7,7 +7,7 @@ import {
   Text,
   TouchableOpacity,
 } from 'react-native';
-import { VStack } from 'native-base';
+import { Icon, VStack } from 'native-base';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 // Configuration
@@ -17,6 +17,8 @@ import colors from 'app/config/colors';
 // Components
 import ErrorMessage from 'app/components/ErrorMessage';
 import RequiredIndicator from './RequiredIndicator';
+import { formatDate, formatTime } from 'app/utility/miscFunctions';
+import { MaterialIcons } from '@expo/vector-icons';
 
 function DateInputField({
   isRequired,
@@ -29,7 +31,7 @@ function DateInputField({
   onChildData,
   hideDayOfWeek,
   mode='date',
-  placeholder=null
+  placeholder=mode == 'date' ? 'Select date' : 'Select time',
 }) {
   const [show, setShow] = useState(false);
 
@@ -71,26 +73,9 @@ function DateInputField({
 
   const onChangeData = (event, selected) => {
     setShow(false);
-    handleFormData(selected);
-    validation();
-  };
-
-  // Used to format the date to DD/MM/YYYY for display in the input field.
-  const formatDate = (inputDate) => {
-    if(!placeholder) {
-      let day, date, month, year;
-      day = inputDate.getDay();
-      date = inputDate.getDate();
-      month = inputDate.getMonth() + 1;
-      year = inputDate.getFullYear();
-      date = date.toString().padStart(2, '0');
-      month = month.toString().padStart(2, '0');
-  
-      return hideDayOfWeek
-        ? `${date}/${month}/${year}`
-        : `${listOfDays[day]}, ${date}/${month}/${year}`;
-    } else {
-      return placeholder;
+    if(event == null || event.type != 'dismissed') {
+      handleFormData(selected);
+      validation();
     }
   };
 
@@ -122,9 +107,21 @@ function DateInputField({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isError, onChildData]);
 
+  const setFieldText = () => {
+    if(value != null) {
+      return mode == 'date' ? formatDate(value, hideDayOfWeek) : formatTime(value);
+    }  else {
+      return placeholder;
+    }
+  }
+
+  const clearDate = () => {
+    value = null;
+    onChangeData(null, null)
+  }
+
   return (
     <View style={styles.componentContainer}>
-      <VStack>
         {title ? (
           <Text style={styles.titleMsg}>
             {title}:{isRequired ? <RequiredIndicator/> : ''}
@@ -132,18 +129,39 @@ function DateInputField({
         ) : (
           <></>
         )}
-        <View style={styles.pickerButton}>
-          <TouchableOpacity onPress={() => showPicker()}>
-            <Text style={styles.textField}>{formatDate(value)}</Text>
-          </TouchableOpacity>
+        <View style={styles.dateWrapper}>
+          {/* <View style={[styles.pickerButton]}> */}
+            <TouchableOpacity style={[styles.pickerButton]} onPress={showPicker}>
+              <Text style={styles.textField}>{setFieldText()}</Text>
+            </TouchableOpacity>
+            {/* </View> */}
+            {
+              !isRequired ? (
+                <TouchableOpacity 
+                  // style={{width: '80%'}} 
+                  onPress={clearDate} 
+                  disabled={value==null}
+                  activeOpacity={value==null ? 1 : 0.5}
+                  >
+                  <Icon 
+                    as={
+                      <MaterialIcons 
+                      name="close" 
+                      />
+                    } 
+                    size={10}                
+                  />
+                </TouchableOpacity>
+              ) : null
+            }
         </View>
         {show && (
           <DateTimePicker
             testID="dateTimePicker"
-            value={value}
+            value={value || new Date()}
             display="default"
             mode={mode}
-            onChange={onChangeData}
+            onChange={(onChangeData)}
             // if the selection mode is set to Date of Birth (DOB), fixed max and min years will be specified
             // else, the minimumInputDate and maximumInputDate will be used.
             // if there is no minimumInputDate or maximumInputDate specified in the prop, default DateTimePicker min and max dates will be used.
@@ -158,7 +176,6 @@ function DateInputField({
         {isError.errorMsg ? (
           <ErrorMessage message={isError.errorMsg} visible={true} />
         ) : null}
-      </VStack>
     </View>
   );
 }
@@ -171,10 +188,10 @@ DateInputField.defaultProps = {
 
 const styles = StyleSheet.create({
   componentContainer: {
-    display: 'flex',
-    width: '80%',
+    flexDirection: 'column',
     marginTop: 5,
     justifyContent: 'flex-start',
+    backgroundColor: 'pink'
   },
   titleMsg: {
     fontSize: 13.5,
@@ -185,9 +202,8 @@ const styles = StyleSheet.create({
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
   },
   pickerButton: {
-    display: 'flex',
-    justifyContent: 'center',
-    width: '100%',
+    // justifyContent: 'center',
+    // width: '100%',
     height: 50,
     borderWidth: 1,
     borderRadius: 25,
@@ -199,6 +215,12 @@ const styles = StyleSheet.create({
     color: colors.black_var1,
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
   },
+  dateWrapper: {
+    flexDirection: 'row',
+    // width: '100%',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  }
 });
 
 export default DateInputField;

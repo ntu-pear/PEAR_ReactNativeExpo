@@ -59,3 +59,36 @@ export const updateState = (setInternalState, setExternalState, value) => {
 export const isEmptyObject = (object) => {
   return Object.keys(object).length == 0;
 }
+
+// Used to format the date to DD/MM/YYYY
+export const formatDate = (inputDate, hideDayOfWeek) => {
+  let day, date, month, year;
+  day = inputDate.getDay();
+  date = inputDate.getDate();
+  month = inputDate.getMonth() + 1;
+  year = inputDate.getFullYear();
+  date = date.toString().padStart(2, '0');
+  month = month.toString().padStart(2, '0');
+
+  return hideDayOfWeek
+    ? `${date}/${month}/${year}`
+    : `${listOfDays[day]}, ${date}/${month}/${year}`;
+};
+
+// Used to format the time to HH:mm AM/PM
+// TODO
+export const formatTime = (inputTime) => {
+  let day, date, month, year;
+  day = inputTime.getDay();
+  date = inputTime.getDate();
+  month = inputTime.getMonth() + 1;
+  year = inputTime.getFullYear();
+  date = date.toString().padStart(2, '0');
+  month = month.toString().padStart(2, '0');
+
+  return hideDayOfWeek
+    ? `${date}/${month}/${year}`
+    : `${listOfDays[day]}, ${date}/${month}/${year}`;
+};
+
+export const sortFilterInitialState = {'filterOptions': {}, 'sel': {}, 'tempSel': {}}

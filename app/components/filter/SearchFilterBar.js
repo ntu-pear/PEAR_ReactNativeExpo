@@ -10,7 +10,7 @@ import typography from 'app/config/typography';
 // Components
 import SearchBar from 'app/components/input-fields/SearchBar';
 import FilterModalCard from 'app/components/filter/FilterModalCard';
-import { isEmptyObject, parseAutoCompleteOptions, parseSelectOptions, sortArray } from 'app/utility/miscFunctions';
+import { isEmptyObject, parseAutoCompleteOptions, parseSelectOptions, sortArray, sortFilterInitialState } from 'app/utility/miscFunctions';
 import FilterIndicator from 'app/components/filter/FilterIndicator';
 import TabBar from '../TabBar';
 
@@ -22,6 +22,9 @@ function SearchFilterBar({
   initializeData=true,
   onInitialize=()=>{},
 
+  applySortFilter,
+  setApplySortFilter,
+
   itemCount=null,   
   handleSearchSortFilterCustom,
   
@@ -31,33 +34,25 @@ function SearchFilterBar({
   
   FIELD_MAPPING={},
 
-  sort,
-  setSort,
-  filters,
-  setFilters,
+  sort=sortFilterInitialState,
+  setSort=()=>{},
 
-  dropdown,
-  setDropdown,
+  dropdown=sortFilterInitialState,
+  setDropdown=()=>{},
 
-  chip,
-  setChip,
+  chip=sortFilterInitialState,
+  setChip=()=>{},
   
-  autocomplete,
-  setAutocomplete,
+  autocomplete=sortFilterInitialState,
+  setAutocomplete=()=>{},
+
+  date=sortFilterInitialState,
+  setDate=()=>{},
   
   SORT_OPTIONS={},
-  selectedSort={},
-  setSelectedSort=()=>{},
-  tempSelectedSort={},
-  setTempSelectedSort,
   
   FILTER_OPTIONS={},
   filterOptionDetails={},
-
-  selectedDateFilters={},
-  setSelectedDateFilters=()=>{},
-  tempSelectedDateFilters={},
-  setTempSelectedDateFilters,
   
   SEARCH_OPTIONS=[],
   searchOption='',
@@ -68,23 +63,16 @@ function SearchFilterBar({
   // Default state to control modal visibility
   const [modalVisible, setModalVisible] = useState(false);
 
-  
-  // Search, sort, and filter related states
-  const [sortOptions, setSortOptions] = useState(!isEmptyObject(SORT_OPTIONS) 
-  ? parseSelectOptions(isEmptyObject(VIEW_MODES) ? SORT_OPTIONS : SORT_OPTIONS[viewMode]) 
-  : {}
-  );
-  const [dateFilterOptions, setDateFilterOptions] = useState({}); 
-
   const handleSearchSortFilter = ({
     text=searchQuery, 
-    tempSelSort=selectedSort, 
+    tempSelSort=sort['tempSel'], 
     tempSelDropdownFilters=dropdown['tempSel'],
     tempSelChipFilters=chip['tempSel'], 
     tempSelAutocompleteFilters=autocomplete['tempSel'], 
+    tempSelDateFilters=date['tempSel'], 
     tempSearchMode=searchOption,
   }) => {
-    // console.log('BAR -', 3, 'handleSearchSortFilter',tempSelAutocompleteFilters)
+    // console.log('BAR -', 3, 'handleSearchSortFilter')
 
     if(handleSearchSortFilterCustom) {
       handleSearchSortFilterCustom({
@@ -93,6 +81,7 @@ function SearchFilterBar({
         tempSelDropdownFilters: tempSelDropdownFilters,
         tempSelChipFilters: tempSelChipFilters, 
         tempSelAutocompleteFilters: tempSelAutocompleteFilters, 
+        tempSelDateFilters: tempSelDateFilters,
         tempSearchMode: tempSearchMode,
         setFilteredList
       });
@@ -103,6 +92,7 @@ function SearchFilterBar({
         tempSelDropdownFilters: tempSelDropdownFilters,
         tempSelChipFilters: tempSelChipFilters, 
         tempSelAutocompleteFilters: tempSelAutocompleteFilters, 
+        tempSelDateFilters: tempSelDateFilters,
         tempSearchMode: tempSearchMode,
       })
       setIsLoading(false);
@@ -112,10 +102,11 @@ function SearchFilterBar({
   // Update list based on search, sort, and filter criteria
   const setFilteredList = ({
     text=searchQuery, 
-    tempSelSort=selectedSort, 
+    tempSelSort=sort['tempSel'], 
     tempSelDropdownFilters=dropdown['tempSel'],
     tempSelChipFilters=chip['tempSel'], 
     tempSelAutocompleteFilters=autocomplete['tempSel'], 
+    tempSelDateFilters=date['tempSel'], 
     tempSearchMode=searchOption,
   }) => {
     // console.log('BAR -', 4, 'setFilteredList')
@@ -134,33 +125,45 @@ function SearchFilterBar({
     if(!isEmptyObject(SORT_OPTIONS)) {
       filteredList = sortArray(filteredList, 
         FIELD_MAPPING[isEmptyObject(tempSelSort) ? 
-          sortOptions[0]['label'] : 
+          sort['filterOptions'][0]['label'] : 
           tempSelSort['option']['label']],
         tempSelSort['asc'] != null ? tempSelSort['asc'] : true);
     }
   
     // Dropdown filters
-    for (var filter of Object.keys(dropdown['tempSel'])) {   
+    for (var filter in dropdown['tempSel']) {   
       if(tempSelDropdownFilters[filter]['label'] != 'All') {
         filteredList = getSubFilteredList(filteredList, filter, 'label', tempSelDropdownFilters);
       }      
     }
 
     // Autocomplete filters
-    for (var filter of Object.keys(tempSelAutocompleteFilters)) {
+    for (var filter in tempSelAutocompleteFilters) {
       if(tempSelAutocompleteFilters[filter]['title'] != 'All') {
         filteredList = getSubFilteredList(filteredList, filter, 'title', tempSelAutocompleteFilters);
       }      
     }
 
     // Chip Filters
-    for (var filter of Object.keys(tempSelChipFilters)) {
+    for (var filter in tempSelChipFilters) {
       filteredList = getSubFilteredList(filteredList, filter, 'label', tempSelChipFilters);
+    }  
+
+    // Date filters
+    for (var filter in tempSelDateFilters) {
+      if('min' in tempSelDateFilters[filter] && tempSelDateFilters[filter]['min'] != null) {
+        filteredList = filteredList.filter((obj) => (
+          new Date(obj[FIELD_MAPPING[filter]]) >= tempSelDateFilters[filter]['min'])) || []
+      }
+      if('max' in tempSelDateFilters[filter] && tempSelDateFilters[filter]['max'] != null) {
+        filteredList = filteredList.filter((obj) => (
+          new Date (obj[FIELD_MAPPING[filter]]) <= tempSelDateFilters[filter]['max'])) || []
+      }
     }  
 
     setList(filteredList);
   }
-
+      
   // Apply filters
   // Only filter if required (isFilter is true)
   // For example, patient status is not meant for filtering - it requires new API call, so do not filter
@@ -197,35 +200,6 @@ function SearchFilterBar({
 
     if(mode!=viewMode) {
       setIsLoading(true);
-
-      // Delete/Reset any sort options/filters that should not be applied to the current tab 
-      // if(!isEmptyObject(SORT_OPTIONS)) {
-      //   if(!SORT_OPTIONS[mode].includes(!isEmptyObject(selectedSort) ? selectedSort['option']['label'] : sortOptions[0]['label'])) {
-      //     setSelectedSort({});
-      //   }
-      // }
-
-      // for(var filter of Object.keys(dropdown['sel'])) {
-      //   if(!FILTER_OPTIONS[mode].includes(filter)) {
-      //     delete dropdown['sel'][filter];
-      //     delete dropdown['tempSel'][filter];
-      //     delete dropdown['filterOptions'][filter];
-      //   }
-      // }
-
-      // for(var filter of Object.keys(selectedAutocompleteFilters)) {
-      //   if(!FILTER_OPTIONS[mode].includes(filter)) {
-      //     delete selectedAutocompleteFilters[filter];
-      //   }
-      // }
-
-      // for(var filter of Object.keys(chip['sel'])) {
-      //   if(!FILTER_OPTIONS[mode].includes(filter)) {
-      //     delete chip['sel'][filter];
-      //     delete chip['tempSel'][filter];
-      //     delete chip['filterOptions'][filter];
-      //   }
-      // }
     }     
   }
 
@@ -273,10 +247,11 @@ function SearchFilterBar({
             initializeData={initializeData}
             onInitialize={onInitialize}
 
+            applySortFilter={applySortFilter}
+            setApplySortFilter={setApplySortFilter}
+            
             sort={sort}
             setSort={setSort}
-            filters={filters}
-            setFilters={setFilters}
             
             dropdown={dropdown}
             setDropdown={setDropdown}
@@ -286,21 +261,10 @@ function SearchFilterBar({
 
             autocomplete={autocomplete}
             setAutocomplete={setAutocomplete}
-            
-            setSortOptions={setSortOptions}
-            setDateFilterOptions={setDateFilterOptions}
-            
-            sortOptions={sortOptions}
-            selectedSort={selectedSort}
-            setSelectedSort={setSelectedSort}
-            tempSelectedSort={tempSelectedSort}
-            setTempSelectedSort={setTempSelectedSort}
 
-            dateFilterOptions={dateFilterOptions}
-            selectedDateFilters={selectedDateFilters}
-            setSelectedDateFilters={setSelectedDateFilters}
-            tempSelectedDateFilters={tempSelectedDateFilters}
-            setTempSelectedDateFilters={setTempSelectedDateFilters}
+            
+            date={date}
+            setDate={setDate}
 
             handleSortFilter={handleSearchSortFilter}
           />
@@ -326,20 +290,12 @@ function SearchFilterBar({
         <FilterIndicator
           modalVisible={modalVisible}
           setModalVisible={setModalVisible}
-
           sort={sort}
           setSort={setSort}
-          filters={filters}
-          setFilters={filters}
-
           dropdown={dropdown}
           chip={chip}
           autocomplete={autocomplete}
-
-          sortOptions={sortOptions}
-          selectedSort={selectedSort}
-          setSelectedSort={setSelectedSort}
-          
+          date={date}
           handleSortFilter={handleSearchSortFilter}
         />
       </View>

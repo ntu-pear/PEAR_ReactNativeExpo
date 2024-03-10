@@ -29,8 +29,6 @@ function ProfileNameButton({
     setIsError(false);
   }, [profilePicture])
 
-  const defaultImageUri = Image.resolveAssetSource(DefaultImage).uri;
-
   const [isError, setIsError] = useState(false);
 
   const containerStyle = isVertical
@@ -53,7 +51,6 @@ function ProfileNameButton({
   };
 
   const handleProfilePicError = (e) => {
-    console.log(profileLineOne)
     ToastAndroid.show(('Error loading profile picture for patient ' + profileLineOne.trim()), ToastAndroid.SHORT)
     setIsError(true);
   }

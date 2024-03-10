@@ -19,7 +19,7 @@ import MessageDisplayCard from 'app/components/MessageDisplayCard';
 import SearchFilterBar from 'app/components/filter/SearchFilterBar';
 
 // Utilities
-import { isEmptyObject } from 'app/utility/miscFunctions';
+import { isEmptyObject, sortFilterInitialState } from 'app/utility/miscFunctions';
 
 function PatientsScreen({ navigation }) {
   
@@ -67,6 +67,7 @@ function PatientsScreen({ navigation }) {
 
   // Patient data related states
   const [isLoading, setIsLoading] = useState(true);
+  const [isApiError, setIsApiError] = useState(false);
   const [isDataInitialized, setIsDataInitialized] = useState(false);
   const [originalListOfPatients, setOriginalListOfPatients] = useState([]); // list of patients without sort, search, filter
   const [listOfPatients, setListOfPatients] = useState([]); // list of patients after sort, search, filter
@@ -75,20 +76,17 @@ function PatientsScreen({ navigation }) {
   const [patientStatus, setPatientStatus] = useState('active'); // active, inactive, ''
   const [viewMode, setViewMode] = useState('myPatients'); // myPatients, allPatients
   const [isReloadPatientList, setIsReloadPatientList] = useState(false);
-  
+  const [applySortFilter, setApplySortFilter] = useState(true);
+
   // Search related states
   const [searchQuery, setSearchQuery] = useState('');
   const [searchOption, setSearchOption] = useState('Full Name');
   
-  // Sort related states
-  const [selectedSort, setSelectedSort] = useState({});
-  
   // Sort/filter related states
-  const [sort, setSort] = useState({});
-  const [filters, setFilters] = useState({});
-  const [dropdown, setDropdown] = useState({'filterOptions': {}, 'sel': {}, 'tempSel': {}});
-  const [chip, setChip] = useState({'filterOptions': {}, 'sel': {}, 'tempSel': {}});
-  const [autocomplete, setAutocomplete] = useState({'filterOptions': {}, 'sel': {}, 'tempSel': {}});
+  const [sort, setSort] = useState(sortFilterInitialState);
+  const [dropdown, setDropdown] = useState(sortFilterInitialState);
+  const [chip, setChip] = useState(sortFilterInitialState);
+  const [date, setDate] = useState(sortFilterInitialState);
 
   // Filter details related state
   // Details of filter options
@@ -98,7 +96,7 @@ function PatientsScreen({ navigation }) {
   //                e.g.: {'Active': true, 'Inactive': false, 'All': undefined} for filter corresponding to isActive
   //                      where 'Active' filter option corresponds to isActive=true etc.
   // isFilter - whether the filter is actually to be used for filtering,
-  //            since some filters like patient status may be used to make an API call instead of norma; filtering
+  //            since some filters like patient status may be used to make an API call instead of normal filtering
   // --------------------------
   const [filterOptionDetails, setFilterOptionDetails] = useState({
     'Caregiver': {
@@ -159,6 +157,7 @@ function PatientsScreen({ navigation }) {
         : 'Active'
       ]
       updateCaregiverFilterOptions({tempPatientStatus: tempPatientStatus});
+      setApplySortFilter(false);
       setIsDataInitialized(true);
     } else {
       setJustUpdated(false);
@@ -173,9 +172,14 @@ function PatientsScreen({ navigation }) {
     viewMode === 'myPatients'
         ? await patientApi.getPatientListByLoggedInCaregiver(undefined, status)
         : await patientApi.getPatientList(undefined, status);
-
-    setOriginalListOfPatients([...response.data.data]);
-    setListOfPatients([...response.data.data])
+    
+    if(response.ok) {
+      setOriginalListOfPatients([...response.data.data]);
+      setListOfPatients([...response.data.data])
+      setIsApiError(false);
+    } else {
+      setIsApiError(true);
+    }
   };
 
   // Retrieve cargivers patient count list from backend
@@ -183,9 +187,14 @@ function PatientsScreen({ navigation }) {
     // console.log('PATIENTS -', 7, 'getPatientCountInfo');
 
     const response = await patientApi.getPatientStatusCountList();
-    setPatientCountInfo(response.data);
-    updateCaregiverFilterOptions({tempPatientCountInfo: response.data, tempPatientStatus: tempPatientStatus});
 
+    if(response.ok) {
+      setPatientCountInfo(response.data);
+      updateCaregiverFilterOptions({tempPatientCountInfo: response.data, tempPatientStatus: tempPatientStatus});
+      setIsApiError(false);
+    } else {
+      setIsApiError(true);
+    }
   }
 
   // Set screen to loading wheel when retrieving patient list from backend
@@ -245,16 +254,17 @@ function PatientsScreen({ navigation }) {
     tempSearchMode,
     setFilteredList
   }) => {       
-    // console.log('PATIENTS -', 10, 'handleSearchSortFilter');
+    // console.log('PATIENTS -', 10, 'handleSearchSortFilter', tempSelChipFilters);
 
     setIsLoading(true);
+    setApplySortFilter(true);
 
     let tempPatientStatus = PATIENT_STATUSES[
       !isEmptyObject(tempSelChipFilters) 
         ? tempSelChipFilters['Patient Status']['label'] 
         : 'Active'
     ]
-
+    
     if(tempPatientStatus != patientStatus) {
       refreshPatientData(tempPatientStatus);
       setPatientStatus(tempPatientStatus);       
@@ -288,9 +298,17 @@ function PatientsScreen({ navigation }) {
     navigation.push(routes.PATIENT_PROFILE, { id: patientID });
   };
 
+  const showStartDate = () => {
+    return (!isEmptyObject(sort['sel']) ? sort['sel']['option']['label'] == 'Start Date' : false) || 'Start Date' in date['sel']
+  }
+
   return (
     <>
-      {isLoading ? (
+      {isApiError ? (
+        <Text>
+          shit
+        </Text>
+      ) : isLoading ? (
         <ActivityIndicator visible />
       ) : (
         <View backgroundColor={colors.white_var1}>
@@ -301,6 +319,9 @@ function PatientsScreen({ navigation }) {
 
             initializeData={isDataInitialized}
             onInitialize={() => setIsDataInitialized(false)}
+
+            applySortFilter={applySortFilter}
+            setApplySortFilter={setApplySortFilter}
 
             itemCount={listOfPatients ? listOfPatients.length : null}
             handleSearchSortFilterCustom={handleSearchSortFilter}
@@ -313,8 +334,6 @@ function PatientsScreen({ navigation }) {
 
             sort={sort}
             setSort={setSort}
-            filters={filters}
-            setFilters={setFilters}
 
             dropdown={dropdown}
             setDropdown={setDropdown}
@@ -322,12 +341,10 @@ function PatientsScreen({ navigation }) {
             chip={chip}
             setChip={setChip}
 
-            autocomplete={autocomplete}
-            setAutocomplete={setAutocomplete}
+            date={date}
+            setDate={setDate}
             
             SORT_OPTIONS={SORT_OPTIONS}
-            selectedSort={selectedSort}
-            setSelectedSort={setSelectedSort}
             
             FILTER_OPTIONS={FILTER_OPTIONS}
             filterOptionDetails={filterOptionDetails}
@@ -371,7 +388,7 @@ function PatientsScreen({ navigation }) {
                         key={index}
                         isVertical={false}
                         isActive={patientStatus == '' ? item.isActive : null}
-                        startDate={!isEmptyObject(selectedSort) ? selectedSort['option']['label'] == 'Start Date' ? item.startDate : null : null}
+                        startDate={showStartDate() ? item.startDate : null}
                       />
                       <View style={styles.caregiverNameContainer}>
                         <Text style={styles.caregiverName}>

@@ -500,7 +500,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   dateSelectionContainer: {
-    width: '70%',
+    width: '100%',
   },
   text: {
     fontWeight: 'bold',
