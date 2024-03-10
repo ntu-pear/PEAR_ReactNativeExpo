@@ -130,30 +130,27 @@ function DateInputField({
           <></>
         )}
         <View style={styles.dateWrapper}>
-          {/* <View style={[styles.pickerButton]}> */}
-            <TouchableOpacity style={[styles.pickerButton]} onPress={showPicker}>
-              <Text style={styles.textField}>{setFieldText()}</Text>
+            <TouchableOpacity style={styles.dateContainer} onPress={showPicker}>
+              <Text style={[styles.textField]}>{setFieldText()}</Text>
             </TouchableOpacity>
-            {/* </View> */}
-            {
-              !isRequired ? (
-                <TouchableOpacity 
-                  // style={{width: '80%'}} 
-                  onPress={clearDate} 
-                  disabled={value==null}
-                  activeOpacity={value==null ? 1 : 0.5}
-                  >
-                  <Icon 
-                    as={
-                      <MaterialIcons 
-                      name="close" 
-                      />
-                    } 
-                    size={10}                
-                  />
-                </TouchableOpacity>
-              ) : null
-            }
+            {!isRequired && value != null? (
+              <TouchableOpacity 
+                onPress={clearDate} 
+                disabled={value==null}
+                activeOpacity={value==null ? 1 : 0.5}
+                style={styles.resetIcon}
+                >
+                <Icon 
+                  as={
+                    <MaterialIcons 
+                    name="close" 
+                    />
+                  } 
+                  size={6}    
+                  style={{alignSelf: 'flex-end', marginRight: 5}} 
+                />
+              </TouchableOpacity>
+            ) : null}
         </View>
         {show && (
           <DateTimePicker
@@ -191,7 +188,6 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     marginTop: 5,
     justifyContent: 'flex-start',
-    backgroundColor: 'pink'
   },
   titleMsg: {
     fontSize: 13.5,
@@ -201,25 +197,36 @@ const styles = StyleSheet.create({
     color: colors.light_gray2,
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
   },
-  pickerButton: {
-    // justifyContent: 'center',
-    // width: '100%',
+  textField: {
+    fontSize: 18,
+    textAlign: 'left',
+    color: colors.black_var1,
+    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+    paddingHorizontal: 10,
+  },
+  dateWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',    
+    width: '100%',
     height: 50,
     borderWidth: 1,
     borderRadius: 25,
     borderColor: colors.light_gray3,
   },
-  textField: {
-    fontSize: 18,
-    textAlign: 'center',
-    color: colors.black_var1,
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+  dateContainer: {
+    alignItems: 'flex-start', 
+    width: '90%',    
+    borderTopLeftRadius: 25, 
+    borderBottomLeftRadius: 25,
+    height: 50, 
+    justifyContent: 'center'
   },
-  dateWrapper: {
-    flexDirection: 'row',
-    // width: '100%',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  resetIcon: {
+    width: '10%', 
+    justifyContent: 'flex-end',
+    borderTopRightRadius: 25,
+    borderBottomRightRadius: 25
   }
 });
 

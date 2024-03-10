@@ -607,7 +607,7 @@ const FilterModalCard = ({
                     <View style={styles.dateFilterContainer}>
                       <LocalizationProvider dateAdapter={AdapterDayjs}>
                         {'min' in date['filterOptions'][filter] ? (
-                          <View style={{flex:'max' in date['filterOptions'][filter] ? 0.5 : 1, backgroundColor: 'black' }}>
+                          <View style={{flex:'max' in date['filterOptions'][filter] ? 0.5 : 1 }}>
                             <DateInputField
                               hideDayOfWeek
                               mode='date'
@@ -620,7 +620,7 @@ const FilterModalCard = ({
                           </View>   
                         ) : null}
                         {'min' in date['filterOptions'][filter] && 'max' in date['filterOptions'][filter] ? (
-                          <View style={[styles.dateTitle, {backgroundColor: 'blue'}]}>
+                          <View style={styles.dateTitle}>
                             <Text style={styles.textStyle}>To</Text>
                           </View>
                         ) : null}
@@ -708,10 +708,9 @@ const styles = StyleSheet.create({
   dateTitle: {
     paddingHorizontal: 5,
     alignItems: 'center', 
-    marginTop: 10
+    marginTop: 15
   },
   dateFilterContainer: {
-    backgroundColor: 'yellow',
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between'

@@ -299,7 +299,11 @@ function PatientsScreen({ navigation }) {
   };
 
   const showStartDate = () => {
-    return (!isEmptyObject(sort['sel']) ? sort['sel']['option']['label'] == 'Start Date' : false) || 'Start Date' in date['sel']
+    return (!isEmptyObject(sort['sel']) ? sort['sel']['option']['label'] == 'Start Date' : false) || 
+      'Start Date' in date['sel'] ? (
+        (date['sel']['Start Date']['min'] && date['sel']['Start Date']['min'] != null) || 
+        (date['sel']['Start Date']['max'] && date['sel']['Start Date']['max'] != null) 
+      ) : false        
   }
 
   return (
