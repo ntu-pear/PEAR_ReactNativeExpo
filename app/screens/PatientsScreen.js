@@ -138,7 +138,6 @@ function PatientsScreen({ navigation }) {
   );
 
   // Refresh patient data from backend when user switches between 'My Patients' and 'All Patients'
-  // Note: not done with function that handles view mode toggling bc of state update latency
   useEffect(() => {
     // console.log('PATIENTS -', 3, 'useEffect [viemode]', viewMode);
     refreshPatientData();
@@ -251,6 +250,7 @@ function PatientsScreen({ navigation }) {
     tempSelSort, 
     tempSelDropdownFilters,
     tempSelChipFilters, 
+    tempSelSearchDate,
     tempSearchMode,
     setFilteredList
   }) => {       
@@ -274,6 +274,7 @@ function PatientsScreen({ navigation }) {
         tempSelSort: tempSelSort, 
         tempSelDropdownFilters: tempSelDropdownFilters,
         tempSelChipFilters: tempSelChipFilters, 
+        tempSelSearchDate: tempSelSearchDate,
         tempSearchMode: tempSearchMode,
       });
       
