@@ -6,7 +6,9 @@ import { useContext } from 'react';
 import AuthContext from 'app/auth/context';
 import jwt_decode from 'jwt-decode';
 
-const baseURL = 'https://coremvc.fyp2017.com/api';
+// const baseURL = 'https://coremvc.fyp2017.com/api'; // old server
+const baseURL = 'http://172.21.148.180:5678/api'; // new NTU server
+
 // for CORS error
 // API for local BE
 // const baseURLWeb = 'http://localhost:5383/api';
@@ -65,7 +67,7 @@ apiClient.addAsyncResponseTransform(async (response) => {
   if (
     response &&
     response.status &&
-    (response.status === 401 || response.status === 403) 
+    (response.status === 401 || response.status === 403)
   ) {
     // if access token is invalid, begin renewal.
     console.log('client.js: Renewing user tokens');
