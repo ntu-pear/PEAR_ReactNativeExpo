@@ -94,4 +94,14 @@ export const formatTime = (inputTime) => {
     : `${listOfDays[day]}, ${date}/${month}/${year}`;
 };
 
+// Given a string containig military time like 0900, convert to datetime 
+export const formatMilitaryTime = (timeString, date=new Date()) => {
+  const hours = parseInt(timeString.substring(0, 2), 10);
+  const minutes = parseInt(timeString.substring(2), 10);
+
+  const dateTime = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hours, minutes);
+
+  return dateTime;
+}
+
 export const sortFilterInitialState = {'filterOptions': {}, 'sel': {}, 'tempSel': {}}

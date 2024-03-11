@@ -36,11 +36,11 @@ const ActivityCard = ({
 
   return (
     <Container
-      style={
+      style={[styles.activityContainer,
         isCurrentDate() && isCurrentActivity()
           ? styles.activityContainerPink
           : styles.activityContainerGray
-      }
+      ]}
     >
       <Text style={styles.activityName}>{activityTitle}</Text>
       <Text style={styles.activityTime}>
@@ -59,35 +59,27 @@ const ActivityCard = ({
 };
 
 const styles = StyleSheet.create({
-  activityContainerPink: {
-    width: Platform.OS === 'web' ? 190 : 120,
-    height: Platform.OS === 'web' ? 110 : 90,
+  activityContainer: {
+    width: 160,
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.pink,
-    marginRight: 5,
-    marginLeft: 5,
+    margin: 10,
     paddingLeft: 3,
     paddingRight: 3,
+
+  },
+  activityContainerPink: {
+    backgroundColor: colors.pink,
   },
   activityContainerGray: {
-    width: Platform.OS === 'web' ? 190 : 120,
-    height: Platform.OS === 'web' ? 110 : 90,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.gray,
-    marginRight: 5,
-    marginLeft: 5,
-    paddingLeft: 3,
-    paddingRight: 3,
+    backgroundColor: colors.gray
   },
   activityName: {
     textAlign: 'center',
     fontWeight: 'bold',
     marginBottom: 5,
-    fontSize: Platform.OS === 'web' ? 22 : 18,
+    fontSize: 18,
     color: colors.white_var1,
   },
   activityTime: {
@@ -96,7 +88,7 @@ const styles = StyleSheet.create({
     color: colors.white_var1,
     paddingLeft: 5,
     paddingRight: 5,
-    fontSize: Platform.OS === 'web' ? 18 : 14,
+    fontSize: 14,
   },
 });
 
