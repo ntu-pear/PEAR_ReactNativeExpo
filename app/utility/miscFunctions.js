@@ -62,6 +62,7 @@ export const isEmptyObject = (object) => {
 
 // Used to format the date to DD/MM/YYYY
 export const formatDate = (inputDate, hideDayOfWeek) => {
+  const listOfDays = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
   let day, date, month, year;
   day = inputDate.getDay();
   date = inputDate.getDate();
@@ -78,6 +79,8 @@ export const formatDate = (inputDate, hideDayOfWeek) => {
 // Used to format the time to HH:mm AM/PM
 // TODO
 export const formatTime = (inputTime) => {
+  const listOfDays = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
+
   let day, date, month, year;
   day = inputTime.getDay();
   date = inputTime.getDate();

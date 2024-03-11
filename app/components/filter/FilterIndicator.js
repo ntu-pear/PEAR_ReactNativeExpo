@@ -6,8 +6,9 @@ import { Chip } from 'react-native-elements';
 
 // Configurations
 import colors from 'app/config/colors';
+
+// Utilities
 import { formatDate } from 'app/utility/miscFunctions';
-import styles from 'app/utility/styles';
 
 function FilterIndicator({  
   modalVisible,

@@ -423,8 +423,6 @@ const FilterModalCard = ({
     }))
   }
 
-  // useEffect(()=>console.log(date), [date])
-
   // Set upper limit of date filter
   const setMaxDate = (filter, type) => {
     let maxDate = date['filterOptions'][filter][type]['limit'] ? date['filterOptions'][filter][type]['limit']['max'] : null ;
@@ -610,6 +608,7 @@ const FilterModalCard = ({
                           <View style={{flex:'max' in date['filterOptions'][filter] ? 0.5 : 1 }}>
                             <DateInputField
                               hideDayOfWeek
+                              allowNull
                               mode='date'
                               placeholder={'Select date'}
                               value={date['tempSel'][filter]['min']}
@@ -628,6 +627,7 @@ const FilterModalCard = ({
                           <View style={{flex: 'min' in date['filterOptions'][filter] ? 0.5 : 1}}>
                             <DateInputField
                               hideDayOfWeek
+                              allowNull
                               mode='date'
                               placeholder={'Select date'}
                               maximumInputDate={setMaxDate(filter, 'max')}

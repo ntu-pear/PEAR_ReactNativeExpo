@@ -32,6 +32,7 @@ function DateInputField({
   hideDayOfWeek,
   mode='date',
   placeholder=mode == 'date' ? 'Select date' : 'Select time',
+  allowNull=false,
 }) {
   const [show, setShow] = useState(false);
 
@@ -43,8 +44,6 @@ function DateInputField({
     error: false,
     errorMsg: '',
   });
-
-  const listOfDays = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
 
   // Earliest year user can be born (150 years ago)
   const minimumDOB = new Date();
@@ -130,10 +129,10 @@ function DateInputField({
           <></>
         )}
         <View style={styles.dateWrapper}>
-            <TouchableOpacity style={styles.dateContainer} onPress={showPicker}>
+            <TouchableOpacity style={[styles.dateContainer, {alignItems: allowNull ? 'flex-start' : 'center'}]} onPress={showPicker}>
               <Text style={[styles.textField]}>{setFieldText()}</Text>
             </TouchableOpacity>
-            {!isRequired && value != null? (
+            {allowNull && value != null? (
               <TouchableOpacity 
                 onPress={clearDate} 
                 disabled={value==null}
@@ -215,7 +214,6 @@ const styles = StyleSheet.create({
     borderColor: colors.light_gray3,
   },
   dateContainer: {
-    alignItems: 'flex-start', 
     width: '90%',    
     borderTopLeftRadius: 25, 
     borderBottomLeftRadius: 25,

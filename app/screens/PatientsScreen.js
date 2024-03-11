@@ -307,12 +307,7 @@ function PatientsScreen({ navigation }) {
   }
 
   return (
-    <>
-      {isApiError ? (
-        <Text>
-          shit
-        </Text>
-      ) : isLoading ? (
+    <>{isLoading ? (
         <ActivityIndicator visible />
       ) : (
         <View backgroundColor={colors.white_var1}>

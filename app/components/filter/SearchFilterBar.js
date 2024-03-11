@@ -1,5 +1,5 @@
 // Libs
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Center, Divider } from 'native-base';
 import { Text, StyleSheet, View } from 'react-native';
 
@@ -10,12 +10,14 @@ import typography from 'app/config/typography';
 // Components
 import SearchBar from 'app/components/input-fields/SearchBar';
 import FilterModalCard from 'app/components/filter/FilterModalCard';
-import { isEmptyObject, parseAutoCompleteOptions, parseSelectOptions, sortArray, sortFilterInitialState } from 'app/utility/miscFunctions';
 import FilterIndicator from 'app/components/filter/FilterIndicator';
 import TabBar from '../TabBar';
 
+// Utilities
+import { isEmptyObject, parseSelectOptions, sortArray, sortFilterInitialState } from 'app/utility/miscFunctions';
+
 function SearchFilterBar({
-  originalList={},
+  originalList=[],
   setList=()=>{},
   setIsLoading=()=>{},
 
@@ -131,7 +133,7 @@ function SearchFilterBar({
     }
   
     // Dropdown filters
-    for (var filter in dropdown['tempSel']) {   
+    for (var filter in tempSelDropdownFilters) {   
       if(tempSelDropdownFilters[filter]['label'] != 'All') {
         filteredList = getSubFilteredList(filteredList, filter, 'label', tempSelDropdownFilters);
       }      
