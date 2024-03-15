@@ -75,6 +75,7 @@ function WelcomeScreen(props) {
     setIsLoginError(false);    
     
     const result = await userApi.loginUser(username, userRole, password);
+    console.log(result);
 
     // if authentication unsucessful (returned array is empty or error)
     if (!result.ok) {

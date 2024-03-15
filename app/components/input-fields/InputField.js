@@ -9,7 +9,7 @@ import typography from 'app/config/typography';
 import colors from 'app/config/colors';
 
 // Utils
-import * as validation from 'app/utility/inputValidation';
+import * as validation from 'app/utility/InputValidation';
 
 // Components
 import ErrorMessage from 'app/components/ErrorMessage';
