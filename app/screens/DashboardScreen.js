@@ -508,27 +508,25 @@ function DashboardScreen() {
         ListEmptyComponent={noDataMessage}
         data={schedule}
         renderItem={({ item, i }) => {
-          return(
-          <Box style={styles.rowBox} key={item.patientID}>
-            <HStack justifyContent="space-between">
-              <Container style={styles.patientContainer}>
-                <ProfileNameButton
-                  // navigation={navigation}
-                  // route={routes.PATIENT_PROFILE}
-                  profileLineOne={item.patientName}
-                  profilePicture={item.patientImage}
-
-                  isPatient={true}
-                  // size={90}
-                />
-              </Container>
-              <ScrollView
-                horizontal={true}
-                width="100%"
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{flexGrow: 1}}
-              >
-                {item.activities.length > 0 ? (
+          if(item.activities.length > 0) {
+            return (
+            <Box style={styles.rowBox} key={item.patientID}>
+              <HStack justifyContent="space-between">
+                <Container style={styles.patientContainer}>
+                  <ProfileNameButton
+                    // navigation={navigation}
+                    // route={routes.PATIENT_PROFILE}
+                    profileLineOne={item.patientName}
+                    profilePicture={item.patientImage}
+                    isPatient={true}
+                  />
+                </Container>
+                <ScrollView
+                  horizontal={true}
+                  width="100%"
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{flexGrow: 1}}
+                >
                   <HStack>
                     {item.activities.map((activity, i) => (
                       <ActivityCard
@@ -540,18 +538,19 @@ function DashboardScreen() {
                         medications={activity.medications}
                       />
                     ))}
-                  </HStack>
-                ) : (
-                  <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                    <Text>No schedule today</Text>
-                  </View>
-                )
-                  
-                }
-              </ScrollView>
-            </HStack>
-          </Box>
-        )}}
+                  </HStack>                
+                </ScrollView>
+              </HStack>
+            </Box>
+          )
+        } else {
+          return (
+            <MessageDisplayCard
+              TextMessage={isError ? message : 'No schedules found today'}
+              topPaddingSize={'42%'}
+            />
+          )
+        }}}
       />
     </View>
   );
