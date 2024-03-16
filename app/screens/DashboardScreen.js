@@ -2,7 +2,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import {
-  Avatar,
   Box,
   Container,
   FlatList,
@@ -11,7 +10,10 @@ import {
   Image,
   Stack,
   View,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from 'native-base';
+import { useFocusEffect } from '@react-navigation/native';
 
 // API
 import scheduleApi from 'app/api/schedule'
@@ -24,13 +26,12 @@ import colors from 'app/config/colors';
 import ActivityCard from 'app/components/ActivityCard';
 import DateInputField from 'app/components/DateInputField';
 import SearchFilterBar from 'app/components/filter/SearchFilterBar';
+import MessageDisplayCard from 'app/components/MessageDisplayCard';
+import ProfileNameButton from 'app/components/ProfileNameButton';
 
 // Utilities
 import globalStyles from 'app/utility/styles.js';
-import { useFocusEffect } from '@react-navigation/native';
-import MessageDisplayCard from 'app/components/MessageDisplayCard';
 import { formatDate, formatMilitaryTime, isEmptyObject } from 'app/utility/miscFunctions';
-import ProfileNameButton from 'app/components/ProfileNameButton';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 
 function DashboardScreen() {
@@ -57,7 +58,6 @@ function DashboardScreen() {
   const [justUpdated, setJustUpdated] = useState(false); 
   const [viewMode, setViewMode] = useState('myPatients'); // myPatients, allPatients
   const [isReloadSchedule, setIsReloadSchedule] = useState(false);
-
 
   // Refresh schedule when new user requests refresh
   useFocusEffect(
@@ -478,14 +478,11 @@ function DashboardScreen() {
             onPress={handlePreviousDate} 
             disabled={isMonday()}
             >
-            <Image
-              alt={'previous date'}
-              marginRight="3"
-              source={{
-                uri: 'https://cdn-icons-png.flaticon.com/512/2722/2722991.png',
-              }}
-              size={'30px'}
-            />
+            <ChevronLeftIcon 
+              size={6}
+              marginRight={3}
+              color={isMonday() ? colors.light_gray3 : colors.green}
+              />           
           </TouchableOpacity>
           <DateInputField
             handleFormData={setSelectedDate}
@@ -497,16 +494,10 @@ function DashboardScreen() {
           <TouchableOpacity onPress={handleNextDate}
             disabled={isSunday()}
             >
-            <Image
-              alt={'next-date'}
-              marginLeft="3"
-              source={{
-                uri: 'https://cdn-icons-png.flaticon.com/512/2722/2722991.png',
-              }}
-              style={{
-                transform: [{ rotate: '180deg' }],
-              }}
-              size={'30px'}
+            <ChevronRightIcon 
+              size={6}
+              marginLeft={3}
+              color={isSunday() ? colors.light_gray3 : colors.green}
             />
           </TouchableOpacity>
         </View>
