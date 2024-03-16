@@ -104,4 +104,16 @@ export const formatMilitaryTime = (timeString, date=new Date()) => {
   return dateTime;
 }
 
+export const formatTimeHM24 = (time) => {  
+  const hour = new Date(time).getHours();
+  const minute = new Date(time).getMinutes();
+
+  const hourString = hour < 10 ? '0' + hour : hour.toString();
+  const minuteString = minute < 10 ? '0' + minute : minute.toString();
+  
+  const timeString = hourString + ':' + minuteString;
+
+  return timeString;
+}
+
 export const sortFilterInitialState = {'filterOptions': {}, 'sel': {}, 'tempSel': {}}

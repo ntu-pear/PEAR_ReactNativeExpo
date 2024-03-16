@@ -1,5 +1,5 @@
 // Libs
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import {
   Avatar,
@@ -29,8 +29,9 @@ import SearchFilterBar from 'app/components/filter/SearchFilterBar';
 import globalStyles from 'app/utility/styles.js';
 import { useFocusEffect } from '@react-navigation/native';
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
-import { formatDate, formatMilitaryTime } from 'app/utility/miscFunctions';
+import { formatDate, formatMilitaryTime, isEmptyObject } from 'app/utility/miscFunctions';
 import ProfileNameButton from 'app/components/ProfileNameButton';
+import ActivityIndicator from 'app/components/ActivityIndicator';
 
 function DashboardScreen() {
   // View modes user can switch between (displayed as tab on top)
@@ -56,6 +57,7 @@ function DashboardScreen() {
   const [justUpdated, setJustUpdated] = useState(false); 
   const [viewMode, setViewMode] = useState('myPatients'); // myPatients, allPatients
   const [isReloadSchedule, setIsReloadSchedule] = useState(false);
+
 
   // Refresh schedule when new user requests refresh
   useFocusEffect(
@@ -95,6 +97,15 @@ function DashboardScreen() {
     };
     promiseFunction();     
   }  
+
+  const updateSchedule = ({tempScheduleWeekly=originalScheduleWeekly, tempSelectedDate=selectedDate}) => {
+    if(!isEmptyObject(tempScheduleWeekly)) {      
+      const currentDate = formatDate(tempSelectedDate, true);
+
+      setOriginalSchedule([...tempScheduleWeekly[currentDate]]);
+      setSchedule([...tempScheduleWeekly[currentDate]]);
+    }
+  }
 
    // Retrieve schedule from backend
    const getSchedule = async() => { 
@@ -136,8 +147,7 @@ function DashboardScreen() {
           if(Object.keys(tempScheduleWeekly).length <= j) {
             tempScheduleWeekly[scheduleDateStr] = [];
           }
-          scheduleDate = new Date(scheduleDate.setDate(scheduleDate.getDate() + 1));
-
+          
           const patientDailySchedule = {
             patientID: data[i]['patientID'],
             patientName: data[i]['patientName'],
@@ -145,17 +155,16 @@ function DashboardScreen() {
             activities: parseScheduleString(data[i][day], scheduleDate),
             date: scheduleDateStr
           };
-
+          
+          scheduleDate.setDate(scheduleDate.getDate() + 1);
 
           tempScheduleWeekly[scheduleDateStr].push(patientDailySchedule)
           
         }
       }
 
-      const currentDate = formatDate(selectedDate, true);
       setOriginalScheduleWeekly(tempScheduleWeekly);
-      setOriginalSchedule([...tempScheduleWeekly[currentDate]]);
-      setSchedule([...tempScheduleWeekly[currentDate]]);
+      updateSchedule({tempScheduleWeekly: tempScheduleWeekly});
     }
   }
 
@@ -171,44 +180,52 @@ function DashboardScreen() {
   // Example input: Breathing+Vital Check | Give Medication@0930: Diphenhydramine(2 tabs)**Always leave at least 4 hours between doses
   const parseScheduleString = (scheduleString, scheduleDate) => {
     let scheduleData = [];
-    let startTime = new Date(new Date(scheduleDate).setHours(9, 0, 0, 0));
-    let endTime = new Date(new Date(scheduleDate).setHours(10, 0, 0, 0));
-        
-    let timeslotSplit = scheduleString.split('--') // split by timeslot
-    for(var i = 0; i<timeslotSplit.length; i++) {
-      const activitySplit = timeslotSplit[i].split(' | '); // split to get medication info
-      const activityName = activitySplit[0];
-      
-      let medications = [];
-      if(activitySplit.length > 1) {
-        let medicationSplit = activitySplit[1].split(', '); // split to get list of medications
-        for(var k = 0; k <medicationSplit.length; k++) {  
-          const medicationInfo = medicationSplit[k].split('@')[1]; // spli to get time + medname + notes
-          
-          const medName = medicationInfo.split(": ")[1].split("**")[0];
-          const medTime = medicationInfo.split(":")[0];
-          const medNote = medicationInfo.split("**")[1];
-          
-          medications.push({
-            medTime: formatMilitaryTime(medTime),
-            medName: medName,
-            medNote: medNote
-          })
-        }
-      }      
-      
-      let activityData = {
-        startTime: startTime,
-        endTime: endTime,
-        activityName: activityName,
-        medications: medications
-      };
+    let startTime = new Date(scheduleDate)
+    startTime.setHours(9, 0, 0, 0);
+    let endTime = new Date(scheduleDate)
+    endTime.setHours(10, 0, 0, 0);
 
-      startTime = new Date(startTime.setHours(startTime.getHours() + 1));
-      endTime = new Date(endTime.setHours(endTime.getHours() + 1));
+    if(scheduleString.length > 0) {
       
-      scheduleData.push(activityData);
-    }
+      let timeslotSplit = scheduleString.split('--') // split by timeslot
+      for(var i = 0; i<timeslotSplit.length; i++) {
+        const activitySplit = timeslotSplit[i].split(' | '); // split to get medication info
+        const activityName = activitySplit[0];
+        
+        let medications = [];
+        if(activitySplit.length > 1) {
+          let medicationSplit = activitySplit[1].split(', '); // split to get list of medications
+          for(var k = 0; k <medicationSplit.length; k++) {  
+            const medicationInfo = medicationSplit[k].split('@')[1]; // spli to get time + medname + notes
+            
+            const med = medicationInfo.split(": ")[1].split("**")[0];
+            const medName = med.split("(")[0];
+            const medDosage = med.split("(")[1].split(")")[0];
+            const medTime = medicationInfo.split(":")[0];
+            const medNote = medicationInfo.split("**")[1];
+            
+            medications.push({
+              medName: medName,
+              medDosage: medDosage,
+              medTime: formatMilitaryTime(medTime),
+              medNote: medNote
+            })
+          }
+        }      
+        
+        let activityData = {
+          startTime: startTime,
+          endTime: endTime,
+          activityName: activityName,
+          medications: medications
+        };
+  
+        startTime = new Date(startTime.setHours(startTime.getHours() + 1));
+        endTime = new Date(endTime.setHours(endTime.getHours() + 1));
+        
+        scheduleData.push(activityData);
+      }
+    }        
     
     return scheduleData;
   }
@@ -280,12 +297,14 @@ function DashboardScreen() {
     const previous = new Date(selectedDate.getTime());
     previous.setDate(selectedDate.getDate() - 1);
     setSelectedDate(previous);
+    updateSchedule({tempSelectedDate: previous});
   };
 
   const handleNextDate = () => {
     const next = new Date(selectedDate.getTime());
     next.setDate(selectedDate.getDate() + 1);
     setSelectedDate(next);
+    updateSchedule({tempSelectedDate: next});
   };
 
   
@@ -409,6 +428,30 @@ function DashboardScreen() {
     setCurrentTime(new Date());
   };
 
+  const getMonday = () => {
+    let date = new Date();
+    const day = date.getDay();
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+    return new Date(date.setDate(diff));
+  }
+
+  const isMonday = () => {
+    return selectedDate.toDateString() == new Date(getMonday()).toDateString();
+  }
+
+  const getSunday = () => {    
+    let date = new Date(getMonday());
+    date.setDate(date.getDate() + 6);
+    return date;
+  }
+  
+  const isSunday = () => {
+    return selectedDate.toDateString() == new Date(getSunday()).toDateString();
+  }
+
+  // if(isLoading) {
+  //   return (<ActivityIndicator visible/>)
+  // } 
   return (
     <View
       style={globalStyles.mainContentContainer}
@@ -431,7 +474,10 @@ function DashboardScreen() {
       >
         <View style={styles.dateSelectionContainer}>
           {/* < icon button */}
-          <TouchableOpacity onPress={handlePreviousDate}>
+          <TouchableOpacity 
+            onPress={handlePreviousDate} 
+            disabled={isMonday()}
+            >
             <Image
               alt={'previous date'}
               marginRight="3"
@@ -444,9 +490,13 @@ function DashboardScreen() {
           <DateInputField
             handleFormData={setSelectedDate}
             value={selectedDate}
-          />
+            maximumInputDate={getSunday()}
+            minimumInputDate={getMonday()}
+            />
           {/* > icon button */}
-          <TouchableOpacity onPress={handleNextDate}>
+          <TouchableOpacity onPress={handleNextDate}
+            disabled={isSunday()}
+            >
             <Image
               alt={'next-date'}
               marginLeft="3"
@@ -466,18 +516,11 @@ function DashboardScreen() {
         // refreshing={isLoading}
         ListEmptyComponent={noDataMessage}
         data={schedule}
-        renderItem={({ item }) => {
+        renderItem={({ item, i }) => {
           return(
-          <Box style={styles.rowBox}>
+          <Box style={styles.rowBox} key={item.patientID}>
             <HStack justifyContent="space-between">
               <Container style={styles.patientContainer}>
-                {/* <Avatar
-                  size={'60px'}
-                  source={{
-                    uri: item.patientImage,
-                  }}
-                />
-                <Text style={styles.patientName}>{item.patientName}</Text> */}
                 <ProfileNameButton
                   // navigation={navigation}
                   // route={routes.PATIENT_PROFILE}
@@ -492,23 +535,32 @@ function DashboardScreen() {
                 horizontal={true}
                 width="100%"
                 showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{flexGrow: 1}}
               >
-                <HStack>
-                  {item.activities.map((activity, i) => (
-                    <ActivityCard
-                      key={i}
-                      activityTitle={activity.activityName}
-                      activityStartTime={activity.startTime}
-                      activityEndTime={activity.endTime}
-                      currentTime={currentTime}
-                    />
-                  ))}
-                </HStack>
+                {item.activities.length > 0 ? (
+                  <HStack>
+                    {item.activities.map((activity, i) => (
+                      <ActivityCard
+                        key={i}
+                        activityTitle={activity.activityName}
+                        activityStartTime={activity.startTime}
+                        activityEndTime={activity.endTime}
+                        currentTime={currentTime}
+                        medications={activity.medications}
+                      />
+                    ))}
+                  </HStack>
+                ) : (
+                  <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                    <Text>No schedule today</Text>
+                  </View>
+                )
+                  
+                }
               </ScrollView>
             </HStack>
           </Box>
         )}}
-        keyExtractor={(item) => item.patientId}
       />
     </View>
   );
