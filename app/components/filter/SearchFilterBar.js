@@ -14,7 +14,7 @@ import FilterIndicator from 'app/components/filter/FilterIndicator';
 import TabBar from '../TabBar';
 
 // Utilities
-import { isEmptyObject, parseSelectOptions, sortArray, sortFilterInitialState } from 'app/utility/miscFunctions';
+import { isEmptyObject, parseSelectOptions, setSecondsToZero, sortArray, sortFilterInitialState } from 'app/utility/miscFunctions';
 
 function SearchFilterBar({
   originalList=[],
@@ -24,8 +24,8 @@ function SearchFilterBar({
   initializeData=true,
   onInitialize=()=>{},
 
-  applySortFilter,
-  setApplySortFilter,
+  applySortFilter=true,
+  setApplySortFilter=()=>{},
 
   itemCount=null,   
   handleSearchSortFilterCustom,
@@ -48,8 +48,8 @@ function SearchFilterBar({
   autocomplete=sortFilterInitialState,
   setAutocomplete=()=>{},
 
-  date=sortFilterInitialState,
-  setDate=()=>{},
+  datetime=sortFilterInitialState,
+  setDatetime=()=>{},
   
   SORT_OPTIONS={},
   
@@ -71,10 +71,10 @@ function SearchFilterBar({
     tempSelDropdownFilters=dropdown['tempSel'],
     tempSelChipFilters=chip['tempSel'], 
     tempSelAutocompleteFilters=autocomplete['tempSel'], 
-    tempSelDateFilters=date['tempSel'], 
+    tempSelDatetimeFilters=datetime['tempSel'], 
     tempSearchMode=searchOption,
   }) => {
-    // console.log('BAR -', 3, 'handleSearchSortFilter')
+    console.log('BAR 1 - handleSearchSortFilter')
 
     if(handleSearchSortFilterCustom) {
       handleSearchSortFilterCustom({
@@ -83,7 +83,7 @@ function SearchFilterBar({
         tempSelDropdownFilters: tempSelDropdownFilters,
         tempSelChipFilters: tempSelChipFilters, 
         tempSelAutocompleteFilters: tempSelAutocompleteFilters, 
-        tempSelDateFilters: tempSelDateFilters,
+        tempSelDatetimeFilters: tempSelDatetimeFilters,
         tempSearchMode: tempSearchMode,
         setFilteredList
       });
@@ -94,7 +94,7 @@ function SearchFilterBar({
         tempSelDropdownFilters: tempSelDropdownFilters,
         tempSelChipFilters: tempSelChipFilters, 
         tempSelAutocompleteFilters: tempSelAutocompleteFilters, 
-        tempSelDateFilters: tempSelDateFilters,
+        tempSelDatetimeFilters: tempSelDatetimeFilters,
         tempSearchMode: tempSearchMode,
       })
       setIsLoading(false);
@@ -108,15 +108,12 @@ function SearchFilterBar({
     tempSelDropdownFilters=dropdown['tempSel'],
     tempSelChipFilters=chip['tempSel'], 
     tempSelAutocompleteFilters=autocomplete['tempSel'], 
-    tempSelDateFilters=date['tempSel'], 
+    tempSelDatetimeFilters=datetime['tempSel'], 
     tempSearchMode=searchOption,
   }) => {
-    // console.log('BAR -', 4, 'setFilteredList')
-
-    let filteredList = originalList.map((obj) => ({
-      ...obj,
-      fullName: `${obj.firstName.trim()} ${obj.lastName.trim()}`
-    }));   
+    console.log('BAR 2 - setFilteredList')
+    
+    let filteredList = [...originalList];
 
     // Search
     filteredList = filteredList.filter((item) => {
@@ -131,14 +128,14 @@ function SearchFilterBar({
           tempSelSort['option']['label']],
         tempSelSort['asc'] != null ? tempSelSort['asc'] : true);
     }
-  
+    
     // Dropdown filters
     for (var filter in tempSelDropdownFilters) {   
       if(tempSelDropdownFilters[filter]['label'] != 'All') {
         filteredList = getSubFilteredList(filteredList, filter, 'label', tempSelDropdownFilters);
       }      
     }
-
+    
     // Autocomplete filters
     for (var filter in tempSelAutocompleteFilters) {
       if(tempSelAutocompleteFilters[filter]['title'] != 'All') {
@@ -150,20 +147,91 @@ function SearchFilterBar({
     for (var filter in tempSelChipFilters) {
       filteredList = getSubFilteredList(filteredList, filter, 'label', tempSelChipFilters);
     }  
-
-    // Date filters
-    for (var filter in tempSelDateFilters) {
-      if('min' in tempSelDateFilters[filter] && tempSelDateFilters[filter]['min'] != null) {
-        filteredList = filteredList.filter((obj) => (
-          new Date(obj[FIELD_MAPPING[filter]]) >= tempSelDateFilters[filter]['min'])) || []
-      }
-      if('max' in tempSelDateFilters[filter] && tempSelDateFilters[filter]['max'] != null) {
-        filteredList = filteredList.filter((obj) => (
-          new Date (obj[FIELD_MAPPING[filter]]) <= tempSelDateFilters[filter]['max'])) || []
-      }
+    
+    // Datetime filters
+    for (var filter in tempSelDatetimeFilters) {
+      filteredList = getDatetimeFilteredList(filteredList, filter, tempSelDatetimeFilters);
     }  
 
     setList(filteredList);
+  }  
+  
+  // Filter list by datetime filter
+  const getDatetimeFilteredList = (filteredList, filter, tempSelDatetimeFilters) => {
+    const datetimeFilterTypes = ['min', 'max']
+    if(filterOptionDetails[filter]['isFilter']) {
+      for(var i = 0; i<datetimeFilterTypes.length; i++) {
+        const datetimeFilterType = datetimeFilterTypes[i];
+        if(datetimeFilterType in tempSelDatetimeFilters[filter] && tempSelDatetimeFilters[filter][datetimeFilterType] != null) {          
+          const datetimeType = filterOptionDetails[filter]['type'];
+          let selectedDatetime = new Date(tempSelDatetimeFilters[filter][datetimeFilterType].setHours(0,0,0));
+          if(datetimeType == 'time') {
+            selectedDatetime = setSecondsToZero(new Date(tempSelDatetimeFilters[filter][datetimeFilterType]));
+          }
+          filteredList = filterByDatetime(filteredList, filter, datetimeFilterType, selectedDatetime);
+        }
+      }
+    } else if (filterOptionDetails[filter]['nestedFilter'] != undefined && filterOptionDetails[filter]['nestedFilter'].length > 0) {
+      const key = filterOptionDetails[filter]['nestedFilter'];   
+      const fieldKey = FIELD_MAPPING[filter];
+      const tempFilteredList = [];
+
+      filteredList.forEach((item) => {
+        const keyItems = [];
+        item[key].forEach((itemObj) => {
+          let filterPass = true;
+          const datetimeType = filterOptionDetails[filter]['type'];
+          if('min' in tempSelDatetimeFilters[filter] && tempSelDatetimeFilters[filter]['min'] != null) {
+            let selectedDatetime = null;
+            if(datetimeType == 'date') {
+              selectedDatetime = new Date(tempSelDatetimeFilters[filter]['min'].setHours(0,0,0));
+            } else if(datetimeType == 'time') {
+              selectedDatetime = setSecondsToZero(new Date(tempSelDatetimeFilters[filter]['min']));
+            }
+            if(new Date(itemObj[fieldKey]) < selectedDatetime) {
+              filterPass = false;
+            }
+          }
+          if('max' in tempSelDatetimeFilters[filter] && tempSelDatetimeFilters[filter]['max'] != null) {
+            let selectedDatetime = null;
+            if(datetimeType == 'date') {
+              selectedDatetime = new Date(tempSelDatetimeFilters[filter]['max'].setHours(0,0,0));
+            } else if(datetimeType == 'time') {
+              selectedDatetime = setSecondsToZero(new Date(tempSelDatetimeFilters[filter]['max']));
+            }
+            if(new Date(itemObj[fieldKey]) > selectedDatetime) {
+              filterPass = false;
+            }
+          }
+          if(filterPass) {
+            keyItems.push({...itemObj});
+          }
+        });
+
+        tempFilteredList.push({
+          ...item,
+          activities: keyItems,
+        });
+      });
+
+      filteredList = tempFilteredList;
+    }
+    return filteredList
+  }
+
+  // Filter list by specific min/max date filter option
+  const filterByDatetime = (filteredList, filter, datetimeFilterType, selectedDatetime) => {    
+    const fieldKey = FIELD_MAPPING[filter];
+
+    if(datetimeFilterType == 'min') {
+      filteredList = filteredList.filter((obj) => (
+        new Date(obj[fieldKey]) >= selectedDatetime)) || []
+    } else if(datetimeFilterType == 'max') {
+      filteredList = filteredList.filter((obj) => (
+        new Date(obj[fieldKey]) <= selectedDatetime)) || []      
+    }
+
+    return filteredList;    
   }
       
   // Apply filters
@@ -171,22 +239,57 @@ function SearchFilterBar({
   // For example, patient status is not meant for filtering - it requires new API call, so do not filter
   // Use custom options if declared in FILTER_MAPPING 
   const getSubFilteredList = (filteredList, filter, id, tempSelFilters) => {
-    // console.log('BAR -', 5, 'getSubFilteredList')
+    console.log('BAR 3 - getSubFilteredList')
     if(filterOptionDetails[filter]['isFilter']){
+      const fieldKey = FIELD_MAPPING[filter];
       if(isEmptyObject(filterOptionDetails[filter]['options'])) {
         filteredList = filteredList.filter((obj) => (
-          obj[FIELD_MAPPING[filter]] === tempSelFilters[filter][id])) || []
+          obj[fieldKey] === tempSelFilters[filter][id])) || []
       } else {
         filteredList = filteredList.filter((obj) => (
-          obj[FIELD_MAPPING[filter]] === filterOptionDetails[filter]['options'][tempSelFilters[filter][id]])) || []
+          obj[fieldKey] === filterOptionDetails[filter]['options'][tempSelFilters[filter][id]])) || []        
       }
+    } else if (filterOptionDetails[filter]['nestedFilter'] != undefined && filterOptionDetails[filter]['nestedFilter'].length > 0 ) {
+      filteredList = getNestedSubFilteredList(filteredList, filter, id, tempSelFilters);
     }
     return filteredList;
   }
 
+  // If list to be filtered is nested in a larger array of objects  
+  // E.g.: [{a: [{b: [{c: 1, d: 2, e: 3}]}]}] => want to filter array corresponding to b by property c
+  // i.e. filter [{c: 1, d: 2, e: 3}]
+  const getNestedSubFilteredList = (filteredList, filter, id, tempSelFilters) => {
+    console.log('BAR 4 - getNestedSubfilteredList', filterOptionDetails, filter)
+
+    const key = filterOptionDetails[filter]['nestedFilter'];      
+    const tempFilteredList = [];
+    filteredList.forEach((item) => {
+      const keyItems = [];
+      item[key].forEach((itemObj) => {
+        const fieldKey = FIELD_MAPPING[filter];
+        if(isEmptyObject(filterOptionDetails[filter]['options'])) {
+          if (itemObj[fieldKey] == tempSelFilters[filter][id]) { 
+            keyItems.push({...itemObj});
+          }
+        } else {
+          if (itemObj[fieldKey] == filterOptionDetails[filter]['options'][tempSelFilters[filter][id]]) { 
+            keyItems.push({...itemObj});
+          }
+        }
+      });
+
+      tempFilteredList.push({
+        ...item,
+        activities: keyItems,
+      });
+    });
+
+    return tempFilteredList;
+  }
+
   // Switch between search modes (full name, preferred name)
   const handleOnToggleSearchOptions = async(item) => {
-    // console.log('BAR -', 6, 'handleOnToggleSearchOptions')
+    console.log('BAR 5 - handleOnToggleSearchOptions')
 
     const label = SEARCH_OPTIONS[item-1];
     setSearchOption(label);
@@ -198,7 +301,7 @@ function SearchFilterBar({
   // Switch between tabs
   // If user clicks on same tab, reset all search/sort/filter options
   const handleOnToggleViewMode = (mode) => {
-    // console.log('BAR -', 7, 'handleOnToggleViewMode')
+    console.log('BAR 6 - handleOnToggleViewMode')
 
     if(mode!=viewMode) {
       setIsLoading(true);
@@ -207,7 +310,7 @@ function SearchFilterBar({
 
   // Update search state and handle searching when user changes search query
   const handleSearch = (text) => {
-    // console.log('BAR -', 8, 'handleSearch')
+    console.log('BAR 7 - handleSearch')
 
     setSearchQuery(text); 
     handleSearchSortFilter({'text': text})
@@ -248,7 +351,6 @@ function SearchFilterBar({
             originalList={originalList}
             initializeData={initializeData}
             onInitialize={onInitialize}
-
             applySortFilter={applySortFilter}
             setApplySortFilter={setApplySortFilter}
             
@@ -263,10 +365,9 @@ function SearchFilterBar({
 
             autocomplete={autocomplete}
             setAutocomplete={setAutocomplete}
-
             
-            date={date}
-            setDate={setDate}
+            datetime={datetime}
+            setDatetime={setDatetime}
 
             handleSortFilter={handleSearchSortFilter}
           />
@@ -292,12 +393,13 @@ function SearchFilterBar({
         <FilterIndicator
           modalVisible={modalVisible}
           setModalVisible={setModalVisible}
+          filterOptionDetails={filterOptionDetails}
           sort={sort}
           setSort={setSort}
           dropdown={dropdown}
           chip={chip}
           autocomplete={autocomplete}
-          date={date}
+          datetime={datetime}
           handleSortFilter={handleSearchSortFilter}
         />
       </View>

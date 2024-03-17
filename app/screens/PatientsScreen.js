@@ -86,7 +86,7 @@ function PatientsScreen({ navigation }) {
   const [sort, setSort] = useState(sortFilterInitialState);
   const [dropdown, setDropdown] = useState(sortFilterInitialState);
   const [chip, setChip] = useState(sortFilterInitialState);
-  const [date, setDate] = useState(sortFilterInitialState);
+  const [datetime, setDatetime] = useState(sortFilterInitialState);
 
   // Filter details related state
   // Details of filter options
@@ -156,7 +156,6 @@ function PatientsScreen({ navigation }) {
         : 'Active'
       ]
       updateCaregiverFilterOptions({tempPatientStatus: tempPatientStatus});
-      setApplySortFilter(false);
       setIsDataInitialized(true);
     } else {
       setJustUpdated(false);
@@ -173,8 +172,13 @@ function PatientsScreen({ navigation }) {
         : await patientApi.getPatientList(undefined, status);
     
     if(response.ok) {
-      setOriginalListOfPatients([...response.data.data]);
-      setListOfPatients([...response.data.data])
+      const listWithFullName = response.data.data.map(item => ({
+        ...item,
+        fullName: item.firstName.trim() + ' ' + item.lastName.trim(),
+      }));
+
+      setOriginalListOfPatients([...listWithFullName]);
+      setListOfPatients([...listWithFullName])
       setIsApiError(false);
     } else {
       setIsApiError(true);
@@ -239,6 +243,7 @@ function PatientsScreen({ navigation }) {
       }
     }));
 
+    setApplySortFilter(false);
     setJustUpdated(true);
   }    
 
@@ -250,14 +255,13 @@ function PatientsScreen({ navigation }) {
     tempSelSort, 
     tempSelDropdownFilters,
     tempSelChipFilters, 
-    tempSelSearchDate,
+    tempSelDatetimeFilters,
     tempSearchMode,
     setFilteredList
   }) => {       
     // console.log('PATIENTS -', 10, 'handleSearchSortFilter', tempSelChipFilters);
 
     setIsLoading(true);
-    setApplySortFilter(true);
 
     let tempPatientStatus = PATIENT_STATUSES[
       !isEmptyObject(tempSelChipFilters) 
@@ -274,7 +278,7 @@ function PatientsScreen({ navigation }) {
         tempSelSort: tempSelSort, 
         tempSelDropdownFilters: tempSelDropdownFilters,
         tempSelChipFilters: tempSelChipFilters, 
-        tempSelSearchDate: tempSelSearchDate,
+        tempSelDatetimeFilters: tempSelDatetimeFilters,
         tempSearchMode: tempSearchMode,
       });
       
@@ -301,9 +305,9 @@ function PatientsScreen({ navigation }) {
 
   const showStartDate = () => {
     return (!isEmptyObject(sort['sel']) ? sort['sel']['option']['label'] == 'Start Date' : false) || 
-      'Start Date' in date['sel'] ? (
-        (date['sel']['Start Date']['min'] && date['sel']['Start Date']['min'] != null) || 
-        (date['sel']['Start Date']['max'] && date['sel']['Start Date']['max'] != null) 
+      'Start Date' in datetime['sel'] ? (
+        (datetime['sel']['Start Date']['min'] && datetime['sel']['Start Date']['min'] != null) || 
+        (datetime['sel']['Start Date']['max'] && datetime['sel']['Start Date']['max'] != null) 
       ) : false        
   }
 
@@ -319,9 +323,6 @@ function PatientsScreen({ navigation }) {
 
             initializeData={isDataInitialized}
             onInitialize={() => setIsDataInitialized(false)}
-
-            applySortFilter={applySortFilter}
-            setApplySortFilter={setApplySortFilter}
 
             itemCount={listOfPatients ? listOfPatients.length : null}
             handleSearchSortFilterCustom={handleSearchSortFilter}
@@ -341,8 +342,8 @@ function PatientsScreen({ navigation }) {
             chip={chip}
             setChip={setChip}
 
-            date={date}
-            setDate={setDate}
+            datetime={datetime}
+            setDatetime={setDatetime}
             
             SORT_OPTIONS={SORT_OPTIONS}
             

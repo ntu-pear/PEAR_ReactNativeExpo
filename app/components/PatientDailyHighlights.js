@@ -1,10 +1,11 @@
 // Base
 import React, { useState, useEffect } from 'react';
 import { Modal, StyleSheet, Text, Pressable, View, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
-import { MaterialCommunityIcons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { FlatList, Icon } from 'native-base';
 
-//Navigation
+// APIs
 import highlightApi from 'app/api/highlight';
 
 // Configs
@@ -15,13 +16,12 @@ import { Platform } from 'react-native';
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
 import SelectionInputField from 'app/components/input-fields/SelectionInputField';
 import HighlightsCard from 'app/components/HighlightsCard';
-import { FlatList, Icon } from 'native-base';
-import InputField from './input-fields/InputField';
 import SearchBar from './input-fields/SearchBar';
 
-function PatientDailyHighlights(props) {
-  // Destructure props
-  const { modalVisible, setModalVisible } = props;
+function PatientDailyHighlights() {
+  // State controlling whether modal is visible or not
+  const [modalVisible, setModalVisible] = useState(true);
+
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [statusCode, setStatusCode] = useState();
@@ -30,9 +30,9 @@ function PatientDailyHighlights(props) {
   const [highlightsData, setHighlightsData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [isRetry, setIsRetry] = useState(false);
+
   // searchValue for SearchBar, filterValue for DropDownPicker
   const [searchValue, setSearchValue] = useState('');
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [filterValue, setFilterValue] = useState([]);
   const [dropdownItems, setDropdownItems] = useState([
     {
@@ -169,67 +169,90 @@ function PatientDailyHighlights(props) {
   };
 
   return (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={modalVisible}
-      onRequestClose={() => {
-        setModalVisible(!modalVisible);
-      }}
-      testID="highlightsModal"
-    >
-      <TouchableOpacity style={styles.centeredView} activeOpacity={1} onPressOut={() => {setModalVisible(!modalVisible)}} >
-        <TouchableWithoutFeedback>
-          <View style={styles.modalView}>
-            <Text style={styles.modalHeaderText}>Patients Daily Highlights</Text>
-            <Pressable
-              style={styles.buttonClose}
-              onPress={() => setModalVisible(!modalVisible)}
-              testID="highlightsCloseButton"
-            >
-              <MaterialCommunityIcons
-                name="close"
-                size={Platform.OS === 'web' ? 42 : 20}
-              />
-            </Pressable>
-            <View style={styles.searchBarDropDownView}>
-              <View style={styles.flex}>
-                <SearchBar
-                  value={searchValue}
-                  onChangeText={setSearchValue}
-                />
-              </View>
-              <View style={styles.flex}>
-                <SelectionInputField
-                  showTitle={false}
-                  value={filterValue}
-                  dataArray={dropdownItems}
-                  onDataChange={setFilterValue}
-                  placeholder={'Select Filter'}
-                />
-              </View>
-            </View>
-            <FlatList
-              w="100%"
-              showsVerticalScrollIndicator={true}
-              data={filteredData}
-              keyExtractor={(item) => item.patientInfo.patientId}
-              onRefresh={handlePullToRefresh}
-              refreshing={isLoading}
-              ListEmptyComponent={noDataMessage}
-              renderItem={({ item }) => (
-                <HighlightsCard
-                  item={item}
-                  navigation={navigation}
-                  setModalVisible={setModalVisible}
-                />
-              )}
-              testID="flatList"
+    <>
+      <TouchableOpacity
+        onPress={() => setModalVisible(!modalVisible)}
+        testID={'highlightsButton'}
+        style={{flexDirection: 'row'}}
+      >
+        <Icon 
+          as={
+            <MaterialIcons 
+            name="announcement" 
             />
+          } 
+          size={10}
+          color={colors.light_gray}
+        >
+        </Icon>
+        {highlightsData.length > 0 ? (          
+          <View style={styles.iconNumber}>
+            <Text style={{color: colors.white_var1, fontSize: 11, fontWeight: '700'}}>{highlightsData.length}</Text>
           </View>
-        </TouchableWithoutFeedback>
+        ) : null}
       </TouchableOpacity>
-    </Modal>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+        testID="highlightsModal"
+      >
+        <TouchableOpacity style={styles.centeredView} activeOpacity={1} onPressOut={() => {setModalVisible(!modalVisible)}} >
+          <TouchableWithoutFeedback>
+            <View style={styles.modalView}>
+              <Text style={styles.modalHeaderText}>Patients Daily Highlights</Text>
+              <Pressable
+                style={styles.buttonClose}
+                onPress={() => setModalVisible(!modalVisible)}
+                testID="highlightsCloseButton"
+                >
+                <MaterialCommunityIcons
+                  name="close"
+                  size={Platform.OS === 'web' ? 42 : 20}
+                  />
+              </Pressable>
+              <View style={styles.searchBarDropDownView}>
+                <View style={styles.flex}>
+                  <SearchBar
+                    value={searchValue}
+                    onChangeText={setSearchValue}
+                  />
+                </View>
+                <View style={styles.flex}>
+                  <SelectionInputField
+                    showTitle={false}
+                    value={filterValue}
+                    dataArray={dropdownItems}
+                    onDataChange={setFilterValue}
+                    placeholder={'Select Filter'}
+                  />
+                </View>
+              </View>
+              <FlatList
+                w="100%"
+                showsVerticalScrollIndicator={true}
+                data={filteredData}
+                keyExtractor={(item) => item.patientInfo.patientId}
+                onRefresh={handlePullToRefresh}
+                refreshing={isLoading}
+                ListEmptyComponent={noDataMessage}
+                renderItem={({ item }) => (
+                  <HighlightsCard
+                    item={item}
+                    navigation={navigation}
+                    setModalVisible={setModalVisible}
+                  />
+                  )}
+                  testID="flatList"
+                  />
+            </View>
+          </TouchableWithoutFeedback>
+        </TouchableOpacity>
+      </Modal>
+    </>
   );
 }
 
@@ -263,10 +286,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   modalHeaderText: {
-    fontWeight: 'bold',
     marginBottom: 15,
+    marginTop: 10,
     textAlign: 'center',
     fontSize: Platform.OS === 'web' ? 18 : null,
+    fontSize: 25,
   },
   modalText: {
     marginTop: Platform.OS === 'web' ? 24 : 15,
@@ -286,6 +310,19 @@ const styles = StyleSheet.create({
   flex: {
     flex: 0.49,
   }, 
+  iconNumber: {
+    borderRadius: 27, 
+    height: 27, 
+    width: 27, 
+    backgroundColor: colors.red, 
+    borderColor: colors.white_var1, 
+    borderWidth: 3, 
+    position: 'absolute',
+    top: -11,
+    right: -12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
 });
 
 export default PatientDailyHighlights;

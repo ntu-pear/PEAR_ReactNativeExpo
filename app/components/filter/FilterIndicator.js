@@ -8,18 +8,19 @@ import { Chip } from 'react-native-elements';
 import colors from 'app/config/colors';
 
 // Utilities
-import { formatDate } from 'app/utility/miscFunctions';
+import { formatDate, formatTimeAMPM, formatTimeHM24 } from 'app/utility/miscFunctions';
 
 function FilterIndicator({  
   modalVisible,
   setModalVisible,
+  filterOptionDetails,
 
   sort={},
   setSort=()=>{},
   dropdown={},
   chip={},
   autocomplete={},
-  date={},
+  datetime={},
   
   handleSortFilter=()=>{},
 }) {
@@ -122,11 +123,15 @@ function FilterIndicator({
           }})
         }
 
-        {Object.keys(date['sel']).map((filter) => (
+        {Object.keys(datetime['sel']).map((filter) => (
           <View key={filter} style={{flexDirection: 'row'}}>
-            {date['sel'][filter]['min'] && date['sel'][filter]['min'] != null ? (
+            {datetime['sel'][filter]['min'] 
+              && datetime['sel'][filter]['min'] != null 
+              && datetime['sel'][filter]['min'] != filterOptionDetails[filter]['options']['min']['default'] ? (
               <Chip
-                title={filter + " (from): " + formatDate(date['sel'][filter]['min'], true)}
+                title={filter + " (from): " + (filterOptionDetails[filter]['type'] == 'date' 
+                ? formatDate(datetime['sel'][filter]['min'], true)
+                : formatTimeAMPM(datetime['sel'][filter]['min']))}
                 type="solid"
                 buttonStyle={{backgroundColor: colors.green}}
                 containerStyle={{marginLeft: 5}}
@@ -136,9 +141,13 @@ function FilterIndicator({
                 disabledTitleStyle={{color: colors.white_var1}}
               />
             ) : null}
-            {date['sel'][filter]['max'] && date['sel'][filter]['max'] != null ? (
+            {datetime['sel'][filter]['max'] 
+              && datetime['sel'][filter]['max'] != null 
+              && datetime['sel'][filter]['max'] != filterOptionDetails[filter]['options']['max']['default'] ? (
               <Chip
-                title={filter + " (to): " + formatDate(date['sel'][filter]['max'], true)}
+                title={filter + " (to): " + (filterOptionDetails[filter]['type'] == 'date' 
+                  ? formatDate(datetime['sel'][filter]['max'], true)
+                  : formatTimeAMPM(datetime['sel'][filter]['max']))}
                 type="solid"
                 buttonStyle={{backgroundColor: colors.green}}
                 containerStyle={{marginLeft: 5}}

@@ -14,15 +14,17 @@ import DynamicTable from 'app/components/DynamicTable';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 
 function PatientPrescriptionScreen(props) {
+  const { navigation, route } = props;
+
   const [isLoading, setIsLoading] = useState(true);
   const [headerData, setHeaderData] = useState([]);
   const [rowData, setRowData] = useState([]);
   const [widthData, setWidthData] = useState([]);
   const [tableDataFormated, setTableDataFormated] = useState([]);
-  const [patientID, setPatientID] = useState(props.route.params.patientID);
+  const [patientID, setPatientID] = useState(route.params.id);
 
-  const retrieveScreenData = async (id) => {
-    const response = await patientApi.getPatientPrescriptionList(id);
+  const retrieveScreenData = async () => {
+    const response = await patientApi.getPatientPrescriptionList(patientID);
     if (!response.ok) {
       console.log('Request failed with status code: ', response.status);
       return;

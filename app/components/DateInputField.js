@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Icon, VStack } from 'native-base';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { MaterialIcons } from '@expo/vector-icons';
 
 // Configuration
 import typography from 'app/config/typography';
@@ -17,8 +18,9 @@ import colors from 'app/config/colors';
 // Components
 import ErrorMessage from 'app/components/ErrorMessage';
 import RequiredIndicator from './RequiredIndicator';
-import { formatDate, formatTime } from 'app/utility/miscFunctions';
-import { MaterialIcons } from '@expo/vector-icons';
+
+// Utilities
+import { formatDate, formatTimeAMPM } from 'app/utility/miscFunctions';
 
 function DateInputField({
   isRequired,
@@ -33,6 +35,7 @@ function DateInputField({
   mode='date',
   placeholder=mode == 'date' ? 'Select date' : 'Select time',
   allowNull=false,
+  dateForTime,
 }) {
   const [show, setShow] = useState(false);
 
@@ -108,7 +111,7 @@ function DateInputField({
 
   const setFieldText = () => {
     if(value != null) {
-      return mode == 'date' ? formatDate(value, hideDayOfWeek) : formatTime(value);
+      return mode == 'date' ? formatDate(value, hideDayOfWeek) : formatTimeAMPM(value);
     }  else {
       return placeholder;
     }
@@ -154,7 +157,7 @@ function DateInputField({
         {show && (
           <DateTimePicker
             testID="dateTimePicker"
-            value={value || new Date()}
+            value={value || dateForTime || new Date()}
             display="default"
             mode={mode}
             onChange={(onChangeData)}

@@ -30,7 +30,7 @@ const FilterModalCard = ({
   originalList=[],
   initializeData,
   onInitialize,
-  applySortFilter=true,
+  applySortFilter,
   setApplySortFilter,
 
   sort=sortFilterInitialState,
@@ -45,14 +45,18 @@ const FilterModalCard = ({
   autocomplete=sortFilterInitialState,
   setAutocomplete=()=>{},
   
-  date=sortFilterInitialState,
-  setDate=()=>{}, 
+  datetime=sortFilterInitialState,
+  setDatetime=()=>{}, 
+
+  time=sortFilterInitialState,
+  setTime=()=>{}, 
 
   filterIconSize=12,  
   handleSortFilter,
 }) => {
+  
   // Types of filter display options
-  const FILTER_TYPES = ['chip', 'dropdown', 'autocomplete', 'date', 'tempSelFilters'];
+  const FILTER_TYPES = ['chip', 'dropdown', 'autocomplete', 'date', 'time'];
 
   const initialRef = useRef(null);
   const finalRef = useRef(null);
@@ -66,42 +70,30 @@ const FilterModalCard = ({
     
   // Whenever data changes, reinitialize sort and filter options and apply search, sort, filter
   useEffect(() => {
-    // console.log('MODAL -', 1, 'useEffect [initializeData, filterOptionDetails]', initializeData)
+    console.log('MODAL 1 - useEffect [initializeData, filterOptionDetails]', initializeData)
     if (initializeData) {
+      console.log('MODAL 1.5 - useEffect [initializeData, filterOptionDetails]')
       initSortFilterOptions();
       onInitialize();
     }
-  }, [initializeData, filterOptionDetails])
+  }, [initializeData])
 
   // Re-initialize sort and filter values to currently applied values whenever modal opens
   useEffect(() => {
-    // console.log('MODAL -', 2, 'useEffect [isModalVisible]', isModalVisible)
+    console.log('MODAL 2 - useEffect [isModalVisible]')
     setIsLoading(true);
 
-    setSort(prevState => ({
+    const update = prevState => ({
       ...prevState,
       tempSel: {...prevState.sel}
-    }))
-    
-    setDropdown(prevState => ({
-      ...prevState,
-      tempSel: {...prevState.sel}
-    }))
+    })
 
-    setChip(prevState => ({
-      ...prevState,
-      tempSel: {...prevState.sel}
-    }))
-
-    setAutocomplete(prevState => ({
-      ...prevState,
-      tempSel: {...prevState.sel}
-    }))
-
-    setDate(prevState => ({
-      ...prevState,
-      tempSel: {...prevState.sel}
-    }))
+    setSort(prevState => update(prevState))    
+    setDropdown(prevState => update(prevState))
+    setChip(prevState => update(prevState))
+    setAutocomplete(prevState => update(prevState))
+    setDatetime(prevState => update(prevState))
+    setTime(prevState => update(prevState))
 
     Keyboard.dismiss();
     setIsLoading(false);
@@ -110,8 +102,38 @@ const FilterModalCard = ({
   
   // Initialize sort and filteroptions based on view mode
   const initSortFilterOptions = () => {
-    // console.log('BAR -', 3, 'initSortOptions')
+    console.log('MODAL 3 - initSortOptions')
 
+    let tempSort = initSort();
+    setSort(tempSort);
+
+    let tempFilters = initFilterOptions();
+    let tempChip = tempFilters.tempChip;
+    let tempDropdown = tempFilters.tempDropdown;
+    let tempAutocomplete = tempFilters.tempAutocomplete;
+    let tempDatetime = tempFilters.tempDatetime;
+    setDropdown(tempDropdown);
+    setChip(tempChip);
+    setAutocomplete(tempAutocomplete);
+    setDatetime(tempDatetime)
+
+    // Do not sort/filter if applySortFilter is false
+    // For example, if only temporarily updating filter options when modal is open, no need to apply sort/filter
+    if(applySortFilter) {
+      handleSortFilter({
+        'tempSelSort': tempSort['tempSel'], 
+        'tempSelDropdownFilters': tempDropdown['tempSel'], 
+        'tempSelChipFilters': tempChip['tempSel'],
+        'tempSelAutocompleteFilters': tempAutocomplete['tempSel'],
+        'tempSelDatetimeFilters': tempDatetime['tempSel'],
+      });
+    } else {
+      setApplySortFilter(false);
+    }
+  }
+
+  // Initialize sort state
+  const initSort = () => {
     let tempSort = {'filterOptions': parseSelectOptions(SORT_OPTIONS), 'sel': {}, 'tempSel': {}};
 
     const keys = ['sel', 'tempSel'];
@@ -138,12 +160,15 @@ const FilterModalCard = ({
         }
       }
     }    
-    setSort(tempSort);
+    return tempSort
+  }
 
+  // Initialize filter states
+  const initFilterOptions = () => {
     let tempDropdown = {'filterOptions': {}, 'sel': {}, 'tempSel': {}};
     let tempChip = {'filterOptions': {}, 'sel': {}, 'tempSel': {}};
     let tempAutocomplete = {'filterOptions': {}, 'sel': {}, 'tempSel': {}};
-    let tempDate = {'filterOptions': {}, 'sel': {}, 'tempSel': {}};
+    let tempDatetime = {'filterOptions': {}, 'sel': {}, 'tempSel': {}};
 
     if(FILTER_OPTIONS.length > 0) {
       
@@ -155,7 +180,7 @@ const FilterModalCard = ({
           tempFilterOptionList = originalList.map(x => x[FIELD_MAPPING[filter]]);
           tempFilterOptionList = Array.from(new Set(tempFilterOptionList));        
         }
-        
+
         // Parse filter options based on dropdown/chip type
         switch(filterOptionDetails[filter]['type']) {
           case 'chip':
@@ -189,60 +214,39 @@ const FilterModalCard = ({
             }            
             tempAutocomplete = initSelectedFilters(tempAutocomplete, filter, autocomplete, 'id');            
             break;
+          case 'time':
           case 'date': 
-            tempDate['filterOptions'][filter] = {}
-            tempDate['sel'][filter] = {}
-            tempDate['tempSel'][filter] = {}
+            tempDatetime['filterOptions'][filter] = {}
+            tempDatetime['sel'][filter] = {}
+            tempDatetime['tempSel'][filter] = {}
             const keys = ['min', 'max'];
             for (var i = 0; i<keys.length; i++) {
               const key = keys[i];
               if(key in filterOptionDetails[filter]['options']) {
-                tempDate['filterOptions'][filter][key] = {
+                tempDatetime['filterOptions'][filter][key] = {
                   'default': filterOptionDetails[filter]['options'][key]['default'] || null,
                   'limit': filterOptionDetails[filter]['options'][key]['limit'] || null
                 }
-                tempDate['sel'][filter][key] = filter in date['sel'] 
-                  ? date['sel'][filter][key] 
-                  : tempDate['filterOptions'][filter][key]['default']; 
-                tempDate['tempSel'][filter][key] = filter in date['tempSel'] 
-                ? date['tempSel'][filter][key] 
-                : tempDate['filterOptions'][filter][key]['default'];
+                tempDatetime['sel'][filter][key] = filter in datetime['sel'] 
+                  ? datetime['sel'][filter][key] 
+                  : tempDatetime['filterOptions'][filter][key]['default']; 
+                tempDatetime['tempSel'][filter][key] = filter in datetime['tempSel'] 
+                ? datetime['tempSel'][filter][key] 
+                : tempDatetime['filterOptions'][filter][key]['default'];
               }
             }
             break;
         }
       }
     }
-    setDropdown(tempDropdown);
-    setChip(tempChip);
-    setAutocomplete(tempAutocomplete);
-    setDate(tempDate)
-
-    // Only apply sort filter if no change to filterOptionDetails
-    // For example, if only updating filter options, no need to apply sort/filter
-    // if(applySortFilter) {
-    //   handleSortFilter({});
-    // } else {
-    //   setApplySortFilter(true);
-    // }
-    // For example, if only updating filter options, no need to apply sort/filter
-    if(filterOptionDetails == localFilterOptionDetails ) {
-      handleSortFilter({
-        'tempSelSort': tempSort['tempSel'], 
-        'tempSelDropdownFilters': tempDropdown['tempSel'], 
-        'tempSelChipFilters': tempChip['tempSel'],
-        'tempSelAutocompleteFilters': tempAutocomplete['tempSel'],
-        'tempSelDateFilters': tempDate['tempSel'],
-      });
-    } else {
-      setLocalFilterOptionDetails(filterOptionDetails);
-    }
+    return {tempChip, tempDropdown, tempAutocomplete, tempDatetime};
   }
-
+  
   // If filter already selected, set to new filter with same value if exists
   // Otherwise set to first option
   // Note: real time update of tempsel value will not be reflected in autocomplete
   const initSelectedFilters = (temp, filter, og, key='value') => {        
+    console.log('MODAL 4 - initSelectedFilters', )
     if(filter in og['tempSel']) {
       let sel = og['sel'][filter][key];
       temp['sel'][filter] = temp['filterOptions'][filter].find(x => x[key] == sel) || temp['filterOptions'][filter][0];
@@ -257,40 +261,25 @@ const FilterModalCard = ({
 
   // Apply sort and filter values and close modal
   const handleApply = () => {
-    // console.log('MODAL -', 4, 'handleApply', )
+    console.log('MODAL 5 - handleApply', )
     updateState(setIsModalVisible, setModalVisible, false);
-
-    setSort(prevState => ({
+    const update = prevState => ({
       ...prevState,
       sel: {...prevState.tempSel}
-    }))
+    })
 
-    setDropdown(prevState => ({
-      ...prevState,
-      sel: {...prevState.tempSel}
-    }))
-
-    setChip(prevState => ({
-      ...prevState,
-      sel: {...prevState.tempSel}
-    }))
-
-    setAutocomplete(prevState => ({
-      ...prevState,
-      sel: {...prevState.tempSel}
-    }))
-
-    setDate(prevState => ({
-      ...prevState,
-      sel: {...prevState.tempSel}
-    }))
+    setSort(prevState => update(prevState));
+    setDropdown(prevState => update(prevState));
+    setChip(prevState => update(prevState));
+    setAutocomplete(prevState => update(prevState));
+    setDatetime(prevState => update(prevState));
 
     handleSortFilter({
       'tempSelSort': sort['tempSel'], 
       'tempSelDropdownFilters': dropdown['tempSel'], 
       'tempSelChipFilters': chip['tempSel'],
       'tempSelAutocompleteFilters': autocomplete['tempSel'],
-      'tempSelDateFilters': date['tempSel'],
+      'tempSelDatetimeFilters': datetime['tempSel'],
     });
   };
 
@@ -303,7 +292,7 @@ const FilterModalCard = ({
     return temp;
   }  
 
-  const resetDateFilters = (temp) => {
+  const resetDatetimeFilters = (temp) => {
     for(var filter in temp['filterOptions']) {
       if('min' in temp['filterOptions'][filter]) {
         temp['sel'][filter]['min'] = temp['filterOptions'][filter]['min']['default'];
@@ -328,7 +317,7 @@ const FilterModalCard = ({
       'option': {...sort.filterOptions[0]},
       'asc': true,
     }
-    let tempDate = resetDateFilters({...date});
+    let tempDatetime = resetDatetimeFilters({...datetime});
 
     setSort(prevState => ({
       ...prevState,
@@ -338,7 +327,7 @@ const FilterModalCard = ({
     setDropdown(tempDropdown);
     setChip(tempChip);
     setAutocomplete(tempAutocomplete);
-    setDate(tempDate);
+    setDatetime(tempDatetime);
 
     updateState(setIsModalVisible, setModalVisible, false);
     handleSortFilter({
@@ -346,7 +335,7 @@ const FilterModalCard = ({
       'tempSelDropdownFilters': tempDropdown['tempSel'], 
       'tempSelChipFilters': tempChip['tempSel'],
       'tempSelAutoCompleteFilters': tempAutocomplete['tempSel'],
-      'tempSelDateFilters': tempDate['tempSel'],
+      'tempSelDatetimeFilters': tempDatetime['tempSel'],
     });  };
 
   // Set display value of sort item is selected
@@ -405,35 +394,36 @@ const FilterModalCard = ({
   }
   
   // Set display value of date filter when item is selected
-  const handleOnSelectDateFilter = (dateVal, filter, type) => {
-    let tempSelectedDateFilter = {...date['tempSel'][filter]} || {};
+  const handleOnSelectDatetimeFilter = (datetimeVal, filter, type) => {
+    console.log(datetimeVal)
+    let tempSelectedDatetimeFilter = {...datetime['tempSel'][filter]} || {};
  
     if(type == 'min') {
-      tempSelectedDateFilter['min'] = dateVal;
-    } else {
-      tempSelectedDateFilter['max'] = dateVal;      
+      tempSelectedDatetimeFilter['min'] = datetimeVal;
+    } else if(type == 'max'){
+      tempSelectedDatetimeFilter['max'] = datetimeVal;      
     }
 
-    setDate(prevState => ({
+    setDatetime(prevState => ({
       ...prevState,
       tempSel: {
         ...prevState['tempSel'],
-        [filter]: tempSelectedDateFilter
+        [filter]: tempSelectedDatetimeFilter
       }
     }))
   }
 
   // Set upper limit of date filter
   const setMaxDate = (filter, type) => {
-    let maxDate = date['filterOptions'][filter][type]['limit'] ? date['filterOptions'][filter][type]['limit']['max'] : null ;
+    let maxDate = datetime['filterOptions'][filter][type]['limit'] ? datetime['filterOptions'][filter][type]['limit']['max'] : null ;
     if(type == 'min') {
-      if('max' in date['tempSel'][filter]) {
-        maxDate = date['tempSel'][filter]['max'] == null 
+      if('max' in datetime['tempSel'][filter]) {
+        maxDate = datetime['tempSel'][filter]['max'] == null 
           ? maxDate 
           : maxDate == null
-            ? date['tempSel'][filter]['max'] 
-            : date['tempSel'][filter]['max'] < maxDate 
-              ? date['tempSel'][filter]['max'] 
+            ? datetime['tempSel'][filter]['max'] 
+            : datetime['tempSel'][filter]['max'] < maxDate 
+              ? datetime['tempSel'][filter]['max'] 
               : maxDate
       } 
     } 
@@ -441,20 +431,43 @@ const FilterModalCard = ({
   }
   // Set lower limit of date filter
   const setMinDate = (filter, type) => {
-    let minDate = date['filterOptions'][filter][type]['limit'] ? date['filterOptions'][filter][type]['limit']['min'] : null;
+    let minDate = datetime['filterOptions'][filter][type]['limit'] ? datetime['filterOptions'][filter][type]['limit']['min'] : null;
     if(type == 'max') {
-      if('min' in date['tempSel'][filter]) {
-        minDate = date['tempSel'][filter]['min'] == null 
-          ? minDate 
-          : minDate == null
-            ? date['tempSel'][filter]['min'] 
-            : date['tempSel'][filter]['min'] > minDate 
-              ? date['tempSel'][filter]['min'] 
-              : minDate
+      if('min' in datetime['tempSel'][filter]) {
+        minDate = datetime['tempSel'][filter]['min'] == null 
+        ? minDate 
+        : minDate == null
+        ? datetime['tempSel'][filter]['min'] 
+        : datetime['tempSel'][filter]['min'] > minDate 
+        ? datetime['tempSel'][filter]['min'] 
+        : minDate
       } 
     }
     return minDate;
+  }
+  
+  // For time filters where user has input both min and max time, ensure that min time is less than max time
+  // Else show error and disable submit button
+  const checkTimeFilterError = (filter) => {
+    let err = false;
+    if ('min' in datetime['filterOptions'][filter] && 'max' in datetime['filterOptions'][filter]) {
+      if(datetime['tempSel'][filter]['min'] != null && datetime['tempSel'][filter]['max'] != null) {
+        if(datetime['tempSel'][filter]['min'] > datetime['tempSel'][filter]['max']) {
+          err = true;
+        }
+      }
+    }
+    return err;
+  }
 
+  const checkFilterError = () => {
+    let err = false;
+    for(var filter in datetime['filterOptions']) {
+      if(filterOptionDetails[filter]['type'] == 'time') {
+        err = checkTimeFilterError(filter) || false;
+      }
+    }
+    return err;
   }
 
   return (
@@ -597,48 +610,53 @@ const FilterModalCard = ({
                     )}
                 </View>
               ): null}
-            {!isEmptyObject(date['filterOptions']) ? (
+            {!isEmptyObject(datetime['filterOptions']) ? (
               <View style={styles.filterContainer}>
-                {Object.keys(date['filterOptions']).map((filter) => (
+                {Object.keys(datetime['filterOptions']).map((filter) => (
                   <View key={filter}>
-                    <Text style={styles.textStyle}>{filter}{!('min' in date['filterOptions'][filter]) ? ' (Maximum)' : ''}{!('max' in date['filterOptions'][filter]) ? ' (Minimum)' : ''} </Text>
-                    <View style={styles.dateFilterContainer}>
+                    <Text style={styles.textStyle}>{filter}{!('min' in datetime['filterOptions'][filter]) ? ' (Maximum)' : ''}{!('max' in datetime['filterOptions'][filter]) ? ' (Minimum)' : ''} </Text>
+                    <View style={styles.datetimeFilterContainer}>
                       <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        {'min' in date['filterOptions'][filter] ? (
-                          <View style={{flex:'max' in date['filterOptions'][filter] ? 0.5 : 1 }}>
+                        {'min' in datetime['filterOptions'][filter] ? (
+                          <View style={{flex:'max' in datetime['filterOptions'][filter] ? 0.5 : 1 }}>
                             <DateInputField
                               hideDayOfWeek
                               allowNull
-                              mode='date'
-                              placeholder={'Select date'}
-                              value={date['tempSel'][filter]['min']}
+                              mode={filterOptionDetails[filter]['type']}
+                              placeholder={filterOptionDetails[filter]['type'] == 'date' ? 'Select date' : 'Select time'}
+                              value={datetime['tempSel'][filter]['min']}
                               maximumInputDate={setMaxDate(filter, 'min')}
                               minimumInputDate={setMinDate(filter, 'min')}
-                              handleFormData={(date) => handleOnSelectDateFilter(date, filter, 'min')}
+                              handleFormData={(date) => handleOnSelectDatetimeFilter(date, filter, 'min')}
+                              dateForTime={filterOptionDetails[filter]['options']['date']}
                               />                            
                           </View>   
                         ) : null}
-                        {'min' in date['filterOptions'][filter] && 'max' in date['filterOptions'][filter] ? (
+                        {'min' in datetime['filterOptions'][filter] && 'max' in datetime['filterOptions'][filter] ? (
                           <View style={styles.dateTitle}>
                             <Text style={styles.textStyle}>To</Text>
                           </View>
                         ) : null}
-                        {'max' in date['filterOptions'][filter] ? (                      
-                          <View style={{flex: 'min' in date['filterOptions'][filter] ? 0.5 : 1}}>
+                        {'max' in datetime['filterOptions'][filter] ? (                      
+                          <View style={{flex: 'min' in datetime['filterOptions'][filter] ? 0.5 : 1}}>
                             <DateInputField
                               hideDayOfWeek
                               allowNull
-                              mode='date'
-                              placeholder={'Select date'}
+                              mode={filterOptionDetails[filter]['type']}
+                              placeholder={filterOptionDetails[filter]['type'] == 'date' ? 'Select date' : 'Select time'}
                               maximumInputDate={setMaxDate(filter, 'max')}
                               minimumInputDate={setMinDate(filter, 'max')}
-                              value={date['tempSel'][filter]['max']}
-                              handleFormData={(date) => handleOnSelectDateFilter(date, filter, 'max')}
-                            />                            
+                              value={datetime['tempSel'][filter]['max']}
+                              handleFormData={(date) => handleOnSelectDatetimeFilter(date, filter, 'max')}
+                              dateForTime={filterOptionDetails[filter]['options']['date']}
+                              />                            
                           </View> 
-                          ) : null}
-                          </LocalizationProvider>
+                        ) : null}
+                      </LocalizationProvider>
                     </View>
+                    {checkTimeFilterError(filter) ? (
+                      <Text style={styles.errorMsg}>Start time cannot be greater than end time</Text>
+                    ) : null}
                   </View>
                 ))}
               </View>
@@ -656,10 +674,11 @@ const FilterModalCard = ({
                   Reset
                 </Button>
                 <Button
-                  backgroundColor={colors.green}
+                  backgroundColor={checkFilterError() ? colors.gray : colors.green}
                   onPress={() => {
                     handleApply();
                   }}
+                  disabled={checkFilterError()}
                 >
                   Apply
                 </Button>
@@ -702,7 +721,7 @@ const styles = StyleSheet.create({
   textStyle: {
     fontSize: 13.5,
     padding: 5,
-    paddingBottom: 10,
+    fontWeight: '400',
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
   },
   dateTitle: {
@@ -710,13 +729,17 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
     marginTop: 15
   },
-  dateFilterContainer: {
+  datetimeFilterContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
+    paddingBottom: 10,
   },
   dateText: {
     fontSize: 17
+  },
+  errorMsg: {
+    color: colors.red
   }
 });
 
