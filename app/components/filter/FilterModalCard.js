@@ -70,7 +70,7 @@ const FilterModalCard = ({
     
   // Whenever data changes, reinitialize sort and filter options and apply search, sort, filter
   useEffect(() => {
-    console.log('MODAL 1 - useEffect [initializeData, filterOptionDetails]', initializeData, datetime)
+    console.log('MODAL 1 - useEffect [initializeData, filterOptionDetails]', initializeData)
     if (initializeData) {
       console.log('MODAL 1.5 - useEffect [initializeData, filterOptionDetails]')
       initSortFilterOptions();
@@ -239,7 +239,7 @@ const FilterModalCard = ({
         }
       }
     }
-    return {tempChip, tempDropdown, tempAutocomplete, tempDatetime: tempDatetime};
+    return {tempChip, tempDropdown, tempAutocomplete, tempDatetime};
   }
   
   // If filter already selected, set to new filter with same value if exists
@@ -400,7 +400,7 @@ const FilterModalCard = ({
  
     if(type == 'min') {
       tempSelectedDatetimeFilter['min'] = datetimeVal;
-    } else {
+    } else if(type == 'max'){
       tempSelectedDatetimeFilter['max'] = datetimeVal;      
     }
 

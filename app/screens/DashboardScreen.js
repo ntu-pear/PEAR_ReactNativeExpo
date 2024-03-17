@@ -53,9 +53,13 @@ function DashboardScreen({ navigation }) {
   
   // Filter options based on view mode
   const FILTER_OPTIONS = {
-    'myPatients': [ 'Activity Type', 'Activity Time'],
-    'allPatients': ['Caregiver', 'Patient Start Date', 'Activity Type', 'Activity Time']
+    'myPatients': ['Activity Time'],
+    'allPatients': ['Activity Time']
   };
+  // const FILTER_OPTIONS = {
+  //   'myPatients': [ 'Activity Type', 'Patient Start Date', 'Activity Time'],
+  //   'allPatients': ['Caregiver', 'Patient Start Date', 'Activity Type', 'Patient Start Date', 'Activity Time']
+  // };
   
   // Mapping between sort/filter/search names and the respective field in the patient data retrieved from the backend
   const FIELD_MAPPING = {
@@ -190,9 +194,12 @@ function DashboardScreen({ navigation }) {
     if(!isEmptyObject(tempScheduleWeekly)) {      
       const currentDate = formatDate(tempSelectedDate, true);
       setOriginalSchedule([...tempScheduleWeekly[currentDate]]);
-      setSchedule([...tempScheduleWeekly[currentDate]]);
+      // if(checkAllEmptySchedules(tempScheduleWeekly[currentDate])) {
+      //   setSchedule([]);
+      // } else {
+        setSchedule([...tempScheduleWeekly[currentDate]]);
+      // }
     }
-    console.log("UPDATED SCHEDULE")
   }
 
   // Retrieve schedule from backend
@@ -430,6 +437,10 @@ function DashboardScreen({ navigation }) {
       tempSearchMode: tempSearchMode,
     });
 
+    if(checkAllEmptySchedules(schedule)) {
+      setSchedule([]);
+    }
+
     setIsLoading(false);    
   }
 
@@ -456,35 +467,51 @@ function DashboardScreen({ navigation }) {
   };
 
   // When user toggles date, update filter details and selected datetime filter accordingly
- const onToggleSelectedDate = (newDate) => {
-  setFilterOptionDetails(prevState=>({
-    ...prevState,
-    'Activity Time': {
-      ...prevState['Activity Time'],
-      options: {
-        ...prevState['Activity Time']['options'],
-        date: newDate
-      }
-    }
-  }))
-
-  const minActivityTime = datetime['sel']['Activity Time']['min'] ? new Date(datetime['sel']['Activity Time']['min']) : null;
-  const maxActivityTime = datetime['sel']['Activity Time']['max'] ? new Date(datetime['sel']['Activity Time']['max']) : null;
-
-  console.log(minActivityTime, newDate, minActivityTime ? new Date(newDate.setHours(minActivityTime.getHours(), minActivityTime.getMinutes(), 0)) : null)
-  setDatetime(prevState=>({
-    ...prevState,
-    'sel': {
+  const onToggleSelectedDate = (newDate) => {
+    setFilterOptionDetails(prevState=>({
       ...prevState,
       'Activity Time': {
-        'min': minActivityTime ? new Date(newDate.setHours(minActivityTime.getHours(), minActivityTime.getMinutes(), 0)) : null,
-        'max': maxActivityTime ? new Date(newDate.setHours(maxActivityTime.getHours(), maxActivityTime.getMinutes(), 0)) : null
+        ...prevState['Activity Time'],
+        options: {
+          ...prevState['Activity Time']['options'],
+          date: newDate
+        }
+      }
+    }))
+
+    const minActivityTime = datetime['sel']['Activity Time']['min'] ? new Date(datetime['sel']['Activity Time']['min']) : null;
+    const maxActivityTime = datetime['sel']['Activity Time']['max'] ? new Date(datetime['sel']['Activity Time']['max']) : null;
+
+    setDatetime(prevState=>({
+      ...prevState,
+      'sel': {
+        ...prevState['sel'],
+        'Activity Time': {
+          'min': minActivityTime ? new Date(newDate.setHours(minActivityTime.getHours(), minActivityTime.getMinutes(), 0)) : null,
+          'max': maxActivityTime ? new Date(newDate.setHours(maxActivityTime.getHours(), maxActivityTime.getMinutes(), 0)) : null
+        }
+      },
+      'tempSel': {
+        ...prevState['tempSel'],
+        'Activity Time': {
+          'min': minActivityTime ? new Date(newDate.setHours(minActivityTime.getHours(), minActivityTime.getMinutes(), 0)) : null,
+          'max': maxActivityTime ? new Date(newDate.setHours(maxActivityTime.getHours(), maxActivityTime.getMinutes(), 0)) : null
+        }
+      },
+    }));
+  }
+
+  // Check if all schedules are empty
+  const checkAllEmptySchedules = (tempSchedule) => {
+    for(var i = 0; i<schedule.length; i++) {
+      if(schedule[i]['activities'].length > 0) {
+        return false
       }
     }
-  }));
-  
-}
+    return true;
+  }
 
+  // Returns message to display if api call error or no data to display
   const noDataMessage = () => {
     // Display error message if API request fails
     let message = '';
@@ -502,8 +529,8 @@ function DashboardScreen({ navigation }) {
     }
     return (
       <MessageDisplayCard
-        TextMessage={isError ? message : 'No schedules found today'}
-        topPaddingSize={'42%'}
+        TextMessage={isError ? message : 'No schedules found'}
+        topPaddingSize={'36%'}
       />
     );
   };
