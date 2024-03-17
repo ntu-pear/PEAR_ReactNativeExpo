@@ -19,9 +19,6 @@ import AppButton from 'app/components/AppButton';
 function EditPatientInfoScreen(props) {
   const { navigation, patientProfile } = props.route.params;
 
-  // Variables relatied to retrieving preferred language select options from API
-  const { data, isError, isLoading } = useGetSelectionOptions('Language');
-
   // Set initial value for preferred language select field
   const [listOfLanguages, setListOfLanguages] = useState(
     parseSelectOptions([
