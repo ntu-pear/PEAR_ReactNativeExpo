@@ -16,7 +16,7 @@ import colors from 'app/config/colors';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
-import SearchFilterBar from 'app/components/filter/SearchFilterBar';
+import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
 
 // Utilities
 import { isEmptyObject, sortFilterInitialState } from 'app/utility/miscFunctions';
