@@ -78,24 +78,21 @@ export const formatDate = (inputDate, hideDayOfWeek) => {
 
 // Used to format the time to HH:mm AM/PM
 // TODO
-export const formatTime = (inputTime) => {
-  const listOfDays = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
-
-  let day, date, month, year;
-  day = inputTime.getDay();
-  date = inputTime.getDate();
-  month = inputTime.getMonth() + 1;
-  year = inputTime.getFullYear();
-  date = date.toString().padStart(2, '0');
-  month = month.toString().padStart(2, '0');
-
-  return hideDayOfWeek
-    ? `${date}/${month}/${year}`
-    : `${listOfDays[day]}, ${date}/${month}/${year}`;
+export const formatTimeAMPM = (date) => {
+  date = new Date(date);
+  var hours = date.getHours();
+  var minutes = date.getMinutes();
+  var ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12; 
+  minutes = minutes < 10 ? '0' + minutes : minutes;
+  var strTime = hours + ':' + minutes + ' ' + ampm;
+  
+  return strTime;
 };
 
 // Given a string containig military time like 0900, convert to datetime 
-export const formatMilitaryTime = (timeString, date=new Date()) => {
+export const formatTimeMilitary = (timeString, date=new Date()) => {
   const hours = parseInt(timeString.substring(0, 2), 10);
   const minutes = parseInt(timeString.substring(2), 10);
 
@@ -104,9 +101,9 @@ export const formatMilitaryTime = (timeString, date=new Date()) => {
   return dateTime;
 }
 
-export const formatTimeHM24 = (time) => {  
-  const hour = new Date(time).getHours();
-  const minute = new Date(time).getMinutes();
+export const formatTimeHM24 = (date) => {  
+  const hour = new Date(date).getHours();
+  const minute = new Date(date).getMinutes();
 
   const hourString = hour < 10 ? '0' + hour : hour.toString();
   const minuteString = minute < 10 ? '0' + minute : minute.toString();
@@ -114,6 +111,14 @@ export const formatTimeHM24 = (time) => {
   const timeString = hourString + ':' + minuteString;
 
   return timeString;
+}
+
+// Set the seconds of any datetime to zero
+// Useful for time-related calculations where seconds are irrelevant
+export const setSecondsToZero = (datetime) => {
+  let tempDatetime = new Date(datetime)
+  datetime = datetime.setHours(tempDatetime.getHours(), tempDatetime.getMinutes(), 0);
+  return datetime;
 }
 
 export const sortFilterInitialState = {'filterOptions': {}, 'sel': {}, 'tempSel': {}}

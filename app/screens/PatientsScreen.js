@@ -76,6 +76,7 @@ function PatientsScreen({ navigation }) {
   const [patientStatus, setPatientStatus] = useState('active'); // active, inactive, ''
   const [viewMode, setViewMode] = useState('myPatients'); // myPatients, allPatients
   const [isReloadPatientList, setIsReloadPatientList] = useState(false);
+  const [applySortFilter, setApplySortFilter] = useState(true);
 
   // Search related states
   const [searchQuery, setSearchQuery] = useState('');
@@ -85,7 +86,7 @@ function PatientsScreen({ navigation }) {
   const [sort, setSort] = useState(sortFilterInitialState);
   const [dropdown, setDropdown] = useState(sortFilterInitialState);
   const [chip, setChip] = useState(sortFilterInitialState);
-  const [date, setDate] = useState(sortFilterInitialState);
+  const [datetime, setDatetime] = useState(sortFilterInitialState);
 
   // Filter details related state
   // Details of filter options
@@ -242,6 +243,7 @@ function PatientsScreen({ navigation }) {
       }
     }));
 
+    setApplySortFilter(false);
     setJustUpdated(true);
   }    
 
@@ -253,7 +255,7 @@ function PatientsScreen({ navigation }) {
     tempSelSort, 
     tempSelDropdownFilters,
     tempSelChipFilters, 
-    tempSelSearchDate,
+    tempSelDatetimeFilters,
     tempSearchMode,
     setFilteredList
   }) => {       
@@ -276,7 +278,7 @@ function PatientsScreen({ navigation }) {
         tempSelSort: tempSelSort, 
         tempSelDropdownFilters: tempSelDropdownFilters,
         tempSelChipFilters: tempSelChipFilters, 
-        tempSelSearchDate: tempSelSearchDate,
+        tempSelDatetimeFilters: tempSelDatetimeFilters,
         tempSearchMode: tempSearchMode,
       });
       
@@ -303,9 +305,9 @@ function PatientsScreen({ navigation }) {
 
   const showStartDate = () => {
     return (!isEmptyObject(sort['sel']) ? sort['sel']['option']['label'] == 'Start Date' : false) || 
-      'Start Date' in date['sel'] ? (
-        (date['sel']['Start Date']['min'] && date['sel']['Start Date']['min'] != null) || 
-        (date['sel']['Start Date']['max'] && date['sel']['Start Date']['max'] != null) 
+      'Start Date' in datetime['sel'] ? (
+        (datetime['sel']['Start Date']['min'] && datetime['sel']['Start Date']['min'] != null) || 
+        (datetime['sel']['Start Date']['max'] && datetime['sel']['Start Date']['max'] != null) 
       ) : false        
   }
 
@@ -340,8 +342,8 @@ function PatientsScreen({ navigation }) {
             chip={chip}
             setChip={setChip}
 
-            date={date}
-            setDate={setDate}
+            datetime={datetime}
+            setDatetime={setDatetime}
             
             SORT_OPTIONS={SORT_OPTIONS}
             

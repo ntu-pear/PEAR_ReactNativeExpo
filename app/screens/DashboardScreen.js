@@ -32,7 +32,7 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 
 // Utilities
 import globalStyles from 'app/utility/styles.js';
-import { formatDate, formatMilitaryTime, isEmptyObject, sortFilterInitialState } from 'app/utility/miscFunctions';
+import { formatDate, formatTimeMilitary, isEmptyObject, sortFilterInitialState } from 'app/utility/miscFunctions';
 
 function DashboardScreen() {
   // View modes user can switch between (displayed as tab on top)
@@ -52,8 +52,8 @@ function DashboardScreen() {
   
   // Filter options based on view mode
   const FILTER_OPTIONS = {
-    'myPatients': ['Patient Start Date', 'Activity Type'],
-    'allPatients': ['Caregiver', 'Patient Start Date', 'Activity Type']
+    'myPatients': [ 'Activity Type', 'Activity Time'],
+    'allPatients': ['Caregiver', 'Patient Start Date', 'Activity Type', 'Activity Time']
   };
   
   // Mapping between sort/filter/search names and the respective field in the patient data retrieved from the backend
@@ -62,7 +62,8 @@ function DashboardScreen() {
     'Preferred Name': 'patientName', 
     'Caregiver': 'patientCaregiverName', 
     'Patient Start Date': 'patientStartDate',
-    'Activity Type': 'activityTitle'
+    'Activity Type': 'activityTitle',
+    'Activity Time': 'startTime'
   };
   
   // Patient ata related states
@@ -88,8 +89,7 @@ function DashboardScreen() {
   // Sort/filter related states
   const [sort, setSort] = useState(sortFilterInitialState);
   const [dropdown, setDropdown] = useState(sortFilterInitialState);
-  const [date, setDate] = useState(sortFilterInitialState);
-  const [time, setTime] = useState(sortFilterInitialState);
+  const [datetime, setDatetime] = useState(sortFilterInitialState);
 
   // Filter details related state
   // Details of filter options
@@ -117,7 +117,13 @@ function DashboardScreen() {
       'options': {},
       'isFilter': false,
       'nestedFilter': 'activities'
-    }
+    },
+    'Activity Time': {
+      'type': 'time',
+      'options': {'min': {}, 'max': {}, 'date': selectedDate},
+      'isFilter': false,
+      'nestedFilter': 'activities'
+    },
   });
 
   // Refresh schedule when new user requests refresh
@@ -184,7 +190,6 @@ function DashboardScreen() {
       const currentDate = formatDate(tempSelectedDate, true);
       setOriginalSchedule([...tempScheduleWeekly[currentDate]]);
       setSchedule([...tempScheduleWeekly[currentDate]]);
-      // setIsLoading(true);
     }
     console.log("UPDATED SCHEDULE")
   }
@@ -319,7 +324,7 @@ function DashboardScreen() {
             medications.push({
               medName: medName,
               medDosage: medDosage,
-              medTime: formatMilitaryTime(medTime),
+              medTime: formatTimeMilitary(medTime),
               medNote: medNote
             })
           }
@@ -407,7 +412,7 @@ function DashboardScreen() {
     text,
     tempSelSort, 
     tempSelDropdownFilters,
-    tempSelChipFilters, 
+    tempSelDateFilters,
     tempSearchMode,
     setFilteredList
   }) => {       
@@ -418,8 +423,8 @@ function DashboardScreen() {
     setFilteredList({
       text: text, 
       tempSelSort: tempSelSort, 
-      tempSelDropdownFilters: tempSelDropdownFilters,
-      tempSelChipFilters: tempSelChipFilters, 
+      tempSelDropdownFilters: tempSelDropdownFilters, 
+      tempSelDateFilters: tempSelDateFilters,
       tempSearchMode: tempSearchMode,
     });
 
@@ -428,25 +433,53 @@ function DashboardScreen() {
 
   const handlePreviousDate = () => {
     console.log('DB 12 - handlePreviousDate');
-    
-    // setIsLoading(true); 
-    const previous = new Date(selectedDate.getTime());
-    previous.setDate(selectedDate.getDate() - 1);
+
+    let previous = new Date(selectedDate.setDate(selectedDate.getDate() - 1));
     setSelectedDate(previous);
     updateSchedule({tempSelectedDate: previous});
-    setIsDataInitialized(true);
+    onToggleSelectedDate(previous);
   };
 
   const handleNextDate = () => {
     console.log('DB 13 - handleNextDate');
     
-    // setIsLoading(true); 
-    const next = new Date(selectedDate.getTime());
-    next.setDate(selectedDate.getDate() + 1);
+    let next = new Date(selectedDate.setDate(selectedDate.getDate() + 1));
     setSelectedDate(next);
     updateSchedule({tempSelectedDate: next});
+    onToggleSelectedDate(next);
     setIsDataInitialized(true);
   };
+
+  // When user toggles date, update filter details and selected datetime filter accordingly
+ const onToggleSelectedDate = (newDate) => {
+  setFilterOptionDetails(prevState=>({
+    ...prevState,
+    'Activity Time': {
+      ...prevState['Activity Time'],
+      options: {
+        ...prevState['Activity Time']['options'],
+        date: newDate
+      }
+    }
+  }))
+
+  const minActivityTime = datetime['sel']['Activity Time']['min'] ? new Date(datetime['sel']['Activity Time']['min']) : null;
+  const maxActivityTime = datetime['sel']['Activity Time']['max'] ? new Date(datetime['sel']['Activity Time']['max']) : null;
+
+  console.log(minActivityTime, newDate, minActivityTime ? new Date(newDate.setHours(minActivityTime.getHours(), minActivityTime.getMinutes(), 0)) : null)
+  setDatetime(prevState=>({
+    ...prevState,
+    'sel': {
+      ...prevState,
+      'Activity Time': {
+        'min': minActivityTime ? new Date(newDate.setHours(minActivityTime.getHours(), minActivityTime.getMinutes(), 0)) : null,
+        'max': maxActivityTime ? new Date(newDate.setHours(maxActivityTime.getHours(), maxActivityTime.getMinutes(), 0)) : null
+      }
+    }
+  }));
+  
+  setIsDataInitialized(true);
+}
 
   const noDataMessage = () => {
     // Display error message if API request fails
@@ -502,12 +535,13 @@ function DashboardScreen() {
   }
 
   const showStartDate = () => {
-    return (!isEmptyObject(sort['sel']) ? sort['sel']['option']['label'] == 'Patient Start Date' : false)        
+    return (!isEmptyObject(sort['sel']) ? sort['sel']['option']['label'] == 'Patient Start Date' : false) || 
+      'Patient Start Date' in datetime['sel'] ? (
+        (datetime['sel']['Patient Start Date']['min'] && datetime['sel']['Patient Start Date']['min'] != null) || 
+        (datetime['sel']['Patient Start Date']['max'] && datetime['sel']['Patient Start Date']['max'] != null) 
+      ) : false    
   }
 
-  // if(isLoading) {
-  //   return (<ActivityIndicator visible/>)
-  // } 
   return (
     <>{isLoading ? (
       <ActivityIndicator visible />
@@ -542,8 +576,8 @@ function DashboardScreen() {
           dropdown={dropdown}
           setDropdown={setDropdown}
 
-          date={date}
-          setDate={setDate}    
+          datetime={datetime}
+          setDatetime={setDatetime}    
           
           SEARCH_OPTIONS={SEARCH_OPTIONS}
           searchOption={searchOption}
