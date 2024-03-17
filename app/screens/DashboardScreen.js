@@ -25,7 +25,7 @@ import routes from 'app/navigation/routes';
 
 // Components
 import ActivityCard from 'app/components/ActivityCard';
-import DateInputField from 'app/components/DateInputField';
+import DateInputField from 'app/components/input-components/DateInputField';
 import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
 import ProfileNameButton from 'app/components/ProfileNameButton';
