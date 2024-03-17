@@ -397,7 +397,7 @@ function PatientsScreen({ navigation }) {
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
           />
-          <View style={{height: '100%'}}>
+          <View style={{height:'85%'}}>
             <FlatList
               onRefresh={refreshPatientData}
               refreshing={isLoading}
@@ -437,21 +437,24 @@ function PatientsScreen({ navigation }) {
                 </TouchableOpacity>
               )}}
             />
-            <Fab
-              backgroundColor={colors.pink}
-              icon={
-                <Icon
-                  as={MaterialIcons}
-                  color={colors.white}
-                  name="person-add-alt"
-                  size="lg"
-                />
-              }
-              onPress={handleOnClickAddPatient}
-              shadow={2}
-              size="sm"
-              style={{position: 'absolute', 'bottom': '5%', 'right': '5%'}}
-            />
+            <Center position="absolute" right="5" bottom="5%">
+              <Fab
+                backgroundColor={colors.pink}
+                icon={
+                  <Icon
+                    as={MaterialIcons}
+                    color={colors.white}
+                    name="person-add-alt"
+                    size="lg"
+                    placement="bottom-right"
+                  />
+                }
+                onPress={handleOnClickAddPatient}
+                renderInPortal={false}
+                shadow={2}
+                size="sm"
+              />
+            </Center>
           </View>
         </View>
       )}
