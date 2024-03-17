@@ -1,5 +1,5 @@
 // Base
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { StyleSheet, Platform, View } from 'react-native';
 import {
   Box,
@@ -24,13 +24,13 @@ import { parseSelectOptions } from 'app/utility/miscFunctions';
 // Components
 import AddPatientProgress from 'app/components/AddPatientProgress';
 import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
-import DateInputField from 'app/components/DateInputField';
-import SelectionInputField from 'app/components/input-fields/SelectionInputField';
-import RadioButtonInput from 'app/components/RadioButtonsInput';
-import SingleOptionCheckBox from 'app/components/SingleOptionCheckBox';
+import DateInputField from 'app/components/input-components/DateInputField';
+import SelectionInputField from 'app/components/input-components/SelectionInputField';
+import RadioButtonInput from 'app/components/input-components/RadioButtonsInput';
+import SingleOptionCheckBox from 'app/components/input-components/SingleOptionCheckBox';
 import ActivityIndicator from 'app/components/ActivityIndicator';
-import InputField from 'app/components/input-fields/InputField';
-import SensitiveInputField from 'app/components/input-fields/SensitiveInputField';
+import InputField from 'app/components/input-components/InputField';
+import SensitiveInputField from 'app/components/input-components/SensitiveInputField';
 
 // APIs
 import patientApi from 'app/api/patient';
@@ -82,8 +82,8 @@ function PatientAddPatientInfoScreen({
   const [isPostalCodeError, setIsPostalCodeError] = useState(false);
   const [isTempAddrError, setIsTempAddrError] = useState(false);
   const [isTempPostalCodeError, setIsTempPostalCodeError] = useState(false);
-  const [isHomeTeleError, setIsHomeNoError] = useState(false);
-  const [isMobileError, setIsMobileNoError] = useState(false);
+  const [isHomeNoError, setIsHomeNoError] = useState(false);
+  const [isMobileNoError, setIsMobileNoError] = useState(false);
   const [isPrefNameError, setIsPrefNameError] = useState(false);
   const [isPrefLanguageError, setPrefLanguageError] = useState(false);
   const [isRespiteError, setIsRespiteError] = useState(false);
@@ -107,86 +107,135 @@ function PatientAddPatientInfoScreen({
   ];
 
   // Functions for error state reporting for the child components
-  const handleFirstNameError = (e) => {
-    setIsFirstNameError(e);
-    // console.log("first name", e)
-  };
+  const handleFirstNameError = useCallback(
+    (state) => {
+      setIsFirstNameError(state);
+      // console.log('FirstName: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isFirstNameError],
+  );
 
-  const handleLastNameError = (e) => {
-    setIsLastNameError(e);
-    // console.log("last name", e)
-  }
+  const handleLastNameError = useCallback(
+    (state) => {
+      setIsLastNameError(state);
+      // console.log("last name", state)
+    },
+    [isLastNameError],
+  );
     
-  const handleNRICError = (e) => {
-    setIsNRICError(e);
-    // console.log("nric", e)
-  }
+  const handleNRICError = useCallback(
+    (state) => {
+      setIsNRICError(state);
+      // console.log("nric", state)
+    },
+    [isNRICError],
+  );
   
-  const handleDOBError = (e) => {
-    setIsDOBError(e);
-    // console.log("dob", e)
-  }
+  const handleDOBError = useCallback(
+    (state) => {
+      setIsDOBError(state);
+      // console.log("dob", state)
+    },
+    [isDOBError],
+  );
 
-  const handleGenderError = (e) => {
-    setIsGenderError(e);
-    // console.log("gender", e)
-  }  
+  const handleGenderError = useCallback(
+    (state) => {
+      setIsGenderError(state);
+      // console.log("gender", state)
+    },
+    [isGenderError],
+  );
 
   
-  const handleAddrError = (e) => {
-    setIsAddrError(e);
-    // console.log("addr", e)
-  }
+  const handleAddrError = useCallback(
+    (state) => {
+      setIsAddrError(state);
+      // console.log("addr", state)
+    },
+    [isAddrError],
+  );
 
-  const handlePostalCodeError = (e) => {
-    setIsPostalCodeError(e);
-    // console.log("addr", e)
-  }
+  const handlePostalCodeError = useCallback(
+    (state) => {
+      setIsPostalCodeError(state);
+      // console.log("addr", state)
+    },
+    [isPostalCodeError],
+  );
   
-  const handleTempAddrError = (e) => {
-    setIsTempAddrError(e);
-    // console.log("temp addr", e)
-  }
+  const handleTempAddrError = useCallback(
+    (state) => {
+      setIsTempAddrError(state);
+      // console.log("temp addr", state)
+    },
+    [isTempAddrError],
+  );
 
-  const handleTempPostalCodeError = (e) => {
-    setIsTempPostalCodeError(e);
-    // console.log("addr", e)
-  }
+  const handleTempPostalCodeError = useCallback(
+    (state) => {
+      setIsTempPostalCodeError(state);
+      // console.log("addr", state)
+    },
+    [isTempPostalCodeError],
+  );
   
-  const handleHomeNoError = (e) => {
-    setIsHomeNoError(e);
-    // console.log("home", e)
-  };
+  const handleHomeNoError = useCallback(
+    (state) => {
+      setIsHomeNoError(state);
+      // console.log("home", state)
+    },
+    [isHomeNoError],
+  );
 
-  const handleMobileNoError = (e) => {
-    setIsMobileNoError(e);
-    // console.log("mobile", e)
-  }
+  const handleMobileNoError = useCallback(
+    (state) => {
+      setIsMobileNoError(state);
+      // console.log("mobile", state)
+    },
+    [isMobileNoError],
+  );
   
-  const handlePrefNameError = (e) => {
-    setIsPrefNameError(e);
-    // console.log("pref name", e)
-  }
+  const handlePrefNameError = useCallback(
+    (state) => {
+      setIsPrefNameError(state);
+      // console.log("pref name", state)
+    },
+    [isPrefNameError],
+  );
   
-  const handlePrefLanguageError = (e) => {
-    setPrefLanguageError(e);
-    // console.log("language", e)
-  }
+  const handlePrefLanguageError = useCallback(
+    (state) => {
+      setPrefLanguageError(state);
+      // console.log("language", state)
+    },
+    [isPrefLanguageError],
+  );
 
-  const handleRespiteError = (e) => {
-    setIsRespiteError(e);
-    // console.log("respite", e)
-  };
+  const handleRespiteError = useCallback(
+    (state) => {
+      setIsRespiteError(state);
+      // console.log("respite", state)
+    },
+    [isRespiteError],
+  );
 
-  const handleJoiningError = (e) => {
-    setIsJoiningError(e);
-    // console.log("joining", e)
-  };
+  const handleJoiningError = useCallback(
+    (state) => {
+      setIsJoiningError(state);
+      // console.log("joining", state)
+    },
+    [isJoiningError],
+  );
 
-  const handleLeavingError = (e) => {
-    setIsLeavingError(e);
-    // console.log("leaving", e)
-  };
+  const handleLeavingError = useCallback(
+    (state) => {
+      setIsLeavingError(state);
+      // console.log("leaving", state)
+    },
+    [isLeavingError],
+  );
 
   // This useEffect enables the page to show correct error checking.
   // The main isInputErrors is responsible for the error state of the screen.

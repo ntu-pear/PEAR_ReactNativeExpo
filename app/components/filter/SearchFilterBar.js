@@ -8,7 +8,7 @@ import colors from 'app/config/colors';
 import typography from 'app/config/typography';
 
 // Components
-import SearchBar from 'app/components/input-fields/SearchBar';
+import SearchBar from 'app/components/input-components/SearchBar';
 import FilterModalCard from 'app/components/filter/FilterModalCard';
 import FilterIndicator from 'app/components/filter/FilterIndicator';
 import TabBar from '../TabBar';

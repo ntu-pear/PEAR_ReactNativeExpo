@@ -14,9 +14,9 @@ import { Platform } from 'react-native';
 
 // Components
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
-import SelectionInputField from 'app/components/input-fields/SelectionInputField';
+import SelectionInputField from 'app/components/input-components/SelectionInputField';
 import HighlightsCard from 'app/components/HighlightsCard';
-import SearchBar from './input-fields/SearchBar';
+import SearchBar from './input-components/SearchBar';
 
 function PatientDailyHighlights() {
   // State controlling whether modal is visible or not

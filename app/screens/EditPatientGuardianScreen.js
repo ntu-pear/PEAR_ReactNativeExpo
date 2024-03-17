@@ -17,13 +17,12 @@ import NameInputField from 'app/components/NameInputField';
 import NRICInputField from 'app/components/NRICInputField';
 import SelectionInputField from 'app/components/SelectionInputField';
 import TelephoneInputField from 'app/components/TelephoneInputField';
-import SingleOptionCheckBox from 'app/components/SingleOptionCheckBox';
 import EmailInputField from 'app/components/EmailInputField';
 import CommonInputField from 'app/components/CommonInputField';
-import DateInputField from 'app/components/DateInputField';
+import DateInputField from 'app/components/input-components/DateInputField';
 import AppButton from 'app/components/AppButton';
 import ActivityIndicator from 'app/components/ActivityIndicator';
-import RadioButtonInput from 'app/components/RadioButtonsInput';
+import RadioButtonInput from 'app/components/input-components/RadioButtonsInput';
 
 function EditPatientGuardianScreen(props) {
   const { navigation, guardianProfile } = props.route.params;

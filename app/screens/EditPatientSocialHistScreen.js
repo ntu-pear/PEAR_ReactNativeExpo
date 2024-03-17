@@ -14,7 +14,7 @@ import socialHistoryApi from 'app/api/socialHistory';
 
 // Components
 import SelectionInputField from 'app/components/SelectionInputField';
-import RadioButtonInput from 'app/components/RadioButtonsInput';
+import RadioButtonInput from 'app/components/input-components/RadioButtonsInput';
 import AppButton from 'app/components/AppButton';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 

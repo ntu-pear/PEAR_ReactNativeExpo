@@ -1,5 +1,5 @@
 // Libs
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Box, Text, Divider, VStack } from 'native-base';
 import { StyleSheet, Platform, View } from 'react-native';
 
@@ -11,16 +11,16 @@ import typography from 'app/config/typography';
 import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
 // Components
-import SelectionInputField from 'app/components/SelectionInputField';
-import SingleOptionCheckBox from 'app/components/SingleOptionCheckBox';
+import SingleOptionCheckBox from 'app/components/input-components/SingleOptionCheckBox';
 import LoadingWheel from 'app/components/LoadingWheel';
-import DateInputField from 'app/components/DateInputField';
-import RadioButtonInput from 'app/components/RadioButtonsInput';
-import InputField from './input-fields/InputField';
-import SensitiveInputField from './input-fields/SensitiveInputField';
+import DateInputField from 'app/components/input-components/DateInputField';
+import RadioButtonInput from 'app/components/input-components/RadioButtonsInput';
+import InputField from './input-components/InputField';
+import SensitiveInputField from './input-components/SensitiveInputField';
 
 // Utilities
 import { parseSelectOptions } from 'app/utility/miscFunctions';
+import SelectionInputField from './input-components/SelectionInputField';
 
 function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
   const page = 'guardianInfo';
@@ -74,76 +74,118 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
   ];
 
   // Functions for error state reporting for the child components
+  const handleFirstNameError = useCallback(
+    (state) => {
+      setIsFirstNameError(state);
+      // console.log('FirstName: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isFirstNameError],
+  );
 
-  const handleFirstNameError = (e) => {
-    setIsFirstNameError(e);
-    // console.log("first name", e)
-  };
+  const handleLastNameError = useCallback(
+    (state) => {
+      setIsLastNameError(state);
+      // console.log("last name", state)
+    },
+    [isLastNameError]
+  );
 
-  const handleLastNameError = (e) => {
-    setIsLastNameError(e);
-    // console.log("last name", e)
-  };
+  const handlePrefNameError = useCallback(
+    (state) => {
+      setIsPrefNameError(state);
+      // console.log("pref name", state)
+    },
+    [isPrefNameError]
+  );
 
-  const handlePrefNameError = (e) => {
-    setIsPrefNameError(e);
-    // console.log("pref name", e)
-  };
+  const handleNRICError = useCallback(
+    (state) => {
+      setIsNRICError(state);
+      // console.log("nric", state)
+    },
+    [isNRICError]
+  );
 
-  const handleNRICError = (e) => {
-    setIsNRICError(e);
-    // console.log("nric", e)
-  };
+  const handleGenderError = useCallback(
+    (state) => {
+      setIsGenderError(state);
+      // console.log("gender", state)
+    },
+    [isGenderError]
+  );
 
-  const handleGenderError = (e) => {
-    setIsGenderError(e);
-    // console.log("gender", e)
-  };
+  const handleDOBError = useCallback(
+    (state) => {
+      setIsDOBError(state);
+      // console.log("dob", state)
+    },
+    [isDOBError]
+  );
 
-  const handleDOBError = (e) => {
-    setIsDOBError(e);
-    // console.log("dob", e)
-  };
+  const handleRelationError = useCallback(
+    (state) => {
+      setIsRelationError(state);
+      // console.log("relation", state)
+    },
+    [isRelationError]
+  );
 
-  const handleRelationError = (e) => {
-    setIsRelationError(e);
-    // console.log("relation", e)
-  };
+  const handleAddrError = useCallback(
+    (state) => {
+      setIsAddrError(state);
+      // console.log("addr", state)
+    },
+    [isAddrError]
+  );
 
-  const handleAddrError = (e) => {
-    setIsAddrError(e);
-    // console.log("addr", e)
-  };
+  const handlePostalCodeError = useCallback(
+    (state) => {
+      setIsPostalCodeError(state);
+      // console.log("addr", state)
+    },
+    [isPostalCodeError]
+  );
 
-  const handlePostalCodeError = (e) => {
-    setIsPostalCodeError(e);
-    // console.log("addr", e)
-  };
+  const handleTempAddrError = useCallback(
+    (state) => {
+      setIsTempAddrError(state);
+      // console.log("temp addr", state)
+    },
+    [isTempAddrError]
+  );
 
-  const handleTempAddrError = (e) => {
-    setIsTempAddrError(e);
-    // console.log("temp addr", e)
-  };
+  const handleTempPostalCodeError = useCallback(
+    (state) => {
+      setIsTempPostalCodeError(state);
+      // console.log("temp postal code", state)
+    },
+    [isTempPostalCodeError]
+  );
 
-  const handleTempPostalCodeError = (e) => {
-    setIsTempPostalCodeError(e);
-    // console.log("temp postal code", e)
-  };
+  const handleMobileNoError = useCallback(
+    (state) => {
+      setIsMobileNoError(state);
+      // console.log("mobile", state)
+    },
+    [isMobileNoError]
+  );
 
-  const handleMobileNoError = (e) => {
-    setIsMobileNoError(e);
-    // console.log("mobile", e)
-  };
+  const handleEmailError = useCallback(
+    (state) => {
+      setIsEmailError(state);
+      // console.log("email", state)
+    },
+    [isEmailError]
+  );
 
-  const handleEmailError = (e) => {
-    setIsEmailError(e);
-    // console.log("email", e)
-  };
-
-  const handleLoginError = (e) => {
-    setIsLoginError(e);
-    // console.log("email", e)
-  };
+  const handleLoginError = useCallback(
+    (state) => {
+      setIsLoginError(state);
+      // console.log("email", state)
+    },
+    [isLoginError]
+  );
 
   useEffect(() => {
     setIsInputErrors(

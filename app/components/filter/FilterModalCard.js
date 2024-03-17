@@ -13,8 +13,8 @@ import colors from 'app/config/colors';
 import typography from 'app/config/typography';
 
 // Components
-import SelectionInputField from '../input-fields/SelectionInputField';
-import DateInputField from '../DateInputField';
+import SelectionInputField from '../input-components/SelectionInputField';
+import DateInputField from '../input-components/DateInputField';
 
 // Utilities
 import { isEmptyObject, parseAutoCompleteOptions, parseSelectOptions, sortFilterInitialState, updateState } from 'app/utility/miscFunctions';

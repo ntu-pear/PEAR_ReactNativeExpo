@@ -11,8 +11,8 @@ import colors from 'app/config/colors';
 import patientApi from 'app/api/patient';
 
 //Components
-import RadioButtonInput from 'app/components/RadioButtonsInput';
-import DateInputField from 'app/components/DateInputField';
+import RadioButtonInput from 'app/components/input-components/RadioButtonsInput';
+import DateInputField from 'app/components/input-components/DateInputField';
 import CommonInputField from 'app/components/CommonInputField';
 import TelephoneInputField from 'app/components/TelephoneInputField';
 import AppButton from 'app/components/AppButton';
