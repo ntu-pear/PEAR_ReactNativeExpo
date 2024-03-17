@@ -16,6 +16,9 @@ import DateInputField from 'app/components/input-components/DateInputField';
 import InputField from 'app/components/input-components/InputField';
 import AppButton from 'app/components/AppButton';
 
+// Utilities
+import { parseSelectOptions } from 'app/utility/miscFunctions';
+
 function EditPatientInfoScreen(props) {
   const { navigation, patientProfile } = props.route.params;
 
@@ -66,26 +69,26 @@ function EditPatientInfoScreen(props) {
     PreferredLanguageListID: listOfLanguages.find(
       (item) => item.label === patientProfile.preferredLanguage,
     ).value, // convert label to value with listOfLanguages
-    PrefLanguage: patientProfile.preferredLanguage,
-    FirstName: patientProfile.firstName,
-    LastName: patientProfile.lastName,
-    NRIC: patientProfile.nric,
-    Gender: patientProfile.gender,
-    DOB: patientProfile.dob,
-    PreferredName: patientProfile.preferredName,
-    Address: patientProfile.address,
-    PostalCode: patientProfile.postalCode,
-    TempAddress: patientProfile.tempAddress,
-    TempPostalCode: patientProfile.tempPostalCode,
-    HomeNo: patientProfile.homeNo,
-    HandphoneNo: patientProfile.handphoneNo,
-    StartDate: patientProfile.startDate,
-    EndDate: patientProfile.endDate,
-    IsRespiteCare: patientProfile.isRespiteCare,
-    PrivacyLevel: patientProfile.privacyLevel,
-    UpdateBit: patientProfile.updateBit,
-    AutoGame: patientProfile.autoGame,
-    IsActive: patientProfile.isActive,
+    PrefLanguage: patientProfile.preferredLanguage != null ? patientProfile.preferredLanguage : '',
+    FirstName: patientProfile.firstName != null ? patientProfile.firstName : '',
+    LastName: patientProfile.lastName != null ? patientProfile.lastName : '',
+    NRIC: patientProfile.nric != null ? patientProfile.nric : '',
+    Gender: patientProfile.gender != null ? patientProfile.gender : '',
+    DOB: patientProfile.dob != null ? patientProfile.dob : null,
+    PreferredName: patientProfile.preferredName != null ? patientProfile.preferredName : '',
+    Address: patientProfile.address != null ? patientProfile.address : '',
+    PostalCode: patientProfile.postalCode != null ? patientProfile.postalCode : '',
+    TempAddress: patientProfile.tempAddress != null ? patientProfile.tempAddress : '',
+    TempPostalCode: patientProfile.tempPostalCode != null ? patientProfile.tempPostalCode : '',
+    HomeNo: patientProfile.homeNo != null ? patientProfile.homeNo : '',
+    HandphoneNo: patientProfile.handphoneNo != null ? patientProfile.handphoneNo : '',
+    StartDate: patientProfile.startDate != null ? patientProfile.startDate : null,
+    EndDate: patientProfile.endDate != null ? patientProfile.endDate : null,
+    IsRespiteCare: patientProfile.isRespiteCare != null ? patientProfile.isRespiteCare : '',
+    PrivacyLevel: patientProfile.privacyLevel != null ? patientProfile.privacyLevel : '',
+    UpdateBit: patientProfile.updateBit != null ? patientProfile.updateBit : '',
+    AutoGame: patientProfile.autoGame != null ? patientProfile.autoGame : '',
+    IsActive: patientProfile.isActive != null ? patientProfile.isActive : '',
   });
 
   
@@ -277,7 +280,7 @@ function EditPatientInfoScreen(props) {
                 />
 
                 <InputField
-                  isRequired={formData.TempAddress.length > 0}
+                  isRequired={formData.TempAddress ? formData.TempAddress.length > 0 : false}
                   title={'Temporary Postal Code'}
                   value={formData.TempPostalCode}
                   onChangeText={handleFormData('TempPostalCode')}
@@ -338,15 +341,6 @@ function EditPatientInfoScreen(props) {
                     onEndEditing={handleLeavingError}
                   />
                 </View>
-
-                <RadioButtonInput
-                  isRequired
-                  title={'Respite Care'}
-                  value={formData['IsRespiteCare']}
-                  onChangeData={handleFormData('IsRespiteCare')}
-                  dataArray={listOfRespiteCare}
-                  onChildData={handleRespiteState}
-                />
 
                 <Text style={styles.redText}>
                   Note: To edit other information, please contact system
