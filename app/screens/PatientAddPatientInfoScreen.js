@@ -1,5 +1,5 @@
 // Base
-import React, { useState, useEffect, useCallback, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { StyleSheet, Platform, View } from 'react-native';
 import {
   Box,
@@ -32,7 +32,7 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 import InputField from 'app/components/input-fields/InputField';
 import SensitiveInputField from 'app/components/input-fields/SensitiveInputField';
 
-// API
+// APIs
 import patientApi from 'app/api/patient';
 import AuthContext from 'app/auth/context';
 
@@ -241,6 +241,8 @@ function PatientAddPatientInfoScreen({
     getPrefNames();
   }, []);
 
+  console.log(isTempPostalCodeError)
+
   const [isPrefNamesLoading, setIsPrefNamesLoading] = useState(false);
   const { user, setUser } = useContext(AuthContext);
   const [prefNames, setPrefNames] = useState([]);
@@ -391,6 +393,16 @@ function PatientAddPatientInfoScreen({
                     onEndEditing={handleTempAddrError}
                   />
 
+                  <InputField
+                    isRequired={patient.TempAddress.length > 0}
+                    title={'Temporary Postal Code'}
+                    value={patient.TempPostalCode}
+                    onChangeText={handleFormData('TempPostalCode')}
+                    onEndEditing={handleTempPostalCodeError}
+                    dataType='postal code'
+                    keyboardType='numeric'
+                    maxLength={6}
+                  />
                   <InputField
                     title={'Home Telephone No.'}
                     value={patient.HomeNo}

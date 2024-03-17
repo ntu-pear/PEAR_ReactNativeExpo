@@ -1,5 +1,5 @@
 // Libs
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Text, Divider, VStack } from 'native-base';
 import { StyleSheet, Platform, View } from 'react-native';
 
@@ -16,9 +16,11 @@ import SingleOptionCheckBox from 'app/components/SingleOptionCheckBox';
 import LoadingWheel from 'app/components/LoadingWheel';
 import DateInputField from 'app/components/DateInputField';
 import RadioButtonInput from 'app/components/RadioButtonsInput';
-import { parseSelectOptions } from 'app/utility/miscFunctions';
 import InputField from './input-fields/InputField';
 import SensitiveInputField from './input-fields/SensitiveInputField';
+
+// Utilities
+import { parseSelectOptions } from 'app/utility/miscFunctions';
 
 function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
   const page = 'guardianInfo';
@@ -58,6 +60,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
   const [isDOBError, setIsDOBError] = useState(false);
   const [isRelationError, setIsRelationError] = useState(false);
   const [isTempAddrError, setIsTempAddrError] = useState(false);
+  const [isTempPostalCodeError, setIsTempPostalCodeError] = useState(false);
   const [isAddrError, setIsAddrError] = useState(false);
   const [isPostalCodeError, setIsPostalCodeError] = useState(false);
   const [isMobileNoError, setIsMobileNoError] = useState(false);
@@ -120,6 +123,11 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
   const handleTempAddrError = (e) => {
     setIsTempAddrError(e);
     // console.log("temp addr", e)
+  };
+
+  const handleTempPostalCodeError = (e) => {
+    setIsTempPostalCodeError(e);
+    // console.log("temp postal code", e)
   };
 
   const handleMobileNoError = (e) => {
@@ -284,6 +292,17 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
             onEndEditing={handleTempAddrError}
           />
 
+          <InputField
+            isRequired={guardian.TempAddress.length > 0}
+            title={'Temporary Postal Code'}
+            value={guardian.TempPostalCode}
+            onChangeText={handleFormData('TempPostalCode', i)}
+            onEndEditing={handleTempPostalCodeError}
+            dataType='postal code'
+            keyboardType='numeric'
+            maxLength={6}
+          />
+          
           <InputField
             isRequired
             title={'Mobile No.'}

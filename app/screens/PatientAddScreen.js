@@ -1,12 +1,12 @@
 // Libs
 import React, { useState } from 'react';
-import { Platform, Alert } from 'react-native';
+import { Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-// import { useNavigate } from 'react-router-dom';
+import mime from 'mime';
+import * as ImagePicker from 'expo-image-picker';
 
 // API
 import patientApi from 'app/api/patient';
-import mime from 'mime';
 
 // Configurations
 import routes from 'app/navigation/routes';
@@ -15,8 +15,6 @@ import routes from 'app/navigation/routes';
 import PatientAddPatientInfoScreen from 'app/screens/PatientAddPatientInfoScreen';
 import PatientAddGuardianScreen from 'app/screens/PatientAddGuardianScreen';
 import PatientAddAllergyScreen from 'app/screens/PatientAddAllergyScreen';
-import * as ImagePicker from 'expo-image-picker';
-import { ActivityIndicator } from 'react-native-paper';
 import LoadingWheel from 'app/components/LoadingWheel';
 
 function PatientAddScreen() {
@@ -49,6 +47,7 @@ function PatientAddScreen() {
       Address: '',
       PostalCode: '',
       TempAddress: '',
+      TempPostalCode: '',
       HomeNo: '',
       HandphoneNo: '',
       Gender: 'M',
@@ -85,6 +84,7 @@ function PatientAddScreen() {
         Address: '',
         PostalCode: '',
         TempAddress: '',
+        TempPostalCode: '',
         Gender: 'M',
         PreferredName: '',
       },
