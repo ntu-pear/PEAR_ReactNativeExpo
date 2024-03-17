@@ -189,7 +189,7 @@ function PatientAddScreen() {
     }));
   };
 
-  // Function to update patient data
+  // Function to update guardian data
   const handleGuardianData = (field, i) => (e) => {
     const newData = formData.guardianInfo;
 

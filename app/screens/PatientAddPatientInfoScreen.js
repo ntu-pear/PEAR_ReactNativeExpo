@@ -66,6 +66,16 @@ function PatientAddPatientInfoScreen({
       'Korean',
     ]),
   );
+  
+  // Used for the RadioButtonInput dataArray prop -> follow format of "label" and "value"
+  const [listOfGenders, setListOfGenders] = useState([
+    { label: 'Male', value: 'M' },
+    { label: 'Female', value: 'F' },
+  ]);
+  const [listOfRespiteCare, setListOfRespiteCare] = useState([
+    { label: 'Yes', value: true },
+    { label: 'No', value: false },
+  ]);
 
   // Screen error state: This = true when the child components report error(input fields)
   // Enables use of dynamic rendering of components when the page error = true/false.
@@ -90,21 +100,81 @@ function PatientAddPatientInfoScreen({
   const [isJoiningError, setIsJoiningError] = useState(false);
   const [isLeavingError, setIsLeavingError] = useState(false);
 
+  // States for getting list of preferred names
+  const [isPrefNamesLoading, setIsPrefNamesLoading] = useState(false);
+  const { user, setUser } = useContext(AuthContext);
+  const [prefNames, setPrefNames] = useState([]);
+
   // Maximum and minimum valid joining dates
   const minimumJoiningDate = new Date();
   minimumJoiningDate.setDate(minimumJoiningDate.getDate() - 30); // 30 days ago
   const maximumJoiningDate = new Date();
   maximumJoiningDate.setDate(maximumJoiningDate.getDate() + 30); // 30 days later
 
-  // Used for the RadioButtonInput dataArray prop -> follow format of "label" and "value"
-  const listOfGenders = [
-    { label: 'Male', value: 'M' },
-    { label: 'Female', value: 'F' },
-  ];
-  const listRespiteCare = [
-    { label: 'Yes', value: true },
-    { label: 'No', value: false },
-  ];
+  // This useEffect enables the page to show correct error checking.
+  // The main isInputErrors is responsible for the error state of the screen.
+  // This state will be true whenever any child input components are in error state.
+  useEffect(() => {
+    setIsInputErrors(
+      isFirstNameError ||
+      isLastNameError ||
+      isNRICError ||
+      isDOBError ||
+      isGenderError ||
+      isAddrError ||
+      isPostalCodeError ||
+      isTempAddrError ||
+      isTempPostalCodeError ||
+      isHomeNoError ||
+      isMobileNoError ||
+      isPrefNameError ||
+      isRespiteError ||
+      isJoiningError ||
+      isLeavingError,
+    );
+  }, [
+    isFirstNameError,
+    isLastNameError,
+    isNRICError,
+    isDOBError,
+    isGenderError,
+    isAddrError,
+    isPostalCodeError,
+    isTempAddrError,
+    isTempPostalCodeError,
+    isHomeNoError,
+    isMobileNoError,
+    isPrefNameError,
+    isRespiteError,
+    isJoiningError,
+    isLeavingError,
+  ]);
+
+  // Try to get langugage list from backend. If retrieval from the hook is successful, replace the content in
+  // listOfLanguages with the retrieved one.
+  useEffect(() => {
+    if (!isLoading && !isError && data) {
+      // console.log('selection data!');
+      setListOfLanguages(data);
+    }
+  }, [data, isError, isLoading]);
+
+  // Get patient preferred names from API
+  useEffect(() => {
+    getPrefNames();
+  }, []);
+
+  // Get list of preferred names from backend to detect duplicate preferred names
+  const getPrefNames = async () => {
+    setIsPrefNamesLoading(true);
+    const response = await patientApi.getPatientList(false, 'active');
+    if (!response.ok) {
+      setUser(null);
+      return;
+    }
+    setPrefNames(response.data.data.map((x) => x.preferredName));
+    setIsPrefNamesLoading(false);
+  };
 
   // Functions for error state reporting for the child components
   const handleFirstNameError = useCallback(
@@ -147,7 +217,6 @@ function PatientAddPatientInfoScreen({
     },
     [isGenderError],
   );
-
   
   const handleAddrError = useCallback(
     (state) => {
@@ -236,76 +305,6 @@ function PatientAddPatientInfoScreen({
     },
     [isLeavingError],
   );
-
-  // This useEffect enables the page to show correct error checking.
-  // The main isInputErrors is responsible for the error state of the screen.
-  // This state will be true whenever any child input components are in error state.
-  useEffect(() => {
-    setIsInputErrors(
-      isFirstNameError ||
-      isLastNameError ||
-      isNRICError ||
-      isDOBError ||
-      isGenderError ||
-      isAddrError ||
-      isPostalCodeError ||
-      isTempAddrError ||
-      isTempPostalCodeError ||
-      isHomeTeleError ||
-      isMobileError ||
-      isPrefNameError ||
-      isRespiteError ||
-      isJoiningError ||
-      isLeavingError,
-    );
-  }, [
-    isFirstNameError,
-    isLastNameError,
-    isNRICError,
-    isDOBError,
-    isGenderError,
-    isAddrError,
-    isPostalCodeError,
-    isTempAddrError,
-    isTempPostalCodeError,
-    isHomeTeleError,
-    isMobileError,
-    isPrefNameError,
-    isRespiteError,
-    isJoiningError,
-    isLeavingError,
-  ]);
-
-  // Try to get langugage list from backend. If retrieval from the hook is successful, replace the content in
-  // listOfLanguages with the retrieved one.
-  useEffect(() => {
-    if (!isLoading && !isError && data) {
-      // console.log('selection data!');
-      setListOfLanguages(data);
-    }
-  }, [data, isError, isLoading]);
-
-  // Get patient preferred names from API
-  useEffect(() => {
-    getPrefNames();
-  }, []);
-
-  console.log(isTempPostalCodeError)
-
-  const [isPrefNamesLoading, setIsPrefNamesLoading] = useState(false);
-  const { user, setUser } = useContext(AuthContext);
-  const [prefNames, setPrefNames] = useState([]);
-
-  const getPrefNames = async () => {
-    setIsPrefNamesLoading(true);
-    const response = await patientApi.getPatientList(false, 'active');
-    if (!response.ok) {
-      setUser(null);
-      return;
-    }
-    setPrefNames(response.data.data.map((x) => x.preferredName));
-    setIsPrefNamesLoading(false);
-  };
 
   return isLoading || isPrefNamesLoading ? (
     <ActivityIndicator visible />
@@ -497,7 +496,7 @@ function PatientAddPatientInfoScreen({
                     title={'Respite Care'}
                     value={patient.IsRespiteCare}
                     onChangeData={handleFormData('IsRespiteCare')}
-                    dataArray={listRespiteCare}
+                    dataArray={listOfRespiteCare}
                     onEndEditing={handleRespiteError}
                   />
 
@@ -527,9 +526,9 @@ function PatientAddPatientInfoScreen({
                   {formData.patientInfo.IsChecked ? (
                     <DateInputField
                       title={'Date of Leaving'}
+                      value={patient.EndDate}
                       handleFormData={handleFormData('EndDate')}
                       hideDayOfWeek={true}
-                      value={patient.EndDate}
                       onEndEditing={handleLeavingError}
                     />
                   ) : null}
