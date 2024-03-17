@@ -21,6 +21,7 @@ import patientApi from 'app/api/patient'
 
 // Configurations
 import colors from 'app/config/colors';
+import routes from 'app/navigation/routes';
 
 // Components
 import ActivityCard from 'app/components/ActivityCard';
@@ -59,7 +60,7 @@ function DashboardScreen({ navigation }) {
   // Mapping between sort/filter/search names and the respective field in the patient data retrieved from the backend
   const FIELD_MAPPING = {
     'Full Name': 'patientFullName', 
-    'Preferred Name': 'patientName', 
+    'Preferred Name': 'patientPreferredName', 
     'Caregiver': 'patientCaregiverName', 
     'Patient Start Date': 'patientStartDate',
     'Activity Type': 'activityTitle',
@@ -266,6 +267,7 @@ function DashboardScreen({ navigation }) {
             patientName: tempSchedule[i]['patientName'],
             patientStartDate: patientData['startDate'],
             patientFullName: patientData['firstName'] + " " + patientData['lastName'],
+            patientPreferredName: patientData['preferredName'],
             patientCaregiverName: patientData['caregiverName'],
             patientImage: tempSchedule[i]['patientImage'],
             activities: parseScheduleString(tempSchedule[i][day], scheduleDate),
@@ -438,7 +440,7 @@ function DashboardScreen({ navigation }) {
     setSelectedDate(previous);
     updateSchedule({tempSelectedDate: previous});
     onToggleSelectedDate(previous);
-    setIsLoading(true);
+    // setIsLoading(true);
     setIsDataInitialized(true);
   };
 
@@ -450,7 +452,7 @@ function DashboardScreen({ navigation }) {
     updateSchedule({tempSelectedDate: next});
     onToggleSelectedDate(next);
     setIsDataInitialized(true);
-    setIsLoading(true);
+    // setIsLoading(true);
   };
 
   // When user toggles date, update filter details and selected datetime filter accordingly
@@ -532,8 +534,8 @@ function DashboardScreen({ navigation }) {
     return selectedDate.toDateString() == new Date(getSunday()).toDateString();
   }
 
-  const showPatientModal = () => {
-
+  const onClickPatientProfile = (patientID) => {
+    navigation.push(routes.PATIENT_PROFILE, { id: patientID });
   }
 
   const showStartDate = () => {
@@ -635,10 +637,8 @@ function DashboardScreen({ navigation }) {
                 <HStack justifyContent="space-between">
                   <Container style={styles.patientContainer}>
                     <ProfileNameButton
-                      handleOnPress={showPatientModal}
-                      // navigation={navigation}
-                      // route={routes.PATIENT_PROFILE}
-                      profileLineOne={item.patientName}
+                      handleOnPress={() => onClickPatientProfile(item.patientID)}
+                      profileLineOne={item.patientPreferredName}
                       profilePicture={item.patientImage}
                       isPatient={true}
                     />
