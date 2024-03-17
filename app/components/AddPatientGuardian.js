@@ -46,6 +46,12 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
       'Grandparent',
     ]),
   );
+  
+  // Used for the RadioButtonInput dataArray prop -> follow format of "label" and "value"
+  const [listOfGenders, setListOfGenders] = useState([
+    { label: 'Male', value: 'M' },
+    { label: 'Female', value: 'F' },
+  ]);
 
   // Screen error state: This = true when the child components report error(input fields)
   // Enables use of dynamic rendering of components when the page error = true/false.
@@ -67,140 +73,20 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
   const [isEmailError, setIsEmailError] = useState(false);
   const [isLoginError, setIsLoginError] = useState(false);
 
-  // Used for the RadioButtonInput dataArray prop -> follow format of "label" and "value"
-  const listOfGenders = [
-    { label: 'Male', value: 'M' },
-    { label: 'Female', value: 'F' },
-  ];
-
-  // Functions for error state reporting for the child components
-  const handleFirstNameError = useCallback(
-    (state) => {
-      setIsFirstNameError(state);
-      // console.log('FirstName: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isFirstNameError],
-  );
-
-  const handleLastNameError = useCallback(
-    (state) => {
-      setIsLastNameError(state);
-      // console.log("last name", state)
-    },
-    [isLastNameError]
-  );
-
-  const handlePrefNameError = useCallback(
-    (state) => {
-      setIsPrefNameError(state);
-      // console.log("pref name", state)
-    },
-    [isPrefNameError]
-  );
-
-  const handleNRICError = useCallback(
-    (state) => {
-      setIsNRICError(state);
-      // console.log("nric", state)
-    },
-    [isNRICError]
-  );
-
-  const handleGenderError = useCallback(
-    (state) => {
-      setIsGenderError(state);
-      // console.log("gender", state)
-    },
-    [isGenderError]
-  );
-
-  const handleDOBError = useCallback(
-    (state) => {
-      setIsDOBError(state);
-      // console.log("dob", state)
-    },
-    [isDOBError]
-  );
-
-  const handleRelationError = useCallback(
-    (state) => {
-      setIsRelationError(state);
-      // console.log("relation", state)
-    },
-    [isRelationError]
-  );
-
-  const handleAddrError = useCallback(
-    (state) => {
-      setIsAddrError(state);
-      // console.log("addr", state)
-    },
-    [isAddrError]
-  );
-
-  const handlePostalCodeError = useCallback(
-    (state) => {
-      setIsPostalCodeError(state);
-      // console.log("addr", state)
-    },
-    [isPostalCodeError]
-  );
-
-  const handleTempAddrError = useCallback(
-    (state) => {
-      setIsTempAddrError(state);
-      // console.log("temp addr", state)
-    },
-    [isTempAddrError]
-  );
-
-  const handleTempPostalCodeError = useCallback(
-    (state) => {
-      setIsTempPostalCodeError(state);
-      // console.log("temp postal code", state)
-    },
-    [isTempPostalCodeError]
-  );
-
-  const handleMobileNoError = useCallback(
-    (state) => {
-      setIsMobileNoError(state);
-      // console.log("mobile", state)
-    },
-    [isMobileNoError]
-  );
-
-  const handleEmailError = useCallback(
-    (state) => {
-      setIsEmailError(state);
-      // console.log("email", state)
-    },
-    [isEmailError]
-  );
-
-  const handleLoginError = useCallback(
-    (state) => {
-      setIsLoginError(state);
-      // console.log("email", state)
-    },
-    [isLoginError]
-  );
-
   useEffect(() => {
     setIsInputErrors(
       isFirstNameError ||
-        isLastNameError ||
-        isPrefNameError ||
-        isNRICError ||
-        isGenderError ||
-        isDOBError ||
-        isRelationError ||
-        isAddrError ||
-        isTempAddrError ||
-        isMobileNoError ||
-        isEmailError ||
-        isLoginError,
+      isLastNameError ||
+      isPrefNameError ||
+      isNRICError ||
+      isGenderError ||
+      isDOBError ||
+      isRelationError ||
+      isAddrError ||
+      isTempAddrError ||
+      isMobileNoError ||
+      isEmailError ||
+      isLoginError,
     );
     onError(i, isInputErrors);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -222,7 +108,6 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
 
   // To ensure that when the is guardian login required checkbox is checked, guardian email
   // must be filled before continuing. Done by verifying if guardian.Email is empty or not.
-  // console.log(i);
   useEffect(() => {
     setIsLoginError(guardian.IsChecked && !guardian.Email);
     setIsEmailError(guardian.IsChecked && !guardian.Email);
@@ -238,6 +123,120 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
       setListOfRelationships(data.sort((a, b) => a.value - b.value)); // sort by value
     }
   }, [data, isError, isLoading]);
+
+    // Functions for error state reporting for the child components
+    const handleFirstNameError = useCallback(
+      (state) => {
+        setIsFirstNameError(state);
+        // console.log('FirstName: ', state);
+      },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [isFirstNameError],
+    );
+  
+    const handleLastNameError = useCallback(
+      (state) => {
+        setIsLastNameError(state);
+        // console.log("last name", state)
+      },
+      [isLastNameError]
+    );
+  
+    const handlePrefNameError = useCallback(
+      (state) => {
+        setIsPrefNameError(state);
+        // console.log("pref name", state)
+      },
+      [isPrefNameError]
+    );
+  
+    const handleNRICError = useCallback(
+      (state) => {
+        setIsNRICError(state);
+        // console.log("nric", state)
+      },
+      [isNRICError]
+    );
+  
+    const handleGenderError = useCallback(
+      (state) => {
+        setIsGenderError(state);
+        // console.log("gender", state)
+      },
+      [isGenderError]
+    );
+  
+    const handleDOBError = useCallback(
+      (state) => {
+        setIsDOBError(state);
+        // console.log("dob", state)
+      },
+      [isDOBError]
+    );
+  
+    const handleRelationError = useCallback(
+      (state) => {
+        setIsRelationError(state);
+        // console.log("relation", state)
+      },
+      [isRelationError]
+    );
+  
+    const handleAddrError = useCallback(
+      (state) => {
+        setIsAddrError(state);
+        // console.log("addr", state)
+      },
+      [isAddrError]
+    );
+  
+    const handlePostalCodeError = useCallback(
+      (state) => {
+        setIsPostalCodeError(state);
+        // console.log("addr", state)
+      },
+      [isPostalCodeError]
+    );
+  
+    const handleTempAddrError = useCallback(
+      (state) => {
+        setIsTempAddrError(state);
+        // console.log("temp addr", state)
+      },
+      [isTempAddrError]
+    );
+  
+    const handleTempPostalCodeError = useCallback(
+      (state) => {
+        setIsTempPostalCodeError(state);
+        // console.log("temp postal code", state)
+      },
+      [isTempPostalCodeError]
+    );
+  
+    const handleMobileNoError = useCallback(
+      (state) => {
+        setIsMobileNoError(state);
+        // console.log("mobile", state)
+      },
+      [isMobileNoError]
+    );
+  
+    const handleEmailError = useCallback(
+      (state) => {
+        setIsEmailError(state);
+        // console.log("email", state)
+      },
+      [isEmailError]
+    );
+  
+    const handleLoginError = useCallback(
+      (state) => {
+        setIsLoginError(state);
+        // console.log("email", state)
+      },
+      [isLoginError]
+    );
 
   return isLoading ? (
     <LoadingWheel />
@@ -368,9 +367,9 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
           <SelectionInputField
             isRequired
             title={'Relationship'}
+            value={guardian.RelationshipID}
             placeholder={'Select Relationship'}
             onDataChange={handleFormData('RelationshipID', i)}
-            value={guardian.RelationshipID}
             dataArray={listOfRelationships}
             onChildData={handleRelationError}
           />         
