@@ -13,7 +13,9 @@ const ActivityCard = ({
   currentTime,
   medications,
   patientName,
+  patientID, 
   date,
+  navigation,
 }) => {
 
   // State to toggle modal visibility
@@ -56,7 +58,9 @@ const ActivityCard = ({
         setIsModalVisible={setIsModalVisible}
         medications={medications}
         patientName={patientName}
+        patientID={patientID}
         date={date}
+        navigation={navigation}
         />
     </>
   );

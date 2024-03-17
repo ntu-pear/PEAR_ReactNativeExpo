@@ -34,7 +34,7 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 import globalStyles from 'app/utility/styles.js';
 import { formatDate, formatTimeMilitary, isEmptyObject, sortFilterInitialState } from 'app/utility/miscFunctions';
 
-function DashboardScreen() {
+function DashboardScreen({ navigation }) {
   // View modes user can switch between (displayed as tab on top)
   const VIEW_MODES = {
     'My Patients': 'myPatients',
@@ -669,7 +669,9 @@ function DashboardScreen() {
                           currentTime={currentTime}
                           medications={activity.medications}
                           patientName={item.patientName}
+                          patientID={item.patientID}
                           date={item.date}
+                          navigation={navigation}
                         />
                       ))}
                     </HStack>                

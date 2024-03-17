@@ -1,25 +1,34 @@
 // Libs
 import React, { useRef } from 'react';
 import { Modal, Text, ScrollView, Icon, View } from 'native-base';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 // Configurations
 import colors from 'app/config/colors';
 import typography from 'app/config/typography';
-import { formatTimeHM24 } from 'app/utility/miscFunctions';
-import { TouchableOpacity } from 'react-native';
+import routes from 'app/navigation/routes';
+
+// Utilities
+import { formatTimeAMPM, formatTimeHM24 } from 'app/utility/miscFunctions';
+
 
 const MedicationModal = ({
   isModalVisible,
   setIsModalVisible, 
   medications,
   patientName,
-  date
+  patientID,
+  date,
+  navigation,
 }) => {  
   
   const initialRef = useRef(null);
   const finalRef = useRef(null);
+
+  const onPressViewAll = () => {
+    navigation.push(routes.PATIENT_PRESCRIPTION, { id: patientID });
+  }
 
   return (
     <Modal
@@ -60,11 +69,11 @@ const MedicationModal = ({
                           ): null}
                       </View>
                       <View>
-                        <Text style={styles.medTime}>{formatTimeHM24(item.medTime)}</Text>
+                        <Text style={styles.medTime}>{formatTimeAMPM(item.medTime)}</Text>
                       </View>
                     </View>
                 ))}
-                <TouchableOpacity style={styles.viewAllContainer}>
+                <TouchableOpacity style={styles.viewAllContainer} onPress={onPressViewAll}>
                   <Text style={styles.viewAllText}>View all medications for {patientName}</Text>
                 </TouchableOpacity>                
             </ScrollView>
@@ -146,7 +155,7 @@ const styles = StyleSheet.create({
   },
   medTime: {
     fontSize: 20,
-    marginLeft: 10,
+    marginLeft: 17,
     marginRight: 15,
   },
   red: {
