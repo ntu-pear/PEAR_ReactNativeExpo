@@ -24,9 +24,6 @@ function SearchFilterBar({
   initializeData=true,
   onInitialize=()=>{},
 
-  applySortFilter,
-  setApplySortFilter,
-
   itemCount=null,   
   handleSearchSortFilterCustom,
   
@@ -74,7 +71,7 @@ function SearchFilterBar({
     tempSelDateFilters=date['tempSel'], 
     tempSearchMode=searchOption,
   }) => {
-    // console.log('BAR -', 3, 'handleSearchSortFilter')
+    console.log('BAR 1 - handleSearchSortFilter')
 
     if(handleSearchSortFilterCustom) {
       handleSearchSortFilterCustom({
@@ -111,12 +108,9 @@ function SearchFilterBar({
     tempSelDateFilters=date['tempSel'], 
     tempSearchMode=searchOption,
   }) => {
-    // console.log('BAR -', 4, 'setFilteredList')
-
-    let filteredList = originalList.map((obj) => ({
-      ...obj,
-      fullName: `${obj.firstName.trim()} ${obj.lastName.trim()}`
-    }));   
+    console.log('BAR 2 - setFilteredList')
+    
+    let filteredList = [...originalList];
 
     // Search
     filteredList = filteredList.filter((item) => {
@@ -131,14 +125,14 @@ function SearchFilterBar({
           tempSelSort['option']['label']],
         tempSelSort['asc'] != null ? tempSelSort['asc'] : true);
     }
-  
+    
     // Dropdown filters
     for (var filter in tempSelDropdownFilters) {   
       if(tempSelDropdownFilters[filter]['label'] != 'All') {
         filteredList = getSubFilteredList(filteredList, filter, 'label', tempSelDropdownFilters);
       }      
     }
-
+    
     // Autocomplete filters
     for (var filter in tempSelAutocompleteFilters) {
       if(tempSelAutocompleteFilters[filter]['title'] != 'All') {
@@ -171,22 +165,56 @@ function SearchFilterBar({
   // For example, patient status is not meant for filtering - it requires new API call, so do not filter
   // Use custom options if declared in FILTER_MAPPING 
   const getSubFilteredList = (filteredList, filter, id, tempSelFilters) => {
-    // console.log('BAR -', 5, 'getSubFilteredList')
+    console.log('BAR 3 - getSubFilteredList')
     if(filterOptionDetails[filter]['isFilter']){
       if(isEmptyObject(filterOptionDetails[filter]['options'])) {
         filteredList = filteredList.filter((obj) => (
           obj[FIELD_MAPPING[filter]] === tempSelFilters[filter][id])) || []
       } else {
         filteredList = filteredList.filter((obj) => (
-          obj[FIELD_MAPPING[filter]] === filterOptionDetails[filter]['options'][tempSelFilters[filter][id]])) || []
+          obj[FIELD_MAPPING[filter]] === filterOptionDetails[filter]['options'][tempSelFilters[filter][id]])) || []        
       }
+    } 
+    else if(filterOptionDetails[filter]['nestedFilter'] != undefined && filterOptionDetails[filter]['nestedFilter'].length > 0 ) {
+      filteredList = getNestedSubFilteredList(filteredList, filter, id, tempSelFilters);
     }
     return filteredList;
   }
 
+  // If list to be filtered is nested in a larger array of objects  
+  // E.g.: [{a: [{b: [{c: 1, d: 2, e: 3}]}]}] => want to filter array corresponding to b by property c
+  // i.e. filter [{c: 1, d: 2, e: 3}]
+  const getNestedSubFilteredList = (filteredList, filter, id, tempSelFilters) => {
+    console.log('BAR 4 - getNestedSubfilteredList', filterOptionDetails, filter)
+
+    const key = filterOptionDetails[filter]['nestedFilter'];      
+    const tempFilteredList = [];
+    filteredList.forEach((item) => {
+      const keyItems = [];
+      item[key].forEach((itemObj) => {
+        if(isEmptyObject(filterOptionDetails[filter]['options'])) {
+          if (itemObj[FIELD_MAPPING[filter]] == tempSelFilters[filter][id]) { 
+            keyItems.push({...itemObj});
+          }
+        } else {
+          if (itemObj[FIELD_MAPPING[filter]] == filterOptionDetails[filter]['options'][tempSelFilters[filter][id]]) { 
+            keyItems.push({...itemObj});
+          }
+        }
+      });
+
+      tempFilteredList.push({
+        ...item,
+        activities: keyItems,
+      });
+    });
+
+    return tempFilteredList;
+  }
+
   // Switch between search modes (full name, preferred name)
   const handleOnToggleSearchOptions = async(item) => {
-    // console.log('BAR -', 6, 'handleOnToggleSearchOptions')
+    console.log('BAR 5 - handleOnToggleSearchOptions')
 
     const label = SEARCH_OPTIONS[item-1];
     setSearchOption(label);
@@ -198,7 +226,7 @@ function SearchFilterBar({
   // Switch between tabs
   // If user clicks on same tab, reset all search/sort/filter options
   const handleOnToggleViewMode = (mode) => {
-    // console.log('BAR -', 7, 'handleOnToggleViewMode')
+    console.log('BAR 6 - handleOnToggleViewMode')
 
     if(mode!=viewMode) {
       setIsLoading(true);
@@ -207,7 +235,7 @@ function SearchFilterBar({
 
   // Update search state and handle searching when user changes search query
   const handleSearch = (text) => {
-    // console.log('BAR -', 8, 'handleSearch')
+    console.log('BAR 7 - handleSearch')
 
     setSearchQuery(text); 
     handleSearchSortFilter({'text': text})
@@ -248,9 +276,6 @@ function SearchFilterBar({
             originalList={originalList}
             initializeData={initializeData}
             onInitialize={onInitialize}
-
-            applySortFilter={applySortFilter}
-            setApplySortFilter={setApplySortFilter}
             
             sort={sort}
             setSort={setSort}
@@ -263,7 +288,6 @@ function SearchFilterBar({
 
             autocomplete={autocomplete}
             setAutocomplete={setAutocomplete}
-
             
             date={date}
             setDate={setDate}

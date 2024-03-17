@@ -12,6 +12,8 @@ const ActivityCard = ({
   activityEndTime,
   currentTime,
   medications,
+  patientName,
+  date,
 }) => {
 
   // State to toggle modal visibility
@@ -34,7 +36,7 @@ const ActivityCard = ({
         activeOpacity={medications.length > 0 ? null : 1}
         >
           <View style={{marginTop: 4}}>
-            <Text style={[styles.activityName, isCurrentActivity() ? styles.darkText : styles.lightText]}>{activityTitle}</Text>
+            <Text style={[styles.activityTitle, isCurrentActivity() ? styles.darkText : styles.lightText]}>{activityTitle}</Text>
             <Text style={[styles.activityTime, isCurrentActivity() ? styles.darkText : styles.lightText]}>
               {formatTimeHM24(activityStartTime)}
               -{' '}
@@ -52,11 +54,9 @@ const ActivityCard = ({
       <MedicationModal
         isModalVisible={isModalVisible}
         setIsModalVisible={setIsModalVisible}
-        activityTitle={activityTitle}
-        activityStartTime={activityStartTime}
-        activityEndTime={activityEndTime}
-        currentTime={currentTime}
         medications={medications}
+        patientName={patientName}
+        date={date}
         />
     </>
   );
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
   activityContainerGray: {
     backgroundColor: colors.gray
   },
-  activityName: {
+  activityTitle: {
     textAlign: 'center',
     fontWeight: 'bold',
     marginBottom: 5,

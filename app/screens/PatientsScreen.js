@@ -76,7 +76,6 @@ function PatientsScreen({ navigation }) {
   const [patientStatus, setPatientStatus] = useState('active'); // active, inactive, ''
   const [viewMode, setViewMode] = useState('myPatients'); // myPatients, allPatients
   const [isReloadPatientList, setIsReloadPatientList] = useState(false);
-  const [applySortFilter, setApplySortFilter] = useState(true);
 
   // Search related states
   const [searchQuery, setSearchQuery] = useState('');
@@ -156,7 +155,6 @@ function PatientsScreen({ navigation }) {
         : 'Active'
       ]
       updateCaregiverFilterOptions({tempPatientStatus: tempPatientStatus});
-      setApplySortFilter(false);
       setIsDataInitialized(true);
     } else {
       setJustUpdated(false);
@@ -173,8 +171,13 @@ function PatientsScreen({ navigation }) {
         : await patientApi.getPatientList(undefined, status);
     
     if(response.ok) {
-      setOriginalListOfPatients([...response.data.data]);
-      setListOfPatients([...response.data.data])
+      const listWithFullName = response.data.data.map(item => ({
+        ...item,
+        fullName: item.firstName.trim() + ' ' + item.lastName.trim(),
+      }));
+
+      setOriginalListOfPatients([...listWithFullName]);
+      setListOfPatients([...listWithFullName])
       setIsApiError(false);
     } else {
       setIsApiError(true);
@@ -257,7 +260,6 @@ function PatientsScreen({ navigation }) {
     // console.log('PATIENTS -', 10, 'handleSearchSortFilter', tempSelChipFilters);
 
     setIsLoading(true);
-    setApplySortFilter(true);
 
     let tempPatientStatus = PATIENT_STATUSES[
       !isEmptyObject(tempSelChipFilters) 
@@ -319,9 +321,6 @@ function PatientsScreen({ navigation }) {
 
             initializeData={isDataInitialized}
             onInitialize={() => setIsDataInitialized(false)}
-
-            applySortFilter={applySortFilter}
-            setApplySortFilter={setApplySortFilter}
 
             itemCount={listOfPatients ? listOfPatients.length : null}
             handleSearchSortFilterCustom={handleSearchSortFilter}

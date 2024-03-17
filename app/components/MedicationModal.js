@@ -8,15 +8,14 @@ import { MaterialIcons } from '@expo/vector-icons';
 import colors from 'app/config/colors';
 import typography from 'app/config/typography';
 import { formatTimeHM24 } from 'app/utility/miscFunctions';
+import { TouchableOpacity } from 'react-native';
 
 const MedicationModal = ({
   isModalVisible,
-  setIsModalVisible,  
-  activityTitle,
-  activityStartTime,
-  activityEndTime,
-  currentTime,
+  setIsModalVisible, 
   medications,
+  patientName,
+  date
 }) => {  
   
   const initialRef = useRef(null);
@@ -35,7 +34,8 @@ const MedicationModal = ({
         backgroundColor={colors.white_var1}
         >
         <Modal.Body padding={6}>
-          <Text style={styles.headerStyle}>Medication Details</Text>
+          <Text style={styles.headerStyle}>Medication Details for {patientName}</Text>
+          <Text style={[styles.headerStyle, styles.subheaderStyle]} italic>{date}</Text>
             <ScrollView
               flex={1}
               >
@@ -64,8 +64,9 @@ const MedicationModal = ({
                       </View>
                     </View>
                 ))}
-
-                
+                <TouchableOpacity style={styles.viewAllContainer}>
+                  <Text style={styles.viewAllText}>View all medications for {patientName}</Text>
+                </TouchableOpacity>                
             </ScrollView>
         </Modal.Body>
       </Modal.Content>
@@ -98,8 +99,10 @@ const styles = StyleSheet.create({
     fontSize: 25,
     alignSelf: 'center',
     padding: 10,
-    // paddingBottom: 20,
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,    
+  }, 
+  subheaderStyle: {
+    fontSize: 20,    
   },
   textStyle: {
     fontSize: 13.5,
@@ -148,6 +151,14 @@ const styles = StyleSheet.create({
   },
   red: {
     color: colors.dark_red
+  },
+  viewAllContainer: {
+    paddingVertical: 10,
+    alignSelf: 'flex-end',
+  },
+  viewAllText: {
+    color: colors.green,
+    fontSize: 15    
   }
 });
 
