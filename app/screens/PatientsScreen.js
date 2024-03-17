@@ -1,6 +1,6 @@
 // Libs
 import React, { useState, useEffect, useRef } from 'react';
-import { Center, VStack, ScrollView, Fab, Icon } from 'native-base';
+import { Center, VStack, ScrollView, Fab, Icon, FlatList } from 'native-base';
 import { StyleSheet, View , RefreshControl, Dimensions, Text, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
@@ -67,7 +67,9 @@ function PatientsScreen({ navigation }) {
 
   // Patient data related states
   const [isLoading, setIsLoading] = useState(true);
-  const [isApiError, setIsApiError] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [isRetry, setIsRetry] = useState(false);
+  const [statusCode, setStatusCode] = useState(200);
   const [isDataInitialized, setIsDataInitialized] = useState(false);
   const [originalListOfPatients, setOriginalListOfPatients] = useState([]); // list of patients without sort, search, filter
   const [listOfPatients, setListOfPatients] = useState([]); // list of patients after sort, search, filter
@@ -156,6 +158,7 @@ function PatientsScreen({ navigation }) {
         : 'Active'
       ]
       updateCaregiverFilterOptions({tempPatientStatus: tempPatientStatus});
+      setApplySortFilter(false);
       setIsDataInitialized(true);
     } else {
       setJustUpdated(false);
@@ -179,9 +182,14 @@ function PatientsScreen({ navigation }) {
 
       setOriginalListOfPatients([...listWithFullName]);
       setListOfPatients([...listWithFullName])
-      setIsApiError(false);
+      setIsError(false);
+      setIsRetry(false);
+      setStatusCode(response.status);
     } else {
-      setIsApiError(true);
+      setIsLoading(false);
+      setIsError(true);
+      setStatusCode(response.status);
+      setIsRetry(true);
     }
   };
 
@@ -194,9 +202,14 @@ function PatientsScreen({ navigation }) {
     if(response.ok) {
       setPatientCountInfo(response.data);
       updateCaregiverFilterOptions({tempPatientCountInfo: response.data, tempPatientStatus: tempPatientStatus});
-      setIsApiError(false);
+      setIsError(false);
+      setIsRetry(false);
+      setStatusCode(response.status);
     } else {
-      setIsApiError(true);
+      setIsLoading(false);
+      setIsError(true);
+      setStatusCode(response.status);
+      setIsRetry(true);
     }
   }
 
@@ -243,7 +256,6 @@ function PatientsScreen({ navigation }) {
       }
     }));
 
-    setApplySortFilter(false);
     setJustUpdated(true);
   }    
 
@@ -262,6 +274,7 @@ function PatientsScreen({ navigation }) {
     // console.log('PATIENTS -', 10, 'handleSearchSortFilter', tempSelChipFilters);
 
     setIsLoading(true);
+    setApplySortFilter(true);
 
     let tempPatientStatus = PATIENT_STATUSES[
       !isEmptyObject(tempSelChipFilters) 
@@ -303,6 +316,7 @@ function PatientsScreen({ navigation }) {
     navigation.push(routes.PATIENT_PROFILE, { id: patientID });
   };
 
+  // Whether to show start date for each patient - depends on whether sort/filter using start date applied
   const showStartDate = () => {
     return (!isEmptyObject(sort['sel']) ? sort['sel']['option']['label'] == 'Start Date' : false) || 
       'Start Date' in datetime['sel'] ? (
@@ -310,6 +324,30 @@ function PatientsScreen({ navigation }) {
         (datetime['sel']['Start Date']['max'] && datetime['sel']['Start Date']['max'] != null) 
       ) : false        
   }
+
+  // Returns message to display if api call error or no data to display
+  const noDataMessage = () => {
+    // Display error message if API request fails
+    let message = '';
+    if (isLoading) {
+      return <></>;
+    }
+    if (isError) {
+      if (statusCode === 401) {
+        message = 'Error: User is not authenticated.';
+      } else if (statusCode >= 500) {
+        message = 'Error: Server is down. Please try again later.';
+      } else {
+        message = `${statusCode || 'Some'} error has occured`;
+      }
+    }
+    return (
+      <MessageDisplayCard
+        TextMessage={isError ? message : 'No patients found'}
+        topPaddingSize={'43%'}
+      />
+    );
+  };
 
   return (
     <>{isLoading ? (
@@ -323,6 +361,9 @@ function PatientsScreen({ navigation }) {
 
             initializeData={isDataInitialized}
             onInitialize={() => setIsDataInitialized(false)}
+
+            applySortFilter={applySortFilter}
+            setApplySortFilter={setApplySortFilter}
 
             itemCount={listOfPatients ? listOfPatients.length : null}
             handleSearchSortFilterCustom={handleSearchSortFilter}
@@ -356,61 +397,46 @@ function PatientsScreen({ navigation }) {
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
           />
-          <ScrollView
-            ref={patientListRef}
-            w="100%"
-            style={styles.patientListContainer}
-            height="90%"
-            refreshControl={
-              <RefreshControl
-                refreshing={isReloadPatientList}
-                onRefresh={refreshPatientData}
-              />
-            }
-            keyboardShouldPersistTaps='handled'
-          >
-            <VStack alignItems="flex-start" backgroundColor={'yellow'} marginBottom='10%'>
-              {listOfPatients && listOfPatients.length > 0
-                ? listOfPatients.map((item, index) => (
-                    <TouchableOpacity 
-                      style={styles.patientRowContainer} 
-                      key={index}
-                      onPress={() => handleOnClickPatientItem(item.patientID)}
-                      >
-                      <ProfileNameButton
-                        profileLineOne={item.preferredName}
-                        profileLineTwo={
-                          `${item.firstName} ${item.lastName}`
-                        }
-                        profilePicture={item.profilePicture}
-                        handleOnPress={() => handleOnClickPatientItem(item.patientID)}
-                        isPatient={true}
-                        size={Dimensions.get('window').width / 10}
-                        key={index}
-                        isVertical={false}
-                        isActive={patientStatus == '' ? item.isActive : null}
-                        startDate={showStartDate() ? item.startDate : null}
-                      />
-                      <View style={styles.caregiverNameContainer}>
-                        <Text style={styles.caregiverName}>
-                          {viewMode === 'allPatients'
-                            ? item.caregiverName !== null
-                              ? item.caregiverName
-                              : 'No Caregiver'
-                            : null}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  ))
-                : (
-                  <MessageDisplayCard
-                    TextMessage='No patients found'
-                    topPaddingSize={'42%'}
+          <View style={{height: '100%'}}>
+            <FlatList
+              onRefresh={refreshPatientData}
+              refreshing={isLoading}
+              ListEmptyComponent={noDataMessage}
+              data={listOfPatients}
+              style={styles.patientListContainer}
+              renderItem={({ item, index }) => {
+              return (
+                <TouchableOpacity 
+                  style={styles.patientRowContainer} 
+                  key={index}
+                  onPress={() => handleOnClickPatientItem(item.patientID)}
+                  >
+                  <ProfileNameButton
+                    profileLineOne={item.preferredName}
+                    profileLineTwo={
+                      `${item.firstName} ${item.lastName}`
+                    }
+                    profilePicture={item.profilePicture}
+                    handleOnPress={() => handleOnClickPatientItem(item.patientID)}
+                    isPatient={true}
+                    size={Dimensions.get('window').width / 10}
+                    key={index}
+                    isVertical={false}
+                    isActive={patientStatus == '' ? item.isActive : null}
+                    startDate={showStartDate() ? item.startDate : null}
                   />
-                )}
-            </VStack>
-          </ScrollView>
-          <Center position="absolute" right="5" bottom="5%">
+                  <View style={styles.caregiverNameContainer}>
+                    <Text style={styles.caregiverName}>
+                      {viewMode === 'allPatients'
+                        ? item.caregiverName !== null
+                          ? item.caregiverName
+                          : 'No Caregiver'
+                        : null}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              )}}
+            />
             <Fab
               backgroundColor={colors.pink}
               icon={
@@ -419,15 +445,14 @@ function PatientsScreen({ navigation }) {
                   color={colors.white}
                   name="person-add-alt"
                   size="lg"
-                  placement="bottom-right"
                 />
               }
               onPress={handleOnClickAddPatient}
-              renderInPortal={false}
               shadow={2}
               size="sm"
+              style={{position: 'absolute', 'bottom': '5%', 'right': '5%'}}
             />
-          </Center>
+          </View>
         </View>
       )}
     </>

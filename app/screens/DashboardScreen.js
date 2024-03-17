@@ -217,6 +217,7 @@ function DashboardScreen({ navigation }) {
       setIsRetry(false);
       setStatusCode(response.status);
     } else {
+      setIsLoading(false);
       setIsError(true);
       setStatusCode(response.status);
       setIsRetry(true);
@@ -240,6 +241,7 @@ function DashboardScreen({ navigation }) {
       setIsRetry(false);
       setStatusCode(response.status);
     } else {
+      setIsLoading(false);
       setIsError(true);
       setStatusCode(response.status);
       setIsRetry(true);
