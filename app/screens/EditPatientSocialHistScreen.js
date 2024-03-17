@@ -13,7 +13,7 @@ import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 import socialHistoryApi from 'app/api/socialHistory';
 
 // Components
-import SelectionInputField from 'app/components/SelectionInputField';
+import SelectionInputField from 'app/components/input-components/SelectionInputField';
 import RadioButtonInput from 'app/components/input-components/RadioButtonsInput';
 import AppButton from 'app/components/AppButton';
 import ActivityIndicator from 'app/components/ActivityIndicator';
@@ -482,7 +482,7 @@ function EditPatientSocialHistScreen(props) {
                   onDataChange={handleFormData('LiveWithDescription')}
                   value={formData['LiveWithListId']}
                   dataArray={listOfLiveWith}
-                  onChildData={handleLiveWithState}
+                  onEndEditing={handleLiveWithState}
                 />
                 
                 <SelectionInputField
@@ -492,7 +492,7 @@ function EditPatientSocialHistScreen(props) {
                   onDataChange={handleFormData('EducationDescription')}
                   value={formData['EducationListId']}
                   dataArray={listOfEducation}
-                  onChildData={handleEducationState}
+                  onEndEditing={handleEducationState}
                 />
                 
                 <SelectionInputField
@@ -502,7 +502,7 @@ function EditPatientSocialHistScreen(props) {
                   onDataChange={handleFormData('OccupationDescription')}
                   value={formData['OccupationListId']}
                   dataArray={listOfOccupation}
-                  onChildData={handleOccupationState}
+                  onEndEditing={handleOccupationState}
                 />
                 
                 <SelectionInputField
@@ -512,7 +512,7 @@ function EditPatientSocialHistScreen(props) {
                   onDataChange={handleFormData('ReligionDescription')}
                   value={formData['ReligionListId']}
                   dataArray={listOfReligion}
-                  onChildData={handleReligionState}
+                  onEndEditing={handleReligionState}
                 />
                 
                 <SelectionInputField
@@ -522,7 +522,7 @@ function EditPatientSocialHistScreen(props) {
                   onDataChange={handleFormData('PetDescription')}
                   value={formData['PetListId']}
                   dataArray={listOfPet}
-                  onChildData={handlePetState}
+                  onEndEditing={handlePetState}
                 />
                 
                 <SelectionInputField
