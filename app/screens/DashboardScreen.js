@@ -438,6 +438,8 @@ function DashboardScreen({ navigation }) {
     setSelectedDate(previous);
     updateSchedule({tempSelectedDate: previous});
     onToggleSelectedDate(previous);
+    setIsLoading(true);
+    setIsDataInitialized(true);
   };
 
   const handleNextDate = () => {
@@ -448,6 +450,7 @@ function DashboardScreen({ navigation }) {
     updateSchedule({tempSelectedDate: next});
     onToggleSelectedDate(next);
     setIsDataInitialized(true);
+    setIsLoading(true);
   };
 
   // When user toggles date, update filter details and selected datetime filter accordingly
@@ -478,7 +481,6 @@ function DashboardScreen({ navigation }) {
     }
   }));
   
-  setIsDataInitialized(true);
 }
 
   const noDataMessage = () => {

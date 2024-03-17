@@ -17,18 +17,20 @@ import MessageDisplayCard from 'app/components/MessageDisplayCard';
 
 // Import Constants from Routes
 import routes from 'app/navigation/routes';
-import { Image, Row } from 'native-base';
+import { Icon, Image, Row, View } from 'native-base';
 import { TouchableOpacity, Text } from 'react-native';
 import ActivityFilterCard from 'app/components/ActivityFilterCard';
 import dashboardApi from 'app/api/dashboard';
 import PatientDailyHighlights from 'app/components/PatientDailyHighlights';
+import { MaterialIcons } from '@expo/vector-icons';
+import colors from 'app/config/colors';
+import styles from 'app/utility/styles';
 
 // Refer to this: https://reactnavigation.org/docs/hello-react-navigation
 const Stack = createNativeStackNavigator();
 
 // Refer to this for configuration: https://reactnavigation.org/docs/native-stack-navigator#options
 function DashboardNavigator() {
-  const [highlightsModalVisible, setHighlightsModalVisible] = useState(true);
 
   return (
     <Stack.Navigator>
@@ -37,22 +39,7 @@ function DashboardNavigator() {
         component={DashboardScreen}
         options={{
           headerRight: () => (
-            <TouchableOpacity
-              onPress={() => setHighlightsModalVisible(!highlightsModalVisible)}
-              testID={'highlightsButton'}
-            >
-              <Image
-                alt={'daily-highlights'}
-                source={{
-                  uri: 'https://cdn-icons-png.flaticon.com/512/747/747310.png',
-                }}
-                size={'25px'}
-              />
-              <PatientDailyHighlights
-                modalVisible={highlightsModalVisible}
-                setModalVisible={setHighlightsModalVisible}
-              />
-            </TouchableOpacity>
+            <PatientDailyHighlights/>
           ),
         }}
       />
