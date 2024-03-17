@@ -15,7 +15,7 @@ import routes from 'app/navigation/routes';
 import PatientAddPatientInfoScreen from 'app/screens/PatientAddPatientInfoScreen';
 import PatientAddGuardianScreen from 'app/screens/PatientAddGuardianScreen';
 import PatientAddAllergyScreen from 'app/screens/PatientAddAllergyScreen';
-import LoadingWheel from 'app/components/LoadingWheel';
+import ActivityIndicator from 'app/components/ActivityIndicator';
 
 function PatientAddScreen() {
   const navigation = useNavigation();
@@ -103,7 +103,6 @@ function PatientAddScreen() {
 
   // Function to handle form sections which can have multiple items (like allergies/guardians - can have multiple)
   const componentHandler = (page = '', list = []) => {
-    console.log(1, list);
     if (list) {
       setComponentList((prevState) => ({
         // eg. componentList: { guardian: [{..}, {..}] }
@@ -165,6 +164,8 @@ function PatientAddScreen() {
         ...prevState,
         ['patientInfo']: newData,
       }));
+
+      console.log(newData);
     }
   };
 
@@ -224,6 +225,7 @@ function PatientAddScreen() {
   // Function to submit form
   const onSubmit = async () => {
     setIsSubmitting(true);
+    console.log(formData);
     const result = await patientApi.addPatient(formData);
 
     let alertTitle = '';
@@ -276,7 +278,7 @@ function PatientAddScreen() {
       );
     case 3:
       if(isSubmitting) {
-        return (<LoadingWheel visible/>)  
+        return (<ActivityIndicator visible/>)  
       } 
       return (
         <PatientAddAllergyScreen

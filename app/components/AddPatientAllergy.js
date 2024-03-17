@@ -1,5 +1,5 @@
 // Libs
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Box, VStack, Text, Divider } from 'native-base';
 import { StyleSheet, Platform, View } from 'react-native';
 
@@ -160,14 +160,6 @@ function AddPatientAllergy({ i, title, formData, handleFormData, onError }) {
 
   
   // Functions for error state reporting for the child components
-  const handleFirstNameError = useCallback(
-    (state) => {
-      setIsFirstNameError(state);
-      // console.log('FirstName: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isFirstNameError],
-  );
   const handleAllergyError = useCallback(
     (state) => {
       setIsAllergyError(state);
@@ -181,7 +173,7 @@ function AddPatientAllergy({ i, title, formData, handleFormData, onError }) {
       setIsReactionError(state);
       // console.log("reaction", state);
     },
-    [isReactionErro],
+    [isReactionError],
   );
   
   const handleRemarksError = useCallback(

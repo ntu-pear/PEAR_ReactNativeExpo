@@ -83,7 +83,9 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
       isDOBError ||
       isRelationError ||
       isAddrError ||
+      isPostalCodeError ||
       isTempAddrError ||
+      isTempPostalCodeError ||
       isMobileNoError ||
       isEmailError ||
       isLoginError,
@@ -99,7 +101,9 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
     isDOBError,
     isRelationError,
     isAddrError,
+    isPostalCodeError,
     isTempAddrError,
+    isTempPostalCodeError,
     isMobileNoError,
     isEmailError,
     isLoginError,
