@@ -128,7 +128,7 @@ const FilterModalCard = ({
         'tempSelDatetimeFilters': tempDatetime['tempSel'],
       });
     } else {
-      setApplySortFilter(false);
+      setApplySortFilter(true);
     }
   }
 
