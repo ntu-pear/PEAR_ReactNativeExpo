@@ -74,7 +74,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     justifyContent: 'space-between',
     alignItems: 'center',
-    margin: 10,
+    marginVertical: 10,
+    marginRight: 20,
     // padding: 3,
   },
   medication: { 
