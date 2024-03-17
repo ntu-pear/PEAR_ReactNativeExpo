@@ -210,22 +210,9 @@ function EditPatientInfoScreen(props) {
 
   // Function to update patient data
   const handleFormData = (field) => (e) => {
-    const newData = formData;
-
-    if (field === 'IsChecked') {
-      newData[field] = !formData.IsChecked;
-      if (!newData[field]) {
-        newData.EndDate = new Date(0); // if IsChecked is false, reset End Date to beginning of epoch time
-      }
-    } else if (field === 'PreferredLanguageListID') {
-      newData[field] = parseInt(e);
-    } else {
-      newData[field] = e;
-    }
-
     setFormData((prevState) => ({
       ...prevState,
-      patientInfo: newData,
+      [field]: e
     }));
   };
 

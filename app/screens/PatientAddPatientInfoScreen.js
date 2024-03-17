@@ -95,7 +95,7 @@ function PatientAddPatientInfoScreen({
   const [isHomeNoError, setIsHomeNoError] = useState(false);
   const [isMobileNoError, setIsMobileNoError] = useState(false);
   const [isPrefNameError, setIsPrefNameError] = useState(false);
-  const [isPrefLanguageError, setPrefLanguageError] = useState(false);
+  const [isPrefLanguageError, setIsPrefLanguageError] = useState(false);
   const [isRespiteError, setIsRespiteError] = useState(false);
   const [isJoiningError, setIsJoiningError] = useState(false);
   const [isLeavingError, setIsLeavingError] = useState(false);
@@ -276,7 +276,7 @@ function PatientAddPatientInfoScreen({
   
   const handlePrefLanguageError = useCallback(
     (state) => {
-      setPrefLanguageError(state);
+      setIsPrefLanguageError(state);
       // console.log("language", state)
     },
     [isPrefLanguageError],
