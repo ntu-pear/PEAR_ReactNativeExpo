@@ -17,6 +17,9 @@ import AppButton from 'app/components/AppButton';
 import SelectionInputField from 'app/components/input-components/SelectionInputField';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 
+// Utilities
+import { parseSelectOptions } from 'app/utility/miscFunctions';
+
 function EditPatientPreferencesScreen(props) {
   const { navigation, patientProfile } = props.route.params;
   const [isLoading, setIsLoading] = useState(true);
@@ -105,7 +108,8 @@ function EditPatientPreferencesScreen(props) {
   useEffect(() => {
     if (!languageLoading && !languageError && languageData) {
       // console.log('selection data!');
-      setListOfLanguages(data);
+      setListOfLanguages(languageData);
+      setIsLoading(false);
     }
   }, [languageData, languageError, languageLoading]);
 
