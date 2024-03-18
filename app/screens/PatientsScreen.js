@@ -404,7 +404,8 @@ function PatientsScreen({ navigation }) {
           />
           <View style={{height:'85%'}}>
             <FlatList
-              marginBottom={'15'}
+              ref={patientListRef}
+              marginBottom={'20'}
               onRefresh={refreshPatientData}
               refreshing={isLoading}
               ListEmptyComponent={noDataMessage}
