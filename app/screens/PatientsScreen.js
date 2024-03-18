@@ -62,7 +62,7 @@ function PatientsScreen({ navigation }) {
     'Patient Status': 'isActive' 
   };
 
-  // Ref used to programmatically scroll to top of list
+  // Scrollview ref used to programmatically scroll to top of list
   const patientListRef = useRef(null);
 
   // Patient data related states
@@ -76,6 +76,7 @@ function PatientsScreen({ navigation }) {
   const [patientCountInfo, setPatientCountInfo] = useState({}); // list of patients for each caregiver (differentiated by patient status)
   const [justUpdated, setJustUpdated] = useState(false); 
   const [patientStatus, setPatientStatus] = useState('active'); // active, inactive, ''
+  const [tempSelPatientStatus, setTempSelPatientStatus] = useState('active'); // active, inactive, ''
   const [viewMode, setViewMode] = useState('myPatients'); // myPatients, allPatients
   const [isReloadPatientList, setIsReloadPatientList] = useState(false);
   const [applySortFilter, setApplySortFilter] = useState(true);
@@ -151,16 +152,19 @@ function PatientsScreen({ navigation }) {
     // console.log('PATIENTS -', 4, 'useEffect [tempSelectedChipFilters]');
 
     if(chip['tempSel']['Patient Status'] != undefined && viewMode == 'allPatients' && !justUpdated) {
-      // console.log('PATIENTS -', 4.5, 'useEffect [tempSelectedChipFilters]');
+      console.log('PATIENTS -', 4.5, 'useEffect [tempSelectedChipFilters]');
       let tempPatientStatus = PATIENT_STATUSES[
         !isEmptyObject(chip['tempSel']) 
         ? chip['tempSel']['Patient Status']['label'] 
         : 'Active'
       ]
-      updateCaregiverFilterOptions({tempPatientStatus: tempPatientStatus});
-      setApplySortFilter(false);
-      setIsDataInitialized(true);
-    } else {
+      if(tempPatientStatus != tempSelPatientStatus) {
+        updateCaregiverFilterOptions({tempPatientStatus: tempPatientStatus});
+        setApplySortFilter(false);
+        setIsDataInitialized(true);
+        setTempSelPatientStatus(tempPatientStatus);
+      } 
+    } else {  
       setJustUpdated(false);
     }
   }, [chip['tempSel']['Patient Status']])
@@ -216,7 +220,7 @@ function PatientsScreen({ navigation }) {
   // Set screen to loading wheel when retrieving patient list from backend
   // Note: Once the data is retrieved from backend, setIsLoading is set to false momentarily so SearchFilterBar can render and initialize data
   const refreshPatientData = (tempPatientStatus=patientStatus) => {
-    // console.log('PATIENTS -', 8, 'refreshPatientData');
+    console.log('PATIENTS -', 8, 'refreshPatientData');
 
     setIsLoading(true);
     const promiseFunction = async () => {
@@ -284,7 +288,8 @@ function PatientsScreen({ navigation }) {
     
     if(tempPatientStatus != patientStatus) {
       refreshPatientData(tempPatientStatus);
-      setPatientStatus(tempPatientStatus);       
+      setPatientStatus(tempPatientStatus); 
+      setTempSelPatientStatus(tempPatientStatus);      
     } else {
       setFilteredList({
         text: text, 
@@ -296,7 +301,7 @@ function PatientsScreen({ navigation }) {
       });
       
       // Scroll to top of list
-      patientListRef.current?.scrollToOffset({offset: 0, animated: true});
+      patientListRef.current?.scrollTo({x: 0, y: 0, animated: true});
       setIsLoading(false);    
     }   
   }
@@ -399,7 +404,7 @@ function PatientsScreen({ navigation }) {
           />
           <View style={{height:'85%'}}>
             <FlatList
-              ref={patientListRef}
+              marginBottom={'15'}
               onRefresh={refreshPatientData}
               refreshing={isLoading}
               ListEmptyComponent={noDataMessage}
