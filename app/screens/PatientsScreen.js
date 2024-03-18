@@ -62,7 +62,7 @@ function PatientsScreen({ navigation }) {
     'Patient Status': 'isActive' 
   };
 
-  // Scrollview ref used to programmatically scroll to top of list
+  // Ref used to programmatically scroll to top of list
   const patientListRef = useRef(null);
 
   // Patient data related states
@@ -296,7 +296,7 @@ function PatientsScreen({ navigation }) {
       });
       
       // Scroll to top of list
-      patientListRef.current?.scrollTo({x: 0, y: 0, animated: true});
+      patientListRef.current?.scrollToOffset({offset: 0, animated: true});
       setIsLoading(false);    
     }   
   }
@@ -399,6 +399,7 @@ function PatientsScreen({ navigation }) {
           />
           <View style={{height:'85%'}}>
             <FlatList
+              ref={patientListRef}
               onRefresh={refreshPatientData}
               refreshing={isLoading}
               ListEmptyComponent={noDataMessage}
