@@ -102,7 +102,7 @@ const FilterModalCard = ({
   
   // Initialize sort and filteroptions based on view mode
   const initSortFilterOptions = () => {
-    console.log('MODAL 3 - initSortOptions')
+    console.log('MODAL 3 - initSortFilterOptions')
 
     let tempSort = initSort();
     setSort(tempSort);
@@ -395,7 +395,6 @@ const FilterModalCard = ({
   
   // Set display value of date filter when item is selected
   const handleOnSelectDatetimeFilter = (datetimeVal, filter, type) => {
-    console.log(datetimeVal)
     let tempSelectedDatetimeFilter = {...datetime['tempSel'][filter]} || {};
  
     if(type == 'min') {
