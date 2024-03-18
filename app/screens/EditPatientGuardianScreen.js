@@ -19,6 +19,8 @@ import AppButton from 'app/components/AppButton';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import RadioButtonInput from 'app/components/input-components/RadioButtonsInput';
 import SensitiveInputField from 'app/components/input-components/SensitiveInputField';
+import { parseSelectOptions } from 'app/utility/miscFunctions';
+import InputField from 'app/components/input-components/InputField';
 
 function EditPatientGuardianScreen(props) {
   const { navigation, guardianProfile } = props.route.params;
@@ -86,18 +88,20 @@ function EditPatientGuardianScreen(props) {
     GuardianID: guardianProfile.guardianID,
     FirstName: guardianProfile.firstName,
     LastName: guardianProfile.lastName,
+    ContactNo: guardianProfile.contactNo,
     PreferredName: guardianProfile.preferredName,
-    NRIC: guardianProfile.nric,
     Gender: guardianProfile.gender,
+    DOB: guardianProfile.dob ? new Date(guardianProfile.dob) : minimumJoiningDate,
+    Address: guardianProfile.address ? guardianProfile.address : '',
+    // PostalCode: guardianProfile.postalCode ? guardianProfile.postalCode : '',
+    TempAddress: guardianProfile.tempAddress ? guardianProfile.tempAddress : '',
+    // TempPostalCode: guardianProfile.tempPostalCode ? guardianProfile.tempPostalCode : '',
     Email: guardianProfile.email ? guardianProfile.email : '',
     RelationshipID: guardianProfile.relationshipID,
     isActive: guardianProfile.isActive,
-    ContactNo: guardianProfile.contactNo,
-    DOB: guardianProfile.dob ? guardianProfile.dob : minimumJoiningDate,
-    Address: guardianProfile.address ? guardianProfile.address : '',
-    PostalCode: guardianProfile.postalCode ? guardianProfile.postalCode : '',
-    TempPostalCode: guardianProfile.tempPostalCode ? guardianProfile.tempPostalCode : '',
   });
+
+  console.log(formData);
 
   // To ensure that when the is guardian login required checkbox is checked, guardian email
   // must be filled before continuing. Done by verifying if guardian.Email is empty or not.
@@ -136,7 +140,7 @@ function EditPatientGuardianScreen(props) {
   // replace the content in listOfRelationships with the retrieved one
   useEffect(() => {
     if (!relationshipLoading && !relationshipError && relationshipData) {
-      setListOfRelationships(data.sort((a, b) => a.value - b.value)); // sort by value
+      setListOfRelationships(relationshipData); // sort by value
       setIsLoading(false);
     }
   }, [relationshipData, relationshipError, relationshipLoading]);
@@ -286,6 +290,7 @@ function EditPatientGuardianScreen(props) {
 
   // form submission when save button is pressed
   const submitForm = async () => {
+    console.log(formData);
     const result = await guardianApi.updateGuardian(formData);
 
     let alertTitle = '';
@@ -337,17 +342,6 @@ function EditPatientGuardianScreen(props) {
                   onEndEditing={handleLastNameError}
                   dataType="name"
                 />
-
-                <SensitiveInputField
-                  isRequired
-                  title={'NRIC'}
-                  autoCapitalize="characters"
-                  value={formData.NRIC}
-                  onChangeText={handleFormData('NRIC')}
-                  onEndEditing={handleNRICError}
-                  dataType="nric"
-                  maxLength={9}
-                />   
 
                 <View style={styles.dateSelectionContainer}>
                   <DateInputField
@@ -446,7 +440,6 @@ function EditPatientGuardianScreen(props) {
                 }
 
                 <InputField
-                  isRequired={guardian.IsChecked}
                   title={'Email'}
                   value={formData.Email}
                   onChangeText={handleFormData('Email')}

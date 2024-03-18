@@ -124,7 +124,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
   // replace the content in listOfRelationships with the retrieved one
   useEffect(() => {
     if (!isLoading && !isError && data) {
-      setListOfRelationships(data.sort((a, b) => a.value - b.value)); // sort by value
+      setListOfRelationships(data); // sort by value
     }
   }, [data, isError, isLoading]);
 
