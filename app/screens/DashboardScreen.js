@@ -53,13 +53,9 @@ function DashboardScreen({ navigation }) {
   
   // Filter options based on view mode
   const FILTER_OPTIONS = {
-    'myPatients': ['Activity Time'],
-    'allPatients': ['Activity Time']
+    'myPatients': [ 'Activity Type', 'Patient Start Date', 'Activity Time'],
+    'allPatients': ['Caregiver', 'Patient Start Date', 'Activity Type', 'Patient Start Date', 'Activity Time']
   };
-  // const FILTER_OPTIONS = {
-  //   'myPatients': [ 'Activity Type', 'Patient Start Date', 'Activity Time'],
-  //   'allPatients': ['Caregiver', 'Patient Start Date', 'Activity Type', 'Patient Start Date', 'Activity Time']
-  // };
   
   // Mapping between sort/filter/search names and the respective field in the patient data retrieved from the backend
   const FIELD_MAPPING = {
