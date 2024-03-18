@@ -67,6 +67,9 @@ function DashboardScreen({ navigation }) {
     'Activity Time': 'startTime'
   };
   
+  // Ref used to programmatically scroll to top of list
+  const scheduleRef = useRef(null);
+
   // Patient ata related states
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
@@ -439,6 +442,7 @@ function DashboardScreen({ navigation }) {
       setSchedule([]);
     }
 
+    scheduleRef.current?.scrollToOffset({offset: 0, animated: true});
     setIsLoading(false);    
   }
 
@@ -652,6 +656,7 @@ function DashboardScreen({ navigation }) {
           </View>
         </Stack>
         <FlatList
+          ref={scheduleRef}
           onRefresh={handlePullToRefresh}
           refreshing={isLoading}
           ListEmptyComponent={noDataMessage}
