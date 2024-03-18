@@ -58,6 +58,13 @@ function InputField({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    setError({
+      ...error,
+      isError: isRequired && value.length === 0,
+    });
+  }, [isRequired]);
+
   // Update the parent component that there is a validation error.
   // Validation is passed via the onEndEditing prop.
   useEffect(() => {

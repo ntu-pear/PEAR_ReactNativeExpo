@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   TouchableOpacity,
   Platform,
   StyleSheet,
   Image,
+  ToastAndroid,
 } from 'react-native';
 import { Text, VStack } from 'native-base';
 import typography from 'app/config/typography';
@@ -19,9 +20,16 @@ function ProfileNameButton({
   size,
   isVertical,
   handleOnPress,
-  isActive=null
+  isActive=null,
+  startDate=null,
 }) {
-  // const defaultImage = Image.resolveAssetSource(DefaultImage).uri;
+
+  // Reset error if profile picture uri changes
+  useEffect(() => {
+    setIsError(false);
+  }, [profilePicture])
+
+  const [isError, setIsError] = useState(false);
 
   const containerStyle = isVertical
     ? styles.ContentWrapperVertical
@@ -42,6 +50,11 @@ function ProfileNameButton({
     marginLeft: isVertical ? null : 30,
   };
 
+  const handleProfilePicError = (e) => {
+    ToastAndroid.show(('Error loading profile picture for patient ' + profileLineOne.trim()), ToastAndroid.SHORT)
+    setIsError(true);
+  }
+  
   return (
     <VStack alignItems="center">
       <TouchableOpacity onPress={handleOnPress}>
@@ -49,10 +62,14 @@ function ProfileNameButton({
           <Image
             style={customProfilePictureStyle}
             alt={isPatient === true ? 'patient_image' : 'user_image'}
+            onError={handleProfilePicError}
             // Note: This is a fall-back uri. Will only be used if source fails to render the image.
-            fallbackSource={DefaultImage}
             source={
-              profilePicture ? { uri: `${profilePicture}` } : DefaultImage
+              profilePicture 
+                ? isError 
+                  ? DefaultImage
+                  : { uri: `${profilePicture}` } 
+                : DefaultImage
             }
           />
           <View style={customTextContainerStyle}>
@@ -68,6 +85,11 @@ function ProfileNameButton({
             {profileLineTwo ? (
               <Text style={[styles.DefaultText, ...isVertical ? [{textAlign: 'center'}] : []]} fontSize={size / 6}>
                 {profileLineTwo.trim()}
+              </Text>
+            ) : null}
+            {startDate != null ? (
+              <Text style={styles.DefaultText} fontSize={size / 6}>
+                Start date: {startDate.split('T')[0]}
               </Text>
             ) : null}
             {isActive != null ? (

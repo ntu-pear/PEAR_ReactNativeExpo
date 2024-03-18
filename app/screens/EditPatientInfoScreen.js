@@ -7,156 +7,125 @@ import { Box, VStack, FlatList, Text } from 'native-base';
 import routes from 'app/navigation/routes';
 import colors from 'app/config/colors';
 
-//API
+// API
 import patientApi from 'app/api/patient';
 
-//Components
-import RadioButtonInput from 'app/components/RadioButtonsInput';
-import DateInputField from 'app/components/DateInputField';
-import CommonInputField from 'app/components/CommonInputField';
-import TelephoneInputField from 'app/components/TelephoneInputField';
+// Components
+import RadioButtonInput from 'app/components/input-components/RadioButtonsInput';
+import DateInputField from 'app/components/input-components/DateInputField';
+import InputField from 'app/components/input-components/InputField';
 import AppButton from 'app/components/AppButton';
+
+// Utilities
+import { parseSelectOptions } from 'app/utility/miscFunctions';
 
 function EditPatientInfoScreen(props) {
   const { navigation, patientProfile } = props.route.params;
 
+  // Set initial value for preferred language select field
+  const [listOfLanguages, setListOfLanguages] = useState(
+    parseSelectOptions([
+      'Cantonese',
+      'English',
+      'Hainanese',
+      'Hakka',
+      'Hindi',
+      'Hokkien',
+      'Malay',
+      'Mandarin',
+      'Tamil',
+      'Teochew',
+      'Japanese',
+      'Spanish',
+      'Korean',
+    ]),
+    );
+  
+    // Used for the RadioButtonInput dataArray prop -> follow format of "label" and "value"
+  const [listOfRespiteCare, setListOfRespiteCare] = useState([
+    { label: 'Yes', value: true },
+    { label: 'No', value: false },
+  ]);
+
+  // Screen error state: This = true when the child components report error(input fields)
+  // Enables use of dynamic rendering of components when the page error = true/false.
+  const [isInputErrors, setIsInputErrors] = useState(false);
+
+  // Input error states (Child components)
+  // This records the error states of each child component (ones that require tracking).
+  const [isAddrError, setIsAddrError] = useState(false);
+  const [isPostalCodeError, setIsPostalCodeError] = useState(false);
+  const [isTempAddrError, setIsTempAddrError] = useState(false);
+  const [isTempPostalCodeError, setIsTempPostalCodeError] = useState(false);
+  const [isHomeNoError, setIsHomeNoError] = useState(false);
+  const [isMobileNoError, setIsMobileNoError] = useState(false);
+  const [isRespiteError, setIsRespiteError] = useState(false);
+  const [isJoiningError, setIsJoiningError] = useState(false);
+  const [isLeavingError, setIsLeavingError] = useState(false);
+
+  // Patient data to be submitted
+  const [formData, setFormData] = useState({
+    PatientID: patientProfile.patientID,
+    PreferredLanguageListID: listOfLanguages.find(
+      (item) => item.label === patientProfile.preferredLanguage,
+    ).value, // convert label to value with listOfLanguages
+    PrefLanguage: patientProfile.preferredLanguage != null ? patientProfile.preferredLanguage : '',
+    FirstName: patientProfile.firstName != null ? patientProfile.firstName : '',
+    LastName: patientProfile.lastName != null ? patientProfile.lastName : '',
+    NRIC: patientProfile.nric != null ? patientProfile.nric : '',
+    Gender: patientProfile.gender != null ? patientProfile.gender : '',
+    DOB: patientProfile.dob != null ? patientProfile.dob : null,
+    PreferredName: patientProfile.preferredName != null ? patientProfile.preferredName : '',
+    Address: patientProfile.address != null ? patientProfile.address : '',
+    PostalCode: patientProfile.postalCode != null ? patientProfile.postalCode : '',
+    TempAddress: patientProfile.tempAddress != null ? patientProfile.tempAddress : '',
+    TempPostalCode: patientProfile.tempPostalCode != null ? patientProfile.tempPostalCode : '',
+    HomeNo: patientProfile.homeNo != null ? patientProfile.homeNo : '',
+    HandphoneNo: patientProfile.handphoneNo != null ? patientProfile.handphoneNo : '',
+    StartDate: patientProfile.startDate != null ? patientProfile.startDate : null,
+    EndDate: patientProfile.endDate != null ? patientProfile.endDate : null,
+    IsRespiteCare: patientProfile.isRespiteCare != null ? patientProfile.isRespiteCare : '',
+    PrivacyLevel: patientProfile.privacyLevel != null ? patientProfile.privacyLevel : '',
+    UpdateBit: patientProfile.updateBit != null ? patientProfile.updateBit : '',
+    AutoGame: patientProfile.autoGame != null ? patientProfile.autoGame : '',
+    IsActive: patientProfile.isActive != null ? patientProfile.isActive : '',
+  });
+
+  
   // Maximum and minimum valid joining dates
   const minimumJoiningDate = new Date();
   minimumJoiningDate.setDate(minimumJoiningDate.getDate() - 30); // 30 days ago
   const maximumJoiningDate = new Date();
   maximumJoiningDate.setDate(maximumJoiningDate.getDate() + 30); // 30 days later
 
-  const listOfRespiteCare = [
-    { label: 'Yes', value: true },
-    { label: 'No', value: false },
-  ];
-
-  // error state for component
-  const [isInputErrors, setIsInputErrors] = useState(false);
-
-  // error states for child components
-  const [isAddrError, setIsAddrError] = useState(false);
-  const [isTempAddrError, setIsTempAddrError] = useState(false);
-  const [isHomeNumberError, setIsHomeNumberError] = useState(false);
-  const [isMobileNumberError, setIsMobileNumberError] = useState(false);
-  const [isJoiningError, setIsJoiningError] = useState(false);
-  const [isLeavingError, setIsLeavingError] = useState(false);
-  const [isRespiteError, setIsRespiteError] = useState(false);
-  const listOfLanguages = [
-    { label: 'Cantonese', value: 1 },
-    { label: 'English', value: 2 },
-    { label: 'Hainanese', value: 3 },
-    { label: 'Hakka', value: 4 },
-    { label: 'Hindi', value: 5 },
-    { label: 'Hokkien', value: 6 },
-    { label: 'Malay', value: 7 },
-    { label: 'Mandarin', value: 8 },
-    { label: 'Tamil', value: 9 },
-    { label: 'Teochew', value: 10 },
-    { label: 'Japanese', value: 11 },
-    { label: 'Spanish', value: 12 },
-    { label: 'Korean', value: 13 },
-  ];
-
-  // Error state handling for child components
-  const handleAddrState = useCallback(
-    (state) => {
-      setIsAddrError(state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isAddrError],
-  );
-  const handleTempAddrState = useCallback(
-    (state) => {
-      setIsTempAddrError(state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isTempAddrError],
-  );
-  const handleHomeNumberState = useCallback(
-    (state) => {
-      setIsHomeNumberError(state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isHomeNumberError],
-  );
-  const handleMobileNumberState = useCallback(
-    (state) => {
-      setIsMobileNumberError(state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isMobileNumberError],
-  );
-  const handleJoiningState = useCallback(
-    (state) => {
-      setIsJoiningError(state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isJoiningError],
-  );
-  const handleLeavingState = useCallback(
-    (state) => {
-      setIsLeavingError(state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isLeavingError],
-  );
-  const handleRespiteState = useCallback(
-    (state) => {
-      setIsRespiteError(state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isRespiteError],
-  );
 
   // Error state handling for this component
   useEffect(() => {
     setIsInputErrors(
       isAddrError ||
-        isTempAddrError ||
-        isHomeNumberError ||
-        isMobileNumberError ||
-        isJoiningError ||
-        isLeavingError ||
-        isRespiteError,
+      isPostalCodeError ||
+      isTempAddrError ||
+      isTempPostalCodeError ||
+      isHomeNoError ||
+      isMobileNoError ||
+      isRespiteError ||
+      isJoiningError ||
+      isLeavingError,
     );
     // console.log(isInputErrors);
   }, [
     isAddrError,
+    isPostalCodeError,
     isTempAddrError,
-    isHomeNumberError,
-    isMobileNumberError,
+    isTempPostalCodeError,
+    isHomeNoError,
+    isMobileNoError,
+    isRespiteError,
     isJoiningError,
     isLeavingError,
-    isRespiteError,
-    isInputErrors,
   ]);
 
-  const [formData, setFormData] = useState({
-    PatientID: patientProfile.patientID,
-    PreferredLanguageListID: listOfLanguages.find(
-      (item) => item.label === patientProfile.preferredLanguage,
-    ).value, // convert label to value with listOfLanguages
-    PrefLanguage: patientProfile.preferredLanguage,
-    FirstName: patientProfile.firstName,
-    LastName: patientProfile.lastName,
-    NRIC: patientProfile.nric,
-    Gender: patientProfile.gender,
-    DOB: patientProfile.dob,
-    PreferredName: patientProfile.preferredName,
-    Address: patientProfile.address,
-    TempAddress: patientProfile.tempAddress,
-    HomeNo: patientProfile.homeNo,
-    HandphoneNo: patientProfile.handphoneNo,
-    StartDate: patientProfile.startDate,
-    EndDate: patientProfile.endDate,
-    IsRespiteCare: patientProfile.isRespiteCare,
-    PrivacyLevel: patientProfile.privacyLevel,
-    UpdateBit: patientProfile.updateBit,
-    AutoGame: patientProfile.autoGame,
-    IsActive: patientProfile.isActive,
-  });
-
+  // If no end date specified in original data, set default value
   useEffect(() => {
     if (formData['EndDate'] === null) {
       let replacedDate = new Date(0);
@@ -168,37 +137,87 @@ function EditPatientInfoScreen(props) {
     }
   }, []);
 
-  // handling form input data by taking onchange value and updating our previous form data state
-  const handleFormData =
-    (input = null) =>
-    (e, date = null) => {
-      if (
-        input === 'HomeNo' ||
-        input === 'HandphoneNo' ||
-        input === 'Address' ||
-        input === 'TempAddress'
-      ) {
-        e.toString(); // convert to string
-      } else if (
-        input === 'DOB' ||
-        input === 'StartDate' ||
-        input === 'EndDate'
-      ) {
-        e = e.toISOString().replace('.000Z', ''); // replacement of date values as '.000Z' is not allowed in database
-      } else {
-        date
-          ? date
-          : e.$d //e['$d']-check if input from MUI date-picker
-          ? e.$d
-          : parseInt(e) // check if integer (for dropdown)
-          ? parseInt(e) // change to integer
-          : e; // eg. guardianInfo[0].FirstName = e
-      }
-      setFormData((previousState) => ({
-        ...previousState,
-        [input]: e,
-      }));
-    };
+  
+  // Functions for error state reporting for the child components
+  const handleAddrError = useCallback(
+    (state) => {
+      setIsAddrError(state);
+      // console.log("addr", state)
+    },
+    [isAddrError],
+  );
+
+  const handlePostalCodeError = useCallback(
+    (state) => {
+      setIsPostalCodeError(state);
+      // console.log("addr", state)
+    },
+    [isPostalCodeError],
+  );
+  
+  const handleTempAddrError = useCallback(
+    (state) => {
+      setIsTempAddrError(state);
+      // console.log("temp addr", state)
+    },
+    [isTempAddrError],
+  );
+
+  const handleTempPostalCodeError = useCallback(
+    (state) => {
+      setIsTempPostalCodeError(state);
+      // console.log("addr", state)
+    },
+    [isTempPostalCodeError],
+  );
+  
+  const handleHomeNoError = useCallback(
+    (state) => {
+      setIsHomeNoError(state);
+      // console.log("home", state)
+    },
+    [isHomeNoError],
+  );
+
+  const handleMobileNoError = useCallback(
+    (state) => {
+      setIsMobileNoError(state);
+      // console.log("mobile", state)
+    },
+    [isMobileNoError],
+  );
+  
+  const handleRespiteError = useCallback(
+    (state) => {
+      setIsRespiteError(state);
+      // console.log("respite", state)
+    },
+    [isRespiteError],
+  );
+
+  const handleJoiningError = useCallback(
+    (state) => {
+      setIsJoiningError(state);
+      // console.log("joining", state)
+    },
+    [isJoiningError],
+  );
+
+  const handleLeavingError = useCallback(
+    (state) => {
+      setIsLeavingError(state);
+      // console.log("leaving", state)
+    },
+    [isLeavingError],
+  );
+
+  // Function to update patient data
+  const handleFormData = (field) => (e) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      [field]: e
+    }));
+  };
 
   // form submission when save button is pressed
   const submitForm = async () => {
@@ -234,35 +253,70 @@ function EditPatientInfoScreen(props) {
           <Box w="100%">
             <VStack>
               <View style={styles.formContainer}>
-                <TelephoneInputField
-                  title={'Home Number'}
-                  value={formData['HomeNo']}
-                  numberType={'home'}
-                  onChangeText={handleFormData('HomeNo')}
-                  onChildData={handleHomeNumberState}
-                />
-
-                <TelephoneInputField
-                  title={'Mobile Number'}
-                  value={formData['HandphoneNo']}
-                  numberType={'mobile'}
-                  onChangeText={handleFormData('HandphoneNo')}
-                  onChildData={handleMobileNumberState}
-                />
-
-                <CommonInputField
+                <InputField
                   isRequired
                   title={'Address'}
-                  value={formData['Address']}
+                  value={formData.Address}
                   onChangeText={handleFormData('Address')}
-                  onChildData={handleAddrState}
+                  onEndEditing={handleAddrError}
+                />
+                
+                <InputField
+                  isRequired={formData.Address.length > 0}
+                  title={'Postal Code'}
+                  value={formData.PostalCode}
+                  onChangeText={handleFormData('PostalCode')}
+                  onEndEditing={handlePostalCodeError}
+                  dataType='postal code'
+                  keyboardType='numeric'
+                  maxLength={6}
                 />
 
-                <CommonInputField
+                <InputField
                   title={'Temporary Address'}
-                  value={formData['TempAddress']}
+                  value={formData.TempAddress}
                   onChangeText={handleFormData('TempAddress')}
-                  onChildData={handleTempAddrState}
+                  onEndEditing={handleTempAddrError}
+                />
+
+                <InputField
+                  isRequired={formData.TempAddress ? formData.TempAddress.length > 0 : false}
+                  title={'Temporary Postal Code'}
+                  value={formData.TempPostalCode}
+                  onChangeText={handleFormData('TempPostalCode')}
+                  onEndEditing={handleTempPostalCodeError}
+                  dataType='postal code'
+                  keyboardType='numeric'
+                  maxLength={6}
+                />
+
+                <InputField
+                  title={'Home Telephone No.'}
+                  value={formData.HomeNo}
+                  onChangeText={handleFormData('HomeNo')}
+                  onEndEditing={handleHomeNoError}
+                  dataType={'home phone'}
+                  keyboardType='numeric'
+                  maxLength={8}
+                />
+
+                <InputField
+                  title={'Mobile No.'}
+                  value={formData.HandphoneNo}
+                  onChangeText={handleFormData('HandphoneNo')}
+                  onEndEditing={handleMobileNoError}
+                  dataType={'mobile phone'}
+                  keyboardType='numeric'                      
+                  maxLength={8}
+                />   
+
+                <RadioButtonInput
+                  isRequired
+                  title={'Respite Care'}
+                  value={formData.IsRespiteCare}
+                  onChangeData={handleFormData('IsRespiteCare')}
+                  dataArray={listOfRespiteCare}
+                  onEndEditing={handleRespiteError}
                 />
 
                 <View style={styles.dateSelectionContainer}>
@@ -270,9 +324,9 @@ function EditPatientInfoScreen(props) {
                     isRequired
                     title={'Date of Joining'}
                     value={new Date(formData['StartDate'])}
-                    handleFormData={handleFormData('StartDate')}
-                    onChildData={handleJoiningState}
                     hideDayOfWeek={true}
+                    handleFormData={handleFormData('StartDate')}
+                    onEndEditing={handleJoiningError}
                     minimumInputDate={minimumJoiningDate}
                     maximumInputDate={maximumJoiningDate}
                   />
@@ -280,21 +334,13 @@ function EditPatientInfoScreen(props) {
 
                 <View style={styles.dateSelectionContainer}>
                   <DateInputField
-                    title={'Date of Leaving (Optional)'}
+                    title={'Date of Leaving'}
                     value={new Date(formData['EndDate'])}
                     handleFormData={handleFormData('EndDate')}
-                    onChildData={handleLeavingState}
+                    hideDayOfWeek={true}
+                    onEndEditing={handleLeavingError}
                   />
                 </View>
-
-                <RadioButtonInput
-                  isRequired
-                  title={'Respite Care'}
-                  value={formData['IsRespiteCare']}
-                  onChangeData={handleFormData('IsRespiteCare')}
-                  dataArray={listOfRespiteCare}
-                  onChildData={handleRespiteState}
-                />
 
                 <Text style={styles.redText}>
                   Note: To edit other information, please contact system

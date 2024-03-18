@@ -7,8 +7,9 @@ import {
   Text,
   TouchableOpacity,
 } from 'react-native';
-import { VStack } from 'native-base';
+import { Icon, VStack } from 'native-base';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { MaterialIcons } from '@expo/vector-icons';
 
 // Configuration
 import typography from 'app/config/typography';
@@ -16,7 +17,10 @@ import colors from 'app/config/colors';
 
 // Components
 import ErrorMessage from 'app/components/ErrorMessage';
-import RequiredIndicator from './RequiredIndicator';
+import RequiredIndicator from '../RequiredIndicator';
+
+// Utilities
+import { formatDate, formatTimeAMPM } from 'app/utility/miscFunctions';
 
 function DateInputField({
   isRequired,
@@ -28,6 +32,10 @@ function DateInputField({
   maximumInputDate,
   onChildData,
   hideDayOfWeek,
+  mode='date',
+  placeholder=mode == 'date' ? 'Select date' : 'Select time',
+  allowNull=false,
+  dateForTime,
 }) {
   const [show, setShow] = useState(false);
 
@@ -39,8 +47,6 @@ function DateInputField({
     error: false,
     errorMsg: '',
   });
-
-  const listOfDays = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
 
   // Earliest year user can be born (150 years ago)
   const minimumDOB = new Date();
@@ -69,23 +75,10 @@ function DateInputField({
 
   const onChangeData = (event, selected) => {
     setShow(false);
-    handleFormData(selected);
-    validation();
-  };
-
-  // Used to format the date to DD/MM/YYYY for display in the input field.
-  const formatDate = (inputDate) => {
-    let day, date, month, year;
-    day = inputDate.getDay();
-    date = inputDate.getDate();
-    month = inputDate.getMonth() + 1;
-    year = inputDate.getFullYear();
-    date = date.toString().padStart(2, '0');
-    month = month.toString().padStart(2, '0');
-
-    return hideDayOfWeek
-      ? `${date}/${month}/${year}`
-      : `${listOfDays[day]}, ${date}/${month}/${year}`;
+    if(event == null || event.type != 'dismissed') {
+      handleFormData(selected);
+      validation();
+    }
   };
 
   const showPicker = () => {
@@ -116,9 +109,21 @@ function DateInputField({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isError, onChildData]);
 
+  const setFieldText = () => {
+    if(value != null) {
+      return mode == 'date' ? formatDate(value, hideDayOfWeek) : formatTimeAMPM(value);
+    }  else {
+      return placeholder;
+    }
+  }
+
+  const clearDate = () => {
+    value = null;
+    onChangeData(null, null)
+  }
+
   return (
     <View style={styles.componentContainer}>
-      <VStack>
         {title ? (
           <Text style={styles.titleMsg}>
             {title}:{isRequired ? <RequiredIndicator/> : ''}
@@ -126,18 +131,36 @@ function DateInputField({
         ) : (
           <></>
         )}
-        <View style={styles.pickerButton}>
-          <TouchableOpacity onPress={() => showPicker()}>
-            <Text style={styles.textField}>{formatDate(value)}</Text>
-          </TouchableOpacity>
+        <View style={styles.dateWrapper}>
+            <TouchableOpacity style={[styles.dateContainer, {alignItems: allowNull ? 'flex-start' : 'center'}]} onPress={showPicker}>
+              <Text style={[styles.textField]}>{setFieldText()}</Text>
+            </TouchableOpacity>
+            {allowNull && value != null? (
+              <TouchableOpacity 
+                onPress={clearDate} 
+                disabled={value==null}
+                activeOpacity={value==null ? 1 : 0.5}
+                style={styles.resetIcon}
+                >
+                <Icon 
+                  as={
+                    <MaterialIcons 
+                    name="close" 
+                    />
+                  } 
+                  size={6}    
+                  style={{alignSelf: 'flex-end', marginRight: 5}} 
+                />
+              </TouchableOpacity>
+            ) : null}
         </View>
         {show && (
           <DateTimePicker
             testID="dateTimePicker"
-            value={value}
+            value={value || dateForTime || new Date()}
             display="default"
-            mode="date"
-            onChange={onChangeData}
+            mode={mode}
+            onChange={(onChangeData)}
             // if the selection mode is set to Date of Birth (DOB), fixed max and min years will be specified
             // else, the minimumInputDate and maximumInputDate will be used.
             // if there is no minimumInputDate or maximumInputDate specified in the prop, default DateTimePicker min and max dates will be used.
@@ -152,7 +175,6 @@ function DateInputField({
         {isError.errorMsg ? (
           <ErrorMessage message={isError.errorMsg} visible={true} />
         ) : null}
-      </VStack>
     </View>
   );
 }
@@ -165,8 +187,7 @@ DateInputField.defaultProps = {
 
 const styles = StyleSheet.create({
   componentContainer: {
-    display: 'flex',
-    width: '80%',
+    flexDirection: 'column',
     marginTop: 5,
     justifyContent: 'flex-start',
   },
@@ -178,21 +199,36 @@ const styles = StyleSheet.create({
     color: colors.light_gray2,
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
   },
-  pickerButton: {
-    display: 'flex',
-    justifyContent: 'center',
+  textField: {
+    fontSize: 18,
+    textAlign: 'left',
+    color: colors.black_var1,
+    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+    paddingHorizontal: 10,
+  },
+  dateWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',    
     width: '100%',
     height: 50,
     borderWidth: 1,
     borderRadius: 25,
     borderColor: colors.light_gray3,
   },
-  textField: {
-    fontSize: 18,
-    textAlign: 'center',
-    color: colors.black_var1,
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+  dateContainer: {
+    width: '90%',    
+    borderTopLeftRadius: 25, 
+    borderBottomLeftRadius: 25,
+    height: 50, 
+    justifyContent: 'center'
   },
+  resetIcon: {
+    width: '10%', 
+    justifyContent: 'flex-end',
+    borderTopRightRadius: 25,
+    borderBottomRightRadius: 25
+  }
 });
 
 export default DateInputField;

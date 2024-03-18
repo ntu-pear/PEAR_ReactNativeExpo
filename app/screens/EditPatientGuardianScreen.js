@@ -13,17 +13,14 @@ import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 import guardianApi from 'app/api/guardian';
 
 // Components
-import NameInputField from 'app/components/NameInputField';
-import NRICInputField from 'app/components/NRICInputField';
-import SelectionInputField from 'app/components/SelectionInputField';
-import TelephoneInputField from 'app/components/TelephoneInputField';
-import SingleOptionCheckBox from 'app/components/SingleOptionCheckBox';
-import EmailInputField from 'app/components/EmailInputField';
-import CommonInputField from 'app/components/CommonInputField';
-import DateInputField from 'app/components/DateInputField';
+import SelectionInputField from 'app/components/input-components/SelectionInputField';
+import DateInputField from 'app/components/input-components/DateInputField';
 import AppButton from 'app/components/AppButton';
 import ActivityIndicator from 'app/components/ActivityIndicator';
-import RadioButtonInput from 'app/components/RadioButtonsInput';
+import RadioButtonInput from 'app/components/input-components/RadioButtonsInput';
+import SensitiveInputField from 'app/components/input-components/SensitiveInputField';
+import { parseSelectOptions } from 'app/utility/miscFunctions';
+import InputField from 'app/components/input-components/InputField';
 
 function EditPatientGuardianScreen(props) {
   const { navigation, guardianProfile } = props.route.params;
@@ -42,178 +39,112 @@ function EditPatientGuardianScreen(props) {
     isLoading: relationshipLoading,
   } = useGetSelectionOptions('relationship');
 
-  // set initial value for SelectionInputField dataArray prop -> follow format of "label" and "value"
-  const [listOfRelationships, setListOfRelationships] = useState([
-    { value: 1, label: 'Husband' },
-    { value: 2, label: 'Wife' },
-    { value: 3, label: 'Child' },
-    { value: 4, label: 'Parent' },
-    { value: 5, label: 'Sibling' },
-    { value: 6, label: 'Grandchild' },
-    { value: 7, label: 'Friend' },
-    { value: 8, label: 'Nephew' },
-    { value: 9, label: 'Niece' },
-    { value: 10, label: 'Aunt' },
-    { value: 11, label: 'Uncle' },
-    { value: 12, label: 'Grandparent' },
-  ]);
-
-  const listOfGenders = [
+  // Set initial value for relationship select field
+  const [listOfRelationships, setListOfRelationships] = useState(
+    parseSelectOptions([
+      'Husband',
+      'Wife',
+      'Child',
+      'Parent',
+      'Sibling',
+      'Grandchild',
+      'Friend',
+      'Nephew',
+      'Niece',
+      'Aunt',
+      'Uncle',
+      'Grandparent',
+    ]),
+  );
+  
+  // Used for the RadioButtonInput dataArray prop -> follow format of "label" and "value"
+  const [listOfGenders, setListOfGenders] = useState([
     { label: 'Male', value: 'M' },
     { label: 'Female', value: 'F' },
-  ];
-
+  ]);
+  
+  // Screen error state: This = true when the child components report error(input fields)
+  // Enables use of dynamic rendering of components when the page error = true/false.
   const [isInputErrors, setIsInputErrors] = useState(false);
 
+  // Input error states (Child components)
   const [isFirstNameError, setIsFirstNameError] = useState(false);
   const [isLastNameError, setIsLastNameError] = useState(false);
   const [isPrefNameError, setIsPrefNameError] = useState(false);
   const [isNRICError, setIsNRICError] = useState(false);
   const [isGenderError, setIsGenderError] = useState(false);
-  const [isEmailError, setIsEmailError] = useState(false);
-  const [isRelationError, setIsRelationError] = useState(false);
-  const [isPhoneError, setIsPhoneError] = useState(false);
   const [isDOBError, setIsDOBError] = useState(false);
-  const [isAddrError, setIsAddrError] = useState(false);
+  const [isRelationError, setIsRelationError] = useState(false);
   const [isTempAddrError, setIsTempAddrError] = useState(false);
-  const [isGuardianLoginError, setIsGuardianLoginError] = useState(false);
+  const [isTempPostalCodeError, setIsTempPostalCodeError] = useState(false);
+  const [isAddrError, setIsAddrError] = useState(false);
+  const [isPostalCodeError, setIsPostalCodeError] = useState(false);
+  const [isMobileNoError, setIsMobileNoError] = useState(false);
+  const [isEmailError, setIsEmailError] = useState(false);
+  const [isLoginError, setIsLoginError] = useState(false);
+  
+  // Guardian data to be submitted 
+  const [formData, setFormData] = useState({
+    GuardianID: guardianProfile.guardianID,
+    FirstName: guardianProfile.firstName,
+    LastName: guardianProfile.lastName,
+    ContactNo: guardianProfile.contactNo,
+    PreferredName: guardianProfile.preferredName,
+    Gender: guardianProfile.gender,
+    DOB: guardianProfile.dob ? new Date(guardianProfile.dob) : minimumJoiningDate,
+    Address: guardianProfile.address ? guardianProfile.address : '',
+    Nric: guardianProfile.nric ? guardianProfile.nric : '',
+    PostalCode: guardianProfile.postalCode ? guardianProfile.postalCode : '',
+    TempAddress: guardianProfile.tempAddress ? guardianProfile.tempAddress : '',
+    TempPostalCode: guardianProfile.tempPostalCode ? guardianProfile.tempPostalCode : '',
+    Email: guardianProfile.email ? guardianProfile.email : '',
+    RelationshipID: guardianProfile.relationshipID,
+    isActive: guardianProfile.isActive,
+  });
 
-  const handleFirstNameState = useCallback(
-    (state) => {
-      setIsFirstNameError(state);
-      // console.log('FirstName: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isFirstNameError],
-  );
-  const handleLastNameState = useCallback(
-    (state) => {
-      setIsLastNameError(state);
-      // console.log('LastName: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isLastNameError],
-  );
-  const handlePrefNameState = useCallback(
-    (state) => {
-      setIsPrefNameError(state);
-      // console.log('LastName: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isPrefNameError],
-  );
-  const handleNRICState = useCallback(
-    (state) => {
-      setIsNRICError(state);
-      // console.log('NRIC: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isNRICError],
-  );
-  const handleGenderState = useCallback(
-    (state) => {
-      setIsGenderError(state);
-      // console.log('LastName: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isGenderError],
-  );
-  const handleEmailState = useCallback(
-    (state) => {
-      setIsEmailError(state);
-      // console.log('Email: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isEmailError],
-  );
-  const handleRelationState = useCallback(
-    (state) => {
-      setIsRelationError(state);
-      // console.log('Relation: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isRelationError],
-  );
-  const handlePhoneState = useCallback(
-    (state) => {
-      setIsPhoneError(state);
-      // console.log('Phone: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isPhoneError],
-  );
-  const handleDOBState = useCallback(
-    (state) => {
-      setIsDOBError(state);
-      // console.log('DOB: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isDOBError],
-  );
-  const handleAddrState = useCallback(
-    (state) => {
-      setIsAddrError(state);
-      // console.log('Addr: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isAddrError],
-  );
-  const handleTempAddrState = useCallback(
-    (state) => {
-      setIsTempAddrError(state);
-      // console.log('TempAddr: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isTempAddrError],
-  );
+  console.log(formData);
 
+  // To ensure that when the is guardian login required checkbox is checked, guardian email
+  // must be filled before continuing. Done by verifying if guardian.Email is empty or not.
   useEffect(() => {
     setIsInputErrors(
       isFirstNameError ||
-        isLastNameError ||
-        isPrefNameError ||
-        isNRICError ||
-        isGenderError ||
-        isEmailError ||
-        isPhoneError ||
-        isRelationError ||
-        isDOBError ||
-        isAddrError ||
-        isTempAddrError ||
-        isGuardianLoginError,
+      isLastNameError ||
+      isPrefNameError ||
+      isNRICError ||
+      isGenderError ||
+      isDOBError ||
+      isRelationError ||
+      isAddrError ||
+      isTempAddrError ||
+      isMobileNoError ||
+      isEmailError ||
+      isLoginError,
     );
-    // console.log(isInputErrors);
   }, [
     isFirstNameError,
     isLastNameError,
     isPrefNameError,
     isNRICError,
     isGenderError,
-    isEmailError,
-    isPhoneError,
-    isRelationError,
     isDOBError,
+    isRelationError,
     isAddrError,
     isTempAddrError,
+    isMobileNoError,
+    isEmailError,
+    isLoginError,
     isInputErrors,
-    isGuardianLoginError,
   ]);
-
-  const [formData, setFormData] = useState({
-    GuardianID: guardianProfile.guardianID,
-    FirstName: guardianProfile.firstName,
-    LastName: guardianProfile.lastName,
-    PreferredName: guardianProfile.preferredName,
-    NRIC: guardianProfile.nric,
-    Gender: guardianProfile.gender,
-    Email: guardianProfile.email ? guardianProfile.email : '',
-    RelationshipID: guardianProfile.relationshipID,
-    isActive: guardianProfile.isActive,
-    ContactNo: guardianProfile.contactNo,
-    DOB: guardianProfile.dob ? guardianProfile.dob : minimumJoiningDate,
-    Address: guardianProfile.address ? guardianProfile.address : '',
-    TempAddress: guardianProfile.tempAddress ? guardianProfile.tempAddress : '',
-  });
+  
+  // Try to get relationships list from backend. If retrieval from the hook is successful,
+  // replace the content in listOfRelationships with the retrieved one
+  useEffect(() => {
+    if (!relationshipLoading && !relationshipError && relationshipData) {
+      setListOfRelationships(relationshipData); // sort by value
+      setIsLoading(false);
+    }
+  }, [relationshipData, relationshipError, relationshipLoading]);
 
   // To ensure that when the is guardian login required checkbox is checked, guardian email
   // must be filled before continuing. Done by verifying if formData['Email'] is empty or not.
@@ -228,32 +159,139 @@ function EditPatientGuardianScreen(props) {
   //    }
   //  });
   //}, [formData['isActive'], formData['Email']]);
+  
+  // Functions for error state reporting for the child components
+  const handleFirstNameError = useCallback(
+    (state) => {
+      setIsFirstNameError(state);
+      // console.log('FirstName: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isFirstNameError],
+  );
+
+  const handleLastNameError = useCallback(
+    (state) => {
+      setIsLastNameError(state);
+      // console.log("last name", state)
+    },
+    [isLastNameError]
+  );
+
+  const handlePrefNameError = useCallback(
+    (state) => {
+      setIsPrefNameError(state);
+      // console.log("pref name", state)
+    },
+    [isPrefNameError]
+  );
+
+  const handleNRICError = useCallback(
+    (state) => {
+      setIsNRICError(state);
+      // console.log("nric", state)
+    },
+    [isNRICError]
+  );
+
+  const handleGenderError = useCallback(
+    (state) => {
+      setIsGenderError(state);
+      // console.log("gender", state)
+    },
+    [isGenderError]
+  );
+
+  const handleDOBError = useCallback(
+    (state) => {
+      setIsDOBError(state);
+      // console.log("dob", state)
+    },
+    [isDOBError]
+  );
+
+  const handleRelationError = useCallback(
+    (state) => {
+      setIsRelationError(state);
+      // console.log("relation", state)
+    },
+    [isRelationError]
+  );
+
+  const handleAddrError = useCallback(
+    (state) => {
+      setIsAddrError(state);
+      // console.log("addr", state)
+    },
+    [isAddrError]
+  );
+
+  const handlePostalCodeError = useCallback(
+    (state) => {
+      setIsPostalCodeError(state);
+      // console.log("addr", state)
+    },
+    [isPostalCodeError]
+  );
+
+  const handleTempAddrError = useCallback(
+    (state) => {
+      setIsTempAddrError(state);
+      // console.log("temp addr", state)
+    },
+    [isTempAddrError]
+  );
+
+  const handleTempPostalCodeError = useCallback(
+    (state) => {
+      setIsTempPostalCodeError(state);
+      // console.log("temp postal code", state)
+    },
+    [isTempPostalCodeError]
+  );
+
+  const handleMobileNoError = useCallback(
+    (state) => {
+      setIsMobileNoError(state);
+      // console.log("mobile", state)
+    },
+    [isMobileNoError]
+  );
+
+  const handleEmailError = useCallback(
+    (state) => {
+      setIsEmailError(state);
+      // console.log("email", state)
+    },
+    [isEmailError]
+  );
+
+  const handleLoginError = useCallback(
+    (state) => {
+      setIsLoginError(state);
+      // console.log("email", state)
+    },
+    [isLoginError]
+  );
 
   // handling form input data by taking onchange value and updating our previous form data state
-  const handleFormData =
-    (input = null) =>
-    (e) => {
-      if (input === 'ContactNo') {
-        e.toString(); // convert to string
-        setFormData((prevData) => ({
-          ...prevData,
-          [input]: e,
-        }));
-      } else if (input === 'Relationship') {
-        setFormData((prevData) => ({
-          ...prevData,
-          RelationshipID: e,
-        }));
+    const handleFormData = (field) => (e) => {
+      if (field === 'RelationshipID') {
+        setFormData(prevState=>({
+          ...prevState,
+          [field]: parseInt(e)
+        }))
       } else {
-        setFormData((prevData) => ({
-          ...prevData,
-          [input]: e,
-        }));
+        setFormData(prevState=>({
+          ...prevState,
+          [field]: e
+        }))
       }
     };
 
   // form submission when save button is pressed
   const submitForm = async () => {
+    console.log(formData);
     const result = await guardianApi.updateGuardian(formData);
 
     let alertTitle = '';
@@ -278,15 +316,6 @@ function EditPatientGuardianScreen(props) {
     Alert.alert(alertTitle, alertDetails);
   };
 
-  /* If retrieval from the hook is successful, replace the content in
-     listOfLanguages with the retrieved one. */
-  useEffect(() => {
-    if (!relationshipLoading && !relationshipError && relationshipData) {
-      setListOfRelationships(relationshipData);
-      setIsLoading(false);
-    }
-  }, [relationshipData, relationshipError, relationshipLoading]);
-
   return relationshipLoading || isLoading ? (
     <ActivityIndicator visible />
   ) : (
@@ -297,92 +326,110 @@ function EditPatientGuardianScreen(props) {
           <Box w="100%">
             <VStack>
               <View style={styles.formContainer}>
-                <NameInputField
+                <InputField
                   isRequired
-                  title={'Guardian First Name'}
-                  value={formData['FirstName']}
+                  title={'First Name'}
+                  value={formData.FirstName}
                   onChangeText={handleFormData('FirstName')}
-                  onChildData={handleFirstNameState}
+                  onEndEditing={handleFirstNameError}
+                  dataType="name"
                 />
 
-                <NameInputField
+                <InputField
                   isRequired
-                  title={'Guardian Last Name'}
-                  value={formData['LastName']}
+                  title={'Last Name'}
+                  value={formData.LastName}
                   onChangeText={handleFormData('LastName')}
-                  onChildData={handleLastNameState}
-                />
-
-                <NameInputField
-                  isRequired
-                  title={'Guardian Preferred Name'}
-                  value={formData['PreferredName']}
-                  onChangeText={handleFormData('PreferredName')}
-                  onChildData={handlePrefNameState}
-                />
-
-                <NRICInputField
-                  isRequired
-                  title={'Guardian NRIC'}
-                  value={formData['NRIC']}
-                  onChangeText={handleFormData('NRIC')}
-                  onChildData={handleNRICState}
-                  maxLength={9}
-                />
-
-                <RadioButtonInput
-                  isRequired
-                  title={'Guardian Gender'}
-                  value={formData['Gender']}
-                  onChangeData={handleFormData('Gender')}
-                  onChildData={handleGenderState}
-                  dataArray={listOfGenders}
-                />
-
-                <SelectionInputField
-                  isRequired
-                  title={'Relationship'}
-                  placeholderText={guardianProfile.relationship}
-                  onDataChange={handleFormData('Relationship')}
-                  value={guardianProfile.relationship}
-                  dataArray={listOfRelationships}
-                  onChildData={handleRelationState}
-                />
-
-                <TelephoneInputField
-                  isRequired
-                  title={"Guardian's Handphone No."}
-                  value={formData['ContactNo']}
-                  onChangeText={handleFormData('ContactNo')}
-                  onChildData={handlePhoneState}
-                  maxLength={8}
+                  onEndEditing={handleLastNameError}
+                  dataType="name"
                 />
 
                 <View style={styles.dateSelectionContainer}>
                   <DateInputField
                     isRequired
                     selectionMode={'DOB'}
-                    title={'Date of Birth'}
                     hideDayOfWeek={true}
-                    value={new Date(formData['DOB'])}
+                    title={'Date of Birth'}
+                    value={formData.DOB}
                     handleFormData={handleFormData('DOB')}
-                    onChildData={handleDOBState}
+                    onChildData={handleDOBError}
                   />
-                </View>
+                </View>  
 
-                <CommonInputField
+                <RadioButtonInput
                   isRequired
-                  title={'Address'}
-                  value={formData['Address']}
-                  onChangeText={handleFormData('Address')}
-                  onChildData={handleAddrState}
+                  title={'Gender'}
+                  value={formData['Gender']}
+                  onChangeData={handleFormData('Gender')}
+                  onChildData={handleGenderError}
+                  dataArray={listOfGenders}
                 />
 
-                <CommonInputField
-                  title={'Temporary Address (optional)'}
-                  value={formData['TempAddress']}
+                <InputField
+                  isRequired
+                  title={'Address'}
+                  value={formData.Address}
+                  onChangeText={handleFormData('Address')}
+                  onEndEditing={handleAddrError}
+                />
+
+                <InputField
+                  isRequired
+                  title={'Postal Code'}
+                  value={formData.PostalCode}
+                  onChangeText={handleFormData('PostalCode')}
+                  onEndEditing={handlePostalCodeError}
+                  dataType='postal code'
+                  keyboardType='numeric'
+                  maxLength={6}
+                />
+
+                <InputField
+                  title={'Temporary Address'}
+                  value={formData.TempAddress}
                   onChangeText={handleFormData('TempAddress')}
-                  onChildData={handleTempAddrState}
+                  onEndEditing={handleTempAddrError}
+                />
+
+                <InputField
+                  isRequired={formData.TempAddress.length > 0}
+                  title={'Temporary Postal Code'}
+                  value={formData.TempPostalCode}
+                  onChangeText={handleFormData('TempPostalCode')}
+                  onEndEditing={handleTempPostalCodeError}
+                  dataType='postal code'
+                  keyboardType='numeric'
+                  maxLength={6}
+                />
+
+                <InputField
+                  isRequired
+                  title={'Mobile No.'}
+                  value={formData.ContactNo}
+                  onChangeText={handleFormData('ContactNo')}
+                  onEndEditing={handleMobileNoError}
+                  dataType={'mobile phone'}
+                  keyboardType='numeric' 
+                  maxLength={8}                   
+                />
+
+                <InputField
+                  isRequired
+                  title={'Preferred Name'}
+                  value={formData.PreferredName}
+                  onChangeText={handleFormData('PreferredName')}
+                  onEndEditing={handlePrefNameError}                    
+                  dataType="name"
+                />
+
+                <SelectionInputField
+                  isRequired
+                  title={'Relationship'}
+                  placeholder={guardianProfile.relationship}
+                  onDataChange={handleFormData('RelationshipID')}
+                  value={guardianProfile.relationship}
+                  dataArray={listOfRelationships}
+                  onChildData={handleRelationError}
                 />
 
                 {
@@ -393,11 +440,12 @@ function EditPatientGuardianScreen(props) {
                   ///>
                 }
 
-                <EmailInputField
-                  title={'Guardian Email'}
-                  value={formData['Email']}
+                <InputField
+                  title={'Email'}
+                  value={formData.Email}
                   onChangeText={handleFormData('Email')}
-                  onChildData={handleEmailState}
+                  onEndEditing={handleEmailError}
+                  dataType="email"
                 />
               </View>
               <View style={styles.saveButtonContainer}>

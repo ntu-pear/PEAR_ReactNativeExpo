@@ -23,7 +23,8 @@ function SelectionInputField({
   onEndEditing = () => {},
   inputLeftElement = null,
   inputRightElement = null,
-  isDisabledItems = {}
+  isDisabledItems = {},
+  otherProps={},
 }) {
   /*
   This state and subsequent useEffect are used to track if the component is in its first render. This is mainly used to
@@ -84,10 +85,10 @@ function SelectionInputField({
   };  
 
   return (
-    <View style={styles.ComponentContainer}>
+    <View style={styles.componentContainer}>
       <VStack>
         {showTitle ? (
-          <Text style={styles.TitleMsg}>
+          <Text style={styles.titleMsg}>
             {title}:{isRequired ? <RequiredIndicator/> : ''}
           </Text>
         ) : (
@@ -109,6 +110,7 @@ function SelectionInputField({
           onValueChange={handleValueChanged}
           InputLeftElement={inputLeftElement}
           inputRightElement={inputRightElement}
+          {...otherProps}
         >
           {dataArray.map((item) => (
             <Select.Item key={item} label={item.label} value={item.value} isDisabled={isDisabledItems ? isDisabledItems[item.value] : false}/>
@@ -128,23 +130,19 @@ SelectionInputField.defaultProps = {
 };
 
 const styles = StyleSheet.create({
-  ComponentContainer: {
+  componentContainer: {
     display: 'flex',
     width: '100%',
     marginTop: 5,
     justifyContent: 'flex-start',
   },
-  TitleMsg: {
+  titleMsg: {
     fontSize: 13.5,
     fontWeight: 'bold',
     marginBottom: 5,
     marginTop: 10,
     color: colors.light_gray2,
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
-  },
-  RequiredIndicator: {
-    color: colors.red,
-    fontSize: 18,
   },
 });
 

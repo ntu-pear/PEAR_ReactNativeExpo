@@ -11,7 +11,7 @@ import {
   Text,
   VStack,
 } from 'native-base';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Platform, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Accordion from 'react-native-collapsible/Accordion';
@@ -58,6 +58,8 @@ function PatientInformationScreen(props) {
   const [ activeSections, setActiveSections ] = useState([]);
   const [ sections, setSections ] = useState([]);
 
+  const mounted = useRef(false);
+
   // Used to retrieve the patient since after an editing of the patients particulars it will need to be refreshed - Russell
   const retrievePatient = async (id) => {
     const response = await patientApi.getPatient(id);
@@ -89,7 +91,6 @@ function PatientInformationScreen(props) {
       return;
     }
     setGuardianData(response.data.data);
-    console.log(response.data.data);
   };
 
   const retrieveDoctorsNote = async (id) => {
@@ -99,6 +100,7 @@ function PatientInformationScreen(props) {
       return;
     }
     setDoctorNoteData(response.data.data);
+    console.log('doctor notes', response.data.data);
   };
 
   // Data used for display, sent to InformationCard
@@ -156,8 +158,8 @@ function PatientInformationScreen(props) {
   ];
 
   useEffect(() => {
-    let isMounted = true;
-    if (isMounted) {
+    mounted.current = true;
+    if (mounted.current) {      // check if component mounted
       if (patientProfile !== undefined && Object.keys(patientProfile).length>0) {
         setPatientData([
           { label: 'First Name', value: patientProfile.firstName },
@@ -205,7 +207,8 @@ function PatientInformationScreen(props) {
   }, [patientProfile]);
 
   useEffect(() => {
-    if (doctorsNoteData !== null && Object.keys(doctorsNoteData).length>0) {
+    mounted.current = true;
+    if (doctorsNoteData !== null && Object.keys(doctorsNoteData).length>0 && mounted.current) {
       var lastItem = doctorsNoteData.pop();
       setDoctorNoteInfo([
         {
@@ -229,7 +232,8 @@ function PatientInformationScreen(props) {
   }, [doctorsNoteData]);
 
   useEffect(() => {
-    if (Object.keys(guardianData).length>0) {
+    mounted.current = true;
+    if (Object.keys(guardianData).length>0 && mounted.current) {
       // get data of first guardian
       setUnMaskedGuardianNRIC(guardianData.guardian.nric);
       setGuardianInfoData([
@@ -496,7 +500,6 @@ function PatientInformationScreen(props) {
         return handlePatientPrefOnPress;
         break;
       case 'Guardian(s) Information':
-      case 'Guardian 1':
         return handlePatientGuardianOnPress;
         break;
       case 'Guardian 2':
@@ -516,7 +519,6 @@ function PatientInformationScreen(props) {
         return unMaskedPatientNRIC;
         break;
       case 'Guardian(s) Information':
-      case 'Guardian 1':
         return unMaskedGuardianNRIC;
         break;
       case 'Guardian 2':
@@ -527,83 +529,31 @@ function PatientInformationScreen(props) {
     }
   };
 
-  // const sections = [
-  //   {
-  //     title: 'Patient Information',
-  //     content: patientData
-  //   },
-  //   {
-  //     title: 'Patient Preferences',
-  //     content: preferenceData
-  //   },
-  //   {
-  //     title: 'Doctor\'s Notes',
-  //     content: doctorsNoteInfo
-  //   },
-  //   {
-  //     title: 'Guardian(s) Information',
-  //     content: guardianInfoData
-  //   },
-  //   {
-  //     title: 'Social History',
-  //     content: socialHistoryInfo
-  //   }
-  // ];
-
   useEffect(() => {
-    if(isSecondGuardian) {
-      setSections([
-        {
-          title: 'Patient Information',
-          content: patientData
-        },
-        {
-          title: 'Patient Preferences',
-          content: preferenceData
-        },
-        {
-          title: "Doctor's Notes",
-          content: doctorsNoteInfo
-        },
-        {
-          title: 'Guardian 1',
-          content: guardianInfoData
-        },
-        {
-          title: 'Guardian 2',
-          content: secondGuardianInfoData
-        },
-        {
-          title: 'Social History',
-          content: socialHistoryInfo
-        }
-      ]);
-      // change the guardians information display
-    } else {
-      setSections([
-        {
-          title: 'Patient Information',
-          content: patientData
-        },
-        {
-          title: 'Patient Preferences',
-          content: preferenceData
-        },
-        {
-          title: "Doctor's Notes",
-          content: doctorsNoteInfo
-        },
-        {
-          title: 'Guardian(s) Information',
-          content: guardianInfoData
-        },
-        {
-          title: 'Social History',
-          content: socialHistoryInfo
-        }
-      ]);
-    }
-  }, [patientData]);
+    setSections([
+      {
+        title: 'Patient Information',
+        content: patientData
+      },
+      {
+        title: 'Patient Preferences',
+        content: preferenceData
+      },
+      {
+        title: "Doctor's Notes",
+        content: doctorsNoteInfo
+      },
+      {
+        title: 'Guardian(s) Information',
+        content: guardianInfoData
+      },
+      {
+        title: 'Social History',
+        content: socialHistoryInfo
+      }
+    ]);
+    console.log('guardian? ', guardianInfoData);
+  }, [patientData, doctorsNoteInfo, guardianInfoData, secondGuardianInfoData, socialHistoryInfo]);
 
   function renderHeader(section, _, isActive) {
     return (
@@ -618,16 +568,16 @@ function PatientInformationScreen(props) {
     return (
       <View style={styles.accordBody}>
         <InformationCard 
-          // title={section.title}
-          // subtitle={section.title == 'Guardian(s) Information' ? 'Guardian 1' : null}
+          title={section.title}
+          subtitle={(section.title == 'Guardian(s) Information' && isSecondGuardian) ? 'Guardian 1' : null}
           displayData={section.content}
           handleOnPress={handleOnPress(section.title)}
           unMaskedNRIC={unmaskedNRIC(section.title)}
         />
-        {section.title === "Guardian 1" ? (
+        {(section.title == "Guardian(s) Information" && isSecondGuardian) ? (
           <InformationCard 
-            // title={section.title}
-            subtitle='Guardian 2'
+            title={section.title}
+            subtitle={'Guardian 2'}
             displayData={secondGuardianInfoData}
             handleOnPress={handlePatientSecondGuardianOnPress}
             unMaskedNRIC={unmaskedNRIC('Guardian 2')}

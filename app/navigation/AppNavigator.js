@@ -56,7 +56,7 @@ function AppNavigator() {
             tabBarTestID: 'Dashboard_Tab',
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons
-                name="notebook-outline"
+                name="view-dashboard-outline"
                 color={color}
                 size={size}
               />

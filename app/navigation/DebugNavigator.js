@@ -9,6 +9,9 @@ import PatientAddPatientInfoScreen from 'app/screens/PatientAddPatientInfoScreen
 import PatientAddScreen from 'app/screens/PatientAddScreen';
 import PatientDailyHighlights from 'app/components/PatientDailyHighlights';
 import AccountEditScreen from 'app/screens/AccountEditScreen';
+import PatientsNavigator from './PatientsNavigator';
+import DashboardNavigator from './DashboardNavigator';
+import AppNavigator from './AppNavigator';
 
 // Refer to this: https://reactnavigation.org/docs/hello-react-navigation
 const Stack = createNativeStackNavigator();
@@ -19,7 +22,7 @@ function DebugNavigator() {
     <Stack.Navigator>
       <Stack.Screen
         name="xyz"
-        component={PatientAddScreen}
+        component={DashboardNavigator}
         options={{
           headerShown: false,
         }}

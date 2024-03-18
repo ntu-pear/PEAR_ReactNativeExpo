@@ -17,6 +17,7 @@ const patientList = `${endpoint}/patientList`;
 // `${endpoint}/patientListByUserId` changed to ${endpoint}/patientListByLoggedInCaregiver
 // to enable fetching caregiver specific patients
 const patientListByUserId = `${endpoint}/patientListByLoggedInCaregiver`;
+const patientStatusCountList = `${endpoint}/patientStatusCountList`;
 const patientAdd = `${endpoint}/add`;
 const patientUpdate = `${endpoint}/update`; //eslint-disable-line no-unused-vars
 const privacyLevelUpdate = `${endpoint}/UpdatePatient`; //eslint-disable-line no-unused-vars
@@ -95,8 +96,12 @@ const getPatientList = async (maskNRIC = true, patientStatus = null) => {
   return client.get(patientList, { maskNRIC, patientStatus });
 };
 
-const getPatientListByLoggedInCaregiver = async (maskNRIC = true) => {
-  return client.get(patientListByUserId, maskNRIC);
+const getPatientListByLoggedInCaregiver = async (maskNRIC = true, patientStatus = null) => {
+  return client.get(patientListByUserId, {maskNRIC, patientStatus});
+};
+
+const getPatientStatusCountList = async () => {
+  return client.get(patientStatusCountList, {});
 };
 
 const getPatientAllergy = async (patientID) => {
@@ -232,6 +237,7 @@ export default {
   getPatient,
   getPatientList,
   getPatientListByLoggedInCaregiver,
+  getPatientStatusCountList,
   getPatientAllergy,
   getPatientVitalList,
   getPatientPrescriptionList,
