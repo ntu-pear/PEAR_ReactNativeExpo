@@ -25,6 +25,10 @@ import PatientDailyHighlights from 'app/components/PatientDailyHighlights';
 import { MaterialIcons } from '@expo/vector-icons';
 import colors from 'app/config/colors';
 import styles from 'app/utility/styles';
+import EditPatientSocialHistScreen from 'app/screens/EditPatientSocialHistScreen';
+import EditPatientGuardianScreen from 'app/screens/EditPatientGuardianScreen';
+import EditPatientPreferencesScreen from 'app/screens/EditPatientPreferencesScreen';
+import EditPatientInfoScreen from 'app/screens/EditPatientInfoScreen';
 
 // Refer to this: https://reactnavigation.org/docs/hello-react-navigation
 const Stack = createNativeStackNavigator();
@@ -140,6 +144,43 @@ function DashboardNavigator() {
           headerShown: true,
           headerBackTitleVisible: false,
           title: 'Routine',
+        }}
+      />
+      
+      <Stack.Screen
+        name={routes.EDIT_PATIENT_INFO}
+        component={EditPatientInfoScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Edit Patient Info',
+        }}
+      />
+      <Stack.Screen
+        name={routes.EDIT_PATIENT_PREFERENCES}
+        component={EditPatientPreferencesScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Edit Patient Preferences',
+        }}
+      />
+      <Stack.Screen
+        name={routes.EDIT_PATIENT_GUARDIAN}
+        component={EditPatientGuardianScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Edit Patient Guardian',
+        }}
+      />
+      <Stack.Screen
+        name={routes.EDIT_PATIENT_SOCIALHIST}
+        component={EditPatientSocialHistScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Edit Patient Social History',
         }}
       />
     </Stack.Navigator>
