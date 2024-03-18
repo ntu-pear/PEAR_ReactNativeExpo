@@ -26,16 +26,99 @@ export const initSelectDisable = (list) => {
 }
 
 // Function to sort array of objects on a property
-export const sortArray = (arr, property) => {
-  return arr.sort((a,b) => 
-    (a[property].toString().toLowerCase().trim() > b[property].toString().toLowerCase().trim()) ? 1 :
-    (b[property].toString().toLowerCase().trim() > a[property].toString().toLowerCase().trim()) ? -1 : 0)
+export const sortArray = (arr, property, asc) => {
+  if(asc) {
+    return arr.sort((a,b) => 
+      (a[property].toString().toLowerCase().trim() > b[property].toString().toLowerCase().trim()) ? 1 :
+      (b[property].toString().toLowerCase().trim() > a[property].toString().toLowerCase().trim()) ? -1 : 0)
+  } else {    
+    return arr.sort((a,b) => 
+      (a[property].toString().toLowerCase().trim() < b[property].toString().toLowerCase().trim()) ? 1 :
+      (b[property].toString().toLowerCase().trim() < a[property].toString().toLowerCase().trim()) ? -1 : 0)
+  }
 }
 
 export const parseAutoCompleteOptions = (array) => {
   let options = [];
   for(var i=0; i<array.length; i++){
-    options.push({title: array[i], id: i+1})
+    options.push({title: array[i], id: (i+1).toString()})
   }
   return options;
 }
+
+// Used to update state when a component declares a state only if the state is not a prop from the parent
+// If prop state passed, update prop state
+// Otherwise update state that is declared in the component
+export const updateState = (setInternalState, setExternalState, value) => {
+  if(setExternalState) {
+    setExternalState(value);
+  }
+  setInternalState(value);  
+}
+
+export const isEmptyObject = (object) => {
+  return Object.keys(object).length == 0;
+}
+
+// Used to format the date to DD/MM/YYYY
+export const formatDate = (inputDate, hideDayOfWeek) => {
+  const listOfDays = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
+  let day, date, month, year;
+  day = inputDate.getDay();
+  date = inputDate.getDate();
+  month = inputDate.getMonth() + 1;
+  year = inputDate.getFullYear();
+  date = date.toString().padStart(2, '0');
+  month = month.toString().padStart(2, '0');
+
+  return hideDayOfWeek
+    ? `${date}/${month}/${year}`
+    : `${listOfDays[day]}, ${date}/${month}/${year}`;
+};
+
+// Used to format the time to HH:mm AM/PM
+// TODO
+export const formatTimeAMPM = (date) => {
+  date = new Date(date);
+  var hours = date.getHours();
+  var minutes = date.getMinutes();
+  var ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12; 
+  minutes = minutes < 10 ? '0' + minutes : minutes;
+  var strTime = hours + ':' + minutes + ' ' + ampm;
+  
+  return strTime;
+};
+
+// Given a string containig military time like 0900, convert to datetime 
+export const formatTimeMilitary = (timeString, date=new Date()) => {
+  const hours = parseInt(timeString.substring(0, 2), 10);
+  const minutes = parseInt(timeString.substring(2), 10);
+
+  const dateTime = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hours, minutes);
+
+  return dateTime;
+}
+
+export const formatTimeHM24 = (date) => {  
+  const hour = new Date(date).getHours();
+  const minute = new Date(date).getMinutes();
+
+  const hourString = hour < 10 ? '0' + hour : hour.toString();
+  const minuteString = minute < 10 ? '0' + minute : minute.toString();
+  
+  const timeString = hourString + ':' + minuteString;
+
+  return timeString;
+}
+
+// Set the seconds of any datetime to zero
+// Useful for time-related calculations where seconds are irrelevant
+export const setSecondsToZero = (datetime) => {
+  let tempDatetime = new Date(datetime)
+  datetime = datetime.setHours(tempDatetime.getHours(), tempDatetime.getMinutes(), 0);
+  return datetime;
+}
+
+export const sortFilterInitialState = {'filterOptions': {}, 'sel': {}, 'tempSel': {}}

@@ -16,7 +16,7 @@ export default Object.freeze({
   CONFIG: 'Config',
   CONFIG_SCREEN: 'ConfigScreen',
   DASHBOARD: 'Dashboard',
-  DASHBOARD_SCREEN: 'Current Activity',
+  DASHBOARD_SCREEN: 'Patient Schedules',
   LOGIN: 'Login',
   NOTIFICATION: 'Notifications',
   NOTIFICATION_ACCEPT: 'NotificationAccept',

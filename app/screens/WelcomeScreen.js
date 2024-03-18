@@ -33,9 +33,9 @@ import { parseSelectOptions } from 'app/utility/miscFunctions'
 // Import Api
 import userApi from 'app/api/user';
 import LoadingWheel from 'app/components/LoadingWheel';
-import InputField from 'app/components/input-fields/InputField';
-import SelectionInputField from 'app/components/input-fields/SelectionInputField';
-import SensitiveInputField from 'app/components/input-fields/SensitiveInputField';
+import InputField from 'app/components/input-components/InputField';
+import SelectionInputField from 'app/components/input-components/SelectionInputField';
+import SensitiveInputField from 'app/components/input-components/SensitiveInputField';
 
 
 function WelcomeScreen(props) {

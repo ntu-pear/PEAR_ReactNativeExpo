@@ -9,104 +9,73 @@ import routes from 'app/navigation/routes';
 // Hooks
 import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
-//API
+// APIs
 import patientApi from 'app/api/patient';
 
-//Components
-import CommonInputField from 'app/components/CommonInputField';
+// Components
 import AppButton from 'app/components/AppButton';
-import SelectionInputField from 'app/components/SelectionInputField';
+import SelectionInputField from 'app/components/input-components/SelectionInputField';
 import ActivityIndicator from 'app/components/ActivityIndicator';
+
+// Utilities
+import { parseSelectOptions } from 'app/utility/miscFunctions';
 
 function EditPatientPreferencesScreen(props) {
   const { navigation, patientProfile } = props.route.params;
   const [isLoading, setIsLoading] = useState(true);
   
-  // retrive list data from database using useGetSelectionOptions
+  // Variables relatied to retrieving preferred language select options from API
   const {
     data: languageData,
     isError: languageError,
     isLoading: languageLoading,
   } = useGetSelectionOptions('Language');
 
-  // error state for component
+  // Set initial value for preferred language select field
+  const [listOfLanguages, setListOfLanguages] = useState(
+    parseSelectOptions([
+      'Cantonese',
+      'English',
+      'Hainanese',
+      'Hakka',
+      'Hindi',
+      'Hokkien',
+      'Malay',
+      'Mandarin',
+      'Tamil',
+      'Teochew',
+      'Japanese',
+      'Spanish',
+      'Korean',
+    ]),
+  );
+
+  // Screen error state: This = true when the child components report error(input fields)
+  // Enables use of dynamic rendering of components when the page error = true/false.
   const [isInputErrors, setIsInputErrors] = useState(false);
 
-  // error states for child components
+  // Input error states (Child components)
+  // This records the error states of each child component (ones that require tracking).
   const [isPrefNameError, setIsPrefNameError] = useState(false);
   const [isPrefLanguageError, setIsPrefLanguageError] = useState(false);
 
-  // listOfLanguages used after api is called
-  const [listOfLanguages, setListOfLanguages] = useState([]);
+  // States for getting list of preferred names
+  const [isPrefNamesLoading, setIsPrefNamesLoading] = useState(false);
+  const [prefNames, setPrefNames] = useState([]);
 
-  // set initial value for SelectionInputField dataArray prop -> follow format of "label" and "value"
-  const listOfLanguagesPreset = [
-    { label: 'Cantonese', value: 1 },
-    { label: 'English', value: 2 },
-    { label: 'Hainanese', value: 3 },
-    { label: 'Hakka', value: 4 },
-    { label: 'Hindi', value: 5 },
-    { label: 'Hokkien', value: 6 },
-    { label: 'Malay', value: 7 },
-    { label: 'Mandarin', value: 8 },
-    { label: 'Tamil', value: 9 },
-    { label: 'Teochew', value: 10 },
-    { label: 'Japanese', value: 11 },
-    { label: 'Spanish', value: 12 },
-    { label: 'Korean', value: 13 },
-  ];
-
-  // Waiting for language to be fully loaded before finding and setting PreferredLanguageListID
-  //useEffect(() => {
-  //  if (!languageLoading && !isLoading && listOfLanguages !== undefined && listOfLanguages) {
-  //    setFormData((prevData) => ({
-  //      ...prevData,
-  //      PreferredLanguageListID: listOfLanguagesPreset.find((item) => item.label === patientProfile.preferredLanguage).value,
-  //    }));
-  //  }
-  //}, [languageLoading, isLoading]);
-
-  // Error state handling for child components
-  const handlePrefNameState = useCallback(
-    (state) => {
-      setIsPrefNameError(state);
-      // console.log('FirstName: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isPrefNameError],
-  );
-  const handlePrefLanguageState = useCallback(
-    (state) => {
-      setIsPrefLanguageError(state);
-      // console.log('LastName: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isPrefLanguageError],
-  );
-
-  // Error state handling for this component
-  useEffect(() => {
-    setIsInputErrors(
-      isPrefNameError || 
-      isPrefLanguageError,
-    );
-    // console.log(isInputErrors);
-
-  }, [
-    isPrefNameError,
-    isPrefLanguageError,
-    isInputErrors,
-  ]);
-
-  // Data used on the page. This is the data that will be sent to the update API.
+   
+  // Patient data to be submitted
   const [formData, setFormData] = useState({
     PatientID: patientProfile.patientID,
-    PreferredLanguageListID: listOfLanguagesPreset.find((item) => item.label === patientProfile.preferredLanguage).value,
+    PreferredLanguageListID: listOfLanguages.find((item) => item.label === patientProfile.preferredLanguage).value,
     PrefLanguage: patientProfile.preferredLanguage,
     FirstName: patientProfile.firstName,
     LastName: patientProfile.lastName,
     NRIC: patientProfile.nric,
     Address: patientProfile.address,
+    PostalCode: patientProfile.postalCode,
+    TempAddress: patientProfile.tempAddress,
+    TempPostalCode: patientProfile.tempPostalCode,
     HomeNo: patientProfile.homeNo,
     HandphoneNo: patientProfile.handphoneNo,
     Gender: patientProfile.gender,
@@ -120,22 +89,79 @@ function EditPatientPreferencesScreen(props) {
     IsRespiteCare: patientProfile.isRespiteCare,
   });
 
-  // handling form input data by taking onchange value and updating our previous form data state
-  const handleFormData =
-    (input = null) =>
-    (e) => {
-      if (input === 'PrefLanguage') {
-        setFormData((prevData) => ({
-          ...prevData,
-          PreferredLanguageListID: e,
-        }));
-      } else {
-        setFormData((prevData) => ({
-          ...prevData,
-          PreferredName: e,
-        }));
-      }
-    };
+  // This useEffect enables the page to show correct error checking.
+  // The main isInputErrors is responsible for the error state of the screen.
+  // This state will be true whenever any child input components are in error state.  
+  useEffect(() => {
+    setIsInputErrors(
+      isPrefNameError || 
+      isPrefLanguageError,
+    );
+
+  }, [
+    isPrefNameError,
+    isPrefLanguageError,
+    isInputErrors,
+  ]);
+   // Try to get langugage list from backend. If retrieval from the hook is successful, replace the content in
+  // listOfLanguages with the retrieved one.
+  useEffect(() => {
+    if (!languageLoading && !languageError && languageData) {
+      // console.log('selection data!');
+      setListOfLanguages(languageData);
+      setIsLoading(false);
+    }
+  }, [languageData, languageError, languageLoading]);
+
+  // Get patient preferred names from API
+  useEffect(() => {
+    getPrefNames();
+  }, []);
+
+  // Get list of preferred names from backend to detect duplicate preferred names
+  const getPrefNames = async () => {
+    setIsPrefNamesLoading(true);
+    const response = await patientApi.getPatientList(false, 'active');
+    if (!response.ok) {
+      setUser(null);
+      return;
+    }
+    setPrefNames(response.data.data.map((x) => x.preferredName));
+    setIsPrefNamesLoading(false);
+  };
+
+  // Functions for error state reporting for the child components
+  const handlePrefNameError = useCallback(
+    (state) => {
+      setIsPrefNameError(state);
+      // console.log('FirstName: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isPrefNameError],
+  );
+  const handlePrefLanguageError = useCallback(
+    (state) => {
+      setIsPrefLanguageError(state);
+      // console.log('LastName: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isPrefLanguageError],
+  );
+
+  // Function to update patient data
+  const handleFormData = (field) => (e) => {
+    if (field === 'PreferredLanguageListID') {
+      setFormData((prevState) => ({
+        ...prevState,
+        [field]: parseInt(e)
+      }));
+    } else {
+      setFormData((prevState) => ({
+        ...prevState,
+        [field]: e
+      }));
+    }    
+  };  
 
   // form submission when save button is pressed
   const submitForm = async () => {
@@ -163,15 +189,6 @@ function EditPatientPreferencesScreen(props) {
     console.log("formData "+JSON.stringify(formData));
   };
 
-  /* If retrieval from the hook is successful, replace the content in
-     listOfLanguages with the retrieved one. */
-  useEffect(() => {
-    if (!languageLoading && !languageError && languageData) {
-      setListOfLanguages(languageData);
-      setIsLoading(false);
-    }
-  }, [languageData, languageError, languageLoading]);
-
   return languageLoading || isLoading ? (
     <ActivityIndicator visible />
   ) : (
@@ -182,23 +199,25 @@ function EditPatientPreferencesScreen(props) {
           <Box w="100%">
             <VStack>
               <View style={styles.formContainer}>
-                <CommonInputField
+                <InputField
                   isRequired
-                  title={'Preferred name'}
-                  value={formData['PreferredName']}
+                  title={'Preferred Name'}
+                  value={formData.PreferredName}
                   onChangeText={handleFormData('PreferredName')}
-                  onChildData={handlePrefNameState}
+                  onEndEditing={handlePrefNameError}                    
+                  dataType="name"
+                  otherProps={{prefNameList: prefNames}}
                 />
 
                 <SelectionInputField
                   isRequired
                   title={'Preferred Language'}
-                  placeholderText={formData['PrefLanguage']}
-                  onDataChange={handleFormData('PrefLanguage')}
-                  value={formData['PrefLanguage']}
+                  placeholder={formData['PrefLanguage']}
+                  onDataChange={handleFormData('PreferredLanguageListID')}
+                  value={formData.PreferredLanguageListID}
                   dataArray={listOfLanguages}
-                  onChildData={handlePrefLanguageState}
-                />
+                  onEndEditing={handlePrefLanguageError}
+                /> 
               </View>
               <View style={styles.saveButtonContainer}>
                 <Box width='70%'>

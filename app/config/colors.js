@@ -12,6 +12,7 @@ export default {
   gray: '#ABABAB',
   black_var2: '#3C4043',
   red: '#FD4734',
+  dark_red: '#e00b0b',
   light_gray: '#595959',
   light_gray2: '#696969',
   light_gray3: '#d3d3d3',
@@ -28,6 +29,7 @@ export default {
   black_var1: '#484848', // ** Frequently used colors throughout app **
   green: '#019192',
   green_lighter: '#66bdbd',
+  green_lightest: '#cce8e8',
   pink: '#FF585D', // ** Frequently used colors throughout app **
   pink_lighter: '#ff9396',
   pink_lightest: '#ffe6ee',

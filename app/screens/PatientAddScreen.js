@@ -1,12 +1,12 @@
 // Libs
 import React, { useState } from 'react';
-import { Platform, Alert } from 'react-native';
+import { Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-// import { useNavigate } from 'react-router-dom';
+import mime from 'mime';
+import * as ImagePicker from 'expo-image-picker';
 
 // API
 import patientApi from 'app/api/patient';
-import mime from 'mime';
 
 // Configurations
 import routes from 'app/navigation/routes';
@@ -15,13 +15,16 @@ import routes from 'app/navigation/routes';
 import PatientAddPatientInfoScreen from 'app/screens/PatientAddPatientInfoScreen';
 import PatientAddGuardianScreen from 'app/screens/PatientAddGuardianScreen';
 import PatientAddAllergyScreen from 'app/screens/PatientAddAllergyScreen';
-import * as ImagePicker from 'expo-image-picker';
+import ActivityIndicator from 'app/components/ActivityIndicator';
 
 function PatientAddScreen() {
   const navigation = useNavigation();
 
   // State to keep track of which page of the form is loaded
   const [step, setStep] = useState(1);
+
+  // State to keep track of whether user pressed subnmit button
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   //  State for components
   const [componentList, setComponentList] = useState({
@@ -44,6 +47,7 @@ function PatientAddScreen() {
       Address: '',
       PostalCode: '',
       TempAddress: '',
+      TempPostalCode: '',
       HomeNo: '',
       HandphoneNo: '',
       Gender: 'M',
@@ -80,6 +84,7 @@ function PatientAddScreen() {
         Address: '',
         PostalCode: '',
         TempAddress: '',
+        TempPostalCode: '',
         Gender: 'M',
         PreferredName: '',
       },
@@ -98,7 +103,6 @@ function PatientAddScreen() {
 
   // Function to handle form sections which can have multiple items (like allergies/guardians - can have multiple)
   const componentHandler = (page = '', list = []) => {
-    console.log(1, list);
     if (list) {
       setComponentList((prevState) => ({
         // eg. componentList: { guardian: [{..}, {..}] }
@@ -160,6 +164,8 @@ function PatientAddScreen() {
         ...prevState,
         ['patientInfo']: newData,
       }));
+
+      console.log(newData);
     }
   };
 
@@ -184,7 +190,7 @@ function PatientAddScreen() {
     }));
   };
 
-  // Function to update patient data
+  // Function to update guardian data
   const handleGuardianData = (field, i) => (e) => {
     const newData = formData.guardianInfo;
 
@@ -218,23 +224,9 @@ function PatientAddScreen() {
 
   // Function to submit form
   const onSubmit = async () => {
-    // temp solution to add postal code as separate field without BE implementation
-    var tempPatientInfo = {...formData.patientInfo}
-    var tempGuardianInfoList = []
-    var tempAllergyInfo = {...formData.allergyInfo}
-
-    tempPatientInfo['Address'] = tempPatientInfo['Address'] + ' SINGAPORE ' + tempPatientInfo['PostalCode'];
-    delete tempPatientInfo['PostalCode'];
-
-    for(var i in formData.guardianInfo) {
-      var tempGuardianInfo = {...formData.guardianInfo[i]}
-      tempGuardianInfo['Address'] = tempGuardianInfo['Address'] + ' SINGAPORE ' + tempGuardianInfo['PostalCode'];
-      delete tempGuardianInfo['PostalCode'];
-      tempGuardianInfoList.push(tempGuardianInfo);
-    }
-
-    // console.log({'patientInfo': tempPatientInfo, 'guardianInfo': tempGuardianInfoList, 'allergyInfo': tempAllergyInfo})
-    const result = await patientApi.addPatient({'patientInfo': tempPatientInfo, 'guardianInfo': tempGuardianInfoList, 'allergyInfo': tempAllergyInfo});
+    setIsSubmitting(true);
+    console.log(formData);
+    const result = await patientApi.addPatient(formData);
 
     let alertTitle = '';
     let alertDetails = '';
@@ -259,6 +251,7 @@ function PatientAddScreen() {
       alertTitle = 'Error in Adding Patient';
     }
     Alert.alert(alertTitle, alertDetails);
+    setIsSubmitting(false);
   };
 
   switch (step) {
@@ -284,6 +277,9 @@ function PatientAddScreen() {
         />
       );
     case 3:
+      if(isSubmitting) {
+        return (<ActivityIndicator visible/>)  
+      } 
       return (
         <PatientAddAllergyScreen
           nextQuestionHandler={nextQuestionHandler}

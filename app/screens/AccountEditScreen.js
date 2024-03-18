@@ -4,7 +4,6 @@ import { Platform, Alert, ActivityIndicator, TouchableOpacity, StyleSheet, View 
 import {
   Image,
   VStack,
-  HStack,
   AspectRatio,
   Center,
   FlatList,
@@ -13,7 +12,7 @@ import {
 } from 'native-base';
 import * as ImagePicker from 'expo-image-picker';
 
-//API
+// APIs
 import userApi from 'app/api/user';
 
 // Configurations
@@ -21,65 +20,69 @@ import routes from 'app/navigation/routes';
 import colors from 'app/config/colors';
 
 // Components
-import NameInputField from 'app/components/NameInputField';
-import TelephoneInputField from 'app/components/TelephoneInputField';
 import InformationCard from 'app/components/InformationCard';
 import AppButton from 'app/components/AppButton';
+import InputField from 'app/components/input-components/InputField';
 
 function AccountEditScreen(props) {
   const [isLoading, setIsLoading] = useState(false);
   const { navigation, userData, unMaskedUserNRIC } = props.route.params;
   const [profilePicture, setProfilePicture] = useState(props.route.params.profilePicture);
 
-  // error state for component
+  // Screen error state: This = true when the child components report error(input fields)
+  // Enables use of dynamic rendering of components when the page error = true/false.
   const [isInputErrors, setIsInputErrors] = useState(false);
 
-  // error states for child components
+  // Input error states (Child components)
+  // This records the error states of each child component (ones that require tracking).
   const [isPrefNameError, setIsPrefNameError] = useState(false);
-  const [isContactError, setIsContactError] = useState(false);
+  const [isMobileNoError, setIsMobileNoError] = useState(false);
 
-  // Error state handling for child components
-  const handlePrefNameState = useCallback(
+  // Account data to be submitted
+  const [formData, setFormData] = useState({
+    PreferredName: props.route.params.preferredName,
+    ContactNo: props.route.params.contactNo,
+  });
+
+  // This useEffect enables the page to show correct error checking.
+  // The main isInputErrors is responsible for the error state of the screen.
+  // This state will be true whenever any child input components are in error state.  
+  useEffect(() => {
+    setIsInputErrors(
+      isPrefNameError ||
+      isMobileNoError,
+    );
+  }, [
+    isPrefNameError,
+    isMobileNoError,
+    isInputErrors,
+  ]);
+
+  // Functions for error state reporting for the child components
+  const handlePrefNameError = useCallback(
     (state) => {
       setIsPrefNameError(state);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [isPrefNameError],
   );
-  const handleContactNoState = useCallback(
+  const handleMobileNoError = useCallback(
     (state) => {
-      setIsContactError(state);
+      setIsMobileNoError(state);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isContactError],
+    [isMobileNoError],
   );
 
-  // Error state handling for this component
-  useEffect(() => {
-    setIsInputErrors(
-      isPrefNameError ||
-      isContactError,
-    );
-  }, [
-    isPrefNameError,
-    isContactError,
-    isInputErrors,
-  ]);
+  // Function to update patient data
+  const handleFormData = (field) => (e) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      [field]: e
+    }));
+  };
 
-  const [formData, setFormData] = useState({
-    PreferredName: props.route.params.preferredName,
-    ContactNo: props.route.params.contactNo,
-  });
-
-  const handleFormData =
-    (input = null) =>
-    (e) => {
-      setFormData((previousState) => ({
-        ...previousState,
-        [input]: e,
-      }));
-    };
-
+  // form submission when save button is pressed
   const submitForm = async () => {
     setIsLoading(true);
     const result = await userApi.updateUser(formData);
@@ -106,40 +109,33 @@ function AccountEditScreen(props) {
     setIsLoading(false);
   };
 
-  // Used to pick images for profile picture (Not working?)
-  const handleOnPressToImagePicker = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status === 'granted') {
-      let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 1,
-      });
+  // Function to launch image picker and handle image picking.
+  // Reference: https://docs.expo.dev/versions/latest/sdk/imagepicker/
+  const pickImage = (input) => async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    if (!result.cancelled) {
+      const newImageUri = 'file:///' + result.uri.split('file:/').join('');
 
-      if (!result.cancelled) {
-        setProfilePicture(result.uri);
-        const fileName = result.uri.split('/').pop();
-        const fileType = fileName.split('.').pop();
-        
-        // Moved spliting of profilePicture from user.js to here
-        setFormData(prevUserData => ({
-          ...prevUserData,
-          "uploadProfilePicture": {
-            uri: result.uri,
-            name: fileName,
-            type: `image/${fileType}`,
-          },
-        }));
-      } else {
-        return false;
-      }
-    } else {
-      const alertTxt = 'Please enable permissions to pick from image gallery.';
-      Platform.OS === 'web' ? alert(alertTxt) : Alert.alert(alertTxt);
+      var newData = formData['patientInfo'];
+      newData[input] = {
+        uri: newImageUri,
+        name: newImageUri.split('/').pop(),
+        type: mime.getType(newImageUri),
+      };
+
+      setFormData((prevState) => ({
+        ...prevState,
+        ['patientInfo']: newData,
+      }));
     }
   };
-
+  
   return isLoading ? (
     <ActivityIndicator visible />
   ) : (
@@ -177,21 +173,24 @@ function AccountEditScreen(props) {
                   </TouchableOpacity>
                 </Center>
 
-                <NameInputField
+                <InputField
                   isRequired
                   title={'Preferred Name'}
-                  value={formData['PreferredName']}
+                  value={formData.PreferredName}
                   onChangeText={handleFormData('PreferredName')}
-                  onChildData={handlePrefNameState}
+                  onEndEditing={handlePrefNameError}
+                  dataType="name"
                 />
 
-                <TelephoneInputField
+                <InputField
                   isRequired
                   title={'Contact No.'}
-                  value={formData['ContactNo']}
-                  numberType={'mobile'}
+                  value={formData.ContactNo}
                   onChangeText={handleFormData('ContactNo')}
-                  onChildData={handleContactNoState}
+                  onEndEditing={handleMobileNoError}
+                  dataType={'mobile phone'}
+                  keyboardType='numeric'                      
+                  maxLength={8}
                 />
 
                 <InformationCard

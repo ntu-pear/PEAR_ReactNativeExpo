@@ -10,7 +10,7 @@ import colors from 'app/config/colors';
 
 // Components
 import ErrorMessage from 'app/components/ErrorMessage';
-import RequiredIndicator from './RequiredIndicator';
+import RequiredIndicator from '../RequiredIndicator';
 
 function RadioButtonInput({
   isRequired,
