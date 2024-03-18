@@ -301,7 +301,7 @@ function PatientsScreen({ navigation }) {
       });
       
       // Scroll to top of list
-      patientListRef.current?.scrollTo({x: 0, y: 0, animated: true});
+      patientListRef.current?.scrollToOffset({offset: 0, animated: true});
       setIsLoading(false);    
     }   
   }

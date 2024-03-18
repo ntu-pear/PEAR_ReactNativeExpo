@@ -19,6 +19,7 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 
 // Utilities
 import { parseSelectOptions } from 'app/utility/miscFunctions';
+import InputField from 'app/components/input-components/InputField';
 
 function EditPatientPreferencesScreen(props) {
   const { navigation, patientProfile } = props.route.params;
@@ -63,11 +64,24 @@ function EditPatientPreferencesScreen(props) {
   const [isPrefNamesLoading, setIsPrefNamesLoading] = useState(false);
   const [prefNames, setPrefNames] = useState([]);
 
-   
   // Patient data to be submitted
   const [formData, setFormData] = useState({
     PatientID: patientProfile.patientID,
-    PreferredLanguageListID: listOfLanguages.find((item) => item.label === patientProfile.preferredLanguage).value,
+    PreferredLanguageListID: parseSelectOptions([
+      'Cantonese',
+      'English',
+      'Hainanese',
+      'Hakka',
+      'Hindi',
+      'Hokkien',
+      'Malay',
+      'Mandarin',
+      'Tamil',
+      'Teochew',
+      'Japanese',
+      'Spanish',
+      'Korean',
+    ]).filter((item) => item.label === patientProfile.preferredLanguage)[0].value,
     PrefLanguage: patientProfile.preferredLanguage,
     FirstName: patientProfile.firstName,
     LastName: patientProfile.lastName,

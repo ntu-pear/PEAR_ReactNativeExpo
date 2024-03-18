@@ -11,7 +11,7 @@ import {
   Text,
   VStack,
 } from 'native-base';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Platform, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Accordion from 'react-native-collapsible/Accordion';
@@ -57,6 +57,8 @@ function PatientInformationScreen(props) {
 
   const [ activeSections, setActiveSections ] = useState([]);
   const [ sections, setSections ] = useState([]);
+
+  const mounted = useRef(false);
 
   // Used to retrieve the patient since after an editing of the patients particulars it will need to be refreshed - Russell
   const retrievePatient = async (id) => {
@@ -156,8 +158,8 @@ function PatientInformationScreen(props) {
   ];
 
   useEffect(() => {
-    let isMounted = true;
-    if (isMounted) {
+    mounted.current = true;
+    if (mounted.current) {      // check if component mounted
       if (patientProfile !== undefined && Object.keys(patientProfile).length>0) {
         setPatientData([
           { label: 'First Name', value: patientProfile.firstName },
@@ -205,7 +207,8 @@ function PatientInformationScreen(props) {
   }, [patientProfile]);
 
   useEffect(() => {
-    if (doctorsNoteData !== null && Object.keys(doctorsNoteData).length>0) {
+    mounted.current = true;
+    if (doctorsNoteData !== null && Object.keys(doctorsNoteData).length>0 && mounted.current) {
       var lastItem = doctorsNoteData.pop();
       setDoctorNoteInfo([
         {
@@ -229,7 +232,8 @@ function PatientInformationScreen(props) {
   }, [doctorsNoteData]);
 
   useEffect(() => {
-    if (Object.keys(guardianData).length>0) {
+    mounted.current = true;
+    if (Object.keys(guardianData).length>0 && mounted.current) {
       // get data of first guardian
       setUnMaskedGuardianNRIC(guardianData.guardian.nric);
       setGuardianInfoData([
@@ -549,7 +553,7 @@ function PatientInformationScreen(props) {
       }
     ]);
     console.log('guardian? ', guardianInfoData);
-  }, [patientData]);
+  }, [patientData, doctorsNoteInfo, guardianInfoData, secondGuardianInfoData, socialHistoryInfo]);
 
   function renderHeader(section, _, isActive) {
     return (
@@ -564,15 +568,15 @@ function PatientInformationScreen(props) {
     return (
       <View style={styles.accordBody}>
         <InformationCard 
-          // title={section.title}
+          title={section.title}
           subtitle={(section.title == 'Guardian(s) Information' && isSecondGuardian) ? 'Guardian 1' : null}
           displayData={section.content}
           handleOnPress={handleOnPress(section.title)}
           unMaskedNRIC={unmaskedNRIC(section.title)}
         />
-        {(section.title === "Guardian(s) Information" && isSecondGuardian) ? (
+        {(section.title == "Guardian(s) Information" && isSecondGuardian) ? (
           <InformationCard 
-            // title={section.title}
+            title={section.title}
             subtitle={'Guardian 2'}
             displayData={secondGuardianInfoData}
             handleOnPress={handlePatientSecondGuardianOnPress}
