@@ -29,6 +29,9 @@ const patientProblemLog = `${problemLogEndpoint}/PatientProblemLog`; //eslint-di
 const patientMedicalHistory = `${medicalHistorypoint}/list`; //eslint-disable-line no-unused-vars
 const patientRoutine = `${activityEndpoint}${routineEndpoint}/PatientRoutine`; //eslint-disable-line no-unused-vars
 const patientAllergyAdd = `${allergyEndpoint}/add`; //eslint-disable-line no-unused-vars
+// alergy
+const allergyDelete = `${allergyEndpoint}/delete`; //eslint-disable-line no-unused-vars
+
 /*
  * List all functions here
  * Refer to this api doc: https://github.com/infinitered/apisauce
@@ -96,8 +99,11 @@ const getPatientList = async (maskNRIC = true, patientStatus = null) => {
   return client.get(patientList, { maskNRIC, patientStatus });
 };
 
-const getPatientListByLoggedInCaregiver = async (maskNRIC = true, patientStatus = null) => {
-  return client.get(patientListByUserId, {maskNRIC, patientStatus});
+const getPatientListByLoggedInCaregiver = async (
+  maskNRIC = true,
+  patientStatus = null,
+) => {
+  return client.get(patientListByUserId, { maskNRIC, patientStatus });
 };
 
 const getPatientStatusCountList = async () => {
@@ -230,6 +236,11 @@ const updatePatient = async (data) => {
 
   return client.put(patientUpdate, formData, { headers });
 };
+
+const deleteAllergy = async (allergyID) => {
+  return client.delete(allergyDelete, { allergyID });
+};
+
 /*
  * Expose your end points here
  */
@@ -247,4 +258,5 @@ export default {
   addPatient,
   AddPatientAllergy,
   updatePatient,
+  deleteAllergy,
 };
