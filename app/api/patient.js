@@ -237,7 +237,7 @@ const updatePatient = async (data) => {
   return client.put(patientUpdate, formData, { headers });
 };
 
-const deleteAllergy = async (allergyID) => {
+const deletePatientAllergy = async (allergyID) => {
   return client.delete(allergyDelete, { allergyID });
 };
 
@@ -258,5 +258,5 @@ export default {
   addPatient,
   AddPatientAllergy,
   updatePatient,
-  deleteAllergy,
+  deletePatientAllergy,
 };
