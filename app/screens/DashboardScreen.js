@@ -249,7 +249,7 @@ function DashboardScreen({ navigation }) {
 
   // Parse data returned by api to required format to display schedule
   const parseScheduleData = ({tempPatientInfo, tempSchedule}) => {
-    console.log('DB 7 - parseScheduleData')
+    console.log('DB 7 - parseScheduleData', )
 
     if(tempSchedule == null) {
       setOriginalScheduleWeekly({});
@@ -267,25 +267,26 @@ function DashboardScreen({ navigation }) {
           if(Object.keys(tempScheduleWeekly).length <= j) {
             tempScheduleWeekly[scheduleDateStr] = [];
           }
-          const patientData = tempPatientInfo.filter(x=>x.patientID == tempSchedule[i]['patientID'])[0];
-          // console.log(patientData.startDate)
-          
-          const patientDailySchedule = {
-            patientID: tempSchedule[i]['patientID'],
-            patientName: tempSchedule[i]['patientName'],
-            patientStartDate: patientData['startDate'],
-            patientFullName: patientData['firstName'] + " " + patientData['lastName'],
-            patientPreferredName: patientData['preferredName'],
-            patientCaregiverName: patientData['caregiverName'],
-            patientImage: tempSchedule[i]['patientImage'],
-            activities: parseScheduleString(tempSchedule[i][day], scheduleDate),
-            date: scheduleDateStr
-          };
-          
-          scheduleDate.setDate(scheduleDate.getDate() + 1);
+          const patientData = tempPatientInfo.filter(x=>x.patientID == tempSchedule[i]['patientID'])[0] || {};
 
-          tempScheduleWeekly[scheduleDateStr].push(patientDailySchedule)
-          
+          // If patient has not been (soft) deleted
+          if(!isEmptyObject(patientData)) {
+            const patientDailySchedule = {
+              patientID: tempSchedule[i]['patientID'],
+              patientName: tempSchedule[i]['patientName'],
+              patientStartDate: patientData['startDate'],
+              patientFullName: patientData['firstName'] + " " + patientData['lastName'],
+              patientPreferredName: patientData['preferredName'],
+              patientCaregiverName: patientData['caregiverName'],
+              patientImage: tempSchedule[i]['patientImage'],
+              activities: parseScheduleString(tempSchedule[i][day], scheduleDate),
+              date: scheduleDateStr
+            };
+            
+            scheduleDate.setDate(scheduleDate.getDate() + 1);
+  
+            tempScheduleWeekly[scheduleDateStr].push(patientDailySchedule)
+          }          
         }
       }
 
@@ -545,10 +546,10 @@ function DashboardScreen({ navigation }) {
 
   const showStartDate = () => {
     return (!isEmptyObject(sort['sel']) ? sort['sel']['option']['label'] == 'Patient Start Date' : false) || 
-      'Patient Start Date' in datetime['sel'] ? (
-        (datetime['sel']['Patient Start Date']['min'] && datetime['sel']['Patient Start Date']['min'] != null) || 
-        (datetime['sel']['Patient Start Date']['max'] && datetime['sel']['Patient Start Date']['max'] != null) 
-      ) : false    
+    ('Patient Start Date' in datetime['sel'] ? (
+      (datetime['sel']['Patient Start Date']['min'] && datetime['sel']['Patient Start Date']['min'] != null) || 
+      (datetime['sel']['Patient Start Date']['max'] && datetime['sel']['Patient Start Date']['max'] != null) 
+    ) : false)    
   }
 
   return (
