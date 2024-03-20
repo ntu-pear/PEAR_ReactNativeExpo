@@ -8,13 +8,16 @@ import { MaterialIcons } from '@expo/vector-icons';
 import colors from 'app/config/colors';
 
 // Utilities
-import { formatTimeAMPM } from 'app/utility/miscFunctions';
+import { formatDate, formatTimeAMPM } from 'app/utility/miscFunctions';
 
 const MedicationItem = ({
   medName,
   medDosage,
   medTime,
-  medNote
+  medNote,
+  medStartDate,
+  medEndDate,
+  medRemarks,
 }) => {  
   return (
     <View 
@@ -31,8 +34,17 @@ const MedicationItem = ({
         </Icon>
         <View style={styles.medTextContainer}>
           <Text style={styles.heading}>{medName} ({medDosage})</Text>
+          {medRemarks != undefined ? (
+            <Text style={[styles.medText]}>Remarks: {medRemarks}</Text>
+            ): null}
           {medNote != undefined ? (
             <Text style={[styles.medText, styles.red]}>Note: {medNote}</Text>
+            ): null}
+          {medStartDate != undefined ? (
+            <Text style={[styles.medText]}>Start Date: {formatDate(new Date(medStartDate))}</Text>
+            ): null}
+          {medEndDate != undefined ? (
+            <Text style={[styles.medText]}>End Date: {formatDate(new Date(medEndDate))}</Text>
             ): null}
         </View>
         <View>
