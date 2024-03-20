@@ -18,6 +18,7 @@ const MedicationItem = ({
   medStartDate,
   medEndDate,
   medRemarks,
+  editable=false
 }) => {  
   return (
     <View 
@@ -34,21 +35,35 @@ const MedicationItem = ({
         </Icon>
         <View style={styles.medTextContainer}>
           <Text style={styles.heading}>{medName} ({medDosage})</Text>
-          {medRemarks != undefined ? (
-            <Text style={[styles.medText]}>Remarks: {medRemarks}</Text>
+          {medRemarks ? (
+            <View style={{flexDirection: 'row'}}>
+              <Text style={[styles.medText, styles.bold]}>Remarks: </Text>
+              <Text style={[styles.medText]}>{medRemarks}</Text>
+            </View>
             ): null}
-          {medNote != undefined ? (
-            <Text style={[styles.medText, styles.red]}>Note: {medNote}</Text>
+          {medNote ? (
+            <View style={{flexDirection: 'row'}}>
+              <Text style={[styles.medText, styles.bold]}>Note: </Text>
+              <Text style={[styles.medText]}>{medNote}</Text>
+            </View>
             ): null}
-          {medStartDate != undefined ? (
-            <Text style={[styles.medText]}>Start Date: {formatDate(new Date(medStartDate), true)}</Text>
+          
+          {medStartDate ? (
+            <View style={{flexDirection: 'row'}}>
+              <Text style={[styles.medText, styles.bold]}>Start Date: </Text>
+              <Text style={[styles.medText]}>{formatDate(new Date(medStartDate), true)}</Text>
+            </View>
             ): null}
-          {medEndDate != undefined ? (
-            <Text style={[styles.medText]}>End Date: {formatDate(new Date(medEndDate), true)}</Text>
+          {medEndDate ? (
+            <View style={{flexDirection: 'row'}}>
+              <Text style={[styles.medText, styles.bold]}>End Date: </Text>
+              <Text style={[styles.medText]}>{formatDate(new Date(medEndDate), true)}</Text>
+            </View>
             ): null}
         </View>
         <View>
           <Text style={styles.medTime}>{formatTimeAMPM(medTime)}</Text>
+          {/* {editable ? () : } */}
         </View>
       </View>
   );
@@ -61,7 +76,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.green_lightest, 
     padding: 20, 
     borderRadius: 7,
-    marginTop: 20,
   },
   medTextContainer: {
     flex: 1
@@ -73,7 +87,6 @@ const styles = StyleSheet.create({
   },
   medText: {
     marginTop: 4,
-    marginLeft: 20,
     fontSize: 16,
   },
   medTime: {
@@ -83,6 +96,10 @@ const styles = StyleSheet.create({
   },
   red: {
     color: colors.dark_red
+  },
+  bold: {
+    marginLeft: 20,
+    fontWeight: '600',
   },
 });
 

@@ -1,6 +1,6 @@
 // Libs
 import React, { useRef } from 'react';
-import { Modal, Text, ScrollView, } from 'native-base';
+import { Modal, Text, ScrollView, View, } from 'native-base';
 import { Platform, StyleSheet, TouchableOpacity } from 'react-native';
 
 // Configurations
@@ -48,13 +48,14 @@ const MedicationModal = ({
               flex={1}
               >
                 {medications.map((item, i)=>(
-                  <MedicationItem
-                  key={i}
-                  medName={item.medName}
-                  medDosage={item.medDosage}
-                  medTime={item.medTime}
-                  medNote={item.medNote}
-                  />
+                  <View key={i} style={{marginTop: 20}}>
+                    <MedicationItem
+                    medName={item.medName}
+                    medDosage={item.medDosage}
+                    medTime={item.medTime}
+                    medNote={item.medNote}
+                    />
+                  </View>
                 ))}
                 <TouchableOpacity style={styles.viewAllContainer} onPress={onPressViewAll}>
                   <Text style={styles.viewAllText}>View all medications for {patientName}</Text>
