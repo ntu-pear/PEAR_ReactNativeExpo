@@ -26,7 +26,7 @@ const MedicationModal = ({
   const finalRef = useRef(null);
 
   const onPressViewAll = () => {
-    navigation.push(routes.PATIENT_MEDICATION, { id: patientID });
+    navigation.push(routes.PATIENT_MEDICATION, { patientID: patientID });
   }
 
   return (
