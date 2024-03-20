@@ -93,26 +93,36 @@ export const formatTimeAMPM = (date) => {
   return strTime;
 };
 
-// Given a string containig military time like 0900, convert to datetime 
+// Given a string of military time like 0900, convert to datetime 
 export const formatTimeMilitary = (timeString, date=new Date()) => {
   const hours = parseInt(timeString.substring(0, 2), 10);
   const minutes = parseInt(timeString.substring(2), 10);
-
+  
   const dateTime = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hours, minutes);
-
+  
   return dateTime;
 }
 
-export const formatTimeHM24 = (date) => {  
+// Convert date to 24 hour format string 
+export const formatTimeHM24 = (date, useColon=true) => {  
   const hour = new Date(date).getHours();
   const minute = new Date(date).getMinutes();
 
   const hourString = hour < 10 ? '0' + hour : hour.toString();
   const minuteString = minute < 10 ? '0' + minute : minute.toString();
   
-  const timeString = hourString + ':' + minuteString;
+  const timeString = hourString + (useColon ? ':' : '') + minuteString;
 
   return timeString;
+}
+
+// Convert 24 hour format string to datetime
+export const convertTimeHM24 = (timeString, date=new Date()) => {
+  
+  const hours = timeString.split(':')[0];
+  const minutes = timeString.split(':')[1];
+
+  return new Date(new Date(new Date().setHours(hours)).setMinutes(minutes));
 }
 
 // Set the seconds of any datetime to zero
