@@ -10,6 +10,7 @@ import AppButton from './AppButton';
 
 // Hooks
 import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
+import colors from 'app/config/colors';
 
 // Configurations
 
@@ -159,7 +160,7 @@ function AddPatientAllergyModal({
 
 const styles = StyleSheet.create({
   modalHeader: {
-    backgroundColor: 'green', // Change to your preferred green color
+    backgroundColor: colors.green, // Change to your preferred green color
     alignItems: 'center',
     justifyContent: 'center',
   },
