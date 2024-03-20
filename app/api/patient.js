@@ -28,9 +28,11 @@ const patientPrescriptionList = `${prescriptionEndpoint}/PatientPrescription`; /
 const patientProblemLog = `${problemLogEndpoint}/PatientProblemLog`; //eslint-disable-line no-unused-vars
 const patientMedicalHistory = `${medicalHistorypoint}/list`; //eslint-disable-line no-unused-vars
 const patientRoutine = `${activityEndpoint}${routineEndpoint}/PatientRoutine`; //eslint-disable-line no-unused-vars
+// Allergy
 const patientAllergyAdd = `${allergyEndpoint}/add`; //eslint-disable-line no-unused-vars
-// alergy
-const allergyDelete = `${allergyEndpoint}/delete`; //eslint-disable-line no-unused-vars
+const patientAllergyDelete = `${allergyEndpoint}/delete`; //eslint-disable-line no-unused-vars
+// Vitals
+const patientVitalAdd = `${vitalEndpoint}/add`; //eslint-disable-line no-unused-vars
 
 /*
  * List all functions here
@@ -223,6 +225,24 @@ const AddPatientAllergy = async (patientID, allergyData) => {
   return client.post(patientAllergyAdd, payload);
 };
 
+const AddPatientVital = async (patientID, vitalData) => {
+  const payload = {
+    PatientID: patientID,
+    Temperature: vitalData.temperature,
+    SystolicBP: vitalData.systolicBP,
+    DiastolicBP: vitalData.diastolicBP,
+    HeartRate: vitalData.heartRate,
+    SpO2: vitalData.spO2,
+    BloodSugarLevel: vitalData.bloodSugarlevel,
+    Height: vitalData.height,
+    Weight: vitalData.weight,
+    VitalRemarks: vitalData.vitalRemarks,
+    AfterMeal: vitalData.afterMeal,
+  };
+  console.log('payload to API', payload);
+  return client.post(patientVitalAdd, payload);
+};
+
 // ************************* UPDATE REQUESTS *************************
 const updatePatient = async (data) => {
   const formData = new FormData();
@@ -238,7 +258,7 @@ const updatePatient = async (data) => {
 };
 
 const deletePatientAllergy = async (allergyID) => {
-  return client.delete(allergyDelete, { allergyID });
+  return client.delete(patientAllergyDelete, { allergyID });
 };
 
 /*
@@ -257,6 +277,7 @@ export default {
   getPatientRoutine,
   addPatient,
   AddPatientAllergy,
+  AddPatientVital,
   updatePatient,
   deletePatientAllergy,
 };

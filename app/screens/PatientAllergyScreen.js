@@ -32,7 +32,6 @@ function PatientAllergyScreen(props) {
   };
 
   const handleModalSubmit = async (allergyData) => {
-    //TODO JOEL : Process allergyData
     const result = await patientApi.AddPatientAllergy(patientID, allergyData);
     if (result.ok) {
       console.log('submitting allergy data', allergyData);
