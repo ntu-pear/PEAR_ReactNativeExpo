@@ -10,7 +10,8 @@ const allergyEndpoint = '/Allergy';
 const vitalEndpoint = '/Vital';
 const prescriptionEndpoint = '/Prescription';
 const problemLogEndpoint = '/ProblemLog';
-const medicalHistorypoint = '/MedicalHistory';
+const medicalHistoryEndpoint = '/MedicalHistory';
+const medicationEndpoint = '/Medication';
 const activityEndpoint = '/Activity';
 const routineEndpoint = '/Routine';
 const patientList = `${endpoint}/patientList`;
@@ -26,9 +27,10 @@ const patientAllergy = `${allergyEndpoint}/PatientAllergy`; //eslint-disable-lin
 const patientVitalList = `${vitalEndpoint}/list`; //eslint-disable-line no-unused-vars
 const patientPrescriptionList = `${prescriptionEndpoint}/PatientPrescription`; //eslint-disable-line no-unused-vars
 const patientProblemLog = `${problemLogEndpoint}/PatientProblemLog`; //eslint-disable-line no-unused-vars
-const patientMedicalHistory = `${medicalHistorypoint}/list`; //eslint-disable-line no-unused-vars
+const patientMedicalHistory = `${medicalHistoryEndpoint}/list`; //eslint-disable-line no-unused-vars
 const patientRoutine = `${activityEndpoint}${routineEndpoint}/PatientRoutine`; //eslint-disable-line no-unused-vars
 const patientAllergyAdd = `${allergyEndpoint}/add`; //eslint-disable-line no-unused-vars
+const patientMedicationAdd = `${medicationEndpoint}/add`; //eslint-disable-line no-unused-vars
 /*
  * List all functions here
  * Refer to this api doc: https://github.com/infinitered/apisauce
@@ -91,8 +93,6 @@ const getPatient = async (patientID, maskNRIC) => {
 };
 
 const getPatientList = async (maskNRIC = true, patientStatus = null) => {
-  // Error Handling
-  // maskNRIC ? (maskNRIC = true) : (maskNRIC = false);
   return client.get(patientList, { maskNRIC, patientStatus });
 };
 
@@ -147,6 +147,15 @@ const getPatientMedicalHistory = async (patientID) => {
   };
 
   return client.get(patientMedicalHistory, params);
+};
+
+const getPatientMedication = async (patientID) => {
+  let params;
+  params = {
+    patientID,
+  };
+
+  return client.get(medicationEndpoint, params);
 };
 
 const getPatientRoutine = async (patientID) => {
@@ -217,6 +226,20 @@ const AddPatientAllergy = async (patientID, allergyData) => {
   return client.post(patientAllergyAdd, payload);
 };
 
+const addPatientMedication = async (patientID, medicationData) => {
+  const payload = {
+    patientID: patientID,
+    prescriptionName: medicationData.prescriptionName,
+    dosage: medicationData.dosage,
+    administerTime: medicationData.administerTime,
+    instruction: medicationData.instruction,
+    startDateTime: medicationData.startDateTime,
+    endDateTime: medicationData.endDateTime,
+    prescriptionRemarks: medicationData.prescriptionRemarks,
+  };
+  return client.post(patientMedicationAdd, payload);
+};
+
 // ************************* UPDATE REQUESTS *************************
 const updatePatient = async (data) => {
   const formData = new FormData();
@@ -243,8 +266,10 @@ export default {
   getPatientPrescriptionList,
   getPatientProblemLog,
   getPatientMedicalHistory,
+  getPatientMedication,
   getPatientRoutine,
   addPatient,
   AddPatientAllergy,
+  addPatientMedication,
   updatePatient,
 };
