@@ -7,7 +7,7 @@ import InputField from './input-components/InputField';
 
 function AddPatientVitalModal({ showModal, onClose, onSubmit }) {
   // State to hold form data
-  const [vitalData, setVitalData] = useState({
+  const initialVitalData = {
     temperature: '',
     weight: '',
     height: '',
@@ -18,11 +18,17 @@ function AddPatientVitalModal({ showModal, onClose, onSubmit }) {
     bloodSugarlevel: '',
     vitalRemarks: '',
     afterMeal: true,
-  });
+  };
+
+  const [vitalData, setVitalData] = useState(initialVitalData);
 
   // Update field values
   const handleChange = (name, value) => {
     setVitalData({ ...vitalData, [name]: value });
+  };
+
+  const resetForm = () => {
+    setVitalData(initialVitalData);
   };
 
   // Handle form submission
@@ -40,11 +46,17 @@ function AddPatientVitalModal({ showModal, onClose, onSubmit }) {
     };
 
     onSubmit(submittedData);
+    resetForm();
     onClose(); // Close the modal
   };
 
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
   return (
-    <Modal isOpen={showModal} onClose={onClose}>
+    <Modal isOpen={showModal} onClose={handleClose}>
       <Modal.Content maxWidth="500px">
         <Modal.CloseButton />
         <Modal.Header style={styles.modalHeader}>
