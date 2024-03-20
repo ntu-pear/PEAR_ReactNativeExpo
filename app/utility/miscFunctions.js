@@ -1,3 +1,5 @@
+import MessageDisplayCard from "app/components/MessageDisplayCard";
+
 // Function that takes array of select options and converts to required [{value, label}, {}, {} ...] format
 export const parseSelectOptions = (array) => {
   let options = [];
@@ -121,4 +123,29 @@ export const setSecondsToZero = (datetime) => {
   return datetime;
 }
 
+// Format of data for sort and filter states used by FilterModal/SearchFilterBar
 export const sortFilterInitialState = {'filterOptions': {}, 'sel': {}, 'tempSel': {}}
+
+// Returns message to display if api call error or no data to display
+export const noDataMessage = (statusCode, isLoading, isError, defaultMessage='No data found') => {
+  // Display error message if API request fails
+  let message = '';
+  if (isLoading) {
+    return <></>;
+  }
+  if (isError) {
+    if (statusCode === 401) {
+      message = 'Error: User is not authenticated.';
+    } else if (statusCode >= 500) {
+      message = 'Error: Server is down. Please try again later.';
+    } else {
+      message = `${statusCode || 'Some'} error has occured`;
+    }
+  }
+  return (
+    <MessageDisplayCard
+      TextMessage={isError ? message : defaultMessage}
+      topPaddingSize={'36%'}
+    />
+  );
+};

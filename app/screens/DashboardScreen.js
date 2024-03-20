@@ -33,7 +33,7 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 
 // Utilities
 import globalStyles from 'app/utility/styles.js';
-import { formatDate, formatTimeMilitary, isEmptyObject, sortFilterInitialState } from 'app/utility/miscFunctions';
+import { formatDate, formatTimeMilitary, isEmptyObject, noDataMessage, sortFilterInitialState } from 'app/utility/miscFunctions';
 
 function DashboardScreen({ navigation }) {
   // View modes user can switch between (displayed as tab on top)
@@ -513,30 +513,6 @@ function DashboardScreen({ navigation }) {
     return true;
   }
 
-  // Returns message to display if api call error or no data to display
-  const noDataMessage = () => {
-    // Display error message if API request fails
-    let message = '';
-    if (isLoading) {
-      return <></>;
-    }
-    if (isError) {
-      if (statusCode === 401) {
-        message = 'Error: User is not authenticated.';
-      } else if (statusCode >= 500) {
-        message = 'Error: Server is down. Please try again later.';
-      } else {
-        message = `${statusCode || 'Some'} error has occured`;
-      }
-    }
-    return (
-      <MessageDisplayCard
-        TextMessage={isError ? message : 'No schedules found'}
-        topPaddingSize={'36%'}
-      />
-    );
-  };
-
   const handlePullToRefresh = () => {
     refreshSchedule();
     setCurrentTime(new Date());
@@ -659,7 +635,7 @@ function DashboardScreen({ navigation }) {
           ref={scheduleRef}
           onRefresh={handlePullToRefresh}
           refreshing={isLoading}
-          ListEmptyComponent={noDataMessage}
+          ListEmptyComponent={()=>noDataMessage(statusCode, isLoading, isError, 'No schedules found')}
           data={schedule}
           renderItem={({ item, i }) => {
               return (

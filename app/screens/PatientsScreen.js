@@ -19,7 +19,7 @@ import MessageDisplayCard from 'app/components/MessageDisplayCard';
 import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
 
 // Utilities
-import { isEmptyObject, sortFilterInitialState } from 'app/utility/miscFunctions';
+import { isEmptyObject, noDataMessage, sortFilterInitialState } from 'app/utility/miscFunctions';
 
 function PatientsScreen({ navigation }) {
   
@@ -330,30 +330,6 @@ function PatientsScreen({ navigation }) {
       ) : false        
   }
 
-  // Returns message to display if api call error or no data to display
-  const noDataMessage = () => {
-    // Display error message if API request fails
-    let message = '';
-    if (isLoading) {
-      return <></>;
-    }
-    if (isError) {
-      if (statusCode === 401) {
-        message = 'Error: User is not authenticated.';
-      } else if (statusCode >= 500) {
-        message = 'Error: Server is down. Please try again later.';
-      } else {
-        message = `${statusCode || 'Some'} error has occured`;
-      }
-    }
-    return (
-      <MessageDisplayCard
-        TextMessage={isError ? message : 'No patients found'}
-        topPaddingSize={'43%'}
-      />
-    );
-  };
-
   return (
     <>{isLoading ? (
         <ActivityIndicator visible />
@@ -408,7 +384,7 @@ function PatientsScreen({ navigation }) {
               marginBottom={'20'}
               onRefresh={refreshPatientData}
               refreshing={isLoading}
-              ListEmptyComponent={noDataMessage}
+              ListEmptyComponent={()=>noDataMessage(statusCode, isLoading, isError, 'No patients found')}
               data={listOfPatients}
               style={styles.patientListContainer}
               renderItem={({ item, index }) => {
