@@ -9,8 +9,6 @@ import colors from 'app/config/colors';
 function OfflineNotice(props) {
   const netInfo = useNetInfo();
 
-  console.log(netInfo)
-
   if (netInfo.type !== 'unknown' && netInfo.isInternetReachable === false) {
     if(!(netInfo.type == 'wifi' && netInfo.isConnected == true && netInfo.details.strength > 0)) {
       return (
