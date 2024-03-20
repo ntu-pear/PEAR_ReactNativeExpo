@@ -41,10 +41,10 @@ const MedicationItem = ({
             <Text style={[styles.medText, styles.red]}>Note: {medNote}</Text>
             ): null}
           {medStartDate != undefined ? (
-            <Text style={[styles.medText]}>Start Date: {formatDate(new Date(medStartDate))}</Text>
+            <Text style={[styles.medText]}>Start Date: {formatDate(new Date(medStartDate), true)}</Text>
             ): null}
           {medEndDate != undefined ? (
-            <Text style={[styles.medText]}>End Date: {formatDate(new Date(medEndDate))}</Text>
+            <Text style={[styles.medText]}>End Date: {formatDate(new Date(medEndDate), true)}</Text>
             ): null}
         </View>
         <View>
