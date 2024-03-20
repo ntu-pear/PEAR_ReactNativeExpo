@@ -149,7 +149,7 @@ function DashboardNavigator() {
       />
       <Stack.Screen
         name={routes.PATIENT_MEDICATION}
-        component={PatientAllergyScreen}
+        component={PatientMedicationScreen}
         options={{
           headerShown: true,
           headerBackTitleVisible: false,
