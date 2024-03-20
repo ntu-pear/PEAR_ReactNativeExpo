@@ -7,7 +7,6 @@ import {
   FlatList,
   HStack,
   ScrollView,
-  Image,
   Stack,
   View,
   ChevronLeftIcon,
@@ -27,7 +26,6 @@ import routes from 'app/navigation/routes';
 import ActivityCard from 'app/components/ActivityCard';
 import DateInputField from 'app/components/input-components/DateInputField';
 import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
-import MessageDisplayCard from 'app/components/MessageDisplayCard';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 
@@ -187,6 +185,7 @@ function DashboardScreen({ navigation }) {
     promiseFunction();     
   }  
 
+  // Update schedule to display based on selected date
   const updateSchedule = ({tempScheduleWeekly=originalScheduleWeekly, tempSelectedDate=selectedDate}) => {
     console.log('DB 4 - updateSchedule')
 
