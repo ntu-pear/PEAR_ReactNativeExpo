@@ -1,16 +1,19 @@
 // Libs
 import React from 'react';
 import { Text, Icon, View } from 'native-base';
-import { StyleSheet, Touchable, TouchableOpacity } from 'react-native';
+import { Alert, StyleSheet, Touchable, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 // Configurations
 import colors from 'app/config/colors';
 
 // Utilities
-import { formatDate, formatTimeAMPM } from 'app/utility/miscFunctions';
+import { formatDate, formatTimeAMPM, setTimeToZero } from 'app/utility/miscFunctions';
 
 const MedicationItem = ({
+  medID,
+  patientID,
+  patientName,
   medName,
   medDosage,
   medTime,
@@ -18,8 +21,34 @@ const MedicationItem = ({
   medStartDate,
   medEndDate,
   medRemarks,
-  editable=false
+  editable=false,
+  date=new Date()
 }) => {  
+  // Get user confirmation to save adminstration status of medication
+  const onClickAdminister = () => {
+    Alert.alert('Confirm medication adminstration', 
+    `Patient: ${patientName}\nMedication: ${medName}\nTime: ${formatTimeAMPM(medTime)}`, [
+      {
+        text: 'Cancel',
+        onPress: ()=>{},
+        style: 'cancel',
+      },
+      {text: 'OK', onPress: administerMed},
+    ]);
+  }
+
+  // Save medicine administration
+  const administerMed = () => {
+    () => console.log('Administer')
+  }
+
+  const canAdminister = () => {
+    const tempDate = setTimeToZero(date);
+    const today = setTimeToZero(new Date());
+    return !((medStartDate && tempDate < medStartDate) 
+    || (medEndDate && tempDate > medEndDate)  
+    || (tempDate > today || tempDate < today))
+  }
   return (
     <View>
       <View 
@@ -74,8 +103,12 @@ const MedicationItem = ({
           <Text style={styles.medTime}>{formatTimeAMPM(medTime)}</Text>
         </View>
       </View>
-      <TouchableOpacity style={styles.administerContainer}>
-        <Text style={styles.medText} color={colors.white}>Click to administer medicine</Text>
+      <TouchableOpacity 
+        style={[styles.administerContainer, {backgroundColor: canAdminister() ? colors.green : colors.light_gray}]} 
+        onPress={canAdminister() ? onClickAdminister : ()=>{}}
+        activeOpacity={canAdminister() ? null : 1}
+      >
+        <Text style={styles.medText} color={colors.white}>{canAdminister() ? 'Click to log medicine administration' : 'Cannot administer today'}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -116,7 +149,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   administerContainer: {
-    backgroundColor: colors.green,
     height: 40, 
     alignItems: 'center', 
     justifyContent: 'center', 

@@ -282,7 +282,7 @@ function DashboardScreen({ navigation }) {
               patientPreferredName: patientData['preferredName'],
               patientCaregiverName: patientData['caregiverName'],
               patientImage: tempSchedule[i]['patientImage'],
-              activities: parseScheduleString(tempSchedule[i][day], scheduleDate),
+              activities: parseScheduleString(tempSchedule[i][day], scheduleDate, tempSchedule[i]['patientID'], tempSchedule[i]['patientName']),
               date: scheduleDateStr
             };
             
@@ -308,7 +308,7 @@ function DashboardScreen({ navigation }) {
   // '**' represents notes/instructions for medication
   // ', ' represents another medication following
   // Example input: Breathing+Vital Check | Give Medication@0930: Diphenhydramine(2 tabs)**Always leave at least 4 hours between doses
-  const parseScheduleString = (scheduleString, scheduleDate) => {
+  const parseScheduleString = (scheduleString, scheduleDate, patientID, patientName) => {
     // console.log('DB 8 - parseScheduleString')
 
     let scheduleData = [];
@@ -336,6 +336,9 @@ function DashboardScreen({ navigation }) {
             const medNote = medicationInfo.split("**")[1];
             
             medications.push({
+              patientID: patientID,
+              patientName: patientName,
+              medID: 0, // to return with API so in future can save administration
               medName: medName,
               medDosage: medDosage,
               medTime: convertTimeMilitary(medTime),

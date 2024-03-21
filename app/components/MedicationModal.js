@@ -10,6 +10,7 @@ import routes from 'app/navigation/routes';
 
 // Utilities
 import MedicationItem from './MedicationItem';
+import { convertDateDMY } from 'app/utility/miscFunctions';
 
 
 const MedicationModal = ({
@@ -50,10 +51,14 @@ const MedicationModal = ({
                 {medications.map((item, i)=>(
                   <View key={i} style={{marginTop: 20}}>
                     <MedicationItem
+                    medID={item.medID}
+                    patientID={item.patientID}
+                    patientName={item.patientName}
                     medName={item.medName}
                     medDosage={item.medDosage}
                     medTime={item.medTime}
                     medNote={item.medNote}
+                    date={convertDateDMY(date)}
                     />
                   </View>
                 ))}

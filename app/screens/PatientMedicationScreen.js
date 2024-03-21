@@ -1,6 +1,6 @@
 // Libs
 import React, { useEffect, useState } from 'react';
-import { Alert, StyleSheet } from 'react-native';
+import { Alert, StyleSheet, TouchableOpacity } from 'react-native';
 import { ChevronLeftIcon, ChevronRightIcon, Divider, FlatList, Icon, Text, View } from 'native-base';
 import { ListItem, Button } from 'react-native-elements';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -28,6 +28,7 @@ import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
 import LoadingWheel from 'app/components/LoadingWheel';
 import Swipeable from 'app/components/swipeable-components/Swipeable';
 import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
+import DynamicTable from 'app/components/DynamicTable';
 
 function PatientMedicationScreen(props) {
   const {patientID} = props.route.params;
@@ -85,6 +86,15 @@ function PatientMedicationScreen(props) {
   // Patient data related states
   const [patientData, setPatientData] = useState({});
 
+  // Table display related states
+  const [headerData, setHeaderData] = useState([]);
+  const [rowData, setRowData] = useState([]);
+  const [widthData, setWidthData] = useState([]);
+
+  // Scrollview state
+  const [isScrolling, setIsScrolling] = useState(false);
+  
+
   // Refresh list when new medication is added or user requests refresh
   useFocusEffect(
     React.useCallback(() => {
@@ -103,9 +113,6 @@ function PatientMedicationScreen(props) {
     const promiseFunction = async () => {
       await getMedicationData();
       await getPatientData();
-      // setIsLoading(false);        
-      // setIsDataInitialized(true);
-      // setIsLoading(true);        
     };
     promiseFunction();
   }    
@@ -339,7 +346,10 @@ function PatientMedicationScreen(props) {
                 /> 
             </View>
           </View>
-          <FlatList
+          {displayMode == 'rows' ? (
+            <FlatList
+            onScrollBeginDrag={() => setIsScrolling(true)}
+            onScrollEndDrag={() => setIsScrolling(false)}
             onRefresh={refreshMedData}
             refreshing={isLoading}
             height={'73%'}
@@ -349,26 +359,44 @@ function PatientMedicationScreen(props) {
             keyExtractor={item => (item.medID + item.medTime)}
             renderItem={({ item, index }) => { 
               return(
-                <Swipeable
-                  onSwipeRight={()=>handleDeleteMedication(item.medID)}
-                  onSwipeLeft={()=>handleEditMedication(item.medID)}
-                  underlay={<EditDeleteUnderlay/>}
-                  item={
-                    <MedicationItem
-                      medName={item.medName}
-                      medDosage={item.medDosage}
-                      medTime={item.medTime}
-                      medNote={item.medNote}                  
-                      medStartDate={item.medStartDate}
-                      medEndDate={item.medEndDate}
-                      medRemarks={item.medRemarks}
-                      editable
-                    />
-                  }
-                />
+                <View>
+                  <Swipeable
+                    setIsScrolling={setIsScrolling}
+                    onSwipeRight={()=>handleDeleteMedication(item.medID)}
+                    onSwipeLeft={()=>handleEditMedication(item.medID)}
+                    underlay={<EditDeleteUnderlay/>}
+                    item={
+                      <View>
+                        <TouchableOpacity style={styles.medContainer} activeOpacity={1} disabled={!isScrolling}>
+                          <MedicationItem
+                            medID={item.medID}
+                            patientID={patientID}
+                            patientName={patientData.preferredName}
+                            medName={item.medName}
+                            medDosage={item.medDosage}
+                            medTime={item.medTime}
+                            medNote={item.medNote}                  
+                            medStartDate={item.medStartDate}
+                            medEndDate={item.medEndDate}
+                            medRemarks={item.medRemarks}
+                            editable
+                            />
+                        </TouchableOpacity>
+                      </View>
+                    }
+                  />
+                </View>
               )           
             }}
           />
+          ) : (
+            <DynamicTable
+            headerData={headerData}
+            rowData={rowData}
+            widthData={widthData}
+            screenName={'patient allergy'}
+          />
+          )}
           <View style={styles.addBtn}>
             <AddButton 
               title="Add Medication"
@@ -376,12 +404,12 @@ function PatientMedicationScreen(props) {
               />
           </View>
           <AddPatientMedicationModal
-          showModal={isModalVisible}
-          modalMode={modalMode}
-          medicationData={medicationData}
-          setMedicationData={setMedicationData}
-          onClose={()=>setIsModalVisible(false)}
-          onSubmit={modalMode=='add' ? handleModalSubmitAdd : handleModalSubmitEdit} 
+            showModal={isModalVisible}
+            modalMode={modalMode}
+            medicationData={medicationData}
+            setMedicationData={setMedicationData}
+            onClose={()=>setIsModalVisible(false)}
+            onSubmit={modalMode=='add' ? handleModalSubmitAdd : handleModalSubmitEdit} 
           />
         </View>
       )
@@ -390,9 +418,13 @@ function PatientMedicationScreen(props) {
 
 const styles = StyleSheet.create({
   container: {
-    // padding: 30,
     backgroundColor: colors.white_var1,
   },
+  medContainer: {
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  }
 });
 
 export default PatientMedicationScreen;

@@ -104,9 +104,11 @@ export const convertTimeMilitary = (timeString, date=new Date()) => {
 }
 
 // Convert date to 24 hour format string like "15:20" or "1520"
-export const formatTimeHM24 = (date, useColon=true) => {  
-  const hour = new Date(date).getHours();
-  const minute = new Date(date).getMinutes();
+export const formatTimeHM24 = (date, useColon=true) => { 
+  date = typeof(date) == 'Date' ? date : new Date(date);
+
+  const hour = date.getHours();
+  const minute = date.getMinutes();
 
   const hourString = hour < 10 ? '0' + hour : hour.toString();
   const minuteString = minute < 10 ? '0' + minute : minute.toString();
@@ -125,12 +127,31 @@ export const convertTimeHM24 = (timeString, date=new Date()) => {
   return new Date(new Date(new Date().setHours(hours)).setMinutes(minutes));
 }
 
+// Convert DD/MM/YYYY string to datetime
+export const convertDateDMY = (dateString) => {
+  
+  const date = dateString.split('/')[0];
+  const month = dateString.split('/')[1];
+  const year = dateString.split('/')[2];
+  
+  return new Date().setFullYear(year, month-1, date);
+}
+
 // Set the seconds of any datetime to zero
 // Useful for time-related calculations where seconds are irrelevant
 export const setSecondsToZero = (datetime) => {
   let tempDatetime = new Date(datetime)
   datetime = datetime.setHours(tempDatetime.getHours(), tempDatetime.getMinutes(), 0);
-  return datetime;
+  return new Date(datetime);
+}
+
+// Set the hours, minutes, and seconds of any datetime to zero
+// Useful for date-related calculations where only comparing date
+export const setTimeToZero = (datetime) => {
+  datetime = typeof(datetime) == 'Date' ? datetime : new Date(datetime);
+  datetime = datetime.setHours(0, 0, 0);
+  datetime = new Date(datetime).setMilliseconds(0);
+  return new Date(datetime);
 }
 
 // Format of data for sort and filter states used by FilterModal/SearchFilterBar
