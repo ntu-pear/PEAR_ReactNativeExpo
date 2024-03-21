@@ -70,7 +70,6 @@ function PatientMedicalHistoryScreen(props) {
         medicalRemarks,
       }) => ({
         Date: `${formatDateTime(medicalEstimatedDate, true)}`,
-        Time: `${formatDateTime(medicalEstimatedDate, false)}`,
         Diagnosis: medicalDetails,
         'Diagnosis By': informationSource,
         Remarks: medicalRemarks,
@@ -93,7 +92,7 @@ function PatientMedicalHistoryScreen(props) {
 
   useEffect(() => {
     retrieveScreenData(patientID);
-    setWidthData([120, 100, 120, 150, 300]);
+    setWidthData([120, 120, 150, 400]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

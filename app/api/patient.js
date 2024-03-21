@@ -253,7 +253,7 @@ const AddPatientProblemLog = async (patientID, problemLogData) => {
     ProblemLogListID: problemLogData.problemLogListDesc,
     ProblemLogRemarks: problemLogData.remarks,
   };
-  console.log('payload to API', payload);
+
   return client.post(patientProblemLogAdd, payload);
 };
 
@@ -263,7 +263,9 @@ const AddPatientMedicalHistory = async (patientID, medicalData) => {
     medicalDetails: medicalData.medicalDetails,
     informationSource: medicalData.informationSource,
     medicalRemarks: medicalData.medicalRemarks,
+    medicalEstimatedDate: medicalData.medicalEstimatedDate,
   };
+  console.log('payload to API', payload);
   return client.post(patientMedicalHistoryAdd, payload);
 };
 

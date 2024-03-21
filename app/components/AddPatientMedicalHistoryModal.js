@@ -6,6 +6,7 @@ import { StyleSheet } from 'react-native';
 // Adding Components
 import AppButton from './AppButton';
 import InputField from './input-components/InputField';
+import DateInputField from './input-components/DateInputField';
 
 function AddPatientMedicalHistoryModal({ showModal, onClose, onSubmit }) {
   // Initial state for form data
@@ -13,6 +14,7 @@ function AddPatientMedicalHistoryModal({ showModal, onClose, onSubmit }) {
     medicalDetails: '',
     informationSource: '',
     medicalRemarks: '',
+    medicalEstimatedDate: new Date(),
   };
 
   const [medicalData, setMedicalData] = useState(initialMedicalData);
@@ -48,6 +50,18 @@ function AddPatientMedicalHistoryModal({ showModal, onClose, onSubmit }) {
         </Modal.Header>
         <Modal.Body>
           <VStack space={4}>
+            <DateInputField
+              title={'Medical Estimated Date'}
+              hideDayOfWeek={true}
+              isRequired={true}
+              mode={'date'}
+              selectionMode={'default'}
+              handleFormData={(selectedDate) =>
+                handleChange('medicalEstimatedDate', selectedDate)
+              }
+              value={medicalData.medicalEstimatedDate}
+              allowNull={false}
+            />
             <InputField
               isRequired
               title={'Medical Details'}
