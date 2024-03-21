@@ -118,12 +118,10 @@ const styles = StyleSheet.create({
   medContainer: {
     flexDirection: 'row', 
     alignItems: 'center',
-    backgroundColor: colors.white_var1,
-    borderColor: colors.green, 
-    borderWidth: 0.4,
+    backgroundColor: colors.green_lightest,
     padding: 20, 
-    borderTopLeftRadius: 4,
-    borderTopRightRadius: 4,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
   },
   medTextContainer: {
     flex: 1
