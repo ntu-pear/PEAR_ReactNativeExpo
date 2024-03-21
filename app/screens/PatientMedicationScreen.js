@@ -248,8 +248,6 @@ function PatientMedicationScreen(props) {
 
     let data = {...medicationData};
     data['administerTime'] = convertAdmTimeToMilitary(medicationData.administerTime);
-    // data['endDateTime'] = new Date(data['endDateTime']).toISOString();
-    // data['startDateTime'] = new Date(data['startDateTime']).toISOString();
     console.log('edit', data)
 
     let alertTitle = '';

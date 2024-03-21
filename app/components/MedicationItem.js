@@ -1,7 +1,7 @@
 // Libs
 import React from 'react';
 import { Text, Icon, View } from 'native-base';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Touchable, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 // Configurations
@@ -21,8 +21,9 @@ const MedicationItem = ({
   editable=false
 }) => {  
   return (
-    <View 
-      style={styles.medContainer}>
+    <View>
+      <View 
+        style={[styles.medContainer]}>
         <Icon
           as={
             <MaterialIcons 
@@ -71,9 +72,12 @@ const MedicationItem = ({
         </View>
         <View>
           <Text style={styles.medTime}>{formatTimeAMPM(medTime)}</Text>
-          {/* {editable ? () : } */}
         </View>
       </View>
+      <TouchableOpacity style={styles.administerContainer}>
+        <Text style={styles.medText} color={colors.white}>Click to administer medicine</Text>
+      </TouchableOpacity>
+    </View>
   );
 };
 
@@ -83,7 +87,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.green_lightest, 
     padding: 20, 
-    borderRadius: 7,
+    borderTopLeftRadius: 7,
+    borderTopRightRadius: 7,
   },
   medTextContainer: {
     flex: 1
@@ -110,6 +115,14 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     fontWeight: '600',
   },
+  administerContainer: {
+    backgroundColor: colors.green,
+    height: 40, 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    borderBottomLeftRadius: 7, 
+    borderBottomRightRadius: 7
+  }
 });
 
 export default MedicationItem;
