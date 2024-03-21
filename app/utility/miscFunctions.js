@@ -1,4 +1,5 @@
 import MessageDisplayCard from "app/components/MessageDisplayCard";
+import { View } from "native-base";
 
 // Function that takes array of select options and converts to required [{value, label}, {}, {} ...] format
 export const parseSelectOptions = (array) => {
@@ -137,7 +138,8 @@ export const setSecondsToZero = (datetime) => {
 export const sortFilterInitialState = {'filterOptions': {}, 'sel': {}, 'tempSel': {}}
 
 // Returns message to display if api call error or no data to display
-export const noDataMessage = (statusCode, isLoading, isError, defaultMessage='No data found') => {
+// For flatlist, need additional top padding to center the message
+export const noDataMessage = (statusCode=null, isLoading=false, isError=false, defaultMessage='No data found', flatlist=false) => {
   // Display error message if API request fails
   let message = '';
   if (isLoading) {
@@ -153,9 +155,9 @@ export const noDataMessage = (statusCode, isLoading, isError, defaultMessage='No
     }
   }
   return (
-    <MessageDisplayCard
-      TextMessage={isError ? message : defaultMessage}
-      topPaddingSize={'36%'}
-    />
+      <MessageDisplayCard
+        TextMessage={isError ? message : defaultMessage}
+        topPaddingSize={flatlist ? '36%' : 0}
+        />
   );
 };
