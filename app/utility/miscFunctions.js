@@ -133,8 +133,14 @@ export const convertDateDMY = (dateString) => {
   const date = dateString.split('/')[0];
   const month = dateString.split('/')[1];
   const year = dateString.split('/')[2];
-  
+
   return new Date().setFullYear(year, month-1, date);
+}
+
+// Convert military time to AM/PM time
+export const formatMilitaryToAMPM = (timeString) => {
+  const date = convertTimeMilitary(timeString);
+  return formatTimeAMPM(date);
 }
 
 // Set the seconds of any datetime to zero

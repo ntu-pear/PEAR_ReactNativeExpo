@@ -32,7 +32,6 @@ const MedicationModal = ({
 
   return (
     <Modal
-      size={'lg'}
       animationPreset={'slide'}
       isOpen={isModalVisible}
       onClose={()=>setIsModalVisible(false)}
@@ -41,6 +40,7 @@ const MedicationModal = ({
     >
       <Modal.Content
         backgroundColor={colors.white_var1}
+        maxWidth={'70%'}
         >
         <Modal.Body padding={6}>
           <Text style={styles.headerStyle}>Medication Details for {patientName}</Text>
@@ -49,7 +49,7 @@ const MedicationModal = ({
               flex={1}
               >
                 {medications.map((item, i)=>(
-                  <View key={i} style={{marginTop: 20}}>
+                  <View key={i} style={{marginTop: 20, marginHorizontal: 17}}>
                     <MedicationItem
                     medID={item.medID}
                     patientID={item.patientID}
@@ -86,8 +86,9 @@ const styles = StyleSheet.create({
     fontSize: 20,    
   },
   viewAllContainer: {
-    paddingVertical: 10,
+    paddingTop: 20,
     alignSelf: 'flex-end',
+    marginRight: 17
   },
   viewAllText: {
     color: colors.green,

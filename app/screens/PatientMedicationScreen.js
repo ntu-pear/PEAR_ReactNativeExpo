@@ -1,16 +1,14 @@
 // Libs
-import React, { useEffect, useState } from 'react';
-import { Alert, StyleSheet, TouchableOpacity } from 'react-native';
-import { ChevronLeftIcon, ChevronRightIcon, Divider, FlatList, Icon, Text, View } from 'native-base';
-import { ListItem, Button } from 'react-native-elements';
+import React, { useState } from 'react';
+import { Alert, Keyboard, StyleSheet, TouchableOpacity } from 'react-native';
+import { FlatList, View } from 'native-base';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { MaterialIcons } from '@expo/vector-icons';
 
 // API
 import patientApi from 'app/api/patient';
 
 // Utilities
-import { formatTimeHM24, convertTimeMilitary, isEmptyObject, noDataMessage, sortFilterInitialState } from 'app/utility/miscFunctions';
+import { formatTimeHM24, convertTimeMilitary, isEmptyObject, noDataMessage, sortFilterInitialState, formatMilitaryToAMPM, formatDate, formatTimeAMPM } from 'app/utility/miscFunctions';
 
 // Navigation
 import routes from 'app/navigation/routes';
@@ -86,11 +84,6 @@ function PatientMedicationScreen(props) {
   // Patient data related states
   const [patientData, setPatientData] = useState({});
 
-  // Table display related states
-  const [headerData, setHeaderData] = useState([]);
-  const [rowData, setRowData] = useState([]);
-  const [widthData, setWidthData] = useState([]);
-
   // Scrollview state
   const [isScrolling, setIsScrolling] = useState(false);
   
@@ -145,7 +138,7 @@ function PatientMedicationScreen(props) {
     if (patientID) {
       const response = await patientApi.getPatient(patientID);
       if (response.ok) {
-        console.log(response);
+        console.log('got patient');
         setPatientData(response.data.data);
         setIsError(false);
         setIsRetry(false);
@@ -259,21 +252,19 @@ function PatientMedicationScreen(props) {
 
     let data = {...medicationData};
     data['administerTime'] = convertAdmTimeToMilitary(medicationData.administerTime);
-    console.log('edit', data)
 
     let alertTitle = '';
     let alertDetails = '';
 
     const result = await patientApi.updateMedication(patientID, data);
     if (result.ok) {
-      console.log('submitting medication data', data);
       refreshMedData();
       setIsModalVisible(false);
       
       alertTitle = 'Successfully edited medication';
     } else {
       const errors = result.data?.message;
-      console.log(result)
+      console.log("Error editing med")
 
       result.data
       ? (alertDetails = `\n${errors}\n\nPlease try again.`)
@@ -288,21 +279,52 @@ function PatientMedicationScreen(props) {
   
   // Delete medication
   const handleDeleteMedication = (medID) => {
-    console.log('delete', medID)
-    
+    const unparsedMedData = originalUnparsedMedData.filter(x=>x.medicationID == medID && x.patientID == patientID)[0];
+
+    Alert.alert('Are you sure you wish to delete this medication?', 
+    `Medication: ${unparsedMedData.prescriptionName}\nTime: ${formatAdmString(unparsedMedData.administerTime)}`, [
+      {
+        text: 'Cancel',
+        onPress: ()=>{},
+        style: 'cancel',
+      },
+      {text: 'OK', onPress: ()=>console.log('delete')},
+    ]);
   }
 
+  // Convert comma separated military time administer time to comma separated AM/PM time
+  const formatAdmString = (timeString) => {
+    let admArray = timeString.split(',');
+    admArray = admArray.map(item => (
+      formatMilitaryToAMPM(item)
+    )).join(', ');
+    return admArray;
+  }
+  
+  // Navigate to patient profile on click profile image
+  const onClickProfile = () => {  
+    navigation.navigate(routes.PATIENT_PROFILE, { id: patientID });
+  }
+  
   // Convert date time administer time array to military time array
   const convertAdmTimeToMilitary = (admTimeArray) => {
     admTimeArray = admTimeArray.map(item=>(formatTimeHM24(new Date(item), false)))
     return admTimeArray.join(',');
   }
 
-  // Navigate to patient profile on click profile image
-  const onClickProfile = () => {  
-    navigation.navigate(routes.PATIENT_PROFILE, { id: patientID });
+  // Return formatted row data for table display
+  const getTableRowData = () => {
+    return medData.map(item=> {
+      return Object.entries(item).map(([key, value]) => {
+        if (key.toLowerCase().includes('date')) {
+          return formatDate(new Date(value), true); 
+        } else if (key.toLowerCase().includes('time')) {
+          return formatTimeAMPM(new Date(value));
+        } else {
+          return String(value); // Convert other values to strings
+        }
+      })});
   }
-
 
   return (
       isLoading ? (
@@ -310,7 +332,7 @@ function PatientMedicationScreen(props) {
       ) : (
         <View style={styles.container}>  
           <View style={{justifyContent: 'space-between'}}>            
-            <View style={{alignSelf: 'center', marginTop: 15, height: '9%'}} >
+            <View style={{alignSelf: 'center', marginTop: 15, height: '10%'}} >
               {!isEmptyObject(patientData) ? (
                   <ProfileNameButton   
                     profilePicture={patientData.profilePicture}
@@ -348,54 +370,53 @@ function PatientMedicationScreen(props) {
           </View>
           {displayMode == 'rows' ? (
             <FlatList
+            onTouchStart={()=>Keyboard.dismiss()}
             onScrollBeginDrag={() => setIsScrolling(true)}
             onScrollEndDrag={() => setIsScrolling(false)}
             onRefresh={refreshMedData}
             refreshing={isLoading}
-            height={'73%'}
+            height={'70%'}
             ListEmptyComponent={()=>noDataMessage(statusCode, isLoading, isError, 'No medications found')}
             data={medData}
             keyboardShouldPersistTaps='handled'
             keyExtractor={item => (item.medID + item.medTime)}
             renderItem={({ item, index }) => { 
               return(
-                <View>
-                  <Swipeable
-                    setIsScrolling={setIsScrolling}
-                    onSwipeRight={()=>handleDeleteMedication(item.medID)}
-                    onSwipeLeft={()=>handleEditMedication(item.medID)}
-                    underlay={<EditDeleteUnderlay/>}
-                    item={
-                      <View>
-                        <TouchableOpacity style={styles.medContainer} activeOpacity={1} disabled={!isScrolling}>
-                          <MedicationItem
-                            medID={item.medID}
-                            patientID={patientID}
-                            patientName={patientData.preferredName}
-                            medName={item.medName}
-                            medDosage={item.medDosage}
-                            medTime={item.medTime}
-                            medNote={item.medNote}                  
-                            medStartDate={item.medStartDate}
-                            medEndDate={item.medEndDate}
-                            medRemarks={item.medRemarks}
-                            editable
-                            />
-                        </TouchableOpacity>
-                      </View>
-                    }
-                  />
-                </View>
+                <Swipeable
+                  setIsScrolling={setIsScrolling}
+                  onSwipeRight={()=>handleDeleteMedication(item.medID)}
+                  onSwipeLeft={()=>handleEditMedication(item.medID)}
+                  underlay={<EditDeleteUnderlay/>}
+                  item={
+                    <TouchableOpacity style={styles.medContainer} activeOpacity={1} disabled={!isScrolling}>
+                      <MedicationItem
+                        medID={item.medID}
+                        patientID={patientID}
+                        patientName={patientData.preferredName}
+                        medName={item.medName}
+                        medDosage={item.medDosage}
+                        medTime={item.medTime}
+                        medNote={item.medNote}                  
+                        medStartDate={item.medStartDate}
+                        medEndDate={item.medEndDate}
+                        medRemarks={item.medRemarks}
+                        editable
+                        />
+                    </TouchableOpacity>
+                  }
+                />
               )           
             }}
           />
           ) : (
-            <DynamicTable
-            headerData={headerData}
-            rowData={rowData}
-            widthData={widthData}
-            screenName={'patient allergy'}
-          />
+            <View style={{height: '72%', marginBottom: 20, marginHorizontal: 40}}>
+              <DynamicTable
+              headerData={medData.length > 0 ? Object.keys(medData[0]) : []}
+              rowData={getTableRowData()}
+              widthData={[90, 200, 150, 140, 300, 150, 150, 300]}
+              screenName={'patient medication'}
+              />
+            </View>
           )}
           <View style={styles.addBtn}>
             <AddButton 
@@ -424,6 +445,9 @@ const styles = StyleSheet.create({
     padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
+  },
+  addBtn: {
+    marginTop: '0.01%'
   }
 });
 

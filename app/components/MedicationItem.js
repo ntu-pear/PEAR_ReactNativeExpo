@@ -118,10 +118,12 @@ const styles = StyleSheet.create({
   medContainer: {
     flexDirection: 'row', 
     alignItems: 'center',
-    backgroundColor: colors.green_lightest, 
+    backgroundColor: colors.white_var1,
+    borderColor: colors.green, 
+    borderWidth: 0.4,
     padding: 20, 
-    borderTopLeftRadius: 7,
-    borderTopRightRadius: 7,
+    borderTopLeftRadius: 4,
+    borderTopRightRadius: 4,
   },
   medTextContainer: {
     flex: 1
@@ -152,8 +154,8 @@ const styles = StyleSheet.create({
     height: 40, 
     alignItems: 'center', 
     justifyContent: 'center', 
-    borderBottomLeftRadius: 7, 
-    borderBottomRightRadius: 7
+    borderBottomLeftRadius: 8, 
+    borderBottomRightRadius: 8
   }
 });
 
