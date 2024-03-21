@@ -82,7 +82,7 @@ function SearchFilterBar({
     tempSelDatetimeFilters=datetime['tempSel'], 
     tempSearchMode=searchOption,
   }) => {
-    console.log('BAR 1 - handleSearchSortFilter', tempSelDatetimeFilters)
+    console.log('BAR 1 - handleSearchSortFilter')
 
     if(handleSearchSortFilterCustom) {
       handleSearchSortFilterCustom({
@@ -119,7 +119,7 @@ function SearchFilterBar({
     tempSelDatetimeFilters=datetime['tempSel'], 
     tempSearchMode=searchOption,
   }) => {
-    console.log('BAR 2 - setFilteredList', tempSelDatetimeFilters )
+    console.log('BAR 2 - setFilteredList')
     
     let filteredList = [...originalList];
 
@@ -162,7 +162,6 @@ function SearchFilterBar({
     }  
 
     setList(filteredList);
-    console.log(filteredList)
   }  
   
   // Filter list by datetime filter
@@ -270,7 +269,7 @@ function SearchFilterBar({
   // E.g.: [{a: [{b: [{c: 1, d: 2, e: 3}]}]}] => want to filter array corresponding to b by property c
   // i.e. filter [{c: 1, d: 2, e: 3}]
   const getNestedSubFilteredList = (filteredList, filter, id, tempSelFilters) => {
-    console.log('BAR 4 - getNestedSubfilteredList', filterOptionDetails, filter)
+    console.log('BAR 4 - getNestedSubfilteredList')
 
     const key = filterOptionDetails[filter]['nestedFilter'];      
     const tempFilteredList = [];
