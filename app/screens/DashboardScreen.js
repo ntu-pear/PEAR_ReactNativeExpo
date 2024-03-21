@@ -31,7 +31,7 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 
 // Utilities
 import globalStyles from 'app/utility/styles.js';
-import { formatDate, formatTimeMilitary, isEmptyObject, noDataMessage, sortFilterInitialState } from 'app/utility/miscFunctions';
+import { formatDate, convertTimeMilitary, isEmptyObject, noDataMessage, sortFilterInitialState } from 'app/utility/miscFunctions';
 
 function DashboardScreen({ navigation }) {
   // View modes user can switch between (displayed as tab on top)
@@ -338,7 +338,7 @@ function DashboardScreen({ navigation }) {
             medications.push({
               medName: medName,
               medDosage: medDosage,
-              medTime: formatTimeMilitary(medTime),
+              medTime: convertTimeMilitary(medTime),
               medNote: medNote
             })
           }
