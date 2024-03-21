@@ -406,7 +406,7 @@ function SearchFilterBar({
           </>
         ) : null}
         {hideIndicator ? null : (
-          <View style={{justifyContent: 'center'}}>
+          <View style={{justifyContent: 'center', flex: 1, marginTop: 2}}>
             <FilterIndicator
               modalVisible={modalVisible}
               setModalVisible={setModalVisible}
