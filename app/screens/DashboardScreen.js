@@ -196,11 +196,7 @@ function DashboardScreen({ navigation }) {
     if(!isEmptyObject(tempScheduleWeekly)) {      
       const currentDate = formatDate(tempSelectedDate, true);
       setOriginalSchedule([...tempScheduleWeekly[currentDate]]);
-      // if(checkAllEmptySchedules(tempScheduleWeekly[currentDate])) {
-      //   setSchedule([]);
-      // } else {
-        setSchedule([...tempScheduleWeekly[currentDate]]);
-      // }
+      setSchedule([...tempScheduleWeekly[currentDate]]);
     }
   }
 
@@ -437,17 +433,13 @@ function DashboardScreen({ navigation }) {
 
     setIsLoading(true);
 
-    setFilteredList({
+    let tempSchedule = setFilteredList({
       text: text, 
       tempSelSort: tempSelSort, 
       tempSelDropdownFilters: tempSelDropdownFilters, 
       tempSelDateFilters: tempSelDateFilters,
       tempSearchMode: tempSearchMode,
     });
-
-    if(checkAllEmptySchedules(schedule)) {
-      setSchedule([]);
-    }
 
     scheduleRef.current?.scrollToOffset({offset: 0, animated: true});
     setIsLoading(false);    
@@ -512,7 +504,7 @@ function DashboardScreen({ navigation }) {
 
   // Check if all schedules are empty
   const checkAllEmptySchedules = (tempSchedule) => {
-    for(var i = 0; i<schedule.length; i++) {
+    for(var i = 0; i<tempSchedule.length; i++) {
       if(schedule[i]['activities'].length > 0) {
         return false
       }
@@ -643,7 +635,7 @@ function DashboardScreen({ navigation }) {
           onRefresh={handlePullToRefresh}
           refreshing={isLoading}
           ListEmptyComponent={()=>noDataMessage(statusCode, isLoading, isError, 'No schedules found', true)}
-          data={schedule}
+          data={checkAllEmptySchedules(schedule) ? [] : schedule}
           renderItem={({ item, i }) => {
               return (
               <Box style={styles.rowBox} key={item.patientID}>
