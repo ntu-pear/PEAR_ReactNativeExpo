@@ -1,54 +1,85 @@
+// Libs
 import React from 'react';
 import { StyleSheet, Text } from 'react-native';
 import {
-  Button,
   Divider,
   ScrollView,
   View,
 } from 'native-base';
 import { Table, Row, Rows } from 'react-native-table-component';
+
+// Configurations
 import colors from 'app/config/colors';
 
-function DynamicTable({ headerData, rowData, widthData, screenName, onClickEdit, onClickDelete }){
-  console.log([...widthData, onClickEdit ? [100] : [],  onClickDelete ? [100] : []])
-  console.log([...headerData, onClickEdit ? ['Edit'] : [], onClickDelete ? ['Delete'] : []])
-  // console.log()
+// Components
+import AppButton from './AppButton';
+
+function DynamicTable({ headerData, rowData, widthData, screenName, onClickEdit, onClickDelete, noDataMessage }){
+  // Button to edit item
+  const editButton = (id) => {
+    return (
+      <View style={{marginVertical: '7%', marginHorizontal: '7%'}}>
+        <AppButton 
+          title="Edit" 
+          onPress={() => onClickEdit(id)} 
+          color='green'
+          />
+      </View>
+    )
+  }
+
+  // Button to delete item
+  const deleteButton = (id) => {
+    return (
+      <View style={{marginVertical: '7%', marginHorizontal: '7%'}}>
+        <AppButton 
+          title="Delete" 
+          onPress={() => onClickDelete(id)} 
+          color='red'
+        />
+      </View>
+    )
+  }
+
+  // Get row data by removing ID values if any and adding edit/delete buttons
+  const getRowData = () => {
+    return rowData.map(item=>(
+      [...headerData.includes('ID') ? item.slice(headerData.indexOf('ID')+1) : item,  
+        onClickEdit ? editButton(item[headerData.indexOf('ID')]): [], 
+        onClickDelete ? deleteButton(item[headerData.indexOf('ID')]) : []]
+    ))
+  }
 
   return (
-    <ScrollView style={styles.scrollViewVertical}>
-      <ScrollView horizontal>
-        <View>
-          {rowData.length !== 0 ? 
-            <View>
-              <Table borderStyle={{ borderWidth: 1, borderColor: colors.primary_gray }}>
-                <Row 
-                  style={styles.head} 
-                  textStyle={styles.titleText}
-                  widthArr={[...widthData, onClickEdit ? [100] : [],  onClickDelete ? [100] : []]} 
-                  data={[...headerData, onClickEdit ? ['Edit'] : [], onClickDelete ? ['Delete'] : []]} 
-                  />
-                <Rows 
-                  textStyle={styles.rowText} 
-                  data={[...rowData,  onClickEdit ? [<Button title="Edit" onPress={() => console.log('Edit button pressed')} />] : [], 
-                  onClickDelete ? [<Button title="Edit" onPress={() => console.log('Edit button pressed')} />] : []]} 
-                  widthArr={[...widthData, onClickEdit ? [100] : [],  onClickDelete ? [100] : []]}
-                  /> 
-              </Table>
-              <Divider/>
-            </View>
-            :
-            <View>
-              <Text style={styles.rowText}>
-                No data available
-              </Text>
-            </View>
-          }
-        </View>
+    rowData.length > 0 ? (
+      <ScrollView style={styles.scrollViewVertical}>
+        <ScrollView horizontal>
+          <View>
+              <View>
+                <Table borderStyle={{ borderWidth: 1, borderColor: colors.primary_gray }}>
+                  <Row 
+                    style={styles.head} 
+                    textStyle={styles.titleText}
+                    widthArr={[...widthData, onClickEdit ? 140 : [],  onClickDelete ? 140 : []]} 
+                    data={[...headerData.filter(x=>x!='ID'), onClickEdit ? 'Edit': [], onClickDelete ? 'Delete' : []]} 
+                    />
+                  <Rows 
+                    textStyle={styles.rowText} 
+                    data={getRowData()} 
+                    widthArr={[...widthData, onClickEdit ? 140 : [],  onClickDelete ? 140 : []]}
+                    /> 
+                </Table>
+                <Divider/>
+              </View>
+          </View>
+        </ScrollView>
+        <Text style={styles.redText}>
+          Note: To include extra {screenName} information, please contact system administrator.
+        </Text>
       </ScrollView>
-      <Text style={styles.redText}>
-        Note: To include extra {screenName} information, please contact system administrator.
-      </Text>
-    </ScrollView>
+    ) : (
+      noDataMessage
+    )
   );
 }
 

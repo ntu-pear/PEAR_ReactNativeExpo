@@ -29,7 +29,10 @@ import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUn
 import DynamicTable from 'app/components/DynamicTable';
 
 function PatientMedicationScreen(props) {
-  const {patientID} = props.route.params;
+  let {patientID, patientId} = props.route.params;
+  if (patientId) {
+    patientID = patientId;
+  }
   const navigation = useNavigation();
 
   // Modal states
@@ -149,8 +152,8 @@ function PatientMedicationScreen(props) {
     if (patientID) {
       const response = await patientApi.getPatientMedication(patientID);
       if (response.ok) {
-        setOriginalUnparsedMedData([...response.data.data])
-        parseMedicationData(response.data.data);
+        setOriginalUnparsedMedData(response.data.data != null ? [...response.data.data] : [])
+        parseMedicationData(response.data.data != null ? response.data.data : []);
         setIsError(false);
         setIsRetry(false);
         setStatusCode(response.status);
@@ -172,7 +175,6 @@ function PatientMedicationScreen(props) {
     if (patientID) {
       const response = await patientApi.getPatient(patientID);
       if (response.ok) {
-        console.log('got patient');
         setPatientData(response.data.data);
         setIsError(false);
         setIsRetry(false);
@@ -378,6 +380,7 @@ function PatientMedicationScreen(props) {
 
   // Return formatted row data for table display
   const getTableRowData = () => {
+    // const medDataNoMedID = medData.map(({ medID, ...rest }) => rest);
     return medData.map(item=> {
       return Object.entries(item).map(([key, value]) => {
         if (key.toLowerCase().includes('date')) {
@@ -386,8 +389,19 @@ function PatientMedicationScreen(props) {
           return formatTimeAMPM(new Date(value));
         } else {
           return String(value); // Convert other values to strings
-        }
+        } 
       })});
+  }
+
+  // Return formatted header data for table display
+  const getTableHeaderData = () => {
+    return medData.length > 0 
+      ? ['ID', ...Object.keys(medData[0])
+        .filter(x=>x!='medID')
+        .map(item=>("Prescription "+item
+        .split("med")[1].
+        replace(/([a-z])([A-Z])/g, '$1 $2')))  
+      ] : null
   }
 
   return (
@@ -396,7 +410,7 @@ function PatientMedicationScreen(props) {
       ) : (
         <View style={styles.container}>  
           <View style={{justifyContent: 'space-between'}}>            
-            <View style={{alignSelf: 'center', marginTop: 15, height: '10%'}} >
+            <View style={{alignSelf: 'center', marginTop: 15, maxHeight: 120}} >
               {!isEmptyObject(patientData) ? (
                   <ProfileNameButton   
                     profilePicture={patientData.profilePicture}
@@ -443,7 +457,7 @@ function PatientMedicationScreen(props) {
             onScrollEndDrag={() => setIsScrolling(false)}
             onRefresh={refreshMedData}
             refreshing={isLoading}
-            height={'70%'}
+            height={'72%'}
             ListEmptyComponent={()=>noDataMessage(statusCode, isLoading, isError, 'No medications found', true)}
             data={medData}
             keyboardShouldPersistTaps='handled'
@@ -483,12 +497,14 @@ function PatientMedicationScreen(props) {
           ) : (
             <View style={{height: '72%', marginBottom: 20, marginHorizontal: 40}}>
               <DynamicTable
-              headerData={medData.length > 0 ? Object.keys(medData[0]) : []}
+              headerData={getTableHeaderData()}
               rowData={getTableRowData()}
-              widthData={[90, 200, 150, 140, 300, 150, 150, 300]}
+              widthData={[200, 200, 200, 200, 270, 270, 300]}
               screenName={'patient medication'}
               onClickEdit={handleEditMedication}
               onClickDelete={handleDeleteMedication}
+              dataType={'medications'}
+              noDataMessage={noDataMessage(statusCode, isLoading, isError, 'No medications found', false)}
               />
             </View>
           )}
