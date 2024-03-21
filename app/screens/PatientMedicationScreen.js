@@ -311,7 +311,7 @@ function PatientMedicationScreen(props) {
     setIsLoading(false);
   };
   
-  // Delete medication
+  // Ask user to confirm deletion of medication
   const handleDeleteMedication = (medID) => {
     const unparsedMedData = originalUnparsedMedData.filter(x=>x.medicationID == medID && x.patientID == patientID)[0];
 
@@ -322,8 +322,38 @@ function PatientMedicationScreen(props) {
         onPress: ()=>{},
         style: 'cancel',
       },
-      {text: 'OK', onPress: ()=>console.log('delete')},
+      {text: 'OK', onPress: ()=>deleteMedication(medID)},
     ]);
+  }
+
+  // Delete medication
+  const deleteMedication = async (medID) => {
+    setIsLoading(true);
+
+    let data = {medicationID: medID};
+
+    let alertTitle = '';
+    let alertDetails = '';
+
+    const result = await patientApi.deleteMedication(data);
+    if (result.ok) {
+      refreshMedData();
+      setIsModalVisible(false);
+      
+      alertTitle = 'Successfully deleted medication';
+    } else {
+      const errors = result.data?.message;
+      console.log("Error deleting med")
+
+      result.data
+      ? (alertDetails = `\n${errors}\n\nPlease try again.`)
+      : (alertDetails = 'Please try again.');
+      
+      alertTitle = 'Error deleting medication';
+    }
+    
+    Alert.alert(alertTitle, alertDetails);
+    setIsLoading(false);
   }
 
   // Convert comma separated military time administer time to comma separated AM/PM time

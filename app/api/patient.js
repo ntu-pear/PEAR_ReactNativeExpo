@@ -32,6 +32,7 @@ const patientRoutine = `${activityEndpoint}${routineEndpoint}/PatientRoutine`; /
 const patientAllergyAdd = `${allergyEndpoint}/add`; //eslint-disable-line no-unused-vars
 const patientMedicationAdd = `${medicationEndpoint}/add`; //eslint-disable-line no-unused-vars
 const patientMedicationUpdate = `${medicationEndpoint}/update`; //eslint-disable-line no-unused-vars
+const patientMedicationDelete = `${medicationEndpoint}/delete`; //eslint-disable-line no-unused-vars
 /*
  * List all functions here
  * Refer to this api doc: https://github.com/infinitered/apisauce
@@ -267,6 +268,14 @@ const updateMedication = async (patientID, medicationData) => {
 
   return client.put(patientMedicationUpdate, payload);
 };
+
+const deleteMedication = async (medicationData) => {
+  const payload = {
+    medicationID: medicationData.medicationID,
+  };
+
+  return client.put(patientMedicationDelete, payload);
+};
 /*
  * Expose your end points here
  */
@@ -286,5 +295,6 @@ export default {
   AddPatientAllergy,
   addPatientMedication,
   updatePatient,
-  updateMedication
+  updateMedication,
+  deleteMedication,
 };
