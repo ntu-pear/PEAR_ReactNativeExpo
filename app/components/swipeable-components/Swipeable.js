@@ -3,7 +3,7 @@ import React, { useRef } from 'react';
 import { View } from 'native-base';
 import { StyleSheet, PanResponder, Animated } from 'react-native';
 
-const Swipeable = ({item, underlay, onSwipeLeft=()=>{}, onSwipeRight=()=>{}}) => {
+const Swipeable = ({item, underlay, onSwipeLeft=()=>{}, onSwipeRight=()=>{}, setIsScrolling=()=>{}}) => {
   const translateX = useRef(new Animated.Value(0)).current;
 
   const panResponder = useRef(
@@ -11,14 +11,26 @@ const Swipeable = ({item, underlay, onSwipeLeft=()=>{}, onSwipeRight=()=>{}}) =>
       onStartShouldSetPanResponder: () => true,
       onPanResponderMove: (_, gestureState) => {
         let dx = gestureState.dx;
+        const dy = gestureState.dy;
 
         // Limit how far user can swipe
         if (gestureState.dx < 0) {
           dx = Math.max(-150, Math.min(0, gestureState.dx)); 
+          if(dy < 50) {
+            translateX.setValue(dx);
+            setIsScrolling(false);
+          } else {
+            setIsScrolling(true);
+          }
         } else {
           dx = Math.min(150, Math.max(0, gestureState.dx)); 
+          if(dy > -50) {
+            translateX.setValue(dx);
+            setIsScrolling(false);
+          } else {
+            setIsScrolling(true);
+          }
         }
-        translateX.setValue(dx);
       },
       onPanResponderRelease: (_, gestureState) => {
         // Right swipe
@@ -57,9 +69,6 @@ const styles = StyleSheet.create({
   },
   swipeable: {
     backgroundColor: '#fff',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
   },
 });
 
