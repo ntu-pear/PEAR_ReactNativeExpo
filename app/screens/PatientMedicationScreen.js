@@ -487,6 +487,8 @@ function PatientMedicationScreen(props) {
               rowData={getTableRowData()}
               widthData={[90, 200, 150, 140, 300, 150, 150, 300]}
               screenName={'patient medication'}
+              onClickEdit={handleEditMedication}
+              onClickDelete={handleDeleteMedication}
               />
             </View>
           )}

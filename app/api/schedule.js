@@ -5,7 +5,7 @@ import client from 'app/api/client';
  * List all end points here
  */
 const endpoint = '/Schedule';
-const patientWeeklySchedule = '/Schedule/PatientWeeklySchedule';
+const patientWeeklySchedule = '/Schedule/PatientLatestSchedules';
 const patientAllTest = '/Schedule/patientAllTest';
 const patientTest = '/Schedule/patientTest';
 const systemTest = '/Schedule/systemTest';

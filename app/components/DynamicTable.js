@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text } from 'react-native';
 import {
+  Button,
   Divider,
   ScrollView,
   View,
@@ -8,7 +9,10 @@ import {
 import { Table, Row, Rows } from 'react-native-table-component';
 import colors from 'app/config/colors';
 
-function DynamicTable({ headerData, rowData, widthData, screenName }){
+function DynamicTable({ headerData, rowData, widthData, screenName, onClickEdit, onClickDelete }){
+  console.log([...widthData, onClickEdit ? [100] : [],  onClickDelete ? [100] : []])
+  console.log([...headerData, onClickEdit ? ['Edit'] : [], onClickDelete ? ['Delete'] : []])
+  // console.log()
 
   return (
     <ScrollView style={styles.scrollViewVertical}>
@@ -17,8 +21,18 @@ function DynamicTable({ headerData, rowData, widthData, screenName }){
           {rowData.length !== 0 ? 
             <View>
               <Table borderStyle={{ borderWidth: 1, borderColor: colors.primary_gray }}>
-                <Row data={headerData} style={styles.head} widthArr={widthData} textStyle={styles.titleText}/>
-                <Rows data={rowData} textStyle={styles.rowText} widthArr={widthData}/>
+                <Row 
+                  style={styles.head} 
+                  textStyle={styles.titleText}
+                  widthArr={[...widthData, onClickEdit ? [100] : [],  onClickDelete ? [100] : []]} 
+                  data={[...headerData, onClickEdit ? ['Edit'] : [], onClickDelete ? ['Delete'] : []]} 
+                  />
+                <Rows 
+                  textStyle={styles.rowText} 
+                  data={[...rowData,  onClickEdit ? [<Button title="Edit" onPress={() => console.log('Edit button pressed')} />] : [], 
+                  onClickDelete ? [<Button title="Edit" onPress={() => console.log('Edit button pressed')} />] : []]} 
+                  widthArr={[...widthData, onClickEdit ? [100] : [],  onClickDelete ? [100] : []]}
+                  /> 
               </Table>
               <Divider/>
             </View>
