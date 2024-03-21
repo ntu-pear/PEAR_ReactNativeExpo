@@ -50,7 +50,7 @@ function PatientProblemLog(props) {
     }
 
     const sortedData = response.data.data.sort(
-      (a, b) => new Date(b.createdDate) - new Date(a.createdDate),
+      (a, b) => new Date(b.createdDateTime) - new Date(a.createdDateTime),
     );
     const newArray = sortedData.map(
       ({
