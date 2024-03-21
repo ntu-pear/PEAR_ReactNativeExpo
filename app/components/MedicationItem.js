@@ -36,28 +36,36 @@ const MedicationItem = ({
         <View style={styles.medTextContainer}>
           <Text style={styles.heading}>{medName} ({medDosage})</Text>
           {medRemarks ? (
-            <View style={{flexDirection: 'row'}}>
-              <Text style={[styles.medText, styles.bold]}>Remarks: </Text>
-              <Text style={[styles.medText]}>{medRemarks}</Text>
+            <View style={{flexDirection: 'row',  marginLeft: 20}}>
+              <Text>
+                <Text style={[styles.medText, styles.bold]}>Remarks: </Text>
+                <Text style={[styles.medText]}>{medRemarks}</Text>
+              </Text>
             </View>
             ): null}
           {medNote ? (
-            <View style={{flexDirection: 'row'}}>
-              <Text style={[styles.medText, styles.bold]}>Note: </Text>
-              <Text style={[styles.medText]}>{medNote}</Text>
+            <View style={{flexDirection: 'row',  marginLeft: 20}}>
+              <Text>
+                <Text style={[styles.medText, styles.bold]}>Note: </Text>
+                <Text style={[styles.medText]}>{medNote}</Text>
+              </Text>
             </View>
             ): null}
           
           {medStartDate ? (
-            <View style={{flexDirection: 'row'}}>
-              <Text style={[styles.medText, styles.bold]}>Start Date: </Text>
-              <Text style={[styles.medText]}>{formatDate(new Date(medStartDate), true)}</Text>
+            <View style={{flexDirection: 'row',  marginLeft: 20}}>
+              <Text>
+                <Text style={[styles.medText, styles.bold]}>Start Date: </Text>
+                <Text style={[styles.medText]}>{formatDate(new Date(medStartDate), true)}</Text>
+              </Text>
             </View>
             ): null}
           {medEndDate ? (
-            <View style={{flexDirection: 'row'}}>
-              <Text style={[styles.medText, styles.bold]}>End Date: </Text>
-              <Text style={[styles.medText]}>{formatDate(new Date(medEndDate), true)}</Text>
+            <View style={{flexDirection: 'row',  marginLeft: 20}}>
+              <Text>
+                <Text style={[styles.medText, styles.bold]}>End Date: </Text>
+                <Text style={[styles.medText]}>{formatDate(new Date(medEndDate), true)}</Text>
+              </Text>
             </View>
             ): null}
         </View>
@@ -84,6 +92,7 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     fontSize: 19,
     fontWeight: '600',
+    marginBottom: 7,
   },
   medText: {
     marginTop: 4,
