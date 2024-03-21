@@ -10,7 +10,7 @@ import colors from 'app/config/colors';
 const EditDeleteUnderlay = () => {
   return (
     <View style={styles.underlayContainer}>
-      <View backgroundColor={colors.green} style={styles.underlay} alignItems='flex-start'>
+      <View backgroundColor={colors.green} style={styles.underlay}>
         <Icon 
           as={
             <MaterialIcons 
@@ -19,10 +19,9 @@ const EditDeleteUnderlay = () => {
           } 
           size={12}
           color={colors.white}
-          marginLeft={'10%'}
         />
       </View>
-      <View backgroundColor={colors.red} style={styles.underlay} alignItems='flex-end'>
+      <View backgroundColor={colors.red} style={styles.underlay}>
         <Icon 
           as={
             <MaterialIcons 
@@ -31,7 +30,6 @@ const EditDeleteUnderlay = () => {
           } 
           size={12}
           color={colors.white}
-          marginRight={'10%'}
         />
       </View>
     </View>
@@ -46,11 +44,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     width: '100%',
     height: '100%',
+    justifyContent: 'space-between'
   },
   underlay: {
-    width: '50%',
+    width: 150,
     height: '100%',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    alignItems: 'center'
   },
 });
 
