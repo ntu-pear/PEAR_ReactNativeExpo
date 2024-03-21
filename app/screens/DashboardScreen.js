@@ -313,9 +313,9 @@ function DashboardScreen({ navigation }) {
 
     let scheduleData = [];
     let startTime = new Date(scheduleDate)
-    startTime.setHours(9, 0, 0, 0);
+    startTime.setHours(8, 0, 0, 0);
     let endTime = new Date(scheduleDate)
-    endTime.setHours(10, 0, 0, 0);
+    endTime.setHours(9, 0, 0, 0);
 
     if(scheduleString.length > 0) {      
       let timeslotSplit = scheduleString.split('--') // split by timeslot
