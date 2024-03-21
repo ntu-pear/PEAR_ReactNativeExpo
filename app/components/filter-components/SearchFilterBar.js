@@ -57,10 +57,14 @@ function SearchFilterBar({
   filterOptionDetails={},
   
   SEARCH_OPTIONS=[],
-  searchOption='',
+  searchOption=SEARCH_OPTIONS.length == 1 ? SEARCH_OPTIONS[0] : '',
   setSearchOption,
   searchQuery='',
   setSearchQuery,
+
+  itemType='patients',
+
+  hideIndicator=false,
 }) {  
   // Default state to control modal visibility
   const [modalVisible, setModalVisible] = useState(false);
@@ -111,7 +115,7 @@ function SearchFilterBar({
     tempSelDatetimeFilters=datetime['tempSel'], 
     tempSearchMode=searchOption,
   }) => {
-    console.log('BAR 2 - setFilteredList')
+    console.log('BAR 2 - setFilteredList', originalList )
     
     let filteredList = [...originalList];
 
@@ -379,7 +383,7 @@ function SearchFilterBar({
         {itemCount != null ? (
           <>
             <View style={styles.itemCount}>
-              <Text>No. of patients: {itemCount}</Text>
+              <Text>No. of {itemType}: {itemCount}</Text>
             </View>
 
             <Divider 
@@ -390,18 +394,22 @@ function SearchFilterBar({
             />
           </>
         ) : null}
-        <FilterIndicator
-          modalVisible={modalVisible}
-          setModalVisible={setModalVisible}
-          filterOptionDetails={filterOptionDetails}
-          sort={sort}
-          setSort={setSort}
-          dropdown={dropdown}
-          chip={chip}
-          autocomplete={autocomplete}
-          datetime={datetime}
-          handleSortFilter={handleSearchSortFilter}
-        />
+        {hideIndicator ? null : (
+          <View style={{justifyContent: 'center'}}>
+            <FilterIndicator
+              modalVisible={modalVisible}
+              setModalVisible={setModalVisible}
+              filterOptionDetails={filterOptionDetails}
+              sort={sort}
+              setSort={setSort}
+              dropdown={dropdown}
+              chip={chip}
+              autocomplete={autocomplete}
+              datetime={datetime}
+              handleSortFilter={handleSearchSortFilter}
+            />
+          </View>
+        )}
       </View>
       
       <Divider/>
@@ -428,7 +436,7 @@ const styles = StyleSheet.create({
   itemCount: {
     fontSize: 13.5,
     marginLeft: '2%',
-    paddingVertical: '1%',
+    paddingVertical: '1.5%',
     alignSelf: 'flex-start',
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
   },
