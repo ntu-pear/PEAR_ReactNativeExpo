@@ -27,6 +27,7 @@ import LoadingWheel from 'app/components/LoadingWheel';
 import Swipeable from 'app/components/swipeable-components/Swipeable';
 import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
 import DynamicTable from 'app/components/DynamicTable';
+import AppButton from 'app/components/AppButton';
 
 function PatientMedicationScreen(props) {
   let {patientID, patientId} = props.route.params;
@@ -401,7 +402,28 @@ function PatientMedicationScreen(props) {
         .map(item=>("Prescription "+item
         .split("med")[1].
         replace(/([a-z])([A-Z])/g, '$1 $2')))  
-      ] : null
+      ] : null;
+  }
+
+  // Get user confirmation to save adminstration status of medication
+  const onClickAdminister = (index) => {
+    console.log(patientData.preferredName);
+    const data = medData[0];
+    
+    Alert.alert('Confirm medication adminstration', 
+    `Medication: ${data.medName}\nTime: ${formatTimeAMPM(data.medTime)}`, [
+      {
+        text: 'Cancel',
+        onPress: ()=>{},
+        style: 'cancel',
+      },
+      {text: 'OK', onPress: administerMed},
+    ]);
+  }
+
+  // Save medicine administration
+  const administerMed = () => {
+    () => console.log('Administer')
   }
 
   return (
@@ -505,6 +527,12 @@ function PatientMedicationScreen(props) {
               onClickDelete={handleDeleteMedication}
               dataType={'medications'}
               noDataMessage={noDataMessage(statusCode, isLoading, isError, 'No medications found', false)}
+              customColumns={[{
+                title: 'Log medication administration',
+                onPress: onClickAdminister,
+                color: 'green',
+                width: 300
+              }]}
               />
             </View>
           )}

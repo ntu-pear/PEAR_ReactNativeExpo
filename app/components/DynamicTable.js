@@ -14,7 +14,7 @@ import colors from 'app/config/colors';
 // Components
 import AppButton from './AppButton';
 
-function DynamicTable({ headerData, rowData, widthData, screenName, onClickEdit, onClickDelete, noDataMessage }){
+function DynamicTable({ headerData, rowData, widthData, screenName, onClickEdit, onClickDelete, customColumns=[], noDataMessage=()=>{} }){  
   // Button to edit item
   const editButton = (id) => {
     return (
@@ -41,13 +41,34 @@ function DynamicTable({ headerData, rowData, widthData, screenName, onClickEdit,
     )
   }
 
-  // Get row data by removing ID values if any and adding edit/delete buttons
+
+  // Get header data
+  const getHeaderData = () => {
+    let tempHeaderData = [...headerData.filter(x=>x!='ID'), onClickEdit ? 'Edit': [], onClickDelete ? 'Delete' : []]
+    customColumns.forEach(item=>(
+      tempHeaderData.push(item.title)
+    ));
+    return tempHeaderData;
+  }
+
+  // Get row data by removing ID values if any and adding edit/delete/custom buttons
   const getRowData = () => {
-    return rowData.map(item=>(
+    let tempRowData = [...rowData].map((item, i)=>(
       [...headerData.includes('ID') ? item.slice(headerData.indexOf('ID')+1) : item,  
         onClickEdit ? editButton(item[headerData.indexOf('ID')]): [], 
         onClickDelete ? deleteButton(item[headerData.indexOf('ID')]) : []]
+    ));
+    
+    return tempRowData;
+  }
+
+  // Get width data
+  const getWidthData = () => {
+    let tempWidthData = [...widthData, onClickEdit ? 140 : [],  onClickDelete ? 140 : []];
+    customColumns.forEach(item=>(
+      tempWidthData.push(item.width)
     ))
+    return tempWidthData;
   }
 
   return (
@@ -60,14 +81,27 @@ function DynamicTable({ headerData, rowData, widthData, screenName, onClickEdit,
                   <Row 
                     style={styles.head} 
                     textStyle={styles.titleText}
-                    widthArr={[...widthData, onClickEdit ? 140 : [],  onClickDelete ? 140 : []]} 
-                    data={[...headerData.filter(x=>x!='ID'), onClickEdit ? 'Edit': [], onClickDelete ? 'Delete' : []]} 
+                    widthArr={getWidthData()} 
+                    data={getHeaderData()} 
                     />
-                  <Rows 
-                    textStyle={styles.rowText} 
-                    data={getRowData()} 
-                    widthArr={[...widthData, onClickEdit ? 140 : [],  onClickDelete ? 140 : []]}
-                    /> 
+                    {getRowData().map((row, index) => (
+                      <Row
+                        textStyle={styles.rowText} 
+                        widthArr={getWidthData()}
+                        key={index}
+                        data={row.concat(
+                          customColumns.map((column) => (
+                            <View key={column.title} style={{marginVertical: '7%', marginHorizontal: '7%'}}>
+                              <AppButton 
+                                title={column.title} 
+                                onPress={() => column.onPress(index)} 
+                                color={column.color}
+                              />
+                            </View>
+                          ))
+                        )}
+                      />
+                    ))} 
                 </Table>
                 <Divider/>
               </View>

@@ -26,7 +26,7 @@ const MedicationItem = ({
   // Get user confirmation to save adminstration status of medication
   const onClickAdminister = () => {
     Alert.alert('Confirm medication adminstration', 
-    `Patient: ${patientName}\nMedication: ${medName}\nTime: ${formatTimeAMPM(medTime)}`, [
+    `Medication: ${medName}\nTime: ${formatTimeAMPM(medTime)}`, [
       {
         text: 'Cancel',
         onPress: ()=>{},
