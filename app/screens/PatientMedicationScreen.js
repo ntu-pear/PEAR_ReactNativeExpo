@@ -1,5 +1,5 @@
 // Libs
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, Keyboard, StyleSheet, TouchableOpacity } from 'react-native';
 import { FlatList, View } from 'native-base';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -43,8 +43,11 @@ function PatientMedicationScreen(props) {
   const [displayMode, setDisplayMode] = useState('rows');
   const DISPLAY_MODES = ['rows', 'table'];
   
-  // Sort options based on view mode
+  // Sort options 
   const SORT_OPTIONS = ['Medication', 'Medication Time', 'Start Date', 'End Date'];
+
+  // Filter options
+  const FILTER_OPTIONS = ['Medication Time', 'Start Date', 'End Date'];
   
   // Mapping between sort/filter/search names and the respective field in the patient data retrieved from the backend
   const FIELD_MAPPING = {
@@ -53,11 +56,42 @@ function PatientMedicationScreen(props) {
     'End Date': 'medEndDate',
     'Medication Time': 'medTime'
   };
-
-  // Search and sort related states
+  
+  // Search, sort, and filter related states
   const [sort, setSort] = useState(sortFilterInitialState);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDataInitialized, setIsDataInitialized] = useState(false);
+  const [datetime, setDatetime] = useState(sortFilterInitialState);
+
+  // Filter details related state
+  // Details of filter options
+  // --------------------------
+  // type - chip | dropdown | autocomplete (what kind of UI/component to use to display the filter)
+  // options - {} | custom dict that maps options for filtering to corresponding values in the patient data
+  //                e.g.: {'Active': true, 'Inactive': false, 'All': undefined} for filter corresponding to isActive
+  //                      where 'Active' filter option corresponds to isActive=true etc.
+  // isFilter - whether the filter is actually to be used for filtering,
+  //            since some filters like patient status may be used to make an API call instead of normal filtering
+  // --------------------------
+  const [filterOptionDetails, setFilterOptionDetails] = useState({
+    'Medication Time': {
+      'type': 'time',
+      'options': {'min': {}, 'max': {},},
+      'isFilter': true,
+    },
+    'Start Date': {
+      'type': 'date',
+      'options': {'min': {}, 'max': {}},
+      'isFilter': true,
+    },
+    'End Date': {
+      'type': 'date',
+      'options': {'min': {}, 'max': {}},
+      'isFilter': true,
+    },
+  });
+
+  // useEffect(()=>console.log(datetime), [datetime])
 
   // API call related states
   const [isLoading, setIsLoading] = useState(false);
@@ -354,6 +388,10 @@ function PatientMedicationScreen(props) {
                 SEARCH_OPTIONS={SEARCH_OPTIONS}
                 FIELD_MAPPING={FIELD_MAPPING}
                 SORT_OPTIONS={SORT_OPTIONS}
+                FILTER_OPTIONS={FILTER_OPTIONS}
+                filterOptionDetails={filterOptionDetails}
+                datetime={datetime}
+                setDatetime={setDatetime}
                 sort={sort}
                 setSort={setSort}
                 searchQuery={searchQuery}
@@ -376,7 +414,7 @@ function PatientMedicationScreen(props) {
             onRefresh={refreshMedData}
             refreshing={isLoading}
             height={'70%'}
-            ListEmptyComponent={()=>noDataMessage(statusCode, isLoading, isError, 'No medications found')}
+            ListEmptyComponent={()=>noDataMessage(statusCode, isLoading, isError, 'No medications found', true)}
             data={medData}
             keyboardShouldPersistTaps='handled'
             keyExtractor={item => (item.medID + item.medTime)}

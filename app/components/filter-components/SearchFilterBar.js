@@ -82,7 +82,7 @@ function SearchFilterBar({
     tempSelDatetimeFilters=datetime['tempSel'], 
     tempSearchMode=searchOption,
   }) => {
-    console.log('BAR 1 - handleSearchSortFilter')
+    console.log('BAR 1 - handleSearchSortFilter', tempSelDatetimeFilters)
 
     if(handleSearchSortFilterCustom) {
       handleSearchSortFilterCustom({
@@ -119,7 +119,7 @@ function SearchFilterBar({
     tempSelDatetimeFilters=datetime['tempSel'], 
     tempSearchMode=searchOption,
   }) => {
-    console.log('BAR 2 - setFilteredList' )
+    console.log('BAR 2 - setFilteredList', tempSelDatetimeFilters )
     
     let filteredList = [...originalList];
 
@@ -162,6 +162,7 @@ function SearchFilterBar({
     }  
 
     setList(filteredList);
+    console.log(filteredList)
   }  
   
   // Filter list by datetime filter
@@ -172,8 +173,10 @@ function SearchFilterBar({
         const datetimeFilterType = datetimeFilterTypes[i];
         if(datetimeFilterType in tempSelDatetimeFilters[filter] && tempSelDatetimeFilters[filter][datetimeFilterType] != null) {          
           const datetimeType = filterOptionDetails[filter]['type'];
-          let selectedDatetime = new Date(tempSelDatetimeFilters[filter][datetimeFilterType].setHours(0,0,0));
-          if(datetimeType == 'time') {
+          let selectedDatetime = null;
+          if(datetimeType == 'date') {
+            selectedDatetime = new Date(tempSelDatetimeFilters[filter][datetimeFilterType].setHours(0,0,0));
+          } else if(datetimeType == 'time') {
             selectedDatetime = setSecondsToZero(new Date(tempSelDatetimeFilters[filter][datetimeFilterType]));
           }
           filteredList = filterByDatetime(filteredList, filter, datetimeFilterType, selectedDatetime);
