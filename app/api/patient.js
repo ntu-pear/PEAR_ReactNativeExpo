@@ -245,12 +245,12 @@ const AddPatientVital = async (patientID, vitalData) => {
   return client.post(patientVitalAdd, payload);
 };
 
-const AddPatientProblemLog = async (patientID, userID, problemLogData) => {
+const AddPatientProblemLog = async (patientID, problemLogData) => {
   const payload = {
-    UserID: userID,
+    UserID: problemLogData.userID,
     PatientID: patientID,
-    ProblemLogListID: problemLogData.problemLogListID,
-    ProblemLogRemarks: problemLogData.problemLogRemarks,
+    ProblemLogListID: problemLogData.problemLogListDesc,
+    ProblemLogRemarks: problemLogData.remarks,
   };
   console.log('payload to API', payload);
   return client.post(patientProblemLogAdd, payload);

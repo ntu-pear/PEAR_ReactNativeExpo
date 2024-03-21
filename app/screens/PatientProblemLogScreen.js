@@ -23,7 +23,6 @@ function PatientProblemLog(props) {
   const [tableDataFormated, setTableDataFormated] = useState([]);
   const [patientID, setPatientID] = useState(props.route.params.patientID);
   const [showModal, setShowModal] = useState(false);
-  const [userID, setUserID] = useState(props.route.params.userID);
 
   const handleAddProblemLog = () => {
     setShowModal(true);
@@ -31,7 +30,6 @@ function PatientProblemLog(props) {
 
   const handleModalSubmit = async (problemLogData) => {
     const result = await patientApi.AddPatientProblemLog(
-      userID,
       patientID,
       problemLogData,
     );

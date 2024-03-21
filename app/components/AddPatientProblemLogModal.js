@@ -1,17 +1,29 @@
 // Import necessary dependencies
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Modal, Button, VStack, Text } from 'native-base';
 import { StyleSheet } from 'react-native';
 
 // Components
 import InputField from './input-components/InputField'; // Reuse your existing InputField component
 import AppButton from './AppButton'; // Reuse your existing AppButton component
+import AuthContext from '../auth/context';
+import SelectionInputField from './input-components/SelectionInputField';
+
+// Hooks
+import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
 function AddPatientProblemLogModal({ showModal, onClose, onSubmit }) {
+  // Get user data from AuthContext
+  const { user } = useContext(AuthContext);
+  const userID = user ? user.userID : null;
+
+  // options data
+  const { data: ProblemLog } = useGetSelectionOptions('ProblemLog');
+
   // State for form data
   const [problemLogData, setProblemLogData] = useState({
-    authorName: '',
-    problemLogListDesc: 0,
+    userID: userID,
+    problemLogListDesc: 8,
     remarks: '',
   });
 
@@ -23,8 +35,8 @@ function AddPatientProblemLogModal({ showModal, onClose, onSubmit }) {
   // Reset form fields
   const resetForm = () => {
     setProblemLogData({
-      authorName: '',
-      problemLogListDesc: 0,
+      userID: userID,
+      problemLogListDesc: 8,
       remarks: '',
     });
   };
@@ -45,14 +57,18 @@ function AddPatientProblemLogModal({ showModal, onClose, onSubmit }) {
         </Modal.Header>
         <Modal.Body>
           <VStack space={4}>
-            <InputField
+            <SelectionInputField
               title="Description"
               isRequired
-              onChangeText={(value) => handleChange('description', value)}
+              dataArray={ProblemLog}
+              onDataChange={(value) =>
+                handleChange('problemLogListDesc', value)
+              }
               value={problemLogData.problemLogListDesc}
             />
             <InputField
               title="Remarks"
+              isRequired
               onChangeText={(value) => handleChange('remarks', value)}
               value={problemLogData.remarks}
               variant="multiLine"
