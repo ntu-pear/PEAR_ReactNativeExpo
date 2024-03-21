@@ -4,6 +4,7 @@ import { Modal, Button, VStack, Text, HStack } from 'native-base';
 import { StyleSheet } from 'react-native';
 import AppButton from './AppButton';
 import InputField from './input-components/InputField';
+import RadioButtonInput from './input-components/RadioButtonsInput';
 
 function AddPatientVitalModal({ showModal, onClose, onSubmit }) {
   // State to hold form data
@@ -21,6 +22,10 @@ function AddPatientVitalModal({ showModal, onClose, onSubmit }) {
   };
 
   const [vitalData, setVitalData] = useState(initialVitalData);
+  const afterMealOptions = [
+    { label: 'yes', value: true },
+    { label: 'no', value: false },
+  ];
 
   // Update field values
   const handleChange = (name, value) => {
@@ -75,12 +80,12 @@ function AddPatientVitalModal({ showModal, onClose, onSubmit }) {
                 value={vitalData.temperature}
               />
               <InputField
-                title={'Height (m)'}
+                title={'Systolic BP (mmHg)'}
                 isRequired
                 keyboardType="numeric"
                 type="number"
-                onChangeText={(value) => handleChange('height', value)}
-                value={vitalData.height}
+                onChangeText={(value) => handleChange('systolicBP', value)}
+                value={vitalData.systolicBP}
               />
               <InputField
                 title={'Diastolic BP (mmHg)'}
@@ -106,9 +111,26 @@ function AddPatientVitalModal({ showModal, onClose, onSubmit }) {
                 onChangeText={(value) => handleChange('bloodSugarlevel', value)}
                 value={vitalData.bloodSugarlevel}
               />
+              <RadioButtonInput
+                title={'After Meal'}
+                isRequired={true}
+                value={vitalData.afterMeal}
+                dataArray={afterMealOptions}
+                onChangeData={(newValue) =>
+                  handleChange('afterMeal', newValue === true)
+                }
+              />
             </VStack>
             {/* Column 2 */}
             <VStack space={4} flex={1}>
+              <InputField
+                title={'Height (m)'}
+                isRequired
+                keyboardType="numeric"
+                type="number"
+                onChangeText={(value) => handleChange('height', value)}
+                value={vitalData.height}
+              />
               <InputField
                 title={'Weight (kg)'}
                 isRequired
@@ -116,14 +138,6 @@ function AddPatientVitalModal({ showModal, onClose, onSubmit }) {
                 type="number"
                 onChangeText={(value) => handleChange('weight', value)}
                 value={vitalData.weight}
-              />
-              <InputField
-                title={'Systolic BP (mmHg)'}
-                isRequired
-                keyboardType="numeric"
-                type="number"
-                onChangeText={(value) => handleChange('systolicBP', value)}
-                value={vitalData.systolicBP}
               />
               <InputField
                 title={'Heart Rate BP (bpm)'}
