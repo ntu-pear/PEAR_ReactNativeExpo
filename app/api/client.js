@@ -68,6 +68,11 @@ apiClient.addAsyncResponseTransform(async (response) => {
     const unformattedUserRefreshToken = await authStorage.getToken(
       'userRefreshToken',
     );
+
+    if(unformattedUserAccessToken == null && unformattedUserRefreshToken == null) {
+      return;
+    }
+
     const accessToken = unformattedUserAccessToken.replace(/['"]+/g, '');
     const refreshToken = unformattedUserRefreshToken.replace(/['"]+/g, '');
     let bearerToken = accessToken;

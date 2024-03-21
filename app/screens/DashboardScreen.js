@@ -7,7 +7,6 @@ import {
   FlatList,
   HStack,
   ScrollView,
-  Image,
   Stack,
   View,
   ChevronLeftIcon,
@@ -27,13 +26,12 @@ import routes from 'app/navigation/routes';
 import ActivityCard from 'app/components/ActivityCard';
 import DateInputField from 'app/components/input-components/DateInputField';
 import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
-import MessageDisplayCard from 'app/components/MessageDisplayCard';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 
 // Utilities
 import globalStyles from 'app/utility/styles.js';
-import { formatDate, formatTimeMilitary, isEmptyObject, sortFilterInitialState } from 'app/utility/miscFunctions';
+import { formatDate, convertTimeMilitary, isEmptyObject, noDataMessage, sortFilterInitialState } from 'app/utility/miscFunctions';
 
 function DashboardScreen({ navigation }) {
   // View modes user can switch between (displayed as tab on top)
@@ -70,7 +68,7 @@ function DashboardScreen({ navigation }) {
   // Ref used to programmatically scroll to top of list
   const scheduleRef = useRef(null);
 
-  // Patient ata related states
+  // Patient data related states
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const [isRetry, setIsRetry] = useState(false);
@@ -180,24 +178,25 @@ function DashboardScreen({ navigation }) {
       if(viewMode === 'allPatients') {
         await getPatientCountInfo();
       }       
-      setIsLoading(false);        
-      setIsDataInitialized(true);
-      setIsLoading(true);        
-    };
+      if(!isError) {
+        setIsLoading(false);        
+        setIsDataInitialized(true);
+        setIsLoading(true);        
+      } else {
+        setIsLoading(false);
+      }
+    }
     promiseFunction();     
   }  
 
+  // Update schedule to display based on selected date
   const updateSchedule = ({tempScheduleWeekly=originalScheduleWeekly, tempSelectedDate=selectedDate}) => {
     console.log('DB 4 - updateSchedule')
 
     if(!isEmptyObject(tempScheduleWeekly)) {      
       const currentDate = formatDate(tempSelectedDate, true);
       setOriginalSchedule([...tempScheduleWeekly[currentDate]]);
-      // if(checkAllEmptySchedules(tempScheduleWeekly[currentDate])) {
-      //   setSchedule([]);
-      // } else {
-        setSchedule([...tempScheduleWeekly[currentDate]]);
-      // }
+      setSchedule([...tempScheduleWeekly[currentDate]]);
     }
   }
 
@@ -249,7 +248,7 @@ function DashboardScreen({ navigation }) {
 
   // Parse data returned by api to required format to display schedule
   const parseScheduleData = ({tempPatientInfo, tempSchedule}) => {
-    console.log('DB 7 - parseScheduleData')
+    console.log('DB 7 - parseScheduleData', )
 
     if(tempSchedule == null) {
       setOriginalScheduleWeekly({});
@@ -267,25 +266,26 @@ function DashboardScreen({ navigation }) {
           if(Object.keys(tempScheduleWeekly).length <= j) {
             tempScheduleWeekly[scheduleDateStr] = [];
           }
-          const patientData = tempPatientInfo.filter(x=>x.patientID == tempSchedule[i]['patientID'])[0];
-          // console.log(patientData.startDate)
-          
-          const patientDailySchedule = {
-            patientID: tempSchedule[i]['patientID'],
-            patientName: tempSchedule[i]['patientName'],
-            patientStartDate: patientData['startDate'],
-            patientFullName: patientData['firstName'] + " " + patientData['lastName'],
-            patientPreferredName: patientData['preferredName'],
-            patientCaregiverName: patientData['caregiverName'],
-            patientImage: tempSchedule[i]['patientImage'],
-            activities: parseScheduleString(tempSchedule[i][day], scheduleDate),
-            date: scheduleDateStr
-          };
-          
-          scheduleDate.setDate(scheduleDate.getDate() + 1);
+          const patientData = tempPatientInfo.filter(x=>x.patientID == tempSchedule[i]['patientID'])[0] || {};
 
-          tempScheduleWeekly[scheduleDateStr].push(patientDailySchedule)
-          
+          // If patient has not been (soft) deleted
+          if(!isEmptyObject(patientData)) {
+            const patientDailySchedule = {
+              patientID: tempSchedule[i]['patientID'],
+              patientName: tempSchedule[i]['patientName'],
+              patientStartDate: patientData['startDate'],
+              patientFullName: patientData['firstName'] + " " + patientData['lastName'],
+              patientPreferredName: patientData['preferredName'],
+              patientCaregiverName: patientData['caregiverName'],
+              patientImage: tempSchedule[i]['patientImage'],
+              activities: parseScheduleString(tempSchedule[i][day], scheduleDate, tempSchedule[i]['patientID'], tempSchedule[i]['patientName']),
+              date: scheduleDateStr
+            };
+            
+            scheduleDate.setDate(scheduleDate.getDate() + 1);
+  
+            tempScheduleWeekly[scheduleDateStr].push(patientDailySchedule)
+          }          
         }
       }
 
@@ -304,14 +304,14 @@ function DashboardScreen({ navigation }) {
   // '**' represents notes/instructions for medication
   // ', ' represents another medication following
   // Example input: Breathing+Vital Check | Give Medication@0930: Diphenhydramine(2 tabs)**Always leave at least 4 hours between doses
-  const parseScheduleString = (scheduleString, scheduleDate) => {
+  const parseScheduleString = (scheduleString, scheduleDate, patientID, patientName) => {
     // console.log('DB 8 - parseScheduleString')
 
     let scheduleData = [];
     let startTime = new Date(scheduleDate)
-    startTime.setHours(9, 0, 0, 0);
+    startTime.setHours(8, 0, 0, 0);
     let endTime = new Date(scheduleDate)
-    endTime.setHours(10, 0, 0, 0);
+    endTime.setHours(9, 0, 0, 0);
 
     if(scheduleString.length > 0) {      
       let timeslotSplit = scheduleString.split('--') // split by timeslot
@@ -332,9 +332,12 @@ function DashboardScreen({ navigation }) {
             const medNote = medicationInfo.split("**")[1];
             
             medications.push({
+              patientID: patientID,
+              patientName: patientName,
+              medID: 0, // to return with API so in future can save administration
               medName: medName,
               medDosage: medDosage,
-              medTime: formatTimeMilitary(medTime),
+              medTime: convertTimeMilitary(medTime),
               medNote: medNote
             })
           }
@@ -430,17 +433,13 @@ function DashboardScreen({ navigation }) {
 
     setIsLoading(true);
 
-    setFilteredList({
+    let tempSchedule = setFilteredList({
       text: text, 
       tempSelSort: tempSelSort, 
       tempSelDropdownFilters: tempSelDropdownFilters, 
       tempSelDateFilters: tempSelDateFilters,
       tempSearchMode: tempSearchMode,
     });
-
-    if(checkAllEmptySchedules(schedule)) {
-      setSchedule([]);
-    }
 
     scheduleRef.current?.scrollToOffset({offset: 0, animated: true});
     setIsLoading(false);    
@@ -505,37 +504,13 @@ function DashboardScreen({ navigation }) {
 
   // Check if all schedules are empty
   const checkAllEmptySchedules = (tempSchedule) => {
-    for(var i = 0; i<schedule.length; i++) {
+    for(var i = 0; i<tempSchedule.length; i++) {
       if(schedule[i]['activities'].length > 0) {
         return false
       }
     }
     return true;
   }
-
-  // Returns message to display if api call error or no data to display
-  const noDataMessage = () => {
-    // Display error message if API request fails
-    let message = '';
-    if (isLoading) {
-      return <></>;
-    }
-    if (isError) {
-      if (statusCode === 401) {
-        message = 'Error: User is not authenticated.';
-      } else if (statusCode >= 500) {
-        message = 'Error: Server is down. Please try again later.';
-      } else {
-        message = `${statusCode || 'Some'} error has occured`;
-      }
-    }
-    return (
-      <MessageDisplayCard
-        TextMessage={isError ? message : 'No schedules found'}
-        topPaddingSize={'36%'}
-      />
-    );
-  };
 
   const handlePullToRefresh = () => {
     refreshSchedule();
@@ -569,10 +544,10 @@ function DashboardScreen({ navigation }) {
 
   const showStartDate = () => {
     return (!isEmptyObject(sort['sel']) ? sort['sel']['option']['label'] == 'Patient Start Date' : false) || 
-      'Patient Start Date' in datetime['sel'] ? (
-        (datetime['sel']['Patient Start Date']['min'] && datetime['sel']['Patient Start Date']['min'] != null) || 
-        (datetime['sel']['Patient Start Date']['max'] && datetime['sel']['Patient Start Date']['max'] != null) 
-      ) : false    
+    ('Patient Start Date' in datetime['sel'] ? (
+      (datetime['sel']['Patient Start Date']['min'] && datetime['sel']['Patient Start Date']['min'] != null) || 
+      (datetime['sel']['Patient Start Date']['max'] && datetime['sel']['Patient Start Date']['max'] != null) 
+    ) : false)    
   }
 
   return (
@@ -659,8 +634,8 @@ function DashboardScreen({ navigation }) {
           ref={scheduleRef}
           onRefresh={handlePullToRefresh}
           refreshing={isLoading}
-          ListEmptyComponent={noDataMessage}
-          data={schedule}
+          ListEmptyComponent={()=>noDataMessage(statusCode, isLoading, isError, 'No schedules found', true)}
+          data={checkAllEmptySchedules(schedule) ? [] : schedule}
           renderItem={({ item, i }) => {
               return (
               <Box style={styles.rowBox} key={item.patientID}>

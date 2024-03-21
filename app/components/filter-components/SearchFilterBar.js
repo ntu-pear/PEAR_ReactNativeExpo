@@ -15,6 +15,7 @@ import TabBar from '../TabBar';
 
 // Utilities
 import { isEmptyObject, parseSelectOptions, setSecondsToZero, sortArray, sortFilterInitialState } from 'app/utility/miscFunctions';
+import DisplayModeComponent from '../DisplayModeComponent';
 
 function SearchFilterBar({
   originalList=[],
@@ -57,10 +58,17 @@ function SearchFilterBar({
   filterOptionDetails={},
   
   SEARCH_OPTIONS=[],
-  searchOption='',
+  searchOption=SEARCH_OPTIONS.length == 1 ? SEARCH_OPTIONS[0] : '',
   setSearchOption,
   searchQuery='',
   setSearchQuery,
+
+  itemType='patients',
+
+  displayMode='',
+  setDisplayMode=()=>{},
+  DISPLAY_MODES=[],
+  hideIndicator=false,
 }) {  
   // Default state to control modal visibility
   const [modalVisible, setModalVisible] = useState(false);
@@ -164,8 +172,10 @@ function SearchFilterBar({
         const datetimeFilterType = datetimeFilterTypes[i];
         if(datetimeFilterType in tempSelDatetimeFilters[filter] && tempSelDatetimeFilters[filter][datetimeFilterType] != null) {          
           const datetimeType = filterOptionDetails[filter]['type'];
-          let selectedDatetime = new Date(tempSelDatetimeFilters[filter][datetimeFilterType].setHours(0,0,0));
-          if(datetimeType == 'time') {
+          let selectedDatetime = null;
+          if(datetimeType == 'date') {
+            selectedDatetime = new Date(tempSelDatetimeFilters[filter][datetimeFilterType].setHours(0,0,0));
+          } else if(datetimeType == 'time') {
             selectedDatetime = setSecondsToZero(new Date(tempSelDatetimeFilters[filter][datetimeFilterType]));
           }
           filteredList = filterByDatetime(filteredList, filter, datetimeFilterType, selectedDatetime);
@@ -259,7 +269,7 @@ function SearchFilterBar({
   // E.g.: [{a: [{b: [{c: 1, d: 2, e: 3}]}]}] => want to filter array corresponding to b by property c
   // i.e. filter [{c: 1, d: 2, e: 3}]
   const getNestedSubFilteredList = (filteredList, filter, id, tempSelFilters) => {
-    console.log('BAR 4 - getNestedSubfilteredList', filterOptionDetails, filter)
+    console.log('BAR 4 - getNestedSubfilteredList')
 
     const key = filterOptionDetails[filter]['nestedFilter'];      
     const tempFilteredList = [];
@@ -339,7 +349,7 @@ function SearchFilterBar({
           SEARCH_OPTIONS={parseSelectOptions([...SEARCH_OPTIONS])}
           searchOption={SEARCH_OPTIONS.indexOf(searchOption)+1}
         />
-        <View>
+        <View style={{flexDirection: 'row', justifyContent: 'center'}}>
           <FilterModalCard
             modalVisible={modalVisible}
             setModalVisible={setModalVisible}
@@ -371,6 +381,13 @@ function SearchFilterBar({
 
             handleSortFilter={handleSearchSortFilter}
           />
+          {displayMode != '' ? (
+            <DisplayModeComponent
+              DISPLAY_MODES={DISPLAY_MODES}
+              displayMode={displayMode}
+              setDisplayMode={setDisplayMode}
+            />
+          ) : null}          
         </View>
       </View>
       <View
@@ -379,7 +396,7 @@ function SearchFilterBar({
         {itemCount != null ? (
           <>
             <View style={styles.itemCount}>
-              <Text>No. of patients: {itemCount}</Text>
+              <Text>No. of {itemType}: {itemCount}</Text>
             </View>
 
             <Divider 
@@ -390,18 +407,22 @@ function SearchFilterBar({
             />
           </>
         ) : null}
-        <FilterIndicator
-          modalVisible={modalVisible}
-          setModalVisible={setModalVisible}
-          filterOptionDetails={filterOptionDetails}
-          sort={sort}
-          setSort={setSort}
-          dropdown={dropdown}
-          chip={chip}
-          autocomplete={autocomplete}
-          datetime={datetime}
-          handleSortFilter={handleSearchSortFilter}
-        />
+        {hideIndicator ? null : (
+          <View style={{justifyContent: 'center', flex: 1, marginTop: 2}}>
+            <FilterIndicator
+              modalVisible={modalVisible}
+              setModalVisible={setModalVisible}
+              filterOptionDetails={filterOptionDetails}
+              sort={sort}
+              setSort={setSort}
+              dropdown={dropdown}
+              chip={chip}
+              autocomplete={autocomplete}
+              datetime={datetime}
+              handleSortFilter={handleSearchSortFilter}
+            />
+          </View>
+        )}
       </View>
       
       <Divider/>
@@ -428,7 +449,7 @@ const styles = StyleSheet.create({
   itemCount: {
     fontSize: 13.5,
     marginLeft: '2%',
-    paddingVertical: '1%',
+    paddingVertical: '1.5%',
     alignSelf: 'flex-start',
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
   },
