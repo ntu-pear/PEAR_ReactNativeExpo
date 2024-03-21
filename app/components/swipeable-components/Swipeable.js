@@ -3,7 +3,7 @@ import React, { useRef } from 'react';
 import { View } from 'native-base';
 import { StyleSheet, PanResponder, Animated } from 'react-native';
 
-const Swipeable = ({item, underlay, onSwipeLeft=()=>{}, onSwipeRight=()=>{}, setIsScrolling=()=>{}}) => {
+const Swipeable = ({item, underlay, onSwipeLeft, onSwipeRight, setIsScrolling=()=>{}}) => {
   const translateX = useRef(new Animated.Value(0)).current;
 
   const panResponder = useRef(
@@ -14,32 +14,34 @@ const Swipeable = ({item, underlay, onSwipeLeft=()=>{}, onSwipeRight=()=>{}, set
         const dy = gestureState.dy;
 
         // Limit how far user can swipe
-        if (gestureState.dx < 0) {
+        if (gestureState.dx < 0 && onSwipeRight) {
           dx = Math.max(-150, Math.min(0, gestureState.dx)); 
           if(dy < 50) {
             translateX.setValue(dx);
             setIsScrolling(false);
-          } else {
+          } else { 
             setIsScrolling(true);
           }
         } else {
-          dx = Math.min(150, Math.max(0, gestureState.dx)); 
-          if(dy > -50) {
-            translateX.setValue(dx);
-            setIsScrolling(false);
-          } else {
-            setIsScrolling(true);
+          if(onSwipeLeft) {
+            dx = Math.min(150, Math.max(0, gestureState.dx)); 
+            if(dy > -50) {
+              translateX.setValue(dx);
+              setIsScrolling(false);
+            } else {
+              setIsScrolling(true);
+            }
           }
         }
       },
       onPanResponderRelease: (_, gestureState) => {
         // Right swipe
-        if (gestureState.dx < -50) {
+        if (gestureState.dx < -50 && onSwipeRight) {
           onSwipeRight();
         }
         
         // Left Swipe
-        if (gestureState.dx > 50) {
+        if (gestureState.dx > 50 && onSwipeLeft) {
           onSwipeLeft();
         }
         Animated.spring(translateX, {
