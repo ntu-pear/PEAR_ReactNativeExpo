@@ -15,6 +15,7 @@ import TabBar from '../TabBar';
 
 // Utilities
 import { isEmptyObject, parseSelectOptions, setSecondsToZero, sortArray, sortFilterInitialState } from 'app/utility/miscFunctions';
+import DisplayModeComponent from '../DisplayModeComponent';
 
 function SearchFilterBar({
   originalList=[],
@@ -64,6 +65,9 @@ function SearchFilterBar({
 
   itemType='patients',
 
+  displayMode='',
+  setDisplayMode=()=>{},
+  DISPLAY_MODES=[],
   hideIndicator=false,
 }) {  
   // Default state to control modal visibility
@@ -343,7 +347,7 @@ function SearchFilterBar({
           SEARCH_OPTIONS={parseSelectOptions([...SEARCH_OPTIONS])}
           searchOption={SEARCH_OPTIONS.indexOf(searchOption)+1}
         />
-        <View>
+        <View style={{flexDirection: 'row', justifyContent: 'center'}}>
           <FilterModalCard
             modalVisible={modalVisible}
             setModalVisible={setModalVisible}
@@ -375,6 +379,13 @@ function SearchFilterBar({
 
             handleSortFilter={handleSearchSortFilter}
           />
+          {displayMode != '' ? (
+            <DisplayModeComponent
+              DISPLAY_MODES={DISPLAY_MODES}
+              displayMode={displayMode}
+              setDisplayMode={setDisplayMode}
+            />
+          ) : null}          
         </View>
       </View>
       <View

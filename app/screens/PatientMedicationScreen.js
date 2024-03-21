@@ -30,7 +30,7 @@ import Swipeable from 'app/components/swipeable-components/Swipeable';
 import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
 
 function PatientMedicationScreen(props) {
-  const patientID = props.route.params.patientID
+  const {patientID} = props.route.params;
   const navigation = useNavigation();
 
   // Modal states
@@ -39,6 +39,10 @@ function PatientMedicationScreen(props) {
   
   // Options for user to search by
   const SEARCH_OPTIONS = ['Medication'];
+
+  // Display mode options  
+  const [displayMode, setDisplayMode] = useState('rows');
+  const DISPLAY_MODES = ['rows', 'table'];
   
   // Sort options based on view mode
   const SORT_OPTIONS = ['Medication', 'Medication Time', 'Start Date', 'End Date'];
@@ -329,6 +333,9 @@ function PatientMedicationScreen(props) {
                 onInitialize={()=>setIsDataInitialized(false)}
                 itemType='medications'
                 itemCount={medData.length}
+                displayMode={displayMode}
+                setDisplayMode={setDisplayMode}
+                DISPLAY_MODES={DISPLAY_MODES}
                 /> 
             </View>
           </View>
