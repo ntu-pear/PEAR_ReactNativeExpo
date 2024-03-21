@@ -12,6 +12,8 @@ import formatDateTime from 'app/hooks/useFormatDateTime.js';
 // Components
 import DynamicTable from 'app/components/DynamicTable';
 import ActivityIndicator from 'app/components/ActivityIndicator';
+import AddPatientProblemLogModal from 'app/components/AddPatientProblemLogModal';
+import AddButton from 'app/components/AddButton';
 
 function PatientProblemLog(props) {
   const [isLoading, setIsLoading] = useState(true);
@@ -20,6 +22,27 @@ function PatientProblemLog(props) {
   const [widthData, setWidthData] = useState([]);
   const [tableDataFormated, setTableDataFormated] = useState([]);
   const [patientID, setPatientID] = useState(props.route.params.patientID);
+  const [showModal, setShowModal] = useState(false);
+  const [userID, setUserID] = useState(props.route.params.userID);
+
+  const handleAddProblemLog = () => {
+    setShowModal(true);
+  };
+
+  const handleModalSubmit = async (problemLogData) => {
+    const result = await patientApi.AddPatientProblemLog(
+      userID,
+      patientID,
+      problemLogData,
+    );
+    if (result.ok) {
+      console.log('submitting problem log data', problemLogData);
+      retrieveScreenData(patientID);
+      setShowModal(false);
+    } else {
+      console.log('Error submitting problem log data', problemLogData);
+    }
+  };
 
   const retrieveScreenData = async (id) => {
     const response = await patientApi.getPatientProblemLog(id);
@@ -27,13 +50,24 @@ function PatientProblemLog(props) {
       console.log('Request failed with status code: ', response.status);
       return;
     }
-    const newArray = response.data.data.map(({ createdDateTime, authorName, problemLogListDesc, problemLogRemarks }) => ({
-      "Date": `${formatDateTime(createdDateTime, true)}`,
-      "Time": `${formatDateTime(createdDateTime, false)}`,
-      "Author": authorName,
-      "Description": problemLogListDesc,
-      "Remarks": problemLogRemarks,
-    }));
+
+    const sortedData = response.data.data.sort(
+      (a, b) => new Date(b.createdDate) - new Date(a.createdDate),
+    );
+    const newArray = sortedData.map(
+      ({
+        createdDateTime,
+        authorName,
+        problemLogListDesc,
+        problemLogRemarks,
+      }) => ({
+        Date: `${formatDateTime(createdDateTime, true)}`,
+        Time: `${formatDateTime(createdDateTime, false)}`,
+        Author: authorName,
+        Description: problemLogListDesc,
+        Remarks: problemLogRemarks,
+      }),
+    );
     setTableDataFormated(newArray);
     setIsLoading(false);
   };
@@ -41,7 +75,7 @@ function PatientProblemLog(props) {
   useEffect(() => {
     if (tableDataFormated !== undefined && tableDataFormated.length !== 0) {
       setHeaderData(Object.keys(tableDataFormated[0]));
-      
+
       const finalArray = tableDataFormated.map((item) => {
         return Object.values(item).map((value) => value.toString());
       });
@@ -64,6 +98,13 @@ function PatientProblemLog(props) {
         rowData={rowData}
         widthData={widthData}
         screenName={'patient problem'}
+      />
+
+      <AddButton title="Add Problem" onPress={handleAddProblemLog} />
+      <AddPatientProblemLogModal
+        showModal={showModal}
+        onClose={() => setShowModal(false)}
+        onSubmit={handleModalSubmit}
       />
     </View>
   );

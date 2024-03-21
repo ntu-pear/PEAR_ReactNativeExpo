@@ -23,16 +23,19 @@ const patientUpdate = `${endpoint}/update`; //eslint-disable-line no-unused-vars
 const privacyLevelUpdate = `${endpoint}/UpdatePatient`; //eslint-disable-line no-unused-vars
 const patientDelete = `${endpoint}/delete`; //eslint-disable-line no-unused-vars
 const patientAllergy = `${allergyEndpoint}/PatientAllergy`; //eslint-disable-line no-unused-vars
-const patientVitalList = `${vitalEndpoint}/list`; //eslint-disable-line no-unused-vars
 const patientPrescriptionList = `${prescriptionEndpoint}/PatientPrescription`; //eslint-disable-line no-unused-vars
-const patientProblemLog = `${problemLogEndpoint}/PatientProblemLog`; //eslint-disable-line no-unused-vars
+
 const patientMedicalHistory = `${medicalHistorypoint}/list`; //eslint-disable-line no-unused-vars
 const patientRoutine = `${activityEndpoint}${routineEndpoint}/PatientRoutine`; //eslint-disable-line no-unused-vars
 // Allergy
 const patientAllergyAdd = `${allergyEndpoint}/add`; //eslint-disable-line no-unused-vars
 const patientAllergyDelete = `${allergyEndpoint}/delete`; //eslint-disable-line no-unused-vars
 // Vitals
+const patientVitalList = `${vitalEndpoint}/list`; //eslint-disable-line no-unused-vars
 const patientVitalAdd = `${vitalEndpoint}/add`; //eslint-disable-line no-unused-vars
+// Problem Log
+const patientProblemLog = `${problemLogEndpoint}/PatientProblemLog`; //eslint-disable-line no-unused-vars
+const patientProblemLogAdd = `${problemLogEndpoint}/add`; //eslint-disable-line no-unused-vars
 
 /*
  * List all functions here
@@ -239,8 +242,18 @@ const AddPatientVital = async (patientID, vitalData) => {
     VitalRemarks: vitalData.vitalRemarks,
     AfterMeal: vitalData.afterMeal,
   };
-  console.log('payload to API', payload);
   return client.post(patientVitalAdd, payload);
+};
+
+const AddPatientProblemLog = async (patientID, userID, problemLogData) => {
+  const payload = {
+    UserID: userID,
+    PatientID: patientID,
+    ProblemLogListID: problemLogData.problemLogListID,
+    ProblemLogRemarks: problemLogData.problemLogRemarks,
+  };
+  console.log('payload to API', payload);
+  return client.post(patientProblemLogAdd, payload);
 };
 
 // ************************* UPDATE REQUESTS *************************
@@ -278,6 +291,7 @@ export default {
   addPatient,
   AddPatientAllergy,
   AddPatientVital,
+  AddPatientProblemLog,
   updatePatient,
   deletePatientAllergy,
 };
