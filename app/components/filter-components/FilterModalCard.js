@@ -64,9 +64,6 @@ const FilterModalCard = ({
 
   const [isModalVisible, setIsModalVisible] = useState(modalVisible || true);
   const [isLoading, setIsLoading] = useState(true);
-
-  // State used to keep track of whether initializeData state has changed
-  const [localFilterOptionDetails, setLocalFilterOptionDetails] = useState(filterOptionDetails);
     
   // Whenever data changes, reinitialize sort and filter options and apply search, sort, filter
   useEffect(() => {

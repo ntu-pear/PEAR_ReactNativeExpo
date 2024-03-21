@@ -27,14 +27,17 @@ const patientAllergy = `${allergyEndpoint}/PatientAllergy`; //eslint-disable-lin
 const patientVitalList = `${vitalEndpoint}/list`; //eslint-disable-line no-unused-vars
 const patientPrescriptionList = `${prescriptionEndpoint}/PatientPrescription`; //eslint-disable-line no-unused-vars
 const patientProblemLog = `${problemLogEndpoint}/PatientProblemLog`; //eslint-disable-line no-unused-vars
-const patientMedicalHistory = `${medicalHistoryEndpoint}/list`; //eslint-disable-line no-unused-vars
 const patientRoutine = `${activityEndpoint}${routineEndpoint}/PatientRoutine`; //eslint-disable-line no-unused-vars
+// Medical History
+const patientMedicalHistory = `${medicalHistoryEndpoint}/list`; //eslint-disable-line no-unused-vars
+const patientMedicalHistoryAdd = `${medicalHistoryEndpoint}/add`; //eslint-disable-line no-unused-vars
+const patientMedicalHistoryDelete = `${medicalHistoryEndpoint}/delete`; //eslint-disable-line no-unused-vars
 // Allergy
 const patientAllergyAdd = `${allergyEndpoint}/add`; //eslint-disable-line no-unused-vars
 const patientAllergyDelete = `${allergyEndpoint}/delete`; //eslint-disable-line no-unused-vars
 // Vitals
 const patientVitalAdd = `${vitalEndpoint}/add`; //eslint-disable-line no-unused-vars
-
+// Medication
 const patientMedicationAdd = `${medicationEndpoint}/add`; //eslint-disable-line no-unused-vars
 const patientMedicationUpdate = `${medicationEndpoint}/update`; //eslint-disable-line no-unused-vars
 const patientMedicationDelete = `${medicationEndpoint}/delete`; //eslint-disable-line no-unused-vars
@@ -265,6 +268,17 @@ const addPatientMedication = async (patientID, medicationData) => {
   return client.post(patientMedicationAdd, payload);
 };
 
+const addPatientMedicalHistory = async (patientID, hxData) => {
+  const payload = {
+    patientID: patientID,
+    informationSource: hxData.informationSource,
+    medicalDetails: hxData.medicalDetails,
+    medicalRemarks: hxData.medicalRemarks,
+    medicalEstimatedDate: hxData.medicalEstimatedDate,
+  };
+  return client.post(patientMedicalHistoryAdd, payload);
+};
+
 // ************************* UPDATE REQUESTS *************************
 const updatePatient = async (data) => {
   const formData = new FormData();
@@ -282,7 +296,6 @@ const updatePatient = async (data) => {
 const deletePatientAllergy = async (allergyID) => {
   return client.delete(patientAllergyDelete, { allergyID });
 };
-
 
 const updateMedication = async (patientID, medicationData) => {
   const payload = {
@@ -307,6 +320,14 @@ const deleteMedication = async (medicationData) => {
 
   return client.put(patientMedicationDelete, payload);
 };
+
+const deleteMedicalHistory = async (medHistoryData) => {
+  const payload = {
+    medicalHistoryID: medHistoryData.medicalHistoryID,
+  };
+
+  return client.put(patientMedicalHistoryDelete, payload);
+};
 /*
  * Expose your end points here
  */
@@ -326,8 +347,10 @@ export default {
   AddPatientAllergy,
   AddPatientVital,
   addPatientMedication,
+  addPatientMedicalHistory,
   updatePatient,
   deletePatientAllergy,
   updateMedication,
   deleteMedication,
+  deleteMedicalHistory,
 };

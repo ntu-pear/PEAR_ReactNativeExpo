@@ -525,7 +525,6 @@ function PatientMedicationScreen(props) {
               screenName={'patient medication'}
               onClickEdit={handleEditMedication}
               onClickDelete={handleDeleteMedication}
-              dataType={'medications'}
               noDataMessage={noDataMessage(statusCode, isLoading, isError, 'No medications found', false)}
               customColumns={[{
                 title: 'Log medication administration',
