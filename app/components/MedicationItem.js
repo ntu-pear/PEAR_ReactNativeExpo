@@ -21,7 +21,6 @@ const MedicationItem = ({
   medStartDate,
   medEndDate,
   medRemarks,
-  editable=false,
   date=new Date()
 }) => {  
   // Get user confirmation to save adminstration status of medication

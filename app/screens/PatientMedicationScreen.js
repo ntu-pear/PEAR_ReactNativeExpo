@@ -456,7 +456,11 @@ function PatientMedicationScreen(props) {
                   onSwipeLeft={()=>handleEditMedication(item.medID)}
                   underlay={<EditDeleteUnderlay/>}
                   item={
-                    <TouchableOpacity style={styles.medContainer} activeOpacity={1} disabled={!isScrolling}>
+                    <TouchableOpacity 
+                      style={styles.medContainer} 
+                      activeOpacity={1} 
+                      disabled={!isScrolling}
+                    >
                       <MedicationItem
                         medID={item.medID}
                         patientID={patientID}
