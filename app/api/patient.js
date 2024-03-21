@@ -24,8 +24,6 @@ const privacyLevelUpdate = `${endpoint}/UpdatePatient`; //eslint-disable-line no
 const patientDelete = `${endpoint}/delete`; //eslint-disable-line no-unused-vars
 const patientAllergy = `${allergyEndpoint}/PatientAllergy`; //eslint-disable-line no-unused-vars
 const patientPrescriptionList = `${prescriptionEndpoint}/PatientPrescription`; //eslint-disable-line no-unused-vars
-
-const patientMedicalHistory = `${medicalHistorypoint}/list`; //eslint-disable-line no-unused-vars
 const patientRoutine = `${activityEndpoint}${routineEndpoint}/PatientRoutine`; //eslint-disable-line no-unused-vars
 // Allergy
 const patientAllergyAdd = `${allergyEndpoint}/add`; //eslint-disable-line no-unused-vars
@@ -36,6 +34,9 @@ const patientVitalAdd = `${vitalEndpoint}/add`; //eslint-disable-line no-unused-
 // Problem Log
 const patientProblemLog = `${problemLogEndpoint}/PatientProblemLog`; //eslint-disable-line no-unused-vars
 const patientProblemLogAdd = `${problemLogEndpoint}/add`; //eslint-disable-line no-unused-vars
+// Medical History
+const patientMedicalHistory = `${medicalHistorypoint}/list`; //eslint-disable-line no-unused-vars
+const patientMedicalHistoryAdd = `${medicalHistorypoint}/add`; //eslint-disable-line no-unused-vars
 
 /*
  * List all functions here
@@ -256,6 +257,16 @@ const AddPatientProblemLog = async (patientID, problemLogData) => {
   return client.post(patientProblemLogAdd, payload);
 };
 
+const AddPatientMedicalHistory = async (patientID, medicalData) => {
+  const payload = {
+    PatientID: patientID,
+    medicalDetails: medicalData.medicalDetails,
+    informationSource: medicalData.informationSource,
+    medicalRemarks: medicalData.medicalRemarks,
+  };
+  return client.post(patientMedicalHistoryAdd, payload);
+};
+
 // ************************* UPDATE REQUESTS *************************
 const updatePatient = async (data) => {
   const formData = new FormData();
@@ -292,6 +303,7 @@ export default {
   AddPatientAllergy,
   AddPatientVital,
   AddPatientProblemLog,
+  AddPatientMedicalHistory,
   updatePatient,
   deletePatientAllergy,
 };

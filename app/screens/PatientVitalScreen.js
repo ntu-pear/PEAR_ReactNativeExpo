@@ -50,13 +50,9 @@ function PatientVitalScreen(props) {
       return;
     }
 
-    //console.log('response.data.data', response.data.data);
-
     const sortedData = response.data.data.sort(
       (a, b) => new Date(b.createdDate) - new Date(a.createdDate),
     );
-
-    console.log('sortedData', sortedData);
 
     const newArray = sortedData.map(
       ({
@@ -119,7 +115,6 @@ function PatientVitalScreen(props) {
         widthData={widthData}
         screenName={'patient vital'}
       />
-      {/* "Add Vitals" button */}
       <AddButton title="Add Vitals" onPress={handleAddVitals} />
       <AddPatientVitalModal
         showModal={showModal}

@@ -12,6 +12,8 @@ import formatDateTime from 'app/hooks/useFormatDateTime.js';
 // Components
 import DynamicTable from 'app/components/DynamicTable';
 import ActivityIndicator from 'app/components/ActivityIndicator';
+import AddButton from 'app/components/AddButton';
+import AddPatientMedicalHistoryModal from 'app/components/AddPatientMedicalHistoryModal';
 
 function PatientMedicalHistoryScreen(props) {
   const [isLoading, setIsLoading] = useState(true);
@@ -20,6 +22,33 @@ function PatientMedicalHistoryScreen(props) {
   const [widthData, setWidthData] = useState([]);
   const [tableDataFormated, setTableDataFormated] = useState([]);
   const [patientID, setPatientID] = useState(props.route.params.patientID);
+  const [showModal, setShowModal] = useState(false);
+
+  const handleAddMedicalHistory = () => {
+    setShowModal(true);
+  };
+
+  const handleModalSubmit = async (medicalData) => {
+    try {
+      const result = await patientApi.AddPatientMedicalHistory(
+        patientID,
+        medicalData,
+      );
+      if (result.ok) {
+        console.log('submitting medical data', medicalData);
+        retrieveScreenData(patientID);
+        setShowModal(false);
+      } else {
+        console.error(
+          'Error submitting medical data',
+          result.problem,
+          medicalData,
+        );
+      }
+    } catch (error) {
+      console.error('Exception when calling AddMedicalHistory:', error);
+    }
+  };
 
   const retrieveScreenData = async (id) => {
     const response = await patientApi.getPatientMedicalHistory(id);
@@ -28,15 +57,25 @@ function PatientMedicalHistoryScreen(props) {
       return;
     }
 
-    const newArray = response.data.data.map(({ 
-      medicalEstimatedDate, medicalDetails, informationSource, medicalRemarks
-    }) => ({
-      "Date": `${formatDateTime(medicalEstimatedDate, true)}`,
-      "Time": `${formatDateTime(medicalEstimatedDate, false)}`,
-      "Diagnosis": medicalDetails,
-      "Diagnosis By": informationSource,
-      "Remarks": medicalRemarks,
-    }));
+    const sortedData = response.data.data.sort(
+      (a, b) =>
+        new Date(b.medicalEstimatedDate) - new Date(a.medicalEstimatedDate),
+    );
+
+    const newArray = sortedData.map(
+      ({
+        medicalEstimatedDate,
+        medicalDetails,
+        informationSource,
+        medicalRemarks,
+      }) => ({
+        Date: `${formatDateTime(medicalEstimatedDate, true)}`,
+        Time: `${formatDateTime(medicalEstimatedDate, false)}`,
+        Diagnosis: medicalDetails,
+        'Diagnosis By': informationSource,
+        Remarks: medicalRemarks,
+      }),
+    );
     setTableDataFormated(newArray);
     setIsLoading(false);
   };
@@ -44,7 +83,7 @@ function PatientMedicalHistoryScreen(props) {
   useEffect(() => {
     if (tableDataFormated !== undefined && tableDataFormated.length !== 0) {
       setHeaderData(Object.keys(tableDataFormated[0]));
-      
+
       const finalArray = tableDataFormated.map((item) => {
         return Object.values(item).map((value) => value.toString());
       });
@@ -67,6 +106,15 @@ function PatientMedicalHistoryScreen(props) {
         rowData={rowData}
         widthData={widthData}
         screenName={'patient medical history'}
+      />
+      <AddButton
+        title="Add Medical History"
+        onPress={handleAddMedicalHistory}
+      />
+      <AddPatientMedicalHistoryModal
+        showModal={showModal}
+        onClose={() => setShowModal(false)}
+        onSubmit={handleModalSubmit}
       />
     </View>
   );
