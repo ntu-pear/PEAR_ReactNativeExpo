@@ -58,7 +58,7 @@ apiClient.addAsyncResponseTransform(async (response) => {
   if (
     response &&
     response.status &&
-    (response.status === 401 || response.status === 403) 
+    (response.status === 401 || response.status === 403)
   ) {
     // if access token is invalid, begin renewal.
     console.log('client.js: Renewing user tokens');

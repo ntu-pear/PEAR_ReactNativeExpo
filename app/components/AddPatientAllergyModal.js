@@ -93,7 +93,6 @@ function AddPatientAllergyModal({
   }, [existingAllergyIDs, allergies]);
 
   // Handle form submission
-  // there is some problem with the allergydata format - Joel
   const handleSubmit = () => {
     if (!isAllergyError && !isReactionError && !isRemarksError) {
       onSubmit(allergyData);

@@ -29,7 +29,12 @@ const patientPrescriptionList = `${prescriptionEndpoint}/PatientPrescription`; /
 const patientProblemLog = `${problemLogEndpoint}/PatientProblemLog`; //eslint-disable-line no-unused-vars
 const patientMedicalHistory = `${medicalHistoryEndpoint}/list`; //eslint-disable-line no-unused-vars
 const patientRoutine = `${activityEndpoint}${routineEndpoint}/PatientRoutine`; //eslint-disable-line no-unused-vars
+// Allergy
 const patientAllergyAdd = `${allergyEndpoint}/add`; //eslint-disable-line no-unused-vars
+const patientAllergyDelete = `${allergyEndpoint}/delete`; //eslint-disable-line no-unused-vars
+// Vitals
+const patientVitalAdd = `${vitalEndpoint}/add`; //eslint-disable-line no-unused-vars
+
 const patientMedicationAdd = `${medicationEndpoint}/add`; //eslint-disable-line no-unused-vars
 const patientMedicationUpdate = `${medicationEndpoint}/update`; //eslint-disable-line no-unused-vars
 const patientMedicationDelete = `${medicationEndpoint}/delete`; //eslint-disable-line no-unused-vars
@@ -95,8 +100,11 @@ const getPatientList = async (maskNRIC = true, patientStatus = null) => {
   return client.get(patientList, { maskNRIC, patientStatus });
 };
 
-const getPatientListByLoggedInCaregiver = async (maskNRIC = true, patientStatus = null) => {
-  return client.get(patientListByUserId, {maskNRIC, patientStatus});
+const getPatientListByLoggedInCaregiver = async (
+  maskNRIC = true,
+  patientStatus = null,
+) => {
+  return client.get(patientListByUserId, { maskNRIC, patientStatus });
 };
 
 const getPatientStatusCountList = async () => {
@@ -225,6 +233,24 @@ const AddPatientAllergy = async (patientID, allergyData) => {
   return client.post(patientAllergyAdd, payload);
 };
 
+const AddPatientVital = async (patientID, vitalData) => {
+  const payload = {
+    PatientID: patientID,
+    Temperature: vitalData.temperature,
+    SystolicBP: vitalData.systolicBP,
+    DiastolicBP: vitalData.diastolicBP,
+    HeartRate: vitalData.heartRate,
+    SpO2: vitalData.spO2,
+    BloodSugarLevel: vitalData.bloodSugarlevel,
+    Height: vitalData.height,
+    Weight: vitalData.weight,
+    VitalRemarks: vitalData.vitalRemarks,
+    AfterMeal: vitalData.afterMeal,
+  };
+  console.log('payload to API', payload);
+  return client.post(patientVitalAdd, payload);
+};
+
 const addPatientMedication = async (patientID, medicationData) => {
   const payload = {
     patientID: patientID,
@@ -252,6 +278,11 @@ const updatePatient = async (data) => {
 
   return client.put(patientUpdate, formData, { headers });
 };
+
+const deletePatientAllergy = async (allergyID) => {
+  return client.delete(patientAllergyDelete, { allergyID });
+};
+
 
 const updateMedication = async (patientID, medicationData) => {
   const payload = {
@@ -293,8 +324,10 @@ export default {
   getPatientRoutine,
   addPatient,
   AddPatientAllergy,
+  AddPatientVital,
   addPatientMedication,
   updatePatient,
+  deletePatientAllergy,
   updateMedication,
   deleteMedication,
 };
