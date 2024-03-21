@@ -12,6 +12,7 @@ import AccountEditScreen from 'app/screens/AccountEditScreen';
 import PatientsNavigator from './PatientsNavigator';
 import DashboardNavigator from './DashboardNavigator';
 import AppNavigator from './AppNavigator';
+import AuthNavigator from './AuthNavigator';
 
 // Refer to this: https://reactnavigation.org/docs/hello-react-navigation
 const Stack = createNativeStackNavigator();

@@ -126,10 +126,11 @@ function PatientProfileScreen(props) {
                           color={colors.pink}
                         />
                       }
-                      text="Prescription"
+                      text="Medication"
                       navigation={navigation}
-                      routes={routes.PATIENT_PRESCRIPTION}
-                      patientProfile={patientProfile}
+                      routes={routes.PATIENT_MEDICATION}
+                      patientId={patientID}
+                      // patientProfile={patientProfile}
                     />
                   </View>
                 </HStack>

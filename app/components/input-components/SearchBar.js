@@ -32,22 +32,24 @@ function SearchBar({
             inputContainerStyle={{borderTopRightRadius: 0, borderBottomRightRadius: 0, height: 47}}
           />
         </View>
-        <View style={{flex: 0.4, zIndex: 1}}>
-          <SelectionInputField
-            dataArray={SEARCH_OPTIONS}
-            showTitle={false}
-            otherProps={{
-              backgroundColor: colors.green,
-              color: colors.white,
-              borderTopLeftRadius: 0,
-              borderBottomLeftRadius: 0,
-              borderTopRightRadius: 10, 
-              borderBottomRightRadius: 10,
-            }}
-            value={searchOption}
-            onDataChange={handleOnToggleSearchOptions}                        
-          />
-        </View>
+        {SEARCH_OPTIONS.length > 1 ? (
+          <View style={{flex: 0.4, zIndex: 1}}>
+            <SelectionInputField
+              dataArray={SEARCH_OPTIONS}
+              showTitle={false}
+              otherProps={{
+                backgroundColor: colors.green,
+                color: colors.white,
+                borderTopLeftRadius: 0,
+                borderBottomLeftRadius: 0,
+                borderTopRightRadius: 10, 
+                borderBottomRightRadius: 10,
+              }}
+              value={searchOption}
+              onDataChange={handleOnToggleSearchOptions}                        
+            />
+          </View>
+        ) : null}
       </>
     )
 

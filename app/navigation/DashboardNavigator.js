@@ -29,6 +29,8 @@ import EditPatientSocialHistScreen from 'app/screens/EditPatientSocialHistScreen
 import EditPatientGuardianScreen from 'app/screens/EditPatientGuardianScreen';
 import EditPatientPreferencesScreen from 'app/screens/EditPatientPreferencesScreen';
 import EditPatientInfoScreen from 'app/screens/EditPatientInfoScreen';
+import PatientMedicationScreen from 'app/screens/PatientMedicationScreen';
+import DisplayModeComponent from 'app/components/filter-components/DisplayModeComponent';
 
 // Refer to this: https://reactnavigation.org/docs/hello-react-navigation
 const Stack = createNativeStackNavigator();
@@ -143,7 +145,15 @@ function DashboardNavigator() {
           title: 'Routine',
         }}
       />
-
+      <Stack.Screen
+        name={routes.PATIENT_MEDICATION}
+        component={PatientMedicationScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Medication',
+        }}
+      />
       <Stack.Screen
         name={routes.EDIT_PATIENT_INFO}
         component={EditPatientInfoScreen}
