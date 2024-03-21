@@ -215,10 +215,11 @@ function DashboardScreen({ navigation }) {
       setIsRetry(false);
       setStatusCode(response.status);
     } else {
+      console.log(response)
       setIsLoading(false);
       setIsError(true);
       setStatusCode(response.status);
-      setIsRetry(true);
+      // setIsRetry(true);
     }
   };
 
@@ -242,7 +243,7 @@ function DashboardScreen({ navigation }) {
       setIsLoading(false);
       setIsError(true);
       setStatusCode(response.status);
-      setIsRetry(true);
+      // setIsRetry(true);
     }
   };
 

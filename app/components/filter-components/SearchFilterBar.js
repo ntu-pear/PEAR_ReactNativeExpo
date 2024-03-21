@@ -15,7 +15,7 @@ import TabBar from '../TabBar';
 
 // Utilities
 import { isEmptyObject, parseSelectOptions, setSecondsToZero, sortArray, sortFilterInitialState } from 'app/utility/miscFunctions';
-import DisplayModeComponent from '../DisplayModeComponent';
+import DisplayModeComponent from './DisplayModeComponent';
 
 function SearchFilterBar({
   originalList=[],
@@ -382,11 +382,13 @@ function SearchFilterBar({
             handleSortFilter={handleSearchSortFilter}
           />
           {displayMode != '' ? (
-            <DisplayModeComponent
-              DISPLAY_MODES={DISPLAY_MODES}
-              displayMode={displayMode}
-              setDisplayMode={setDisplayMode}
-            />
+            <View style={{justifyContent: 'center'}}>
+              <DisplayModeComponent
+                DISPLAY_MODES={DISPLAY_MODES}
+                displayMode={displayMode}
+                setDisplayMode={setDisplayMode}
+              />
+            </View>
           ) : null}          
         </View>
       </View>
