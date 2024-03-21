@@ -115,7 +115,7 @@ function SearchFilterBar({
     tempSelDatetimeFilters=datetime['tempSel'], 
     tempSearchMode=searchOption,
   }) => {
-    console.log('BAR 2 - setFilteredList', originalList )
+    console.log('BAR 2 - setFilteredList' )
     
     let filteredList = [...originalList];
 

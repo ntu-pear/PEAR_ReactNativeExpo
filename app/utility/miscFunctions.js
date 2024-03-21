@@ -80,9 +80,8 @@ export const formatDate = (inputDate, hideDayOfWeek) => {
 };
 
 // Used to format the time to HH:mm AM/PM
-// TODO
 export const formatTimeAMPM = (date) => {
-  date = new Date(date);
+  date = typeof(date) == 'Date' ? date : new Date(date);
   var hours = date.getHours();
   var minutes = date.getMinutes();
   var ampm = hours >= 12 ? 'PM' : 'AM';

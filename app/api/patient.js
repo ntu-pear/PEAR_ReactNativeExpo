@@ -31,6 +31,7 @@ const patientMedicalHistory = `${medicalHistoryEndpoint}/list`; //eslint-disable
 const patientRoutine = `${activityEndpoint}${routineEndpoint}/PatientRoutine`; //eslint-disable-line no-unused-vars
 const patientAllergyAdd = `${allergyEndpoint}/add`; //eslint-disable-line no-unused-vars
 const patientMedicationAdd = `${medicationEndpoint}/add`; //eslint-disable-line no-unused-vars
+const patientMedicationUpdate = `${medicationEndpoint}/update`; //eslint-disable-line no-unused-vars
 /*
  * List all functions here
  * Refer to this api doc: https://github.com/infinitered/apisauce
@@ -67,10 +68,7 @@ const addPatientForm = (arr, str, patientData) => {
 };
 // **********************  GET REQUESTS *************************
 
-const getPatient = async (patientID, maskNRIC) => {
-  // Error Handling
-  maskNRIC ? (maskNRIC = true) : (maskNRIC = false);
-
+const getPatient = async (patientID, maskNRIC = true) => {
   /*
    *   Build Params
    */
@@ -253,6 +251,22 @@ const updatePatient = async (data) => {
 
   return client.put(patientUpdate, formData, { headers });
 };
+
+const updateMedication = async (patientID, medicationData) => {
+  const payload = {
+    patientID: patientID,
+    medicationID: medicationData.medicationID,
+    prescriptionName: medicationData.prescriptionName,
+    dosage: medicationData.dosage,
+    administerTime: medicationData.administerTime,
+    instruction: medicationData.instruction,
+    startDateTime: medicationData.startDateTime,
+    endDateTime: medicationData.endDateTime,
+    prescriptionRemarks: medicationData.prescriptionRemarks,
+  };
+
+  return client.put(patientMedicationUpdate, payload);
+};
 /*
  * Expose your end points here
  */
@@ -272,4 +286,5 @@ export default {
   AddPatientAllergy,
   addPatientMedication,
   updatePatient,
+  updateMedication
 };
