@@ -19,7 +19,7 @@ import typography from 'app/config/typography';
 import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
 // Utilities
-import { parseSelectOptions } from 'app/utility/miscFunctions';
+import { noDataMessage, parseSelectOptions } from 'app/utility/miscFunctions';
 
 // Components
 import AddPatientProgress from 'app/components/AddPatientProgress';
@@ -306,7 +306,9 @@ function PatientAddPatientInfoScreen({
     [isLeavingError],
   );
 
-  return isLoading || isPrefNamesLoading ? (
+  return isError ? (    
+    noDataMessage(null, false, isError, null)
+  ) : isLoading || isPrefNamesLoading ? (
     <ActivityIndicator visible />
   ) : (
     <>

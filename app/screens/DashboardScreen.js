@@ -68,7 +68,7 @@ function DashboardScreen({ navigation }) {
   // Ref used to programmatically scroll to top of list
   const scheduleRef = useRef(null);
 
-  // Patient ata related states
+  // Patient data related states
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const [isRetry, setIsRetry] = useState(false);
@@ -178,10 +178,14 @@ function DashboardScreen({ navigation }) {
       if(viewMode === 'allPatients') {
         await getPatientCountInfo();
       }       
-      setIsLoading(false);        
-      setIsDataInitialized(true);
-      setIsLoading(true);        
-    };
+      if(!isError) {
+        setIsLoading(false);        
+        setIsDataInitialized(true);
+        setIsLoading(true);        
+      } else {
+        setIsLoading(false);
+      }
+    }
     promiseFunction();     
   }  
 
@@ -635,7 +639,7 @@ function DashboardScreen({ navigation }) {
           ref={scheduleRef}
           onRefresh={handlePullToRefresh}
           refreshing={isLoading}
-          ListEmptyComponent={()=>noDataMessage(statusCode, isLoading, isError, 'No schedules found')}
+          ListEmptyComponent={()=>noDataMessage(statusCode, isLoading, isError, 'No schedules found', true)}
           data={schedule}
           renderItem={({ item, i }) => {
               return (

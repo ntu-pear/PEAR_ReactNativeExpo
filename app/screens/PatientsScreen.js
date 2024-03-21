@@ -384,7 +384,7 @@ function PatientsScreen({ navigation }) {
               marginBottom={'20'}
               onRefresh={refreshPatientData}
               refreshing={isLoading}
-              ListEmptyComponent={()=>noDataMessage(statusCode, isLoading, isError, 'No patients found')}
+              ListEmptyComponent={()=>noDataMessage(statusCode, isLoading, isError, 'No patients found', true)}
               data={listOfPatients}
               style={styles.patientListContainer}
               renderItem={({ item, index }) => {
