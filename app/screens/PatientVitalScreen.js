@@ -84,6 +84,7 @@ function PatientVitalScreen(props) {
   const [originalVitalData, setOriginalVitalData] = useState([]);
   const [vitalData, setVitalData] = useState([]);
   const [vitalFormData, setVitalFormData] = useState({
+    vitalID: null,
     afterMeal: true,
     temperature: '',
     systolicBP: '',
@@ -189,38 +190,33 @@ function PatientVitalScreen(props) {
     // Logic to handle opening the modal to add a new vital
     setIsModalVisible(true);
     setModalMode('add');
-    setVitalFormData({
-      // Reset or set default form data for new entry
-      temperature: '',
-      weight: '',
-      height: '',
-      systolicBP: '',
-      diastolicBP: '',
-      heartRate: '',
-      spO2: '',
-      bloodSugarLevel: '',
-      vitalRemarks: '',
-      afterMeal: true,
-      // Include additional fields as necessary
-    });
   };
 
   const handleModalSubmitAdd = async (tempVitalFormData) => {
     setIsLoading(true);
 
+    let alertTitle = '';
+    let alertDetails = '';
+
     const result = await patientApi.AddPatientVital(
       patientID,
-      userID,
       tempVitalFormData,
     );
     if (result.ok) {
+      console.log('submitted vital data', tempVitalFormData);
       refreshVitalData();
       setIsModalVisible(false);
-      Alert.alert('Success', 'Vital added successfully');
+      alertTitle = 'Successfully added vital data';
     } else {
-      Alert.alert('Error', 'Failed to add vital');
-    }
+      const errors = result.data?.message;
 
+      result.data
+        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
+        : (alertDetails = 'Please try again.');
+
+      alertTitle = 'Error adding vital data';
+    }
+    Alert.alert(alertTitle, alertDetails);
     setIsLoading(false);
   };
 
@@ -318,8 +314,8 @@ function PatientVitalScreen(props) {
       'Diastolic BP (mmHg)',
       'Heart Rate (bpm)',
       'SpO2 (%)',
-      'Blood Sugar (mg/dL)',
-      'Height (cm)',
+      'Blood Sugar (mmol/L)',
+      'Height (m)',
       'Weight (kg)',
       'Remarks',
       'After Meal',

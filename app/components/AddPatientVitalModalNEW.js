@@ -1,12 +1,11 @@
-// Libs
 import React, { useEffect, useState } from 'react';
-import { Modal, Button, VStack, Text, Checkbox, ScrollView } from 'native-base';
+import { Modal, Button, VStack, Text, Flex } from 'native-base';
 import { StyleSheet } from 'react-native';
 
 // Components
 import InputField from './input-components/InputField';
 import AppButton from './AppButton';
-import SelectionInputField from './input-components/SelectionInputField'; // Assuming you have or will implement this for selections if needed
+import RadioButtonInput from './input-components/RadioButtonsInput';
 
 // Configurations
 import colors from 'app/config/colors';
@@ -19,84 +18,213 @@ function AddPatientVitalModalNEW({
   onClose,
   onSubmit,
 }) {
-  // Handle form data changes, assuming all fields are directly edited on the vitalFormData object
-  const handleVitalDataChange = (field, value) => {
+  const [isInputErrors, setIsInputErrors] = useState(false);
+  const afterMealOptions = [
+    { label: 'Yes', value: true },
+    { label: 'No', value: false },
+  ];
+
+  // Input error states (Child components)
+  // This records the error states of each child component (ones that require tracking).
+  const [isTemperatureError, setIsTemperatureError] = useState(false);
+  const [isSystolicBPError, setIsSystolicBPError] = useState(false);
+  const [isDiastolicBPError, setIsDiastolicBPError] = useState(false);
+  const [isHeartRateError, setIsHeartRateError] = useState(false);
+  const [isSpO2Error, setIsSpO2Error] = useState(false);
+  const [isBloodSugarLevelError, setIsBloodSugarLevelError] = useState(false);
+  const [isHeightError, setIsHeightError] = useState(false);
+  const [isWeightError, setIsWeightError] = useState(false);
+  const [isVitalRemarksError, setIsVitalRemarksError] = useState(false);
+
+  // This useEffect enables the page to show correct error checking.
+  // The main isInputErrors is responsible for the error state of the screen.
+  // This state will be true whenever any child input components are in error state.
+  useEffect(() => {
+    setIsInputErrors(
+      isTemperatureError ||
+        isSystolicBPError ||
+        isDiastolicBPError ||
+        isHeartRateError ||
+        isSpO2Error ||
+        isBloodSugarLevelError ||
+        isHeightError ||
+        isWeightError ||
+        isVitalRemarksError,
+    );
+  }, [
+    isTemperatureError,
+    isSystolicBPError,
+    isDiastolicBPError,
+    isHeartRateError,
+    isSpO2Error,
+    isBloodSugarLevelError,
+    isHeightError,
+    isWeightError,
+    isVitalRemarksError,
+  ]);
+
+  // Reset form to initial state
+  const resetForm = () => {
+    setVitalFormData({
+      temperature: '',
+      systolicBP: '',
+      diastolicBP: '',
+      heartRate: '',
+      spO2: '',
+      bloodSugarLevel: '',
+      height: '',
+      weight: '',
+      vitalRemarks: '',
+      afterMeal: false,
+    });
+    setIsTemperatureError(false);
+    setIsSystolicBPError(false);
+    setIsDiastolicBPError(false);
+    setIsHeartRateError(false);
+    setIsSpO2Error(false);
+    setIsBloodSugarLevelError(false);
+    setIsHeightError(false);
+    setIsWeightError(false);
+    setIsVitalRemarksError(false);
+  };
+
+  // When modal is closed, reset the form
+  useEffect(() => {
+    if (!showModal) {
+      resetForm();
+    }
+  }, [showModal]);
+
+  // Update form data as the user inputs values
+  const handleVitalDataChange = (field) => (value) => {
     setVitalFormData((prevState) => ({
       ...prevState,
-      [field]: value,
+      [field]: field == 'vitalID' ? parseInt(value) : value,
     }));
   };
 
-  // Reset form to initial state when modal is closed or after successful data submission
-  useEffect(() => {
-    if (!showModal) {
-      setVitalFormData({
-        temperature: '',
-        weight: '',
-        height: '',
-        systolicBP: '',
-        diastolicBP: '',
-        heartRate: '',
-        spO2: '',
-        bloodSugarLevel: '',
-        afterMeal: false,
-        vitalRemarks: '',
-      });
+  // Handle form submission
+  const handleSubmit = () => {
+    if (!isInputErrors) {
+      onSubmit(vitalFormData);
+      onClose();
     }
-  }, [showModal, setVitalFormData]);
+  };
 
   return (
-    <Modal isOpen={showModal} onClose={onClose} size="lg">
-      <Modal.Content>
+    <Modal isOpen={showModal} onClose={onClose}>
+      <Modal.Content maxWidth="500px">
         <Modal.CloseButton />
-        <Modal.Header>{modalMode} Patient Vital</Modal.Header>
-        <ScrollView>
-          <Modal.Body>
-            <VStack space={4}>
+        <Modal.Header style={styles.modalHeader}>
+          <Text
+            style={styles.modalHeaderText}
+          >{`${modalMode} Vital Data`}</Text>
+        </Modal.Header>
+        <Modal.Body>
+          <Flex direction="row" justifyContent="space-between">
+            <VStack space={4} flex={1} mr={2}>
               <InputField
-                label="Temperature (°C)"
+                title="Temperature (°C)"
+                isRequired
+                keyboardType="numeric"
                 value={vitalFormData.temperature}
-                onChangeText={(value) =>
-                  handleVitalDataChange('temperature', value)
-                }
+                onChangeText={handleVitalDataChange('temperature')}
+                onEndEditing={setIsTemperatureError}
+                isInvalid={false}
               />
               <InputField
-                label="Weight (kg)"
-                value={vitalFormData.weight}
-                onChangeText={(value) => handleVitalDataChange('weight', value)}
+                isRequired
+                title="Systolic Blood Pressure (mmHg)"
+                keyboardType="numeric"
+                value={vitalFormData.systolicBP}
+                onChangeText={handleVitalDataChange('systolicBP')}
+                isInvalid={false}
               />
-              {/* Add other vital sign input fields in a similar pattern */}
               <InputField
-                label="Remarks"
-                value={vitalFormData.vitalRemarks}
-                onChangeText={(value) =>
-                  handleVitalDataChange('vitalRemarks', value)
-                }
-                multiline
+                isRequired
+                title="Diastolic Blood Pressure (mmHg)"
+                keyboardType="numeric"
+                value={vitalFormData.diastolicBP}
+                onChangeText={handleVitalDataChange('diastolicBP')}
+                isInvalid={false}
               />
-              <Checkbox
-                isChecked={vitalFormData.afterMeal}
-                onChange={() =>
-                  handleVitalDataChange('afterMeal', !vitalFormData.afterMeal)
+              <InputField
+                isRequired
+                title="SpO2 (%)"
+                keyboardType="numeric"
+                value={vitalFormData.spO2}
+                onChangeText={handleVitalDataChange('spO2')}
+                isInvalid={false}
+              />
+              <InputField
+                isRequired
+                title="Blood Sugar (mmol/L)"
+                keyboardType="numeric"
+                value={vitalFormData.bloodSugarLevel}
+                onChangeText={handleVitalDataChange('bloodSugarLevel')}
+                isInvalid={false}
+              />
+              <RadioButtonInput
+                title={'After Meal'}
+                isRequired={true}
+                value={vitalFormData.afterMeal}
+                dataArray={afterMealOptions}
+                onChangeData={(newValue) =>
+                  handleChange('afterMeal', newValue === true)
                 }
-                value="afterMeal"
-              >
-                <Text ml={2}>After Meal</Text>
-              </Checkbox>
+              />
             </VStack>
-          </Modal.Body>
-        </ScrollView>
+            <VStack space={4} flex={1} ml={2}>
+              <InputField
+                isRequired
+                title="Height (m)"
+                keyboardType="numeric"
+                value={vitalFormData.height}
+                onChangeText={handleVitalDataChange('height')}
+                isInvalid={false}
+              />
+              <InputField
+                isRequired
+                title="Weight (kg)"
+                keyboardType="numeric"
+                value={vitalFormData.weight}
+                onChangeText={handleVitalDataChange('weight')}
+                isInvalid={false}
+              />
+              <InputField
+                isRequired
+                title="Heart Rate (bpm)"
+                keyboardType="numeric"
+                value={vitalFormData.heartRate}
+                onChangeText={handleVitalDataChange('heartRate')}
+                isInvalid={false}
+              />
+              <InputField
+                isRequired
+                title="Remarks"
+                value={vitalFormData.vitalRemarks}
+                onChangeText={handleVitalDataChange('vitalRemarks')}
+                variant="multiLine"
+                isInvalid={false}
+              />
+            </VStack>
+          </Flex>
+        </Modal.Body>
         <Modal.Footer>
           <Button.Group space={2}>
-            <AppButton title="Cancel" onPress={onClose} />
-            <AppButton title="Submit" onPress={onSubmit} />
+            <AppButton color="red" title="Cancel" onPress={onClose}></AppButton>
+            <AppButton
+              onPress={handleSubmit}
+              title="Submit"
+              color="green"
+              isDisabled={isInputErrors}
+            ></AppButton>
           </Button.Group>
         </Modal.Footer>
       </Modal.Content>
     </Modal>
   );
 }
-
 const styles = StyleSheet.create({
   modalHeader: {
     backgroundColor: colors.green, // Change to your preferred green color
