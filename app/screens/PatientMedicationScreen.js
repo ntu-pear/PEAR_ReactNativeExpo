@@ -532,6 +532,8 @@ function PatientMedicationScreen(props) {
                 color: 'green',
                 width: 300
               }]}
+              edit
+              del
               />
             </View>
           )}

@@ -1,5 +1,5 @@
 // Libs
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Alert, Keyboard, StyleSheet, TouchableOpacity } from 'react-native';
 import { FlatList, View } from 'native-base';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -8,7 +8,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import patientApi from 'app/api/patient';
 
 // Utilities
-import { formatTimeHM24, convertTimeMilitary, isEmptyObject, noDataMessage, sortFilterInitialState, formatMilitaryToAMPM, formatDate, formatTimeAMPM } from 'app/utility/miscFunctions';
+import { isEmptyObject, noDataMessage, sortFilterInitialState, formatDate } from 'app/utility/miscFunctions';
 
 // Navigation
 import routes from 'app/navigation/routes';
@@ -19,15 +19,12 @@ import colors from 'app/config/colors';
 // Components
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import AddButton from 'app/components/AddButton';
-import MedicationItem from 'app/components/MedicationItem';
-import AddPatientMedicationModal from 'app/components/AddPatientMedicationModal';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
 import LoadingWheel from 'app/components/LoadingWheel';
 import Swipeable from 'app/components/swipeable-components/Swipeable';
 import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
 import DynamicTable from 'app/components/DynamicTable';
-import AppButton from 'app/components/AppButton';
 import MedicalHistoryItem from 'app/components/MedicalHistoryItem';
 import AddPatientMedicalHistoryModal from 'app/components/AddPatientMedicalHistoryModal';
 
@@ -50,7 +47,7 @@ function PatientMedicalHistory(props) {
   const DISPLAY_MODES = ['rows', 'table'];
   
   // Sort options 
-  const SORT_OPTIONS = ['Source', 'Estimated Date'];
+  const SORT_OPTIONS = ['Estimated Date', 'Source'];
 
   // Filter options
   const FILTER_OPTIONS = ['Estimated Date'];
@@ -94,7 +91,6 @@ function PatientMedicalHistory(props) {
   const [isReloadPatientList, setIsReloadList] = useState(true);
 
   // Medication data related states
-  const [originalUnparsedHxData, setOriginalUnparsedHxData] = useState([]);
   const [originalHxData, setOriginalHxData] = useState([]);
   const [hxData, setHxData] = useState([]);
   const [medHistoryData, setMedHistoryData] = useState({ // for add/edit form
@@ -138,7 +134,7 @@ function PatientMedicalHistory(props) {
       const response = await patientApi.getPatientMedicalHistory(patientID);
       if (response.ok) {
         setOriginalHxData([...response.data.data]);    
-        setHxData([...response.data.data]);    
+        setHxData(parseHxData([...response.data.data]));    
         setIsDataInitialized(true);
         setIsLoading(false);  
         setIsError(false);
@@ -155,6 +151,17 @@ function PatientMedicalHistory(props) {
       }
     }
   };
+
+  // Parse data
+  const parseHxData = (data) => {
+    return data.map(item=>({
+      "medicalHistoryId": item.medicalHistoryId, 
+      "informationSource": item.informationSource, 
+      "medicalDetails": item.medicalDetails, 
+      "medicalRemarks": item.medicalRemarks, 
+      "medicalEstimatedDate": item.medicalEstimatedDate,
+    }))
+  }
 
   // Get medication data from backend
   const getPatientData = async () => {
@@ -176,13 +183,13 @@ function PatientMedicalHistory(props) {
     }
   };
 
-  // Show form to add medication when add button is clicked
+  // Show form to add medical history when add button is clicked
   const handleOnClickAddHx = () => {
     setIsModalVisible(true);
     setModalMode('add');
   };
 
-  // Submit data to add medication
+  // Submit data to add medical history
   const handleModalSubmitAdd = async (medData) => {
     setIsLoading(true);
 
@@ -210,9 +217,8 @@ function PatientMedicalHistory(props) {
     setIsLoading(false);
   };
   
-  // Ask user to confirm deletion of medication
+  // Ask user to confirm deletion of medical details
   const handleDeleteHx = (hxID) => {
-
     const data = hxData.filter(x=>x.medicalHistoryId == hxID)[0];
 
     Alert.alert('Are you sure you wish to delete this item?', 
@@ -262,24 +268,39 @@ function PatientMedicalHistory(props) {
   }
 
   // Return formatted row data for table display
+  // Note: keys originally ordered like ['ID', 'Details', 'Source', 'Remarks', 'Estimated Date']
   const getTableRowData = () => {
-    // const medDataNoMedID = medData.map(({ medID, ...rest }) => rest);
-    return hxData.map(item=> {
+    const dataNoPatientID = hxData.map(({ patientId, ...rest }) => rest);
+    
+    let tempHxData =  dataNoPatientID.map(item=> {
+      console.log(item)
       return Object.entries(item).map(([key, value]) => {
         if (key.toLowerCase().includes('date')) {
           return formatDate(new Date(value), true); 
         } else {
           return String(value); // Convert other values to strings
         } 
-      })});
+      })
+    });
+
+    // Reordered items to have source before details
+    tempHxData = tempHxData.map(item => {
+      let temp = item[1];
+      item[1] = item[2];
+      item[2] = temp;
+
+    return item;
+    })
+
+    console.log(tempHxData);
+    return tempHxData;
   }
 
   // Return formatted header data for table display
+  // Note: keys originally ordered like ['ID', 'Details', 'Source', 'Remarks', 'Estimated Date']
   const getTableHeaderData = () => {
-    return hxData.length > 0 
-      ? ['ID', ...Object.keys(hxData[0])
-        .filter(x=>x!='medicalHistoryID') 
-      ] : null;
+    return ['ID', 'Source', 'Details', 'Remarks', 'Estimated Date'];
+
   }
 
   return (
@@ -370,10 +391,11 @@ function PatientMedicalHistory(props) {
               <DynamicTable
                 headerData={getTableHeaderData()}
                 rowData={getTableRowData()}
-                widthData={[200, 200, 200, 200, 270, 270, 300]}
+                widthData={[200, 200, 200, 200]}
                 screenName={'patient medical history'}
                 onClickDelete={handleDeleteHx}
                 noDataMessage={noDataMessage(statusCode, isLoading, isError, 'No medical history found', false)}
+                del={true}
                 />
             </View>
           )}

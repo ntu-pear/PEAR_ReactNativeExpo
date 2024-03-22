@@ -14,7 +14,7 @@ import colors from 'app/config/colors';
 // Components
 import AppButton from './AppButton';
 
-function DynamicTable({ headerData, rowData, widthData, screenName, onClickEdit, onClickDelete, customColumns=[], noDataMessage=()=>{} }){  
+function DynamicTable({ headerData, rowData, widthData, screenName, onClickEdit, edit=false, onClickDelete, del=false, customColumns=[], noDataMessage=()=>{} }){  
   // Button to edit item
   const editButton = (id) => {
     return (
@@ -44,7 +44,13 @@ function DynamicTable({ headerData, rowData, widthData, screenName, onClickEdit,
 
   // Get header data
   const getHeaderData = () => {
-    let tempHeaderData = [...headerData.filter(x=>x!='ID'), onClickEdit ? 'Edit': [], onClickDelete ? 'Delete' : []]
+    let tempHeaderData = [...headerData.filter(x=>x!='ID')]
+    if(edit) {
+      tempHeaderData.push('Edit');
+    }
+    if(del) {
+      tempHeaderData.push('Delete');
+    }
     customColumns.forEach(item=>(
       tempHeaderData.push(item.title)
     ));
@@ -53,18 +59,35 @@ function DynamicTable({ headerData, rowData, widthData, screenName, onClickEdit,
 
   // Get row data by removing ID values if any and adding edit/delete/custom buttons
   const getRowData = () => {
-    let tempRowData = [...rowData].map((item, i)=>(
-      [...headerData.includes('ID') ? item.slice(headerData.indexOf('ID')+1) : item,  
-        onClickEdit ? editButton(item[headerData.indexOf('ID')]): [], 
-        onClickDelete ? deleteButton(item[headerData.indexOf('ID')]) : []]
-    ));
+    let tempRowData = [...rowData];
+    if(headerData.includes('ID')) {
+      tempRowData = tempRowData.map(item=>(
+        item.slice(headerData.indexOf('ID')+1)
+      ))
+    }
+    if(edit) {
+      tempRowData = tempRowData.map(item=>(
+        [...item, editButton(item[headerData.indexOf('ID')])]
+      ))
+    }
+    if(del) {
+      tempRowData = tempRowData.map(item=>(
+        [...item, deleteButton(item[headerData.indexOf('ID')])]
+      ))
+    }
     
     return tempRowData;
   }
 
   // Get width data
   const getWidthData = () => {
-    let tempWidthData = [...widthData, onClickEdit ? 140 : [],  onClickDelete ? 140 : []];
+    let tempWidthData = [...widthData]
+    if(edit) {
+      tempWidthData.push(140);
+    } 
+    if(del) {
+      tempWidthData.push(140);
+    } 
     customColumns.forEach(item=>(
       tempWidthData.push(item.width)
     ))
