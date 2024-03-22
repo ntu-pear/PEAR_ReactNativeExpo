@@ -147,13 +147,13 @@ const FilterModalCard = ({
         } else {
           tempSort[key] = {
             'option': sort['filterOptions'][0],
-            'asc': true
+            'asc': label.toLowerCase().includes('date') ? false : true
           }
         }
       } else {
         tempSort[key] = {
           'option': tempSort['filterOptions'][0],
-          'asc': true
+          'asc': tempSort['filterOptions'][0]['label'].toLowerCase().includes('date') ? false : true
         }
       }
     }    
