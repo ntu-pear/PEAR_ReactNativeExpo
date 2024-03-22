@@ -51,12 +51,12 @@ function ProfileNameButton({
   };
 
   const handleProfilePicError = (e) => {
-    ToastAndroid.show(('Error loading profile picture for ' + profileLineOne.trim()), ToastAndroid.SHORT)
+    ToastAndroid.show(('Error loading profile picture for patient ' + profileLineOne.trim()), ToastAndroid.SHORT)
     setIsError(true);
   }
   
   return (
-    <View alignItems="center">
+    <VStack alignItems="center">
       <TouchableOpacity onPress={handleOnPress}>
         <View style={containerStyle}>
           <Image
@@ -100,7 +100,7 @@ function ProfileNameButton({
           </View>
         </View>
       </TouchableOpacity>
-    </View>
+    </VStack>
   );
 }
 

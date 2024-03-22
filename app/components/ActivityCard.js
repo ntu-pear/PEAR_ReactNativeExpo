@@ -1,16 +1,10 @@
-// Libs
 import React, { useState } from 'react';
-import { TouchableOpacity, StyleSheet, Text } from 'react-native';
-import { View } from 'native-base';
-
-// Configurations
 import colors from 'app/config/colors';
-
-// Utilities
+import { Platform, StyleSheet, Text } from 'react-native';
+import { View } from 'native-base';
 import { formatTimeHM24 } from 'app/utility/miscFunctions';
-
-// Components
 import MedicationModal from './MedicationModal';
+import { TouchableOpacity } from 'react-native';
 
 const ActivityCard = ({
   activityTitle,

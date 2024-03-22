@@ -49,7 +49,7 @@ function FilterIndicator({
       showsHorizontalScrollIndicator={true}
     >
       <View
-        style={{flexDirection: 'row', alignItems: 'center'}}
+        style={{flexDirection: 'row'}}
       >
         {sort['filterOptions'].length > 0 ? (
           <Chip              

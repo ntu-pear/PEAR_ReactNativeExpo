@@ -10,13 +10,11 @@ function OfflineNotice(props) {
   const netInfo = useNetInfo();
 
   if (netInfo.type !== 'unknown' && netInfo.isInternetReachable === false) {
-    if(!(netInfo.type == 'wifi' && netInfo.isConnected == true && netInfo.details.strength > 0)) {
-      return (
-        <View style={styles.container}>
-          <AppText style={styles.text}>No Internet Connection</AppText>
-        </View>
-      );
-    }
+    return (
+      <View style={styles.container}>
+        <AppText style={styles.text}>No Internet Connection</AppText>
+      </View>
+    );
   }
 
   return null;
