@@ -3,9 +3,7 @@ import { StyleSheet } from 'react-native';
 import { Button, Text } from 'native-base';
 import colors from 'app/config/colors';
 
-function AppButton(props) {
-  // Destructure props
-  const { title, onPress, color, isDisabled = false, testID } = props;
+function AppButton({ title, onPress, color, isDisabled = false, testID}) {
   // replacement of TouchableOpacity with Button to enable isDisabled property - Russell
   return (
     <Button
