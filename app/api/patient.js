@@ -276,7 +276,6 @@ const AddPatientMedicalHistory = async (patientID, medicalData) => {
     medicalRemarks: medicalData.medicalRemarks,
     medicalEstimatedDate: medicalData.medicalEstimatedDate,
   };
-  console.log('payload to API', payload);
   return client.post(patientMedicalHistoryAdd, payload);
 };
 
@@ -335,7 +334,6 @@ const updateMedication = async (patientID, medicationData) => {
     endDateTime: medicationData.endDateTime,
     prescriptionRemarks: medicationData.prescriptionRemarks,
   };
-
   return client.put(patientMedicationUpdate, payload);
 };
 
@@ -343,12 +341,10 @@ const updateProblemLog = async (patientID, userID, logData) => {
   const payload = {
     userID: userID,
     patientID: patientID,
-    problemLogRemarks: logData.problemLogRemarks,
     problemLogID: logData.problemLogID,
-    problemLogDesc: logData.problemLogDesc,
     problemLogListID: logData.problemLogListID,
+    problemLogRemarks: logData.problemLogRemarks,
   };
-
   return client.put(patientProblemLogUpdate, payload);
 };
 
@@ -356,7 +352,6 @@ const deleteMedication = async (medicationData) => {
   const payload = {
     medicationID: medicationData.medicationID,
   };
-
   return client.put(patientMedicationDelete, payload);
 };
 
@@ -364,7 +359,6 @@ const deleteMedicalHistory = async (medHistoryData) => {
   const payload = {
     medicalHistoryID: medHistoryData.medicalHistoryID,
   };
-
   return client.put(patientMedicalHistoryDelete, payload);
 };
 
@@ -372,8 +366,7 @@ const deleteProblemLog = async (logData) => {
   const payload = {
     problemLogID: logData.problemLogID,
   };
-
-  return client.put(patientMedicalHistoryDelete, payload);
+  return client.put(patientProblemLogDelete, payload);
 };
 /*
  * Expose your end points here
