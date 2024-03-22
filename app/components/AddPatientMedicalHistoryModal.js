@@ -115,7 +115,7 @@ function AddPatientMedicalHistoryModal({
               title={'Remarks'}
               value={medicalHistoryData.medicalRemarks}
               onChangeText={handleHxData('medicalRemarks')}
-              onEndEditing={isMedicalRemarksError}
+              onEndEditing={setIsMedicalRemarksError}
               autoCapitalize='none'
             />
             <View style={styles.dateSelectionContainer}>
