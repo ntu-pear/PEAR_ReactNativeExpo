@@ -348,6 +348,7 @@ function SearchFilterBar({
           handleOnToggleSearchOptions={handleOnToggleSearchOptions}
           SEARCH_OPTIONS={parseSelectOptions([...SEARCH_OPTIONS])}
           searchOption={SEARCH_OPTIONS.indexOf(searchOption)+1}
+          placeholder={SEARCH_OPTIONS.length > 1 ? 'Search' : `Search by ${searchOption}`}
         />
         <View style={{flexDirection: 'row', justifyContent: 'center'}}>
           <FilterModalCard

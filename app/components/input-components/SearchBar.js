@@ -30,6 +30,7 @@ function SearchBar({
             value={value}
             autoCapitalize='characters'
             inputContainerStyle={{borderTopRightRadius: 0, borderBottomRightRadius: 0, height: 47}}
+            placeholder={placeholder}
           />
         </View>
         {SEARCH_OPTIONS.length > 1 ? (
