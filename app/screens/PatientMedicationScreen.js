@@ -382,7 +382,7 @@ function PatientMedicationScreen(props) {
   // Return formatted row data for table display
   const getTableRowData = () => {
     // const medDataNoMedID = medData.map(({ medID, ...rest }) => rest);
-    return medData.map(item=> {
+    return [...medData].map(item=> {
       return Object.entries(item).map(([key, value]) => {
         if (key.toLowerCase().includes('date')) {
           return formatDate(new Date(value), true); 
@@ -407,11 +407,13 @@ function PatientMedicationScreen(props) {
 
   // Get user confirmation to save adminstration status of medication
   const onClickAdminister = (index) => {
-    console.log(patientData.preferredName);
-    const data = medData[0];
+    const data = medData[[index]]
     
     Alert.alert('Confirm medication adminstration', 
-    `Medication: ${data.medName}\nTime: ${formatTimeAMPM(data.medTime)}`, [
+    `Patient: ${patientData.preferredName}\n`+
+    `Medication: ${data.medName}\n`+
+    `Dosage: ${data.medDosage}\n`+
+    `Time: ${formatTimeAMPM(data.medTime)}`, [
       {
         text: 'Cancel',
         onPress: ()=>{},
