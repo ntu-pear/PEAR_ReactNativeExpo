@@ -1,11 +1,7 @@
 // Libs
 import React from 'react';
 import { StyleSheet, Text } from 'react-native';
-import {
-  Divider,
-  ScrollView,
-  View,
-} from 'native-base';
+import { Divider, ScrollView, View } from 'native-base';
 import { Table, Row, Rows } from 'react-native-table-component';
 
 // Configurations
@@ -18,29 +14,24 @@ function DynamicTable({ headerData, rowData, widthData, screenName, onClickEdit,
   // Button to edit item
   const editButton = (id) => {
     return (
-      <View style={{marginVertical: '7%', marginHorizontal: '7%'}}>
-        <AppButton 
-          title="Edit" 
-          onPress={() => onClickEdit(id)} 
-          color='green'
-          />
+      <View style={{ marginVertical: '7%', marginHorizontal: '7%' }}>
+        <AppButton title="Edit" onPress={() => onClickEdit(id)} color="green" />
       </View>
-    )
-  }
+    );
+  };
 
   // Button to delete item
   const deleteButton = (id) => {
     return (
-      <View style={{marginVertical: '7%', marginHorizontal: '7%'}}>
-        <AppButton 
-          title="Delete" 
-          onPress={() => onClickDelete(id)} 
-          color='red'
+      <View style={{ marginVertical: '7%', marginHorizontal: '7%' }}>
+        <AppButton
+          title="Delete"
+          onPress={() => onClickDelete(id)}
+          color="red"
         />
       </View>
-    )
-  }
-
+    );
+  };
 
   // Get header data
   const getHeaderData = () => {
@@ -55,7 +46,7 @@ function DynamicTable({ headerData, rowData, widthData, screenName, onClickEdit,
       tempHeaderData.push(item.colTitle)
     ));
     return tempHeaderData;
-  }
+  };
 
   // Get row data by removing ID values if any and adding edit/delete/custom buttons
   const getRowData = () => {
@@ -77,7 +68,7 @@ function DynamicTable({ headerData, rowData, widthData, screenName, onClickEdit,
     }
     console.log(tempRowData)
     return tempRowData;
-  }
+  };
 
   // Get width data
   const getWidthData = () => {
@@ -92,7 +83,7 @@ function DynamicTable({ headerData, rowData, widthData, screenName, onClickEdit,
       tempWidthData.push(item.width)
     ))
     return tempWidthData;
-  }
+  };
 
   return (
     rowData.length > 0 ? (
@@ -164,7 +155,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   redText: {
-    alignSelf: "center",
+    alignSelf: 'center',
     color: colors.red,
     marginBottom: 15,
     marginTop: 15,

@@ -10,7 +10,7 @@ import PatientHolidayScreen from 'app/screens/PatientHolidayScreen';
 import PatientPhotoAlbumScreen from 'app/screens/PatientPhotoAlbumScreen';
 import PatientPreferenceScreen from 'app/screens/PatientPreferenceScreen';
 import PatientPrescriptionScreen from 'app/screens/PatientPrescriptionScreen';
-import PatientProblemLog from 'app/screens/PatientProblemLog';
+import PatientProblemLog from 'app/screens/PatientProblemLogScreen';
 import PatientVitalScreen from 'app/screens/PatientVitalScreen';
 import PatientRoutineScreen from 'app/screens/PatientRoutineScreen';
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
@@ -37,16 +37,13 @@ const Stack = createNativeStackNavigator();
 
 // Refer to this for configuration: https://reactnavigation.org/docs/native-stack-navigator#options
 function DashboardNavigator() {
-
   return (
     <Stack.Navigator>
       <Stack.Screen
         name={routes.DASHBOARD_SCREEN}
         component={DashboardScreen}
         options={{
-          headerRight: () => (
-            <PatientDailyHighlights/>
-          ),
+          headerRight: () => <PatientDailyHighlights />,
         }}
       />
       <Stack.Screen

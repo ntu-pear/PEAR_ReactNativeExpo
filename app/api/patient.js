@@ -24,9 +24,7 @@ const patientUpdate = `${endpoint}/update`; //eslint-disable-line no-unused-vars
 const privacyLevelUpdate = `${endpoint}/UpdatePatient`; //eslint-disable-line no-unused-vars
 const patientDelete = `${endpoint}/delete`; //eslint-disable-line no-unused-vars
 const patientAllergy = `${allergyEndpoint}/PatientAllergy`; //eslint-disable-line no-unused-vars
-const patientVitalList = `${vitalEndpoint}/list`; //eslint-disable-line no-unused-vars
 const patientPrescriptionList = `${prescriptionEndpoint}/PatientPrescription`; //eslint-disable-line no-unused-vars
-const patientProblemLog = `${problemLogEndpoint}/PatientProblemLog`; //eslint-disable-line no-unused-vars
 const patientRoutine = `${activityEndpoint}${routineEndpoint}/PatientRoutine`; //eslint-disable-line no-unused-vars
 // Medical History
 const patientMedicalHistory = `${medicalHistoryEndpoint}/list`; //eslint-disable-line no-unused-vars
@@ -36,7 +34,11 @@ const patientMedicalHistoryDelete = `${medicalHistoryEndpoint}/delete`; //eslint
 const patientAllergyAdd = `${allergyEndpoint}/add`; //eslint-disable-line no-unused-vars
 const patientAllergyDelete = `${allergyEndpoint}/delete`; //eslint-disable-line no-unused-vars
 // Vitals
+const patientVitalList = `${vitalEndpoint}/list`; //eslint-disable-line no-unused-vars
 const patientVitalAdd = `${vitalEndpoint}/add`; //eslint-disable-line no-unused-vars
+// Problem Log
+const patientProblemLog = `${problemLogEndpoint}/PatientProblemLog`; //eslint-disable-line no-unused-vars
+const patientProblemLogAdd = `${problemLogEndpoint}/add`; //eslint-disable-line no-unused-vars
 // Medication
 const patientMedicationAdd = `${medicationEndpoint}/add`; //eslint-disable-line no-unused-vars
 const patientMedicationUpdate = `${medicationEndpoint}/update`; //eslint-disable-line no-unused-vars
@@ -250,10 +252,31 @@ const AddPatientVital = async (patientID, vitalData) => {
     VitalRemarks: vitalData.vitalRemarks,
     AfterMeal: vitalData.afterMeal,
   };
-  console.log('payload to API', payload);
   return client.post(patientVitalAdd, payload);
 };
 
+const AddPatientProblemLog = async (patientID, problemLogData) => {
+  const payload = {
+    UserID: problemLogData.userID,
+    PatientID: patientID,
+    ProblemLogListID: problemLogData.problemLogListDesc,
+    ProblemLogRemarks: problemLogData.remarks,
+  };
+
+  return client.post(patientProblemLogAdd, payload);
+};
+
+const AddPatientMedicalHistory = async (patientID, medicalData) => {
+  const payload = {
+    PatientID: patientID,
+    medicalDetails: medicalData.medicalDetails,
+    informationSource: medicalData.informationSource,
+    medicalRemarks: medicalData.medicalRemarks,
+    medicalEstimatedDate: medicalData.medicalEstimatedDate,
+  };
+  console.log('payload to API', payload);
+  return client.post(patientMedicalHistoryAdd, payload);
+};
 const addPatientMedication = async (patientID, medicationData) => {
   const payload = {
     patientID: patientID,
@@ -346,6 +369,8 @@ export default {
   addPatient,
   AddPatientAllergy,
   AddPatientVital,
+  AddPatientProblemLog,
+  AddPatientMedicalHistory,
   addPatientMedication,
   addPatientMedicalHistory,
   updatePatient,
