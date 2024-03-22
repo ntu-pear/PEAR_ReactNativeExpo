@@ -36,8 +36,8 @@ const patientVitalAdd = `${vitalEndpoint}/add`; //eslint-disable-line no-unused-
 const patientProblemLog = `${problemLogEndpoint}/PatientProblemLog`; //eslint-disable-line no-unused-vars
 const patientProblemLogAdd = `${problemLogEndpoint}/add`; //eslint-disable-line no-unused-vars
 // Medical History
-const patientMedicalHistory = `${medicalHistorypoint}/list`; //eslint-disable-line no-unused-vars
-const patientMedicalHistoryAdd = `${medicalHistorypoint}/add`; //eslint-disable-line no-unused-vars
+const patientMedicalHistory = `${medicalHistoryEndpoint}/list`; //eslint-disable-line no-unused-vars
+const patientMedicalHistoryAdd = `${medicalHistoryEndpoint}/add`; //eslint-disable-line no-unused-vars
 
 const patientMedicationAdd = `${medicationEndpoint}/add`; //eslint-disable-line no-unused-vars
 const patientMedicationUpdate = `${medicationEndpoint}/update`; //eslint-disable-line no-unused-vars
