@@ -132,31 +132,33 @@ const FilterModalCard = ({
   // Initialize sort state
   const initSort = () => {
     let tempSort = {'filterOptions': parseSelectOptions(SORT_OPTIONS), 'sel': {}, 'tempSel': {}};
-
-    const keys = ['sel', 'tempSel'];
-    for(var i = 0; i<keys.length; i++) {
-      const key = keys[i];
-      if('option' in sort[key]) {
-        let label = sort[key]['option']['label'];
-  
-        if (sort['filterOptions'].find(x => x['label'] == label)) {
-          tempSort[key] = {
-            'option': sort['filterOptions'].find(x => x['label'] == label),
-            'asc': sort[key]['asc']
+    
+    if(SORT_OPTIONS.length > 0) {
+      const keys = ['sel', 'tempSel'];
+      for(var i = 0; i<keys.length; i++) {
+        const key = keys[i];
+        if('option' in sort[key]) {
+          let label = sort[key]['option']['label'];
+    
+          if (sort['filterOptions'].find(x => x['label'] == label)) {
+            tempSort[key] = {
+              'option': sort['filterOptions'].find(x => x['label'] == label),
+              'asc': sort[key]['asc']
+            }
+          } else {
+            tempSort[key] = {
+              'option': sort['filterOptions'][0],
+              'asc': label.toLowerCase().includes('date') ? false : true
+            }
           }
         } else {
           tempSort[key] = {
-            'option': sort['filterOptions'][0],
-            'asc': label.toLowerCase().includes('date') ? false : true
+            'option': tempSort['filterOptions'][0],
+            'asc': tempSort['filterOptions'][0]['label'].toLowerCase().includes('date') ? false : true
           }
         }
-      } else {
-        tempSort[key] = {
-          'option': tempSort['filterOptions'][0],
-          'asc': tempSort['filterOptions'][0]['label'].toLowerCase().includes('date') ? false : true
-        }
-      }
-    }    
+      }    
+    }
     return tempSort
   }
 

@@ -31,6 +31,8 @@ import EditPatientPreferencesScreen from 'app/screens/EditPatientPreferencesScre
 import EditPatientInfoScreen from 'app/screens/EditPatientInfoScreen';
 import PatientMedicationScreen from 'app/screens/PatientMedicationScreen';
 import DisplayModeComponent from 'app/components/filter-components/DisplayModeComponent';
+import PatientScheduleScreen from 'app/screens/PatientScheduleScreen';
+import PatientMobilityAidScreen from 'app/screens/PatientMobilityAidsScreen';
 
 // Refer to this: https://reactnavigation.org/docs/hello-react-navigation
 const Stack = createNativeStackNavigator();
@@ -152,6 +154,24 @@ function DashboardNavigator() {
           headerShown: true,
           headerBackTitleVisible: false,
           title: 'Medication',
+        }}
+      />
+      <Stack.Screen
+        name={routes.PATIENT_SCHEDULE}
+        component={PatientScheduleScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Schedule',
+        }}
+      />
+      <Stack.Screen
+        name={routes.PATIENT_MOBILITY_AIDS}
+        component={PatientMobilityAidScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Schedule',
         }}
       />
       <Stack.Screen

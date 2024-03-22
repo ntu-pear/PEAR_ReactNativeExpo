@@ -75,13 +75,12 @@ const ActivityCard = ({
 const styles = StyleSheet.create({
   activityContainer: {
     flexDirection: 'column',
-    width: 160,
-    height: 120,
+    width: 180,
+    height: 130,
     borderRadius: 8,
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginVertical: 10,
-    marginRight: 20,
+    margin: 15,
     // padding: 3,
   },
   medication: { 
@@ -105,14 +104,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 5,
     fontSize: 17.5,
-    margin: 3,
+    margin: 7,
   },
   activityTime: {
     textAlign: 'center',
     fontWeight: 'normal',
     paddingLeft: 5,
     paddingRight: 5,
-    fontSize: 14,
+    fontSize: 16,
   },
   lightText: {
     color: colors.white_var1

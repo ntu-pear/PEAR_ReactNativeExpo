@@ -135,7 +135,7 @@ function WelcomeScreen(props) {
       }, 5000);
     });
 
-    const apiPromise = userApi.loginUser(username, userRole, password); // Assuming callApi is your API function
+    const apiPromise = userApi.loginUser(username, userRole, password);
     
     try {
       const result = await Promise.race([apiPromise, timeoutPromise]);
