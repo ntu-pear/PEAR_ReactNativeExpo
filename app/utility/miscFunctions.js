@@ -187,3 +187,28 @@ export const noDataMessage = (statusCode=null, isLoading=false, isError=false, d
         />
   );
 };
+
+// Return date of the week's Monday
+export const getMonday = () => {
+  let date = new Date();
+  const day = date.getDay();
+  const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+  return new Date(date.setDate(diff));
+}
+
+// Return whether selected date is a Monday
+export const isMonday = (selectedDate) => {
+  return selectedDate.toDateString() == new Date(getMonday()).toDateString();
+}
+
+// Return date of the week's Sunday
+export const getSunday = () => {    
+  let date = new Date(getMonday());
+  date.setDate(date.getDate() + 6);
+  return date;
+}
+
+// Return whether current date is a Sunday
+export const isSunday = (selectedDate) => {
+  return selectedDate.toDateString() == new Date(getSunday()).toDateString();
+}

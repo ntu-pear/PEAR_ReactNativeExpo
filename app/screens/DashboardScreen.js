@@ -31,7 +31,7 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 
 // Utilities
 import globalStyles from 'app/utility/styles.js';
-import { formatDate, convertTimeMilitary, isEmptyObject, noDataMessage, sortFilterInitialState } from 'app/utility/miscFunctions';
+import { formatDate, convertTimeMilitary, isEmptyObject, noDataMessage, sortFilterInitialState, getSunday, getMonday, isSunday, isMonday } from 'app/utility/miscFunctions';
 
 function DashboardScreen({ navigation }) {
   // View modes user can switch between (displayed as tab on top)
@@ -167,7 +167,7 @@ function DashboardScreen({ navigation }) {
   const refreshSchedule = () => {
     setIsLoading(true);
     const promiseFunction = async () => {
-      await getData();
+      await getPatientData();
       if(viewMode === 'allPatients') {
         await getPatientCountInfo();
       }       
@@ -204,7 +204,10 @@ function DashboardScreen({ navigation }) {
       setIsRetry(false);
       setStatusCode(response.status);
     } else {
-      console.log('Error getting schedule:',response)
+      console.log('Error getting schedule:',response)      
+      setOriginalScheduleWeekly({});
+      setOriginalSchedule([]);
+      setSchedule([]);
       setIsLoading(false);
       setIsError(true);
       setStatusCode(response.status);
@@ -213,7 +216,7 @@ function DashboardScreen({ navigation }) {
   };
 
   // Retrieve patient list from backend
-  const getData = async () => {   
+  const getPatientData = async () => {   
     const response =
     viewMode === 'myPatients'
       // ? await patientApi.getPatientListByLoggedInCaregiver(undefined, status)
@@ -410,7 +413,7 @@ function DashboardScreen({ navigation }) {
   }) => {       
     setIsLoading(true);
 
-    let tempSchedule = setFilteredList({
+    setFilteredList({
       text: text, 
       tempSelSort: tempSelSort, 
       tempSelDropdownFilters: tempSelDropdownFilters, 
@@ -489,27 +492,6 @@ function DashboardScreen({ navigation }) {
     refreshSchedule();
   };
 
-  const getMonday = () => {
-    let date = new Date();
-    const day = date.getDay();
-    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-    return new Date(date.setDate(diff));
-  }
-
-  const isMonday = () => {
-    return selectedDate.toDateString() == new Date(getMonday()).toDateString();
-  }
-
-  const getSunday = () => {    
-    let date = new Date(getMonday());
-    date.setDate(date.getDate() + 6);
-    return date;
-  }
-  
-  const isSunday = () => {
-    return selectedDate.toDateString() == new Date(getSunday()).toDateString();
-  }
-
   const onClickPatientProfile = (patientID) => {
     navigation.push(routes.PATIENT_PROFILE, { id: patientID });
   }
@@ -576,12 +558,12 @@ function DashboardScreen({ navigation }) {
             {/* < icon button */}
             <TouchableOpacity 
               onPress={handlePreviousDate} 
-              disabled={isMonday()}
+              disabled={isMonday(selectedDate)}
               >
               <ChevronLeftIcon 
                 size={6}
                 marginRight={3}
-                color={isMonday() ? colors.light_gray3 : colors.green}
+                color={isMonday(selectedDate) ? colors.light_gray3 : colors.green}
                 />           
             </TouchableOpacity>
             <DateInputField
@@ -592,12 +574,12 @@ function DashboardScreen({ navigation }) {
               />
             {/* > icon button */}
             <TouchableOpacity onPress={handleNextDate}
-              disabled={isSunday()}
+              disabled={isSunday(selectedDate)}
               >
               <ChevronRightIcon 
                 size={6}
                 marginLeft={3}
-                color={isSunday() ? colors.light_gray3 : colors.green}
+                color={isSunday(selectedDate) ? colors.light_gray3 : colors.green}
               />
             </TouchableOpacity>
           </View>
