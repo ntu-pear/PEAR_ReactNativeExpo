@@ -8,13 +8,13 @@ import InputField from './input-components/InputField';
 import AppButton from './AppButton';
 import SelectionInputField from './input-components/SelectionInputField';
 
-// Hooks 
+// Hooks
 import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
 // Configurations
 import colors from 'app/config/colors';
 
-function AddPatientMedicalHistoryModal({
+function AddPatientProblemLogModal({
   showModal,
   modalMode,
   logFormData,
@@ -32,7 +32,8 @@ function AddPatientMedicalHistoryModal({
   // Input error states (Child components)
   // This records the error states of each child component (ones that require tracking).
   const [isAuthorNameError, setIsAuthorNameError] = useState(false);
-  const [isProblemDescriptionError, setIsProblemDescriptionError] = useState(false);
+  const [isProblemDescriptionError, setIsProblemDescriptionError] =
+    useState(false);
   const [isProblemRemarksError, setIsProblemRemarksError] = useState(false);
   const [isCreatedDateTimeError, setIsCreatedDateTimeError] = useState(false);
 
@@ -42,9 +43,9 @@ function AddPatientMedicalHistoryModal({
   useEffect(() => {
     setIsInputErrors(
       isAuthorNameError ||
-      isProblemDescriptionError ||
-      isProblemRemarksError ||
-      isCreatedDateTimeError
+        isProblemDescriptionError ||
+        isProblemRemarksError ||
+        isCreatedDateTimeError,
     );
   }, [
     isAuthorNameError,
@@ -53,12 +54,12 @@ function AddPatientMedicalHistoryModal({
     isCreatedDateTimeError,
   ]);
 
-  // Reset form 
+  // Reset form
   const resetForm = () => {
-    setLogFormData({    
-      "problemLogID": null,
-      "problemLogListID": 1,
-      "problemLogRemarks": "",
+    setLogFormData({
+      problemLogID: null,
+      problemLogListID: 1,
+      problemLogRemarks: '',
     });
     setIsAuthorNameError(false);
     setIsProblemDescriptionError(false);
@@ -80,7 +81,7 @@ function AddPatientMedicalHistoryModal({
       [field]: field == 'problemLogListID' ? parseInt(e) : e,
     }));
   };
-  
+
   // Handle form submission
   const handleSubmit = () => {
     if (!isInputErrors) {
@@ -94,25 +95,25 @@ function AddPatientMedicalHistoryModal({
       <Modal.Content maxWidth="65%">
         <Modal.CloseButton />
         <Modal.Header style={styles.modalHeader}>
-          <Text style={styles.modalHeaderText}>{modalMode} Medical History</Text>
+          <Text style={styles.modalHeaderText}>{modalMode} Problem Log</Text>
         </Modal.Header>
         <Modal.Body>
-          <VStack space={3}>    
+          <VStack space={3}>
             <SelectionInputField
               isRequired
               title="Description"
               value={logFormData.problemLogListID}
               dataArray={problemLogOptions}
               onDataChange={handleLogData('problemLogListID')}
-            />        
+            />
             <InputField
               isRequired
               title={'Remarks'}
               value={logFormData.problemLogRemarks}
               onChangeText={handleLogData('problemLogRemarks')}
               onEndEditing={setIsProblemRemarksError}
-              autoCapitalize='none'
-            />         
+              autoCapitalize="none"
+            />
           </VStack>
         </Modal.Body>
         <Modal.Footer>
@@ -142,10 +143,10 @@ const styles = StyleSheet.create({
     fontSize: 18, // Adjust font size as needed
     fontWeight: 'bold', // Optional: if you want the text to be bold
     textTransform: 'uppercase',
-  },  
+  },
   dateSelectionContainer: {
     width: '100%',
   },
 });
 
-export default AddPatientMedicalHistoryModal;
+export default AddPatientProblemLogModal;

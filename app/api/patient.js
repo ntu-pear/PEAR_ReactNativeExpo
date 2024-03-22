@@ -32,12 +32,12 @@ const patientMedicalHistoryDelete = `${medicalHistoryEndpoint}/delete`; //eslint
 // Allergy
 const patientAllergy = `${allergyEndpoint}/PatientAllergy`; //eslint-disable-line no-unused-vars
 const patientAllergyAdd = `${allergyEndpoint}/add`; //eslint-disable-line no-unused-vars
-const patientAllergyUpdate = `${allergyEndpoint}/update`; //eslint-disable-line no-unused-vars
+// const patientAllergyUpdate = `${allergyEndpoint}/update`; //eslint-disable-line no-unused-vars
 const patientAllergyDelete = `${allergyEndpoint}/delete`; //eslint-disable-line no-unused-vars
 // Vitals
 const patientVitalList = `${vitalEndpoint}/list`; //eslint-disable-line no-unused-vars
 const patientVitalAdd = `${vitalEndpoint}/add`; //eslint-disable-line no-unused-vars
-const patientVitalUpdate = `${vitalEndpoint}/update`; //eslint-disable-line no-unused-vars
+//const patientVitalUpdate = `${vitalEndpoint}/update`; //eslint-disable-line no-unused-vars
 const patientVitalDelete = `${vitalEndpoint}/delete`; //eslint-disable-line no-unused-vars
 // Problem Log
 const patientProblemLog = `${problemLogEndpoint}/PatientProblemLog`; //eslint-disable-line no-unused-vars
@@ -251,12 +251,13 @@ const AddPatientVital = async (patientID, vitalData) => {
     DiastolicBP: vitalData.diastolicBP,
     HeartRate: vitalData.heartRate,
     SpO2: vitalData.spO2,
-    BloodSugarLevel: vitalData.bloodSugarlevel,
+    BloodSugarLevel: vitalData.bloodSugarLevel,
     Height: vitalData.height,
     Weight: vitalData.weight,
     VitalRemarks: vitalData.vitalRemarks,
     AfterMeal: vitalData.afterMeal,
   };
+  console.log('payload', payload);
   return client.post(patientVitalAdd, payload);
 };
 
@@ -343,7 +344,7 @@ const updatePatientVital = async (patientID, vitalData) => {
     DiastolicBP: vitalData.diastolicBP,
     HeartRate: vitalData.heartRate,
     SpO2: vitalData.spO2,
-    BloodSugarLevel: vitalData.bloodSugarlevel,
+    BloodSugarLevel: vitalData.bloodSugarLevel,
     Height: vitalData.height,
     Weight: vitalData.weight,
     VitalRemarks: vitalData.vitalRemarks,
