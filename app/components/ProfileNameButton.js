@@ -11,6 +11,7 @@ import { Text, VStack } from 'native-base';
 import typography from 'app/config/typography';
 import DefaultImage from 'app/assets/placeholder.png';
 import colors from 'app/config/colors';
+import { formatDate } from 'app/utility/miscFunctions';
 
 function ProfileNameButton({
   profilePicture,
@@ -89,7 +90,7 @@ function ProfileNameButton({
             ) : null}
             {startDate != null ? (
               <Text style={styles.DefaultText} fontSize={size / 6}>
-                Start date: {startDate.split('T')[0]}
+                Start date: {formatDate(new Date(startDate))}
               </Text>
             ) : null}
             {isActive != null ? (

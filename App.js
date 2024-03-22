@@ -55,8 +55,8 @@ export default function App() {
       >
         <OfflineNotice />
         <NavigationContainer theme={MyTheme}>
-          {user ? <AppNavigator /> : <AuthNavigator />}
-          {/* <DebugNavigator/> */}
+          {/* {user ? <AppNavigator /> : <AuthNavigator />} */}
+          <DebugNavigator/>
         </NavigationContainer>
       </AuthContext.Provider>
     </NativeBaseProvider>
