@@ -1,6 +1,5 @@
 import React, { StyleSheet, View } from 'react-native';
 import { HStack, Text } from 'native-base';
-import SelectionInputField from 'app/components/SelectionInputField';
 
 const listOfSorts = [
   { label: 'None', value: '' },
@@ -28,12 +27,12 @@ function NotificationSortSelector(props) {
           ))}
         </Select> */}
         <Text style={styles.sortText}> {'Sort By: '}</Text>
-        <SelectionInputField
+        {/* <SelectionInputField
           placeholderText={'Sort By'}
           onDataChange={setSortBy}
           value={sortBy}
           dataArray={listOfSorts}
-        />
+        /> */}
       </View>
     </HStack>
   );

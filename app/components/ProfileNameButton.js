@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   TouchableOpacity,
   Platform,
   StyleSheet,
   Image,
+  ToastAndroid,
 } from 'react-native';
 import { Text, VStack } from 'native-base';
 import typography from 'app/config/typography';
 import DefaultImage from 'app/assets/placeholder.png';
+import colors from 'app/config/colors';
 
 function ProfileNameButton({
   profilePicture,
@@ -18,8 +20,16 @@ function ProfileNameButton({
   size,
   isVertical,
   handleOnPress,
+  isActive=null,
+  startDate=null,
 }) {
-  // const defaultImage = Image.resolveAssetSource(DefaultImage).uri;
+
+  // Reset error if profile picture uri changes
+  useEffect(() => {
+    setIsError(false);
+  }, [profilePicture])
+
+  const [isError, setIsError] = useState(false);
 
   const containerStyle = isVertical
     ? styles.ContentWrapperVertical
@@ -40,35 +50,57 @@ function ProfileNameButton({
     marginLeft: isVertical ? null : 30,
   };
 
+  const handleProfilePicError = (e) => {
+    ToastAndroid.show(('Error loading profile picture for ' + profileLineOne.trim()), ToastAndroid.SHORT)
+    setIsError(true);
+  }
+  
   return (
-    <VStack alignItems="center">
+    <View alignItems="center">
       <TouchableOpacity onPress={handleOnPress}>
         <View style={containerStyle}>
           <Image
             style={customProfilePictureStyle}
             alt={isPatient === true ? 'patient_image' : 'user_image'}
+            onError={handleProfilePicError}
             // Note: This is a fall-back uri. Will only be used if source fails to render the image.
-            fallbackSource={DefaultImage}
             source={
-              profilePicture ? { uri: `${profilePicture}` } : DefaultImage
+              profilePicture 
+                ? isError 
+                  ? DefaultImage
+                  : { uri: `${profilePicture}` } 
+                : DefaultImage
             }
           />
           <View style={customTextContainerStyle}>
-            <Text
-              style={[styles.DefaultText, styles.NameText]}
-              fontSize={size / 4}
-            >
-              {profileLineOne}
-            </Text>
+            {profileLineOne ? (
+              <Text
+                style={[styles.DefaultText, styles.NameText, ...isVertical ? [{textAlign: 'center'}] : []]}
+                fontSize={size / 4}
+              >
+                {profileLineOne.trim()}
+              </Text>
+            ) 
+            : null}
             {profileLineTwo ? (
+              <Text style={[styles.DefaultText, ...isVertical ? [{textAlign: 'center'}] : []]} fontSize={size / 6}>
+                {profileLineTwo.trim()}
+              </Text>
+            ) : null}
+            {startDate != null ? (
               <Text style={styles.DefaultText} fontSize={size / 6}>
-                {`${profileLineTwo}`}
+                Start date: {startDate.split('T')[0]}
+              </Text>
+            ) : null}
+            {isActive != null ? (
+              <Text style={styles.DefaultText} fontSize={size / 6} color={isActive ? colors.green : colors.red}>
+                {isActive ? 'Active' : 'Inactive'}
               </Text>
             ) : null}
           </View>
         </View>
       </TouchableOpacity>
-    </VStack>
+    </View>
   );
 }
 
@@ -97,17 +129,15 @@ const styles = StyleSheet.create({
     height: 100,
     width: 100,
     borderRadius: 100,
-    resizeMode: 'contain',
   },
   DefaultText: {
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
-    textAlign: 'center',
   },
   NameText: {
     fontWeight: 'bold',
   },
   TextContainer: {
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     marginLeft: 30,
   },
 });

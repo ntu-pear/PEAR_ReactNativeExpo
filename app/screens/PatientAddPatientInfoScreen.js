@@ -1,5 +1,5 @@
 // Base
-import React, { useState, useEffect, useCallback, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { StyleSheet, Platform, View } from 'react-native';
 import {
   Box,
@@ -19,20 +19,20 @@ import typography from 'app/config/typography';
 import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
 // Utilities
-import { parseSelectOptions } from 'app/utility/miscFunctions';
+import { noDataMessage, parseSelectOptions } from 'app/utility/miscFunctions';
 
 // Components
 import AddPatientProgress from 'app/components/AddPatientProgress';
 import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
-import DateInputField from 'app/components/DateInputField';
-import SelectionInputField from 'app/components/input-fields/SelectionInputField';
-import RadioButtonInput from 'app/components/RadioButtonsInput';
-import SingleOptionCheckBox from 'app/components/SingleOptionCheckBox';
+import DateInputField from 'app/components/input-components/DateInputField';
+import SelectionInputField from 'app/components/input-components/SelectionInputField';
+import RadioButtonInput from 'app/components/input-components/RadioButtonsInput';
+import SingleOptionCheckBox from 'app/components/input-components/SingleOptionCheckBox';
 import ActivityIndicator from 'app/components/ActivityIndicator';
-import InputField from 'app/components/input-fields/InputField';
-import SensitiveInputField from 'app/components/input-fields/SensitiveInputField';
+import InputField from 'app/components/input-components/InputField';
+import SensitiveInputField from 'app/components/input-components/SensitiveInputField';
 
-// API
+// APIs
 import patientApi from 'app/api/patient';
 import AuthContext from 'app/auth/context';
 
@@ -47,23 +47,35 @@ function PatientAddPatientInfoScreen({
 
   // Variables relatied to retrieving preferred language select options from API
   const { data, isError, isLoading } = useGetSelectionOptions('Language');
-  
+
   // Set initial value for preferred language select field
-  const [listOfLanguages, setListOfLanguages] = useState(parseSelectOptions([
-    'Cantonese',
-    'English',
-    'Hainanese',
-    'Hakka',
-    'Hindi',
-    'Hokkien',
-    'Malay',
-    'Mandarin',
-    'Tamil',
-    'Teochew',
-    'Japanese',
-    'Spanish',
-    'Korean',
-  ]));
+  const [listOfLanguages, setListOfLanguages] = useState(
+    parseSelectOptions([
+      'Cantonese',
+      'English',
+      'Hainanese',
+      'Hakka',
+      'Hindi',
+      'Hokkien',
+      'Malay',
+      'Mandarin',
+      'Tamil',
+      'Teochew',
+      'Japanese',
+      'Spanish',
+      'Korean',
+    ]),
+  );
+  
+  // Used for the RadioButtonInput dataArray prop -> follow format of "label" and "value"
+  const [listOfGenders, setListOfGenders] = useState([
+    { label: 'Male', value: 'M' },
+    { label: 'Female', value: 'F' },
+  ]);
+  const [listOfRespiteCare, setListOfRespiteCare] = useState([
+    { label: 'Yes', value: true },
+    { label: 'No', value: false },
+  ]);
 
   // Screen error state: This = true when the child components report error(input fields)
   // Enables use of dynamic rendering of components when the page error = true/false.
@@ -80,13 +92,18 @@ function PatientAddPatientInfoScreen({
   const [isPostalCodeError, setIsPostalCodeError] = useState(false);
   const [isTempAddrError, setIsTempAddrError] = useState(false);
   const [isTempPostalCodeError, setIsTempPostalCodeError] = useState(false);
-  const [isHomeTeleError, setIsHomeNoError] = useState(false);
-  const [isMobileError, setIsMobileNoError] = useState(false);
+  const [isHomeNoError, setIsHomeNoError] = useState(false);
+  const [isMobileNoError, setIsMobileNoError] = useState(false);
   const [isPrefNameError, setIsPrefNameError] = useState(false);
-  const [isPrefLanguageError, setPrefLanguageError] = useState(false);
+  const [isPrefLanguageError, setIsPrefLanguageError] = useState(false);
   const [isRespiteError, setIsRespiteError] = useState(false);
   const [isJoiningError, setIsJoiningError] = useState(false);
   const [isLeavingError, setIsLeavingError] = useState(false);
+
+  // States for getting list of preferred names
+  const [isPrefNamesLoading, setIsPrefNamesLoading] = useState(false);
+  const { user, setUser } = useContext(AuthContext);
+  const [prefNames, setPrefNames] = useState([]);
 
   // Maximum and minimum valid joining dates
   const minimumJoiningDate = new Date();
@@ -94,102 +111,9 @@ function PatientAddPatientInfoScreen({
   const maximumJoiningDate = new Date();
   maximumJoiningDate.setDate(maximumJoiningDate.getDate() + 30); // 30 days later
 
-  // Used for the RadioButtonInput dataArray prop -> follow format of "label" and "value"
-  const listOfGenders = [
-    { label: 'Male', value: 'M' },
-    { label: 'Female', value: 'F' },
-  ];
-  const listRespiteCare = [
-    { label: 'Yes', value: true },
-    { label: 'No', value: false },
-  ];
-
-  // Functions for error state reporting for the child components  
-  const handleFirstNameError = (e) => {
-    setIsFirstNameError(e);
-    // console.log("first name", e)
-  }
-  
-  const handleLastNameError = (e) => {
-    setIsLastNameError(e);
-    // console.log("last name", e)
-  }
-    
-  const handleNRICError = (e) => {
-    setIsNRICError(e);
-    // console.log("nric", e)
-  }
-  
-  const handleDOBError = (e) => {
-    setIsDOBError(e);
-    // console.log("dob", e)
-  }
-
-  const handleGenderError = (e) => {
-    setIsGenderError(e);
-    // console.log("gender", e)
-  }  
-
-  
-  const handleAddrError = (e) => {
-    setIsAddrError(e);
-    // console.log("addr", e)
-  }
-
-  const handlePostalCodeError = (e) => {
-    setIsPostalCodeError(e);
-    // console.log("addr", e)
-  }
-  
-  const handleTempAddrError = (e) => {
-    setIsTempAddrError(e);
-    // console.log("temp addr", e)
-  }
-
-  const handleTempPostalCodeError = (e) => {
-    setIsTempPostalCodeError(e);
-    // console.log("addr", e)
-  }
-  
-  const handleHomeNoError = (e) => {
-    setIsHomeNoError(e);
-    // console.log("home", e)
-  }
-  
-  const handleMobileNoError = (e) => {
-    setIsMobileNoError(e);
-    // console.log("mobile", e)
-  }
-  
-  const handlePrefNameError = (e) => {
-    setIsPrefNameError(e);
-    // console.log("pref name", e)
-  }
-  
-  const handlePrefLanguageError = (e) => {
-    setPrefLanguageError(e);
-    // console.log("language", e)
-  }
-
-  const handleRespiteError = (e) => {
-    setIsRespiteError(e);
-    // console.log("respite", e)
-  }
-
-  const handleJoiningError = (e) => {
-    setIsJoiningError(e);
-    // console.log("joining", e)
-  }
-  
-  const handleLeavingError = (e) => {
-    setIsLeavingError(e);
-    // console.log("leaving", e)
-  }
-
-
   // This useEffect enables the page to show correct error checking.
   // The main isInputErrors is responsible for the error state of the screen.
-  // This state will be true whenever any child input components are in error state. 
+  // This state will be true whenever any child input components are in error state.
   useEffect(() => {
     setIsInputErrors(
       isFirstNameError ||
@@ -201,8 +125,8 @@ function PatientAddPatientInfoScreen({
       isPostalCodeError ||
       isTempAddrError ||
       isTempPostalCodeError ||
-      isHomeTeleError ||
-      isMobileError ||
+      isHomeNoError ||
+      isMobileNoError ||
       isPrefNameError ||
       isRespiteError ||
       isJoiningError ||
@@ -218,8 +142,8 @@ function PatientAddPatientInfoScreen({
     isPostalCodeError,
     isTempAddrError,
     isTempPostalCodeError,
-    isHomeTeleError,
-    isMobileError,
+    isHomeNoError,
+    isMobileNoError,
     isPrefNameError,
     isRespiteError,
     isJoiningError,
@@ -227,7 +151,7 @@ function PatientAddPatientInfoScreen({
   ]);
 
   // Try to get langugage list from backend. If retrieval from the hook is successful, replace the content in
-  // listOfLanguages with the retrieved one. 
+  // listOfLanguages with the retrieved one.
   useEffect(() => {
     if (!isLoading && !isError && data) {
       // console.log('selection data!');
@@ -238,24 +162,153 @@ function PatientAddPatientInfoScreen({
   // Get patient preferred names from API
   useEffect(() => {
     getPrefNames();
-  }, [])
+  }, []);
 
-  const [isPrefNamesLoading, setIsPrefNamesLoading] = useState(false);  
-  const { user, setUser } = useContext(AuthContext);
-  const [prefNames, setPrefNames] = useState([]);
-
+  // Get list of preferred names from backend to detect duplicate preferred names
   const getPrefNames = async () => {
     setIsPrefNamesLoading(true);
-    const response = await patientApi.getPatientList(false,'active');
+    const response = await patientApi.getPatientList(false, 'active');
     if (!response.ok) {
       setUser(null);
       return;
     }
-    setPrefNames(response.data.data.map(x => x.preferredName));
-    setIsPrefNamesLoading(false);    
+    setPrefNames(response.data.data.map((x) => x.preferredName));
+    setIsPrefNamesLoading(false);
   };
 
-  return isLoading || isPrefNamesLoading ? (
+  // Functions for error state reporting for the child components
+  const handleFirstNameError = useCallback(
+    (state) => {
+      setIsFirstNameError(state);
+      // console.log('FirstName: ', state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isFirstNameError],
+  );
+
+  const handleLastNameError = useCallback(
+    (state) => {
+      setIsLastNameError(state);
+      // console.log("last name", state)
+    },
+    [isLastNameError],
+  );
+    
+  const handleNRICError = useCallback(
+    (state) => {
+      setIsNRICError(state);
+      // console.log("nric", state)
+    },
+    [isNRICError],
+  );
+  
+  const handleDOBError = useCallback(
+    (state) => {
+      setIsDOBError(state);
+      // console.log("dob", state)
+    },
+    [isDOBError],
+  );
+
+  const handleGenderError = useCallback(
+    (state) => {
+      setIsGenderError(state);
+      // console.log("gender", state)
+    },
+    [isGenderError],
+  );
+  
+  const handleAddrError = useCallback(
+    (state) => {
+      setIsAddrError(state);
+      // console.log("addr", state)
+    },
+    [isAddrError],
+  );
+
+  const handlePostalCodeError = useCallback(
+    (state) => {
+      setIsPostalCodeError(state);
+      // console.log("addr", state)
+    },
+    [isPostalCodeError],
+  );
+  
+  const handleTempAddrError = useCallback(
+    (state) => {
+      setIsTempAddrError(state);
+      // console.log("temp addr", state)
+    },
+    [isTempAddrError],
+  );
+
+  const handleTempPostalCodeError = useCallback(
+    (state) => {
+      setIsTempPostalCodeError(state);
+      // console.log("addr", state)
+    },
+    [isTempPostalCodeError],
+  );
+  
+  const handleHomeNoError = useCallback(
+    (state) => {
+      setIsHomeNoError(state);
+      // console.log("home", state)
+    },
+    [isHomeNoError],
+  );
+
+  const handleMobileNoError = useCallback(
+    (state) => {
+      setIsMobileNoError(state);
+      // console.log("mobile", state)
+    },
+    [isMobileNoError],
+  );
+  
+  const handlePrefNameError = useCallback(
+    (state) => {
+      setIsPrefNameError(state);
+      // console.log("pref name", state)
+    },
+    [isPrefNameError],
+  );
+  
+  const handlePrefLanguageError = useCallback(
+    (state) => {
+      setIsPrefLanguageError(state);
+      // console.log("language", state)
+    },
+    [isPrefLanguageError],
+  );
+
+  const handleRespiteError = useCallback(
+    (state) => {
+      setIsRespiteError(state);
+      // console.log("respite", state)
+    },
+    [isRespiteError],
+  );
+
+  const handleJoiningError = useCallback(
+    (state) => {
+      setIsJoiningError(state);
+      // console.log("joining", state)
+    },
+    [isJoiningError],
+  );
+
+  const handleLeavingError = useCallback(
+    (state) => {
+      setIsLeavingError(state);
+      // console.log("leaving", state)
+    },
+    [isLeavingError],
+  );
+
+  return isError ? (    
+    noDataMessage(null, false, isError, null)
+  ) : isLoading || isPrefNamesLoading ? (
     <ActivityIndicator visible />
   ) : (
     <>
@@ -282,9 +335,7 @@ function PatientAddPatientInfoScreen({
 
                     <Box mt="3.5" mb="3.5" overflow="hidden" rounded="lg">
                       <Center>
-                        <Pressable
-                          onPress={pickImage('UploadProfilePicture')}
-                        >
+                        <Pressable onPress={pickImage('UploadProfilePicture')}>
                           <Image
                             alt="patient_image"
                             borderRadius="full"
@@ -337,7 +388,7 @@ function PatientAddPatientInfoScreen({
                   <SensitiveInputField
                     isRequired
                     title={'NRIC'}
-                    autoCapitalize='characters'
+                    autoCapitalize="characters"
                     value={patient.NRIC}
                     onChangeText={handleFormData('NRIC')}
                     onEndEditing={handleNRICError}
@@ -351,6 +402,7 @@ function PatientAddPatientInfoScreen({
                       selectionMode={'DOB'}
                       title={'Date of Birth'}
                       value={patient.DOB}
+                      hideDayOfWeek={true}
                       handleFormData={handleFormData('DOB')}
                       onEndEditing={handleDOBError}
                     />
@@ -391,6 +443,16 @@ function PatientAddPatientInfoScreen({
                     onEndEditing={handleTempAddrError}
                   />
 
+                  <InputField
+                    isRequired={patient.TempAddress.length > 0}
+                    title={'Temporary Postal Code'}
+                    value={patient.TempPostalCode}
+                    onChangeText={handleFormData('TempPostalCode')}
+                    onEndEditing={handleTempPostalCodeError}
+                    dataType='postal code'
+                    keyboardType='numeric'
+                    maxLength={6}
+                  />
                   <InputField
                     title={'Home Telephone No.'}
                     value={patient.HomeNo}
@@ -436,7 +498,7 @@ function PatientAddPatientInfoScreen({
                     title={'Respite Care'}
                     value={patient.IsRespiteCare}
                     onChangeData={handleFormData('IsRespiteCare')}
-                    dataArray={listRespiteCare}
+                    dataArray={listOfRespiteCare}
                     onEndEditing={handleRespiteError}
                   />
 
@@ -445,6 +507,7 @@ function PatientAddPatientInfoScreen({
                       isRequired
                       title={'Date of Joining'}
                       value={patient.StartDate}
+                      hideDayOfWeek={true}
                       handleFormData={handleFormData('StartDate')}
                       onEndEditing={handleJoiningError}
                       minimumInputDate={minimumJoiningDate}
@@ -465,8 +528,9 @@ function PatientAddPatientInfoScreen({
                   {formData.patientInfo.IsChecked ? (
                     <DateInputField
                       title={'Date of Leaving'}
-                      handleFormData={handleFormData('EndDate')}
                       value={patient.EndDate}
+                      handleFormData={handleFormData('EndDate')}
+                      hideDayOfWeek={true}
                       onEndEditing={handleLeavingError}
                     />
                   ) : null}
@@ -498,7 +562,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   dateSelectionContainer: {
-    width: '70%',
+    width: '100%',
   },
   text: {
     fontWeight: 'bold',

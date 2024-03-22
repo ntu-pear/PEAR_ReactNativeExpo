@@ -1,12 +1,12 @@
 // Libs
 import React, { useState } from 'react';
-import { Platform, Alert } from 'react-native';
+import { Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-// import { useNavigate } from 'react-router-dom';
+import mime from 'mime';
+import * as ImagePicker from 'expo-image-picker';
 
 // API
 import patientApi from 'app/api/patient';
-import mime from 'mime';
 
 // Configurations
 import routes from 'app/navigation/routes';
@@ -15,13 +15,16 @@ import routes from 'app/navigation/routes';
 import PatientAddPatientInfoScreen from 'app/screens/PatientAddPatientInfoScreen';
 import PatientAddGuardianScreen from 'app/screens/PatientAddGuardianScreen';
 import PatientAddAllergyScreen from 'app/screens/PatientAddAllergyScreen';
-import * as ImagePicker from 'expo-image-picker';
+import ActivityIndicator from 'app/components/ActivityIndicator';
 
 function PatientAddScreen() {
   const navigation = useNavigation();
 
   // State to keep track of which page of the form is loaded
   const [step, setStep] = useState(1);
+
+  // State to keep track of whether user pressed subnmit button
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   //  State for components
   const [componentList, setComponentList] = useState({
@@ -44,6 +47,7 @@ function PatientAddScreen() {
       Address: '',
       PostalCode: '',
       TempAddress: '',
+      TempPostalCode: '',
       HomeNo: '',
       HandphoneNo: '',
       Gender: 'M',
@@ -80,6 +84,7 @@ function PatientAddScreen() {
         Address: '',
         PostalCode: '',
         TempAddress: '',
+        TempPostalCode: '',
         Gender: 'M',
         PreferredName: '',
       },
@@ -96,9 +101,8 @@ function PatientAddScreen() {
 
   const [formData, setFormData] = useState(addPatientData);
 
-  // Function to handle form sections which can have multiple items (like allergies/guardians - can have multiple) 
+  // Function to handle form sections which can have multiple items (like allergies/guardians - can have multiple)
   const componentHandler = (page = '', list = []) => {
-    console.log(1, list)
     if (list) {
       setComponentList((prevState) => ({
         // eg. componentList: { guardian: [{..}, {..}] }
@@ -160,9 +164,11 @@ function PatientAddScreen() {
         ...prevState,
         ['patientInfo']: newData,
       }));
+
+      console.log(newData);
     }
   };
- 
+
   // Function to update patient data
   const handlePatientData = (field) => (e) => {
     const newData = formData.patientInfo;
@@ -175,59 +181,52 @@ function PatientAddScreen() {
     } else if (field === 'PreferredLanguageListID') {
       newData[field] = parseInt(e);
     } else {
-      newData[field] = e; 
+      newData[field] = e;
     }
 
     setFormData((prevState) => ({
       ...prevState,
-      patientInfo : newData,
+      patientInfo: newData,
     }));
   };
-  
 
-  // Function to update patient data
+  // Function to update guardian data
   const handleGuardianData = (field, i) => (e) => {
-    const newData = formData.guardianInfo;    
+    const newData = formData.guardianInfo;
 
     if (field === 'RelationshipID') {
       newData[i][field] = parseInt(e);
     } else {
-      newData[i][field] = e; 
+      newData[i][field] = e;
     }
 
     setFormData((prevState) => ({
       ...prevState,
-      guardianInfo : newData,
+      guardianInfo: newData,
     }));
   };
 
   // Function to update patient data
   const handleAllergyData = (field, i) => (e) => {
-    const newData = formData.allergyInfo;    
+    const newData = formData.allergyInfo;
 
     if (field === 'AllergyListID' || field === 'AllergyReactionListID') {
       newData[i][field] = parseInt(e);
     } else {
-      newData[i][field] = e; 
+      newData[i][field] = e;
     }
 
     setFormData((prevState) => ({
       ...prevState,
-      allergyInfo : newData,
+      allergyInfo: newData,
     }));
   };
 
   // Function to submit form
   const onSubmit = async () => {
-    // temp solution to add postal code as from separate input field
-    const tempPatientInfo = {...formData.patientInfo}
-    const tempGuardianInfo = {...formData.guardianInfo}
-    const tempAllergyInfo = {...formData.allergyInfo}
-
-    tempPatientInfo['Address'] = tempPatientInfo['Address'] + ' ' + tempPatientInfo['PostalCode'];
-    delete tempPatientInfo['PostalCode'];
-    
-    const result = await patientApi.addPatient({'patientInfo': tempPatientInfo, 'guardianInfo': tempGuardianInfo, 'allergyInfo': tempAllergyInfo});
+    setIsSubmitting(true);
+    console.log(formData);
+    const result = await patientApi.addPatient(formData);
 
     let alertTitle = '';
     let alertDetails = '';
@@ -252,6 +251,7 @@ function PatientAddScreen() {
       alertTitle = 'Error in Adding Patient';
     }
     Alert.alert(alertTitle, alertDetails);
+    setIsSubmitting(false);
   };
 
   switch (step) {
@@ -277,6 +277,9 @@ function PatientAddScreen() {
         />
       );
     case 3:
+      if(isSubmitting) {
+        return (<ActivityIndicator visible/>)  
+      } 
       return (
         <PatientAddAllergyScreen
           nextQuestionHandler={nextQuestionHandler}

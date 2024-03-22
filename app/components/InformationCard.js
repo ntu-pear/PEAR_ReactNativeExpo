@@ -11,6 +11,9 @@ import formatDateTime from 'app/hooks/useFormatDateTime.js';
 import typography from 'app/config/typography';
 import colors from 'app/config/colors';
 
+// Components
+import AppButton from 'app/components/AppButton';
+
 function InformationCard({ displayData, title, subtitle, handleOnPress=null, unMaskedNRIC=null }) {
   const [itemizedData, setItemizedData] = useState(displayData);
   const [masked, setMasked] = useState(true);
@@ -40,95 +43,106 @@ function InformationCard({ displayData, title, subtitle, handleOnPress=null, unM
     }
   };
 
-  useEffect(() =>{
+  useEffect(() => {
     if (itemizedData.length === 0){
       setItemizedData(displayData);
     }
   }, [itemizedData, displayData]);
 
+  useEffect(() => {
+    console.log(subtitle);
+  }, []);
+
   return (
     <View style={styles.cardContainer}>
-      <VStack>
-        <HStack style={styles.buttonContainer}>
-          {title ? (
-            <Text style={[styles.TextContent, styles.titleText]}>{title}</Text>
-          ) : null}
-          {(handleOnPress !== null && title !== null && title !== "Guardian(s) Information") ? ( // editing button will appear if the title is not null
-            <IconButton                                                                          // or "Guardian(s) Information"
-              _icon={{
-                as: MaterialCommunityIcons,
-                name: 'pencil',
-              }}
-              size="lg"
-              onPress={handleOnPress}
-            />
-          ) : null}
-        </HStack>
-        <HStack style={styles.buttonContainer}>
-          {subtitle ? (
-            <Text style={[styles.TextContent, styles.subtitleText]}>
-              {subtitle}
-            </Text>
-          ) : null}
-          {subtitle ? (
-            <IconButton
-              _icon={{
-                as: MaterialCommunityIcons,
-                name: 'pencil',
-              }}
-              size="lg"
-              onPress={handleOnPress}
-            />
-          ) : null}
-        </HStack>
-        {itemizedData.length !== 0 ? 
-          itemizedData.map((data, index) => (
-          <View style={styles.fieldContainer} key={index}>
-            <Text style={[styles.TextContent, styles.fieldLabel]}>
-              {data === undefined ? 'undefined' : `${data.label}:  `}
-            </Text>
-            <Text style={[styles.TextContent, styles.fieldValue]} key={index+"text"}>
-              {data === undefined ? 'undefined' :                             // formatting of data
-                data.value === 'Not available' ? 'Not available' :
-                data.value === 1 ? 'Yes' :
-                data.value === true ? 'Yes' :
-                data.value === 0 ? 'No' :
-                data.value === null ? 'Not available' :
-                data.value === 'null' ? 'Not available' :
-                data.label === 'DOB' ? `${formatDateTime(data.value, true)}` : 
-                data.label === 'Start Date' ? `${formatDateTime(data.value, true)}` : 
-                data.label === 'End Date' ? `${formatDateTime(data.value, true)}` : 
-                data.label === 'Date' ? `${formatDateTime(data.value, true)}` : 
-                `${data.value}`}
-            </Text>
-            {(data.label !== null && data.label === 'NRIC' && masked === true) ? (
+      <HStack>
+        <VStack>
+          <HStack style={styles.buttonContainer}>
+            {subtitle ? (
+              <Text style={[styles.TextContent, styles.subtitleText]}>
+                {subtitle}
+              </Text>
+            ) : null}
+            {subtitle ? (
               <IconButton
                 _icon={{
                   as: MaterialCommunityIcons,
-                  name: 'eye-outline',
+                  name: 'pencil',
                 }}
-                padding={0}
-                onPress={() => handleUnmaskNRIC()}
-              />
-            ) : (data.label !== null && data.label === 'NRIC' && masked === false) ? (
-              <IconButton
-                _icon={{
-                  as: MaterialCommunityIcons,
-                  name: 'eye',
-                }}
-                padding={0}
-                onPress={() => handleUnmaskNRIC()}
+                size="lg"
+                onPress={handleOnPress}
               />
             ) : null}
+          </HStack>
+          {itemizedData.length !== 0 ? 
+            itemizedData.map((data, index) => (
+            <View style={styles.fieldContainer} key={index}>
+              <Text style={[styles.TextContent, styles.fieldLabel]}>
+                {data === undefined ? 'undefined' : `${data.label}:  `}
+              </Text>
+              <Text style={[styles.TextContent, styles.fieldValue]} key={index+"text"}>
+                {data === undefined ? 'undefined' :                             // formatting of data
+                  data.value === 'Not available' ? 'Not available' :
+                  data.value === 1 ? 'Yes' :
+                  data.value === true ? 'Yes' :
+                  data.value === 0 ? 'No' :
+                  data.value === null ? 'Not available' :
+                  data.value === 'null' ? 'Not available' :
+                  data.label === 'DOB' ? `${formatDateTime(data.value, true)}` : 
+                  data.label === 'Start Date' ? `${formatDateTime(data.value, true)}` : 
+                  data.label === 'End Date' ? `${formatDateTime(data.value, true)}` : 
+                  data.label === 'Date' ? `${formatDateTime(data.value, true)}` : 
+                  `${data.value}`}
+              </Text>
+              {(data.label !== null && data.label === 'NRIC' && masked === true) ? (
+                <IconButton
+                  _icon={{
+                    as: MaterialCommunityIcons,
+                    name: 'eye-outline',
+                  }}
+                  padding={0}
+                  onPress={() => handleUnmaskNRIC()}
+                />
+              ) : (data.label !== null && data.label === 'NRIC' && masked === false) ? (
+                <IconButton
+                  _icon={{
+                    as: MaterialCommunityIcons,
+                    name: 'eye',
+                  }}
+                  padding={0}
+                  onPress={() => handleUnmaskNRIC()}
+                />
+              ) : null}
+            </View>
+          )) :
+            <View style={styles.fieldContainer}>
+              <Text style={[styles.TextContent, styles.fieldLabel]}>
+                Not available
+              </Text>
+            </View>
+          }
+        </VStack>
+        {(handleOnPress != null && title != null && title!="Guardian(s) Information" && subtitle == null) ? (
+          // <IconButton
+          //   _icon={{
+          //     as: MaterialCommunityIcons,
+          //     name: 'pencil',
+          //   }}
+          //   size="lg"
+          //   onPress={handleOnPress}
+          //   style={styles.editButton}
+          // />
+          // TODO: add the icon to the button
+          <View style={styles.editButton}>
+            <AppButton
+              title='EDIT'
+              onPress={handleOnPress}
+              color='green_lighter'
+            />
           </View>
-        )) :
-          <View style={styles.fieldContainer}>
-            <Text style={[styles.TextContent, styles.fieldLabel]}>
-              Not available
-            </Text>
-          </View>
-        }
-      </VStack>
+        ) : null}
+          
+      </HStack>
     </View>
   );
 }
@@ -155,22 +169,30 @@ const styles = StyleSheet.create({
     marginRight: 0,
   },
   subtitleText: {
-    fontSize: 22,
+    fontSize: 25,
     color: colors.black_var1,
+    fontWeight: 'bold',
   },
   fieldLabel: {
     fontSize: 18,
     color: colors.light_gray2,
+    textTransform: 'uppercase',
   },
   fieldValue: {
     fontSize: 18,
-    maxWidth: '58%',
+    maxWidth: '65%',
+    fontWeight: 'bold',
   },
   fieldContainer: {
     flexDirection: 'row',
   },
   buttonContainer:{
     w: "100%",
+  },
+  editButton: {
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    marginLeft: 'auto',
   },
 });
 

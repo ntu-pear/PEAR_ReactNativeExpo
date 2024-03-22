@@ -1,5 +1,5 @@
 // Libs
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Box, VStack, Text, Divider } from 'native-base';
 import { StyleSheet, Platform, View } from 'react-native';
 
@@ -14,9 +14,9 @@ import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 import { initSelectDisable, parseSelectOptions } from 'app/utility/miscFunctions';
 
 // Components
-import SelectionInputField from 'app/components/input-fields/SelectionInputField';
+import SelectionInputField from 'app/components/input-components/SelectionInputField';
 import LoadingWheel from 'app/components/LoadingWheel';
-import InputField from './input-fields/InputField';
+import InputField from './input-components/InputField';
 
 function AddPatientAllergy({ i, title, formData, handleFormData, onError }) {
   const page = 'allergyInfo';
@@ -160,20 +160,29 @@ function AddPatientAllergy({ i, title, formData, handleFormData, onError }) {
 
   
   // Functions for error state reporting for the child components
-  const handleAllergyError = (e) => {
-    setIsAllergyError(e);
-    // console.log("allergy", e)
-  }
+  const handleAllergyError = useCallback(
+    (state) => {
+      setIsAllergyError(state);
+      // console.log("allergy",stat e)
+    },
+    [isAllergyError],
+  );
 
-  const handleReactionError = (e) => {
-    setIsReactionError(e);
-    // console.log("reaction", e);
-  }
+  const handleReactionError = useCallback(
+    (state) => {
+      setIsReactionError(state);
+      // console.log("reaction", state);
+    },
+    [isReactionError],
+  );
   
-  const handleRemarksError = (e) => {
-    setIsRemarksError(e);
-    // console.log("remarks", e); 
-  }
+  const handleRemarksError = useCallback(
+    (state) => {
+      setIsRemarksError(state);
+      // console.log("remarks", estat); 
+    },
+    [isRemarksError],
+  );
 
   return isAllergiesLoading || isReactionsLoading ? (
     <LoadingWheel />

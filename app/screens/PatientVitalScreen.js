@@ -12,6 +12,8 @@ import formatDateTime from 'app/hooks/useFormatDateTime.js';
 // Components
 import DynamicTable from 'app/components/DynamicTable';
 import ActivityIndicator from 'app/components/ActivityIndicator';
+import AddButton from 'app/components/AddButton';
+import AddPatientVitalModal from 'app/components/AddPatientVitalModal';
 
 function PatientVitalScreen(props) {
   const [isLoading, setIsLoading] = useState(true);
@@ -20,6 +22,26 @@ function PatientVitalScreen(props) {
   const [widthData, setWidthData] = useState([]);
   const [tableDataFormated, setTableDataFormated] = useState([]);
   const [patientID, setPatientID] = useState(props.route.params.patientID);
+  const [showModal, setShowModal] = useState(false);
+  // Adding vitals
+  const handleAddVitals = () => {
+    setShowModal(true);
+  };
+
+  const handleModalSubmit = async (vitalData) => {
+    try {
+      const result = await patientApi.AddPatientVital(patientID, vitalData);
+      if (result.ok) {
+        console.log('submitting vital data', vitalData);
+        retrieveScreenData(patientID);
+        setShowModal(false);
+      } else {
+        console.error('Error submitting vital data', result.problem, vitalData);
+      }
+    } catch (error) {
+      console.error('Exception when calling AddPatientVital:', error);
+    }
+  };
 
   const retrieveScreenData = async (id) => {
     const response = await patientApi.getPatientVitalList(id);
@@ -28,19 +50,38 @@ function PatientVitalScreen(props) {
       return;
     }
 
-    const newArray = response.data.data.map(({ 
-      updatedDateTime, temperature, systolicBP, diastolicBP, heartRate, spO2, bloodSugarlevel, vitalRemarks
-    }) => ({
-      "Date": `${formatDateTime(updatedDateTime, true)}`,
-      "Time": `${formatDateTime(updatedDateTime, false)}`,
-      "Temperature (C)": temperature,
-      "Systolic BP": systolicBP,
-      "Diastolic BP": diastolicBP,
-      "Heart Rate": heartRate,
-      "SpO2": spO2,
-      "Blood Sugar Level": bloodSugarlevel,
-      "Notes": vitalRemarks,
-    }));
+    const sortedData = response.data.data.sort(
+      (a, b) => new Date(b.createdDate) - new Date(a.createdDate),
+    );
+
+    const newArray = sortedData.map(
+      ({
+        updatedDateTime,
+        temperature,
+        weight,
+        height,
+        systolicBP,
+        diastolicBP,
+        heartRate,
+        spO2,
+        bloodSugarlevel,
+        afterMeal,
+        vitalRemarks,
+      }) => ({
+        Date: `${formatDateTime(updatedDateTime, true)}`,
+        Time: `${formatDateTime(updatedDateTime, false)}`,
+        'Temperature (°C)': temperature,
+        'Weight (kg)': weight,
+        'Height (m)': height,
+        'Systolic BP (mmHg)': systolicBP,
+        'Diastolic BP (mmHg)': diastolicBP,
+        'Heart Rate (bpm)': heartRate,
+        'SpO2 (%)': spO2,
+        'Blood Sugar Level (mmol/L)': bloodSugarlevel,
+        'After Meal': afterMeal ? 'Yes' : 'No',
+        Remark: vitalRemarks,
+      }),
+    );
     setTableDataFormated(newArray);
     setIsLoading(false);
   };
@@ -48,9 +89,11 @@ function PatientVitalScreen(props) {
   useEffect(() => {
     if (tableDataFormated !== undefined && tableDataFormated.length !== 0) {
       setHeaderData(Object.keys(tableDataFormated[0]));
-      
+
       const finalArray = tableDataFormated.map((item) => {
-        return Object.values(item).map((value) => value.toString());
+        return Object.values(item).map((value) =>
+          value ? value.toString() : '',
+        );
       });
       setRowData(finalArray);
     }
@@ -58,7 +101,7 @@ function PatientVitalScreen(props) {
 
   useEffect(() => {
     retrieveScreenData(patientID);
-    setWidthData([120, 100, 170, 130, 130, 150, 100, 200, 300]);
+    setWidthData([120, 100, 170, 130, 130, 200, 200, 200, 100, 250, 130, 200]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -71,6 +114,12 @@ function PatientVitalScreen(props) {
         rowData={rowData}
         widthData={widthData}
         screenName={'patient vital'}
+      />
+      <AddButton title="Add Vitals" onPress={handleAddVitals} />
+      <AddPatientVitalModal
+        showModal={showModal}
+        onClose={() => setShowModal(false)}
+        onSubmit={handleModalSubmit}
       />
     </View>
   );

@@ -2,7 +2,7 @@
 
 ## File Structure
 
-Note: File structure will continuously be updated
+Note: File structure will be continuously updated
 
 ```
 └── PEAR_ReactNativeExpo
@@ -13,7 +13,7 @@ Note: File structure will continuously be updated
     │   │
     │   ├── api        -- API Layer [Single Responsibility Principle]
     │   │
-    │   ├── auth        -- Authentication handling layer. e.g. login, logout
+    │   ├── auth       -- Authentication handling layer. e.g. login, logout
     │   │
     │   ├── hooks      -- Custom Hooks location.Convention:use<Something>.js
     │   │
@@ -22,9 +22,16 @@ Note: File structure will continuously be updated
     │   ├── utility    -- contains cache layer and misc.
     │   │
     │   ├── config     -- common constants to be stored here.
-    │   │   └── colors.js -- common color constants.
+    │   │   ├── colors.js     -- common color constants.
+    |   |   |
+    |   |   ├── errors.js     -- common error messages.
+    |   |   |
+    |   |   └── typography.js -- typography used.
+    |   |
     │   └── screens    -- pages to be navigated to.
     │       └── web    -- web related pages.
+    |
+    ├── .gitignore     -- files/folders to ignore when making a commit
     |
     ├── App.js         -- React Native Expo entry point
     │
@@ -79,18 +86,18 @@ Note: If you're on windows, you will probably only be able to run the `android` 
 1. cd to `./PEAR_REACTNATIVEEXPO` root folder.
 2. Remove `node_modules` folder and `package-lock.json` file. (Note: NOT `package.json`)
 3. run `npm install`.
-4. run `npm start`, and expo will begin running.
+4. run `expo start`, and expo will begin running.
    - To run `android` simulator. Hit the `a` key.
    - To run `ios` simulator. Hit the `i` key.
    - To run `web`. Hit the `w` key.
 
 Some issues faced during installation guide:
 
-- Android panic borken avd system (android simulator issue). [Link](https://stackoverflow.com/questions/39645178/panic-broken-avd-system-path-check-your-android-sdk-root-value)
+- Android panic broken avd system (android simulator issue). [Link](https://stackoverflow.com/questions/39645178/panic-broken-avd-system-path-check-your-android-sdk-root-value)
 
 #### How to run on physical device?
 
-1. Simply scan the `QR code` (displayed after running `npm start`) using the `expo client`.
+1. Simply scan the `QR code` (displayed after running `expo start`) using the `expo client`.
 
 ## Testing
 

@@ -1,4 +1,4 @@
-// Lib
+// Libs
 import React, { useState, useCallback } from 'react';
 import { SectionList, Center, View } from 'native-base';
 
@@ -55,7 +55,9 @@ function PatientAddGuardianScreen({nextQuestionHandler,
       IsActive: true,
       DOB: maximumDOB,
       Address: '',
+      PostalCode: '',
       TempAddress: '',
+      TempPostalCode: '',
       Gender: 'M',
       PreferredName: '',
     });

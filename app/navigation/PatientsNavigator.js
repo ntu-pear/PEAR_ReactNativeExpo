@@ -12,7 +12,7 @@ import PatientHolidayScreen from 'app/screens/PatientHolidayScreen';
 import PatientPhotoAlbumScreen from 'app/screens/PatientPhotoAlbumScreen';
 import PatientPreferenceScreen from 'app/screens/PatientPreferenceScreen';
 import PatientPrescriptionScreen from 'app/screens/PatientPrescriptionScreen';
-import PatientProblemLog from 'app/screens/PatientProblemLog';
+import PatientProblemLog from 'app/screens/PatientProblemLogScreen';
 import PatientVitalScreen from 'app/screens/PatientVitalScreen';
 import PatientRoutineScreen from 'app/screens/PatientRoutineScreen';
 import PatientAddScreen from 'app/screens/PatientAddScreen';
@@ -20,6 +20,7 @@ import EditPatientInfoScreen from 'app/screens/EditPatientInfoScreen';
 import EditPatientPreferencesScreen from 'app/screens/EditPatientPreferencesScreen';
 import EditPatientGuardianScreen from 'app/screens/EditPatientGuardianScreen';
 import EditPatientSocialHistScreen from 'app/screens/EditPatientSocialHistScreen';
+import PatientMedicationScreen from 'app/screens/PatientMedicationScreen';
 
 // Refer to this: https://reactnavigation.org/docs/hello-react-navigation
 const Stack = createNativeStackNavigator();
@@ -51,7 +52,7 @@ function PatientsNavigator() {
         options={{
           headerShown: true,
           headerBackTitleVisible: false,
-          title: 'Patient Information',
+          title: 'Patient Particulars',
         }}
       />
       <Stack.Screen
@@ -133,6 +134,15 @@ function PatientsNavigator() {
           headerShown: true,
           headerBackTitleVisible: false,
           title: 'Routine',
+        }}
+      />
+      <Stack.Screen
+        name={routes.PATIENT_MEDICATION}
+        component={PatientMedicationScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Medication',
         }}
       />
       <Stack.Screen

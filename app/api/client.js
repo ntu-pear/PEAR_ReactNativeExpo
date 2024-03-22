@@ -1,17 +1,10 @@
 import { create } from 'apisauce';
 import authStorage from 'app/auth/authStorage';
 import cache from 'app/utility/cache';
-// import { Platform } from 'react-native';
-import { useContext } from 'react';
-import AuthContext from 'app/auth/context';
-import jwt_decode from 'jwt-decode';
 
-const baseURL = 'https://coremvc.fyp2017.com/api';
-// for CORS error
-// API for local BE
-// const baseURLWeb = 'http://localhost:5383/api';
-// API for BE staging stage
-const baseURLWeb = 'https://ntu-fyp-pear-core.azurewebsites.net/api';
+const baseURL = 'http://172.21.148.180:5678/api'; // new NTU server
+// const baseURL = 'https://coremvc.fyp2017.com/api'; // old server
+
 const endpoint = '/User';
 const userRefreshToken = `${endpoint}/RefreshToken`;
 /*
@@ -65,7 +58,7 @@ apiClient.addAsyncResponseTransform(async (response) => {
   if (
     response &&
     response.status &&
-    (response.status === 401 || response.status === 403) 
+    (response.status === 401 || response.status === 403)
   ) {
     // if access token is invalid, begin renewal.
     console.log('client.js: Renewing user tokens');
@@ -75,6 +68,11 @@ apiClient.addAsyncResponseTransform(async (response) => {
     const unformattedUserRefreshToken = await authStorage.getToken(
       'userRefreshToken',
     );
+
+    if(unformattedUserAccessToken == null && unformattedUserRefreshToken == null) {
+      return;
+    }
+
     const accessToken = unformattedUserAccessToken.replace(/['"]+/g, '');
     const refreshToken = unformattedUserRefreshToken.replace(/['"]+/g, '');
     let bearerToken = accessToken;

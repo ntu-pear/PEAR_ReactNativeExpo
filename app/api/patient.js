@@ -10,24 +10,41 @@ const allergyEndpoint = '/Allergy';
 const vitalEndpoint = '/Vital';
 const prescriptionEndpoint = '/Prescription';
 const problemLogEndpoint = '/ProblemLog';
-const medicalHistorypoint = '/MedicalHistory';
+const medicalHistoryEndpoint = '/MedicalHistory';
+const medicationEndpoint = '/Medication';
 const activityEndpoint = '/Activity';
 const routineEndpoint = '/Routine';
 const patientList = `${endpoint}/patientList`;
 // `${endpoint}/patientListByUserId` changed to ${endpoint}/patientListByLoggedInCaregiver
 // to enable fetching caregiver specific patients
 const patientListByUserId = `${endpoint}/patientListByLoggedInCaregiver`;
+const patientStatusCountList = `${endpoint}/patientStatusCountList`;
 const patientAdd = `${endpoint}/add`;
 const patientUpdate = `${endpoint}/update`; //eslint-disable-line no-unused-vars
 const privacyLevelUpdate = `${endpoint}/UpdatePatient`; //eslint-disable-line no-unused-vars
 const patientDelete = `${endpoint}/delete`; //eslint-disable-line no-unused-vars
 const patientAllergy = `${allergyEndpoint}/PatientAllergy`; //eslint-disable-line no-unused-vars
-const patientVitalList = `${vitalEndpoint}/list`; //eslint-disable-line no-unused-vars
 const patientPrescriptionList = `${prescriptionEndpoint}/PatientPrescription`; //eslint-disable-line no-unused-vars
-const patientProblemLog = `${problemLogEndpoint}/PatientProblemLog`; //eslint-disable-line no-unused-vars
-const patientMedicalHistory = `${medicalHistorypoint}/list`; //eslint-disable-line no-unused-vars
 const patientRoutine = `${activityEndpoint}${routineEndpoint}/PatientRoutine`; //eslint-disable-line no-unused-vars
-
+// Medical History
+const patientMedicalHistory = `${medicalHistoryEndpoint}/list`; //eslint-disable-line no-unused-vars
+const patientMedicalHistoryAdd = `${medicalHistoryEndpoint}/add`; //eslint-disable-line no-unused-vars
+const patientMedicalHistoryDelete = `${medicalHistoryEndpoint}/delete`; //eslint-disable-line no-unused-vars
+// Allergy
+const patientAllergyAdd = `${allergyEndpoint}/add`; //eslint-disable-line no-unused-vars
+const patientAllergyDelete = `${allergyEndpoint}/delete`; //eslint-disable-line no-unused-vars
+// Vitals
+const patientVitalList = `${vitalEndpoint}/list`; //eslint-disable-line no-unused-vars
+const patientVitalAdd = `${vitalEndpoint}/add`; //eslint-disable-line no-unused-vars
+// Problem Log
+const patientProblemLog = `${problemLogEndpoint}/PatientProblemLog`; //eslint-disable-line no-unused-vars
+const patientProblemLogAdd = `${problemLogEndpoint}/add`; //eslint-disable-line no-unused-vars
+const patientProblemLogUpdate = `${problemLogEndpoint}/update`; //eslint-disable-line no-unused-vars
+const patientProblemLogDelete = `${problemLogEndpoint}/delete`; //eslint-disable-line no-unused-vars
+// Medication
+const patientMedicationAdd = `${medicationEndpoint}/add`; //eslint-disable-line no-unused-vars
+const patientMedicationUpdate = `${medicationEndpoint}/update`; //eslint-disable-line no-unused-vars
+const patientMedicationDelete = `${medicationEndpoint}/delete`; //eslint-disable-line no-unused-vars
 /*
  * List all functions here
  * Refer to this api doc: https://github.com/infinitered/apisauce
@@ -64,10 +81,7 @@ const addPatientForm = (arr, str, patientData) => {
 };
 // **********************  GET REQUESTS *************************
 
-const getPatient = async (patientID, maskNRIC) => {
-  // Error Handling
-  maskNRIC ? (maskNRIC = true) : (maskNRIC = false);
-
+const getPatient = async (patientID, maskNRIC = true) => {
   /*
    *   Build Params
    */
@@ -89,21 +103,25 @@ const getPatient = async (patientID, maskNRIC) => {
   return client.get(endpoint, params);
 };
 
-const getPatientList = async (maskNRIC = true) => {
-  // Error Handling
-  // maskNRIC ? (maskNRIC = true) : (maskNRIC = false);
-
-  return client.get(patientList, maskNRIC);
+const getPatientList = async (maskNRIC = true, patientStatus = null) => {
+  return client.get(patientList, { maskNRIC, patientStatus });
 };
 
-const getPatientListByLoggedInCaregiver = async (maskNRIC = true) => {
-  return client.get(patientListByUserId, maskNRIC);
+const getPatientListByLoggedInCaregiver = async (
+  maskNRIC = true,
+  patientStatus = null,
+) => {
+  return client.get(patientListByUserId, { maskNRIC, patientStatus });
+};
+
+const getPatientStatusCountList = async () => {
+  return client.get(patientStatusCountList, {});
 };
 
 const getPatientAllergy = async (patientID) => {
   let params;
   params = {
-    patientID
+    patientID,
   };
 
   return client.get(patientAllergy, params);
@@ -112,7 +130,7 @@ const getPatientAllergy = async (patientID) => {
 const getPatientVitalList = async (patientID) => {
   let params;
   params = {
-    patientID
+    patientID,
   };
 
   return client.get(patientVitalList, params);
@@ -121,7 +139,7 @@ const getPatientVitalList = async (patientID) => {
 const getPatientPrescriptionList = async (patientID) => {
   let params;
   params = {
-    patientID
+    patientID,
   };
 
   return client.get(patientPrescriptionList, params);
@@ -130,25 +148,34 @@ const getPatientPrescriptionList = async (patientID) => {
 const getPatientProblemLog = async (patientID) => {
   let params;
   params = {
-    patientID
+    patientID,
   };
 
   return client.get(patientProblemLog, params);
 };
 
-const getPatientMedicalHistory= async (patientID) => {
+const getPatientMedicalHistory = async (patientID) => {
   let params;
   params = {
-    patientID
+    patientID,
   };
 
   return client.get(patientMedicalHistory, params);
 };
 
+const getPatientMedication = async (patientID) => {
+  let params;
+  params = {
+    patientID,
+  };
+
+  return client.get(medicationEndpoint, params);
+};
+
 const getPatientRoutine = async (patientID) => {
   let params;
   params = {
-    patientID
+    patientID,
   };
 
   return client.get(patientRoutine, params);
@@ -196,6 +223,81 @@ const addPatient = (patientFormData) => {
   return client.post(patientAdd, patientData, { headers });
 };
 
+// AddPatientAllergy is used in AddPatientAllergyModal.js - Joel
+const AddPatientAllergy = async (patientID, allergyData) => {
+  const payload = {
+    patientID: patientID,
+    allergyListID: allergyData.AllergyListID,
+    allergyReactionListID: allergyData.AllergyReactionListID,
+    allergyRemarks: allergyData.AllergyRemarks,
+  };
+  return client.post(patientAllergyAdd, payload);
+};
+
+const AddPatientVital = async (patientID, vitalData) => {
+  const payload = {
+    PatientID: patientID,
+    Temperature: vitalData.temperature,
+    SystolicBP: vitalData.systolicBP,
+    DiastolicBP: vitalData.diastolicBP,
+    HeartRate: vitalData.heartRate,
+    SpO2: vitalData.spO2,
+    BloodSugarLevel: vitalData.bloodSugarlevel,
+    Height: vitalData.height,
+    Weight: vitalData.weight,
+    VitalRemarks: vitalData.vitalRemarks,
+    AfterMeal: vitalData.afterMeal,
+  };
+  return client.post(patientVitalAdd, payload);
+};
+
+const addPatientProblemLog = async (patientID, userID, problemLogData) => {
+  const payload = {
+    userID: userID,
+    patientID: patientID,
+    problemLogRemarks: problemLogData.problemLogRemarks,
+    problemLogListID: problemLogData.problemLogListID,
+  };
+
+  return client.post(patientProblemLogAdd, payload);
+};
+
+const AddPatientMedicalHistory = async (patientID, medicalData) => {
+  const payload = {
+    PatientID: patientID,
+    medicalDetails: medicalData.medicalDetails,
+    informationSource: medicalData.informationSource,
+    medicalRemarks: medicalData.medicalRemarks,
+    medicalEstimatedDate: medicalData.medicalEstimatedDate,
+  };
+  return client.post(patientMedicalHistoryAdd, payload);
+};
+
+const addPatientMedication = async (patientID, medicationData) => {
+  const payload = {
+    patientID: patientID,
+    prescriptionName: medicationData.prescriptionName,
+    dosage: medicationData.dosage,
+    administerTime: medicationData.administerTime,
+    instruction: medicationData.instruction,
+    startDateTime: medicationData.startDateTime,
+    endDateTime: medicationData.endDateTime,
+    prescriptionRemarks: medicationData.prescriptionRemarks,
+  };
+  return client.post(patientMedicationAdd, payload);
+};
+
+const addPatientMedicalHistory = async (patientID, hxData) => {
+  const payload = {
+    patientID: patientID,
+    informationSource: hxData.informationSource,
+    medicalDetails: hxData.medicalDetails,
+    medicalRemarks: hxData.medicalRemarks,
+    medicalEstimatedDate: hxData.medicalEstimatedDate,
+  };
+  return client.post(patientMedicalHistoryAdd, payload);
+};
+
 // ************************* UPDATE REQUESTS *************************
 const updatePatient = async (data) => {
   const formData = new FormData();
@@ -209,6 +311,57 @@ const updatePatient = async (data) => {
 
   return client.put(patientUpdate, formData, { headers });
 };
+
+const deletePatientAllergy = async (allergyID) => {
+  return client.delete(patientAllergyDelete, { allergyID });
+};
+
+const updateMedication = async (patientID, medicationData) => {
+  const payload = {
+    patientID: patientID,
+    medicationID: medicationData.medicationID,
+    prescriptionName: medicationData.prescriptionName,
+    dosage: medicationData.dosage,
+    administerTime: medicationData.administerTime,
+    instruction: medicationData.instruction,
+    startDateTime: medicationData.startDateTime,
+    endDateTime: medicationData.endDateTime,
+    prescriptionRemarks: medicationData.prescriptionRemarks,
+  };
+  return client.put(patientMedicationUpdate, payload);
+};
+
+const updateProblemLog = async (patientID, userID, logData) => {
+  const payload = {
+    userID: userID,
+    patientID: patientID,
+    problemLogID: logData.problemLogID,
+    problemLogListID: logData.problemLogListID,
+    problemLogRemarks: logData.problemLogRemarks,
+  };
+  return client.put(patientProblemLogUpdate, payload);
+};
+
+const deleteMedication = async (medicationData) => {
+  const payload = {
+    medicationID: medicationData.medicationID,
+  };
+  return client.put(patientMedicationDelete, payload);
+};
+
+const deleteMedicalHistory = async (medHistoryData) => {
+  const payload = {
+    medicalHistoryID: medHistoryData.medicalHistoryID,
+  };
+  return client.put(patientMedicalHistoryDelete, payload);
+};
+
+const deleteProblemLog = async (logData) => {
+  const payload = {
+    problemLogID: logData.problemLogID,
+  };
+  return client.put(patientProblemLogDelete, payload);
+};
 /*
  * Expose your end points here
  */
@@ -216,12 +369,26 @@ export default {
   getPatient,
   getPatientList,
   getPatientListByLoggedInCaregiver,
+  getPatientStatusCountList,
   getPatientAllergy,
   getPatientVitalList,
   getPatientPrescriptionList,
   getPatientProblemLog,
   getPatientMedicalHistory,
+  getPatientMedication,
   getPatientRoutine,
   addPatient,
+  AddPatientAllergy,
+  AddPatientVital,
+  addPatientProblemLog,
+  AddPatientMedicalHistory,
+  addPatientMedication,
+  addPatientMedicalHistory,
   updatePatient,
+  deletePatientAllergy,
+  updateMedication,
+  deleteMedication,
+  deleteMedicalHistory,
+  deleteProblemLog,
+  updateProblemLog
 };
