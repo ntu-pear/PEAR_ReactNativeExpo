@@ -39,6 +39,8 @@ const patientVitalAdd = `${vitalEndpoint}/add`; //eslint-disable-line no-unused-
 // Problem Log
 const patientProblemLog = `${problemLogEndpoint}/PatientProblemLog`; //eslint-disable-line no-unused-vars
 const patientProblemLogAdd = `${problemLogEndpoint}/add`; //eslint-disable-line no-unused-vars
+const patientProblemLogUpdate = `${problemLogEndpoint}/update`; //eslint-disable-line no-unused-vars
+const patientProblemLogDelete = `${problemLogEndpoint}/delete`; //eslint-disable-line no-unused-vars
 // Medication
 const patientMedicationAdd = `${medicationEndpoint}/add`; //eslint-disable-line no-unused-vars
 const patientMedicationUpdate = `${medicationEndpoint}/update`; //eslint-disable-line no-unused-vars
@@ -255,12 +257,12 @@ const AddPatientVital = async (patientID, vitalData) => {
   return client.post(patientVitalAdd, payload);
 };
 
-const AddPatientProblemLog = async (patientID, problemLogData) => {
+const addPatientProblemLog = async (patientID, userID, problemLogData) => {
   const payload = {
-    UserID: problemLogData.userID,
-    PatientID: patientID,
-    ProblemLogListID: problemLogData.problemLogListDesc,
-    ProblemLogRemarks: problemLogData.remarks,
+    userID: userID,
+    patientID: patientID,
+    problemLogRemarks: problemLogData.problemLogRemarks,
+    problemLogListID: problemLogData.problemLogListID,
   };
 
   return client.post(patientProblemLogAdd, payload);
@@ -277,6 +279,7 @@ const AddPatientMedicalHistory = async (patientID, medicalData) => {
   console.log('payload to API', payload);
   return client.post(patientMedicalHistoryAdd, payload);
 };
+
 const addPatientMedication = async (patientID, medicationData) => {
   const payload = {
     patientID: patientID,
@@ -336,6 +339,19 @@ const updateMedication = async (patientID, medicationData) => {
   return client.put(patientMedicationUpdate, payload);
 };
 
+const updateProblemLog = async (patientID, userID, logData) => {
+  const payload = {
+    userID: userID,
+    patientID: patientID,
+    problemLogRemarks: logData.problemLogRemarks,
+    problemLogID: logData.problemLogID,
+    problemLogDesc: logData.problemLogDesc,
+    problemLogListID: logData.problemLogListID,
+  };
+
+  return client.put(patientProblemLogUpdate, payload);
+};
+
 const deleteMedication = async (medicationData) => {
   const payload = {
     medicationID: medicationData.medicationID,
@@ -347,6 +363,14 @@ const deleteMedication = async (medicationData) => {
 const deleteMedicalHistory = async (medHistoryData) => {
   const payload = {
     medicalHistoryID: medHistoryData.medicalHistoryID,
+  };
+
+  return client.put(patientMedicalHistoryDelete, payload);
+};
+
+const deleteProblemLog = async (logData) => {
+  const payload = {
+    problemLogID: logData.problemLogID,
   };
 
   return client.put(patientMedicalHistoryDelete, payload);
@@ -369,7 +393,7 @@ export default {
   addPatient,
   AddPatientAllergy,
   AddPatientVital,
-  AddPatientProblemLog,
+  addPatientProblemLog,
   AddPatientMedicalHistory,
   addPatientMedication,
   addPatientMedicalHistory,
@@ -378,4 +402,6 @@ export default {
   updateMedication,
   deleteMedication,
   deleteMedicalHistory,
+  deleteProblemLog,
+  updateProblemLog
 };
