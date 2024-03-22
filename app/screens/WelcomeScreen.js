@@ -1,4 +1,5 @@
-import React, { useState, useContext } from 'react';
+// Libs
+import React, { useState, useContext, useEffect, useCallback } from 'react';
 import {
   ImageBackground,
   View,
@@ -9,122 +10,157 @@ import {
   Keyboard,
   Text,
 } from 'react-native';
-
-// Custom Import from https://reactnativeelements.com/docs/
 import { Center, Icon, Box } from 'native-base';
 import { MaterialIcons } from '@expo/vector-icons';
 import jwt_decode from 'jwt-decode';
 import AuthContext from 'app/auth/context';
 import authStorage from 'app/auth/authStorage';
 
-// Constant import
-import colors from 'app/config/colors';
+// Configurations
 import errors from 'app/config/errors';
-import useApiHandler from 'app/hooks/useApiHandler';
+
+// Navigation
 import routes from 'app/navigation/routes';
 
-// Import from components
-import AppButton from 'app/components/AppButton';
-import ErrorMessage from 'app/components/ErrorMessage';
+// Hooks
+import useApiHandler from 'app/hooks/useApiHandler';
 
-// Import from utility
+// Utilities
 import { parseSelectOptions } from 'app/utility/miscFunctions'
 
-// Import Api
+// APIs
 import userApi from 'app/api/user';
+
+// Components
+import AppButton from 'app/components/AppButton';
+import ErrorMessage from 'app/components/ErrorMessage';
 import LoadingWheel from 'app/components/LoadingWheel';
 import InputField from 'app/components/input-components/InputField';
-import SelectionInputField from 'app/components/input-components/SelectionInputField';
 import SensitiveInputField from 'app/components/input-components/SensitiveInputField';
-
+import SelectionInputField from 'app/components/input-components/SelectionInputField';
+import colors from 'app/config/colors';
 
 function WelcomeScreen(props) {
+  const { navigation } = props;
+  const apiHandlerHook = useApiHandler();
+  
+  // User auth context
   const authContext = useContext(AuthContext);
-  const [show, setShow] = useState(false);
+
+  // States for input field values
   const [username, setUsername] = useState('');
   const [userRole, setUserRole] = useState('Supervisor');
   const [password, setPassword] = useState('');
+
+  // States related to API call
   const [isLoading, setIsLoading] = useState(false);
+  const [isRetry, setIsRetry] = useState(false);
+  const [statusCode, setStatusCode] = useState(200);
+  const [isError, setIsError] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  // Screen error state: This = true when the child components report error(input fields)
+  // Enables use of dynamic rendering of components when the page error = true/false.
+  const [isInputErrors, setIsInputErrors] = useState(false);
+  
+  // Input error states (Child components)
+  // This records the error states of each child component (ones that require tracking).
   const [isUsernameError, setIsUsernameError] = useState(false);
   const [isPasswordError, setIsPasswordError] = useState(false);
-  const [isLoginError, setIsLoginError] = useState(false);
   
+  // This useEffect enables the page to show correct error checking.
+  // The main isInputErrors is responsible for the error state of the screen.
+  // This state will be true whenever any child input components are in error state.
+  useEffect(() => {
+    setIsInputErrors(
+      isUsernameError ||
+      isPasswordError
+    );
+  }, [
+      isUsernameError,
+      isPasswordError,
+  ]);
+  
+  // User roles for select field
   const listOfUserRoles = parseSelectOptions(['Supervisor', 'Guardian', 'Doctor', 'Caregiver', 'Nurse']);
   
-  const apiHandlerHook = useApiHandler();
-
-   /*
-   * All Api to be place here
-   */
-
-  /*
-   * Component Did Mount or useEffect() to be placed here
-   */
-
-  /*
-   * Deconstructor
-   * Note: Navigation is passed down as a prop from NativeStackNavigator
-   */
-  const { navigation } = props;
-
+  // Start login process when user presses login button
   const onPressLogin = async () => {
-    console.log('Starting login process...\n');
+    console.log('Starting login process...',username,userRole,password);
     Keyboard.dismiss()
     
     setIsLoading(true);
-    setIsLoginError(false);    
+    setIsError(false);    
     
-    const result = await userApi.loginUser(username, userRole, password);
-    console.log(result);
+    const result = await loginWithTimeout();
 
-    // if authentication unsucessful (returned array is empty or error)
-    if (!result.ok) {
-      console.log('Authentication error');
+    if(result && result.ok) {
+      console.log('User authenticated - storing tokens...');
+
+      // Store token refresh and access tokens returned by backend
+      const user = jwt_decode(result.data.data.accessToken);
+      await authStorage.storeToken('userAuthToken', result.data.data.accessToken);
+      await authStorage.storeToken(
+        'userRefreshToken',
+        result.data.data.refreshToken,
+      );
+  
+      // set api header if empty
+      console.log('Setting header...');
+      apiHandlerHook.setHeader();
+      console.log('Header updated...');
       setIsLoading(false);
-      setIsLoginError(true);
+      setIsError(false);
+      setIsError(false);
+      setStatusCode(result.status);
+      setErrorMsg('');
+      console.log('Logging in!');
+      authContext.setUser(user);
+    } else if(result && !result.ok){
+      console.log('Error:', result);
+      setIsLoading(false);
+      setIsError(true);
+      setStatusCode(result.status);
+      setErrorMsg(errors.loginError);
       return;
     }
-
-    // if authentication successful
-    console.log('Authenticated...');
-    console.log('Storing token...');
-    const user = jwt_decode(result.data.data.accessToken);
-    await authStorage.storeToken('userAuthToken', result.data.data.accessToken);
-    await authStorage.storeToken(
-      'userRefreshToken',
-      result.data.data.refreshToken,
-    );
-
-    // set api header if empty
-    console.log('Tokens stored and setting header...');
-    apiHandlerHook.setHeader();
-    console.log('Header updated...');
-    setIsLoading(false);
-    setIsLoginError(false);
-    console.log('Logging in!');
-    authContext.setUser(user);
-  };
-
-  const handleUsernameChanged = (e) => {
-    setUsername(e);
   };
   
-  const handleUserRoleChanged = (e) => {
-    setUserRole(listOfUserRoles[e-1].label)
-  }
+  // If user is not connected to NTU network, takes about 30 seconds for call to return
+  // Instead timeout in 5 seconds
+  const loginWithTimeout = async() => {
+    const timeoutPromise = new Promise((resolve, reject) => {
+      setTimeout(() => {
+        reject(new Error('Request timed out. Ensure you are connected to the NTU network.'));
+      }, 5000);
+    });
 
-  const handlePasswordChanged = (e) => {
-    setPassword(e);
-  };
-
-  const handleUsernameError = (e) => {
-    setIsUsernameError(e)
-  }
-
-  const handlePasswordError = (e) => {
-    setIsPasswordError(e)
-  }
+    const apiPromise = userApi.loginUser(username, userRole, password);
     
+    try {
+      const result = await Promise.race([apiPromise, timeoutPromise]);
+      return result;
+    } catch (error) {
+      console.log('Error:', error.message);
+      setIsLoading(false);
+      setIsError(true);
+      setErrorMsg(error.message);
+    }
+  }
+
+  const handleUsernameError = useCallback(
+    (state) => {
+      setIsUsernameError(state);
+    },
+    [isUsernameError],
+  );
+
+  const handlePasswordError = useCallback(
+    (state) => {
+      setIsPasswordError(state);
+    },
+    [isPasswordError],
+  );    
 
   return (
     <ImageBackground
@@ -159,7 +195,7 @@ function WelcomeScreen(props) {
                   showTitle={false}
                   title="Username/Email"
                   value={username}
-                  onChangeText={handleUsernameChanged}
+                  onChangeText={setUsername}
                   onEndEditing={handleUsernameError}
                   InputLeftElement={
                     <Icon
@@ -183,7 +219,7 @@ function WelcomeScreen(props) {
                     />
                   }
                   placeholder="Supervisor"
-                  onDataChange={handleUserRoleChanged}
+                  onDataChange={(e)=>setUserRole(listOfUserRoles[e-1].label)}
                   dataArray={listOfUserRoles}
                 />
               </View>
@@ -194,7 +230,7 @@ function WelcomeScreen(props) {
                   showTitle={false}
                   title="Password"
                   value={password}
-                  onChangeText={handlePasswordChanged}
+                  onChangeText={setPassword}
                   onEndEditing={handlePasswordError}
                   InputLeftElement={
                     <Icon
@@ -210,17 +246,18 @@ function WelcomeScreen(props) {
                   <LoadingWheel />
                   ) : (
                     <AppButton
-                    title="Login"
-                    color="green"
-                    onPress={onPressLogin}
-                    testingID="Login"
+                      title="Login"
+                      color="green"
+                      onPress={onPressLogin}
+                      testingID="Login"
+                      isDisabled={isInputErrors}                   
                     />
-                    )}
+                  )}
               </View>
               <Box>
-                {isLoginError ? (
+                {isError ? (
                 <ErrorMessage
-                  message={isLoginError ? errors.loginError: ''}
+                  message={errorMsg}
                   testID={'loginError'}
                   />
                 ) : null }
