@@ -206,8 +206,8 @@ function DashboardScreen({ navigation }) {
 
     const response =
     viewMode === 'myPatients'
-        ? await scheduleApi.getSchedule()
-        : await scheduleApi.getSchedule();
+        ? await scheduleApi.getPatientWeeklySchedule()
+        : await scheduleApi.getPatientWeeklySchedule();
     
     if(response.ok) {
       parseScheduleData({tempPatientInfo:tempPatientInfo, tempSchedule:response.data.data})
