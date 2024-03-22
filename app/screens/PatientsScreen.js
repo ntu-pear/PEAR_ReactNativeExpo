@@ -324,10 +324,10 @@ function PatientsScreen({ navigation }) {
   // Whether to show start date for each patient - depends on whether sort/filter using start date applied
   const showStartDate = () => {
     return (!isEmptyObject(sort['sel']) ? sort['sel']['option']['label'] == 'Start Date' : false) || 
-      'Start Date' in datetime['sel'] ? (
+      ('Start Date' in datetime['sel'] ? (
         (datetime['sel']['Start Date']['min'] && datetime['sel']['Start Date']['min'] != null) || 
         (datetime['sel']['Start Date']['max'] && datetime['sel']['Start Date']['max'] != null) 
-      ) : false        
+      ) : false)        
   }
 
   return (
