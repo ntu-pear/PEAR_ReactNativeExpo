@@ -169,21 +169,15 @@ const addPatient = (patientFormData) => {
       value = '';
     }
 
-    // if no profile image is uploaded, upload a placeholder profile image
+    // if no profile image is uploaded, don't use profile pic as a parameter
     if (
       key === 'UploadProfilePicture' &&
       Object.values(value).every((val) => val === '')
     ) {
-      const placeholderImage = Image.resolveAssetSource(
-        require('../assets/placeholder.png'),
-      );
-
-      value = {
-        uri: placeholderImage.uri,
-        name: 'placeholder.png',
-        type: 'image/png',
-      };
+      continue;
     }
+
+    // console.log("PLACEHOLDER",placeholderImage);
     if (key === 'NRIC') {
       value = value.toUpperCase();
     }
