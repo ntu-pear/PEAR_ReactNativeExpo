@@ -661,16 +661,16 @@ function DashboardScreen({ navigation }) {
                       </>
                     ) : null}
                   </Container>
-                  <FlatList
+                  <ScrollView
                     horizontal={true}
                     width="100%"
                     showsHorizontalScrollIndicator={false}
-                    data={item.activities}
                     contentContainerStyle={{flexGrow: 1, alignItems: 'center', justifyContent: item.activities.length > 0 ? 'flex-start': 'center'}}
-                    renderItem={({item:activity, index}) => {
-                      return (
+                  >
+                    <HStack>
+                      {item.activities.map((activity, i) => (
                         <ActivityCard
-                          key={index}
+                          key={i}
                           activityTitle={activity.activityTitle}
                           activityStartTime={activity.startTime}
                           activityEndTime={activity.endTime}
@@ -680,10 +680,10 @@ function DashboardScreen({ navigation }) {
                           patientID={item.patientID}
                           date={item.date}
                           navigation={navigation}
-                          />
-                      )
-                    }}
-                  />
+                        />
+                      ))}
+                    </HStack>                
+                  </ScrollView>
                 </HStack>
               </Box>
             )
