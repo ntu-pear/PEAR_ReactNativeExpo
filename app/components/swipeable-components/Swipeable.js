@@ -13,10 +13,12 @@ const Swipeable = ({item, underlay, onSwipeLeft, onSwipeRight, setIsScrolling=()
         let dx = gestureState.dx;
         const dy = gestureState.dy;
 
+        console.log(dx, dy)
+
         // Limit how far user can swipe
         if (gestureState.dx < 0 && onSwipeRight) {
           dx = Math.max(-150, Math.min(0, gestureState.dx)); 
-          if(dy < 50) {
+          if(Math.abs(dx) > Math.abs(dy)) {
             translateX.setValue(dx);
             setIsScrolling(false);
           } else { 
@@ -25,7 +27,7 @@ const Swipeable = ({item, underlay, onSwipeLeft, onSwipeRight, setIsScrolling=()
         } else {
           if(onSwipeLeft) {
             dx = Math.min(150, Math.max(0, gestureState.dx)); 
-            if(dy > -50) {
+            if(Math.abs(dx) > Math.abs(dy)) {
               translateX.setValue(dx);
               setIsScrolling(false);
             } else {
