@@ -68,11 +68,14 @@ function DashboardScreen({ navigation }) {
   // Ref used to programmatically scroll to top of list
   const scheduleRef = useRef(null);
 
-  // Patient data related states
+  // API call related stated
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const [isRetry, setIsRetry] = useState(false);
   const [statusCode, setStatusCode] = useState(200);
+  const [isReloadSchedule, setIsReloadSchedule] = useState(false);  
+
+  // Patient data related states
   const [isDataInitialized, setIsDataInitialized] = useState(false);
   const [patientInfo, setPatientInfo] = useState({});
   const [originalScheduleWeekly, setOriginalScheduleWeekly] = useState({}); // weekly schedule
@@ -80,8 +83,6 @@ function DashboardScreen({ navigation }) {
   const [schedule, setSchedule] = useState([]); // day schedule after sort, search, filter
   const [patientCountInfo, setPatientCountInfo] = useState({}); // list of patients for each caregiver (differentiated by patient status) 
   const [viewMode, setViewMode] = useState('myPatients'); // myPatients, allPatients
-  const [isReloadSchedule, setIsReloadSchedule] = useState(false);  
-  const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   
   // Search related states
@@ -131,9 +132,7 @@ function DashboardScreen({ navigation }) {
   // Refresh schedule when new user requests refresh
   useFocusEffect(
     React.useCallback(() => {
-      console.log('DB 1 - useCallback')
       if (isReloadSchedule) {
-        console.log('DB 1.5 - useCallback')
         refreshSchedule();
         setIsReloadSchedule(false);
       }
@@ -142,23 +141,18 @@ function DashboardScreen({ navigation }) {
     
   // Refresh schedule from backend when user switches between 'My Patients' and 'All Patients'
   useEffect(() => {
-    console.log('DB 2 - useEffect [viewMode]')
     refreshSchedule();
   }, [viewMode]);
 
   // Refresh schedule if isRetry is set to true
   useEffect(() => {
-    console.log('DB 2 - useEffect [isRetry]')
     if (isRetry) {
-      console.log('DB 2.5 - useEffect [isRetry]')
-      console.log('Retrying dashboard API call');
       refreshSchedule();
     }
   }, [isRetry]);
 
   // Update activity list when weekly schedule is refreshed
   useEffect(() => {
-    console.log('DB 3-1 - useEffect [isRetry]')    
     setFilterOptionDetails(prevState=>({
       ...prevState,
       'Activity Type': {
@@ -171,7 +165,6 @@ function DashboardScreen({ navigation }) {
   // Set screen to loading wheel when retrieving schedule from backend
   // Note: Once the data is retrieved from backend, setIsLoading is set to false momentarily so SearchFilterBar can render and initialize data
   const refreshSchedule = () => {
-    console.log('DB 3 - refreshSchedule')
     setIsLoading(true);
     const promiseFunction = async () => {
       await getData();
@@ -191,8 +184,6 @@ function DashboardScreen({ navigation }) {
 
   // Update schedule to display based on selected date
   const updateSchedule = ({tempScheduleWeekly=originalScheduleWeekly, tempSelectedDate=selectedDate}) => {
-    console.log('DB 4 - updateSchedule')
-
     if(!isEmptyObject(tempScheduleWeekly)) {      
       const currentDate = formatDate(tempSelectedDate, true);
       setOriginalSchedule([...tempScheduleWeekly[currentDate]]);
@@ -202,8 +193,6 @@ function DashboardScreen({ navigation }) {
 
   // Retrieve schedule from backend
   const getSchedule = async(tempPatientInfo=patientInfo) => { 
-    console.log('DB 5 - getSchedule')
-
     const response =
     viewMode === 'myPatients'
         ? await scheduleApi.getPatientWeeklySchedule()
@@ -215,7 +204,7 @@ function DashboardScreen({ navigation }) {
       setIsRetry(false);
       setStatusCode(response.status);
     } else {
-      console.log(response)
+      console.log('Error getting schedule:',response)
       setIsLoading(false);
       setIsError(true);
       setStatusCode(response.status);
@@ -225,14 +214,12 @@ function DashboardScreen({ navigation }) {
 
   // Retrieve patient list from backend
   const getData = async () => {   
-    console.log('DB 6 - getListOfPatients');
-
     const response =
     viewMode === 'myPatients'
-        // ? await patientApi.getPatientListByLoggedInCaregiver(undefined, status)
-        ? await patientApi.getPatientList(undefined, '') // actually supposed to be active patients only but rn schedule returns for inactive patiens also
-        : await patientApi.getPatientList(undefined, '');
-    
+      // ? await patientApi.getPatientListByLoggedInCaregiver(undefined, status)
+      ? await patientApi.getPatientList(undefined, '') // actually supposed to be active patients only but rn schedule returns for inactive patiens also
+      : await patientApi.getPatientList(undefined, '');
+      
     if(response.ok) {
       setPatientInfo([...response.data.data])
       await getSchedule([...response.data.data]);
@@ -240,6 +227,7 @@ function DashboardScreen({ navigation }) {
       setIsRetry(false);
       setStatusCode(response.status);
     } else {
+      console.log('Error getting schedule:',response)
       setIsLoading(false);
       setIsError(true);
       setStatusCode(response.status);
@@ -249,8 +237,6 @@ function DashboardScreen({ navigation }) {
 
   // Parse data returned by api to required format to display schedule
   const parseScheduleData = ({tempPatientInfo, tempSchedule}) => {
-    console.log('DB 7 - parseScheduleData', )
-
     if(tempSchedule == null) {
       setOriginalScheduleWeekly({});
       setOriginalSchedule([]);
@@ -306,8 +292,6 @@ function DashboardScreen({ navigation }) {
   // ', ' represents another medication following
   // Example input: Breathing+Vital Check | Give Medication@0930: Diphenhydramine(2 tabs)**Always leave at least 4 hours between doses
   const parseScheduleString = (scheduleString, scheduleDate, patientID, patientName) => {
-    // console.log('DB 8 - parseScheduleString')
-
     let scheduleData = [];
     let startTime = new Date(scheduleDate)
     startTime.setHours(8, 0, 0, 0);
@@ -363,8 +347,6 @@ function DashboardScreen({ navigation }) {
 
   // Get list of activities from patient data
   const getActivityList = (tempWeeklySchedule=originalScheduleWeekly) => {
-    console.log('DB 14 - getActivityList');
-
     const activities = [];
     Object.keys(tempWeeklySchedule).forEach((day) => {
       tempWeeklySchedule[day].forEach((item) => {
@@ -387,8 +369,6 @@ function DashboardScreen({ navigation }) {
 
   // Retrieve cargivers patient count list from backend
   const getPatientCountInfo = async() => {
-    console.log('DB 9 - getPatientCountInfo')
-
     const response = await patientApi.getPatientStatusCountList();
 
     if(response.ok) {
@@ -399,8 +379,6 @@ function DashboardScreen({ navigation }) {
 
   // Update filter options for Caregiver filter based on patient count data from backend
   const updateCaregiverFilterOptions = ({tempPatientCountInfo=patientCountInfo}) => {
-    console.log('DB 10 - updateCaregiverFilterOptions')
-    
     let caregiverPatientCount = {};
     for (var caregiverID of Object.keys(tempPatientCountInfo)) {
       const caregiverName = tempPatientCountInfo[caregiverID]['fullName']
@@ -430,8 +408,6 @@ function DashboardScreen({ navigation }) {
     tempSearchMode,
     setFilteredList
   }) => {       
-    console.log('DB 11 - handleSearchSortFilter');
-
     setIsLoading(true);
 
     let tempSchedule = setFilteredList({
@@ -447,8 +423,6 @@ function DashboardScreen({ navigation }) {
   }
 
   const handlePreviousDate = () => {
-    console.log('DB 12 - handlePreviousDate');
-
     let previous = new Date(selectedDate.setDate(selectedDate.getDate() - 1));
     setSelectedDate(previous);
     updateSchedule({tempSelectedDate: previous});
@@ -458,8 +432,6 @@ function DashboardScreen({ navigation }) {
   };
 
   const handleNextDate = () => {
-    console.log('DB 13 - handleNextDate');
-    
     let next = new Date(selectedDate.setDate(selectedDate.getDate() + 1));
     setSelectedDate(next);
     updateSchedule({tempSelectedDate: next});
@@ -515,7 +487,6 @@ function DashboardScreen({ navigation }) {
 
   const handlePullToRefresh = () => {
     refreshSchedule();
-    setCurrentTime(new Date());
   };
 
   const getMonday = () => {
@@ -674,7 +645,7 @@ function DashboardScreen({ navigation }) {
                           activityTitle={activity.activityTitle}
                           activityStartTime={activity.startTime}
                           activityEndTime={activity.endTime}
-                          currentTime={currentTime}
+                          currentTime={new Date()}
                           medications={activity.medications}
                           patientName={item.patientName}
                           patientID={item.patientID}
