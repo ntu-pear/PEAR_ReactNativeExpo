@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
   },
   textField: {
-    fontSize: 18,
+    fontSize: 16,
     textAlign: 'left',
     color: colors.black_var1,
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
