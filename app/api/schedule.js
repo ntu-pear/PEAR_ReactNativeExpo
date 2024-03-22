@@ -63,7 +63,6 @@ const getSystemTest = async () => {
  * Expose your end points here
  */
 export default {
-  getSchedule,
   getPatientWeeklySchedule,
   getPatientAllTest,
   getPatientTest,
