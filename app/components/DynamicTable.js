@@ -60,11 +60,6 @@ function DynamicTable({ headerData, rowData, widthData, screenName, onClickEdit,
   // Get row data by removing ID values if any and adding edit/delete/custom buttons
   const getRowData = () => {
     let tempRowData = [...rowData];
-    if(headerData.includes('ID')) {
-      tempRowData = tempRowData.map(item=>(
-        item.slice(headerData.indexOf('ID')+1)
-      ))
-    }
     if(edit) {
       tempRowData = tempRowData.map(item=>(
         [...item, editButton(item[headerData.indexOf('ID')])]
@@ -75,7 +70,12 @@ function DynamicTable({ headerData, rowData, widthData, screenName, onClickEdit,
         [...item, deleteButton(item[headerData.indexOf('ID')])]
       ))
     }
-    
+    if(headerData.includes('ID')) {
+      tempRowData = tempRowData.map(item=>(
+        item.slice(headerData.indexOf('ID')+1)
+      ))
+    }
+    console.log(tempRowData)
     return tempRowData;
   }
 

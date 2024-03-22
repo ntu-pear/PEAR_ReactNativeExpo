@@ -220,9 +220,13 @@ function PatientMedicalHistory(props) {
   // Ask user to confirm deletion of medical details
   const handleDeleteHx = (hxID) => {
     const data = hxData.filter(x=>x.medicalHistoryId == hxID)[0];
+    console.log(data, hxID)
 
     Alert.alert('Are you sure you wish to delete this item?', 
-    `Source: ${data.informationSource}\Details: ${data.medicalDetails}\nRemarks: ${data.medicalRemarks}\nEstimated Date: ${formatDate(new Date(data.medicalEstimatedDate))}`, [
+    `Source: ${data.informationSource}\n`+
+    `Details: ${data.medicalDetails}\n`+
+    `Remarks: ${data.medicalRemarks}\n`+
+    `Estimated Date: ${formatDate(new Date(data.medicalEstimatedDate))}`, [
       {
         text: 'Cancel',
         onPress: ()=>{},
@@ -273,7 +277,6 @@ function PatientMedicalHistory(props) {
     const dataNoPatientID = hxData.map(({ patientId, ...rest }) => rest);
     
     let tempHxData =  dataNoPatientID.map(item=> {
-      console.log(item)
       return Object.entries(item).map(([key, value]) => {
         if (key.toLowerCase().includes('date')) {
           return formatDate(new Date(value), true); 
@@ -292,7 +295,6 @@ function PatientMedicalHistory(props) {
     return item;
     })
 
-    console.log(tempHxData);
     return tempHxData;
   }
 
