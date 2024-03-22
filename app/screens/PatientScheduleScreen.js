@@ -1,14 +1,15 @@
 // Libs
-import React, { useContext, useState } from 'react';
-import { Alert, Keyboard, StyleSheet, TouchableOpacity } from 'react-native';
-import { FlatList, View } from 'native-base';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { Alert, Dimensions, Keyboard, StyleSheet, TouchableOpacity } from 'react-native';
+import { Box, FlatList, HStack, ScrollView, View, Text, Divider } from 'native-base';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 // API
 import patientApi from 'app/api/patient';
+import scheduleApi from 'app/api/schedule';
 
 // Utilities
-import { isEmptyObject, noDataMessage, sortFilterInitialState, formatDate } from 'app/utility/miscFunctions';
+import { isEmptyObject, noDataMessage, sortFilterInitialState, formatDate, convertTimeMilitary } from 'app/utility/miscFunctions';
 
 // Navigation
 import routes from 'app/navigation/routes';
@@ -16,62 +17,37 @@ import routes from 'app/navigation/routes';
 // Configurations
 import colors from 'app/config/colors';
 
-// Auth
-import AuthContext from 'app/auth/context';
-
 // Components
 import ActivityIndicator from 'app/components/ActivityIndicator';
-import AddButton from 'app/components/AddButton';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
 import LoadingWheel from 'app/components/LoadingWheel';
-import Swipeable from 'app/components/swipeable-components/Swipeable';
-import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
-import DynamicTable from 'app/components/DynamicTable';
-import ProblemLogItem from 'app/components/ProblemLogItem';
-import AddPatientProblemLogModal from 'app/components/AddPatientProblemLogModal';
+import ActivityCard from 'app/components/ActivityCard';
 
 function PatientScheduleScreen(props) {
   let {patientID, patientId} = props.route.params;
   if (patientId) {
     patientID = patientId;
   }
+
   const navigation = useNavigation();
   
-  // User ID for edit/add operations
-  const { user } = useContext(AuthContext);
-  const userID = user ? user.userID : null;
-
-  // Modal states
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [modalMode, setModalMode] = useState('add'); // either 'add' or 'edit'
+  // Ref used to programmatically scroll to beginning of list
+  const scheduleRef = useRef(null);
   
-  // Options for user to search by
-  const SEARCH_OPTIONS = ['Description'];
-
-  // Display mode options  
-  const [displayMode, setDisplayMode] = useState('rows');
-  const DISPLAY_MODES = ['rows', 'table'];
-  
-  // Sort options 
-  const SORT_OPTIONS = ['Created Datetime', 'Author'];
-
-  // Filter options
-  const FILTER_OPTIONS = ['Created Datetime'];
+  // Filter options 
+  const FILTER_OPTIONS = [ 'Activity Type', 'Activity Time'];
   
   // Mapping between sort/filter/search names and the respective field in the patient data retrieved from the backend
   const FIELD_MAPPING = {
-    'Description': 'problemLogListDesc',
-    'Created Datetime': 'createdDateTime',
-    'Author': 'authorName'
+    'Activity Type': 'activityTitle',
+    'Activity Time': 'startTime'
   };
   
-  // Search, sort, and filter related states
-  const [sort, setSort] = useState(sortFilterInitialState);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isDataInitialized, setIsDataInitialized] = useState(false);
+  // Sort/filter related states
+  const [dropdown, setDropdown] = useState(sortFilterInitialState);
   const [datetime, setDatetime] = useState(sortFilterInitialState);
-
+  
   // Filter details related state
   // Details of filter options
   // --------------------------
@@ -83,105 +59,107 @@ function PatientScheduleScreen(props) {
   //            since some filters like patient status may be used to make an API call instead of normal filtering
   // --------------------------
   const [filterOptionDetails, setFilterOptionDetails] = useState({
-    'Created Datetime': {
-      'type': 'date',
-      'options': {'min': {}, 'max': {},},
-      'isFilter': true,
+    'Activity Type': {
+      'type': 'dropdown',
+      'options': {},
+      'isFilter': false,
+      'nestedFilter': 'activities'
+    },
+    'Activity Time': {
+      'type': 'time',
+      'options': {'min': {}, 'max': {}},
+      'isFilter': false,
+      'nestedFilter': 'activities'
     },
   });
+
 
   // API call related states
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [isRetry, setIsRetry] = useState(false);
   const [statusCode, setStatusCode] = useState(200);
-  const [isReloadList, setIsReloadList] = useState(true);
+  const [isReloadSchedule, setIsReloadSchedule] = useState(true);
 
-  // Problem log data related states
-  const [originalLogData, setOriginalLogData] = useState([]);
-  const [logData, setLogData] = useState([]);
-  const [logFormData, setLogFormData] = useState({ // for add/edit form
-    "problemLogID": null,
-    "problemLogListID": 1,
-    "problemLogListDesc": "",
-    "problemLogRemarks": "",
-  });
+  // Schedule data related states
+  const [originalScheduleWeekly, setOriginalScheduleWeekly] = useState([]);
+  const [scheduleWeekly, setScheduleWeekly] = useState([]);  
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [isDataInitialized, setIsDataInitialized] = useState(false);
 
   // Patient data related states
-  const [patientData, setPatientData] = useState({});
-
-  // Scrollview state
-  const [isScrolling, setIsScrolling] = useState(false);  
-
-  // Refresh list when new medication is added or user requests refresh
+  const [patientInfo, setPatientInfo] = useState({});
+  
+  // Refresh list when user requests refresh
   useFocusEffect(
     React.useCallback(() => {
-      if (isReloadList) {
-        refreshLogData();
-        setIsReloadList(false);
+      if (isReloadSchedule) {
+        refreshSchedule();
+        setIsReloadSchedule(false);
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isReloadList]),
+    }, [isReloadSchedule]),
   );
+
+  // Update activity list when weekly schedule is refreshed
+  useEffect(() => {
+    setFilterOptionDetails(prevState=>({
+      ...prevState,
+      'Activity Type': {
+        ...prevState['Activity Type'],
+        options: getActivityList([...originalScheduleWeekly])
+      }
+    }))
+  }, [originalScheduleWeekly]);
   
   // Set isLoading to true when retrieving data
-  const refreshLogData = () => {
+  const refreshSchedule = () => {
     setIsLoading(true);
     const promiseFunction = async () => {
-      await getLogData();
       await getPatientData();
+      if(!isError) {
+        setIsLoading(false);        
+        setIsDataInitialized(true);
+        // setIsLoading(true);        
+      } else {
+        setIsLoading(false);
+      }
     };
     promiseFunction();
   }    
-
+  
   // Get problem log data from backend
-  const getLogData = async () => {
-    if (patientID) {
-      const response = await patientApi.getPatientProblemLog(patientID);
-      if (response.ok) {
-        console.log(response.data.data)
-        setOriginalLogData([...response.data.data]);    
-        setLogData(parseLogData([...response.data.data]));    
-        setIsDataInitialized(true);
-        setIsLoading(false);  
-        setIsError(false);
-        setIsRetry(false);
-        setStatusCode(response.status);
-      } else {
-        console.log('Request failed with status code: ', response.status);
-        setOriginalLogData([]);
-        setLogData([]);
-        setIsLoading(false);
-        setIsError(true);
-        setStatusCode(response.status);
-        setIsRetry(true);
-      }
+  const getSchedule = async (tempPatientInfo=patientInfo) => {
+    const response = await scheduleApi.getPatientWeeklySchedule([patientID]);
+    if (response.ok) {
+      parseScheduleData({tempPatientInfo:tempPatientInfo, tempSchedule:response.data.data})
+      setIsError(false);
+      setIsRetry(false);
+      setStatusCode(response.status);
+    } else {
+      console.log('Request failed with status code: ', response.status);
+      setOriginalScheduleWeekly([]);
+      setScheduleWeekly([]);
+      setIsLoading(false);
+      setIsError(true);
+      setStatusCode(response.status);
+      setIsRetry(true);
     }
   };
-
-  // Parse data
-  const parseLogData = (data) => {
-    return data.map(item=>({ // for add/edit form
-      "problemLogID": item.problemLogID,
-      "problemLogRemarks": item.problemLogRemarks,
-      "authorName": item.authorName,
-      "problemLogListDesc": item.problemLogListDesc,
-      "createdDateTime": item.createdDateTime,
-    }))
-  }
 
   // Get medication data from backend
   const getPatientData = async () => {
     if (patientID) {
       const response = await patientApi.getPatient(patientID);
       if (response.ok) {
-        setPatientData(response.data.data);
+        setPatientInfo({...response.data.data})
+        await getSchedule({...response.data.data});
         setIsError(false);
         setIsRetry(false);
         setStatusCode(response.status);
       } else {
         console.log('Request failed with status code: ', response.status);
-        setPatientData({});
+        setPatientInfo({});
         setIsLoading(false);
         setIsError(true);
         setStatusCode(response.status);
@@ -190,301 +168,273 @@ function PatientScheduleScreen(props) {
     }
   };
 
-  // Show form to add problem log when add button is clicked
-  const handleOnClickAddLog = () => {
-    setIsModalVisible(true);
-    setModalMode('add');
-  };
-
-  // Submit data to add problem log
-  const handleModalSubmitAdd = async (tempLogFormData) => {
-    setIsLoading(true);
-
-    let alertTitle = '';
-    let alertDetails = '';
-
-    const result = await patientApi.addPatientProblemLog(patientID, userID, tempLogFormData);
-    if (result.ok) {
-      console.log('submitting problem log data', tempLogFormData);
-      refreshLogData();
-      setIsModalVisible(false);
-      
-      alertTitle = 'Successfully added problem log';
+  // Parse data returned by api to required format to display schedule
+  const parseScheduleData = ({tempPatientInfo, tempSchedule}) => {
+    if(tempSchedule == null) {
+      setOriginalScheduleWeekly([]);
+      setScheduleWeekly([]);
     } else {
-      const errors = result.data?.message;
-
-      console.log(result);
-
-      result.data
-      ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-      : (alertDetails = 'Please try again.');
+      const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+      let tempScheduleWeekly = [];
       
-      alertTitle = 'Error adding problem log';
+      let scheduleDate = new Date(tempSchedule[0]['startDate']);
+      for(var j = 0; j<daysOfWeek.length; j++) {
+        const day = daysOfWeek[j];
+        const patientDailySchedule = {
+          patientID: tempSchedule[0]['patientID'],
+          patientName: tempSchedule[0]['patientName'],
+          patientStartDate: tempPatientInfo['startDate'],
+          patientFullName: tempPatientInfo['firstName'] + " " + tempPatientInfo['lastName'],
+          patientPreferredName: tempPatientInfo['preferredName'],
+          patientCaregiverName: tempPatientInfo['patientAllocationDTO']['caregiverName'],
+          activities: parseScheduleString(tempSchedule[0][day], scheduleDate, tempSchedule[0]['patientID'], tempSchedule[0]['patientName']),
+          date: new Date(scheduleDate)
+        };
+        
+        scheduleDate.setDate(scheduleDate.getDate() + 1);
+
+        tempScheduleWeekly.push(patientDailySchedule)
+      }
+
+      setOriginalScheduleWeekly(tempScheduleWeekly);
+      setScheduleWeekly(tempScheduleWeekly);
     }
-    
-    Alert.alert(alertTitle, alertDetails);
-    setIsLoading(false);
-  };
+  }
+
+  // Parse schedule of a patient for a specific date 
+  // Notes:
+  // Activity timings range from 9 am to 5 pm
+  // Time slot duration is 1 hour
+  // '--' represents start of next activity/timeslot
+  // ' | ' represents medication to be administered during a timeslot
+  // '@abcd' represents timing of medication
+  // '**' represents notes/instructions for medication
+  // ', ' represents another medication following
+  // Example input: Breathing+Vital Check | Give Medication@0930: Diphenhydramine(2 tabs)**Always leave at least 4 hours between doses
+  const parseScheduleString = (scheduleString, scheduleDate, patientID, patientName) => {
+    let scheduleData = [];
+    let startTime = new Date(scheduleDate)
+    startTime.setHours(8, 0, 0, 0);
+    let endTime = new Date(scheduleDate)
+    endTime.setHours(9, 0, 0, 0);
+
+    if(scheduleString.length > 0) {      
+      let timeslotSplit = scheduleString.split('--') // split by timeslot
+      for(var i = 0; i<timeslotSplit.length; i++) {
+        const activitySplit = timeslotSplit[i].split(' | '); // split to get medication info
+        const activityTitle = activitySplit[0];
+        
+        let medications = [];
+        if(activitySplit.length > 1) {
+          let medicationSplit = activitySplit[1].split(', '); // split to get list of medications
+          for(var k = 0; k <medicationSplit.length; k++) {  
+            const medicationInfo = medicationSplit[k].split('@')[1]; // spli to get time + medname + notes
+            
+            const med = medicationInfo.split(": ")[1].split("**")[0];
+            const medName = med.split("(")[0];
+            const medDosage = med.split("(")[1].split(")")[0];
+            const medTime = medicationInfo.split(":")[0];
+            const medNote = medicationInfo.split("**")[1];
+            
+            medications.push({
+              patientID: patientID,
+              patientName: patientName,
+              medID: 0, // to return with API so in future can save administration
+              medName: medName,
+              medDosage: medDosage,
+              medTime: convertTimeMilitary(medTime),
+              medNote: medNote
+            })
+          }
+        }      
+        
+        let activityData = {
+          startTime: startTime,
+          endTime: endTime,
+          activityTitle: activityTitle,
+          medications: medications
+        };
   
-  // Edit problem log
-  const handleEditLog = (logID) => {
-    setIsModalVisible(true);
-    setModalMode('edit');
+        startTime = new Date(startTime.setHours(startTime.getHours() + 1));
+        endTime = new Date(endTime.setHours(endTime.getHours() + 1));
+        
+        scheduleData.push(activityData);
+      }
+    }        
     
-    const tempLogData = logData.filter(x=>x.problemLogID == logID)[0];
-
-    setLogFormData({
-      "problemLogID": tempLogData.problemLogID,
-      "problemLogListID": tempLogData.problemLogListID,
-      "problemLogListDesc": tempLogData.problemLogListDesc,
-      "problemLogRemarks": tempLogData.problemLogRemarks,
-    })
-  }
-
-  // Submit data to edit problem log
-  const handleModalSubmitEdit = async () => {
-    setIsLoading(true);
-
-    let tempFormData = {...logFormData};
-
-    let alertTitle = '';
-    let alertDetails = '';
-
-    const result = await patientApi.updateProblemLog(patientID, userID, tempFormData);
-    if (result.ok) {
-      refreshLogData();
-      setIsModalVisible(false);
-      
-      alertTitle = 'Successfully edited problem log';
-    } else {
-      const errors = result.data?.message;
-      console.log("Error editing problem log")
-
-      result.data
-      ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-      : (alertDetails = 'Please try again.');
-      
-      alertTitle = 'Error editing log data';
-    }
-    
-    Alert.alert(alertTitle, alertDetails);
-    setIsLoading(false);
-  };
-
-  // Ask user to confirm deletion of problem log
-  const handleDeleteLog = (logID) => {
-    const data = logData.filter(x=>x.problemLogID == logID)[0];
-
-    Alert.alert('Are you sure you wish to delete this item?', 
-    `Author: ${data.authorName}\n` +
-    `Description: ${data.problemLogListDesc}\n` +
-    `Remarks: ${data.problemLogRemarks}\n` +
-    `Created: ${formatDate(new Date(data.createdDateTime))}`, [
-      {
-        text: 'Cancel',
-        onPress: ()=>{},
-        style: 'cancel',
-      },
-      {text: 'OK', onPress: ()=>deleteLog(logID)},
-    ]);
-  }
-
-  // Delete probem log
-  const deleteLog = async (logID) => {
-    setIsLoading(true);
-
-    let data = {problemLogID: logID};
-
-    let alertTitle = '';
-    let alertDetails = '';
-
-    const result = await patientApi.deleteProblemLog(data);
-    if (result.ok) {
-      refreshLogData();
-      setIsModalVisible(false);
-      
-      alertTitle = 'Successfully deleted medical history';
-    } else {
-      const errors = result.data?.message;
-      console.log("Error deleting medical history", result)
-
-      result.data
-      ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-      : (alertDetails = 'Please try again.');
-      
-      alertTitle = 'Error deleting medical history';
-    }
-    
-    Alert.alert(alertTitle, alertDetails);
-    setIsLoading(false);
+    return scheduleData;
   }
   
+   // Get list of activities from patient data
+   const getActivityList = (tempWeeklySchedule=originalScheduleWeekly) => {
+    const activities = [];
+    console.log(tempWeeklySchedule)
+    tempWeeklySchedule.forEach((item) => {
+      item.activities.forEach((activity) => {
+        if (!activities.includes(activity.activityTitle)) {
+          activities.push(activity.activityTitle);
+        }
+      });
+    });
+    activities.sort();
+     
+    const dictActivities = activities.reduce((acc, currentValue) => {
+      acc[currentValue] = currentValue;
+      return acc;
+    }, {});
+
+    return dictActivities;
+
+  };
+  // Handle searching, sorting, and filtering of schedule
+  const handleSearchSortFilter = async ({
+    text,
+    tempSelSort, 
+    tempSelDropdownFilters,
+    tempSelDateFilters,
+    tempSearchMode,
+    setFilteredList
+  }) => {       
+    setIsLoading(true);
+
+    setFilteredList({
+      text: text, 
+      tempSelSort: tempSelSort, 
+      tempSelDropdownFilters: tempSelDropdownFilters, 
+      tempSelDateFilters: tempSelDateFilters,
+      tempSearchMode: tempSearchMode,
+    });
+
+    scheduleRef.current?.scrollToOffset({offset: 0, animated: true});
+    setIsLoading(false);    
+  }
+
+  const handlePullToRefresh = () => {
+    refreshSchedule();
+  };
+
   // Navigate to patient profile on click profile image
   const onClickProfile = () => {  
     navigation.navigate(routes.PATIENT_PROFILE, { id: patientID });
   }
 
-  // Return formatted row data for table display
-  // Note: keys originally ordered like ['ID', 'Author', 'Description', 'Created Datetime', 'Remarks']  
-  const getTableRowData = () => {
-    const dataNoIDs = logData.map(({ patientID, userID, problemLogListID, ...rest }) => rest);
-    
-    let tempLogData =  dataNoIDs.map(item=> {
-      return Object.entries(item).map(([key, value]) => {
-        if (key.toLowerCase().includes('date')) {
-          return formatDate(new Date(value), true); 
-        } else {
-          return String(value); // Convert other values to strings
-        } 
-      })
-    });
-
-    // Reordered items to have remarks before created datetime
-    tempLogData = tempLogData.map(item => {
-      let temp = item[3];
-      item[3] = item[4];
-      item[4] = temp;
-
-      return item;
-    })
-
-    return tempLogData;
-  }
-
-  // Return formatted header data for table display
-  // Note: keys originally ordered like ['ID', 'Author', 'Description', 'Created Datetime', 'Remarks']
-  const getTableHeaderData = () => {
-    return ['ID', 'Author', 'Description', 'Remarks', 'Created Datetime'];
+   // Check if all schedules are empty
+   const checkAllEmptySchedules = () => {
+    for(var i = 0; i<scheduleWeekly.length; i++) {
+      if(scheduleWeekly[i]['activities'].length > 0) {
+        return false
+      }
+    }
+    return true;
   }
 
   return (
-      isLoading ? (
-        <ActivityIndicator visible />
-      ) : (
-        <View style={styles.container}>  
-          <View style={{justifyContent: 'space-between'}}>            
-            <View style={{alignSelf: 'center', marginTop: 15, maxHeight: 120}} >
-              {!isEmptyObject(patientData) ? (
-                  <ProfileNameButton   
-                    profilePicture={patientData.profilePicture}
-                    profileLineOne={patientData.preferredName}
-                    profileLineTwo={(patientData.firstName + ' ' + patientData.lastName)}
-                    handleOnPress={onClickProfile}
-                    isPatient
-                    isVertical={false}
-                    size={90}
-                    />
-              ) : (
-                <LoadingWheel/>
-                )}
-            </View>  
-            <View>
-              <SearchFilterBar
-                originalList={originalLogData}
-                setList={setLogData}
-                SEARCH_OPTIONS={SEARCH_OPTIONS}
-                FIELD_MAPPING={FIELD_MAPPING}
-                SORT_OPTIONS={SORT_OPTIONS}
-                FILTER_OPTIONS={FILTER_OPTIONS}
-                filterOptionDetails={filterOptionDetails}
-                datetime={datetime}
-                setDatetime={setDatetime}
-                sort={sort}
-                setSort={setSort}
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                initializeData={isDataInitialized}
-                onInitialize={()=>setIsDataInitialized(false)}
-                itemType='problem log'
-                itemCount={logData.length}
-                displayMode={displayMode}
-                setDisplayMode={setDisplayMode}
-                DISPLAY_MODES={DISPLAY_MODES}
-                /> 
-            </View>
-          </View>
-          {displayMode == 'rows' ? (
-            <FlatList
-            onTouchStart={()=>Keyboard.dismiss()}
-            onScrollBeginDrag={() => setIsScrolling(true)}
-            onScrollEndDrag={() => setIsScrolling(false)}
-            onRefresh={refreshLogData}
-            refreshing={isLoading}
-            height={'72%'}
-            ListEmptyComponent={()=>noDataMessage(statusCode, isLoading, isError, 'No problem logs found', true)}
-            data={logData}
-            keyboardShouldPersistTaps='handled'
-            keyExtractor={item => (item.problemLogID)}
-            renderItem={({ item }) => { 
-              return(
-                <Swipeable
-                  setIsScrolling={setIsScrolling}
-                  onSwipeRight={()=>handleDeleteLog(item.problemLogID)}
-                  onSwipeLeft={()=>handleEditLog(item.problemLogID)}
-                  underlay={<EditDeleteUnderlay/>}
-                  item={
-                    <TouchableOpacity 
-                      style={styles.logContainer} 
-                      activeOpacity={1} 
-                      disabled={!isScrolling}
-                    >
-                      <ProblemLogItem
-                        problemLogRemarks={item.problemLogRemarks}
-                        authorName={item.authorName}
-                        problemLogListDesc={item.problemLogListDesc}
-                        createdDateTime={item.createdDateTime}
-                        />
-                    </TouchableOpacity>
-                  }
+    isLoading ? (
+      <ActivityIndicator visible />
+    ) : (
+      <View style={styles.container}>  
+        <View style={{justifyContent: 'space-between'}}>            
+          <View style={{alignSelf: 'center', marginTop: 15, maxHeight: 120}} >
+            {!isEmptyObject(patientInfo) ? (
+              <ProfileNameButton   
+                profilePicture={patientInfo.profilePicture}
+                profileLineOne={patientInfo.preferredName}
+                profileLineTwo={(patientInfo.firstName + ' ' + patientInfo.lastName)}
+                handleOnPress={onClickProfile}
+                isPatient
+                isVertical={false}
+                size={90}
                 />
-              )           
-            }}
-          />
           ) : (
-            <View style={{height: '72%', marginBottom: 20, marginHorizontal: 40}}>
-              <DynamicTable
-                headerData={getTableHeaderData()}
-                rowData={getTableRowData()}
-                widthData={[200, 200, 200, 200]}
-                screenName={'patient problem log'}
-                onClickDelete={handleDeleteLog}
-                onClickEdit={handleEditLog}
-                noDataMessage={noDataMessage(statusCode, isLoading, isError, 'No problem log found', false)}
-                del={true}
-                edit={true}
-                />
-            </View>
-          )}
-          <View style={styles.addBtn}>
-            <AddButton 
-              title="Add Problem Log"
-              onPress={handleOnClickAddLog}
-              />
-          </View>
-          <AddPatientProblemLogModal
-            showModal={isModalVisible}
-            modalMode={modalMode}
-            logFormData={logFormData}
-            setLogFormData={setLogFormData}
-            onClose={()=>setIsModalVisible(false)}
-            onSubmit={modalMode == 'add' ? handleModalSubmitAdd : handleModalSubmitEdit}
-          />
+            <LoadingWheel/>
+            )}
+        </View>  
+        <Divider width={'94%'} alignSelf={'center'}/>
+        <View marginRight={'3%'} marginLeft={'3%'}>
+          <SearchFilterBar
+            originalList={originalScheduleWeekly}
+            setList={setScheduleWeekly}
+            FIELD_MAPPING={FIELD_MAPPING}
+            FILTER_OPTIONS={FILTER_OPTIONS}
+            filterOptionDetails={filterOptionDetails}
+            datetime={datetime}
+            setDatetime={setDatetime}
+            dropdown={dropdown}
+            setDropdown={setDropdown}
+            initializeData={isDataInitialized}
+            onInitialize={()=>setIsDataInitialized(false)}
+            hideSearchBar
+            /> 
         </View>
-      )
+      </View>      
+      <FlatList
+        ref={scheduleRef}
+        marginLeft={'4%'}
+        marginRight={'4%'}
+        marginBottom={'4%'}
+        marginTop={'1%'}
+        horizontal    
+        height={'80%'}    
+        // onRefresh={handlePullToRefresh}
+        // refreshing={isLoading}
+        ListEmptyComponent={()=>(
+          <View width={Dimensions.get('window').width-85} height='80%'>
+            {noDataMessage(statusCode, isLoading, isError, 'No schedules found')}
+          </View>
+        )}
+        data={checkAllEmptySchedules() ? [] : scheduleWeekly}
+        renderItem={({ item, i }) => {
+            return (
+            <View style={styles.col} key={i}>
+              <View style={styles.dateContainer}>
+                <Text style={styles.dateText}>{formatDate(new Date(item.date), false)}</Text>
+              </View>
+              <ScrollView
+                width="100%"
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{flexGrow: 1, alignItems: 'center', justifyContent: item.activities.length > 0 ? 'flex-start': 'center'}}
+              >
+                {item.activities.map((activity, i) => (
+                  <ActivityCard
+                    key={i}
+                    activityTitle={activity.activityTitle}
+                    activityStartTime={activity.startTime}
+                    activityEndTime={activity.endTime}
+                    currentTime={new Date()}
+                    medications={activity.medications}
+                    patientName={item.patientName}
+                    patientID={item.patientID}
+                    date={formatDate(new Date(item.date), true)}
+                    navigation={navigation}
+                  />
+                ))}
+              </ScrollView>
+            </View>
+          )
+        }}
+      />
+    </View>
+    )
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: colors.white_var1,
+  col: {
+    justifyContent: 'center',
+    borderRightColor: colors.gray,
+    borderRightWidth: 0.5,
   },
-  logContainer: {
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+  dateText: {
+    color: colors.white_var1,
+    fontSize: 18,
+    fontWeight: 'bold',
   },
-  addBtn: {
-    marginTop: '0.01%'
+  dateContainer: {
+    backgroundColor: colors.green,
+    width: 210,
+    alignSelf: 'center',
+    alignItems: "center",
+    paddingVertical: 10
   }
 });
 

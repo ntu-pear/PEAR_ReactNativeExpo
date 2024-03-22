@@ -69,6 +69,7 @@ function SearchFilterBar({
   setDisplayMode=()=>{},
   DISPLAY_MODES=[],
   hideIndicator=false,
+  hideSearchBar=false,
 }) {  
   // Default state to control modal visibility
   const [modalVisible, setModalVisible] = useState(false);
@@ -124,9 +125,11 @@ function SearchFilterBar({
     let filteredList = [...originalList];
 
     // Search
-    filteredList = filteredList.filter((item) => {
-      return item[FIELD_MAPPING[tempSearchMode]].toLowerCase().includes(text.toLowerCase());
-    })
+    if(SEARCH_OPTIONS.length > 0) {
+      filteredList = filteredList.filter((item) => {
+        return item[FIELD_MAPPING[tempSearchMode]].toLowerCase().includes(text.toLowerCase());
+      })
+    }
   
     // Sort
     if(!isEmptyObject(SORT_OPTIONS)) {
@@ -326,108 +329,185 @@ function SearchFilterBar({
     handleSearchSortFilter({'text': text})
   }
 
+  const filterComponent = () => {
+    return (
+      <FilterModalCard
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+
+        SORT_OPTIONS={viewMode ? SORT_OPTIONS[viewMode] : SORT_OPTIONS}
+        FILTER_OPTIONS={viewMode ? FILTER_OPTIONS[viewMode] : FILTER_OPTIONS}
+        FIELD_MAPPING={FIELD_MAPPING}
+        filterOptionDetails={filterOptionDetails}
+        originalList={originalList}
+        initializeData={initializeData}
+        onInitialize={onInitialize}
+        applySortFilter={applySortFilter}
+        setApplySortFilter={setApplySortFilter}
+        
+        sort={sort}
+        setSort={setSort}
+        
+        dropdown={dropdown}
+        setDropdown={setDropdown}
+        
+        chip={chip}
+        setChip={setChip}
+
+        autocomplete={autocomplete}
+        setAutocomplete={setAutocomplete}
+        
+        datetime={datetime}
+        setDatetime={setDatetime}
+
+        handleSortFilter={handleSearchSortFilter}
+      />
+    )
+  }
+
+  const countComponent = () => {
+    return (
+      itemCount != null ? (
+        <View style={styles.itemCount}>
+          <Text>No. of {itemType}: {itemCount}</Text>
+        </View>
+      ) : null
+    )
+  }
+
+  const indicatorComponent = () => {
+    {hideIndicator ? null : (
+      <View style={{justifyContent: 'center', flex: 1, marginTop: 2, flexDirection: 'row'}}>
+        <FilterIndicator
+          modalVisible={modalVisible}
+          setModalVisible={setModalVisible}
+          filterOptionDetails={filterOptionDetails}
+          sort={sort}
+          setSort={setSort}
+          dropdown={dropdown}
+          chip={chip}
+          autocomplete={autocomplete}
+          datetime={datetime}
+          handleSortFilter={handleSearchSortFilter}
+        />
+      </View>
+    )}
+  }
+
+  const displayModeComponent = () => {
+    return (
+      displayMode != '' ? (
+        <View style={{justifyContent: 'center'}}>
+          <DisplayModeComponent
+            DISPLAY_MODES={DISPLAY_MODES}
+            displayMode={displayMode}
+            setDisplayMode={setDisplayMode}
+          />
+        </View>
+      ) : null
+    )
+  }
+
+  const searchBarComponent = () => {
+    return (
+      <SearchBar 
+        onChangeText={handleSearch}
+        value={searchQuery}
+        autoCapitalize='characters'
+        inputContainerStyle={{borderTopRightRadius: 0, borderBottomRightRadius: 0, height: 47}}
+        handleOnToggleSearchOptions={handleOnToggleSearchOptions}
+        SEARCH_OPTIONS={parseSelectOptions([...SEARCH_OPTIONS])}
+        searchOption={SEARCH_OPTIONS.indexOf(searchOption)+1}
+        placeholder={SEARCH_OPTIONS.length > 1 ? 'Search' : `Search by ${searchOption}`}
+      />
+    )
+  }
+
+  const tabBarComponent = () => {
+    return (
+      <TabBar
+        TABS={VIEW_MODES}
+        curTab={viewMode}
+        setCurTab={setViewMode}
+        handleSwitchTab={handleOnToggleViewMode}
+      />
+    )
+  }
+
+  const verticalDividerComponent = () => {
+    return (
+      <Divider 
+        orientation='vertical' 
+        marginHorizontal='2%'
+        height={'60%'} 
+        alignSelf={'center'}
+      />
+    )
+  }
+
   return (
     <Center backgroundColor={colors.white_var1} zindex={1}> 
       {!isEmptyObject(VIEW_MODES) ? (
         <>
-          <TabBar
-            TABS={VIEW_MODES}
-            curTab={viewMode}
-            setCurTab={setViewMode}
-            handleSwitchTab={handleOnToggleViewMode}
-          />
+          {tabBarComponent()}
           <Divider />
         </>
       ) : null}
-      <View style={styles.optionsContainer}>
-        <SearchBar 
-          onChangeText={handleSearch}
-          value={searchQuery}
-          autoCapitalize='characters'
-          inputContainerStyle={{borderTopRightRadius: 0, borderBottomRightRadius: 0, height: 47}}
-          handleOnToggleSearchOptions={handleOnToggleSearchOptions}
-          SEARCH_OPTIONS={parseSelectOptions([...SEARCH_OPTIONS])}
-          searchOption={SEARCH_OPTIONS.indexOf(searchOption)+1}
-          placeholder={SEARCH_OPTIONS.length > 1 ? 'Search' : `Search by ${searchOption}`}
-        />
-        <View style={{flexDirection: 'row', justifyContent: 'center'}}>
-          <FilterModalCard
-            modalVisible={modalVisible}
-            setModalVisible={setModalVisible}
-
-            SORT_OPTIONS={viewMode ? SORT_OPTIONS[viewMode] : SORT_OPTIONS}
-            FILTER_OPTIONS={viewMode ? FILTER_OPTIONS[viewMode] : FILTER_OPTIONS}
-            FIELD_MAPPING={FIELD_MAPPING}
-            filterOptionDetails={filterOptionDetails}
-            originalList={originalList}
-            initializeData={initializeData}
-            onInitialize={onInitialize}
-            applySortFilter={applySortFilter}
-            setApplySortFilter={setApplySortFilter}
-            
-            sort={sort}
-            setSort={setSort}
-            
-            dropdown={dropdown}
-            setDropdown={setDropdown}
-            
-            chip={chip}
-            setChip={setChip}
-
-            autocomplete={autocomplete}
-            setAutocomplete={setAutocomplete}
-            
-            datetime={datetime}
-            setDatetime={setDatetime}
-
-            handleSortFilter={handleSearchSortFilter}
-          />
-          {displayMode != '' ? (
-            <View style={{justifyContent: 'center'}}>
-              <DisplayModeComponent
-                DISPLAY_MODES={DISPLAY_MODES}
-                displayMode={displayMode}
-                setDisplayMode={setDisplayMode}
+        {hideSearchBar ? (
+          <View flexDirection='row' style={{alignItems: 'center', justifyContent: 'space-between', width: '100%'}} >
+            {countComponent()}
+            {hideIndicator ? null : (
+            <View style={{justifyContent: 'center', flex: 1, marginTop: 2, flexDirection: 'row'}}>
+              <FilterIndicator
+                modalVisible={modalVisible}
+                setModalVisible={setModalVisible}
+                filterOptionDetails={filterOptionDetails}
+                sort={sort}
+                setSort={setSort}
+                dropdown={dropdown}
+                chip={chip}
+                autocomplete={autocomplete}
+                datetime={datetime}
+                handleSortFilter={handleSearchSortFilter}
               />
             </View>
-          ) : null}          
-        </View>
-      </View>
-      <View
-        style={[styles.optionsContainer, {paddingTop: 0}]}
-      >
-        {itemCount != null ? (
-          <>
-            <View style={styles.itemCount}>
-              <Text>No. of {itemType}: {itemCount}</Text>
+          )}
+            {verticalDividerComponent()}
+            {filterComponent()}
+          </View>
+        ) : (
+          <View style={styles.optionsContainer}>
+            {searchBarComponent()}
+            <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
+              {filterComponent()}      
+              {displayModeComponent()}              
             </View>
-
-            <Divider 
-              orientation='vertical' 
-              marginHorizontal='2%'
-              height={'60%'} 
-              alignSelf={'center'}
-            />
-          </>
-        ) : null}
-        {hideIndicator ? null : (
-          <View style={{justifyContent: 'center', flex: 1, marginTop: 2}}>
-            <FilterIndicator
-              modalVisible={modalVisible}
-              setModalVisible={setModalVisible}
-              filterOptionDetails={filterOptionDetails}
-              sort={sort}
-              setSort={setSort}
-              dropdown={dropdown}
-              chip={chip}
-              autocomplete={autocomplete}
-              datetime={datetime}
-              handleSortFilter={handleSearchSortFilter}
-            />
           </View>
         )}
+      {hideSearchBar ? null : (
+        <View
+        style={[styles.optionsContainer, {paddingTop: 0}]}
+      >
+        {countComponent()}
+        {verticalDividerComponent()}
+        {hideIndicator ? null : (
+      <View style={{justifyContent: 'center', flex: 1, marginTop: 2, flexDirection: 'row'}}>
+        <FilterIndicator
+          modalVisible={modalVisible}
+          setModalVisible={setModalVisible}
+          filterOptionDetails={filterOptionDetails}
+          sort={sort}
+          setSort={setSort}
+          dropdown={dropdown}
+          chip={chip}
+          autocomplete={autocomplete}
+          datetime={datetime}
+          handleSortFilter={handleSearchSortFilter}
+        />
       </View>
-      
+    )}
+      </View>
+      )}      
       <Divider/>
     </Center>
   );
