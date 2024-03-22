@@ -66,7 +66,6 @@ function DynamicTable({ headerData, rowData, widthData, screenName, onClickEdit,
         item.slice(headerData.indexOf('ID')+1)
       ))
     }
-    console.log(tempRowData)
     return tempRowData;
   };
 

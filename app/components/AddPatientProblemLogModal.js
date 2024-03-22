@@ -1,78 +1,118 @@
-// Import necessary dependencies
-import React, { useState, useContext } from 'react';
+// Libs
+import React, { useEffect, useState } from 'react';
 import { Modal, Button, VStack, Text } from 'native-base';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 // Components
-import InputField from './input-components/InputField'; // Reuse your existing InputField component
-import AppButton from './AppButton'; // Reuse your existing AppButton component
-import AuthContext from '../auth/context';
+import InputField from './input-components/InputField';
+import AppButton from './AppButton';
 import SelectionInputField from './input-components/SelectionInputField';
 
-// Hooks
+// Hooks 
 import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
-function AddPatientProblemLogModal({ showModal, onClose, onSubmit }) {
-  // Get user data from AuthContext
-  const { user } = useContext(AuthContext);
-  const userID = user ? user.userID : null;
+// Configurations
+import colors from 'app/config/colors';
 
-  // options data
-  const { data: ProblemLog } = useGetSelectionOptions('ProblemLog');
+function AddPatientMedicalHistoryModal({
+  showModal,
+  modalMode,
+  logFormData,
+  setLogFormData,
+  onClose,
+  onSubmit,
+}) {
+  // Screen error state: This = true when the child components report error(input fields)
+  // Enables use of dynamic rendering of components when the page error = true/false.
+  const [isInputErrors, setIsInputErrors] = useState(false);
 
-  // State for form data
-  const [problemLogData, setProblemLogData] = useState({
-    userID: userID,
-    problemLogListDesc: 8,
-    remarks: '',
-  });
+  // Options for problem field
+  const { data: problemLogOptions } = useGetSelectionOptions('ProblemLog');
 
-  // Update field values
-  const handleChange = (name, value) => {
-    setProblemLogData({ ...problemLogData, [name]: value });
-  };
+  // Input error states (Child components)
+  // This records the error states of each child component (ones that require tracking).
+  const [isAuthorNameError, setIsAuthorNameError] = useState(false);
+  const [isProblemDescriptionError, setIsProblemDescriptionError] = useState(false);
+  const [isProblemRemarksError, setIsProblemRemarksError] = useState(false);
+  const [isCreatedDateTimeError, setIsCreatedDateTimeError] = useState(false);
 
-  // Reset form fields
+  // This useEffect enables the page to show correct error checking.
+  // The main isInputErrors is responsible for the error state of the screen.
+  // This state will be true whenever any child input components are in error state.
+  useEffect(() => {
+    setIsInputErrors(
+      isAuthorNameError ||
+      isProblemDescriptionError ||
+      isProblemRemarksError ||
+      isCreatedDateTimeError
+    );
+  }, [
+    isAuthorNameError,
+    isProblemDescriptionError,
+    isProblemRemarksError,
+    isCreatedDateTimeError,
+  ]);
+
+  // Reset form 
   const resetForm = () => {
-    setProblemLogData({
-      userID: userID,
-      problemLogListDesc: 8,
-      remarks: '',
+    setLogFormData({    
+      "problemLogID": null,
+      "problemLogListID": 1,
+      "problemLogRemarks": "",
     });
+    setIsAuthorNameError(false);
+    setIsProblemDescriptionError(false);
+    setIsProblemRemarksError(false);
+    setIsCreatedDateTimeError(false);
   };
 
+  // When modal is closed, reset form
+  useEffect(() => {
+    if (!showModal) {
+      resetForm();
+    }
+  }, [showModal]);
+
+  // Function to update  data
+  const handleLogData = (field) => (e) => {
+    setLogFormData((prevState) => ({
+      ...prevState,
+      [field]: field == 'problemLogListID' ? parseInt(e) : e,
+    }));
+  };
+  
   // Handle form submission
   const handleSubmit = () => {
-    onSubmit(problemLogData);
-    onClose();
-    resetForm();
+    if (!isInputErrors) {
+      onSubmit(logFormData);
+      onClose();
+    }
   };
 
   return (
     <Modal isOpen={showModal} onClose={onClose}>
-      <Modal.Content maxWidth="400px">
+      <Modal.Content maxWidth="65%">
         <Modal.CloseButton />
         <Modal.Header style={styles.modalHeader}>
-          <Text style={styles.modalHeaderText}>Add Problem Log</Text>
+          <Text style={styles.modalHeaderText}>{modalMode} Medical History</Text>
         </Modal.Header>
         <Modal.Body>
-          <VStack space={4}>
+          <VStack space={3}>    
             <SelectionInputField
+              isRequired
               title="Description"
-              isRequired
-              dataArray={ProblemLog}
-              onDataChange={(value) =>
-                handleChange('problemLogListDesc', value)
-              }
-              value={problemLogData.problemLogListDesc}
-            />
+              value={logFormData.problemLogListID}
+              dataArray={problemLogOptions}
+              onDataChange={handleLogData('problemLogListID')}
+            />        
             <InputField
-              title="Remarks"
               isRequired
-              onChangeText={(value) => handleChange('remarks', value)}
-              value={problemLogData.remarks}
-              variant="multiLine"
-            />
+              title={'Remarks'}
+              value={logFormData.problemLogRemarks}
+              onChangeText={handleLogData('problemLogRemarks')}
+              onEndEditing={setIsProblemRemarksError}
+              autoCapitalize='none'
+            />         
           </VStack>
         </Modal.Body>
         <Modal.Footer>
@@ -82,6 +122,7 @@ function AddPatientProblemLogModal({ showModal, onClose, onSubmit }) {
               onPress={handleSubmit}
               title="Submit"
               color="green"
+              isDisabled={isInputErrors}
             ></AppButton>
           </Button.Group>
         </Modal.Footer>
@@ -92,16 +133,19 @@ function AddPatientProblemLogModal({ showModal, onClose, onSubmit }) {
 
 const styles = StyleSheet.create({
   modalHeader: {
-    backgroundColor: 'green', // Adjust as needed
+    backgroundColor: colors.green, // Change to your preferred green color
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalHeaderText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
+    color: 'white', // Text color
+    fontSize: 18, // Adjust font size as needed
+    fontWeight: 'bold', // Optional: if you want the text to be bold
     textTransform: 'uppercase',
+  },  
+  dateSelectionContainer: {
+    width: '100%',
   },
 });
 
-export default AddPatientProblemLogModal;
+export default AddPatientMedicalHistoryModal;
