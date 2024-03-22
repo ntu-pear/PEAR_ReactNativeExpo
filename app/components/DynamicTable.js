@@ -52,7 +52,7 @@ function DynamicTable({ headerData, rowData, widthData, screenName, onClickEdit,
       tempHeaderData.push('Delete');
     }
     customColumns.forEach(item=>(
-      tempHeaderData.push(item.title)
+      tempHeaderData.push(item.colTitle)
     ));
     return tempHeaderData;
   }
@@ -114,9 +114,9 @@ function DynamicTable({ headerData, rowData, widthData, screenName, onClickEdit,
                         key={index}
                         data={row.concat(
                           customColumns.map((column) => (
-                            <View key={column.title} style={{marginVertical: '7%', marginHorizontal: '7%'}}>
+                            <View key={column.btnTitle} style={{marginVertical: '7%', marginHorizontal: '7%'}}>
                               <AppButton 
-                                title={column.title} 
+                                title={column.btnTitle} 
                                 onPress={() => column.onPress(index)} 
                                 color={column.color}
                               />

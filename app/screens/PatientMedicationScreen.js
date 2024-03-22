@@ -527,7 +527,8 @@ function PatientMedicationScreen(props) {
               onClickDelete={handleDeleteMedication}
               noDataMessage={noDataMessage(statusCode, isLoading, isError, 'No medications found', false)}
               customColumns={[{
-                title: 'Log medication administration',
+                btnTitle: 'Log',
+                colTitle: 'Log medication administration',
                 onPress: onClickAdminister,
                 color: 'green',
                 width: 300
