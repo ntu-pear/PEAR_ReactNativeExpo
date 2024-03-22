@@ -15,6 +15,10 @@ export default function useFormatDateTime(strDate, boolDate) {
     return strTime;
   }
 
+  if(strDate === 'null' || strDate === null) {
+    return '-';
+  }
+
   if (boolDate){
     const originalDate = new Date(strDate);
     const adjustedDateTime = new Date(originalDate.getTime() - 8 * 60 * 60 * 1000);
