@@ -23,7 +23,6 @@ const patientAdd = `${endpoint}/add`;
 const patientUpdate = `${endpoint}/update`; //eslint-disable-line no-unused-vars
 const privacyLevelUpdate = `${endpoint}/UpdatePatient`; //eslint-disable-line no-unused-vars
 const patientDelete = `${endpoint}/delete`; //eslint-disable-line no-unused-vars
-const patientAllergy = `${allergyEndpoint}/PatientAllergy`; //eslint-disable-line no-unused-vars
 const patientPrescriptionList = `${prescriptionEndpoint}/PatientPrescription`; //eslint-disable-line no-unused-vars
 const patientRoutine = `${activityEndpoint}${routineEndpoint}/PatientRoutine`; //eslint-disable-line no-unused-vars
 // Medical History
@@ -31,11 +30,15 @@ const patientMedicalHistory = `${medicalHistoryEndpoint}/list`; //eslint-disable
 const patientMedicalHistoryAdd = `${medicalHistoryEndpoint}/add`; //eslint-disable-line no-unused-vars
 const patientMedicalHistoryDelete = `${medicalHistoryEndpoint}/delete`; //eslint-disable-line no-unused-vars
 // Allergy
+const patientAllergy = `${allergyEndpoint}/PatientAllergy`; //eslint-disable-line no-unused-vars
 const patientAllergyAdd = `${allergyEndpoint}/add`; //eslint-disable-line no-unused-vars
+const patientAllergyUpdate = `${allergyEndpoint}/update`; //eslint-disable-line no-unused-vars
 const patientAllergyDelete = `${allergyEndpoint}/delete`; //eslint-disable-line no-unused-vars
 // Vitals
 const patientVitalList = `${vitalEndpoint}/list`; //eslint-disable-line no-unused-vars
 const patientVitalAdd = `${vitalEndpoint}/add`; //eslint-disable-line no-unused-vars
+const patientVitalUpdate = `${vitalEndpoint}/update`; //eslint-disable-line no-unused-vars
+const patientVitalDelete = `${vitalEndpoint}/delete`; //eslint-disable-line no-unused-vars
 // Problem Log
 const patientProblemLog = `${problemLogEndpoint}/PatientProblemLog`; //eslint-disable-line no-unused-vars
 const patientProblemLogAdd = `${problemLogEndpoint}/add`; //eslint-disable-line no-unused-vars
@@ -318,8 +321,39 @@ const updatePatient = async (data) => {
   return client.put(patientUpdate, formData, { headers });
 };
 
+const updatePatientAllergy = async (patientID, allergyData) => {
+  const payload = {
+    patientID: patientID,
+    allergyListID: allergyData.AllergyListID,
+    allergyReactionListID: allergyData.AllergyReactionListID,
+    allergyRemarks: allergyData.AllergyRemarks,
+  };
+  return client.put(patientAllergyUpdate, payload);
+};
+
 const deletePatientAllergy = async (allergyID) => {
   return client.delete(patientAllergyDelete, { allergyID });
+};
+
+const updatePatientVital = async (patientID, vitalData) => {
+  const payload = {
+    PatientID: patientID,
+    Temperature: vitalData.temperature,
+    SystolicBP: vitalData.systolicBP,
+    DiastolicBP: vitalData.diastolicBP,
+    HeartRate: vitalData.heartRate,
+    SpO2: vitalData.spO2,
+    BloodSugarLevel: vitalData.bloodSugarlevel,
+    Height: vitalData.height,
+    Weight: vitalData.weight,
+    VitalRemarks: vitalData.vitalRemarks,
+    AfterMeal: vitalData.afterMeal,
+  };
+  return client.put(patientVitalUpdate, payload);
+};
+
+const deletePatientVital = async (vitalID) => {
+  return client.delete(patientVitalDelete, { vitalID });
 };
 
 const updateMedication = async (patientID, medicationData) => {
@@ -391,10 +425,13 @@ export default {
   addPatientMedication,
   addPatientMedicalHistory,
   updatePatient,
+  updatePatientAllergy,
   deletePatientAllergy,
+  updatePatientVital,
+  deletePatientVital,
   updateMedication,
   deleteMedication,
   deleteMedicalHistory,
   deleteProblemLog,
-  updateProblemLog
+  updateProblemLog,
 };
