@@ -2,6 +2,7 @@
 import React from 'react';
 import { StyleSheet, Text } from 'react-native';
 import { Divider, ScrollView, View } from 'native-base';
+import { Divider, ScrollView, View } from 'native-base';
 import { Table, Row, Rows } from 'react-native-table-component';
 
 // Configurations
@@ -46,6 +47,7 @@ function DynamicTable({ headerData, rowData, widthData, screenName, onClickEdit,
       tempHeaderData.push(item.colTitle)
     ));
     return tempHeaderData;
+  };
   };
 
   // Get row data by removing ID values if any and adding edit/delete/custom buttons
