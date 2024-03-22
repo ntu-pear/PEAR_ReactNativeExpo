@@ -13,6 +13,7 @@ import colors from 'app/config/colors';
 
 // Components
 import AppButton from 'app/components/AppButton';
+import { configureProps } from 'react-native-reanimated/lib/reanimated2/core';
 
 function InformationCard({ displayData, title, subtitle, handleOnPress=null, unMaskedNRIC=null }) {
   const [itemizedData, setItemizedData] = useState(displayData);
@@ -49,10 +50,6 @@ function InformationCard({ displayData, title, subtitle, handleOnPress=null, unM
     }
   }, [itemizedData, displayData]);
 
-  useEffect(() => {
-    console.log(subtitle);
-  }, []);
-
   return (
     <View style={styles.cardContainer}>
       <HStack>
@@ -82,12 +79,12 @@ function InformationCard({ displayData, title, subtitle, handleOnPress=null, unM
               </Text>
               <Text style={[styles.TextContent, styles.fieldValue]} key={index+"text"}>
                 {data === undefined ? 'undefined' :                             // formatting of data
-                  data.value === 'Not available' ? 'Not available' :
                   data.value === 1 ? 'Yes' :
                   data.value === true ? 'Yes' :
                   data.value === 0 ? 'No' :
                   data.value === null ? 'Not available' :
                   data.value === 'null' ? 'Not available' :
+                  data.value === '-' ? '-' :
                   data.label === 'DOB' ? `${formatDateTime(data.value, true)}` : 
                   data.label === 'Start Date' ? `${formatDateTime(data.value, true)}` : 
                   data.label === 'End Date' ? `${formatDateTime(data.value, true)}` : 
@@ -123,16 +120,6 @@ function InformationCard({ displayData, title, subtitle, handleOnPress=null, unM
           }
         </VStack>
         {(handleOnPress != null && title != null && title!="Guardian(s) Information" && subtitle == null) ? (
-          // <IconButton
-          //   _icon={{
-          //     as: MaterialCommunityIcons,
-          //     name: 'pencil',
-          //   }}
-          //   size="lg"
-          //   onPress={handleOnPress}
-          //   style={styles.editButton}
-          // />
-          // TODO: add the icon to the button
           <View style={styles.editButton}>
             <AppButton
               title='EDIT'
