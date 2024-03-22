@@ -5,10 +5,10 @@ import client from 'app/api/client';
  * List all end points here
  */
 const endpoint = '/Schedule';
-const patientWeeklySchedule = '/Schedule/PatientLatestSchedules';
-const patientAllTest = '/Schedule/patientAllTest';
-const patientTest = '/Schedule/patientTest';
-const systemTest = '/Schedule/systemTest';
+const patientWeeklySchedule = `${endpoint}/PatientLatestSchedules`;
+const patientAllTest = `${endpoint}/patientAllTest`;
+const patientTest = `${endpoint}/patientTest`;
+const systemTest = `${endpoint}/systemTest`;
 
 /*
  * List all functions here
@@ -17,19 +17,15 @@ const systemTest = '/Schedule/systemTest';
 
 // **********************  GET REQUESTS *************************
 
-const getSchedule = async () => {
-  return await client.get(endpoint, {});
-};
-
-const getPatientWeeklySchedule = async (patientID) => {
+const getPatientWeeklySchedule = async (patientIDs=[]) => {
   let params;
-  if (patientID !== null) {
+  if (patientIDs.length > 0) {
     params = {
-      patientID,
+      patientIDs: patientIDs,
     };
   }
 
-  // if patientId is not specified
+  // if patientIds not specified
   else {
     params = {};
   }
