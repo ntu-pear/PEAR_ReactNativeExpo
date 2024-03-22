@@ -137,7 +137,7 @@ function PatientProfileScreen(props) {
                       }
                       text="Prescriptions"
                       navigation={navigation}
-                      routes={routes.PATIENT_MEDICATION}
+                      routes={routes.PATIENT_PRESCRIPTION}
                       patientId={patientID}
                       // patientProfile={patientProfile}
                       />
