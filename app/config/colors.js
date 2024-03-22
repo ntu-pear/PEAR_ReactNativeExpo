@@ -30,6 +30,7 @@ export default {
   green: '#019192',
   green_lighter: '#66bdbd',
   green_lightest: '#cce8e8',
+  red_lightest: '#f09f97',
   pink: '#FF585D', // ** Frequently used colors throughout app **
   pink_lighter: '#ff9396',
   pink_lightest: '#ffe6ee',
