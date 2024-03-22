@@ -22,19 +22,19 @@ function PatientInformationCard(props) {
   // useNavigate() hook cannot work on mobile
   const navigate = Platform.OS === 'web' ? useNavigate() : null;
 
-  // const handleOnPress = () => {
-  //   if (Platform.OS === 'web') {
-  //     navigate('/' + routes.PATIENT_INFORMATION, {
-  //       state: { displayPicUrl: `${displayPicUrl}`, ...patientProfile },
-  //     });
-  //   } else {
-  //     navigation.push(routes.PATIENT_INFORMATION, {
-  //       displayPicUrl: `${displayPicUrl}`,
-  //       navigation: navigation,
-  //       ...patientProfile,
-  //     });
-  //   }
-  // };
+  const handleOnPress = () => {
+    if (Platform.OS === 'web') {
+      navigate('/' + routes.PATIENT_INFORMATION, {
+        state: { displayPicUrl: `${displayPicUrl}`, ...patientProfile },
+      });
+    } else {
+      navigation.push(routes.PATIENT_INFORMATION, {
+        displayPicUrl: `${displayPicUrl}`,
+        navigation: navigation,
+        ...patientProfile,
+      });
+    }
+  };
 
   const calcAge = (dob) => {
     const today = new Date().getFullYear();
@@ -116,67 +116,79 @@ function PatientInformationCard(props) {
   };
 
   return (
-    <Box
-      overflow="visible"
-      backgroundColor={colors.green}
-      borderColor={colors.primary_gray}
-      borderBottomWidth="3"
-      style={styles.container}
+    <TouchableOpacity
+      onPress={handleOnPress}
+      style={{ flex: 1 }}
+      testID="patientInformationCard"
     >
-      <VStack space={'8%'} justifyContent="center" mb="16" mt="20" mr="20" ml="20" flex="1" >
-        <HStack space={'12%'} justifyContent="center">
-          <Avatar
-            size={Platform.OS === 'web' ? '28vh' : SCREEN_HEIGHT * 0.15}
-            bg={colors.pink}
-            marginY="auto"
-            source={
-              patientProfile?.profilePicture
-                ? {
-                    uri: `${patientProfile.profilePicture}`,
-                  }
-                : null
-            }
-            borderColor={colors.light}
-            borderWidth="2"
-          >
-            {' '}
-            {patientProfile &&
-            patientProfile.firstName &&
-            patientProfile.firstName.substring(0, 1)
-              ? patientProfile.firstName.substring(0, 1)
-              : '--'}{' '}
-          </Avatar>
-          <VStack space={'8%'}>
-            <VStack>
-              <Text
-                bold
-                fontSize={SCREEN_HEIGHT * 0.034}
-                color={colors.light}
-              >
-                {`${patientProfile?.firstName} ${patientProfile?.lastName}`}
-              </Text>
-              <Text
-                italic
-                fontSize={SCREEN_HEIGHT * 0.024}
-                color={colors.light}
-              >
-                {`${patientProfile?.preferredName}`}
-              </Text>
-              <Text
-                italic
-                fontSize={SCREEN_HEIGHT * 0.024}
-                color={colors.light}
-              >
-                {patientProfile?.gender === 'F' ? 'Female' : 'Male'}
-              </Text>
+      <Box
+        overflow="visible"
+        backgroundColor={colors.green}
+        borderColor={colors.primary_gray}
+        borderBottomWidth="3"
+        style={styles.container}
+      >
+        <VStack space={'8%'} justifyContent="center" mb="5" mt="5" flex="1">
+          <HStack space={'12%'} justifyContent="center">
+            <Avatar
+              size={Platform.OS === 'web' ? '28vh' : SCREEN_HEIGHT * 0.15}
+              bg={colors.pink}
+              marginY="auto"
+              source={
+                patientProfile?.profilePicture
+                  ? {
+                      uri: `${patientProfile.profilePicture}`,
+                    }
+                  : null
+              }
+              borderColor={colors.light}
+              borderWidth="2"
+            >
+              {' '}
+              {patientProfile &&
+              patientProfile.firstName &&
+              patientProfile.firstName.substring(0, 1)
+                ? patientProfile.firstName.substring(0, 1)
+                : '--'}{' '}
+            </Avatar>
+            <VStack space={'8%'}>
+              <VStack>
+                <Text
+                  bold
+                  fontSize={SCREEN_HEIGHT * 0.034}
+                  color={colors.light}
+                >
+                  {`${patientProfile?.firstName} ${patientProfile?.lastName}`}
+                </Text>
+                <Text
+                  italic
+                  fontSize={SCREEN_HEIGHT * 0.024}
+                  color={colors.light}
+                >
+                  {`${patientProfile?.preferredName}`}
+                </Text>
+                <Text
+                  italic
+                  fontSize={SCREEN_HEIGHT * 0.024}
+                  color={colors.light}
+                >
+                  {patientProfile?.gender === 'F' ? 'Female' : 'Male'}
+                </Text>
+              </VStack>
+              {Platform.OS === 'web' ? MyComponent() : null}
             </VStack>
-            {Platform.OS === 'web' ? MyComponent() : null}
-          </VStack>
-        </HStack>
+          </HStack>
 
-        {Platform.OS === 'web' ? null : MyComponent()}
-      </VStack>
-    </Box>
+          {Platform.OS === 'web' ? null : MyComponent()}
+        </VStack>
+        <Icon
+          as={MaterialIcons}
+          color={colors.light}
+          name="chevron-right"
+          size={SCREEN_HEIGHT * 0.04}
+        />
+      </Box>
+    </TouchableOpacity>
   );
 }
 
