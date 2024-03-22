@@ -10,321 +10,42 @@ import PatientHolidayScreen from 'app/screens/PatientHolidayScreen';
 import PatientPhotoAlbumScreen from 'app/screens/PatientPhotoAlbumScreen';
 import PatientPreferenceScreen from 'app/screens/PatientPreferenceScreen';
 import PatientPrescriptionScreen from 'app/screens/PatientPrescriptionScreen';
-import PatientProblemLog from 'app/screens/PatientProblemLog';
+import PatientProblemLog from 'app/screens/PatientProblemLogScreen';
 import PatientVitalScreen from 'app/screens/PatientVitalScreen';
 import PatientRoutineScreen from 'app/screens/PatientRoutineScreen';
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
 
 // Import Constants from Routes
 import routes from 'app/navigation/routes';
-import { Image, Row } from 'native-base';
+import { Icon, Image, Row, View } from 'native-base';
 import { TouchableOpacity, Text } from 'react-native';
 import ActivityFilterCard from 'app/components/ActivityFilterCard';
 import dashboardApi from 'app/api/dashboard';
 import PatientDailyHighlights from 'app/components/PatientDailyHighlights';
+import { MaterialIcons } from '@expo/vector-icons';
+import colors from 'app/config/colors';
+import styles from 'app/utility/styles';
+import EditPatientSocialHistScreen from 'app/screens/EditPatientSocialHistScreen';
+import EditPatientGuardianScreen from 'app/screens/EditPatientGuardianScreen';
+import EditPatientPreferencesScreen from 'app/screens/EditPatientPreferencesScreen';
+import EditPatientInfoScreen from 'app/screens/EditPatientInfoScreen';
+import PatientMedicationScreen from 'app/screens/PatientMedicationScreen';
+import DisplayModeComponent from 'app/components/filter-components/DisplayModeComponent';
 
 // Refer to this: https://reactnavigation.org/docs/hello-react-navigation
 const Stack = createNativeStackNavigator();
 
 // Refer to this for configuration: https://reactnavigation.org/docs/native-stack-navigator#options
 function DashboardNavigator() {
-  // const [errorMessage, setErrorMessage] = useState('');
-  const [modalVisible, setModalVisible] = useState(false);
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const [selectedStartTime, setSelectedStartTime] = useState(
-    new Date(
-      currentTime.getFullYear(),
-      currentTime.getMonth(),
-      currentTime.getDate(),
-      0,
-      0,
-      0,
-    ),
-  );
-  const [selectedEndTime, setSelectedEndTime] = useState(
-    new Date(
-      currentTime.getFullYear(),
-      currentTime.getMonth(),
-      currentTime.getDate(),
-      23,
-      59,
-      59,
-    ),
-  );
-  const [patientsData, setPatientsData] = useState([]);
-  const [filteredPatientsData, setFilteredPatientsData] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [activityList, setActivityList] = useState([]);
-  const [selectedActivity, setSelectedActivity] = useState(null);
-  const [activityFilterList, setActivityFilterList] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
-  // soln: User not authenticated error after login
-  const [isRetry, setIsRetry] = useState(false);
-  const [statusCode, setStatusCode] = useState(200);
-  const [highlightsModalVisible, setHighlightsModalVisible] = useState(true);
-
-  const getDefaultStartTime = () =>
-    new Date(
-      currentTime.getFullYear(),
-      currentTime.getMonth(),
-      currentTime.getDate(),
-      0,
-      0,
-      0,
-    );
-
-  const getDefaultEndTime = () =>
-    new Date(
-      currentTime.getFullYear(),
-      currentTime.getMonth(),
-      currentTime.getDate(),
-      23,
-      59,
-      59,
-    );
-
-  const getActivityList = () => {
-    const activities = [];
-    patientsData.forEach((patient) => {
-      patient.activities.forEach((activity) => {
-        if (!activities.includes(activity.activityTitle)) {
-          activities.push(activity.activityTitle);
-        }
-      });
-    });
-    activities.sort();
-    return activities;
-  };
-
-  const compareDates = (activityDate, selectedDateLocal) => {
-    return (
-      activityDate.getFullYear() === selectedDateLocal.getFullYear() &&
-      activityDate.getMonth() === selectedDateLocal.getMonth() &&
-      activityDate.getDate() === selectedDateLocal.getDate()
-    );
-  };
-
-  const isSelectedActivity = (activityTitle) => {
-    return (
-      selectedActivity === null || selectedActivity.title === activityTitle
-    );
-  };
-
-  const isWithinTimeRange = (activityStart, activityEnd) => {
-    if (
-      activityStart.getHours() > selectedEndTime.getHours() ||
-      activityEnd.getHours() < selectedStartTime.getHours()
-    ) {
-      return false;
-    }
-    return !(
-      (activityStart.getHours() === selectedEndTime.getHours() &&
-        activityStart.getMinutes() > selectedEndTime.getMinutes()) ||
-      (activityEnd.getHours() === selectedStartTime.getHours() &&
-        activityEnd.getMinutes() < selectedStartTime.getMinutes())
-    );
-  };
-
-  const updateFilteredPatientsData = () => {
-    const filtered = [];
-    patientsData.forEach((patient) => {
-      const activities = [];
-      patient.activities.forEach((activity) => {
-        const activityDate = new Date(activity.date);
-        if (compareDates(activityDate, selectedDate)) {
-          if (
-            isWithinTimeRange(
-              new Date(activity.startTime),
-              new Date(activity.endTime),
-            ) &&
-            isSelectedActivity(activity.activityTitle)
-          ) {
-            activities.push({
-              activityTitle: activity.activityTitle,
-              date: activity.date,
-              startTime: activity.startTime,
-              endTime: activity.endTime,
-            });
-          }
-        }
-      });
-
-      if (activities.length !== 0) {
-        filtered.push({
-          patientImage: patient.patientImage,
-          patientId: patient.patientId,
-          patientName: patient.patientName,
-          activities: activities,
-        });
-      }
-    });
-    setFilteredPatientsData(filtered);
-  };
-
-  const refreshDashboardData = () => {
-    setIsLoading(true);
-    setIsError(false);
-    dashboardApi
-      .getDashboard()
-      .then((res) => {
-        if (res.status === 200) {
-          setPatientsData(res.data.data);
-          setIsLoading(false);
-          setIsRetry(false);
-          setStatusCode(res.status);
-        } else {
-          setIsLoading(false);
-          setIsError(true);
-          setStatusCode(res.status);
-          setIsRetry(true);
-        }
-      })
-      .catch((err) => {
-        setIsLoading(false);
-        setIsError(true);
-        setIsRetry(true);
-        setStatusCode(err.response.status);
-      });
-  };
-
-  const noDataMessage = () => {
-    // Display error message if API request fails
-    let message = '';
-    if (isLoading) {
-      return <></>;
-    }
-    if (isError) {
-      if (statusCode === 401) {
-        // setIsRetry(true);
-        message = 'Error: User is not authenticated.';
-        // setErrorMessage('Error: User is not authenticated.');
-      } else if (statusCode >= 500) {
-        // setIsRetry(false);
-        message = 'Error: Server is down. Please try again later.';
-        // setErrorMessage('Error: Server is down. Please try again later.');
-      } else {
-        message = `${statusCode} error has occured`;
-      }
-      // setErrorMessage(`${statusCode} error has occurred.`);
-    }
-    // else {
-    //   setErrorMessage('');
-    // }
-    return (
-      <MessageDisplayCard
-        TextMessage={isError ? message : 'No schedules found today'}
-        topPaddingSize={'42%'}
-      />
-    );
-    // return message;
-  };
-
-  const handlePullToRefresh = () => {
-    refreshDashboardData();
-    setCurrentTime(new Date());
-  };
-
-  useEffect(() => {
-    refreshDashboardData();
-    // noDataMessage();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (isRetry) {
-      console.log('Retrying dashboard API call');
-      refreshDashboardData();
-      // noDataMessage();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRetry]);
-
-  useEffect(() => {
-    updateFilteredPatientsData();
-    setActivityList(getActivityList());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [patientsData]);
-
-  useEffect(() => {
-    setSelectedStartTime(getDefaultStartTime());
-    setSelectedEndTime(getDefaultEndTime());
-    setSelectedActivity(null);
-    setActivityFilterList(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentTime, selectedDate]);
-
-  useEffect(() => {
-    updateFilteredPatientsData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedStartTime, selectedEndTime, selectedActivity]);
-
   return (
     <Stack.Navigator>
       <Stack.Screen
         name={routes.DASHBOARD_SCREEN}
+        component={DashboardScreen}
         options={{
-          headerRight: () => (
-            // This refers to the header calender and 3 dashes icons and their functionalities
-            <Row space={4}>
-              <TouchableOpacity onPress={() => setModalVisible(true)}>
-                <Image
-                  alt={'filter'}
-                  source={{
-                    uri: 'https://cdn-icons-png.flaticon.com/512/7693/7693332.png',
-                  }}
-                  size={'25px'}
-                />
-                {/* This refers to the card that pops up when pressing the 3 dashes icon */}
-                <ActivityFilterCard
-                  modalVisible={modalVisible}
-                  setModalVisible={setModalVisible}
-                  selectedStartTime={selectedStartTime}
-                  setSelectedStartTime={setSelectedStartTime}
-                  selectedEndTime={selectedEndTime}
-                  setSelectedEndTime={setSelectedEndTime}
-                  updateFilteredActivityData={updateFilteredPatientsData}
-                  activityList={activityList}
-                  setSelectedActivity={setSelectedActivity}
-                  activityFilterList={activityFilterList}
-                  setActivityFilterList={setActivityFilterList}
-                  getDefaultStartTime={getDefaultStartTime}
-                  getDefaultEndTime={getDefaultEndTime}
-                />
-              </TouchableOpacity>
-              {/* this refers to the calender icon */}
-              <TouchableOpacity
-                onPress={() => setHighlightsModalVisible(!modalVisible)}
-                testID={'highlightsButton'}
-              >
-                <Image
-                  alt={'daily-highlights'}
-                  source={{
-                    uri: 'https://cdn-icons-png.flaticon.com/512/747/747310.png',
-                  }}
-                  size={'25px'}
-                />
-                <PatientDailyHighlights
-                  modalVisible={highlightsModalVisible}
-                  setModalVisible={setHighlightsModalVisible}
-                />
-              </TouchableOpacity>
-            </Row>
-          ),
+          headerRight: () => <PatientDailyHighlights />,
         }}
-      >
-        {() => (
-          <DashboardScreen
-            selectedDate={selectedDate}
-            setSelectedDate={setSelectedDate}
-            filteredActivityData={filteredPatientsData}
-            currentTime={currentTime}
-            isLoading={isLoading}
-            handlePullToRefresh={handlePullToRefresh}
-            noDataMessage={noDataMessage}
-          />
-        )}
-      </Stack.Screen>
+      />
       <Stack.Screen
         name={routes.PATIENT_PROFILE}
         component={PatientProfile}
@@ -422,6 +143,51 @@ function DashboardNavigator() {
           headerShown: true,
           headerBackTitleVisible: false,
           title: 'Routine',
+        }}
+      />
+      <Stack.Screen
+        name={routes.PATIENT_MEDICATION}
+        component={PatientMedicationScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Medication',
+        }}
+      />
+      <Stack.Screen
+        name={routes.EDIT_PATIENT_INFO}
+        component={EditPatientInfoScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Edit Patient Info',
+        }}
+      />
+      <Stack.Screen
+        name={routes.EDIT_PATIENT_PREFERENCES}
+        component={EditPatientPreferencesScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Edit Patient Preferences',
+        }}
+      />
+      <Stack.Screen
+        name={routes.EDIT_PATIENT_GUARDIAN}
+        component={EditPatientGuardianScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Edit Patient Guardian',
+        }}
+      />
+      <Stack.Screen
+        name={routes.EDIT_PATIENT_SOCIALHIST}
+        component={EditPatientSocialHistScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Edit Patient Social History',
         }}
       />
     </Stack.Navigator>

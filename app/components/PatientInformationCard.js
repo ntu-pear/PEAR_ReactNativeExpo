@@ -44,7 +44,7 @@ function PatientInformationCard(props) {
 
   const extractFullYear = (dob) => {
     const _date = new Date(dob);
-    return `${_date.getDate()}-${_date.getMonth()}-${_date.getFullYear()}`;
+    return `${_date.getDate()}-${_date.getMonth()+1}-${_date.getFullYear()}`;
   };
 
   const SCREEN_HEIGHT = Dimensions.get('window').height;

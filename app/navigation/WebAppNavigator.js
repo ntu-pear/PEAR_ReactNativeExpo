@@ -42,7 +42,7 @@ import PatientHolidayScreen from 'app/screens/PatientHolidayScreen';
 import PatientPhotoAlbumScreen from 'app/screens/PatientPhotoAlbumScreen';
 import PatientPreferenceScreen from 'app/screens/PatientPreferenceScreen';
 import PatientPrescriptionScreen from 'app/screens/PatientPrescriptionScreen';
-import PatientProblemLog from 'app/screens/PatientProblemLog';
+import PatientProblemLog from 'app/screens/PatientProblemLogScreen';
 import PatientVitalScreen from 'app/screens/PatientVitalScreen';
 import PatientRoutineScreen from 'app/screens/PatientRoutineScreen';
 

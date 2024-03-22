@@ -1,29 +1,27 @@
-import React, { useState, useCallback } from 'react';
+// Libs
+import React, { useState, useCallback, useEffect } from 'react';
 import { Center, SectionList, View } from 'native-base';
+
+// Components
 import AddPatientAllergy from 'app/components/AddPatientAllergy';
 import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import AddPatientProgress from 'app/components/AddPatientProgress';
 
-function PatientAddAllergyScreen(props) {
-  const {
-    prevQuestionHandler,
-    formData,
-    handleFormData,
-    componentList,
-    concatFormData,
-    removeFormData,
-    onSubmitFunction,
-    // -- Validation is now real-time no need to have on submit validation - Justin
-    // validateStep,
-  } = props;
-
+function PatientAddAllergyScreen({
+  prevQuestionHandler,
+  formData,
+  handleFormData,
+  componentList,
+  concatFormData,
+  removeFormData,
+  onSubmit
+}) {
   const [allergyInfoDisplay, setAllergyInfoDisplay] = useState(
     componentList.allergy,
   );
+  const [errorStates, setErrorStates] = useState([true]);
 
-  const [errorStates, setErrorStates] = useState([false]);
-
-  // Callback function passed to child components. Lets them update their corresponding
+  // Callback function passed to child components to let them update their corresponding
   // error states in ErrorStates state.
   const handleChildError = useCallback(
     (childId, isError) => {
@@ -39,14 +37,14 @@ function PatientAddAllergyScreen(props) {
 
   // if errorStates has true(s) within (errors present) => is submit enabled = false
   // if errorStates does not have true(s) (no errors present) false => is submit enabled = true
-  let isSubmitEnabled = !errorStates.includes(true);
+  let isSubmitDisabled = !errorStates.includes(true);
 
   const addNewAllergyComponent = () => {
     setErrorStates((prev) => [...prev, true]);
     setAllergyInfoDisplay([...allergyInfoDisplay, {}]);
     concatFormData('allergyInfo', {
-      AllergyListID: 2,
-      AllergyReactionListID: null,
+      AllergyListID: null,
+      AllergyReactionListID: 1,
       AllergyRemarks: '',
     });
   };
@@ -72,12 +70,14 @@ function PatientAddAllergyScreen(props) {
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item, index }) => (
           <AddPatientAllergy
+            key={item}
             i={index}
             title={index + 1}
             formData={formData}
             handleFormData={handleFormData}
             onError={handleChildError}
           />
+          // <View style={{backgroundColor: "black", height: 20}}/>
         )}
         ListFooterComponent={() => (
           <View style={{ alignItems: 'center', justifyContent: 'center' }}>
@@ -86,12 +86,13 @@ function PatientAddAllergyScreen(props) {
               prevQuestionHandler={() =>
                 prevQuestionHandler('allergy', allergyInfoDisplay)
               }
+              isAddDisabled={!(formData['allergyInfo'][0]['AllergyListID'] > 2)} // disable add if no allergy selected
               addComponent={addNewAllergyComponent}
               removeComponent={removeAllergyComponent}
-              submit={isSubmitEnabled}
+              submit={true}
+              isSubmitDisabled={!isSubmitDisabled}              
               formData={formData}
-              submitFunction={onSubmitFunction}
-              // // -- Validation is now real-time no need to have on submit validation - Justin
+              onSubmit={onSubmit}
             />
           </View>
         )}

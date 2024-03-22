@@ -19,9 +19,9 @@ export default function useFormatDateTime(strDate, boolDate) {
     const originalDate = new Date(strDate);
     const adjustedDateTime = new Date(originalDate.getTime() - 8 * 60 * 60 * 1000);
     
-    const day = adjustedDateTime.getDate();
-    const month = adjustedDateTime.getMonth() + 1;
-    const year = adjustedDateTime.getFullYear();
+    const day = originalDate.getDate();
+    const month = originalDate.getMonth() + 1;
+    const year = originalDate.getFullYear();
     
     const formattedDate = `${day < 10 ? "0" : ""}${day}-${month < 10 ? "0" : ""}${month}-${year}`;
     return formattedDate;

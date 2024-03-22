@@ -14,7 +14,7 @@ function RequiredIndicator(){
 const styles = StyleSheet.create({
   RequiredIndicator: {
     color: colors.red,
-    fontSize: 18,
+    fontSize: 13.5,
   },
 });
 

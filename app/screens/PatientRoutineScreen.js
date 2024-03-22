@@ -28,18 +28,25 @@ function PatientRoutineScreen(props) {
       return;
     }
 
-    if (response.data.data !== null){
-      const newArray = response.data.data.map(({ 
-        startDate, endDate, activityTitle, activityDesc, routineIssues, includeInSchedule
-      }) => ({
-        "Date": `${formatDateTime(startDate, true)}`,
-        "Start Time": `${formatDateTime(startDate, false)}`,
-        "End Time": `${formatDateTime(endDate, false)}`,
-        "Activity Title": activityTitle,
-        "Activity Description": activityDesc,
-        "Routine Issues": routineIssues,
-        "Was Scheduled": includeInSchedule ? 'Yes' : 'No',
-      }));
+    if (response.data.data !== null) {
+      const newArray = response.data.data.map(
+        ({
+          startDate,
+          endDate,
+          activityTitle,
+          activityDesc,
+          routineIssues,
+          includeInSchedule,
+        }) => ({
+          Date: `${formatDateTime(startDate, true)}`,
+          'Start Time': `${formatDateTime(startDate, false)}`,
+          'End Time': `${formatDateTime(endDate, false)}`,
+          'Activity Title': activityTitle,
+          'Activity Description': activityDesc,
+          'Routine Issues': routineIssues,
+          'Was Scheduled': includeInSchedule ? 'Yes' : 'No',
+        }),
+      );
       setTableDataFormated(newArray);
     } else {
       setTableDataFormated([]);
@@ -50,9 +57,11 @@ function PatientRoutineScreen(props) {
   useEffect(() => {
     if (tableDataFormated !== undefined && tableDataFormated.length !== 0) {
       setHeaderData(Object.keys(tableDataFormated[0]));
-      
+
       const finalArray = tableDataFormated.map((item) => {
-        return Object.values(item).map((value) => value.toString());
+        return Object.values(item).map((value) =>
+          value ? value.toString() : '',
+        );
       });
       setRowData(finalArray);
     }
