@@ -21,6 +21,8 @@ import EditPatientPreferencesScreen from 'app/screens/EditPatientPreferencesScre
 import EditPatientGuardianScreen from 'app/screens/EditPatientGuardianScreen';
 import EditPatientSocialHistScreen from 'app/screens/EditPatientSocialHistScreen';
 import PatientMedicationScreen from 'app/screens/PatientMedicationScreen';
+import PatientScheduleScreen from 'app/screens/PatientScheduleScreen';
+import PatientMobilityAidScreen from 'app/screens/PatientMobilityAidsScreen';
 
 // Refer to this: https://reactnavigation.org/docs/hello-react-navigation
 const Stack = createNativeStackNavigator();
@@ -143,6 +145,24 @@ function PatientsNavigator() {
           headerShown: true,
           headerBackTitleVisible: false,
           title: 'Medication',
+        }}
+      />
+      <Stack.Screen
+        name={routes.PATIENT_SCHEDULE}
+        component={PatientScheduleScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Schedule',
+        }}
+      />      
+      <Stack.Screen
+        name={routes.PATIENT_MOBILITY_AIDS}
+        component={PatientMobilityAidScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Schedule',
         }}
       />
       <Stack.Screen
