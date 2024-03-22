@@ -23,7 +23,7 @@ function DebugNavigator() {
     <Stack.Navigator>
       <Stack.Screen
         name="xyz"
-        component={DashboardNavigator}
+        component={PatientsNavigator}
         options={{
           headerShown: false,
         }}
