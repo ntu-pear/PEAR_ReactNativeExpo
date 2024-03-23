@@ -32,24 +32,25 @@ import typography from 'app/config/typography';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import InformationCard from 'app/components/InformationCard';
 
-function PatientInformationScreen(props) {
-  const { displayPicUrl, firstName, lastName, patientID } = props.route.params;
+function PatientInformationScreen({patientID, patientProfile, guardianData, doctorsNoteData, socialHistoryData}) {
+  // const { displayPicUrl, firstName, lastName, patientID } = props.route.params;
   const navigation = useNavigation();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isPatientLoading, setIsPatientLoading] = useState(true);
-  const [isSocialHistoryLoading, setIsSocialHistoryLoading] = useState(true);
-  const [isGuardianLoading, setIsGuardianLoading] = useState(true);
-  const [isDoctorsNoteLoading, setIsDoctorsNoteLoading] = useState(true);
+  // const [isLoading, setIsLoading] = useState(true);
+  // const [isPatientLoading, setIsPatientLoading] = useState(true);
+  // const [isSocialHistoryLoading, setIsSocialHistoryLoading] = useState(true);
+  // const [isGuardianLoading, setIsGuardianLoading] = useState(true);
+  // const [isDoctorsNoteLoading, setIsDoctorsNoteLoading] = useState(true);
 
-  const [guardianData, setGuardianData] = useState([]);
+  // const [guardianData, setGuardianData] = useState([]);
   const [guardianInfoData, setGuardianInfoData] = useState([]);
   const [secondGuardianInfoData, setSecondGuardianInfoData] = useState([]);
   const [isSecondGuardian, setIsSecondGuardian] = useState(false);
-  const [socialHistoryData, setSocialHistoryData] = useState([]);
+  // const [socialHistoryData, setSocialHistoryData] = useState([]);
   const [socialHistoryInfo, setSocialHistoryInfo] = useState([]);
-  const [patientProfile, setPatientProfile] = useState({});
+  // const [patientProfile, setPatientProfile] = useState({});
   const [patientData, setPatientData] = useState([]);
-  const [doctorsNoteData, setDoctorNoteData] = useState([]);
+  const [preferenceData, setPreferences] = useState([]);
+  // const [doctorsNoteData, setDoctorNoteData] = useState([]);
   const [doctorsNoteInfo, setDoctorNoteInfo] = useState([]);
   const [unMaskedPatientNRIC, setUnMaskedPatientNRIC] = useState('');
   const [unMaskedGuardianNRIC, setUnMaskedGuardianNRIC] = useState('');
@@ -61,101 +62,33 @@ function PatientInformationScreen(props) {
   const mounted = useRef(false);
 
   // Used to retrieve the patient since after an editing of the patients particulars it will need to be refreshed - Russell
-  const retrievePatient = async (id) => {
+  const retrievePatientNRIC = async (id) => {
     const response = await patientApi.getPatient(id);
     if (!response.ok) {
       console.log('Request failed with status code: ', response.status);
       return;
     }
-    setPatientProfile(response.data.data);
     setUnMaskedPatientNRIC(response.data.data.nric);
   };
 
-  const retrieveSocialHistory = async (id) => {
-    const response = await socialHistoryApi.getSocialHistory(id);
-    if (!response.ok) {
-      console.log('Request failed with status code: ', response.status);
-      return;
-    }
-    if (response.data.data === null) {
-      setSocialHistoryData([]);
-    } else {
-      setSocialHistoryData(response.data.data);
-    }
-  };
-
-  const retrieveGuardian = async (id) => {
-    const response = await guardianApi.getPatientGuardian(id, false);
-    if (!response.ok) {
-      console.log('Request failed with status code: ', response.status);
-      return;
-    }
-    setGuardianData(response.data.data);
-  };
-
-  const retrieveDoctorsNote = async (id) => {
-    const response = await doctorNoteApi.getDoctorNote(id);
-    if (!response.ok) {
-      console.log('Request failed with status code: ', response.status);
-      return;
-    }
-    setDoctorNoteData(response.data.data);
-    console.log('doctor notes', response.data.data);
-  };
 
   // Data used for display, sent to InformationCard
-  // const patientData = [
-  //   { label: 'First Name', value: patientProfile.firstName },
-  //   { label: 'Last Name', value: patientProfile.lastName },
-  //   { label: 'NRIC', value: unMaskedPatientNRIC.replace(/\d{4}(\d{3})/, 'xxxx$1') },
-  //   {
-  //     label: 'Gender',
-  //     value: patientProfile.gender === 'F' ? 'Female' : 'Male',
-  //   },
-  //   {
-  //     label: 'DOB',
-  //     value: patientProfile.dob || '-',
-  //   },
-  //   {
-  //     label: 'Home Number',
-  //     value: patientProfile.homeNo || '-',
-  //   },
-  //   {
-  //     label: 'Mobile Number',
-  //     value: patientProfile.handphoneNo || '-',
-  //   },
-  //   {
-  //     label: 'Address',
-  //     value: patientProfile.address || '-',
-  //   },
-  //   {
-  //     label: 'Temp. Address',
-  //     value: patientProfile.tempAddress || '-',
-  //   },
-  //   {
-  //     label: 'Start Date',
-  //     value: patientProfile.startDate || '-',
-  //   },
-  //   {
-  //     label: 'End Date',
-  //     value: patientProfile.endDate || '-',
-  //   },
-  //   {
-  //     label: 'Respite Care',
-  //     value: patientProfile.isRespiteCare ? 'Yes' : 'No',
-  //   },
-  // ];
-
-  const preferenceData = [
-    {
-      label: 'Preferred name',
-      value: patientProfile.preferredName || '-',
-    },
-    {
-      label: 'Preferred language',
-      value: patientProfile.preferredLanguage || '-',
-    },
-  ];
+  useEffect(() => {
+    mounted.current = true;
+    if(mounted.current == true) {
+      setPreferences([
+        {
+          label: 'Preferred name',
+          value: patientProfile.preferredName || '-',
+        },
+        {
+          label: 'Preferred language',
+          value: patientProfile.preferredLanguage || '-',
+        },
+      ]);
+    }
+    
+  }, [patientProfile]);
 
   useEffect(() => {
     mounted.current = true;
@@ -164,14 +97,18 @@ function PatientInformationScreen(props) {
         setPatientData([
           { label: 'First Name', value: patientProfile.firstName },
           { label: 'Last Name', value: patientProfile.lastName },
-          { label: 'NRIC', value: unMaskedPatientNRIC.replace(/\d{4}(\d{3})/, 'xxxx$1') },
+          {label: 'NRIC', value: unMaskedPatientNRIC.replace(/\d{4}(\d{3})/, 'xxxx$1')},
+          {
+            label: 'DOB',
+            value: patientProfile.dob || '-',
+          },
           {
             label: 'Gender',
             value: patientProfile.gender === 'F' ? 'Female' : 'Male',
           },
           {
-            label: 'DOB',
-            value: patientProfile.dob || '-',
+            label: 'Address',
+            value: patientProfile.address || '-',
           },
           {
             label: 'Home Number',
@@ -180,10 +117,6 @@ function PatientInformationScreen(props) {
           {
             label: 'Mobile Number',
             value: patientProfile.handphoneNo || '-',
-          },
-          {
-            label: 'Address',
-            value: patientProfile.address || '-',
           },
           {
             label: 'Temp. Address',
@@ -204,7 +137,7 @@ function PatientInformationScreen(props) {
         ]);
       }
     }
-  }, [patientProfile]);
+  }, [unMaskedPatientNRIC]);
 
   useEffect(() => {
     mounted.current = true;
@@ -246,16 +179,20 @@ function PatientInformationScreen(props) {
           value: guardianData.guardian.lastName || '-',
         },
         {
-          label: 'Preferred Name',
-          value: guardianData.guardian.preferredName || '-',
-        },
-        {
           label: 'NRIC',
           value: guardianData.guardian.nric.replace(/\d{4}(\d{3})/, 'xxxx$1') || '-',
         },
         {
+          label: 'DOB',
+          value: guardianData.guardian.dob || '-',
+        },
+        {
           label: 'Gender',
           value: guardianData.guardian.gender || '-',
+        },
+        {
+          label: 'Address',
+          value: guardianData.guardian.address || '-',
         },
         {
           label: 'Email',
@@ -270,12 +207,8 @@ function PatientInformationScreen(props) {
           value: guardianData.guardian.contactNo || '-',
         },
         {
-          label: 'DOB',
-          value: guardianData.guardian.dob || '-',
-        },
-        {
-          label: 'Address',
-          value: guardianData.guardian.address || '-',
+          label: 'Preferred Name',
+          value: guardianData.guardian.preferredName || '-',
         },
         {
           label: 'Temp. Address',
@@ -303,16 +236,20 @@ function PatientInformationScreen(props) {
           value: guardianData.additionalGuardian.lastName || '-',
         },
         {
-          label: 'Preferred Name',
-          value: guardianData.additionalGuardian.preferredName || '-',
-        },
-        {
           label: 'NRIC',
           value: guardianData.additionalGuardian.nric.replace(/\d{4}(\d{3})/, 'xxxx$1') || '-',
         },
         {
+          label: 'DOB',
+          value: guardianData.additionalGuardian.dob || '-',
+        },
+        {
           label: 'Gender',
           value: guardianData.additionalGuardian.gender || '-',
+        },
+        {
+          label: 'Address',
+          value: guardianData.additionalGuardian.address || '-',
         },
         {
           label: 'Email',
@@ -327,12 +264,8 @@ function PatientInformationScreen(props) {
           value: guardianData.additionalGuardian.contactNo || '-',
         },
         {
-          label: 'DOB',
-          value: guardianData.additionalGuardian.dob || '-',
-        },
-        {
-          label: 'Address',
-          value: guardianData.additionalGuardian.address || '-',
+          label: 'Preferred Name',
+          value: guardianData.additionalGuardian.preferredName || '-',
         },
         {
           label: 'Temp. Address',
@@ -403,53 +336,51 @@ function PatientInformationScreen(props) {
 
   // used to call api when page loads
   useEffect(() => {
-    retrievePatient(patientID);
-    retrieveSocialHistory(patientID);
-    retrieveGuardian(patientID);
-    retrieveDoctorsNote(patientID);
+    retrievePatientNRIC(patientID);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // used to confirm that data has returned from apis before loading the page - Russell
-  useEffect(() => {
-    if(patientProfile !== undefined && Object.keys(patientProfile).length>0){
-      setIsPatientLoading(false);
-    }
-    if(socialHistoryData !== undefined){
-      setIsSocialHistoryLoading(false);
-    }
-    if(guardianData !== undefined && guardianData.length !== 0){
-      setIsGuardianLoading(false);
-    }
-    if(doctorsNoteData !== undefined){
-      setIsDoctorsNoteLoading(false);
-    }
-    if(isPatientLoading === false && isSocialHistoryLoading === false && isGuardianLoading === false && isDoctorsNoteLoading === false ){
-      setIsLoading(false);
-    }
-  }, [patientProfile, isPatientLoading, socialHistoryData, isSocialHistoryLoading, 
-    guardianData, isGuardianLoading, doctorsNoteData, isDoctorsNoteLoading]);
+  // useEffect(() => {
+  //   if(patientProfile !== undefined && Object.keys(patientProfile).length>0){
+  //     setIsPatientLoading(false);
+  //   }
+  //   if(socialHistoryData !== undefined){
+  //     setIsSocialHistoryLoading(false);
+  //   }
+  //   if(guardianData !== undefined && guardianData.length !== 0){
+  //     setIsGuardianLoading(false);
+  //   }
+  //   if(doctorsNoteData !== undefined){
+  //     setIsDoctorsNoteLoading(false);
+  //   }
+  //   if(isPatientLoading === false && isSocialHistoryLoading === false && isGuardianLoading === false && isDoctorsNoteLoading === false ){
+  //     setIsLoading(false);
+  //   }
+  // }, [patientProfile, isPatientLoading, socialHistoryData, isSocialHistoryLoading, 
+  //   guardianData, isGuardianLoading, doctorsNoteData, isDoctorsNoteLoading]);
 
   // This callback function will be executed when the screen comes into focus - Russell
   useEffect(() => {
     const navListener = navigation.addListener('focus', () => {
-      setPatientProfile({});
-      setSocialHistoryData([]);
+      // setPatientProfile({});
+      // setSocialHistoryData([]);
+      setPreferences([]);
       setSocialHistoryInfo([]);
-      setGuardianData([]);
+      // setGuardianData([]);
       setGuardianInfoData([]);
       setSecondGuardianInfoData([]);
-      setDoctorNoteData([]);
+      // setDoctorNoteData([]);
       setDoctorNoteInfo([]);
-      setIsLoading(true);
-      setIsPatientLoading(true);
-      setIsSocialHistoryLoading(true);
-      setIsGuardianLoading(true);
-      setIsDoctorsNoteLoading(true);
-      retrievePatient(patientID, true)
-      retrieveSocialHistory(patientID);
-      retrieveGuardian(patientID);
-      retrieveDoctorsNote(patientID);
+      // setIsLoading(true);
+      // setIsPatientLoading(true);
+      // setIsSocialHistoryLoading(true);
+      // setIsGuardianLoading(true);
+      // setIsDoctorsNoteLoading(true);
+      // retrievePatient(patientID, true)
+      // retrieveSocialHistory(patientID);
+      // retrieveGuardian(patientID);
+      // retrieveDoctorsNote(patientID);
     });
     return navListener;
   }, [navigation]);
@@ -529,6 +460,7 @@ function PatientInformationScreen(props) {
     }
   };
 
+  // Configure Accordion
   useEffect(() => {
     setSections([
       {
@@ -552,7 +484,6 @@ function PatientInformationScreen(props) {
         content: socialHistoryInfo
       }
     ]);
-    console.log('guardian? ', guardianInfoData);
   }, [patientData, doctorsNoteInfo, guardianInfoData, secondGuardianInfoData, socialHistoryInfo]);
 
   function renderHeader(section, _, isActive) {
@@ -587,36 +518,43 @@ function PatientInformationScreen(props) {
     );
   };
 
-  return isLoading ? (
-    <ActivityIndicator visible />
-  ) : (
-    <Center minH="100%" backgroundColor={colors.white_var1}>
-      <ScrollView width="100%">
+  // return isLoading ? (
+  //   <ActivityIndicator visible />
+  // ) : (
+  // return (
+  //   <Center minH="100%" backgroundColor={colors.white_var1}>
+  //     <ScrollView width="100%">
 
-        <Accordion 
-          align="bottom" 
-          sections={sections}
-          activeSections={activeSections}
-          renderHeader={renderHeader}
-          renderContent={renderContent}
-          onChange={ (sections) => setActiveSections(sections) }
-          sectionContainerStyle={styles.accordContainer}
-        />
+  //       <Accordion 
+  //         align="bottom" 
+  //         sections={sections}
+  //         activeSections={activeSections}
+  //         renderHeader={renderHeader}
+  //         renderContent={renderContent}
+  //         onChange={ (sections) => setActiveSections(sections) }
+  //         sectionContainerStyle={styles.accordContainer}
+  //       />
 
-      </ScrollView>
-    </Center>
+  //     </ScrollView>
+  //   </Center>
+  // );
+  
+  return (
+    <Accordion 
+      align="bottom" 
+      sections={sections}
+      activeSections={activeSections}
+      renderHeader={renderHeader}
+      renderContent={renderContent}
+      onChange={ (sections) => setActiveSections(sections) }
+      sectionContainerStyle={styles.accordContainer}
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  // pictureText: {
-  //   color: colors.white_var1,
-  //   fontFamily: Platform.OS === 'ios' ? 'Helvetica' : typography.android,
-  //   fontSize: 24,
-  //   paddingTop: 15,
-  // },
   accordContainer: {
-    paddingBottom: 4
+    paddingBottom: 4,
   },
   accordHeader: {
     padding: 12,
