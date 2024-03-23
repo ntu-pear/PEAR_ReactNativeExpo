@@ -63,7 +63,7 @@ function PatientInformationScreen({patientID, patientProfile, guardianData, doct
 
   // Used to retrieve the patient since after an editing of the patients particulars it will need to be refreshed - Russell
   const retrievePatientNRIC = async (id) => {
-    const response = await patientApi.getPatient(id);
+    const response = await patientApi.getPatient(id, false);
     if (!response.ok) {
       console.log('Request failed with status code: ', response.status);
       return;

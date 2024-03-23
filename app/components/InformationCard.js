@@ -61,14 +61,13 @@ function InformationCard({ displayData, title, subtitle, handleOnPress=null, unM
               </Text>
             ) : null}
             {subtitle ? (
-              <IconButton
-                _icon={{
-                  as: MaterialCommunityIcons,
-                  name: 'pencil',
-                }}
-                size="lg"
-                onPress={handleOnPress}
-              />
+              <View style={{marginLeft: 10}}>
+                <AppButton
+                  title='EDIT'
+                  onPress={handleOnPress}
+                  color='green_lighter'
+                />
+              </View>
             ) : null}
           </HStack>
           {itemizedData.length !== 0 ? 

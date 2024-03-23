@@ -112,7 +112,6 @@ function PatientProfileScreen(props) {
       setIsPatientLoading(false);
     }
     if(socialHistoryData !== undefined){
-      console.log(socialHistoryData);
       setIsSocialHistoryLoading(false);
     }
     if(guardianData !== undefined && guardianData.length !== 0){
@@ -162,9 +161,10 @@ function PatientProfileScreen(props) {
                 space={2}
                 ml="3%"
                 mr="3%"
-                mt="6%"
+                mt="3%"
+                mb="3%"
                 h="100%"
-                style={{ flex: 1, height:500 }}
+                style={{ flex: 1 }}
               >
                 <View flexDirection='row' width='100%'>
                     <PatientProfileCard
