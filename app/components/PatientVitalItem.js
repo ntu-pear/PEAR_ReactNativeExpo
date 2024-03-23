@@ -8,6 +8,7 @@ import colors from 'app/config/colors';
 
 // Utilities
 import { formatDate } from 'app/utility/miscFunctions';
+import EditDeleteBtn from './EditDeleteBtn';
 
 const PatientVitalItem = ({
   temperature,
@@ -21,6 +22,7 @@ const PatientVitalItem = ({
   vitalRemarks,
   createdDateTime,
   afterMeal,
+  onDelete,
 }) => {
   return (
     <View style={styles.container}>
@@ -45,6 +47,7 @@ const PatientVitalItem = ({
           value={formatDate(new Date(createdDateTime), true)}
         />
       </View>
+      <EditDeleteBtn onDelete={onDelete}/>
     </View>
   );
 };

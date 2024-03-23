@@ -9,13 +9,13 @@ import colors from 'app/config/colors';
 
 // Utilities
 import { formatDate } from 'app/utility/miscFunctions';
+import EditDeleteBtn from './EditDeleteBtn';
 
 const MedicalHistoryItem = ({
   informationSource,
   medicalDetails,
   medicalEstimatedDate,
   medicalRemarks,
-  onEdit,
   onDelete
 }) => {  
   return (
@@ -66,18 +66,7 @@ const MedicalHistoryItem = ({
           </View>
           ): null}
       </View>
-      <View style={styles.editDelContainer}>
-        {onEdit ? (
-          <TouchableOpacity style={styles.editBtn} onPress={onEdit}>
-            <Text style={{color: colors.green, fontSize: 16}}>Edit</Text>
-          </TouchableOpacity>
-        ) : null}
-        {onDelete ? (
-          <TouchableOpacity style={styles.delBtn} onPress={onDelete}>
-            <Text style={{color: colors.red, fontSize: 16}}>Delete</Text>
-          </TouchableOpacity>
-        ) : null}
-      </View>
+      <EditDeleteBtn onDelete={onDelete}/>
     </View>
   );
 };
@@ -114,19 +103,6 @@ const styles = StyleSheet.create({
   bold: {
     marginLeft: 20,
     fontWeight: '600',
-  },
-  editDelContainer: {
-    position: 'absolute',
-    right: 10,
-    top: 10,
-    flexDirection: 'row',
-    justifyContent: 'flex-end'
-  },
-  editBtn: {
-    paddingHorizontal: '5%'
-  },
-  deleteBtn: {
-    paddingHorizontal: '5%'
   },
 });
 

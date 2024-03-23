@@ -433,6 +433,8 @@ function PatientProblemLog(props) {
                         authorName={item.authorName}
                         problemLogListDesc={item.problemLogListDesc}
                         createdDateTime={item.createdDateTime}
+                        onDelete={()=>handleDeleteLog(item.problemLogID)}
+                        onEdit={()=>handleEditLog(item.problemLogID)}
                         />
                     </TouchableOpacity>
                   }

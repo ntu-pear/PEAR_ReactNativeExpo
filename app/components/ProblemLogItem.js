@@ -9,12 +9,15 @@ import colors from 'app/config/colors';
 
 // Utilities
 import { formatDate } from 'app/utility/miscFunctions';
+import EditDeleteBtn from './EditDeleteBtn';
 
 const ProblemLogItem = ({
   problemLogRemarks,
   authorName,
   problemLogListDesc,
   createdDateTime,
+  onDelete,
+  onEdit
 }) => {  
   return (
     <View 
@@ -64,6 +67,7 @@ const ProblemLogItem = ({
           </View>
           ): null}
       </View>
+      <EditDeleteBtn onDelete={onDelete} onEdit={onEdit}/>
     </View>
   );
 };

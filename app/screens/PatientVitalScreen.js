@@ -419,6 +419,7 @@ function PatientVitalScreen(props) {
                       vitalRemarks={item.vitalRemarks}
                       afterMeal={item.afterMeal}
                       createdDateTime={item.createdDateTime}
+                      onDelete={() => handleDeleteVital(item.VitalID)}
                     />
                   </TouchableOpacity>
                 }
