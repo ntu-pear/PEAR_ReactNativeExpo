@@ -128,7 +128,7 @@ function PatientInformationScreen({patientID, patientProfile, guardianData, doct
           },
           {
             label: 'End Date',
-            value: patientProfile.endDate != null && patientProfile.endDate !="1970-01-01T00:00:00" ? patientProfile.endDate : 'Not available',
+            value: patientProfile.endDate != null && patientProfile.endDate !="1970-01-01T00:00:00" ? patientProfile.endDate : null,
           },
           {
             label: 'Respite Care',
