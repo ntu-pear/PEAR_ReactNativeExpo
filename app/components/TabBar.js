@@ -7,6 +7,7 @@ import colors from 'app/config/colors';
 import typography from 'app/config/typography';
 
 function TabBar({
+  testID='',
   TABS={},
   curTab='',
   setCurTab=()=>{},  
@@ -19,9 +20,10 @@ function TabBar({
   }
 
   return (
-    <View style={styles.optionsContainer}>
+    <View style={styles.optionsContainer} testID={testID}>
       {Object.keys(TABS).map(mode => (
         <TouchableOpacity 
+          testID={`${testID}_${mode}`}
           key={mode}
           style={[styles.tab, ...curTab==TABS[mode] ? [styles.selectedTab] : []]}
           onPress={() => handleOnToggleViewMode(TABS[mode])}

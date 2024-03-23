@@ -18,6 +18,7 @@ import { isEmptyObject, parseSelectOptions, setSecondsToZero, sortArray, sortFil
 import DisplayModeComponent from './DisplayModeComponent';
 
 function SearchFilterBar({
+  testID='',
   originalList=[],
   setList=()=>{},
   setIsLoading=()=>{},
@@ -332,6 +333,7 @@ function SearchFilterBar({
   const filterComponent = () => {
     return (
       <FilterModalCard
+        testID={`${testID}_filter`}
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
 
@@ -368,30 +370,11 @@ function SearchFilterBar({
   const countComponent = () => {
     return (
       itemCount != null ? (
-        <View style={styles.itemCount}>
+        <View style={styles.itemCount} testID={`${testID}_count`}>
           <Text>No. of {itemType}: {itemCount}</Text>
         </View>
       ) : null
     )
-  }
-
-  const indicatorComponent = () => {
-    {hideIndicator ? null : (
-      <View style={{justifyContent: 'center', flex: 1, marginTop: 2, flexDirection: 'row'}}>
-        <FilterIndicator
-          modalVisible={modalVisible}
-          setModalVisible={setModalVisible}
-          filterOptionDetails={filterOptionDetails}
-          sort={sort}
-          setSort={setSort}
-          dropdown={dropdown}
-          chip={chip}
-          autocomplete={autocomplete}
-          datetime={datetime}
-          handleSortFilter={handleSearchSortFilter}
-        />
-      </View>
-    )}
   }
 
   const displayModeComponent = () => {
@@ -399,6 +382,7 @@ function SearchFilterBar({
       displayMode != '' ? (
         <View style={{justifyContent: 'center'}}>
           <DisplayModeComponent
+            testID={`${testID}_displayMode`}
             DISPLAY_MODES={DISPLAY_MODES}
             displayMode={displayMode}
             setDisplayMode={setDisplayMode}
@@ -411,6 +395,7 @@ function SearchFilterBar({
   const searchBarComponent = () => {
     return (
       <SearchBar 
+        testID={`${testID}_search`}
         onChangeText={handleSearch}
         value={searchQuery}
         autoCapitalize='characters'
@@ -426,6 +411,7 @@ function SearchFilterBar({
   const tabBarComponent = () => {
     return (
       <TabBar
+        testID={`${testID}_tabBar`}
         TABS={VIEW_MODES}
         curTab={viewMode}
         setCurTab={setViewMode}
@@ -446,7 +432,7 @@ function SearchFilterBar({
   }
 
   return (
-    <Center backgroundColor={colors.white_var1} zindex={1}> 
+    <Center testID={testID} backgroundColor={colors.white_var1} zindex={1}> 
       {!isEmptyObject(VIEW_MODES) ? (
         <>
           {tabBarComponent()}
@@ -459,6 +445,7 @@ function SearchFilterBar({
             {hideIndicator ? null : (
             <View style={{justifyContent: 'center', flex: 1, marginTop: 2, flexDirection: 'row'}}>
               <FilterIndicator
+                testID={`${testID}_indicator`}
                 modalVisible={modalVisible}
                 setModalVisible={setModalVisible}
                 filterOptionDetails={filterOptionDetails}
@@ -493,6 +480,7 @@ function SearchFilterBar({
         {hideIndicator ? null : (
       <View style={{justifyContent: 'center', flex: 1, marginTop: 2, flexDirection: 'row'}}>
         <FilterIndicator
+          testID={`${testID}_indicator`}
           modalVisible={modalVisible}
           setModalVisible={setModalVisible}
           filterOptionDetails={filterOptionDetails}

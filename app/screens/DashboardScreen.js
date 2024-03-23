@@ -52,7 +52,7 @@ function DashboardScreen({ navigation }) {
   // Filter options based on view mode
   const FILTER_OPTIONS = {
     'myPatients': [ 'Activity Type', 'Patient Start Date', 'Activity Time'],
-    'allPatients': ['Caregiver', 'Patient Start Date', 'Activity Type', 'Patient Start Date', 'Activity Time']
+    'allPatients': ['Caregiver', 'Patient Start Date', 'Activity Type', 'Activity Time']
   };
   
   // Mapping between sort/filter/search names and the respective field in the patient data retrieved from the backend
@@ -509,9 +509,11 @@ function DashboardScreen({ navigation }) {
       <ActivityIndicator visible />
     ) : (
       <View
+        testID='dashboard'
         style={globalStyles.mainContentContainer}
       >
         <SearchFilterBar
+          testID='searchFilter'
           originalList={originalSchedule}
           setList={setSchedule}
           setIsLoading={setIsLoading}

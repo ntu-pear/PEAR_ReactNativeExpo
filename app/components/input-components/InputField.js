@@ -119,7 +119,7 @@ function InputField({
   };
 
   return (
-    <View style={styles.componentContainer}>
+    <View testID={testID} style={styles.componentContainer}>
       <VStack>
         {showTitle ? (
           <Text style={styles.titleMsg}>

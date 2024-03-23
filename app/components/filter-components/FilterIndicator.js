@@ -11,6 +11,7 @@ import colors from 'app/config/colors';
 import { formatDate, formatTimeAMPM, formatTimeHM24 } from 'app/utility/miscFunctions';
 
 function FilterIndicator({  
+  testID='',
   modalVisible,
   setModalVisible,
   filterOptionDetails,
@@ -44,6 +45,7 @@ function FilterIndicator({
 
   return (    
     <ScrollView
+      testID={testID}
       horizontal={true}
       flex={1}
       showsHorizontalScrollIndicator={true}
@@ -52,7 +54,8 @@ function FilterIndicator({
         style={{flexDirection: 'row', alignItems: 'center'}}
       >
         {sort['filterOptions'].length > 0 ? (
-          <Chip              
+          <Chip   
+            testID={`${testID}_sort_${sort['sel']['option']['label']}`}           
             title={"Sort by: " + (sort['sel']['option']['label'])}
             type="solid"
             buttonStyle={{backgroundColor: colors.green}} 
@@ -71,6 +74,7 @@ function FilterIndicator({
         
         {Object.keys(chip['filterOptions']).map((filter) => (
           <Chip
+            testID={`${testID}_chip_${chip['sel'][filter]['label']}`}
             key={filter}
             title={filter + ": " + (chip['sel'][filter]['label'])}
             type="solid"
@@ -87,6 +91,7 @@ function FilterIndicator({
           if(dropdown['sel'][filter]['label'] != 'All') {
             return (
               <Chip
+                testID={`${testID}_dropdown_${dropdown['sel'][filter]['label']}`}
                 key={filter}
                 title={filter + ": " + dropdown['sel'][filter]['label']}
                 type="solid"
@@ -107,6 +112,7 @@ function FilterIndicator({
           if(autocomplete['sel'][filter]['title'] != 'All') {
             return (
               <Chip
+                testID={`${testID}_autocomplete_${autocomplete['sel'][filter]['title']}`}
                 key={filter}
                 title={filter + ": " + autocomplete['sel'][filter]['title']}
                 type="solid"
@@ -129,6 +135,7 @@ function FilterIndicator({
               && datetime['sel'][filter]['min'] != null 
               && datetime['sel'][filter]['min'] != filterOptionDetails[filter]['options']['min']['default'] ? (
               <Chip
+                testID={`${testID}_datetime_min_${datetime['sel'][filter]}`}
                 title={filter + " (from): " + (filterOptionDetails[filter]['type'] == 'date' 
                 ? formatDate(datetime['sel'][filter]['min'], true)
                 : formatTimeAMPM(datetime['sel'][filter]['min']))}
@@ -145,6 +152,7 @@ function FilterIndicator({
               && datetime['sel'][filter]['max'] != null 
               && datetime['sel'][filter]['max'] != filterOptionDetails[filter]['options']['max']['default'] ? (
               <Chip
+                testID={`${testID}_datetime_max_${datetime['sel'][filter]}`}
                 title={filter + " (to): " + (filterOptionDetails[filter]['type'] == 'date' 
                   ? formatDate(datetime['sel'][filter]['max'], true)
                   : formatTimeAMPM(datetime['sel'][filter]['max']))}

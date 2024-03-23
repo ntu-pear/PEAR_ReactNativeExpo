@@ -18,7 +18,7 @@ import SelectionInputField from 'app/components/input-components/SelectionInputF
 import HighlightsCard from 'app/components/HighlightsCard';
 import SearchBar from './input-components/SearchBar';
 
-function PatientDailyHighlights() {
+function PatientDailyHighlights({testID=''}) {
   // State controlling whether modal is visible or not
   const [modalVisible, setModalVisible] = useState(true);
 

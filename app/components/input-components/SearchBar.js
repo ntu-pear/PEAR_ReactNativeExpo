@@ -9,6 +9,7 @@ import { View } from 'native-base';
 import SelectionInputField from './SelectionInputField';
 
 function SearchBar({
+  testID='',
   placeholder="Search",
   SEARCH_OPTIONS={},
   searchOption=null,
@@ -24,8 +25,9 @@ function SearchBar({
   if(Object.keys(SEARCH_OPTIONS).length > 0) {
     return (
       <>
-        <View style={styles.searchBar}>
-          <SearchBar 
+        <View style={styles.searchBar} testID={testID}>
+          <SearchBar
+            testID={`${testID}_input`} 
             onChangeText={onChangeText}
             value={value}
             autoCapitalize='characters'
@@ -36,6 +38,7 @@ function SearchBar({
         {SEARCH_OPTIONS.length > 1 ? (
           <View style={{flex: 0.4, zIndex: 1}}>
             <SelectionInputField
+              testID={`${testID}_searchOptions`}
               dataArray={SEARCH_OPTIONS}
               showTitle={false}
               otherProps={{
@@ -57,6 +60,7 @@ function SearchBar({
   } else {
     return (
       <Search
+        testID={`${testID}_input`}
         placeholder={placeholder}
         onChangeText={onChangeText}
         onClear={Keyboard.dismiss}

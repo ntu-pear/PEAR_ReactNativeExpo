@@ -23,6 +23,7 @@ import RequiredIndicator from '../RequiredIndicator';
 import { formatDate, formatTimeAMPM } from 'app/utility/miscFunctions';
 
 function DateInputField({
+  testID='',
   isRequired,
   selectionMode,
   title,
@@ -124,7 +125,7 @@ function DateInputField({
   }
 
   return (
-    <View style={styles.componentContainer}>
+    <View  testID={testID} style={styles.componentContainer}>
         {title ? (
           <Text style={styles.titleMsg}>
             {title}:{isRequired ? <RequiredIndicator/> : ''}
@@ -138,6 +139,7 @@ function DateInputField({
             </TouchableOpacity>
             {allowNull && value != null? (
               <TouchableOpacity 
+                testID={`${testID}_input`}
                 onPress={clearDate} 
                 disabled={value==null}
                 activeOpacity={value==null ? 1 : 0.5}
@@ -151,13 +153,13 @@ function DateInputField({
                   } 
                   size={6}    
                   style={{alignSelf: 'flex-end', marginRight: 5}} 
-                />
+                  />
               </TouchableOpacity>
             ) : null}
         </View>
         {show && (
           <DateTimePicker
-            testID="dateTimePicker"
+            testID={`${testID}_picker`}
             value={value || dateForTime || new Date()}
             display="default"
             mode={mode}
@@ -174,7 +176,7 @@ function DateInputField({
           />
         )}
         {isError.errorMsg ? (
-          <ErrorMessage message={isError.errorMsg} visible={true} />
+          <ErrorMessage testID={`${testID}_error`} message={isError.errorMsg} visible={true} />
         ) : null}
     </View>
   );
