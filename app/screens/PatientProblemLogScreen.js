@@ -223,7 +223,6 @@ function PatientProblemLog(props) {
     }
     
     Alert.alert(alertTitle, alertDetails);
-    setIsLoading(false);
   };
   
   // Edit problem log
@@ -268,7 +267,6 @@ function PatientProblemLog(props) {
     }
     
     Alert.alert(alertTitle, alertDetails);
-    setIsLoading(false);
   };
 
   // Ask user to confirm deletion of problem log
@@ -316,7 +314,6 @@ function PatientProblemLog(props) {
     }
     
     Alert.alert(alertTitle, alertDetails);
-    setIsLoading(false);
   }
   
   // Navigate to patient profile on click profile image
