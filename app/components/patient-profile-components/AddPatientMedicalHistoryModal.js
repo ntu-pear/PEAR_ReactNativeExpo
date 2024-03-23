@@ -14,8 +14,8 @@ import colors from 'app/config/colors';
 function AddPatientMedicalHistoryModal({
   showModal,
   modalMode,
-  medicalHistoryData,
-  setMedicalHistoryData,
+  medicalHistoryData: formData,
+  setMedicalHistoryData: setFormData,
   onClose,
   onSubmit,
 }) {
@@ -49,7 +49,7 @@ function AddPatientMedicalHistoryModal({
 
   // Reset form 
   const resetForm = () => {
-    setMedicalHistoryData({
+    setFormData({
       "medicalHistoryId": null,
       "informationSource": "",
       "medicalDetails": "",
@@ -71,7 +71,7 @@ function AddPatientMedicalHistoryModal({
 
   // Function to update  data
   const handleHxData = (field) => (e) => {
-    setMedicalHistoryData((prevState) => ({
+    setFormData((prevState) => ({
       ...prevState,
       [field]: e,
     }));
@@ -80,21 +80,25 @@ function AddPatientMedicalHistoryModal({
   // Handle form submission
   const handleSubmit = () => {
     if (!isInputErrors) {
-      onSubmit(medicalHistoryData);
+      onSubmit(formData);
       onClose();
     }
   };
-
+  
   return (
     <AddEditModal
       handleSubmit={handleSubmit}
       isInputErrors={isInputErrors}
+      modalMode={modalMode}
+      onClose={onClose}
+      showModal={showModal}
+      modalTitle='Medical History'
       modalContent={(
         <>
         <InputField
           isRequired={true}
           title={'Source'}
-          value={medicalHistoryData.informationSource}
+          value={formData.informationSource}
           onChangeText={handleHxData('informationSource')}
           onEndEditing={setIsInformationSourceError}
           autoCapitalize='none'
@@ -102,7 +106,7 @@ function AddPatientMedicalHistoryModal({
         <InputField
           isRequired={true}
           title={'Details'}
-          value={medicalHistoryData.medicalDetails}
+          value={formData.medicalDetails}
           onChangeText={handleHxData('medicalDetails')}
           onEndEditing={setIsMedicalDetailsError}
           autoCapitalize='none'
@@ -110,7 +114,7 @@ function AddPatientMedicalHistoryModal({
         <InputField
           isRequired={true}
           title={'Remarks'}
-          value={medicalHistoryData.medicalRemarks}
+          value={formData.medicalRemarks}
           onChangeText={handleHxData('medicalRemarks')}
           onEndEditing={setIsMedicalRemarksError}
           autoCapitalize='none'
@@ -120,18 +124,14 @@ function AddPatientMedicalHistoryModal({
             isRequired
             title={'Estimated Date'}
             mode='date'
-            value={medicalHistoryData.medicalEstimatedDate}
+            value={formData.medicalEstimatedDate}
             hideDayOfWeek={true}
             handleFormData={handleHxData('medicalEstimatedDate')}
           />
           </View>
         </>
       )}
-      modalMode={modalMode}
-      onClose={onClose}
-      showModal={showModal}
-      modalTitle='Medical History'
-    />
+      />
   );
 }
 

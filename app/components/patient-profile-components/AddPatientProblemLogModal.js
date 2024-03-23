@@ -94,7 +94,7 @@ function AddPatientMedicalHistoryModal({
       <Modal.Content maxWidth="65%">
         <Modal.CloseButton />
         <Modal.Header style={styles.modalHeader}>
-          <Text style={styles.modalHeaderText}>{modalMode} Medical History</Text>
+          <Text style={styles.modalHeaderText}>{modalMode} Problem Log</Text>
         </Modal.Header>
         <Modal.Body>
           <VStack space={3}>    

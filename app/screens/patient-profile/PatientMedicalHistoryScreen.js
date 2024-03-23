@@ -90,10 +90,10 @@ function PatientMedicalHistory(props) {
   const [statusCode, setStatusCode] = useState(200);
   const [isReloadPatientList, setIsReloadList] = useState(true);
 
-  // Medication data related states
-  const [originalHxData, setOriginalHxData] = useState([]);
-  const [hxData, setHxData] = useState([]);
-  const [medHistoryData, setMedHistoryData] = useState({ // for add/edit form
+  // Medical history related states
+  const [originalData, setOriginalList] = useState([]);
+  const [data, setData] = useState([]);
+  const [formData, setFormData] = useState({ // for add/edit form
     "medicalHistoryId": null,
     "informationSource": "",
     "medicalDetails": "",
@@ -107,11 +107,11 @@ function PatientMedicalHistory(props) {
   // Scrollview state
   const [isScrolling, setIsScrolling] = useState(false);  
 
-  // Refresh list when new medication is added or user requests refresh
+  // Refresh list when new medical history is added or user requests refresh
   useFocusEffect(
     React.useCallback(() => {
       if (isReloadPatientList) {
-        refreshHxData();
+        refreshData();
         setIsReloadList(false);
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -119,7 +119,7 @@ function PatientMedicalHistory(props) {
   );
   
   // Set isLoading to true when retrieving data
-  const refreshHxData = () => {
+  const refreshData = () => {
     setIsLoading(true);
     const promiseFunction = async () => {
       await getHxData();
@@ -128,13 +128,13 @@ function PatientMedicalHistory(props) {
     promiseFunction();
   }    
 
-  // Get medication data from backend
+  // Get medical history data from backend
   const getHxData = async () => {
     if (patientID) {
       const response = await patientApi.getPatientMedicalHistory(patientID);
       if (response.ok) {
-        setOriginalHxData([...response.data.data]);    
-        setHxData(parseHxData([...response.data.data]));    
+        setOriginalList([...response.data.data]);    
+        setData(parseHxData([...response.data.data]));    
         setIsDataInitialized(true);
         setIsLoading(false);  
         setIsError(false);
@@ -142,8 +142,8 @@ function PatientMedicalHistory(props) {
         setStatusCode(response.status);
       } else {
         console.log('Request failed with status code: ', response.status);
-        setOriginalHxData([]);
-        setHxData([]);
+        setOriginalList([]);
+        setData([]);
         setIsLoading(false);
         setIsError(true);
         setStatusCode(response.status);
@@ -153,8 +153,8 @@ function PatientMedicalHistory(props) {
   };
 
   // Parse data
-  const parseHxData = (data) => {
-    return data.map(item=>({
+  const parseHxData = (tempData) => {
+    return tempData.map(item=>({
       "medicalHistoryId": item.medicalHistoryId, 
       "informationSource": item.informationSource, 
       "medicalDetails": item.medicalDetails, 
@@ -163,7 +163,7 @@ function PatientMedicalHistory(props) {
     }))
   }
 
-  // Get medication data from backend
+  // Get patient data from backend
   const getPatientData = async () => {
     if (patientID) {
       const response = await patientApi.getPatient(patientID);
@@ -199,7 +199,7 @@ function PatientMedicalHistory(props) {
     const result = await patientApi.addPatientMedicalHistory(patientID, medData);
     if (result.ok) {
       console.log('submitting medical history data', medData);
-      refreshHxData();
+      refreshData();
       setIsModalVisible(false);
       
       alertTitle = 'Successfully added medical history';
@@ -217,16 +217,16 @@ function PatientMedicalHistory(props) {
     setIsLoading(false);
   };
   
-  // Ask user to confirm deletion of medical details
+  // Ask user to confirm deletion of medical history
   const handleDeleteHx = (hxID) => {
-    const data = hxData.filter(x=>x.medicalHistoryId == hxID)[0];
-    console.log(data, hxID)
+    const tempData = data.filter(x=>x.medicalHistoryId == hxID)[0];
+    console.log(tempData, hxID)
 
     Alert.alert('Are you sure you wish to delete this item?', 
-    `Source: ${data.informationSource}\n`+
-    `Details: ${data.medicalDetails}\n`+
-    `Remarks: ${data.medicalRemarks}\n`+
-    `Estimated Date: ${formatDate(new Date(data.medicalEstimatedDate))}`, [
+    `Source: ${tempData.informationSource}\n`+
+    `Details: ${tempData.medicalDetails}\n`+
+    `Remarks: ${tempData.medicalRemarks}\n`+
+    `Estimated Date: ${formatDate(new Date(tempData.medicalEstimatedDate))}`, [
       {
         text: 'Cancel',
         onPress: ()=>{},
@@ -236,18 +236,18 @@ function PatientMedicalHistory(props) {
     ]);
   }
 
-  // Delete medication
+  // Delete medical history item
   const deleteHx = async (hxID) => {
     setIsLoading(true);
 
-    let data = {medicalHistoryID: hxID};
+    let tempData = {medicalHistoryID: hxID};
 
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.deleteMedicalHistory(data);
+    const result = await patientApi.deleteMedicalHistory(tempData);
     if (result.ok) {
-      refreshHxData();
+      refreshData();
       setIsModalVisible(false);
       
       alertTitle = 'Successfully deleted medical history';
@@ -274,7 +274,7 @@ function PatientMedicalHistory(props) {
   // Return formatted row data for table display
   // Note: keys originally ordered like ['ID', 'Details', 'Source', 'Remarks', 'Estimated Date']
   const getTableRowData = () => {
-    const dataNoPatientID = hxData.map(({ patientId, ...rest }) => rest);
+    const dataNoPatientID = data.map(({ patientId, ...rest }) => rest);
     
     let tempHxData =  dataNoPatientID.map(item=> {
       return Object.entries(item).map(([key, value]) => {
@@ -302,7 +302,6 @@ function PatientMedicalHistory(props) {
   // Note: keys originally ordered like ['ID', 'Details', 'Source', 'Remarks', 'Estimated Date']
   const getTableHeaderData = () => {
     return ['ID', 'Source', 'Details', 'Remarks', 'Estimated Date'];
-
   }
 
   return (
@@ -328,8 +327,8 @@ function PatientMedicalHistory(props) {
             </View>  
             <View>
               <SearchFilterBar
-                originalList={originalHxData}
-                setList={setHxData}
+                originalList={originalData}
+                setList={setData}
                 SEARCH_OPTIONS={SEARCH_OPTIONS}
                 FIELD_MAPPING={FIELD_MAPPING}
                 SORT_OPTIONS={SORT_OPTIONS}
@@ -344,7 +343,7 @@ function PatientMedicalHistory(props) {
                 initializeData={isDataInitialized}
                 onInitialize={()=>setIsDataInitialized(false)}
                 itemType='medical history'
-                itemCount={hxData.length}
+                itemCount={data.length}
                 displayMode={displayMode}
                 setDisplayMode={setDisplayMode}
                 DISPLAY_MODES={DISPLAY_MODES}
@@ -356,11 +355,11 @@ function PatientMedicalHistory(props) {
             onTouchStart={()=>Keyboard.dismiss()}
             onScrollBeginDrag={() => setIsScrolling(true)}
             onScrollEndDrag={() => setIsScrolling(false)}
-            onRefresh={refreshHxData}
+            onRefresh={refreshData}
             refreshing={isLoading}
             height={'72%'}
             ListEmptyComponent={()=>noDataMessage(statusCode, isLoading, isError, 'No medical history found', true)}
-            data={hxData}
+            data={data}
             keyboardShouldPersistTaps='handled'
             keyExtractor={item => (item.medicalHistoryId)}
             renderItem={({ item }) => { 
@@ -410,8 +409,8 @@ function PatientMedicalHistory(props) {
           <AddPatientMedicalHistoryModal
             showModal={isModalVisible}
             modalMode={modalMode}
-            medicalHistoryData={medHistoryData}
-            setMedicalHistoryData={setMedHistoryData}
+            formData={formData}
+            setFormData={setFormData}
             onClose={()=>setIsModalVisible(false)}
             onSubmit={modalMode == 'add' ? handleModalSubmitAdd : () => {}}
           />
