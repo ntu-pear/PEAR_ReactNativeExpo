@@ -2,7 +2,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import PatientsScreen from 'app/screens/PatientsScreen';
 import PatientProfile from 'app/screens/PatientProfileScreen';
-import PatientInformationScreen from 'app/screens/PatientInformationScreen';
+import PatientInformationAccordion from 'app/components/PatientInformationAccordion';
 
 // Import Constants from routes
 import routes from 'app/navigation/routes';
@@ -50,7 +50,7 @@ function PatientsNavigator() {
       />
       <Stack.Screen
         name={routes.PATIENT_INFORMATION}
-        component={PatientInformationScreen}
+        component={PatientInformationAccordion}
         options={{
           headerShown: true,
           headerBackTitleVisible: false,

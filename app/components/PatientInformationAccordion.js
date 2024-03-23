@@ -32,7 +32,7 @@ import typography from 'app/config/typography';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import InformationCard from 'app/components/InformationCard';
 
-function PatientInformationScreen({patientID, patientProfile, guardianData, doctorsNoteData, socialHistoryData}) {
+function PatientInformationAccordion({patientID, patientProfile, guardianData, doctorsNoteData, socialHistoryData}) {
   // const { displayPicUrl, firstName, lastName, patientID } = props.route.params;
   const navigation = useNavigation();
   // const [isLoading, setIsLoading] = useState(true);
@@ -490,7 +490,7 @@ function PatientInformationScreen({patientID, patientProfile, guardianData, doct
     return (
       <View style={styles.accordHeader}>
         <Text style={styles.accordTitle}>{section.title}</Text>
-        <Icon name={ isActive ? 'chevron-up' : 'chevron-down' } size={30} color={colors.black} />
+        <Icon name={ isActive ? 'chevron-up' : 'chevron-down' } size={30} color={colors.white_var1} />
       </View>
     );
   };
@@ -563,12 +563,14 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: colors.green_lighter,
+    backgroundColor: colors.green,
   },
   accordTitle: {
     fontSize: 30,
     paddingTop: 15,
     fontWeight: 'bold',
+    color: colors.white_var1,
+    marginHorizontal: '2%'
   },
   accordBody: {
     padding: 12,
@@ -576,4 +578,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default PatientInformationScreen;
+export default PatientInformationAccordion;

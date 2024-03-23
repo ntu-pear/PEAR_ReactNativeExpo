@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 12,
     flex: 1,
-    margin:'4%',
+    margin:'3%',
     aspectRatio: 1.1,
   },
 });

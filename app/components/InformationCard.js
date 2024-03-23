@@ -65,7 +65,7 @@ function InformationCard({ displayData, title, subtitle, handleOnPress=null, unM
                 <AppButton
                   title='EDIT'
                   onPress={handleOnPress}
-                  color='green_lighter'
+                  color='green'
                 />
               </View>
             ) : null}
@@ -123,7 +123,7 @@ function InformationCard({ displayData, title, subtitle, handleOnPress=null, unM
             <AppButton
               title='EDIT'
               onPress={handleOnPress}
-              color='green_lighter'
+              color='green'
             />
           </View>
         ) : null}

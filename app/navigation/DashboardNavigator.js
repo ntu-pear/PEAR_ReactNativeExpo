@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import DashboardScreen from 'app/screens/DashboardScreen';
 import PatientProfile from 'app/screens/PatientProfileScreen';
-import PatientInformationScreen from 'app/screens/PatientInformationScreen';
+import PatientInformationAccordion from 'app/components/PatientInformationAccordion';
 import PatientMedicalHistoryScreen from 'app/screens/PatientMedicalHistoryScreen';
 import PatientAllergyScreen from 'app/screens/PatientAllergyScreen';
 import PatientHolidayScreen from 'app/screens/PatientHolidayScreen';
@@ -51,7 +51,7 @@ function DashboardNavigator() {
       />
       <Stack.Screen
         name={routes.PATIENT_INFORMATION}
-        component={PatientInformationScreen}
+        component={PatientInformationAccordion}
         options={{
           headerShown: true,
           headerBackTitleVisible: false,
