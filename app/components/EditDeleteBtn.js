@@ -36,10 +36,10 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end'
   },
   editBtn: {
-    paddingHorizontal: '5%'
+    paddingHorizontal: '7%'
   },
   deleteBtn: {
-    paddingHorizontal: '5%'
+    paddingHorizontal: '7%'
   },
 });
 
