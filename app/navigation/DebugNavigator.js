@@ -4,9 +4,9 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 // Import Constants from routes
 import routes from 'app/navigation/routes';
-import PatientAddAllergyScreen from 'app/screens/PatientAddAllergyScreen';
-import PatientAddPatientInfoScreen from 'app/screens/PatientAddPatientInfoScreen';
-import PatientAddScreen from 'app/screens/PatientAddScreen';
+import PatientAddAllergyScreen from 'app/screens/add-patient/PatientAddAllergyScreen';
+import PatientAddPatientInfoScreen from 'app/screens/add-patient/PatientAddPatientInfoScreen';
+import PatientAddScreen from 'app/screens/add-patient/PatientAddScreen';
 import PatientDailyHighlights from 'app/components/PatientDailyHighlights';
 import AccountEditScreen from 'app/screens/AccountEditScreen';
 import PatientsNavigator from './PatientsNavigator';

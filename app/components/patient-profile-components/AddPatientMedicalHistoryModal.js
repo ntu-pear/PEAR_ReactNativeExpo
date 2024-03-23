@@ -4,9 +4,9 @@ import { Modal, Button, VStack, Text } from 'native-base';
 import { StyleSheet, View } from 'react-native';
 
 // Components
-import InputField from './input-components/InputField';
-import AppButton from './AppButton';
-import DateInputField from './input-components/DateInputField';
+import InputField from '../input-components/InputField';
+import DateInputField from '../input-components/DateInputField';
+import AddEditModal from './AddEditModal';
 
 // Configurations
 import colors from 'app/config/colors';
@@ -14,8 +14,8 @@ import colors from 'app/config/colors';
 function AddPatientMedicalHistoryModal({
   showModal,
   modalMode,
-  medicalHistoryData,
-  setMedicalHistoryData,
+  formData,
+  setFormData,
   onClose,
   onSubmit,
 }) {
@@ -49,7 +49,7 @@ function AddPatientMedicalHistoryModal({
 
   // Reset form 
   const resetForm = () => {
-    setMedicalHistoryData({
+    setFormData({
       "medicalHistoryId": null,
       "informationSource": "",
       "medicalDetails": "",
@@ -71,7 +71,7 @@ function AddPatientMedicalHistoryModal({
 
   // Function to update  data
   const handleHxData = (field) => (e) => {
-    setMedicalHistoryData((prevState) => ({
+    setFormData((prevState) => ({
       ...prevState,
       [field]: e,
     }));
@@ -80,69 +80,58 @@ function AddPatientMedicalHistoryModal({
   // Handle form submission
   const handleSubmit = () => {
     if (!isInputErrors) {
-      onSubmit(medicalHistoryData);
+      onSubmit(formData);
       onClose();
     }
   };
-
+  
   return (
-    <Modal isOpen={showModal} onClose={onClose}>
-      <Modal.Content maxWidth="65%">
-        <Modal.CloseButton />
-        <Modal.Header style={styles.modalHeader}>
-          <Text style={styles.modalHeaderText}>{modalMode} Medical History</Text>
-        </Modal.Header>
-        <Modal.Body>
-          <VStack space={3}>            
-            <InputField
-              isRequired={true}
-              title={'Source'}
-              value={medicalHistoryData.informationSource}
-              onChangeText={handleHxData('informationSource')}
-              onEndEditing={setIsInformationSourceError}
-              autoCapitalize='none'
-            />
-            <InputField
-              isRequired={true}
-              title={'Details'}
-              value={medicalHistoryData.medicalDetails}
-              onChangeText={handleHxData('medicalDetails')}
-              onEndEditing={setIsMedicalDetailsError}
-              autoCapitalize='none'
-            />
-            <InputField
-              isRequired={true}
-              title={'Remarks'}
-              value={medicalHistoryData.medicalRemarks}
-              onChangeText={handleHxData('medicalRemarks')}
-              onEndEditing={setIsMedicalRemarksError}
-              autoCapitalize='none'
-            />
-            <View style={styles.dateSelectionContainer}>
-              <DateInputField
-                isRequired
-                title={'Estimated Date'}
-                mode='date'
-                value={medicalHistoryData.medicalEstimatedDate}
-                hideDayOfWeek={true}
-                handleFormData={handleHxData('medicalEstimatedDate')}
-              />
-            </View>           
-          </VStack>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button.Group space={2}>
-            <AppButton color="red" title="Cancel" onPress={onClose}></AppButton>
-            <AppButton
-              onPress={handleSubmit}
-              title="Submit"
-              color="green"
-              isDisabled={isInputErrors}
-            ></AppButton>
-          </Button.Group>
-        </Modal.Footer>
-      </Modal.Content>
-    </Modal>
+    <AddEditModal
+      handleSubmit={handleSubmit}
+      isInputErrors={isInputErrors}
+      modalMode={modalMode}
+      onClose={onClose}
+      showModal={showModal}
+      modalTitle='Medical History'
+      modalContent={(
+        <>
+        <InputField
+          isRequired={true}
+          title={'Source'}
+          value={formData.informationSource}
+          onChangeText={handleHxData('informationSource')}
+          onEndEditing={setIsInformationSourceError}
+          autoCapitalize='none'
+        />
+        <InputField
+          isRequired={true}
+          title={'Details'}
+          value={formData.medicalDetails}
+          onChangeText={handleHxData('medicalDetails')}
+          onEndEditing={setIsMedicalDetailsError}
+          autoCapitalize='none'
+        />
+        <InputField
+          isRequired={true}
+          title={'Remarks'}
+          value={formData.medicalRemarks}
+          onChangeText={handleHxData('medicalRemarks')}
+          onEndEditing={setIsMedicalRemarksError}
+          autoCapitalize='none'
+        />
+        <View style={styles.dateSelectionContainer}>
+          <DateInputField
+            isRequired
+            title={'Estimated Date'}
+            mode='date'
+            value={formData.medicalEstimatedDate}
+            hideDayOfWeek={true}
+            handleFormData={handleHxData('medicalEstimatedDate')}
+          />
+          </View>
+        </>
+      )}
+      />
   );
 }
 

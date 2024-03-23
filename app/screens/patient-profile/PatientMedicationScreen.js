@@ -19,15 +19,14 @@ import colors from 'app/config/colors';
 // Components
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import AddButton from 'app/components/AddButton';
-import MedicationItem from 'app/components/MedicationItem';
-import AddPatientMedicationModal from 'app/components/AddPatientMedicationModal';
+import MedicationItem from 'app/components/patient-profile-components/MedicationItem';
+import AddPatientMedicationModal from 'app/components/patient-profile-components/AddPatientMedicationModal';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
 import LoadingWheel from 'app/components/LoadingWheel';
 import Swipeable from 'app/components/swipeable-components/Swipeable';
 import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
 import DynamicTable from 'app/components/DynamicTable';
-import AppButton from 'app/components/AppButton';
 
 function PatientMedicationScreen(props) {
   let {patientID, patientId} = props.route.params;
@@ -105,10 +104,10 @@ function PatientMedicationScreen(props) {
   const [isReloadPatientList, setIsReloadPatientList] = useState(true);
 
   // Medication data related states
-  const [originalUnparsedMedData, setOriginalUnparsedMedData] = useState([]);
-  const [originalMedData, setOriginalMedData] = useState([]);
-  const [medData, setMedData] = useState([]);
-  const [medicationData, setMedicationData] = useState({ // for add/edit form
+  const [originalUnparsedData, setOriginalUnparsedData] = useState([]);
+  const [originalData, setOriginalData] = useState([]);
+  const [data, setData] = useState([]);
+  const [formData, setFormData] = useState({ // for add/edit form
     "medicationID": null,
     "prescriptionName": "",
     "dosage": "",
@@ -125,7 +124,6 @@ function PatientMedicationScreen(props) {
   // Scrollview state
   const [isScrolling, setIsScrolling] = useState(false);
   
-
   // Refresh list when new medication is added or user requests refresh
   useFocusEffect(
     React.useCallback(() => {
@@ -137,7 +135,6 @@ function PatientMedicationScreen(props) {
     }, [isReloadPatientList]),
   );
   
-
   // Set isLoading to true when retrieving data
   const refreshMedData = () => {
     setIsLoading(true);
@@ -153,16 +150,16 @@ function PatientMedicationScreen(props) {
     if (patientID) {
       const response = await patientApi.getPatientMedication(patientID);
       if (response.ok) {
-        setOriginalUnparsedMedData(response.data.data != null ? [...response.data.data] : [])
+        setOriginalUnparsedData(response.data.data != null ? [...response.data.data] : [])
         parseMedicationData(response.data.data != null ? response.data.data : []);
         setIsError(false);
         setIsRetry(false);
         setStatusCode(response.status);
       } else {
         console.log('Request failed with status code: ', response.status);
-        setOriginalUnparsedMedData([]);
-        setOriginalMedData([]);
-        setMedData([]);
+        setOriginalUnparsedData([]);
+        setOriginalData([]);
+        setData([]);
         setIsLoading(false);
         setIsError(true);
         setStatusCode(response.status);
@@ -193,10 +190,10 @@ function PatientMedicationScreen(props) {
 
   // Parse data to display 
   // Some medications may have more than one administerTime - render as separate items for each timing
-  const parseMedicationData = (data) => {
+  const parseMedicationData = (tempData) => {
     var tempMedData = [];
-    for (var i = 0; i<data.length; i++) {
-      var item = data[i];
+    for (var i = 0; i<tempData.length; i++) {
+      var item = tempData[i];
       
       var medTimes = item.administerTime.split(',');
       for (var j = 0; j <medTimes.length; j++) {
@@ -212,8 +209,8 @@ function PatientMedicationScreen(props) {
         });
       }
     }
-    setOriginalMedData([...tempMedData]);    
-    setMedData([...tempMedData]);    
+    setOriginalData([...tempMedData]);    
+    setData([...tempMedData]);    
     setIsDataInitialized(true);  
     setIsLoading(false);
   }
@@ -228,15 +225,15 @@ function PatientMedicationScreen(props) {
   const handleModalSubmitAdd = async (medData) => {
     setIsLoading(true);
 
-    let data = {...medData};
-    data['administerTime'] = convertAdmTimeToMilitary(medData.administerTime);
+    let tempData = {...medData};
+    tempData['administerTime'] = convertAdmTimeToMilitary(medData.administerTime);
 
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.addPatientMedication(patientID, data);
+    const result = await patientApi.addPatientMedication(patientID, tempData);
     if (result.ok) {
-      console.log('submitting medication data', data);
+      console.log('submitting medication data', tempData);
       refreshMedData();
       setIsModalVisible(false);
       
@@ -260,9 +257,9 @@ function PatientMedicationScreen(props) {
     setIsModalVisible(true);
     setModalMode('edit');
     
-    const unparsedMedData = originalUnparsedMedData.filter(x=>x.medicationID == medID && x.patientID == patientID)[0];
+    const unparsedMedData = originalUnparsedData.filter(x=>x.medicationID == medID && x.patientID == patientID)[0];
 
-    setMedicationData({
+    setFormData({
       "medicationID": unparsedMedData.medicationID,
       "prescriptionName": unparsedMedData.prescriptionName,
       "dosage": unparsedMedData.dosage,
@@ -287,13 +284,13 @@ function PatientMedicationScreen(props) {
   const handleModalSubmitEdit = async () => {
     setIsLoading(true);
 
-    let data = {...medicationData};
-    data['administerTime'] = convertAdmTimeToMilitary(medicationData.administerTime);
+    let tempFormData = {...formData};
+    tempFormData['administerTime'] = convertAdmTimeToMilitary(formData.administerTime);
 
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.updateMedication(patientID, data);
+    const result = await patientApi.updateMedication(patientID, tempFormData);
     if (result.ok) {
       refreshMedData();
       setIsModalVisible(false);
@@ -316,7 +313,7 @@ function PatientMedicationScreen(props) {
   
   // Ask user to confirm deletion of medication
   const handleDeleteMedication = (medID) => {
-    const unparsedMedData = originalUnparsedMedData.filter(x=>x.medicationID == medID && x.patientID == patientID)[0];
+    const unparsedMedData = originalUnparsedData.filter(x=>x.medicationID == medID && x.patientID == patientID)[0];
 
     Alert.alert('Are you sure you wish to delete this medication?', 
     `Medication: ${unparsedMedData.prescriptionName}\nTime: ${formatAdmString(unparsedMedData.administerTime)}`, [
@@ -333,12 +330,12 @@ function PatientMedicationScreen(props) {
   const deleteMedication = async (medID) => {
     setIsLoading(true);
 
-    let data = {medicationID: medID};
+    let tempData = {medicationID: medID};
 
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.deleteMedication(data);
+    const result = await patientApi.deleteMedication(tempData);
     if (result.ok) {
       refreshMedData();
       setIsModalVisible(false);
@@ -382,7 +379,7 @@ function PatientMedicationScreen(props) {
   // Return formatted row data for table display
   const getTableRowData = () => {
     // const medDataNoMedID = medData.map(({ medID, ...rest }) => rest);
-    return [...medData].map(item=> {
+    return [...data].map(item=> {
       return Object.entries(item).map(([key, value]) => {
         if (key.toLowerCase().includes('date')) {
           return formatDate(new Date(value), true); 
@@ -396,8 +393,8 @@ function PatientMedicationScreen(props) {
 
   // Return formatted header data for table display
   const getTableHeaderData = () => {
-    return medData.length > 0 
-      ? ['ID', ...Object.keys(medData[0])
+    return data.length > 0 
+      ? ['ID', ...Object.keys(data[0])
         .filter(x=>x!='medID')
         .map(item=>("Prescription "+item
         .split("med")[1].
@@ -407,13 +404,13 @@ function PatientMedicationScreen(props) {
 
   // Get user confirmation to save adminstration status of medication
   const onClickAdminister = (index) => {
-    const data = medData[[index]]
+    const tempData = data[[index]]
     
     Alert.alert('Confirm medication adminstration', 
     `Patient: ${patientData.preferredName}\n`+
-    `Medication: ${data.medName}\n`+
-    `Dosage: ${data.medDosage}\n`+
-    `Time: ${formatTimeAMPM(data.medTime)}`, [
+    `Medication: ${tempData.medName}\n`+
+    `Dosage: ${tempData.medDosage}\n`+
+    `Time: ${formatTimeAMPM(tempData.medTime)}`, [
       {
         text: 'Cancel',
         onPress: ()=>{},
@@ -451,8 +448,8 @@ function PatientMedicationScreen(props) {
             </View>  
             <View>
               <SearchFilterBar
-                originalList={originalMedData}
-                setList={setMedData}
+                originalList={originalData}
+                setList={setData}
                 SEARCH_OPTIONS={SEARCH_OPTIONS}
                 FIELD_MAPPING={FIELD_MAPPING}
                 SORT_OPTIONS={SORT_OPTIONS}
@@ -467,7 +464,7 @@ function PatientMedicationScreen(props) {
                 initializeData={isDataInitialized}
                 onInitialize={()=>setIsDataInitialized(false)}
                 itemType='medications'
-                itemCount={medData.length}
+                itemCount={data.length}
                 displayMode={displayMode}
                 setDisplayMode={setDisplayMode}
                 DISPLAY_MODES={DISPLAY_MODES}
@@ -483,7 +480,7 @@ function PatientMedicationScreen(props) {
             refreshing={isLoading}
             height={'72%'}
             ListEmptyComponent={()=>noDataMessage(statusCode, isLoading, isError, 'No medications found', true)}
-            data={medData}
+            data={data}
             keyboardShouldPersistTaps='handled'
             keyExtractor={item => (item.medID + item.medTime)}
             renderItem={({ item, index }) => { 
@@ -549,8 +546,8 @@ function PatientMedicationScreen(props) {
           <AddPatientMedicationModal
             showModal={isModalVisible}
             modalMode={modalMode}
-            medicationData={medicationData}
-            setMedicationData={setMedicationData}
+            formData={formData}
+            setFormData={setFormData}
             onClose={()=>setIsModalVisible(false)}
             onSubmit={modalMode=='add' ? handleModalSubmitAdd : handleModalSubmitEdit} 
           />
