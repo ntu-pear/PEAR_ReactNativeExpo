@@ -22,8 +22,8 @@ import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 import { noDataMessage, parseSelectOptions } from 'app/utility/miscFunctions';
 
 // Components
-import AddPatientProgress from 'app/components/add-patient-components/AddPatientProgress';
-import AddPatientBottomButtons from 'app/components/add-patient-components/AddPatientBottomButtons';
+import AddPatientProgress from 'app/components/AddPatientProgress';
+import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import DateInputField from 'app/components/input-components/DateInputField';
 import SelectionInputField from 'app/components/input-components/SelectionInputField';
 import RadioButtonInput from 'app/components/input-components/RadioButtonsInput';

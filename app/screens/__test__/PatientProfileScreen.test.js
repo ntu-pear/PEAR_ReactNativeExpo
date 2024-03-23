@@ -4,7 +4,7 @@
 import { cleanup, render, waitFor } from '@testing-library/react-native';
 import { NativeBaseProvider } from 'native-base';
 import '@testing-library/jest-native/extend-expect';
-import PatientProfileScreen from 'app/screens/patient-profile/PatientProfileScreen';
+import PatientProfileScreen from 'app/screens/PatientProfileScreen';
 // import HighlightsCard from 'app/components/HighlightsCard';
 import { getPatient } from 'app/api/patient';
 

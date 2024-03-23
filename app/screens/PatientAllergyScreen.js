@@ -13,7 +13,7 @@ import formatDateTime from 'app/hooks/useFormatDateTime.js';
 import DynamicTable from 'app/components/DynamicTable';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import AddButton from 'app/components/AddButton';
-import AddPatientAllergyModal from 'app/components/patient-profile-components/AddPatientAllergyModal';
+import AddPatientAllergyModal from 'app/components/AddPatientAllergyModal';
 
 function PatientAllergyScreen(props) {
   const [isLoading, setIsLoading] = useState(true);
