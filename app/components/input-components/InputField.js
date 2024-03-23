@@ -17,6 +17,7 @@ import { TextInput } from 'react-native';
 import RequiredIndicator from '../RequiredIndicator';
 
 function InputField({
+  testID='',
   isRequired = false,
   hideError = true,
   showTitle = true,
@@ -126,6 +127,7 @@ function InputField({
           </Text>
         ) : null}
         <Input
+          testID={`${testID}_input`}
           borderColor={!error.errorMsg ? colors.light_gray3 : colors.red}
           textAlignVertical={variant === 'multiLine' ? 'top' : 'center'}
           autoCapitalize="none"
@@ -144,7 +146,7 @@ function InputField({
           {...otherProps}
         />
         {hideError && !error.errorMsg ? null : (
-          <ErrorMessage message={error.errorMsg} />
+          <ErrorMessage testID={`${testID}_error`} message={error.errorMsg} />
         )}
       </VStack>
     </View>

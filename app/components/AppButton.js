@@ -11,6 +11,7 @@ function AppButton({ title, onPress, color, isDisabled = false, testID}) {
       isDisabled={isDisabled}
       onPress={onPress}
       testID={testID}
+      accessibilityTraits={isDisabled ? ['button', 'disabled'] : ['button']}
     >
       <Text style={styles.text}>{title}</Text>
     </Button>

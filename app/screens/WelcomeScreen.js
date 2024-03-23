@@ -178,7 +178,7 @@ function WelcomeScreen(props) {
         }}
       >
         <View testID={'loginContentContainer'} style={styles.overlay}>
-          <Center flex={1} style={styles.formContainer}>
+          <Center flex={1} style={styles.formContainer} >
             <View style={styles.credentialsContainer}>
               <View style={styles.logoContainer}>
                 <Image
@@ -208,6 +208,7 @@ function WelcomeScreen(props) {
               </View>
               <View style={styles.inputContainer}>
                 <SelectionInputField
+                  testID="role"
                   isRequired
                   showTitle={false}
                   title="Select Role"
@@ -246,10 +247,10 @@ function WelcomeScreen(props) {
                   <LoadingWheel />
                   ) : (
                     <AppButton
-                      title="Login"
+                      title="login"
                       color="green"
                       onPress={onPressLogin}
-                      testingID="Login"
+                      testID="login"
                       isDisabled={isInputErrors}                   
                     />
                   )}

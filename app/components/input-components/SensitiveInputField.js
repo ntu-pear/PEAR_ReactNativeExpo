@@ -17,6 +17,7 @@ import InputField from './InputField';
 import { MaterialIcons } from '@expo/vector-icons';
 
 function SensitiveInputField({
+  testID='',
   isRequired = false,
   autoCapitalize = 'none',
   hideError = true,
@@ -41,6 +42,7 @@ function SensitiveInputField({
     <View style={styles.ComponentContainer}>
       <VStack>
         <InputField
+          testID={testID}
           isRequired={isRequired}
           autoCapitalize={autoCapitalize}
           hideError={hideError}
