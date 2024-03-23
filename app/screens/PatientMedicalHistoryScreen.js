@@ -200,13 +200,14 @@ function PatientMedicalHistory(props) {
 
     let alertTitle = '';
     let alertDetails = '';
-
+    
     const result = await patientApi.addPatientMedicalHistory(
       patientID,
       medData,
-    );
-    if (result.ok) {
-      console.log('submitting medical history data', medData);
+      );
+      if (result.ok) {
+        console.log('submitting medical history data', medData);
+      alertTitle = 'Sucessfully added medical history';
       refreshData();
       setIsModalVisible(false);
     } else {
@@ -220,7 +221,6 @@ function PatientMedicalHistory(props) {
     }
 
     Alert.alert(alertTitle, alertDetails);
-    setIsLoading(false);
   };
   
   // Ask user to confirm deletion of medical history
@@ -269,7 +269,6 @@ function PatientMedicalHistory(props) {
     }
 
     Alert.alert(alertTitle, alertDetails);
-    setIsLoading(false);
   };
 
   // Navigate to patient profile on click profile image
