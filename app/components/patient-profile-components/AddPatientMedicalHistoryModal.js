@@ -14,8 +14,8 @@ import colors from 'app/config/colors';
 function AddPatientMedicalHistoryModal({
   showModal,
   modalMode,
-  medicalHistoryData: formData,
-  setMedicalHistoryData: setFormData,
+  formData,
+  setFormData,
   onClose,
   onSubmit,
 }) {
