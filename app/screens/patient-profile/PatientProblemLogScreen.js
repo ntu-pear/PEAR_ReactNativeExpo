@@ -98,9 +98,9 @@ function PatientProblemLog(props) {
   const [isReloadList, setIsReloadList] = useState(true);
 
   // Problem log data related states
-  const [originalLogData, setOriginalLogData] = useState([]);
-  const [logData, setLogData] = useState([]);
-  const [logFormData, setLogFormData] = useState({ // for add/edit form
+  const [originalData, setOriginalData] = useState([]);
+  const [data, setData] = useState([]);
+  const [formData, setFormData] = useState({ // for add/edit form
     "problemLogID": null,
     "problemLogListID": 1,
     "problemLogListDesc": "",
@@ -140,8 +140,8 @@ function PatientProblemLog(props) {
       const response = await patientApi.getPatientProblemLog(patientID);
       if (response.ok) {
         console.log(response.data.data)
-        setOriginalLogData([...response.data.data]);    
-        setLogData(parseLogData([...response.data.data]));    
+        setOriginalData([...response.data.data]);    
+        setData(parseLogData([...response.data.data]));    
         setIsDataInitialized(true);
         setIsLoading(false);  
         setIsError(false);
@@ -149,8 +149,8 @@ function PatientProblemLog(props) {
         setStatusCode(response.status);
       } else {
         console.log('Request failed with status code: ', response.status);
-        setOriginalLogData([]);
-        setLogData([]);
+        setOriginalData([]);
+        setData([]);
         setIsLoading(false);
         setIsError(true);
         setStatusCode(response.status);
@@ -160,8 +160,8 @@ function PatientProblemLog(props) {
   };
 
   // Parse data
-  const parseLogData = (data) => {
-    return data.map(item=>({ // for add/edit form
+  const parseLogData = (tempData) => {
+    return tempData.map(item=>({ // for add/edit form
       "problemLogID": item.problemLogID,
       "problemLogRemarks": item.problemLogRemarks,
       "authorName": item.authorName,
@@ -231,9 +231,9 @@ function PatientProblemLog(props) {
     setIsModalVisible(true);
     setModalMode('edit');
     
-    const tempLogData = logData.filter(x=>x.problemLogID == logID)[0];
+    const tempLogData = data.filter(x=>x.problemLogID == logID)[0];
 
-    setLogFormData({
+    setFormData({
       "problemLogID": tempLogData.problemLogID,
       "problemLogListID": tempLogData.problemLogListID,
       "problemLogListDesc": tempLogData.problemLogListDesc,
@@ -245,7 +245,7 @@ function PatientProblemLog(props) {
   const handleModalSubmitEdit = async () => {
     setIsLoading(true);
 
-    let tempFormData = {...logFormData};
+    let tempFormData = {...formData};
 
     let alertTitle = '';
     let alertDetails = '';
@@ -273,13 +273,13 @@ function PatientProblemLog(props) {
 
   // Ask user to confirm deletion of problem log
   const handleDeleteLog = (logID) => {
-    const data = logData.filter(x=>x.problemLogID == logID)[0];
+    const tempData = data.filter(x=>x.problemLogID == logID)[0];
 
     Alert.alert('Are you sure you wish to delete this item?', 
-    `Author: ${data.authorName}\n` +
-    `Description: ${data.problemLogListDesc}\n` +
-    `Remarks: ${data.problemLogRemarks}\n` +
-    `Created: ${formatDate(new Date(data.createdDateTime))}`, [
+    `Author: ${tempData.authorName}\n` +
+    `Description: ${tempData.problemLogListDesc}\n` +
+    `Remarks: ${tempData.problemLogRemarks}\n` +
+    `Created: ${formatDate(new Date(tempData.createdDateTime))}`, [
       {
         text: 'Cancel',
         onPress: ()=>{},
@@ -293,12 +293,12 @@ function PatientProblemLog(props) {
   const deleteLog = async (logID) => {
     setIsLoading(true);
 
-    let data = {problemLogID: logID};
+    let tempData = {problemLogID: logID};
 
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.deleteProblemLog(data);
+    const result = await patientApi.deleteProblemLog(tempData);
     if (result.ok) {
       refreshLogData();
       setIsModalVisible(false);
@@ -327,7 +327,7 @@ function PatientProblemLog(props) {
   // Return formatted row data for table display
   // Note: keys originally ordered like ['ID', 'Author', 'Description', 'Created Datetime', 'Remarks']  
   const getTableRowData = () => {
-    const dataNoIDs = logData.map(({ patientID, userID, problemLogListID, ...rest }) => rest);
+    const dataNoIDs = data.map(({ patientID, userID, problemLogListID, ...rest }) => rest);
     
     let tempLogData =  dataNoIDs.map(item=> {
       return Object.entries(item).map(([key, value]) => {
@@ -380,8 +380,8 @@ function PatientProblemLog(props) {
             </View>  
             <View>
               <SearchFilterBar
-                originalList={originalLogData}
-                setList={setLogData}
+                originalList={originalData}
+                setList={setData}
                 SEARCH_OPTIONS={SEARCH_OPTIONS}
                 FIELD_MAPPING={FIELD_MAPPING}
                 SORT_OPTIONS={SORT_OPTIONS}
@@ -396,7 +396,7 @@ function PatientProblemLog(props) {
                 initializeData={isDataInitialized}
                 onInitialize={()=>setIsDataInitialized(false)}
                 itemType='problem log'
-                itemCount={logData.length}
+                itemCount={data.length}
                 displayMode={displayMode}
                 setDisplayMode={setDisplayMode}
                 DISPLAY_MODES={DISPLAY_MODES}
@@ -412,7 +412,7 @@ function PatientProblemLog(props) {
             refreshing={isLoading}
             height={'72%'}
             ListEmptyComponent={()=>noDataMessage(statusCode, isLoading, isError, 'No problem logs found', true)}
-            data={logData}
+            data={data}
             keyboardShouldPersistTaps='handled'
             keyExtractor={item => (item.problemLogID)}
             renderItem={({ item }) => { 
@@ -464,8 +464,8 @@ function PatientProblemLog(props) {
           <AddPatientProblemLogModal
             showModal={isModalVisible}
             modalMode={modalMode}
-            logFormData={logFormData}
-            setLogFormData={setLogFormData}
+            formData={formData}
+            setFormData={setFormData}
             onClose={()=>setIsModalVisible(false)}
             onSubmit={modalMode == 'add' ? handleModalSubmitAdd : handleModalSubmitEdit}
           />

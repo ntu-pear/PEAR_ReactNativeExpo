@@ -13,12 +13,13 @@ import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
 // Configurations
 import colors from 'app/config/colors';
+import AddEditModal from './AddEditModal';
 
 function AddPatientMedicalHistoryModal({
   showModal,
   modalMode,
-  logFormData,
-  setLogFormData,
+  formData,
+  setFormData,
   onClose,
   onSubmit,
 }) {
@@ -55,7 +56,7 @@ function AddPatientMedicalHistoryModal({
 
   // Reset form 
   const resetForm = () => {
-    setLogFormData({    
+    setFormData({    
       "problemLogID": null,
       "problemLogListID": 1,
       "problemLogRemarks": "",
@@ -75,7 +76,7 @@ function AddPatientMedicalHistoryModal({
 
   // Function to update  data
   const handleLogData = (field) => (e) => {
-    setLogFormData((prevState) => ({
+    setFormData((prevState) => ({
       ...prevState,
       [field]: field == 'problemLogListID' ? parseInt(e) : e,
     }));
@@ -84,50 +85,39 @@ function AddPatientMedicalHistoryModal({
   // Handle form submission
   const handleSubmit = () => {
     if (!isInputErrors) {
-      onSubmit(logFormData);
+      onSubmit(formData);
       onClose();
     }
   };
 
   return (
-    <Modal isOpen={showModal} onClose={onClose}>
-      <Modal.Content maxWidth="65%">
-        <Modal.CloseButton />
-        <Modal.Header style={styles.modalHeader}>
-          <Text style={styles.modalHeaderText}>{modalMode} Problem Log</Text>
-        </Modal.Header>
-        <Modal.Body>
-          <VStack space={3}>    
-            <SelectionInputField
-              isRequired
-              title="Description"
-              value={logFormData.problemLogListID}
-              dataArray={problemLogOptions}
-              onDataChange={handleLogData('problemLogListID')}
-            />        
-            <InputField
-              isRequired
-              title={'Remarks'}
-              value={logFormData.problemLogRemarks}
-              onChangeText={handleLogData('problemLogRemarks')}
-              onEndEditing={setIsProblemRemarksError}
-              autoCapitalize='none'
-            />         
-          </VStack>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button.Group space={2}>
-            <AppButton color="red" title="Cancel" onPress={onClose}></AppButton>
-            <AppButton
-              onPress={handleSubmit}
-              title="Submit"
-              color="green"
-              isDisabled={isInputErrors}
-            ></AppButton>
-          </Button.Group>
-        </Modal.Footer>
-      </Modal.Content>
-    </Modal>
+    <AddEditModal
+      handleSubmit={handleSubmit}
+      isInputErrors={isInputErrors}
+      modalMode={modalMode}
+      onClose={onClose}
+      showModal={showModal}
+      modalTitle='Problem Log' 
+      modalContent={(
+        <>
+        <SelectionInputField
+          isRequired
+          title="Description"
+          value={formData.problemLogListID}
+          dataArray={problemLogOptions}
+          onDataChange={handleLogData('problemLogListID')}
+        />        
+        <InputField
+          isRequired
+          title={'Remarks'}
+          value={formData.problemLogRemarks}
+          onChangeText={handleLogData('problemLogRemarks')}
+          onEndEditing={setIsProblemRemarksError}
+          autoCapitalize='none'
+        />         
+        </>
+      )}
+    />
   );
 }
 
