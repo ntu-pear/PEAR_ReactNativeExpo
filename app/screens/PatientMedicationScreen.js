@@ -249,7 +249,6 @@ function PatientMedicationScreen(props) {
     }
     
     Alert.alert(alertTitle, alertDetails);
-    setIsLoading(false);
   };
   
   // Edit medication
@@ -308,7 +307,6 @@ function PatientMedicationScreen(props) {
     }
     
     Alert.alert(alertTitle, alertDetails);
-    setIsLoading(false);
   };
   
   // Ask user to confirm deletion of medication
@@ -353,7 +351,6 @@ function PatientMedicationScreen(props) {
     }
     
     Alert.alert(alertTitle, alertDetails);
-    setIsLoading(false);
   }
 
   // Convert comma separated military time administer time to comma separated AM/PM time
