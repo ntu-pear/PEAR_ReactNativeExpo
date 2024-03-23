@@ -372,11 +372,11 @@ function PatientInformationScreen({patientID, patientProfile, guardianData, doct
       setSecondGuardianInfoData([]);
       // setDoctorNoteData([]);
       setDoctorNoteInfo([]);
-      setIsLoading(true);
-      setIsPatientLoading(true);
-      setIsSocialHistoryLoading(true);
-      setIsGuardianLoading(true);
-      setIsDoctorsNoteLoading(true);
+      // setIsLoading(true);
+      // setIsPatientLoading(true);
+      // setIsSocialHistoryLoading(true);
+      // setIsGuardianLoading(true);
+      // setIsDoctorsNoteLoading(true);
       // retrievePatient(patientID, true)
       // retrieveSocialHistory(patientID);
       // retrieveGuardian(patientID);

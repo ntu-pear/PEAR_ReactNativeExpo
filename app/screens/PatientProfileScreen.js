@@ -32,11 +32,16 @@ function PatientProfileScreen(props) {
   const [guardianData, setGuardianData] = useState([]);
   const [socialHistoryData, setSocialHistoryData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPatientLoading, setIsPatientLoading] = useState(true);
+  const [isSocialHistoryLoading, setIsSocialHistoryLoading] = useState(true);
+  const [isGuardianLoading, setIsGuardianLoading] = useState(true);
+  const [isDoctorsNoteLoading, setIsDoctorsNoteLoading] = useState(true);
   const [patientID, setPatientID] = useState(route.params.id);
 
   useEffect(() => {
     // navigated from Highlights Modal or Dashboard Screen
     console.log('id', route.params.id);
+    setIsLoading(true);
     getPatient(route.params.id);
     retrieveDoctorsNote(route.params.id);
     retrieveGuardian(route.params.id);
@@ -45,44 +50,52 @@ function PatientProfileScreen(props) {
 
   // Retrieval of Patient Info, Doctor's Notes, Guardian Info and Social History
   const getPatient = async (id) => {
-    setIsLoading(true);
+    setIsPatientLoading(true);
     // setIsError(false);
     const response = await patientApi.getPatient(id, true);
     if (!response.ok) {
-      // console.log('Request failed with status code: ', response.status);
-      setIsLoading(false);
+      console.log('Request failed with status code: ', response.status);
+      // setIsPatientLoading(false);
       // setIsError(true);
       // setStatusCode(response.status);
       return;
     }
-    setIsLoading(false);
+    // setIsPatientLoading(false);
     // setStatusCode(response.status);
     setPatientProfile(response.data.data);
     // console.log('Request successful with response: ', response);
   };
 
   const retrieveDoctorsNote = async (id) => {
+    setIsDoctorsNoteLoading(true);
     const response = await doctorNoteApi.getDoctorNote(id);
     if (!response.ok) {
       console.log('Request failed with status code: ', response.status);
+      // setIsDoctorsNoteLoading(false);
       return;
     }
+    // setIsDoctorsNoteLoading(false);
     setDoctorNoteData(response.data.data);
   };
 
   const retrieveGuardian = async (id) => {
+    setIsGuardianLoading(true);
     const response = await guardianApi.getPatientGuardian(id, false);
     if (!response.ok) {
       console.log('Request failed with status code: ', response.status);
+      // setIsGuardianLoading(false);
       return;
     }
+    // setIsGuardianLoading(false);
     setGuardianData(response.data.data);
   };
 
   const retrieveSocialHistory = async (id) => {
+    setIsSocialHistoryLoading(true);
     const response = await socialHistoryApi.getSocialHistory(id);
     if (!response.ok) {
       console.log('Request failed with status code: ', response.status);
+      // setIsSocialHistoryLoading(false);
       return;
     }
     if (response.data.data === null) {
@@ -90,7 +103,29 @@ function PatientProfileScreen(props) {
     } else {
       setSocialHistoryData(response.data.data);
     }
+    // setIsSocialHistoryLoading(false);
   };
+
+  // Check if all the data has been loaded before loading page
+  useEffect(() => {
+    if(patientProfile !== undefined && Object.keys(patientProfile).length>0){
+      setIsPatientLoading(false);
+    }
+    if(socialHistoryData !== undefined){
+      console.log(socialHistoryData);
+      setIsSocialHistoryLoading(false);
+    }
+    if(guardianData !== undefined && guardianData.length !== 0){
+      setIsGuardianLoading(false);
+    }
+    if(doctorsNoteData !== undefined){
+      setIsDoctorsNoteLoading(false);
+    }
+    if(isPatientLoading === false && isSocialHistoryLoading === false && isGuardianLoading === false && isDoctorsNoteLoading === false ){
+      setIsLoading(false);
+    }
+  }, [patientProfile, isPatientLoading, socialHistoryData, isSocialHistoryLoading, 
+    guardianData, isGuardianLoading, doctorsNoteData, isDoctorsNoteLoading]);
 
   const SCREEN_HEIGHT = Dimensions.get('window').height;
 

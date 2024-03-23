@@ -119,7 +119,7 @@ function InformationCard({ displayData, title, subtitle, handleOnPress=null, unM
             </View>
           }
         </VStack>
-        {(handleOnPress != null && title != null && title!="Guardian(s) Information" && subtitle == null) ? (
+        {(handleOnPress != null && title != null && subtitle == null) ? (
           <View style={styles.editButton}>
             <AppButton
               title='EDIT'
