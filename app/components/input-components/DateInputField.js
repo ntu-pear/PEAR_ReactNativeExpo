@@ -36,6 +36,7 @@ function DateInputField({
   placeholder=mode == 'date' ? 'Select date' : 'Select time',
   allowNull=false,
   dateForTime,
+  centerDate=false
 }) {
   const [show, setShow] = useState(false);
 
@@ -132,7 +133,7 @@ function DateInputField({
           <></>
         )}
         <View style={styles.dateWrapper}>
-            <TouchableOpacity style={[styles.dateContainer, {alignItems: allowNull ? 'flex-start' : 'center'}]} onPress={showPicker}>
+            <TouchableOpacity style={[styles.dateContainer, {alignItems: allowNull && !centerDate ? 'flex-start' : 'center'}]} onPress={showPicker}>
               <Text style={[styles.textField]}>{setFieldText()}</Text>
             </TouchableOpacity>
             {allowNull && value != null? (

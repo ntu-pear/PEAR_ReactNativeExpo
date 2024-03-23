@@ -69,28 +69,29 @@ function EditPatientInfoScreen(props) {
     PreferredLanguageListID: listOfLanguages.find(
       (item) => item.label === patientProfile.preferredLanguage,
     ).value, // convert label to value with listOfLanguages
-    PrefLanguage: patientProfile.preferredLanguage != null ? patientProfile.preferredLanguage : '',
-    FirstName: patientProfile.firstName != null ? patientProfile.firstName : '',
-    LastName: patientProfile.lastName != null ? patientProfile.lastName : '',
-    NRIC: patientProfile.nric != null ? patientProfile.nric : '',
-    Gender: patientProfile.gender != null ? patientProfile.gender : '',
-    DOB: patientProfile.dob != null ? patientProfile.dob : null,
-    PreferredName: patientProfile.preferredName != null ? patientProfile.preferredName : '',
-    Address: patientProfile.address != null ? patientProfile.address : '',
-    PostalCode: patientProfile.postalCode != null ? patientProfile.postalCode : '',
-    TempAddress: patientProfile.tempAddress != null ? patientProfile.tempAddress : '',
-    TempPostalCode: patientProfile.tempPostalCode != null ? patientProfile.tempPostalCode : '',
-    HomeNo: patientProfile.homeNo != null ? patientProfile.homeNo : '',
-    HandphoneNo: patientProfile.handphoneNo != null ? patientProfile.handphoneNo : '',
-    StartDate: patientProfile.startDate != null ? patientProfile.startDate : null,
-    EndDate: patientProfile.endDate != null ? patientProfile.endDate : null,
-    IsRespiteCare: patientProfile.isRespiteCare != null ? patientProfile.isRespiteCare : '',
-    PrivacyLevel: patientProfile.privacyLevel != null ? patientProfile.privacyLevel : '',
-    UpdateBit: patientProfile.updateBit != null ? patientProfile.updateBit : '',
-    AutoGame: patientProfile.autoGame != null ? patientProfile.autoGame : '',
-    IsActive: patientProfile.isActive != null ? patientProfile.isActive : '',
+    PrefLanguage: patientProfile.preferredLanguage != null && patientProfile.preferredLanguage != 'null' ? patientProfile.preferredLanguage : '',
+    FirstName: patientProfile.firstName != null && patientProfile.firstName != 'null' ? patientProfile.firstName : '',
+    LastName: patientProfile.lastName != null && patientProfile.lastName != 'null' ? patientProfile.lastName : '',
+    NRIC: patientProfile.nric != null && patientProfile.nric != 'null' ? patientProfile.nric : '',
+    Gender: patientProfile.gender != null && patientProfile.gender != 'null' ? patientProfile.gender : '',
+    DOB: patientProfile.dob != null && patientProfile.dob != 'null' ? patientProfile.dob : null,
+    PreferredName: patientProfile.preferredName != null && patientProfile.preferredName != 'null' ? patientProfile.preferredName : '',
+    Address: patientProfile.address != null && patientProfile.address != 'null' ? patientProfile.address : '',
+    PostalCode: patientProfile.postalCode != null && patientProfile.postalCode != 'null' ? patientProfile.postalCode : '',
+    TempAddress: patientProfile.tempAddress != null && patientProfile.tempAddress != 'null' ? patientProfile.tempAddress : '',
+    TempPostalCode: patientProfile.tempPostalCode != null && patientProfile.tempPostalCode != 'null' ? patientProfile.tempPostalCode : '',
+    HomeNo: patientProfile.homeNo != null && patientProfile.homeNo != 'null' ? patientProfile.homeNo : '',
+    HandphoneNo: patientProfile.handphoneNo != null && patientProfile.handphoneNo != 'null' ? patientProfile.handphoneNo : '',
+    StartDate: patientProfile.startDate != null && patientProfile.startDate != 'null' ? patientProfile.startDate : null,
+    EndDate: patientProfile.endDate != null && patientProfile.endDate != 'null' ? patientProfile.endDate : null,
+    IsRespiteCare: patientProfile.isRespiteCare != null && patientProfile.isRespiteCare != 'null' ? patientProfile.isRespiteCare : '',
+    PrivacyLevel: patientProfile.privacyLevel != null && patientProfile.privacyLevel != 'null' ? patientProfile.privacyLevel : '',
+    UpdateBit: patientProfile.updateBit != null && patientProfile.updateBit != 'null' ? patientProfile.updateBit : '',
+    AutoGame: patientProfile.autoGame != null && patientProfile.autoGame != 'null' ? patientProfile.autoGame : '',
+    IsActive: patientProfile.isActive != null && patientProfile.isActive != 'null' ? patientProfile.isActive : '',
   });
 
+  console.log(formData)
   
   // Maximum and minimum valid joining dates
   const minimumJoiningDate = new Date();
@@ -124,19 +125,6 @@ function EditPatientInfoScreen(props) {
     isJoiningError,
     isLeavingError,
   ]);
-
-  // If no end date specified in original data, set default value
-  useEffect(() => {
-    if (formData['EndDate'] === null) {
-      let replacedDate = new Date(0);
-      replacedDate = replacedDate.toISOString().replace('.000Z', '');
-      setFormData((previousState) => ({
-        ...previousState,
-        EndDate: replacedDate,
-      }));
-    }
-  }, []);
-
   
   // Functions for error state reporting for the child components
   const handleAddrError = useCallback(
@@ -213,15 +201,27 @@ function EditPatientInfoScreen(props) {
 
   // Function to update patient data
   const handleFormData = (field) => (e) => {
-    setFormData((prevState) => ({
-      ...prevState,
-      [field]: e
-    }));
+    if(field == 'StartDate' || field == 'EndDate') {
+      setFormData((prevState) => ({
+        ...prevState,
+        [field]: e != null ? new Date(e).toISOString() : null
+      }));
+    } else {
+      setFormData((prevState) => ({
+        ...prevState,
+        [field]: e
+      }))
+    }
   };
 
   // form submission when save button is pressed
   const submitForm = async () => {
-    const result = await patientApi.updatePatient(formData);
+    let tempFormData = {...formData};
+    if(tempFormData['EndDate'] == null) {
+      tempFormData['EndDate'] = new Date(null).toISOString();
+    }
+
+    const result = await patientApi.updatePatient(tempFormData);
 
     let alertTitle = '';
     let alertDetails = '';
@@ -335,10 +335,13 @@ function EditPatientInfoScreen(props) {
                 <View style={styles.dateSelectionContainer}>
                   <DateInputField
                     title={'Date of Leaving'}
-                    value={new Date(formData['EndDate'])}
+                    value={formData['EndDate'] == "1970-01-01T00:00:00" || formData['EndDate'] == null ? null : new Date(formData['EndDate'])}
                     handleFormData={handleFormData('EndDate')}
                     hideDayOfWeek={true}
                     onEndEditing={handleLeavingError}
+                    allowNull
+                    minimumInputDate={new Date()}
+                    centerDate
                   />
                 </View>
 
@@ -379,7 +382,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   dateSelectionContainer: {
-    width: '70%',
+    width: '100%',
   },
   saveButtonContainer: {
     alignItems: 'center',
