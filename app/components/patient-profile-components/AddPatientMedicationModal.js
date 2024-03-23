@@ -13,16 +13,16 @@ import DateInputField from '../input-components/DateInputField';
 import colors from 'app/config/colors';
 import { Chip } from 'react-native-elements';
 import { convertTimeHM24, formatTimeAMPM, formatTimeHM24 } from 'app/utility/miscFunctions';
+import AddEditModal from './AddEditModal';
 
 function AddPatientMedicationModal({
   showModal,
   modalMode,
-  medicationData,
-  setMedicationData,
+  formData,
+  setFormData,
   onClose,
   onSubmit,
-}) {
-  
+}) {  
 
   // Screen error state: This = true when the child components report error(input fields)
   // Enables use of dynamic rendering of components when the page error = true/false.
@@ -63,7 +63,7 @@ function AddPatientMedicationModal({
 
   // Reset form 
   const resetForm = () => {
-    setMedicationData({
+    setFormData({
       "medicationID": null,
       "prescriptionName": "",
       "dosage": "",
@@ -91,22 +91,22 @@ function AddPatientMedicationModal({
 
   // Update administer time error state whenever administer time data is updated
   useEffect(() => {
-    setIsAdministerTimeError(medicationData.administerTime.length == 0);
-  }, [medicationData.administerTime])
+    setIsAdministerTimeError(formData.administerTime.length == 0);
+  }, [formData.administerTime])
 
   // Function to update  data
   const handleMedicationData = (field) => (e) => {
-    const newData = medicationData;
+    const newData = formData;
     if(field == 'administerTime') {
-      let tempTime = medicationData.administerTime;
+      let tempTime = formData.administerTime;
       tempTime.push(e);
       const newTempTime = checkDuplicateAdministerTime(tempTime);
-      setMedicationData((prevState) => ({
+      setFormData((prevState) => ({
         ...prevState,
         [field]: newTempTime,
       }));
     } else {
-      setMedicationData((prevState) => ({
+      setFormData((prevState) => ({
         ...prevState,
         [field]: e,
       }));
@@ -116,7 +116,7 @@ function AddPatientMedicationModal({
   // Handle form submission
   const handleSubmit = () => {
     if (!isInputErrors) {
-      onSubmit(medicationData);
+      onSubmit(formData);
       onClose();
     }
   };
@@ -136,125 +136,114 @@ function AddPatientMedicationModal({
 
   // Delete an administer time option
   const deleteAdministerTime = (i) => {
-    let tempTime = medicationData.administerTime;
+    let tempTime = formData.administerTime;
     tempTime.splice(i, 1);
-    setMedicationData((prevState) => ({
+    setFormData((prevState) => ({
       ...prevState,
       administerTime: [...tempTime],
     }));
   }
 
   return (
-    <Modal isOpen={showModal} onClose={onClose}>
-      <Modal.Content maxWidth="65%">
-        <Modal.CloseButton />
-        <Modal.Header style={styles.modalHeader}>
-          <Text style={styles.modalHeaderText}>{modalMode} Medication</Text>
-        </Modal.Header>
-        <Modal.Body>
-          <VStack space={3}>            
-            <InputField
-              isRequired={true}
-              title={'Prescription Name'}
-              value={medicationData.prescriptionName}
-              onChangeText={handleMedicationData('prescriptionName')}
-              onEndEditing={setIsPrescriptionNameError}
-              autoCapitalize='none'
-            />
-            <InputField
-              isRequired={true}
-              title={'Dosage'}
-              value={medicationData.dosage}
-              onChangeText={handleMedicationData('dosage')}
-              onEndEditing={setIsDosageError}
-              autoCapitalize='none'
-            />
-            <View style={styles.dateSelectionContainer}>
-              <DateInputField
-                isRequired
-                title={'Administer Time'}
-                mode='time'
-                value={null}
-                allowNull
-                hideDayOfWeek={true}
-                handleFormData={handleMedicationData('administerTime')}
+    <AddEditModal
+      handleSubmit={handleSubmit}
+      isInputErrors={isInputErrors}
+      modalMode={modalMode}
+      onClose={onClose}
+      showModal={showModal}
+      modalTitle='Medication' 
+      modalContent={(
+        <>
+        <InputField
+          isRequired={true}
+          title={'Prescription Name'}
+          value={formData.prescriptionName}
+          onChangeText={handleMedicationData('prescriptionName')}
+          onEndEditing={setIsPrescriptionNameError}
+          autoCapitalize='none'
+        />
+        <InputField
+          isRequired={true}
+          title={'Dosage'}
+          value={formData.dosage}
+          onChangeText={handleMedicationData('dosage')}
+          onEndEditing={setIsDosageError}
+          autoCapitalize='none'
+        />
+        <View style={styles.dateSelectionContainer}>
+          <DateInputField
+            isRequired
+            title={'Administer Time'}
+            mode='time'
+            value={null}
+            allowNull
+            hideDayOfWeek={true}
+            handleFormData={handleMedicationData('administerTime')}
+          />
+        </View> 
+        {formData.administerTime.length > 0 ? (
+          <View style={{flexDirection: 'row', flexWrap: 'wrap'}}>
+            {formData.administerTime.map((item,i) => (
+              <Chip
+              key={i}
+              title={formatTimeAMPM(item)}
+              type="solid"
+              buttonStyle={{backgroundColor: colors.green}}
+              containerStyle={{marginLeft: 5}}
+              iconRight
+              icon={{
+                name: 'close',
+                type: "font-awesome",
+                size: 13.5,
+                color: 'white',
+                }}
+              onPress={()=>deleteAdministerTime(i)}
               />
-            </View> 
-            {medicationData.administerTime.length > 0 ? (
-              <View style={{flexDirection: 'row', flexWrap: 'wrap'}}>
-                {medicationData.administerTime.map((item,i) => (
-                  <Chip
-                  key={i}
-                  title={formatTimeAMPM(item)}
-                  type="solid"
-                  buttonStyle={{backgroundColor: colors.green}}
-                  containerStyle={{marginLeft: 5}}
-                  iconRight
-                  icon={{
-                    name: 'close',
-                    type: "font-awesome",
-                    size: 13.5,
-                    color: 'white',
-                    }}
-                  onPress={()=>deleteAdministerTime(i)}
-                  />
-                ))}
-              </View>
-            ) : null}            
-            <InputField
-              isRequired={true}
-              title={'Instructions'}
-              value={medicationData.instruction}
-              onChangeText={handleMedicationData('instruction')}
-              onEndEditing={setIsInstructionError}
-              autoCapitalize='none'
-            />
-            <InputField
-              isRequired={true}
-              title={'Prescription Remarks'}
-              value={medicationData.prescriptionRemarks}
-              onChangeText={handleMedicationData('prescriptionRemarks')}
-              onEndEditing={setIsPrescriptionRemarksError}
-              autoCapitalize='none'
-            />
-            <View style={styles.dateSelectionContainer}>
-              <DateInputField
-                isRequired
-                title={'Start Date'}
-                value={medicationData.startDateTime}
-                hideDayOfWeek={true}
-                handleFormData={handleMedicationData('startDateTime')}
-                onEndEditing={setIsStartDateTimeError}
-                minimumInputDate={new Date()}
-                maximumInputDate={medicationData.endDateTime}
-              />
-            </View>  
-            <View style={styles.dateSelectionContainer}>
-              <DateInputField
-                isRequired
-                title={'End Date'}
-                value={medicationData.endDateTime}
-                hideDayOfWeek={true}
-                handleFormData={handleMedicationData('endDateTime')}
-                onEndEditing={setIsEndDateTimeError}
-                minimumInputDate={medicationData.startDateTime}
-              />
-            </View>            
-          </VStack>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button.Group space={2}>
-            <AppButton color="red" title="Cancel" onPress={onClose}></AppButton>
-            <AppButton
-              onPress={handleSubmit}
-              title="Submit"
-              color="green"
-              isDisabled={isInputErrors}
-            ></AppButton>
-          </Button.Group>
-        </Modal.Footer>
-      </Modal.Content>
-    </Modal>
+            ))}
+          </View>
+        ) : null}            
+        <InputField
+          isRequired={true}
+          title={'Instructions'}
+          value={formData.instruction}
+          onChangeText={handleMedicationData('instruction')}
+          onEndEditing={setIsInstructionError}
+          autoCapitalize='none'
+        />
+        <InputField
+          isRequired={true}
+          title={'Prescription Remarks'}
+          value={formData.prescriptionRemarks}
+          onChangeText={handleMedicationData('prescriptionRemarks')}
+          onEndEditing={setIsPrescriptionRemarksError}
+          autoCapitalize='none'
+        />
+        <View style={styles.dateSelectionContainer}>
+          <DateInputField
+            isRequired
+            title={'Start Date'}
+            value={formData.startDateTime}
+            hideDayOfWeek={true}
+            handleFormData={handleMedicationData('startDateTime')}
+            onEndEditing={setIsStartDateTimeError}
+            minimumInputDate={new Date()}
+            maximumInputDate={formData.endDateTime}
+          />
+        </View>  
+        <View style={styles.dateSelectionContainer}>
+          <DateInputField
+            isRequired
+            title={'End Date'}
+            value={formData.endDateTime}
+            hideDayOfWeek={true}
+            handleFormData={handleMedicationData('endDateTime')}
+            onEndEditing={setIsEndDateTimeError}
+            minimumInputDate={formData.startDateTime}
+          />
+        </View> 
+        </>
+      )}    
+/>
   );
 }
 
