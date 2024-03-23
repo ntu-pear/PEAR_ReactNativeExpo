@@ -37,6 +37,7 @@ import patientApi from 'app/api/patient';
 import AuthContext from 'app/auth/context';
 
 function PatientAddPatientInfoScreen({
+  testID='',
   nextQuestionHandler,
   handleFormData,
   formData,
@@ -316,6 +317,7 @@ function PatientAddPatientInfoScreen({
         <AddPatientProgress value={30} />
       </Center>
       <FlatList
+        testID={testID}
         data={[0]}
         renderItem={() => (
           <Box alignItems="center">
@@ -325,6 +327,7 @@ function PatientAddPatientInfoScreen({
                 <View style={styles.formContainer}>
                   <View style={styles.titleAndPictureContainer}>
                     <Text
+                      testID={`${testID}_title`}
                       marginTop={6}
                       fontSize="2xl"
                       color={colors.green}
@@ -368,6 +371,7 @@ function PatientAddPatientInfoScreen({
                   </View>
 
                   <InputField
+                    testID={`${testID}_FirstName`}
                     isRequired
                     title={'First Name'}
                     value={patient.FirstName}
@@ -377,6 +381,7 @@ function PatientAddPatientInfoScreen({
                   />
 
                   <InputField
+                    testID={`${testID}_LastName`}
                     isRequired
                     title={'Last Name'}
                     value={patient.LastName}
@@ -386,6 +391,7 @@ function PatientAddPatientInfoScreen({
                   />
 
                   <SensitiveInputField
+                    testID={`${testID}_NRIC`}
                     isRequired
                     title={'NRIC'}
                     autoCapitalize="characters"
@@ -398,6 +404,7 @@ function PatientAddPatientInfoScreen({
 
                   <View style={styles.dateSelectionContainer}>
                     <DateInputField
+                      testID={`${testID}_DOB`}
                       isRequired
                       selectionMode={'DOB'}
                       title={'Date of Birth'}
@@ -409,6 +416,7 @@ function PatientAddPatientInfoScreen({
                   </View>             
 
                   <RadioButtonInput
+                    testID={`${testID}_Gender`}
                     isRequired
                     title={'Gender'}
                     value={patient.Gender}
@@ -418,6 +426,7 @@ function PatientAddPatientInfoScreen({
                   />
 
                   <InputField
+                    testID={`${testID}_Address`}
                     isRequired
                     title={'Address'}
                     value={patient.Address}
@@ -426,6 +435,7 @@ function PatientAddPatientInfoScreen({
                   />
                   
                   <InputField
+                    testID={`${testID}_PostalCode`}
                     isRequired
                     title={'Postal Code'}
                     value={patient.PostalCode}
@@ -437,6 +447,8 @@ function PatientAddPatientInfoScreen({
                   />
 
                   <InputField
+                    testID={`${testID}_TempAddress`}
+                    isRequired={patient.TempPostalCode.length > 0}
                     title={'Temporary Address'}
                     value={patient.TempAddress}
                     onChangeText={handleFormData('TempAddress')}
@@ -444,6 +456,7 @@ function PatientAddPatientInfoScreen({
                   />
 
                   <InputField
+                    testID={`${testID}_TempPostalCode`}
                     isRequired={patient.TempAddress.length > 0}
                     title={'Temporary Postal Code'}
                     value={patient.TempPostalCode}
@@ -454,6 +467,7 @@ function PatientAddPatientInfoScreen({
                     maxLength={6}
                   />
                   <InputField
+                    testID={`${testID}_HomeNo`}
                     title={'Home Telephone No.'}
                     value={patient.HomeNo}
                     onChangeText={handleFormData('HomeNo')}
@@ -464,6 +478,7 @@ function PatientAddPatientInfoScreen({
                   />
 
                   <InputField
+                    testID={`${testID}_HandphoneNo`}
                     title={'Mobile No.'}
                     value={patient.HandphoneNo}
                     onChangeText={handleFormData('HandphoneNo')}
@@ -474,6 +489,7 @@ function PatientAddPatientInfoScreen({
                   />                  
 
                   <InputField
+                    testID={`${testID}_PreferredName`}
                     isRequired
                     title={'Preferred Name'}
                     value={patient.PreferredName}
@@ -484,6 +500,7 @@ function PatientAddPatientInfoScreen({
                   />
                   
                   <SelectionInputField
+                    testID={`${testID}_PreferredLanguageListID`}
                     isRequired
                     title={'Preferred Language'}
                     placeholder={'Select Language'}
@@ -494,6 +511,7 @@ function PatientAddPatientInfoScreen({
                   />                 
 
                   <RadioButtonInput
+                    testID={`${testID}_IsRespiteCare`}
                     isRequired
                     title={'Respite Care'}
                     value={patient.IsRespiteCare}
@@ -504,6 +522,7 @@ function PatientAddPatientInfoScreen({
 
                   <View style={styles.dateSelectionContainer}>
                     <DateInputField
+                      testID={`${testID}_StartDate`}
                       isRequired
                       title={'Date of Joining'}
                       value={patient.StartDate}
@@ -516,6 +535,7 @@ function PatientAddPatientInfoScreen({
                   </View>
 
                   <SingleOptionCheckBox
+                    testID={`${testID}_isChecked`}
                     title={'Check this box to specify Date of Leaving'}
                     value={patient.IsChecked}
                     onChangeData={handleFormData('IsChecked')}
@@ -527,6 +547,7 @@ function PatientAddPatientInfoScreen({
                   {/* Rendered only when the specify date of leaving checkbox is selected. */}
                   {formData.patientInfo.IsChecked ? (
                     <DateInputField
+                      testID={`${testID}_EndDate`}
                       title={'Date of Leaving'}
                       value={patient.EndDate}
                       handleFormData={handleFormData('EndDate')}
@@ -538,7 +559,8 @@ function PatientAddPatientInfoScreen({
               </VStack>
             </Box>
 
-            <AddPatientBottomButtons
+            <AddPatientBottomButtons              
+              testID={`${testID}_bottomBtns`}
               nextQuestionHandler={nextQuestionHandler}
               formData={formData}
               isNextDisabled={isInputErrors}

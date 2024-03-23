@@ -13,6 +13,7 @@ import ErrorMessage from 'app/components/ErrorMessage';
 import RequiredIndicator from '../RequiredIndicator';
 
 function RadioButtonInput({
+  testID='',
   isRequired,
   title,
   value,
@@ -71,7 +72,7 @@ function RadioButtonInput({
   }, [isError, onChildData]);
 
   return (
-    <View style={styles.componentContainer}>
+    <View testID={testID} style={styles.componentContainer}>
       <VStack>
         <Text style={styles.titleMsg}>
         {title}:{isRequired ? <RequiredIndicator/> : ''}
@@ -81,6 +82,7 @@ function RadioButtonInput({
             {dataArray.map((item) => (
               <View style={styles.radioButtonContainer} key={item.value}>
                 <RadioButton.Item
+                  testID={`${testID}_item.label`}
                   key={item.value}
                   value={item.value}
                   label={item.label}

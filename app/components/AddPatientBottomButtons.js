@@ -11,6 +11,7 @@ import colors from 'app/config/colors';
 import AppButton from 'app/components/AppButton';
 
 function AddPatientBottomButtons({
+  testID='',
   list = null,
   nextQuestionHandler = null,
   prevQuestionHandler = null,
@@ -26,9 +27,10 @@ function AddPatientBottomButtons({
 }) {
   
   return (
-    <Box mt={8} mb={8}>
-      <Flex w={Platform.OS === 'web' ? 40 : '80%'} direction="row">
+    <Box mt={8} mb={8} testID={testID}>
+      <Flex testID={testID} w={Platform.OS === 'web' ? 40 : '80%'} direction="row">
         <Button
+          testID={`${testID}_prev`}
           width={12}
           height={12}
           bg={colors.green}
@@ -36,6 +38,7 @@ function AddPatientBottomButtons({
             <Icon as={<MaterialIcons name="chevron-left" />} color="white" />
           }
           isDisabled={prevQuestionHandler == null ? true : false}
+          accessibilityTraits={prevQuestionHandler == null ? ['button', 'disabled'] : ['button']}
           onPress={
             prevQuestionHandler == null ? true : () => prevQuestionHandler()
           }
@@ -46,6 +49,7 @@ function AddPatientBottomButtons({
         {list ? (
           list.length === 1 ? (
             <Button
+              testID={`${testID}_add`}
               width={12}
               height={12}
               variant="outline"
@@ -53,6 +57,7 @@ function AddPatientBottomButtons({
               borderRadius="full"
               onPress={addComponent}
               isDisabled={isAddDisabled}
+              accessibilityTraits={isAddDisabled ? ['button', 'disabled'] : ['button']}
             >
               +
             </Button>
@@ -60,6 +65,7 @@ function AddPatientBottomButtons({
             <Box>
               <HStack space={4}>
                 <Button
+                  testID={`${testID}_remove`}
                   width={12}
                   height={12}
                   variant="outline"
@@ -75,6 +81,7 @@ function AddPatientBottomButtons({
             <Box>
               <HStack space={4}>
                 <Button
+                  testID={`${testID}_add`}
                   width={12}
                   height={12}
                   variant="outline"
@@ -85,6 +92,7 @@ function AddPatientBottomButtons({
                   +
                 </Button>
                 <Button
+                  testID={`${testID}_remove`}
                   width={12}
                   height={12}
                   variant="outline"
@@ -100,6 +108,7 @@ function AddPatientBottomButtons({
         ) : null}
         <Spacer />
         <Button
+          testID={`${testID}_next`}
           width={12}
           height={12}
           bg={colors.green}
@@ -110,6 +119,7 @@ function AddPatientBottomButtons({
           isDisabled={
             nextQuestionHandler == null || isNextDisabled ? true : false
           }
+          accessibilityTraits={nextQuestionHandler == null || isNextDisabled ? ['button', 'disabled'] : ['button']}
           onPress={
             nextQuestionHandler == null
               ? true
@@ -122,10 +132,12 @@ function AddPatientBottomButtons({
       {submit ? (
         <Box mt={8}>
           <AppButton 
+            testID={`${testID}_submit`}
             title="Submit" 
             color="green" 
             onPress={onSubmit} 
             isDisabled={isSubmitDisabled}
+            accessibilityTraits={isSubmitDisabled ? ['button', 'disabled'] : ['button']}
           />
         </Box>
       ) : null}

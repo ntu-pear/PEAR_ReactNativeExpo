@@ -421,8 +421,9 @@ function PatientsScreen({ navigation }) {
                 </TouchableOpacity>
               )}}
             />
-            <Center testID='addPatients' position="absolute" right="5" bottom="5%">
+            <Center position="absolute" right="5" bottom="5%">
               <Fab
+                testID='addPatients'
                 backgroundColor={colors.pink}
                 icon={
                   <Icon
