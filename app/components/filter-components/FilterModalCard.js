@@ -543,7 +543,7 @@ const FilterModalCard = ({
               {!isEmptyObject(chip['filterOptions']) ? (
                 <View style={styles.filterContainer}  testID={`${testID}_chip`}>
                   {Object.keys(chip['sel']).map((filter) => 
-                    <View key={filter}>
+                    <View key={filter} testID={`${testID}_chip_${filter}`}>
                       <Text style={styles.textStyle}>{filter}</Text>
                       <ScrollView
                         horizontal={true}
@@ -554,7 +554,7 @@ const FilterModalCard = ({
                           {
                             chip['filterOptions'][filter].map((item) => (
                               <Chip
-                                testID={`${testID}_chip_${item.label}`}
+                                testID={`${testID}_chip_${filter}_${item.label}`}
                                 key={item.value}
                                 title={item.label}
                                 onPress={() => handleOnSelectChipFilter(item, filter)}

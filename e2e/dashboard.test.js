@@ -84,7 +84,7 @@ describe('Dashboard tests', () => {
   });
 
   it('Dashboard: click filter modal to see filter modal (All Patients)', async () => {
-    await expect(element(by.text('My Patients'))).toBeVisible();
+    await expect(element(by.text('All Patients'))).toBeVisible();
     await expect(element(by.id('searchFilter'))).toBeVisible();
     await expect(element(by.id('searchFilter_filter'))).toBeVisible();
     await expect(element(by.id('searchFilter_tabBar'))).toBeVisible();

@@ -332,10 +332,11 @@ function PatientsScreen({ navigation }) {
 
   return (
     <>{isLoading ? (
-        <ActivityIndicator visible />
+        <ActivityIndicator testID='patients_loading' visible />
       ) : (
-        <View backgroundColor={colors.white_var1}>
+        <View testID='patients' backgroundColor={colors.white_var1}>
           <SearchFilterBar
+            testID='patients_searchFilter'
             originalList={originalListOfPatients}
             setList={setListOfPatients}
             setIsLoading={setIsLoading}
@@ -420,7 +421,7 @@ function PatientsScreen({ navigation }) {
                 </TouchableOpacity>
               )}}
             />
-            <Center position="absolute" right="5" bottom="5%">
+            <Center testID='addPatients' position="absolute" right="5" bottom="5%">
               <Fab
                 backgroundColor={colors.pink}
                 icon={
