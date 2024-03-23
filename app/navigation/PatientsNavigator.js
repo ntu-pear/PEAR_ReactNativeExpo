@@ -1,28 +1,28 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import PatientsScreen from 'app/screens/PatientsScreen';
-import PatientProfile from 'app/screens/PatientProfileScreen';
-import PatientInformationScreen from 'app/screens/PatientInformationScreen';
+import PatientProfile from 'app/screens/patient-profile/PatientProfileScreen';
+import PatientInformationScreen from 'app/screens/patient-profile/PatientInformationScreen';
 
 // Import Constants from routes
 import routes from 'app/navigation/routes';
-import PatientMedicalHistoryScreen from 'app/screens/PatientMedicalHistoryScreen';
-import PatientAllergyScreen from 'app/screens/PatientAllergyScreen';
-import PatientHolidayScreen from 'app/screens/PatientHolidayScreen';
-import PatientPhotoAlbumScreen from 'app/screens/PatientPhotoAlbumScreen';
-import PatientPreferenceScreen from 'app/screens/PatientPreferenceScreen';
-import PatientPrescriptionScreen from 'app/screens/PatientPrescriptionScreen';
-import PatientProblemLog from 'app/screens/PatientProblemLogScreen';
-import PatientVitalScreen from 'app/screens/PatientVitalScreen';
-import PatientRoutineScreen from 'app/screens/PatientRoutineScreen';
-import PatientAddScreen from 'app/screens/PatientAddScreen';
-import EditPatientInfoScreen from 'app/screens/EditPatientInfoScreen';
-import EditPatientPreferencesScreen from 'app/screens/EditPatientPreferencesScreen';
-import EditPatientGuardianScreen from 'app/screens/EditPatientGuardianScreen';
-import EditPatientSocialHistScreen from 'app/screens/EditPatientSocialHistScreen';
-import PatientMedicationScreen from 'app/screens/PatientMedicationScreen';
-import PatientScheduleScreen from 'app/screens/PatientScheduleScreen';
-import PatientMobilityAidScreen from 'app/screens/PatientMobilityAidsScreen';
+import PatientMedicalHistoryScreen from 'app/screens/patient-profile/PatientMedicalHistoryScreen';
+import PatientAllergyScreen from 'app/screens/patient-profile/PatientAllergyScreen';
+import PatientHolidayScreen from 'app/screens/patient-profile/PatientHolidayScreen';
+import PatientPhotoAlbumScreen from 'app/screens/patient-profile/PatientPhotoAlbumScreen';
+import PatientPreferenceScreen from 'app/screens/patient-profile/PatientPreferenceScreen';
+import PatientPrescriptionScreen from 'app/screens/patient-profile/PatientPrescriptionScreen';
+import PatientProblemLog from 'app/screens/patient-profile/PatientProblemLogScreen';
+import PatientVitalScreen from 'app/screens/patient-profile/PatientVitalScreen';
+import PatientRoutineScreen from 'app/screens/patient-profile/PatientRoutineScreen';
+import PatientAddScreen from 'app/screens/add-patient/PatientAddScreen';
+import EditPatientInfoScreen from 'app/screens/patient-information/EditPatientInfoScreen';
+import EditPatientPreferencesScreen from 'app/screens/patient-information/EditPatientPreferencesScreen';
+import EditPatientGuardianScreen from 'app/screens/patient-information/EditPatientGuardianScreen';
+import EditPatientSocialHistScreen from 'app/screens/patient-information/EditPatientSocialHistScreen';
+import PatientMedicationScreen from 'app/screens/patient-profile/PatientMedicationScreen';
+import PatientScheduleScreen from 'app/screens/patient-profile/PatientScheduleScreen';
+import PatientMobilityAidScreen from 'app/screens/patient-profile/PatientMobilityAidsScreen';
 
 // Refer to this: https://reactnavigation.org/docs/hello-react-navigation
 const Stack = createNativeStackNavigator();

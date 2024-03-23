@@ -15,12 +15,12 @@ import SingleOptionCheckBox from 'app/components/input-components/SingleOptionCh
 import LoadingWheel from 'app/components/LoadingWheel';
 import DateInputField from 'app/components/input-components/DateInputField';
 import RadioButtonInput from 'app/components/input-components/RadioButtonsInput';
-import InputField from './input-components/InputField';
-import SensitiveInputField from './input-components/SensitiveInputField';
+import InputField from '../input-components/InputField';
+import SensitiveInputField from '../input-components/SensitiveInputField';
 
 // Utilities
 import { parseSelectOptions } from 'app/utility/miscFunctions';
-import SelectionInputField from './input-components/SelectionInputField';
+import SelectionInputField from '../input-components/SelectionInputField';
 
 function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
   const page = 'guardianInfo';

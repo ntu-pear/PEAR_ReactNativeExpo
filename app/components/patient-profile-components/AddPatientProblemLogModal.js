@@ -4,9 +4,12 @@ import { Modal, Button, VStack, Text } from 'native-base';
 import { StyleSheet, View } from 'react-native';
 
 // Components
-import InputField from './input-components/InputField';
-import AppButton from './AppButton';
-import DateInputField from './input-components/DateInputField';
+import InputField from '../input-components/InputField';
+import AppButton from '../AppButton';
+import SelectionInputField from '../input-components/SelectionInputField';
+
+// Hooks 
+import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
 // Configurations
 import colors from 'app/config/colors';
@@ -14,8 +17,8 @@ import colors from 'app/config/colors';
 function AddPatientMedicalHistoryModal({
   showModal,
   modalMode,
-  medicalHistoryData,
-  setMedicalHistoryData,
+  logFormData,
+  setLogFormData,
   onClose,
   onSubmit,
 }) {
@@ -23,43 +26,44 @@ function AddPatientMedicalHistoryModal({
   // Enables use of dynamic rendering of components when the page error = true/false.
   const [isInputErrors, setIsInputErrors] = useState(false);
 
+  // Options for problem field
+  const { data: problemLogOptions } = useGetSelectionOptions('ProblemLog');
+
   // Input error states (Child components)
   // This records the error states of each child component (ones that require tracking).
-  const [isInformationSourceError, setIsInformationSourceError] = useState(false);
-  const [isMedicalDetailsError, setIsMedicalDetailsError] = useState(false);
-  const [isMedicalEstimatedDateError, setIsMedicalEstimatedDateError] = useState(false);
-  const [isMedicalRemarksError, setIsMedicalRemarksError] = useState(false);
+  const [isAuthorNameError, setIsAuthorNameError] = useState(false);
+  const [isProblemDescriptionError, setIsProblemDescriptionError] = useState(false);
+  const [isProblemRemarksError, setIsProblemRemarksError] = useState(false);
+  const [isCreatedDateTimeError, setIsCreatedDateTimeError] = useState(false);
 
   // This useEffect enables the page to show correct error checking.
   // The main isInputErrors is responsible for the error state of the screen.
   // This state will be true whenever any child input components are in error state.
   useEffect(() => {
     setIsInputErrors(
-      isInformationSourceError ||
-      isMedicalDetailsError ||
-      isMedicalEstimatedDateError ||
-      isMedicalRemarksError
+      isAuthorNameError ||
+      isProblemDescriptionError ||
+      isProblemRemarksError ||
+      isCreatedDateTimeError
     );
   }, [
-    isInformationSourceError,
-    isMedicalDetailsError,
-    isMedicalEstimatedDateError,
-    isMedicalRemarksError,
+    isAuthorNameError,
+    isProblemDescriptionError,
+    isProblemRemarksError,
+    isCreatedDateTimeError,
   ]);
 
   // Reset form 
   const resetForm = () => {
-    setMedicalHistoryData({
-      "medicalHistoryId": null,
-      "informationSource": "",
-      "medicalDetails": "",
-      "medicalRemarks": "",
-      "medicalEstimatedDate": new Date(),
+    setLogFormData({    
+      "problemLogID": null,
+      "problemLogListID": 1,
+      "problemLogRemarks": "",
     });
-    setIsInformationSourceError(false);
-    setIsMedicalDetailsError(false);
-    setIsMedicalEstimatedDateError(false);
-    setIsMedicalRemarksError(false);
+    setIsAuthorNameError(false);
+    setIsProblemDescriptionError(false);
+    setIsProblemRemarksError(false);
+    setIsCreatedDateTimeError(false);
   };
 
   // When modal is closed, reset form
@@ -70,17 +74,17 @@ function AddPatientMedicalHistoryModal({
   }, [showModal]);
 
   // Function to update  data
-  const handleHxData = (field) => (e) => {
-    setMedicalHistoryData((prevState) => ({
+  const handleLogData = (field) => (e) => {
+    setLogFormData((prevState) => ({
       ...prevState,
-      [field]: e,
+      [field]: field == 'problemLogListID' ? parseInt(e) : e,
     }));
   };
   
   // Handle form submission
   const handleSubmit = () => {
     if (!isInputErrors) {
-      onSubmit(medicalHistoryData);
+      onSubmit(logFormData);
       onClose();
     }
   };
@@ -93,41 +97,22 @@ function AddPatientMedicalHistoryModal({
           <Text style={styles.modalHeaderText}>{modalMode} Medical History</Text>
         </Modal.Header>
         <Modal.Body>
-          <VStack space={3}>            
+          <VStack space={3}>    
+            <SelectionInputField
+              isRequired
+              title="Description"
+              value={logFormData.problemLogListID}
+              dataArray={problemLogOptions}
+              onDataChange={handleLogData('problemLogListID')}
+            />        
             <InputField
-              isRequired={true}
-              title={'Source'}
-              value={medicalHistoryData.informationSource}
-              onChangeText={handleHxData('informationSource')}
-              onEndEditing={setIsInformationSourceError}
-              autoCapitalize='none'
-            />
-            <InputField
-              isRequired={true}
-              title={'Details'}
-              value={medicalHistoryData.medicalDetails}
-              onChangeText={handleHxData('medicalDetails')}
-              onEndEditing={setIsMedicalDetailsError}
-              autoCapitalize='none'
-            />
-            <InputField
-              isRequired={true}
+              isRequired
               title={'Remarks'}
-              value={medicalHistoryData.medicalRemarks}
-              onChangeText={handleHxData('medicalRemarks')}
-              onEndEditing={setIsMedicalRemarksError}
+              value={logFormData.problemLogRemarks}
+              onChangeText={handleLogData('problemLogRemarks')}
+              onEndEditing={setIsProblemRemarksError}
               autoCapitalize='none'
-            />
-            <View style={styles.dateSelectionContainer}>
-              <DateInputField
-                isRequired
-                title={'Estimated Date'}
-                mode='date'
-                value={medicalHistoryData.medicalEstimatedDate}
-                hideDayOfWeek={true}
-                handleFormData={handleHxData('medicalEstimatedDate')}
-              />
-            </View>           
+            />         
           </VStack>
         </Modal.Body>
         <Modal.Footer>

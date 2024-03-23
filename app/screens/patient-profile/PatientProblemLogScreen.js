@@ -28,8 +28,8 @@ import LoadingWheel from 'app/components/LoadingWheel';
 import Swipeable from 'app/components/swipeable-components/Swipeable';
 import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
 import DynamicTable from 'app/components/DynamicTable';
-import ProblemLogItem from 'app/components/ProblemLogItem';
-import AddPatientProblemLogModal from 'app/components/AddPatientProblemLogModal';
+import ProblemLogItem from 'app/components/patient-profile-components/ProblemLogItem';
+import AddPatientProblemLogModal from 'app/components/patient-profile-components/AddPatientProblemLogModal';
 
 function PatientProblemLog(props) {
   let {patientID, patientId} = props.route.params;

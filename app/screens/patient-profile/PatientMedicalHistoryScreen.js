@@ -25,8 +25,8 @@ import LoadingWheel from 'app/components/LoadingWheel';
 import Swipeable from 'app/components/swipeable-components/Swipeable';
 import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
 import DynamicTable from 'app/components/DynamicTable';
-import MedicalHistoryItem from 'app/components/MedicalHistoryItem';
-import AddPatientMedicalHistoryModal from 'app/components/AddPatientMedicalHistoryModal';
+import MedicalHistoryItem from 'app/components/patient-profile-components/MedicalHistoryItem';
+import AddPatientMedicalHistoryModal from 'app/components/patient-profile-components/AddPatientMedicalHistoryModal';
 
 function PatientMedicalHistory(props) {
   let {patientID, patientId} = props.route.params;

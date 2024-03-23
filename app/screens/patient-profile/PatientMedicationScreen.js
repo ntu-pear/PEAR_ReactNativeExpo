@@ -19,8 +19,8 @@ import colors from 'app/config/colors';
 // Components
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import AddButton from 'app/components/AddButton';
-import MedicationItem from 'app/components/MedicationItem';
-import AddPatientMedicationModal from 'app/components/AddPatientMedicationModal';
+import MedicationItem from 'app/components/patient-profile-components/MedicationItem';
+import AddPatientMedicationModal from 'app/components/patient-profile-components/AddPatientMedicationModal';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
 import LoadingWheel from 'app/components/LoadingWheel';

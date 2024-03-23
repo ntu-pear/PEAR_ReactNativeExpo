@@ -12,9 +12,9 @@ import patientApi from 'app/api/patient';
 import routes from 'app/navigation/routes';
 
 // Components
-import PatientAddPatientInfoScreen from 'app/screens/PatientAddPatientInfoScreen';
-import PatientAddGuardianScreen from 'app/screens/PatientAddGuardianScreen';
-import PatientAddAllergyScreen from 'app/screens/PatientAddAllergyScreen';
+import PatientAddPatientInfoScreen from 'app/screens/add-patient/PatientAddPatientInfoScreen';
+import PatientAddGuardianScreen from 'app/screens/add-patient/PatientAddGuardianScreen';
+import PatientAddAllergyScreen from 'app/screens/add-patient/PatientAddAllergyScreen';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 
 function PatientAddScreen() {

@@ -9,7 +9,7 @@ import typography from 'app/config/typography';
 import routes from 'app/navigation/routes';
 
 // Utilities
-import MedicationItem from './MedicationItem';
+import MedicationItem from './patient-profile-components/MedicationItem';
 import { convertDateDMY } from 'app/utility/miscFunctions';
 
 
