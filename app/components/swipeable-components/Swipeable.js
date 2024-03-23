@@ -1,5 +1,5 @@
 // Libs
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { View } from 'native-base';
 import { StyleSheet, PanResponder, Animated } from 'react-native';
 
@@ -9,41 +9,40 @@ const Swipeable = ({item, underlay, onSwipeLeft, onSwipeRight, setIsScrolling=()
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
+
+      onMoveShouldSetResponder: (evt, gestureState) => {
+        return Math.abs(gestureState.dx) > Math.abs(gestureState.dy * 4);
+      },
+
       onPanResponderMove: (_, gestureState) => {
         let dx = gestureState.dx;
         const dy = gestureState.dy;
 
-        console.log(dx, dy)
+        console.log(dx, dy);
 
         // Limit how far user can swipe
         if (gestureState.dx < 0 && onSwipeRight) {
-          dx = Math.max(-150, Math.min(0, gestureState.dx)); 
-          if(Math.abs(dx) > Math.abs(dy)) {
-            translateX.setValue(dx);
-            setIsScrolling(false);
-          } else { 
-            setIsScrolling(true);
-          }
+          dx = Math.max(-150, Math.min(0, gestureState.dx));           
         } else {
           if(onSwipeLeft) {
             dx = Math.min(150, Math.max(0, gestureState.dx)); 
-            if(Math.abs(dx) > Math.abs(dy)) {
-              translateX.setValue(dx);
-              setIsScrolling(false);
-            } else {
-              setIsScrolling(true);
-            }
           }
+        }
+        if(Math.abs(dy) < 20) {
+          translateX.setValue(dx);
+          setIsScrolling(false);
+        } else { 
+          setIsScrolling(true);
         }
       },
       onPanResponderRelease: (_, gestureState) => {
         // Right swipe
-        if (gestureState.dx < -50 && onSwipeRight) {
+        if (gestureState.dx < -150 && onSwipeRight) {
           onSwipeRight();
         }
         
         // Left Swipe
-        if (gestureState.dx > 50 && onSwipeLeft) {
+        if (gestureState.dx > 150 && onSwipeLeft) {
           onSwipeLeft();
         }
         Animated.spring(translateX, {
