@@ -10,9 +10,9 @@ const Swipeable = ({item, underlay, onSwipeLeft, onSwipeRight, setIsScrolling=()
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
 
-      onMoveShouldSetResponder: (evt, gestureState) => {
-        return Math.abs(gestureState.dx) > Math.abs(gestureState.dy * 4);
-      },
+      // onMoveShouldSetResponder: (evt, gestureState) => {
+      //   return Math.abs(gestureState.dx) > Math.abs(gestureState.dy * 4);
+      // },
 
       onPanResponderMove: (_, gestureState) => {
         let dx = gestureState.dx;
@@ -23,16 +23,21 @@ const Swipeable = ({item, underlay, onSwipeLeft, onSwipeRight, setIsScrolling=()
         // Limit how far user can swipe
         if (gestureState.dx < 0 && onSwipeRight) {
           dx = Math.max(-150, Math.min(0, gestureState.dx));           
-        } else {
-          if(onSwipeLeft) {
-            dx = Math.min(150, Math.max(0, gestureState.dx)); 
+          if(Math.abs(dy) < 50) {
+            translateX.setValue(dx);
+            setIsScrolling(false);
+          } else { 
+            setIsScrolling(true);
           }
-        }
-        if(Math.abs(dy) < 20) {
-          translateX.setValue(dx);
-          setIsScrolling(false);
-        } else { 
-          setIsScrolling(true);
+        } 
+        if (gestureState.dx > 0 && onSwipeLeft) {
+          dx = Math.min(150, Math.max(0, gestureState.dx)); 
+          if(Math.abs(dy) < 50) {
+            translateX.setValue(dx);
+            setIsScrolling(false);
+          } else { 
+            setIsScrolling(true);
+          }
         }
       },
       onPanResponderRelease: (_, gestureState) => {
