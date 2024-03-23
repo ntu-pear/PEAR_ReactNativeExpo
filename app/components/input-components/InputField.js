@@ -58,11 +58,9 @@ function InputField({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Update error state if isRequired value changes
   useEffect(() => {
-    setError({
-      ...error,
-      isError: isRequired && value.length === 0,
-    });
+    validateInput(value.length == 0);
   }, [isRequired]);
 
   // Update the parent component that there is a validation error.
@@ -93,14 +91,15 @@ function InputField({
       value = '';
     }
     setInputText(value);
-    validateInput(value);
+    validateInput();
     onChangeText(value);
   };
 
   // Function used for input validation depending on the type of input data (given by the type prop)
-  const validateInput = () => {
+  // When checking for forms that are prefilled, ignore isRequired so msg is not displayed
+  const validateInput = (ignoreIsRequired=false) => {
     msg = '';
-    if (isRequired) {
+    if (!ignoreIsRequired && isRequired) {
       msg = validation.notEmpty(value);
     }
     if ('prefNameList' in otherProps) {
@@ -113,6 +112,7 @@ function InputField({
       }
     }
     setError({ isError: msg ? true : false, errorMsg: msg });
+    return msg ? true : false;
   };
 
   return (
