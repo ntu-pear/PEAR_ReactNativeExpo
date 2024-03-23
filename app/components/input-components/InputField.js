@@ -60,7 +60,9 @@ function InputField({
 
   // Update error state if isRequired value changes
   useEffect(() => {
-    validateInput(value.length == 0);
+    if(value.length > 0) {
+      validateInput(value.length == 0);
+    }
   }, [isRequired]);
 
   // Update the parent component that there is a validation error.
