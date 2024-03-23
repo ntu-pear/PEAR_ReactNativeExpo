@@ -22,7 +22,7 @@ import routes from 'app/navigation/routes';
 // Components
 import PatientInformationCard from 'app/components/PatientInformationCard';
 import PatientProfileCard from 'app/components/PatientProfileCard';
-import PatientInformationScreen from 'app/components/PatientInformationScreen';
+import PatientInformationScreen from 'app/screens/PatientInformationScreen';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 
 function PatientProfileScreen(props) {

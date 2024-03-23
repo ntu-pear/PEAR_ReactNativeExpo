@@ -9,7 +9,7 @@ import typography from 'app/config/typography';
 import colors from 'app/config/colors';
 
 // Utils
-import * as validation from 'app/utility/InputValidation';
+import * as validation from 'app/utility/inputValidation';
 
 // Components
 import { TextInput } from 'react-native';
