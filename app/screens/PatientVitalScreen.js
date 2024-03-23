@@ -30,8 +30,8 @@ import LoadingWheel from 'app/components/LoadingWheel';
 import Swipeable from 'app/components/swipeable-components/Swipeable';
 import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
 import DynamicTable from 'app/components/DynamicTable';
-import PatientVitalItem from 'app/components/patient-profile-components/PatientVitalItem';
-import AddPatientVitalModalNEW from 'app/components/patient-profile-components/AddPatientVitalModalNEW';
+import PatientVitalItem from 'app/components/PatientVitalItem';
+import AddPatientVitalModalNEW from 'app/components/AddPatientVitalModalNEW';
 
 function PatientVitalScreen(props) {
   let { patientID, patientId } = props.route.params;
@@ -419,6 +419,7 @@ function PatientVitalScreen(props) {
                       vitalRemarks={item.vitalRemarks}
                       afterMeal={item.afterMeal}
                       createdDateTime={item.createdDateTime}
+                      onDelete={() => handleDeleteVital(item.VitalID)}
                     />
                   </TouchableOpacity>
                 }

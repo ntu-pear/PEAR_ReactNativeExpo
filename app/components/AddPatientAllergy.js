@@ -16,7 +16,7 @@ import { initSelectDisable, parseSelectOptions } from 'app/utility/miscFunctions
 // Components
 import SelectionInputField from 'app/components/input-components/SelectionInputField';
 import LoadingWheel from 'app/components/LoadingWheel';
-import InputField from '../input-components/InputField';
+import InputField from './input-components/InputField';
 
 function AddPatientAllergy({ i, title, formData, handleFormData, onError }) {
   const page = 'allergyInfo';

@@ -3,9 +3,9 @@ import React, { useState, useCallback } from 'react';
 import { SectionList, Center, View } from 'native-base';
 
 // Components
-import AddPatientGuardian from 'app/components/add-patient-components/AddPatientGuardian';
-import AddPatientBottomButtons from 'app/components/add-patient-components/AddPatientBottomButtons';
-import AddPatientProgress from 'app/components/add-patient-components/AddPatientProgress';
+import AddPatientGuardian from 'app/components/AddPatientGuardian';
+import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
+import AddPatientProgress from 'app/components/AddPatientProgress';
 
 function PatientAddGuardianScreen({nextQuestionHandler,
   prevQuestionHandler,

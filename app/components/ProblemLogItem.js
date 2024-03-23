@@ -9,74 +9,78 @@ import colors from 'app/config/colors';
 
 // Utilities
 import { formatDate } from 'app/utility/miscFunctions';
+import EditDeleteBtn from './EditDeleteBtn';
 
-const MedicalHistoryItem = ({
-  informationSource,
-  medicalDetails,
-  medicalEstimatedDate,
-  medicalRemarks,
+const ProblemLogItem = ({
+  problemLogRemarks,
+  authorName,
+  problemLogListDesc,
+  createdDateTime,
+  onDelete,
+  onEdit
 }) => {  
   return (
     <View 
-      style={[styles.medContainer]}>
+      style={[styles.container]}>
       <Icon
         as={
           <MaterialIcons 
-          name="info" 
+          name="report-problem" 
           />
         } 
         size={12}
-        color={colors.green}
+        color={colors.red}
       >
       </Icon>
-      <View style={styles.medTextContainer}>
-        {informationSource ? (
+      <View style={styles.textContainer}>
+        {authorName ? (
           <View style={{flexDirection: 'row',  marginLeft: 20}}>
             <Text>
-              <Text style={[styles.medText, styles.bold]}>Source: </Text>
-              <Text style={[styles.medText]}>{informationSource}</Text>
+              <Text style={[styles.text, styles.bold]}>Author: </Text>
+              <Text style={[styles.text]}>{authorName}</Text>
             </Text>
           </View>
           ): null}
-        {medicalDetails ? (
+        {problemLogListDesc ? (
           <View style={{flexDirection: 'row',  marginLeft: 20}}>
             <Text>
-              <Text style={[styles.medText, styles.bold]}>Details: </Text>
-              <Text style={[styles.medText]}>{medicalDetails}</Text>
+              <Text style={[styles.text, styles.bold]}>Description: </Text>
+              <Text style={[styles.text]}>{problemLogListDesc}</Text>
             </Text>
           </View>
           ): null}
         
-        {medicalRemarks ? (
+        {problemLogRemarks ? (
           <View style={{flexDirection: 'row',  marginLeft: 20}}>
             <Text>
-              <Text style={[styles.medText, styles.bold]}>Remarks: </Text>
-              <Text style={[styles.medText]}>{medicalRemarks}</Text>
+              <Text style={[styles.text, styles.bold]}>Remarks: </Text>
+              <Text style={[styles.text]}>{problemLogRemarks}</Text>
             </Text>
           </View>
           ): null}
-        {medicalEstimatedDate ? (
+        {createdDateTime ? (
           <View style={{flexDirection: 'row',  marginLeft: 20}}>
             <Text>
-              <Text style={[styles.medText, styles.bold]}>Estimated Date: </Text>
-              <Text style={[styles.medText]}>{formatDate(new Date(medicalEstimatedDate), true)}</Text>
+              <Text style={[styles.text, styles.bold]}>Created: </Text>
+              <Text style={[styles.text]}>{formatDate(new Date(createdDateTime), true)}</Text>
             </Text>
           </View>
           ): null}
       </View>
+      <EditDeleteBtn onDelete={onDelete} onEdit={onEdit}/>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  medContainer: {
+  container: {
     flexDirection: 'row', 
     alignItems: 'center',
     backgroundColor: colors.green_lightest,
     padding: 20, 
     borderRadius: 8
   },
-  medTextContainer: {
+  textContainer: {
     flex: 1
   },
   heading: {
@@ -85,7 +89,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 7,
   },
-  medText: {
+  text: {
     marginTop: 4,
     fontSize: 16,
   },
@@ -103,4 +107,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MedicalHistoryItem;
+export default ProblemLogItem;

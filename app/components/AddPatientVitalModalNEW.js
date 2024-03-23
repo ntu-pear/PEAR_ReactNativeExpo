@@ -4,9 +4,9 @@ import { Modal, Button, VStack, Text, Checkbox, ScrollView } from 'native-base';
 import { StyleSheet } from 'react-native';
 
 // Components
-import InputField from '../input-components/InputField';
-import AppButton from '../AppButton';
-import SelectionInputField from '../input-components/SelectionInputField'; // Assuming you have or will implement this for selections if needed
+import InputField from './input-components/InputField';
+import AppButton from './AppButton';
+import SelectionInputField from './input-components/SelectionInputField'; // Assuming you have or will implement this for selections if needed
 
 // Configurations
 import colors from 'app/config/colors';

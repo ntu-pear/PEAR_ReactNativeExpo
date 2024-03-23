@@ -2,9 +2,9 @@
 import React, { useState } from 'react';
 import { Modal, Button, VStack, Text, HStack } from 'native-base';
 import { StyleSheet } from 'react-native';
-import AppButton from '../AppButton';
-import InputField from '../input-components/InputField';
-import RadioButtonInput from '../input-components/RadioButtonsInput';
+import AppButton from './AppButton';
+import InputField from './input-components/InputField';
+import RadioButtonInput from './input-components/RadioButtonsInput';
 
 function AddPatientVitalModal({ showModal, onClose, onSubmit }) {
   // State to hold form data

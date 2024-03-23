@@ -9,6 +9,7 @@ import colors from 'app/config/colors';
 
 // Utilities
 import { formatDate, formatTimeAMPM, setTimeToZero } from 'app/utility/miscFunctions';
+import EditDeleteBtn from './EditDeleteBtn';
 
 const MedicationItem = ({
   medID,
@@ -21,7 +22,9 @@ const MedicationItem = ({
   medStartDate,
   medEndDate,
   medRemarks,
-  date=new Date()
+  date=new Date(),
+  onEdit,
+  onDelete
 }) => {  
   // Get user confirmation to save adminstration status of medication
   const onClickAdminister = () => {
@@ -112,6 +115,7 @@ const MedicationItem = ({
       >
         <Text style={styles.medText} color={colors.white}>{canAdminister() ? 'Click to log medicine administration' : 'Cannot administer today'}</Text>
       </TouchableOpacity>
+      <EditDeleteBtn onDelete={onDelete} onEdit={onEdit}/>
     </View>
   );
 };

@@ -1,7 +1,7 @@
 // Libs
 import React from 'react';
 import { Text, Icon, View } from 'native-base';
-import {  StyleSheet } from 'react-native';
+import {  StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 // Configurations
@@ -9,74 +9,77 @@ import colors from 'app/config/colors';
 
 // Utilities
 import { formatDate } from 'app/utility/miscFunctions';
+import EditDeleteBtn from './EditDeleteBtn';
 
-const ProblemLogItem = ({
-  problemLogRemarks,
-  authorName,
-  problemLogListDesc,
-  createdDateTime,
+const MedicalHistoryItem = ({
+  informationSource,
+  medicalDetails,
+  medicalEstimatedDate,
+  medicalRemarks,
+  onDelete
 }) => {  
   return (
     <View 
-      style={[styles.container]}>
+      style={[styles.medContainer]}>
       <Icon
         as={
           <MaterialIcons 
-          name="report-problem" 
+          name="info" 
           />
         } 
         size={12}
-        color={colors.red}
+        color={colors.green}
       >
       </Icon>
-      <View style={styles.textContainer}>
-        {authorName ? (
+      <View style={styles.medTextContainer}>
+        {informationSource ? (
           <View style={{flexDirection: 'row',  marginLeft: 20}}>
             <Text>
-              <Text style={[styles.text, styles.bold]}>Author: </Text>
-              <Text style={[styles.text]}>{authorName}</Text>
+              <Text style={[styles.medText, styles.bold]}>Source: </Text>
+              <Text style={[styles.medText]}>{informationSource}</Text>
             </Text>
           </View>
           ): null}
-        {problemLogListDesc ? (
+        {medicalDetails ? (
           <View style={{flexDirection: 'row',  marginLeft: 20}}>
             <Text>
-              <Text style={[styles.text, styles.bold]}>Description: </Text>
-              <Text style={[styles.text]}>{problemLogListDesc}</Text>
+              <Text style={[styles.medText, styles.bold]}>Details: </Text>
+              <Text style={[styles.medText]}>{medicalDetails}</Text>
             </Text>
           </View>
           ): null}
         
-        {problemLogRemarks ? (
+        {medicalRemarks ? (
           <View style={{flexDirection: 'row',  marginLeft: 20}}>
             <Text>
-              <Text style={[styles.text, styles.bold]}>Remarks: </Text>
-              <Text style={[styles.text]}>{problemLogRemarks}</Text>
+              <Text style={[styles.medText, styles.bold]}>Remarks: </Text>
+              <Text style={[styles.medText]}>{medicalRemarks}</Text>
             </Text>
           </View>
           ): null}
-        {createdDateTime ? (
+        {medicalEstimatedDate ? (
           <View style={{flexDirection: 'row',  marginLeft: 20}}>
             <Text>
-              <Text style={[styles.text, styles.bold]}>Created: </Text>
-              <Text style={[styles.text]}>{formatDate(new Date(createdDateTime), true)}</Text>
+              <Text style={[styles.medText, styles.bold]}>Estimated Date: </Text>
+              <Text style={[styles.medText]}>{formatDate(new Date(medicalEstimatedDate), true)}</Text>
             </Text>
           </View>
           ): null}
       </View>
+      <EditDeleteBtn onDelete={onDelete}/>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  medContainer: {
     flexDirection: 'row', 
     alignItems: 'center',
     backgroundColor: colors.green_lightest,
     padding: 20, 
     borderRadius: 8
   },
-  textContainer: {
+  medTextContainer: {
     flex: 1
   },
   heading: {
@@ -85,7 +88,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 7,
   },
-  text: {
+  medText: {
     marginTop: 4,
     fontSize: 16,
   },
@@ -103,4 +106,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ProblemLogItem;
+export default MedicalHistoryItem;
