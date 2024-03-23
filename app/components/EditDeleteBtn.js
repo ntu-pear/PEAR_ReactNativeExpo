@@ -30,7 +30,7 @@ const EditDeleteBtn = ({
 const styles = StyleSheet.create({
   editDelContainer: {
     position: 'absolute',
-    right: 10,
+    right: 14,
     top: 10,
     flexDirection: 'row',
     justifyContent: 'flex-end'
