@@ -8,7 +8,12 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import patientApi from 'app/api/patient';
 
 // Utilities
-import { isEmptyObject, noDataMessage, sortFilterInitialState, formatDate } from 'app/utility/miscFunctions';
+import {
+  isEmptyObject,
+  noDataMessage,
+  sortFilterInitialState,
+  formatDate,
+} from 'app/utility/miscFunctions';
 
 // Navigation
 import routes from 'app/navigation/routes';
@@ -29,7 +34,7 @@ import MedicalHistoryItem from 'app/components/MedicalHistoryItem';
 import AddPatientMedicalHistoryModal from 'app/components/AddPatientMedicalHistoryModal';
 
 function PatientMedicalHistory(props) {
-  let {patientID, patientId} = props.route.params;
+  let { patientID, patientId } = props.route.params;
   if (patientId) {
     patientID = patientId;
   }
@@ -38,27 +43,27 @@ function PatientMedicalHistory(props) {
   // Modal states
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // either 'add' or 'edit'
-  
+
   // Options for user to search by
   const SEARCH_OPTIONS = ['Details'];
 
-  // Display mode options  
+  // Display mode options
   const [displayMode, setDisplayMode] = useState('rows');
   const DISPLAY_MODES = ['rows', 'table'];
-  
-  // Sort options 
+
+  // Sort options
   const SORT_OPTIONS = ['Estimated Date', 'Source'];
 
   // Filter options
   const FILTER_OPTIONS = ['Estimated Date'];
-  
+
   // Mapping between sort/filter/search names and the respective field in the patient data retrieved from the backend
   const FIELD_MAPPING = {
-    'Source': 'informationSource',
+    Source: 'informationSource',
     'Estimated Date': 'medicalEstimatedDate',
-    'Details': 'medicalDetails'
+    Details: 'medicalDetails',
   };
-  
+
   // Search, sort, and filter related states
   const [sort, setSort] = useState(sortFilterInitialState);
   const [searchQuery, setSearchQuery] = useState('');
@@ -77,9 +82,9 @@ function PatientMedicalHistory(props) {
   // --------------------------
   const [filterOptionDetails, setFilterOptionDetails] = useState({
     'Estimated Date': {
-      'type': 'date',
-      'options': {'min': {}, 'max': {},},
-      'isFilter': true,
+      type: 'date',
+      options: { min: {}, max: {} },
+      isFilter: true,
     },
   });
 
@@ -105,7 +110,7 @@ function PatientMedicalHistory(props) {
   const [patientData, setPatientData] = useState({});
 
   // Scrollview state
-  const [isScrolling, setIsScrolling] = useState(false);  
+  const [isScrolling, setIsScrolling] = useState(false);
 
   // Refresh list when new medical history is added or user requests refresh
   useFocusEffect(
@@ -117,7 +122,7 @@ function PatientMedicalHistory(props) {
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isReloadPatientList]),
   );
-  
+
   // Set isLoading to true when retrieving data
   const refreshData = () => {
     setIsLoading(true);
@@ -126,7 +131,7 @@ function PatientMedicalHistory(props) {
       await getPatientData();
     };
     promiseFunction();
-  }    
+  };
 
   // Get medical history data from backend
   const getHxData = async () => {
@@ -136,7 +141,7 @@ function PatientMedicalHistory(props) {
         setOriginalList([...response.data.data]);    
         setData(parseHxData([...response.data.data]));    
         setIsDataInitialized(true);
-        setIsLoading(false);  
+        setIsLoading(false);
         setIsError(false);
         setIsRetry(false);
         setStatusCode(response.status);
@@ -196,23 +201,24 @@ function PatientMedicalHistory(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.addPatientMedicalHistory(patientID, medData);
+    const result = await patientApi.addPatientMedicalHistory(
+      patientID,
+      medData,
+    );
     if (result.ok) {
       console.log('submitting medical history data', medData);
       refreshData();
       setIsModalVisible(false);
-      
-      alertTitle = 'Successfully added medical history';
     } else {
       const errors = result.data?.message;
 
       result.data
-      ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-      : (alertDetails = 'Please try again.');
-      
+        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
+        : (alertDetails = 'Please try again.');
+
       alertTitle = 'Error adding medical history';
     }
-    
+
     Alert.alert(alertTitle, alertDetails);
     setIsLoading(false);
   };
@@ -249,27 +255,27 @@ function PatientMedicalHistory(props) {
     if (result.ok) {
       refreshData();
       setIsModalVisible(false);
-      
+
       alertTitle = 'Successfully deleted medical history';
     } else {
       const errors = result.data?.message;
-      console.log("Error deleting medical history")
+      console.log('Error deleting medical history');
 
       result.data
-      ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-      : (alertDetails = 'Please try again.');
-      
+        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
+        : (alertDetails = 'Please try again.');
+
       alertTitle = 'Error deleting medical history';
     }
-    
+
     Alert.alert(alertTitle, alertDetails);
     setIsLoading(false);
-  }
-  
+  };
+
   // Navigate to patient profile on click profile image
-  const onClickProfile = () => {  
+  const onClickProfile = () => {
     navigation.navigate(routes.PATIENT_PROFILE, { id: patientID });
-  }
+  };
 
   // Return formatted row data for table display
   // Note: keys originally ordered like ['ID', 'Details', 'Source', 'Remarks', 'Estimated Date']
@@ -279,24 +285,24 @@ function PatientMedicalHistory(props) {
     let tempHxData =  dataNoPatientID.map(item=> {
       return Object.entries(item).map(([key, value]) => {
         if (key.toLowerCase().includes('date')) {
-          return formatDate(new Date(value), true); 
+          return formatDate(new Date(value), true);
         } else {
           return String(value); // Convert other values to strings
-        } 
-      })
+        }
+      });
     });
 
     // Reordered items to have source before details
-    tempHxData = tempHxData.map(item => {
+    tempHxData = tempHxData.map((item) => {
       let temp = item[1];
       item[1] = item[2];
       item[2] = temp;
 
-    return item;
-    })
+      return item;
+    });
 
     return tempHxData;
-  }
+  };
 
   // Return formatted header data for table display
   // Note: keys originally ordered like ['ID', 'Details', 'Source', 'Remarks', 'Estimated Date']
@@ -430,8 +436,8 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
   },
   addBtn: {
-    marginTop: '0.01%'
-  }
+    marginTop: '0.01%',
+  },
 });
 
 export default PatientMedicalHistory;

@@ -8,14 +8,14 @@ import InputField from './input-components/InputField';
 import AppButton from './AppButton';
 import SelectionInputField from './input-components/SelectionInputField';
 
-// Hooks 
+// Hooks
 import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
 // Configurations
 import colors from 'app/config/colors';
 import AddEditModal from './AddEditModal';
 
-function AddPatientMedicalHistoryModal({
+function AddPatientProblemLogModal({
   showModal,
   modalMode,
   formData,
@@ -33,7 +33,8 @@ function AddPatientMedicalHistoryModal({
   // Input error states (Child components)
   // This records the error states of each child component (ones that require tracking).
   const [isAuthorNameError, setIsAuthorNameError] = useState(false);
-  const [isProblemDescriptionError, setIsProblemDescriptionError] = useState(false);
+  const [isProblemDescriptionError, setIsProblemDescriptionError] =
+    useState(false);
   const [isProblemRemarksError, setIsProblemRemarksError] = useState(false);
   const [isCreatedDateTimeError, setIsCreatedDateTimeError] = useState(false);
 
@@ -43,9 +44,9 @@ function AddPatientMedicalHistoryModal({
   useEffect(() => {
     setIsInputErrors(
       isAuthorNameError ||
-      isProblemDescriptionError ||
-      isProblemRemarksError ||
-      isCreatedDateTimeError
+        isProblemDescriptionError ||
+        isProblemRemarksError ||
+        isCreatedDateTimeError,
     );
   }, [
     isAuthorNameError,
@@ -54,7 +55,7 @@ function AddPatientMedicalHistoryModal({
     isCreatedDateTimeError,
   ]);
 
-  // Reset form 
+  // Reset form
   const resetForm = () => {
     setFormData({    
       "problemLogID": null,
@@ -81,7 +82,7 @@ function AddPatientMedicalHistoryModal({
       [field]: field == 'problemLogListID' ? parseInt(e) : e,
     }));
   };
-  
+
   // Handle form submission
   const handleSubmit = () => {
     if (!isInputErrors) {
@@ -132,10 +133,10 @@ const styles = StyleSheet.create({
     fontSize: 18, // Adjust font size as needed
     fontWeight: 'bold', // Optional: if you want the text to be bold
     textTransform: 'uppercase',
-  },  
+  },
   dateSelectionContainer: {
     width: '100%',
   },
 });
 
-export default AddPatientMedicalHistoryModal;
+export default AddPatientProblemLogModal;
