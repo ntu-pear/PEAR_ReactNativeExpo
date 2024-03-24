@@ -28,6 +28,7 @@ function TabBar({
           style={[styles.tab, ...curTab==TABS[mode] ? [styles.selectedTab] : []]}
           onPress={() => handleOnToggleViewMode(TABS[mode])}
           activeOpacity={curTab==TABS[mode] ? 1 : 0.5}
+          accessibilityTraits={curTab==TABS[mode] ? ['tab', 'current'] : ['tab']}
           >
             <Text style={[styles.tabText, ...curTab==TABS[mode] ? [styles.selectedTabText] : []]}>{mode}</Text>
         </TouchableOpacity>

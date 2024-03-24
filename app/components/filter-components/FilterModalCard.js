@@ -47,10 +47,7 @@ const FilterModalCard = ({
   setAutocomplete=()=>{},
   
   datetime=sortFilterInitialState,
-  setDatetime=()=>{}, 
-
-  time=sortFilterInitialState,
-  setTime=()=>{}, 
+  setDatetime=()=>{},  
 
   filterIconSize=12,  
   handleSortFilter,
@@ -91,7 +88,6 @@ const FilterModalCard = ({
     setChip(prevState => update(prevState))
     setAutocomplete(prevState => update(prevState))
     setDatetime(prevState => update(prevState))
-    setTime(prevState => update(prevState))
 
     Keyboard.dismiss();
     setIsLoading(false);

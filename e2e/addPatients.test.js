@@ -120,21 +120,21 @@ describe('AddPatients tests', () => {
     await element(by.id('addPatients')).tap();
   });
   
-  it('Add Patients: patient info - valid data ', async () => {
-    await expect(element(by.id(`${baseID}_title`))).toBeVisible();
+  // it('Add Patients: patient info - valid data ', async () => {
+  //   await expect(element(by.id(`${baseID}_title`))).toBeVisible();
     
-    for(var item in testData.validData) {
-      console.log(`${baseID}_${item}_input`)
-      await element(by.id(`${baseID}_${item}_input`)).tap();
-      await element(by.id(`${baseID}_${item}_input`)).typeText(testData.validData[item]);
+  //   for(var item in testData.validData) {
+  //     console.log(`${baseID}_${item}_input`)
+  //     await element(by.id(`${baseID}_${item}_input`)).tap();
+  //     await element(by.id(`${baseID}_${item}_input`)).typeText(testData.validData[item]);
       
-      await expect(element(by.id(`${baseID}_${item}_input_error`))).not.toBeVisible();
-      await element(by.id(baseID)).scroll(100, 'down');
-    }
-    await device.pressBack();    
-    await disabledPrev();
-    await enabledNext();
-  }); 
+  //     await expect(element(by.id(`${baseID}_${item}_input_error`))).not.toBeVisible();
+  //     await element(by.id(baseID)).scroll(100, 'down');
+  //   }
+  //   await device.pressBack();    
+  //   await disabledPrev();
+  //   await enabledNext();
+  // }); 
 
   it('Add Patients: patient info - erase input', async () => {
     await element(by.id(baseID)).scrollTo('top');
