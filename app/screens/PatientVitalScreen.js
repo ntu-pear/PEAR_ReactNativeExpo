@@ -11,8 +11,9 @@ import patientApi from 'app/api/patient';
 import {
   isEmptyObject,
   noDataMessage,
-  sortFilterInitialState,
+  filterInitialState,
   formatDate,
+  sortInitialState,
 } from 'app/utility/miscFunctions';
 
 // Navigation
@@ -60,10 +61,10 @@ function PatientVitalScreen(props) {
   };
 
   // Search, sort, and filter related states
-  const [sort, setSort] = useState(sortFilterInitialState);
+  const [sort, setSort] = useState(sortInitialState);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDataInitialized, setIsDataInitialized] = useState(false);
-  const [datetime, setDatetime] = useState(sortFilterInitialState);
+  const [datetime, setDatetime] = useState(filterInitialState);
 
   // Filter details state
   const [filterOptionDetails, setFilterOptionDetails] = useState({

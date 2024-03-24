@@ -19,7 +19,7 @@ import MessageDisplayCard from 'app/components/MessageDisplayCard';
 import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
 
 // Utilities
-import { isEmptyObject, noDataMessage, sortFilterInitialState } from 'app/utility/miscFunctions';
+import { isEmptyObject, noDataMessage, filterInitialState, sortInitialState } from 'app/utility/miscFunctions';
 
 function PatientsScreen({ navigation }) {
   
@@ -86,10 +86,10 @@ function PatientsScreen({ navigation }) {
   const [searchOption, setSearchOption] = useState('Full Name');
   
   // Sort/filter related states
-  const [sort, setSort] = useState(sortFilterInitialState);
-  const [dropdown, setDropdown] = useState(sortFilterInitialState);
-  const [chip, setChip] = useState(sortFilterInitialState);
-  const [datetime, setDatetime] = useState(sortFilterInitialState);
+  const [sort, setSort] = useState(sortInitialState);
+  const [dropdown, setDropdown] = useState(filterInitialState);
+  const [chip, setChip] = useState(filterInitialState);
+  const [datetime, setDatetime] = useState(filterInitialState);
 
   // Filter details related state
   // Details of filter options

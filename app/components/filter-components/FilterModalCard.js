@@ -17,7 +17,7 @@ import SelectionInputField from '../input-components/SelectionInputField';
 import DateInputField from '../input-components/DateInputField';
 
 // Utilities
-import { isEmptyObject, parseAutoCompleteOptions, parseSelectOptions, sortFilterInitialState, updateState } from 'app/utility/miscFunctions';
+import { isEmptyObject, parseAutoCompleteOptions, parseSelectOptions, filterInitialState, updateState, sortInitialState } from 'app/utility/miscFunctions';
 
 const FilterModalCard = ({
   testID='',
@@ -34,19 +34,19 @@ const FilterModalCard = ({
   applySortFilter,
   setApplySortFilter,
 
-  sort=sortFilterInitialState,
+  sort=sortInitialState,
   setSort=()=>{},
 
-  dropdown=sortFilterInitialState,
+  dropdown=filterInitialState,
   setDropdown=()=>{},
 
-  chip=sortFilterInitialState,
+  chip=filterInitialState,
   setChip=()=>{},
   
-  autocomplete=sortFilterInitialState,
+  autocomplete=filterInitialState,
   setAutocomplete=()=>{},
   
-  datetime=sortFilterInitialState,
+  datetime=filterInitialState,
   setDatetime=()=>{},  
 
   filterIconSize=12,  

@@ -9,7 +9,7 @@ import patientApi from 'app/api/patient';
 import scheduleApi from 'app/api/schedule';
 
 // Utilities
-import { isEmptyObject, noDataMessage, sortFilterInitialState, formatDate, convertTimeMilitary } from 'app/utility/miscFunctions';
+import { isEmptyObject, noDataMessage, filterInitialState, formatDate, convertTimeMilitary } from 'app/utility/miscFunctions';
 
 // Navigation
 import routes from 'app/navigation/routes';
@@ -45,8 +45,8 @@ function PatientScheduleScreen(props) {
   };
   
   // Sort/filter related states
-  const [dropdown, setDropdown] = useState(sortFilterInitialState);
-  const [datetime, setDatetime] = useState(sortFilterInitialState);
+  const [dropdown, setDropdown] = useState(filterInitialState);
+  const [datetime, setDatetime] = useState(filterInitialState);
   
   // Filter details related state
   // Details of filter options

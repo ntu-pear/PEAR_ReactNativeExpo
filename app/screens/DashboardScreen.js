@@ -31,7 +31,7 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 
 // Utilities
 import globalStyles from 'app/utility/styles.js';
-import { formatDate, convertTimeMilitary, isEmptyObject, noDataMessage, sortFilterInitialState, getSunday, getMonday, isSunday, isMonday } from 'app/utility/miscFunctions';
+import { formatDate, convertTimeMilitary, isEmptyObject, noDataMessage, filterInitialState, getSunday, getMonday, isSunday, isMonday, sortInitialState } from 'app/utility/miscFunctions';
 
 function DashboardScreen({ navigation }) {
   // View modes user can switch between (displayed as tab on top)
@@ -90,9 +90,9 @@ function DashboardScreen({ navigation }) {
   const [searchOption, setSearchOption] = useState('Full Name');
   
   // Sort/filter related states
-  const [sort, setSort] = useState(sortFilterInitialState);
-  const [dropdown, setDropdown] = useState(sortFilterInitialState);
-  const [datetime, setDatetime] = useState(sortFilterInitialState);
+  const [sort, setSort] = useState(sortInitialState);
+  const [dropdown, setDropdown] = useState(filterInitialState);
+  const [datetime, setDatetime] = useState(filterInitialState);
 
   // Filter details related state
   // Details of filter options

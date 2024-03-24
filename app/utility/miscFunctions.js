@@ -160,8 +160,11 @@ export const setTimeToZero = (datetime) => {
   return new Date(datetime);
 }
 
-// Format of data for sort and filter states used by FilterModal/SearchFilterBar
-export const sortFilterInitialState = {'filterOptions': {}, 'sel': {}, 'tempSel': {}}
+// Format of data for filter states used by FilterModal/SearchFilterBar
+export const filterInitialState = {'filterOptions': {}, 'sel': {}, 'tempSel': {}}
+
+// Format of data for sort state used by FilterModal/SearchFilterBar
+export const sortInitialState = {'filterOptions': [], 'sel': {}, 'tempSel': {}}
 
 // Returns message to display if api call error or no data to display
 // For flatlist, need additional top padding to center the message

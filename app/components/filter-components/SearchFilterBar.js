@@ -14,7 +14,7 @@ import FilterIndicator from 'app/components/filter-components/FilterIndicator';
 import TabBar from '../TabBar';
 
 // Utilities
-import { isEmptyObject, parseSelectOptions, setSecondsToZero, sortArray, sortFilterInitialState } from 'app/utility/miscFunctions';
+import { isEmptyObject, parseSelectOptions, setSecondsToZero, sortArray, filterInitialState, sortInitialState } from 'app/utility/miscFunctions';
 import DisplayModeComponent from './DisplayModeComponent';
 
 function SearchFilterBar({
@@ -38,19 +38,19 @@ function SearchFilterBar({
   
   FIELD_MAPPING={},
 
-  sort=sortFilterInitialState,
+  sort=sortInitialState,
   setSort=()=>{},
 
-  dropdown=sortFilterInitialState,
+  dropdown=filterInitialState,
   setDropdown=()=>{},
 
-  chip=sortFilterInitialState,
+  chip=filterInitialState,
   setChip=()=>{},
   
-  autocomplete=sortFilterInitialState,
+  autocomplete=filterInitialState,
   setAutocomplete=()=>{},
 
-  datetime=sortFilterInitialState,
+  datetime=filterInitialState,
   setDatetime=()=>{},
   
   SORT_OPTIONS={},
