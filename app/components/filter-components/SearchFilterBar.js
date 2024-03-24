@@ -126,7 +126,7 @@ function SearchFilterBar({
     let filteredList = [...originalList];
 
     // Search
-    if(SEARCH_OPTIONS.length > 0) {
+    if(!hideSearchBar) {
       filteredList = filteredList.filter((item) => {
         return item[FIELD_MAPPING[tempSearchMode]].toLowerCase().includes(text.toLowerCase());
       })
