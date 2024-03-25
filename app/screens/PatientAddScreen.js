@@ -12,10 +12,10 @@ import patientApi from 'app/api/patient';
 import routes from 'app/navigation/routes';
 
 // Components
-import PatientAddPatientInfoScreen from 'app/screens/PatientAddPatientInfoScreen';
-import PatientAddGuardianScreen from 'app/screens/PatientAddGuardianScreen';
-import PatientAddAllergyScreen from 'app/screens/PatientAddAllergyScreen';
 import ActivityIndicator from 'app/components/ActivityIndicator';
+import PatientAddAllergyScreen from 'app/screens/PatientAddAllergyScreen';
+import PatientAddGuardianScreen from 'app/screens/PatientAddGuardianScreen';
+import PatientAddPatientInfoScreen from 'app/screens/PatientAddPatientInfoScreen';
 
 function PatientAddScreen() {
   const navigation = useNavigation();
