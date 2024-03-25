@@ -11,6 +11,21 @@ import {
   VStack,
 } from 'native-base';
 
+// APIs
+import patientApi from 'app/api/patient';
+import AuthContext from 'app/auth/context';
+
+// Components
+import ActivityIndicator from 'app/components/ActivityIndicator';
+import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
+import AddPatientProgress from 'app/components/AddPatientProgress';
+import DateInputField from 'app/components/input-components/DateInputField';
+import InputField from 'app/components/input-components/InputField';
+import RadioButtonInput from 'app/components/input-components/RadioButtonsInput';
+import SelectionInputField from 'app/components/input-components/SelectionInputField';
+import SensitiveInputField from 'app/components/input-components/SensitiveInputField';
+import SingleOptionCheckBox from 'app/components/input-components/SingleOptionCheckBox';
+
 // Configurations
 import colors from 'app/config/colors';
 import typography from 'app/config/typography';
@@ -20,21 +35,6 @@ import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
 // Utilities
 import { noDataMessage, parseSelectOptions } from 'app/utility/miscFunctions';
-
-// Components
-import AddPatientProgress from 'app/components/AddPatientProgress';
-import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
-import DateInputField from 'app/components/input-components/DateInputField';
-import SelectionInputField from 'app/components/input-components/SelectionInputField';
-import RadioButtonInput from 'app/components/input-components/RadioButtonsInput';
-import SingleOptionCheckBox from 'app/components/input-components/SingleOptionCheckBox';
-import ActivityIndicator from 'app/components/ActivityIndicator';
-import InputField from 'app/components/input-components/InputField';
-import SensitiveInputField from 'app/components/input-components/SensitiveInputField';
-
-// APIs
-import patientApi from 'app/api/patient';
-import AuthContext from 'app/auth/context';
 
 function PatientAddPatientInfoScreen({
   testID='',
