@@ -1,5 +1,5 @@
 // Libs
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Alert, Keyboard, StyleSheet, TouchableOpacity } from 'react-native';
 import { FlatList, View } from 'native-base';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -7,26 +7,26 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 // API
 import patientApi from 'app/api/patient';
 
-// Utilities
-import { formatTimeHM24, convertTimeMilitary, isEmptyObject, noDataMessage, filterInitialState, formatMilitaryToAMPM, formatDate, formatTimeAMPM, sortInitialState } from 'app/utility/miscFunctions';
-
-// Navigation
-import routes from 'app/navigation/routes';
+// Components
+import ActivityIndicator from 'app/components/ActivityIndicator';
+import AddButton from 'app/components/AddButton';
+import AddPatientMedicationModal from 'app/components/AddPatientMedicationModal';
+import DynamicTable from 'app/components/DynamicTable';
+import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
+import LoadingWheel from 'app/components/LoadingWheel';
+import MedicationItem from 'app/components/MedicationItem';
+import ProfileNameButton from 'app/components/ProfileNameButton';
+import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
+import Swipeable from 'app/components/swipeable-components/Swipeable';
 
 // Configurations
 import colors from 'app/config/colors';
 
-// Components
-import ActivityIndicator from 'app/components/ActivityIndicator';
-import AddButton from 'app/components/AddButton';
-import MedicationItem from 'app/components/MedicationItem';
-import AddPatientMedicationModal from 'app/components/AddPatientMedicationModal';
-import ProfileNameButton from 'app/components/ProfileNameButton';
-import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
-import LoadingWheel from 'app/components/LoadingWheel';
-import Swipeable from 'app/components/swipeable-components/Swipeable';
-import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
-import DynamicTable from 'app/components/DynamicTable';
+// Navigation
+import routes from 'app/navigation/routes';
+
+// Utilities
+import { formatTimeHM24, convertTimeMilitary, isEmptyObject, noDataMessage, filterInitialState, formatMilitaryToAMPM, formatDate, formatTimeAMPM, sortInitialState } from 'app/utility/miscFunctions';
 
 function PatientMedicationScreen(props) {
   let {patientID, patientId} = props.route.params;
