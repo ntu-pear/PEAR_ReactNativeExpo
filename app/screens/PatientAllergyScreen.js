@@ -6,14 +6,14 @@ import { View } from 'native-base';
 // API
 import patientApi from 'app/api/patient';
 
-// Hooks
-import formatDateTime from 'app/hooks/useFormatDateTime.js';
-
 // Components
-import DynamicTable from 'app/components/DynamicTable';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import AddButton from 'app/components/AddButton';
 import AddPatientAllergyModal from 'app/components/AddPatientAllergyModal';
+import DynamicTable from 'app/components/DynamicTable';
+
+// Hooks
+import formatDateTime from 'app/hooks/useFormatDateTime.js';
 
 function PatientAllergyScreen(props) {
   const [isLoading, setIsLoading] = useState(true);
