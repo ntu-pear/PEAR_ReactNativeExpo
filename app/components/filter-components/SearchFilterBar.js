@@ -331,8 +331,10 @@ function SearchFilterBar({
   }
 
   const filterComponent = () => {
-    return (
-      SORT_OPTIONS.length > 0 && FILTER_OPTIONS.length > 0 ? (
+    if(!isEmptyObject(VIEW_MODES) 
+      ? SORT_OPTIONS[viewMode].length > 0 && FILTER_OPTIONS[viewMode].length > 0 
+      : SORT_OPTIONS.length > 0 && FILTER_OPTIONS.length > 0 ) {
+        return (
         <FilterModalCard
           testID={`${testID}_filter`}
           modalVisible={modalVisible}
@@ -365,8 +367,8 @@ function SearchFilterBar({
   
           handleSortFilter={handleSearchSortFilter}
         />
-      ) : null
-    )
+      ) 
+    }
   }
 
   const countComponent = () => {
@@ -439,8 +441,8 @@ function SearchFilterBar({
   }
   
   const filterIndicatorComponent = () => {
-    return (
-      hideIndicator ? null : (
+    if(!hideIndicator) {
+      return (
         <View style={{justifyContent: 'center', flex: 1, marginTop: 2, flexDirection: 'row'}}>
           <FilterIndicator
               testID={`${testID}_indicator`}
@@ -457,7 +459,7 @@ function SearchFilterBar({
             />
         </View>
       )
-    )
+    }
   }
 
   return (
