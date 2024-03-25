@@ -1,11 +1,14 @@
+// Libs
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+// Navigation
+import routes from 'app/navigation/routes';
+
+// Screens and components
 import PatientsScreen from 'app/screens/PatientsScreen';
 import PatientProfile from 'app/screens/PatientProfileScreen';
 import PatientInformationAccordion from 'app/components/PatientInformationAccordion';
-
-// Import Constants from routes
-import routes from 'app/navigation/routes';
 import PatientMedicalHistoryScreen from 'app/screens/PatientMedicalHistoryScreen';
 import PatientAllergyScreen from 'app/screens/PatientAllergyScreen';
 import PatientHolidayScreen from 'app/screens/PatientHolidayScreen';
