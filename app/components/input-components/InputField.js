@@ -1,6 +1,6 @@
 // Libs
 import React, { useState, useEffect } from 'react';
-import { Platform, StyleSheet, View, Text } from 'react-native';
+import { Platform, StyleSheet, View, Text, TextInput } from 'react-native';
 import { VStack, Input } from 'native-base';
 import PropTypes from 'prop-types';
 
@@ -13,7 +13,6 @@ import * as validation from 'app/utility/inputValidation';
 
 // Components
 import ErrorMessage from 'app/components/ErrorMessage';
-import { TextInput } from 'react-native';
 import RequiredIndicator from '../RequiredIndicator';
 
 function InputField({
@@ -98,7 +97,7 @@ function InputField({
     onChangeText(value);
   };
 
-  // Function used for input validation depending on the type of input data (given by the type prop)
+  // Function used for input validation depending on the type of input data (given by the dataType prop)
   // When checking for forms that are prefilled, ignore isRequired so msg is not displayed
   const validateInput = (ignoreIsRequired=false) => {
     msg = '';

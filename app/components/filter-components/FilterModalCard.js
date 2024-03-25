@@ -392,12 +392,7 @@ const FilterModalCard = ({
   // Set display value of date filter when item is selected
   const handleOnSelectDatetimeFilter = (datetimeVal, filter, type) => {
     let tempSelectedDatetimeFilter = {...datetime['tempSel'][filter]} || {};
- 
-    if(type == 'min') {
-      tempSelectedDatetimeFilter['min'] = datetimeVal;
-    } else if(type == 'max'){
-      tempSelectedDatetimeFilter['max'] = datetimeVal;      
-    }
+    tempSelectedDatetimeFilter[type] = datetimeVal;
 
     setDatetime(prevState => ({
       ...prevState,
@@ -455,6 +450,7 @@ const FilterModalCard = ({
     return err;
   }
 
+  // Check if any filter has an error so apply button can be disabled
   const checkFilterError = () => {
     let err = false;
     for(var filter in datetime['filterOptions']) {
@@ -658,7 +654,7 @@ const FilterModalCard = ({
                       </LocalizationProvider>
                     </View>
                     {checkTimeFilterError(filter) ? (
-                      <Text testID={`${testID}_date_error_${item.label}`} style={styles.errorMsg}>Start time cannot be greater than end time</Text>
+                      <Text testID={`${testID}_date_error_${filter}`} style={[styles.errorMsg, styles.textStyle]}>Error: Start time cannot be greater than end time</Text>
                     ) : null}
                   </View>
                 ))}

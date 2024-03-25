@@ -14,7 +14,13 @@ export const notUnselected = (value) => {
 
 export const nameFormat = (value) => {
   if (/[!@#$%^&*(),.?":{}|<>]/g.test(value) || /\d+/g.test(value)) {
-    return errors.alphaOnlyError;
+    return errors.nameError;
+  }
+};
+
+export const allowAlpha = (value) => {
+  if (/[!@#$%^&*(),.?":{}|<>]/g.test(value) || /\d+/g.test(value)) {
+    return errors.nameError;
   }
 };
 
@@ -86,10 +92,10 @@ export const uniquePrefName = (value, list) => {
 };
 
 export const validationFunctions = {
-  name: [nameFormat],
-  nric: [nricFormat, nricValid],
+  'name': [nameFormat],
+  'nric': [nricFormat, nricValid],
   'home phone': [homePhoneNoFormat],
   'mobile phone': [mobilePhoneNoFormat],
-  email: [emailFormat],
+  'email': [emailFormat],
   'postal code': [postalCodeFormat],
 };
