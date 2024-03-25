@@ -6,12 +6,12 @@ import { View } from 'native-base';
 // API
 import patientApi from 'app/api/patient';
 
+// Components
+import ActivityIndicator from 'app/components/ActivityIndicator';
+import DynamicTable from 'app/components/DynamicTable';
+
 // Hooks
 import formatDateTime from 'app/hooks/useFormatDateTime.js';
-
-// Components
-import DynamicTable from 'app/components/DynamicTable';
-import ActivityIndicator from 'app/components/ActivityIndicator';
 
 function PatientPrescriptionScreen(props) {
   const { navigation, route } = props;
