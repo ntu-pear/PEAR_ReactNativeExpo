@@ -7,6 +7,24 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 // API
 import patientApi from 'app/api/patient';
 
+// Components
+import ActivityIndicator from 'app/components/ActivityIndicator';
+import AddButton from 'app/components/AddButton';
+import AddPatientMedicalHistoryModal from 'app/components/AddPatientMedicalHistoryModal';
+import DynamicTable from 'app/components/DynamicTable';
+import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
+import LoadingWheel from 'app/components/LoadingWheel';
+import MedicalHistoryItem from 'app/components/MedicalHistoryItem';
+import ProfileNameButton from 'app/components/ProfileNameButton';
+import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
+import Swipeable from 'app/components/swipeable-components/Swipeable';
+
+// Configurations
+import colors from 'app/config/colors';
+
+// Navigation
+import routes from 'app/navigation/routes';
+
 // Utilities
 import {
   isEmptyObject,
@@ -15,24 +33,6 @@ import {
   formatDate,
   sortInitialState,
 } from 'app/utility/miscFunctions';
-
-// Navigation
-import routes from 'app/navigation/routes';
-
-// Configurations
-import colors from 'app/config/colors';
-
-// Components
-import ActivityIndicator from 'app/components/ActivityIndicator';
-import AddButton from 'app/components/AddButton';
-import ProfileNameButton from 'app/components/ProfileNameButton';
-import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
-import LoadingWheel from 'app/components/LoadingWheel';
-import Swipeable from 'app/components/swipeable-components/Swipeable';
-import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
-import DynamicTable from 'app/components/DynamicTable';
-import MedicalHistoryItem from 'app/components/MedicalHistoryItem';
-import AddPatientMedicalHistoryModal from 'app/components/AddPatientMedicalHistoryModal';
 
 function PatientMedicalHistory(props) {
   let { patientID, patientId } = props.route.params;
