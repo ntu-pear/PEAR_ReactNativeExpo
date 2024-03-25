@@ -1,29 +1,26 @@
 // Libs
 import React, { useState, useEffect } from 'react';
 import { Dimensions } from 'react-native';
-import { Center, VStack, HStack, ScrollView, View } from 'native-base';
-import {
-  MaterialCommunityIcons,
-  MaterialIcons,
-  FontAwesome5,
-  Ionicons,
-} from '@expo/vector-icons';
+import { Center, ScrollView, View } from 'native-base';
+import { MaterialCommunityIcons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 
-// API
+// APIs
 import patientApi from 'app/api/patient';
 import doctorNoteApi from 'app/api/doctorNote';
 import guardianApi from 'app/api/guardian';
 import socialHistoryApi from 'app/api/socialHistory';
 
-// Config
-import colors from 'app/config/colors';
-import routes from 'app/navigation/routes';
-
 // Components
+import ActivityIndicator from 'app/components/ActivityIndicator';
+import PatientInformationAccordion from 'app/components/PatientInformationAccordion';
 import PatientInformationCard from 'app/components/PatientInformationCard';
 import PatientProfileCard from 'app/components/PatientProfileCard';
-import PatientInformationAccordion from 'app/components/PatientInformationAccordion';
-import ActivityIndicator from 'app/components/ActivityIndicator';
+
+// Configurations
+import colors from 'app/config/colors';
+
+// Navigation
+import routes from 'app/navigation/routes';
 
 function PatientProfileScreen(props) {
   const { navigation, route } = props;
