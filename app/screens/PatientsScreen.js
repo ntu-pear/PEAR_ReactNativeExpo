@@ -1,7 +1,7 @@
 // Libs
 import React, { useState, useEffect, useRef } from 'react';
-import { Center, VStack, ScrollView, Fab, Icon, FlatList } from 'native-base';
-import { StyleSheet, View , RefreshControl, Dimensions, Text, TouchableOpacity } from 'react-native';
+import { Center, Fab, Icon, FlatList } from 'native-base';
+import { StyleSheet, View , Dimensions, Text, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -15,7 +15,6 @@ import colors from 'app/config/colors';
 // Components
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import ProfileNameButton from 'app/components/ProfileNameButton';
-import MessageDisplayCard from 'app/components/MessageDisplayCard';
 import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
 
 // Utilities
