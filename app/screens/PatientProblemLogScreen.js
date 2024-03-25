@@ -7,29 +7,29 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 // API
 import patientApi from 'app/api/patient';
 
-// Utilities
-import { isEmptyObject, noDataMessage, filterInitialState, formatDate, sortInitialState } from 'app/utility/miscFunctions';
-
-// Navigation
-import routes from 'app/navigation/routes';
-
-// Configurations
-import colors from 'app/config/colors';
-
 // Auth
 import AuthContext from 'app/auth/context';
 
 // Components
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import AddButton from 'app/components/AddButton';
+import AddPatientProblemLogModal from 'app/components/AddPatientProblemLogModal';
+import DynamicTable from 'app/components/DynamicTable';
+import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
+import LoadingWheel from 'app/components/LoadingWheel';
+import ProblemLogItem from 'app/components/ProblemLogItem';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
-import LoadingWheel from 'app/components/LoadingWheel';
 import Swipeable from 'app/components/swipeable-components/Swipeable';
-import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
-import DynamicTable from 'app/components/DynamicTable';
-import ProblemLogItem from 'app/components/ProblemLogItem';
-import AddPatientProblemLogModal from 'app/components/AddPatientProblemLogModal';
+
+// Configurations
+import colors from 'app/config/colors';
+
+// Navigation
+import routes from 'app/navigation/routes';
+
+// Utilities
+import { isEmptyObject, noDataMessage, filterInitialState, formatDate, sortInitialState } from 'app/utility/miscFunctions';
 
 function PatientProblemLog(props) {
   let {patientID, patientId} = props.route.params;
