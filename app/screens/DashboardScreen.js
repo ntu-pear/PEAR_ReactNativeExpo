@@ -174,7 +174,7 @@ function DashboardScreen({ navigation }) {
       if(!isError) {
         setIsLoading(false);        
         setIsDataInitialized(true);
-        // setIsLoading(true);        
+        setIsLoading(true);        
       } else {
         setIsLoading(false);
       }
