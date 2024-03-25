@@ -1,5 +1,5 @@
 // Libs
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Center, SectionList, View } from 'native-base';
 
 // Components
