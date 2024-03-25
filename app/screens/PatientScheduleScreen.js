@@ -1,28 +1,28 @@
 // Libs
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import { Alert, Dimensions, Keyboard, StyleSheet, TouchableOpacity } from 'react-native';
-import { Box, FlatList, HStack, ScrollView, View, Text, Divider } from 'native-base';
+import React, { useEffect, useRef, useState } from 'react';
+import { Dimensions, StyleSheet } from 'react-native';
+import { FlatList, ScrollView, View, Text, Divider } from 'native-base';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 // API
 import patientApi from 'app/api/patient';
 import scheduleApi from 'app/api/schedule';
 
-// Utilities
-import { isEmptyObject, noDataMessage, filterInitialState, formatDate, convertTimeMilitary } from 'app/utility/miscFunctions';
-
-// Navigation
-import routes from 'app/navigation/routes';
+// Components
+import ActivityCard from 'app/components/ActivityCard';
+import ActivityIndicator from 'app/components/ActivityIndicator';
+import LoadingWheel from 'app/components/LoadingWheel';
+import ProfileNameButton from 'app/components/ProfileNameButton';
+import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
 
 // Configurations
 import colors from 'app/config/colors';
 
-// Components
-import ActivityIndicator from 'app/components/ActivityIndicator';
-import ProfileNameButton from 'app/components/ProfileNameButton';
-import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
-import LoadingWheel from 'app/components/LoadingWheel';
-import ActivityCard from 'app/components/ActivityCard';
+// Navigation
+import routes from 'app/navigation/routes';
+
+// Utilities
+import { isEmptyObject, noDataMessage, filterInitialState, formatDate, convertTimeMilitary } from 'app/utility/miscFunctions';
 
 function PatientScheduleScreen(props) {
   let {patientID, patientId} = props.route.params;
