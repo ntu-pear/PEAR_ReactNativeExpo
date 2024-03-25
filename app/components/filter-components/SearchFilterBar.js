@@ -332,8 +332,8 @@ function SearchFilterBar({
 
   const filterComponent = () => {
     if(!isEmptyObject(VIEW_MODES) 
-      ? SORT_OPTIONS[viewMode].length > 0 && FILTER_OPTIONS[viewMode].length > 0 
-      : SORT_OPTIONS.length > 0 && FILTER_OPTIONS.length > 0 ) {
+      ? SORT_OPTIONS[viewMode].length > 0 || FILTER_OPTIONS[viewMode].length > 0 
+      : SORT_OPTIONS.length > 0 || FILTER_OPTIONS.length > 0 ) {
         return (
         <FilterModalCard
           testID={`${testID}_filter`}
