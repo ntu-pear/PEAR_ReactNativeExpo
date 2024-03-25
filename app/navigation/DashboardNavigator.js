@@ -50,15 +50,6 @@ function DashboardNavigator() {
         }}
       />
       <Stack.Screen
-        name={routes.PATIENT_INFORMATION}
-        component={PatientInformationAccordion}
-        options={{
-          headerShown: true,
-          headerBackTitleVisible: false,
-          title: 'Patient Information',
-        }}
-      />
-      <Stack.Screen
         name={routes.PATIENT_MEDICAL_HISTORY}
         component={PatientMedicalHistoryScreen}
         options={{

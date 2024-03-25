@@ -28,7 +28,6 @@ export default Object.freeze({
   PATIENTS_SCREEN: 'PatientScreen',
   PATIENT_PROFILE: 'PatientProfile',
   PATIENT_SCHEDULE: 'PatientSchedule',
-  PATIENT_INFORMATION: 'PatientInformation',
   PATIENT_MEDICAL_HISTORY: 'PatientMedicalHistory',
   PATIENT_MOBILITY_AIDS: 'PatientMobilityAids',
   PATIENT_ALLERGY: 'PatientAllergy',

@@ -54,15 +54,6 @@ function PatientsNavigator() {
         }}
       />
       <Stack.Screen
-        name={routes.PATIENT_INFORMATION}
-        component={PatientInformationAccordion}
-        options={{
-          headerShown: true,
-          headerBackTitleVisible: false,
-          title: 'Patient Particulars',
-        }}
-      />
-      <Stack.Screen
         name={routes.PATIENT_MEDICAL_HISTORY}
         component={PatientMedicalHistoryScreen}
         options={{
