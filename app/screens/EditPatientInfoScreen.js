@@ -227,7 +227,7 @@ function EditPatientInfoScreen(props) {
     let alertDetails = '';
 
     if (result.ok) {
-      navigation.goBack(routes.PATIENT_INFORMATION, {
+      navigation.goBack(routes.PATIENT_PROFILE, {
         navigation: navigation,
       });
       alertTitle = 'Saved Successfully';
