@@ -120,21 +120,21 @@ describe('AddPatients tests', () => {
     await element(by.id('addPatients')).tap();
   });
   
-  // it('Add Patients: patient info - valid data ', async () => {
-  //   await expect(element(by.id(`${baseID}_title`))).toBeVisible();
+  it('Add Patients: patient info - valid data ', async () => {
+    await expect(element(by.id(`${baseID}_title`))).toBeVisible();
     
-  //   for(var item in testData.validData) {
-  //     console.log(`${baseID}_${item}_input`)
-  //     await element(by.id(`${baseID}_${item}_input`)).tap();
-  //     await element(by.id(`${baseID}_${item}_input`)).typeText(testData.validData[item]);
+    for(var item in testData.validData) {
+      console.log(`${baseID}_${item}_input`)
+      await element(by.id(`${baseID}_${item}_input`)).tap();
+      await element(by.id(`${baseID}_${item}_input`)).typeText(testData.validData[item]);
       
-  //     await expect(element(by.id(`${baseID}_${item}_input_error`))).not.toBeVisible();
-  //     await element(by.id(baseID)).scroll(100, 'down');
-  //   }
-  //   await device.pressBack();    
-  //   await disabledPrev();
-  //   await enabledNext();
-  // }); 
+      await expect(element(by.id(`${baseID}_${item}_input_error`))).not.toBeVisible();
+      await element(by.id(baseID)).scroll(100, 'down');
+    }
+    await device.pressBack();    
+    await disabledPrev();
+    await enabledNext();
+  }); 
 
   it('Add Patients: patient info - erase input', async () => {
     await element(by.id(baseID)).scrollTo('top');
@@ -181,41 +181,41 @@ describe('AddPatients tests', () => {
   //   await disabledPrev();
   // }); 
 
-  // it('Add Patients: patient info - no/invalid first name ', async () => {
-  //   await reopenForm();
-  //   await expect(element(by.id(`${baseID}_title`))).toBeVisible();
+  it('Add Patients: patient info - no/invalid first name ', async () => {
+    await reopenForm();
+    await expect(element(by.id(`${baseID}_title`))).toBeVisible();
     
-  //   const field = `${baseID}_FirstName_input`;
+    const field = `${baseID}_FirstName_input`;
     
-  //   for(var item in testDataID) {
-  //     console.log(`${baseID}_${item}_input`)
-  //     if(item == 'FirstName') continue
-  //     await element(by.id(`${baseID}_${item}_input`)).tap();
-  //     if(testDataID[item].type == 'input') {
-  //       await element(by.id(`${baseID}_${item}_input`)).typeText(testData.validData[item]);
-  //     } else if(testDataID[item].type == 'select') {
-  //       await element(by.text(testDataID[item]['suffix'])).tap();
-  //     } else if(testDataID[item].type == 'input') {
-  //       await element(by.id(`${baseID}_${item}_input`)).tap();
-  //     } 
-  //     await expect(element(by.id(`${baseID}_${item}_input_error`))).not.toBeVisible();
-  //     await element(by.id(baseID)).scroll(100, 'down');
-  //   }   
+    for(var item in testDataID) {
+      console.log(`${baseID}_${item}_input`)
+      if(item == 'FirstName') continue
+      await element(by.id(`${baseID}_${item}_input`)).tap();
+      if(testDataID[item].type == 'input') {
+        await element(by.id(`${baseID}_${item}_input`)).typeText(testData.validData[item]);
+      } else if(testDataID[item].type == 'select') {
+        await element(by.text(testDataID[item]['suffix'])).tap();
+      } else if(testDataID[item].type == 'input') {
+        await element(by.id(`${baseID}_${item}_input`)).tap();
+      } 
+      await expect(element(by.id(`${baseID}_${item}_input_error`))).not.toBeVisible();
+      await element(by.id(baseID)).scroll(100, 'down');
+    }   
     
-  //   await disabledNext();
-  //   await disabledPrev();
+    await disabledNext();
+    await disabledPrev();
     
 
-  //   await waitFor(element(by.text(field))).toBeVisible().whileElement(by.id(scrollView)).scroll(300, 'up');
-  //   await element(by.id(field)).tap();
-  //   await element(by.id(field)).typeText(testData.invalidDataCharacters[item]);
-  //   await waitFor(element(by.id(`${field}_error`))).toHaveText(
-  //     'cannot contain numbers or symbols',
-  //     );        
-  //   }   
-  //   await disabledNext();
-  //   await disabledPrev();
+    await waitFor(element(by.text(field))).toBeVisible().whileElement(by.id(scrollView)).scroll(300, 'up');
+    await element(by.id(field)).tap();
+    await element(by.id(field)).typeText(testData.invalidDataCharacters[item]);
+    await waitFor(element(by.id(`${field}_error`))).toHaveText(
+      'cannot contain numbers or symbols',
+      );        
+    }   
+    await disabledNext();
+    await disabledPrev();
 
 
-  // });
+  });
 })

@@ -3,7 +3,7 @@ describe('Patients tests', () => {
     await device.launchApp();
   });  
 
-  it('Patients: close modal to see "My Patients" tab', async () => {
+  it('Patients: click patients tab from bottom navigation to see patients list', async () => {
     // Login
     await expect(element(by.id('loginContentContainer'))).toBeVisible();
     await expect(element(by.id('username_input'))).toBeVisible();
@@ -99,9 +99,8 @@ describe('Patients tests', () => {
 
   // need test data 
   it('Patients: apply sort/filter (All Patients)', async () => {
-    await element(by.id('patients_searchFilter_filter_sort_Full Name')).tap();
+    await element(by.id('patients_searchFilter_filter_sort_Preferred Name')).tap();
     await element(by.id('patients_searchFilter_filter_apply')).tap();
-    await element(by.id('patients_searchFilter_filter_chip_Patient Status_Active')).tap();
 
     await expect(element(by.id('patients'))).toBeVisible();
   });

@@ -7,6 +7,22 @@ describe('Login tests', () => {
     await device.reloadReactNative();
   });
 
+  it('Login: login button disabled by default', async () => {
+    // Ensure all expected elements in the loginScreen are present.
+    await expect(element(by.id('loginContentContainer'))).toBeVisible();
+    await expect(element(by.id('username_input'))).toBeVisible();
+    await expect(element(by.id('password_input'))).toBeVisible();
+    await expect(element(by.id('role_input'))).toBeVisible();
+    await expect(element(by.id('login'))).toBeVisible();
+    await expect(element(by.text('Forgot Password?'))).toBeVisible();
+
+    await expect(
+      element(
+        by.traits(['button', 'disabled']).and(
+        by.id('login'))
+    )).toExist();
+  });
+
   it('Login: invalid credentials (username)', async () => {
     // Ensure all expected elements in the loginScreen are present.
     await expect(element(by.id('loginContentContainer'))).toBeVisible();
@@ -79,7 +95,7 @@ describe('Login tests', () => {
     );
   });
 
-  it('Login: incomplete credentials', async () => {
+  it('Login: incomplete credentials (no username)', async () => {
     // Ensure all expected elements in the loginScreen are present.
     await expect(element(by.id('loginContentContainer'))).toBeVisible();
     await expect(element(by.id('username_input'))).toBeVisible();
@@ -92,6 +108,28 @@ describe('Login tests', () => {
     await element(by.id('loginContentContainer')).tap();
 
     await waitFor(element(by.id('username_error'))).toHaveText(
+          'is required',
+        );
+    await expect(
+      element(
+        by.traits(['button', 'disabled']).and(
+        by.id('login'))
+    )).toExist();
+  });
+
+  it('Login: incomplete credentials (no password)', async () => {
+    // Ensure all expected elements in the loginScreen are present.
+    await expect(element(by.id('loginContentContainer'))).toBeVisible();
+    await expect(element(by.id('username_input'))).toBeVisible();
+    await expect(element(by.id('password_input'))).toBeVisible();
+    await expect(element(by.id('login'))).toBeVisible();
+    await expect(element(by.text('Forgot Password?'))).toBeVisible();
+
+    // Test user input
+    await element(by.id('password_input')).tap();
+    await element(by.id('loginContentContainer')).tap();
+
+    await waitFor(element(by.id('password_error'))).toHaveText(
           'is required',
         );
     await expect(
