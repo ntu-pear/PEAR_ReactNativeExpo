@@ -1,4 +1,5 @@
-import React, { useState, useContext } from 'react';
+// Libs
+import React, { useState, useContext, useEffect, useCallback } from 'react';
 import {
   ImageBackground,
   View,
@@ -7,232 +8,268 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  ActivityIndicator,
   Text,
 } from 'react-native';
-
-// Custom Import from https://reactnativeelements.com/docs/
-import { Select, Input, Center, Icon, Box } from 'native-base';
+import { Center, Icon, Box } from 'native-base';
 import { MaterialIcons } from '@expo/vector-icons';
 import jwt_decode from 'jwt-decode';
 import AuthContext from 'app/auth/context';
 import authStorage from 'app/auth/authStorage';
 
-// Constant import
-import colors from 'app/config/colors';
-import typography from 'app/config/typography';
+// Configurations
 import errors from 'app/config/errors';
-import useApiHandler from 'app/hooks/useApiHandler';
+
+// Navigation
 import routes from 'app/navigation/routes';
 
-// Import from components
-import AppText from 'app/components/AppText';
-import AppButton from 'app/components/AppButton';
-import ErrorMessage from 'app/components/ErrorMessage';
+// Hooks
+import useApiHandler from 'app/hooks/useApiHandler';
 
-// Import Api
+// Utilities
+import { parseSelectOptions } from 'app/utility/miscFunctions'
+
+// APIs
 import userApi from 'app/api/user';
 
+// Components
+import AppButton from 'app/components/AppButton';
+import ErrorMessage from 'app/components/ErrorMessage';
+import LoadingWheel from 'app/components/LoadingWheel';
+import InputField from 'app/components/input-components/InputField';
+import SensitiveInputField from 'app/components/input-components/SensitiveInputField';
+import SelectionInputField from 'app/components/input-components/SelectionInputField';
+import colors from 'app/config/colors';
+
 function WelcomeScreen(props) {
-  /*
-   * All States To Be Placed Here
-   */
-  const authContext = useContext(AuthContext);
-  const [role, setRole] = useState('Supervisor');
-  const [show, setShow] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loginFailed, setLoginFailed] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const apiHandlerHook = useApiHandler();
-
-  /*
-   * All Api to be place here
-   */
-
-  /*
-   * Component Did Mount or useEffect() to be placed here
-   */
-
-  /*
-   * Deconstructor
-   * Note: Navigation is passed down as a prop from NativeStackNavigator
-   */
   const { navigation } = props;
+  const apiHandlerHook = useApiHandler();
+  
+  // User auth context
+  const authContext = useContext(AuthContext);
 
-  /*
-   * All Functions To Be Placed Here
-   */
+  // States for input field values
+  const [username, setUsername] = useState('');
+  const [userRole, setUserRole] = useState('Supervisor');
+  const [password, setPassword] = useState('');
+
+  // States related to API call
+  const [isLoading, setIsLoading] = useState(false);
+  const [isRetry, setIsRetry] = useState(false);
+  const [statusCode, setStatusCode] = useState(200);
+  const [isError, setIsError] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  // Screen error state: This = true when the child components report error(input fields)
+  // Enables use of dynamic rendering of components when the page error = true/false.
+  const [isInputErrors, setIsInputErrors] = useState(false);
+  
+  // Input error states (Child components)
+  // This records the error states of each child component (ones that require tracking).
+  const [isUsernameError, setIsUsernameError] = useState(false);
+  const [isPasswordError, setIsPasswordError] = useState(false);
+  
+  // This useEffect enables the page to show correct error checking.
+  // The main isInputErrors is responsible for the error state of the screen.
+  // This state will be true whenever any child input components are in error state.
+  useEffect(() => {
+    setIsInputErrors(
+      isUsernameError ||
+      isPasswordError
+    );
+  }, [
+      isUsernameError,
+      isPasswordError,
+  ]);
+  
+  // User roles for select field
+  const listOfUserRoles = parseSelectOptions(['Supervisor', 'Guardian', 'Doctor', 'Caregiver', 'Nurse']);
+  
+  // Start login process when user presses login button
   const onPressLogin = async () => {
-    // "Supervisor!23"
+    console.log('Starting login process...',username,userRole,password);
+    Keyboard.dismiss()
+    
     setIsLoading(true);
-    const result = await userApi.loginUser(email, role, password);
-    // userLoginApi.request(email, role, password);
-    // if returned array is empty or error
-    if (!result.ok) {
+    setIsError(false);    
+    
+    const result = await loginWithTimeout();
+
+    if(result && result.ok) {
+      console.log('User authenticated - storing tokens...');
+
+      // Store token refresh and access tokens returned by backend
+      const user = jwt_decode(result.data.data.accessToken);
+      await authStorage.storeToken('userAuthToken', result.data.data.accessToken);
+      await authStorage.storeToken(
+        'userRefreshToken',
+        result.data.data.refreshToken,
+      );
+  
+      // set api header if empty
+      console.log('Setting header...');
+      apiHandlerHook.setHeader();
+      console.log('Header updated...');
       setIsLoading(false);
-      return setLoginFailed(true);
+      setIsError(false);
+      setIsError(false);
+      setStatusCode(result.status);
+      setErrorMsg('');
+      console.log('Logging in!');
+      authContext.setUser(user);
+    } else if(result && !result.ok){
+      console.log('Error:', result);
+      setIsLoading(false);
+      setIsError(true);
+      setStatusCode(result.status);
+      setErrorMsg(errors.loginError);
+      return;
     }
-    setIsLoading(false);
-    setLoginFailed(false);
-    const user = jwt_decode(result.data.data.accessToken);
-    authContext.setUser(user);
-    authStorage.storeToken('userAuthToken', result.data.data.accessToken);
-    authStorage.storeToken('userRefreshToken', result.data.data.refreshToken);
-    // set api header if empty
-    apiHandlerHook.setHeaderIfEmpty();
   };
+  
+  // If user is not connected to NTU network, takes about 30 seconds for call to return
+  // Instead timeout in 5 seconds
+  const loginWithTimeout = async() => {
+    const timeoutPromise = new Promise((resolve, reject) => {
+      setTimeout(() => {
+        reject(new Error('Request timed out. Ensure you are connected to the NTU network.'));
+      }, 5000);
+    });
 
-  const handleEmail = (e) => {
-    setEmail(e);
-  };
+    const apiPromise = userApi.loginUser(username, userRole, password);
+    
+    try {
+      const result = await Promise.race([apiPromise, timeoutPromise]);
+      return result;
+    } catch (error) {
+      console.log('Error:', error.message);
+      setIsLoading(false);
+      setIsError(true);
+      setErrorMsg(error.message);
+    }
+  }
 
-  const handlePassword = (e) => {
-    setPassword(e);
-  };
+  const handleUsernameError = useCallback(
+    (state) => {
+      setIsUsernameError(state);
+    },
+    [isUsernameError],
+  );
+
+  const handlePasswordError = useCallback(
+    (state) => {
+      setIsPasswordError(state);
+    },
+    [isPasswordError],
+  );    
 
   return (
     <ImageBackground
       style={styles.background}
-      blurRadius={8}
+      blurRadius={9}
       source={require('../assets/login_background.jpg')}
     >
+      <View style={styles.vignette} />
+
       <TouchableWithoutFeedback
         onPress={() => {
-          // Prevent keyboard dismiss for desktop web only
           if (Platform.OS !== 'web' || navigator.userAgent.includes('Mobile')) {
             Keyboard.dismiss();
           }
         }}
       >
-        <View>
-          <View style={styles.logoContainer}>
-            <Image
-              source={require('../assets/pear_v2.png')}
-              style={styles.logo}
-            />
-            <AppText style={styles.tagLine}>PEAR</AppText>
-          </View>
-
-          <Center flex={1}>
-            <View
-              style={
-                Platform.OS === 'web'
-                  ? styles.credentialsContainerWeb
-                  : styles.credentialsContainer
-              }
-            >
-              <Input
-                autoCapitalize="none"
-                bg={colors.gray}
-                borderRadius="25"
-                color={colors.black}
-                _focus={{
-                  bg: `${colors.lighter}`,
-                  borderColor: `${colors.secondary}`,
-                }}
-                fontFamily={
-                  Platform.OS === 'ios' ? typography.ios : typography.android
-                }
-                height="50"
-                InputLeftElement={
-                  <Icon
-                    as={<MaterialIcons name="person" />}
-                    size={5}
-                    ml="5"
-                    color={colors.black}
+        <View testID={'loginContentContainer'} style={styles.overlay}>
+          <Center flex={1} style={styles.formContainer}>
+            <View style={styles.credentialsContainer}>
+              <View style={styles.logoContainer}>
+                <Image
+                  source={require('../assets/pear_v2.png')}
+                  style={styles.logo}
+                />
+                <Text style={styles.tagLine}>PEAR</Text>
+              </View>
+              <View style={styles.inputContainer}>
+                <InputField
+                  testID="username"
+                  autoCapitalize='none'
+                  isRequired
+                  showTitle={false}
+                  title="Username/Email"
+                  value={username}
+                  onChangeText={setUsername}
+                  onEndEditing={handleUsernameError}
+                  InputLeftElement={
+                    <Icon
+                      as={<MaterialIcons name="person" />}
+                      size={5}
+                      ml="5"
+                    />
+                  }
+                />
+              </View>
+              <View style={styles.inputContainer}>
+                <SelectionInputField
+                  isRequired
+                  showTitle={false}
+                  title="Select Role"
+                  inputLeftElement={
+                    <Icon
+                      as={<MaterialIcons name="settings" />}
+                      size={5}
+                      ml="5"
+                    />
+                  }
+                  placeholder="Supervisor"
+                  onDataChange={(e)=>setUserRole(listOfUserRoles[e-1].label)}
+                  dataArray={listOfUserRoles}
+                />
+              </View>
+              <View style={styles.inputContainer}>
+                <SensitiveInputField
+                  testID="password"
+                  isRequired
+                  showTitle={false}
+                  title="Password"
+                  value={password}
+                  onChangeText={setPassword}
+                  onEndEditing={handlePasswordError}
+                  InputLeftElement={
+                    <Icon
+                      as={<MaterialIcons name="lock" />}
+                      size={5}
+                      ml="5"
+                    />
+                  }
                   />
-                }
-                onChangeText={handleEmail}
-                placeholder="jess@gmail.com"
-                placeholderTextColor={colors.medium}
-                marginBottom="5"
-                size="18"
-                value={email}
-              />
-              <Select
-                accessibilityLabel="Select Role"
-                bg={colors.gray}
-                borderRadius="25"
-                color={colors.black}
-                fontFamily={
-                  Platform.OS === 'ios' ? typography.ios : typography.android
-                }
-                height="50"
-                minWidth="full"
-                minHeight="3%"
-                placeholder="Supervisor"
-                placeholderTextColor={colors.black}
-                onValueChange={(itemValue) => setRole(itemValue)}
-                selectedValue={role}
-                size="18"
-              >
-                <Select.Item label="Supervisor" value="Supervisor" />
-                <Select.Item label="Guardian" value="Guardian" />
-                <Select.Item label="Doctor" value="Doctor" />
-                <Select.Item label="Caregiver" value="Caregiver" />
-                <Select.Item label="Nurse" value="Nurse" />
-              </Select>
-              <Input
-                autoCapitalize="none"
-                bg={colors.gray}
-                borderRadius="25"
-                color={colors.black}
-                fontFamily={
-                  Platform.OS === 'ios' ? typography.ios : typography.android
-                }
-                _focus={{
-                  bg: `${colors.lighter}`,
-                  borderColor: `${colors.secondary}`,
-                }}
-                height="50"
-                InputRightElement={
-                  <Icon
-                    as={
-                      <MaterialIcons
-                        name={show ? 'visibility' : 'visibility-off'}
-                      />
-                    }
-                    color={colors.black}
-                    mr="5"
-                    onPress={() => setShow(!show)}
-                    size={5}
+                </View>
+              <View style={styles.buttonsContainer}>
+                {isLoading ? (
+                  <LoadingWheel />
+                  ) : (
+                    <AppButton
+                      title="Login"
+                      color="green"
+                      onPress={onPressLogin}
+                      testingID="Login"
+                      isDisabled={isInputErrors}                   
+                    />
+                  )}
+              </View>
+              <Box>
+                {isError ? (
+                <ErrorMessage
+                  message={errorMsg}
+                  testID={'loginError'}
                   />
-                }
-                onChangeText={handlePassword}
-                placeholder="Password"
-                placeholderTextColor={colors.medium}
-                marginTop="5"
-                size="18"
-                value={password}
-                type={show ? 'text' : 'password'}
-              />
-            </View>
-            <Box
-              style={Platform.OS === 'web' ? styles.errorsContainerWeb : null}
-            >
-              <ErrorMessage visible={loginFailed} message={errors.loginError} />
-            </Box>
-            <View
-              style={
-                Platform.OS === 'web'
-                  ? styles.buttonsContainerWeb
-                  : styles.buttonsContainer
-              }
-            >
-              {isLoading ? (
-                <ActivityIndicator color={colors.primary_overlay_color} />
-              ) : (
-                <AppButton title="Login" color="green" onPress={onPressLogin} />
-              )}
-            </View>
-            <View style={Platform.OS === 'web' ? { top: 130 } : ''}>
-              <Text
-                style={styles.underline}
-                onPress={() => navigation.navigate(routes.RESET_PASSWORD)}
-              >
-                Forgot Password?
-              </Text>
+                ) : null }
+              </Box>
+              <View>
+                <Text
+                  style={styles.forgotPassword}
+                  onPress={() => navigation.navigate(routes.RESET_PASSWORD)}
+                  >
+                  Forgot Password?
+                </Text>
+              </View>
             </View>
           </Center>
         </View>
@@ -243,27 +280,33 @@ function WelcomeScreen(props) {
 
 const styles = StyleSheet.create({
   background: {
-    flex: 1,
     alignItems: 'center',
+  },
+  vignette: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+  },
+  overlay: {
+    backgroundColor: colors.secondary_overlay_color
+  },
+  formContainer: {
+    paddingHorizontal: 75
   },
   buttonsContainer: {
     width: '100%',
-    padding: 20,
-  },
-  buttonsContainerWeb: {
-    top: 130,
-    width: '100%',
-    padding: 20,
+    paddingVertical: 8
   },
   credentialsContainer: {
-    width: '90%',
-  },
-  credentialsContainerWeb: {
-    top: 130,
-    width: '90%',
-  },
-  errorsContainerWeb: {
-    top: 130,
+    backgroundColor: colors.white,
+    width: '100%',
+    paddingHorizontal: 50,
+    paddingTop: 25,
+    paddingBottom: 90,
+    borderRadius: 25  
   },
   logo: {
     width: 100,
@@ -271,20 +314,26 @@ const styles = StyleSheet.create({
     tintColor: colors.black,
   },
   logoContainer: {
-    top: 100,
+    padding: 50,
     alignItems: 'center',
   },
   tagLine: {
     fontWeight: 'bold',
-    paddingVertical: 800,
-    fontSize: 80,
+    marginTop: 14,
+    fontSize: 40,
+    color: colors.black,
   },
-  underline: {
+  forgotPassword: {
     textDecorationLine: 'underline',
+    alignSelf: 'center',
+    marginTop: "3%"
   },
-  underlineWeb: {
-    top: 130,
-  },
+  inputContainer: {
+    display: 'flex',
+    width: '100%',
+    justifyContent: 'flex-start',
+    marginBottom: '3%'
+  }
 });
 
 export default WelcomeScreen;

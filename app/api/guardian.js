@@ -19,9 +19,11 @@ const guaridanDelete = `${endPoint}/delete`; //eslint-disable-line no-unused-var
 
 // params: patientID
 // purpose: retrieve's guardian tagged to the patient by patient's ID.
-const getPatientGuardian = (patientID) => {
+const getPatientGuardian = (patientID, maskNRIC = false) => {
+  // Error Handling
   const params = {
     patientID,
+    maskNRIC,
   };
   return client.get(guardianPatientGuardian, params);
 };
@@ -29,10 +31,16 @@ const getPatientGuardian = (patientID) => {
 // **********************  POST REQUESTS *************************
 
 // ************************* UPDATE REQUESTS *************************
+const updateGuardian = async (data) => {
+  const headers = { 'Content-Type': 'application/json-patch+json' };
+
+  return client.put(guardianUpdate, data, { headers });
+};
 
 /*
  * Expose your end points here
  */
 export default {
   getPatientGuardian,
+  updateGuardian,
 };

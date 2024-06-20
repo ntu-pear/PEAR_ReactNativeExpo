@@ -1,265 +1,242 @@
-import React from 'react';
-import { useState } from 'react';
-import { Platform, Alert, ActivityIndicator } from 'react-native';
+// Libs
+import React, { useState, useEffect, useCallback } from 'react';
+import { Platform, Alert, ActivityIndicator, TouchableOpacity, StyleSheet, View } from 'react-native';
 import {
   Image,
   VStack,
-  HStack,
   AspectRatio,
   Center,
-  ScrollView,
+  FlatList,
   Text,
-  Button,
   Box,
 } from 'native-base';
-import typography from 'app/config/typography';
-import colors from 'app/config/colors';
-import { TouchableOpacity } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+
+// APIs
 import userApi from 'app/api/user';
+
+// Configurations
 import routes from 'app/navigation/routes';
-import EditField from 'app/components/EditField';
-import ErrorMessage from 'app/components/ErrorMessage';
-import UserInformationCard from 'app/components/UserInformationCard';
-import * as Yup from 'yup';
-import { useLocation, useNavigate } from 'react-router-dom';
+import colors from 'app/config/colors';
+
+// Components
+import InformationCard from 'app/components/InformationCard';
+import AppButton from 'app/components/AppButton';
+import InputField from 'app/components/input-components/InputField';
 
 function AccountEditScreen(props) {
   const [isLoading, setIsLoading] = useState(false);
-  const { navigation, route } = props;
-  const { state } = Platform.OS === 'web' ? useLocation() : {};
-  const userProfile = Platform.OS === 'web' ? state.userProfile : route.params;
+  const { navigation, userData, unMaskedUserNRIC } = props.route.params;
+  const [profilePicture, setProfilePicture] = useState(props.route.params.profilePicture);
 
-  // useNavigate() hook cannot work on mobile
-  const navigate = Platform.OS === 'web' ? useNavigate() : null;
+  // Screen error state: This = true when the child components report error(input fields)
+  // Enables use of dynamic rendering of components when the page error = true/false.
+  const [isInputErrors, setIsInputErrors] = useState(false);
 
+  // Input error states (Child components)
+  // This records the error states of each child component (ones that require tracking).
+  const [isPrefNameError, setIsPrefNameError] = useState(false);
+  const [isMobileNoError, setIsMobileNoError] = useState(false);
+
+  // Account data to be submitted
   const [formData, setFormData] = useState({
-    preferredName: userProfile.preferredName,
-    contactNo: userProfile.contactNo,
+    PreferredName: props.route.params.preferredName,
+    ContactNo: props.route.params.contactNo,
   });
-  const [profilePicture, setProfilePicture] = useState(
-    userProfile.profilePicture,
+
+  // This useEffect enables the page to show correct error checking.
+  // The main isInputErrors is responsible for the error state of the screen.
+  // This state will be true whenever any child input components are in error state.  
+  useEffect(() => {
+    setIsInputErrors(
+      isPrefNameError ||
+      isMobileNoError,
+    );
+  }, [
+    isPrefNameError,
+    isMobileNoError,
+    isInputErrors,
+  ]);
+
+  // Functions for error state reporting for the child components
+  const handlePrefNameError = useCallback(
+    (state) => {
+      setIsPrefNameError(state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isPrefNameError],
   );
-  const [errors, setErrors] = useState({});
+  const handleMobileNoError = useCallback(
+    (state) => {
+      setIsMobileNoError(state);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isMobileNoError],
+  );
 
-  // set front end validation schema according to Validation Rules document on Confluence
-  const schema = Yup.object().shape({
-    preferredName: Yup.string().required('Preferred Name is a required field.'),
-    contactNo: Yup.string()
-      .matches(/^$|^[869][0-9]{7}$/, {
-        message:
-          'Contact No. must start with the digit 6, 8 or 9, and must have 8 digits.',
-      })
-      .required('Contact No. is a required field.'),
-  });
-
-  const handleFormData =
-    (input = null) =>
-    (e, date = null) => {
-      const newData = formData;
-      date ? (newData[input] = date) : (newData[input] = e);
-      setFormData(() => ({
-        preferredName: newData.preferredName,
-        contactNo: newData.contactNo,
-      }));
-    };
-
-  const validate = async () => {
-    try {
-      // Validate the form data against the schema and set errors when needed
-      await schema.validate(formData, { abortEarly: false });
-      return true;
-    } catch (error) {
-      if (error.inner) {
-        const errorList = {};
-        error.inner.forEach((e) => {
-          errorList[e.path] = e.message;
-        });
-        setErrors(errorList);
-        return false;
-      }
-    }
+  // Function to update patient data
+  const handleFormData = (field) => (e) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      [field]: e
+    }));
   };
 
-  const handleOnPressToSave = async () => {
-    // carry out front end validation first before calling api
-    const validation = await validate();
-    if (!validation) {
-      return;
-    }
-
+  // form submission when save button is pressed
+  const submitForm = async () => {
     setIsLoading(true);
-    const result = await userApi.updateUser(formData, profilePicture);
-    if (!result.ok) {
-      // set errors resulting from back end validation after calling api
-      setErrors({
-        api: result.data.message,
-      });
-      setIsLoading(false);
-      return;
-    }
+    const result = await userApi.updateUser(formData);
+    let alertTitle = '';
+    let alertDetails = '';
 
+    if (result.ok) {
+      navigation.goBack(routes.ACCOUNT_SCREEN, {
+        navigation: navigation,
+      });
+      alertTitle = 'Saved Successfully';
+    } else {
+      const errors = result.data?.message;
+
+      result.data
+        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
+        : (alertDetails = 'Please try again.');
+
+      alertTitle = 'Error in Editing Personal Information';
+      console.log("result error "+JSON.stringify(result));
+    }
+    Alert.alert(alertTitle, alertDetails);
+    console.log("formData "+JSON.stringify(formData));
     setIsLoading(false);
-
-    const alertTxt = 'Successfully updated.';
-    Platform.OS === 'web' ? alert(alertTxt) : Alert.alert(alertTxt);
-
-    // redirect user to account screen after successful update
-    if (Platform.OS === 'web') {
-      navigate('/' + routes.ACCOUNT_VIEW, {
-        state: { userProfile: userProfile },
-      });
-    } else {
-      navigation.pop();
-      navigation.navigate(routes.ACCOUNT_SCREEN);
-    }
   };
 
-  const goBack = () => {
-    if (Platform.OS === 'web') {
-      navigate('/' + routes.ACCOUNT_VIEW, {
-        state: { userProfile: userProfile },
-      });
-    } else {
-      navigation.goBack();
+  // Function to launch image picker and handle image picking.
+  // Reference: https://docs.expo.dev/versions/latest/sdk/imagepicker/
+  const pickImage = (input) => async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    if (!result.cancelled) {
+      const newImageUri = 'file:///' + result.uri.split('file:/').join('');
+
+      var newData = formData['patientInfo'];
+      newData[input] = {
+        uri: newImageUri,
+        name: newImageUri.split('/').pop(),
+        type: mime.getType(newImageUri),
+      };
+
+      setFormData((prevState) => ({
+        ...prevState,
+        ['patientInfo']: newData,
+      }));
     }
   };
+  
+  return isLoading ? (
+    <ActivityIndicator visible />
+  ) : (
+    <FlatList
+      data={[0]}
+      renderItem={() => (
+        <Box alignItems="center">
+          <Box w="100%">
+            <VStack>
+              <View style={styles.formContainer}>
+                <Center alignSelf="center">
+                  <TouchableOpacity
+                    onPress={handleOnPressToImagePicker}
+                  >
+                    <AspectRatio
+                      w='70%'
+                      ratio={1}
+                      mb="2"
+                    >
+                      <Image
+                        borderRadius="full"
+                        fallbackSource={{
+                          uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1634523641/User/Adeline_Tan_Sxxxx515G/ProfilePicture/ffo5oc4jhurmtjjhqcib.jpg',
+                        }}
+                        resizeMode="cover"
+                        source={{
+                          uri: profilePicture
+                            ? `${profilePicture}`
+                            : 'https://res.cloudinary.com/dbpearfyp/image/upload/v1634523641/User/Adeline_Tan_Sxxxx515G/ProfilePicture/ffo5oc4jhurmtjjhqcib.jpg',
+                        }}
+                        alt="user_image"
+                      />
+                    </AspectRatio>
+                    <Text style={styles.redText}> Click to edit profile picture</Text>
+                  </TouchableOpacity>
+                </Center>
 
-  const handleOnPressToImagePicker = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status === 'granted') {
-      let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 1,
-      });
+                <InputField
+                  isRequired
+                  title={'Preferred Name'}
+                  value={formData.PreferredName}
+                  onChangeText={handleFormData('PreferredName')}
+                  onEndEditing={handlePrefNameError}
+                  dataType="name"
+                />
 
-      if (!result.cancelled) {
-        setProfilePicture(result.uri);
-      } else {
-        return false;
-      }
-    } else {
-      const alertTxt = 'Please enable permissions to pick from image gallery.';
-      Platform.OS === 'web' ? alert(alertTxt) : Alert.alert(alertTxt);
-    }
-  };
+                <InputField
+                  isRequired
+                  title={'Contact No.'}
+                  value={formData.ContactNo}
+                  onChangeText={handleFormData('ContactNo')}
+                  onEndEditing={handleMobileNoError}
+                  dataType={'mobile phone'}
+                  keyboardType='numeric'                      
+                  maxLength={8}
+                />
 
-  return (
-    <ScrollView>
-      <VStack mt="4" ml="4" px={Platform.OS === 'web' ? '10%' : null}>
-        <Center>
-          <HStack>
-            <Center>
-              <TouchableOpacity
-                onPress={handleOnPressToImagePicker}
-                alignItems="center"
-              >
-                <AspectRatio
-                  w={Platform.OS === 'web' ? '140%' : '70%'}
-                  ratio={1}
-                  mb="2"
-                  alignSelf="center"
-                >
-                  <Image
-                    borderRadius="full"
-                    fallbackSource={{
-                      uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1634523641/User/Adeline_Tan_Sxxxx515G/ProfilePicture/ffo5oc4jhurmtjjhqcib.jpg',
-                    }}
-                    resizeMode="cover"
-                    source={{
-                      uri: profilePicture
-                        ? `${profilePicture}`
-                        : 'https://res.cloudinary.com/dbpearfyp/image/upload/v1634523641/User/Adeline_Tan_Sxxxx515G/ProfilePicture/ffo5oc4jhurmtjjhqcib.jpg',
-                    }}
-                    alt="user_image"
-                  />
-                </AspectRatio>
-                <Text alignSelf="center" color={colors.red}> Click to edit profile picture</Text>
-              </TouchableOpacity>
-            </Center>
-          </HStack>
-        </Center>
+                <InformationCard
+                  displayData={userData}
+                  unMaskedNRIC={unMaskedUserNRIC}
+                />
 
-        <EditField
-          isRequired
-          isInvalid={'preferredName' in errors}
-          title="Preferred Name"
-          placeholder={userProfile.preferredName}
-          onChangeText={handleFormData('preferredName')}
-          value={formData.preferredName}
-          ErrorMessage={errors.preferredName}
-        />
-
-        <EditField
-          isRequired
-          isInvalid={'contactNo' in errors}
-          title="Contact No."
-          placeholder={userProfile.contactNo}
-          onChangeText={handleFormData('contactNo')}
-          value={formData.contactNo}
-          ErrorMessage={errors.contactNo}
-        />
-
-        <UserInformationCard userProfile={props} />
-
-        <Text
-          mb="4"
-          color={colors.red}
-          fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
-        >
-          {' '}
-          Note: To edit other information, please contact system administrator.
-        </Text>
-
-        <Box>
-          <ErrorMessage visible={'api' in errors} message={errors.api} />
+                <Text style={styles.redText}>
+                  Note: To edit other information, please contact system administrator.
+                </Text>
+              </View>
+              <View style={styles.saveButtonContainer}>
+                <Box width='70%'>
+                  {isLoading ? 
+                  <AppButton title="Save" color="green" onPress={submitForm} isDisabled={true} /> :
+                  <AppButton title="Save" color="green" onPress={submitForm} isDisabled={isInputErrors} /> 
+                  }
+                </Box>
+              </View>
+            </VStack>
+          </Box>
         </Box>
-
-        {isLoading ? (
-          <ActivityIndicator color={colors.primary_overlay_color} />
-        ) : (
-          <HStack
-            w="100%"
-            space="0"
-            alignItems="center"
-            justifyContent="space-around"
-          >
-            <Button
-              onPress={() => handleOnPressToSave()}
-              w="25%"
-              size="md"
-              bg={colors.green}
-              _text={{
-                color: `${colors.white_var1}`,
-                fontFamily:
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android,
-                fontSize: 'sm',
-              }}
-            >
-              Save
-            </Button>
-
-            <Button
-              onPress={goBack}
-              w="25%"
-              size="md"
-              bg={colors.pink}
-              _text={{
-                color: `${colors.white_var1}`,
-                fontFamily:
-                  Platform.OS === 'ios' ? 'Helvetica' : typography.android,
-                fontSize: 'sm',
-              }}
-            >
-              Cancel
-            </Button>
-          </HStack>
-        )}
-      </VStack>
-    </ScrollView>
+      )}
+    />
   );
 }
+
+const styles = StyleSheet.create({
+  formContainer: {
+    flex: 1,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    paddingLeft: '10%',
+    width: '90%',
+    marginBottom: 20,
+  },
+  redText: {
+    marginBottom: 4,
+    alignSelf: "center",
+    color: colors.red,
+  },
+  saveButtonContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+});
 
 export default AccountEditScreen;

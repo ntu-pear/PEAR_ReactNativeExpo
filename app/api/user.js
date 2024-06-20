@@ -8,7 +8,8 @@ const endpoint = '/User';
 const userLogin = `${endpoint}/Login`;
 const userUpdate = `${endpoint}/Update`;
 const userDelete = `${endpoint}/delete`; //eslint-disable-line no-unused-vars
-const userRefreshToken = `${endpoint}/RefereshToken`; //eslint-disable-line no-unused-vars
+// const userRefreshToken = `${endpoint}/RefereshToken`; //eslint-disable-line no-unused-vars
+const userRefreshToken = `${endpoint}/RefreshToken`; //eslint-disable-line no-unused-vars
 const userLogout = `${endpoint}/Logout`; //eslint-disable-line no-unused-vars
 const userResetPassword = `${endpoint}/ResetPassword`;
 const userChangePassword = `${endpoint}/ChangePassword`;
@@ -20,9 +21,10 @@ const userChangePassword = `${endpoint}/ChangePassword`;
 
 // **********************  GET REQUESTS *************************
 
-const getUser = async (userID) => {
+const getUser = async (userID, maskNRIC = true) => {
   const params = {
     userID: userID,
+    maskNRIC,
   };
   return client.get(endpoint, params);
 };
@@ -50,28 +52,9 @@ const changePassword = (Email, OldPassword, NewPassword) => {
 };
 
 // ************************* UPDATE REQUESTS *************************
-const updateUser = async (data, profilePicture) => {
-  const formData = new FormData();
-
-  for (const key in data) {
-    var value = data[key];
-    formData.append(key, value);
-  }
-
-  const fileName = profilePicture.split('/').pop();
-  const fileType = fileName.split('.').pop();
-
-  formData.append('uploadProfilePicture', {
-    uri: profilePicture,
-    name: fileName,
-    type: `image/${fileType}`,
-  });
-
-  const headers = { 'Content-Type': 'multipart/form-data' };
-
-  // console.log('formData', formData);
-
-  return client.put(userUpdate, formData, { headers });
+const updateUser = async (data) => {
+  const headers = { 'Content-Type': 'application/json-patch+json' };
+  return client.put(userUpdate, data, { headers });
 };
 
 /*

@@ -1,12 +1,15 @@
 import React from 'react';
 import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
-import { Text, Box, VStack, HStack, Avatar } from 'native-base';
+import { Text, Box, VStack, HStack } from 'native-base';
 import colors from 'app/config/colors';
-import typography from 'app/config/typography';
 import routes from 'app/navigation/routes';
+import ProfileNameButton from 'app/components/ProfileNameButton';
+import { useNavigation } from '@react-navigation/native';
 
-function HighlightsCard({ item, navigation, setModalVisible }) {
+function HighlightsCard({ item, setModalVisible }) {
+  const navigation = useNavigation();
+
   const goToPatientProfile = () => {
     if (Platform.OS === 'web') {
       // TODO: close modal and navigate
@@ -103,18 +106,93 @@ function HighlightsCard({ item, navigation, setModalVisible }) {
     return icon;
   };
 
-  const list = () => {
-    return item.highlights.map((element) => {
-      return (
-        <View key={element.highlightID} style={styles.highlightsList}>
-          <HStack w="100%" space={2} alignItems="center">
-            {getIcon(element)}
-            <Text fontSize="13">{getDescription(element)}</Text>
-          </HStack>
-        </View>
-      );
-    });
+  const handleNavigation = (element) => {
+    switch (element.highlightTypeID) {
+      // new prescription
+      case 1:
+        console.log('1');
+        navigation.navigate(routes.PATIENT_PRESCRIPTION, {
+          patientID: item.patientInfo.patientId,
+        });
+        break;
+      case 2:
+        // new allergy
+        console.log('2');
+        console.log('item.patientInfo.patientId', item.patientInfo.patientId);
+        navigation.navigate(routes.PATIENT_ALLERGY, {
+          patientId: item.patientInfo.patientId,
+        });
+        break;
+      case 3:
+        // new patient activity exclusion
+        console.log('3');
+        navigation.navigate(routes.PATIENT_ROUTINE, {
+          patientID: item.patientInfo.patientId,
+        });
+        break;
+      case 4:
+        // new patients vital
+        console.log('4');
+        navigation.navigate(routes.PATIENT_VITAL, {
+          patientID: item.patientInfo.patientId,
+        });
+        break;
+      case 5:
+        // new problem log
+        console.log('5');
+        navigation.navigate(routes.PATIENT_PROBLEM_LOG, {
+          patientID: item.patientInfo.patientId,
+        });
+        break;
+      case 6:
+        // new medical record
+        console.log('6');
+        navigation.navigate(routes.PATIENT_MEDICAL_HISTORY, {
+          patientID: item.patientInfo.patientId,
+        });
+        break;
+    }
   };
+  const list = () => {
+    return item.highlights.map((element) => (
+      <View key={element.highlightID} style={styles.highlightsList}>
+        <HStack w="100%" space={2} alignItems="center">
+          {getIcon(element)}
+          <TouchableOpacity onPress={() => handleNavigation(element)}>
+            {/* Show description with count if more than 1 */}
+            <Text fontSize="13">
+              {getDescription(element)}
+              {element.count > 1 ? ` (x${element.count})` : ''}
+            </Text>
+          </TouchableOpacity>
+        </HStack>
+      </View>
+    ));
+  };
+
+  // const list = () => {
+  //   return item.highlights.map((element) => {
+  //     return (
+  //       <View key={element.highlightID} style={styles.highlightsList}>
+  //         <HStack w="100%" space={2} alignItems="center">
+  //           {getIcon(element)}
+  //           {element.highlightTypeID === 1 ||
+  //           element.highlightTypeID === 2 ||
+  //           element.highlightTypeID === 3 ||
+  //           element.highlightTypeID === 4 ||
+  //           element.highlightTypeID === 5 ||
+  //           element.highlightTypeID === 6 ? (
+  //             <TouchableOpacity onPress={() => handleNavigation(element)}>
+  //               <Text fontSize="13">{getDescription(element)}</Text>
+  //             </TouchableOpacity>
+  //           ) : (
+  //             <Text fontSize="13">{getDescription(element)}</Text>
+  //           )}
+  //         </HStack>
+  //       </View>
+  //     );
+  //   });
+  // };
 
   return (
     <TouchableOpacity testID="highlightsCard" onPress={goToPatientProfile}>
@@ -127,35 +205,13 @@ function HighlightsCard({ item, navigation, setModalVisible }) {
         mt="3"
       >
         <HStack w="100%" space={3} flexWrap="wrap" mb="1">
-          <VStack w="28%" space={1} alignItems="center" justifyContent="center">
-            <Avatar
-              size="lg"
-              bg={colors.pink}
-              source={
-                item.patientInfo.patientPhoto
-                  ? {
-                      uri: `${item.patientInfo.patientPhoto}`,
-                    }
-                  : null
-              }
-            >
-              {' '}
-              {item &&
-              item.patientInfo.patientName &&
-              item.patientInfo.patientName.substring(0, 1)
-                ? item.patientInfo.patientName.substring(0, 1)
-                : '--'}{' '}
-            </Avatar>
-
-            <Text
-              bold
-              color={colors.black_var1}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-            >
-              {item.patientInfo.patientName}
-            </Text>
+          <VStack w="28%">
+            {/* --- Replace Avatar and Text component with ProfileNameButton --- Justin */}
+            <ProfileNameButton
+              profilePicture={item.patientInfo.patientPhoto}
+              profileLineOne={item.patientInfo.patientName}
+              handleOnPress={goToPatientProfile}
+            />
           </VStack>
           <VStack w="68%" space={2}>
             {list()}

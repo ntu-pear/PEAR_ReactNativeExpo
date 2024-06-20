@@ -34,7 +34,7 @@ function BottomTabWithCustomizedButtons({
             _text={{
               color: `${colors.white_var1}`,
               fontFamily:
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android,
+                Platform.OS === 'ios' ? typography.ios : typography.android,
               fontSize: 'sm',
             }}
           >
@@ -50,7 +50,7 @@ function BottomTabWithCustomizedButtons({
             _text={{
               color: `${colors.white_var1}`,
               fontFamily:
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android,
+                Platform.OS === 'ios' ? typography.ios : typography.android,
               fontSize: 'sm',
             }}
           >

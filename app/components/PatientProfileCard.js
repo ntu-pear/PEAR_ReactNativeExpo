@@ -8,22 +8,19 @@ import {
 } from 'react-native';
 import { Box, Text } from 'native-base';
 import colors from 'app/config/colors';
-import { useNavigate } from 'react-router-dom';
+import { useNavigation } from '@react-navigation/native';
 
 function PatientProfileCard(props) {
-  const { vectorIconComponent, text, navigation, routes, patientProfile } =
+  const { vectorIconComponent, text, routes, patientProfile, patientId } =
     props;
 
-  // useNavigate() hook cannot work on mobile
-  const navigate = Platform.OS === 'web' ? useNavigate() : null;
+  const navigation = useNavigation();
 
   const handleOnPressToNextScreen = () => {
-    if (Platform.OS === 'web') {
-      console.log('route to: ' + '/' + routes);
-      navigate('/' + routes, { state: { ...patientProfile }});
-    } else {
-      navigation.push(routes, { ...patientProfile });
-    }
+    navigation.navigate(routes, {
+      patientId: patientId,
+      ...patientProfile,
+    });
   };
 
   const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -32,46 +29,34 @@ function PatientProfileCard(props) {
     <TouchableOpacity
       onPress={handleOnPressToNextScreen}
       testID="patientProfileCard"
+      style={styles.container}
+      
     >
-      <Box
-        alignItems="center"
-        rounded="lg"
-        w={Platform.OS === 'web' ? '110' : '100%'}
-        h={Platform.OS === 'web' ? '90' : '100%'}
-      >
-        <Box
-          alignItems="center"
-          justifyContent="center"
-          rounded="xl"
-          w={Platform.OS === 'web' ? '100%' : '50%'}
-          h={Platform.OS === 'web' ? '100%' : '60%'}
-          borderWidth="1"
-          // borderColor={colors.primary_gray}
-          borderColor={colors.pink}
+        
+        {vectorIconComponent}
+        <Text
+          fontSize={SCREEN_HEIGHT * 0.013}
+          mt={SCREEN_HEIGHT * 0.01}
+          color={colors.black_var1}
+          textAlign="center"
+          flexWrap="wrap"
         >
-          {vectorIconComponent}
-        </Box>
-        <View style={styles.container}>
-          <Text
-            fontSize={SCREEN_HEIGHT * 0.013}
-            mt={SCREEN_HEIGHT * 0.01}
-            color={colors.black_var1}
-            textAlign="center"
-            lineHeight="xs"
-            flex="1"
-            flexWrap="wrap"
-          >
-            {text}
-          </Text>
-        </View>
-      </Box>
+          {text}
+        </Text>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderColor: colors.pink,
+    borderWidth: 1,
+    borderRadius: 12,
+    flex: 1,
+    margin:'3%',
+    aspectRatio: 1.1,
   },
 });
 

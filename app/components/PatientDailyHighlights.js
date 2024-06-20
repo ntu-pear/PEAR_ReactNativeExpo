@@ -1,18 +1,27 @@
+// Base
 import React, { useState, useEffect } from 'react';
-import { Modal, StyleSheet, Text, Pressable, View } from 'react-native';
-import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
-import { SearchBar } from 'react-native-elements';
-import DropDownPicker from 'react-native-dropdown-picker';
-import { FlatList } from 'native-base';
+import { Modal, StyleSheet, Text, Pressable, View, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
+import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import HighlightsCard from 'app/components/HighlightsCard';
+import { FlatList, Icon } from 'native-base';
+
+// APIs
 import highlightApi from 'app/api/highlight';
+
+// Configs
 import colors from 'app/config/colors';
 import { Platform } from 'react-native';
 
-function PatientDailyHighlights(props) {
-  // Destructure props
-  const { modalVisible, setModalVisible } = props;
+// Components
+import MessageDisplayCard from 'app/components/MessageDisplayCard';
+import SelectionInputField from 'app/components/input-components/SelectionInputField';
+import HighlightsCard from 'app/components/HighlightsCard';
+import SearchBar from './input-components/SearchBar';
+
+function PatientDailyHighlights() {
+  // State controlling whether modal is visible or not
+  const [modalVisible, setModalVisible] = useState(true);
+
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [statusCode, setStatusCode] = useState();
@@ -20,87 +29,39 @@ function PatientDailyHighlights(props) {
   // highlightsData is all data pulled from backend, filteredData is data displayed
   const [highlightsData, setHighlightsData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
+  const [isRetry, setIsRetry] = useState(false);
 
   // searchValue for SearchBar, filterValue for DropDownPicker
   const [searchValue, setSearchValue] = useState('');
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [filterValue, setFilterValue] = useState([]);
   const [dropdownItems, setDropdownItems] = useState([
     {
+      label: 'All',
+      value: [],
+    },
+    {
       label: 'New Prescription',
       value: 'newPrescription',
-      icon: () => (
-        <FontAwesome5
-          name="pills"
-          size={Platform.OS === 'web' ? 26 : 16}
-          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
-          color={colors.black_var1}
-        />
-      ),
-      testID: 'newPrescriptionDropdownItem',
     },
     {
       label: 'New Allergy',
       value: 'newAllergy',
-      icon: () => (
-        <MaterialCommunityIcons
-          name="allergy"
-          size={Platform.OS === 'web' ? 26 : 18}
-          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
-          color={colors.black_var1}
-        />
-      ),
-      testID: 'newAllergyDropdownItem',
     },
     {
       label: 'New Activity Exclusion',
       value: 'newActivityExclusion',
-      icon: () => (
-        <FontAwesome5
-          name="ban"
-          size={Platform.OS === 'web' ? 26 : 18}
-          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
-          color={colors.black_var1}
-        />
-      ),
     },
     {
       label: 'Abnormal Vital',
       value: 'abnormalVital',
-      icon: () => (
-        <MaterialCommunityIcons
-          name="heart-pulse"
-          size={Platform.OS === 'web' ? 26 : 18}
-          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
-          color={colors.black_var1}
-        />
-      ),
-      testID: 'abnormalVitalDropdownItem',
     },
     {
       label: 'Problem',
       value: 'problem',
-      icon: () => (
-        <FontAwesome5
-          name="exclamation-triangle"
-          size={Platform.OS === 'web' ? 26 : 18}
-          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
-          color={colors.black_var1}
-        />
-      ),
-      testID: 'problemDropdownItem',
     },
     {
       label: 'New Medical Records',
       value: 'medicalHistory',
-      icon: () => (
-        <MaterialCommunityIcons
-          name="clipboard-text"
-          size={Platform.OS === 'web' ? 26 : 18}
-          style={{ paddingHorizontal: Platform.OS === 'web' ? 10 : null }}
-          color={colors.black_var1}
-        />
-      ),
     },
   ]);
 
@@ -118,6 +79,14 @@ function PatientDailyHighlights(props) {
     }, []),
   );
 
+  useEffect(() => {
+    if (isRetry) {
+      getAllHighlights();
+      setSearchValue('');
+      setFilterValue([]);
+    }
+  }, [isRetry]);
+
   const getAllHighlights = async () => {
     setIsLoading(true);
     setIsError(false);
@@ -126,13 +95,19 @@ function PatientDailyHighlights(props) {
       // console.log('Request failed with status code: ', response.status);
       setIsLoading(false);
       setIsError(true);
+      setIsRetry(true);
       setStatusCode(response.status);
       return;
+    } else {
+      const aggregatedData = aggregateHighlightsByType(response.data.data);
+      setHighlightsData(aggregatedData);
+      setFilteredData(aggregatedData);
+      setIsLoading(false);
+      setStatusCode(response.status);
+      setIsError(false);
+      setIsRetry(false);
     }
-    setIsLoading(false);
-    setStatusCode(response.status);
-    setHighlightsData(response.data.data);
-    setIsError(false);
+
     // console.log('Request successful with response: ', response);
   };
 
@@ -140,6 +115,7 @@ function PatientDailyHighlights(props) {
   useEffect(() => {
     // Search by searchValue
     // .toLowerCase() ensures that the search is not case sensitive
+    // console.log(filterValue);
     const dataAfterSearch = highlightsData.filter((item) =>
       item.patientInfo.patientName
         .toLowerCase()
@@ -170,161 +146,141 @@ function PatientDailyHighlights(props) {
     return;
   };
 
+  const aggregateHighlightsByType = (highlights) => {
+    const aggregatedHighlights = [];
+
+    highlights.forEach((highlight) => {
+      const { highlights } = highlight; // Assuming this is an array of highlight objects
+      const aggregated = {};
+
+      highlights.forEach((h) => {
+        if (!aggregated[h.highlightType]) {
+          aggregated[h.highlightType] = { ...h, count: 1 }; // Copy the highlight and add a count
+        } else {
+          aggregated[h.highlightType].count += 1; // Increment the count
+        }
+      });
+
+      aggregatedHighlights.push({
+        ...highlight,
+        highlights: Object.values(aggregated), // Replace with aggregated highlights
+      });
+    });
+
+    return aggregatedHighlights;
+  };
+
   const noDataMessage = () => {
     if (isLoading) {
       return <></>;
     }
 
     // Display error message if API request fails
+    let message = '';
     if (isError) {
-      if (statusCode == 401) {
-        return (
-          <Text style={[styles.modalText, styles.modalErrorText]}>
-            Error: User is not authenticated.
-          </Text>
-        );
+      if (statusCode === 401) {
+        message = 'Error: User not Authenticated';
       } else if (statusCode >= 500) {
-        return (
-          <Text style={[styles.modalText, styles.modalErrorText]}>
-            Error: Server is down. Please try again later.
-          </Text>
-        );
+        message = 'Server is down. Please try again later.';
+      } else {
+        message = `${statusCode} error has occured`;
       }
-      return (
-        <Text style={[styles.modalText, styles.modalErrorText]}>
-          {statusCode} error has occurred.
-        </Text>
-      );
     }
-
     // Display message when there are no new highlights
     return (
-      <Text style={styles.modalText}>No patient changes found today.</Text>
+      <MessageDisplayCard
+        accessibilityLabel="Text"
+        TextMessage={isError ? message : 'Nothing to highlight today'}
+        topPaddingSize={'32%'}
+      />
     );
   };
 
   return (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={modalVisible}
-      onRequestClose={() => {
-        setModalVisible(!modalVisible);
-      }}
-      testID="highlightsModal"
-    >
-      <View style={styles.centeredView}>
-        <View style={styles.modalView}>
-          <Text style={styles.modalHeaderText}>Patients Daily Highlights</Text>
-          <Pressable
-            style={styles.buttonClose}
-            onPress={() => setModalVisible(!modalVisible)}
-            testID="highlightsCloseButton"
-          >
-            <MaterialCommunityIcons
-              name="close"
-              size={Platform.OS === 'web' ? 42 : 20}
+    <>
+      <TouchableOpacity
+        onPress={() => setModalVisible(!modalVisible)}
+        testID={'highlightsButton'}
+        style={{flexDirection: 'row'}}
+      >
+        <Icon 
+          as={
+            <MaterialIcons 
+            name="announcement" 
             />
-          </Pressable>
-          <View style={styles.searchBarDropDownView}>
-            <View style={styles.searchBarView}>
-              <SearchBar
-                placeholder="Search"
-                lightTheme={true}
-                // round={true}
-                value={searchValue}
-                onChangeText={setSearchValue}
-                autoCorrect={false}
-                containerStyle={styles.searchBarContainer}
-                inputContainerStyle={{
-                  backgroundColor: colors.white,
-                  borderRadius: 10,
-                }}
-                inputStyle={{ fontSize: Platform.OS === 'web' ? 18 : 14 }}
-                style={styles.searchBar}
-              />
-            </View>
-            <View style={styles.dropDownView}>
-              <DropDownPicker
-                open={dropdownOpen}
-                value={filterValue}
-                items={dropdownItems}
-                setOpen={setDropdownOpen}
-                setValue={setFilterValue}
-                // onChangeValue={setFilterValue}
-                onPress={setDropdownOpen}
-                setItems={setDropdownItems}
-                mode="BADGE"
-                // listMode="SCROLLVIEW"
-                theme="LIGHT"
-                multiple={true}
-                // TODO: badgeDotColors not avaliable in web
-                badgeDotColors={[
-                  colors.pink,
-                  colors.pink_lighter,
-                  colors.red,
-                  colors.green,
-                  colors.pink,
-                  colors.green_lighter,
-                ]}
-                style={
-                  Platform.OS === 'web' ? styles.dropDownWeb : styles.dropDown
-                }
-                itemSeparator={true}
-                itemSeparatorStyle={{
-                  backgroundColor: colors.primary_gray,
-                }}
-                dropDownContainerStyle={{
-                  backgroundColor: colors.white,
-                  minHeight: 250,
-                }}
-                listItemLabelStyle={{
-                  fontSize: Platform.OS === 'web' ? 18 : 12,
-                }}
-                textStyle={{
-                  fontSize: Platform.OS === 'web' ? 18 : null,
-                }}
-                listItemContainerStyle={
-                  Platform.OS === 'web'
-                    ? {
-                        display: 'flex',
-                        flexDirection: 'row',
-                        marginVertical: 3,
-                        paddingVertical: 5,
-                        fontSize: 18,
-                      }
-                    : {}
-                }
-                selectedItemContainerStyle={{
-                  backgroundColor: colors.primary_gray,
-                }}
-                placeholderStyle={{
-                  color: colors.primary_overlay_color,
-                }}
-                testID="dropdownPicker"
-              />
-            </View>
+          } 
+          size={10}
+          color={colors.light_gray}
+        >
+        </Icon>
+        {highlightsData.length > 0 ? (          
+          <View style={styles.iconNumber}>
+            <Text style={{color: colors.white_var1, fontSize: 11, fontWeight: '700'}}>{highlightsData.length}</Text>
           </View>
-          <FlatList
-            w="100%"
-            showsVerticalScrollIndicator={true}
-            data={filteredData}
-            keyExtractor={(item) => item.patientInfo.patientId}
-            onRefresh={handlePullToRefresh}
-            refreshing={isLoading}
-            ListEmptyComponent={noDataMessage}
-            renderItem={({ item }) => (
-              <HighlightsCard
-                item={item}
-                navigation={navigation}
-                setModalVisible={setModalVisible}
-              />
-            )}
-            testID="flatList"
-          />
-        </View>
-      </View>
-    </Modal>
+        ) : null}
+      </TouchableOpacity>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+        testID="highlightsModal"
+      >
+        <TouchableOpacity style={styles.centeredView} activeOpacity={1} onPressOut={() => {setModalVisible(!modalVisible)}} >
+          <TouchableWithoutFeedback>
+            <View style={styles.modalView}>
+              <Text style={styles.modalHeaderText}>Patients Daily Highlights</Text>
+              <Pressable
+                style={styles.buttonClose}
+                onPress={() => setModalVisible(!modalVisible)}
+                testID="highlightsCloseButton"
+                >
+                <MaterialCommunityIcons
+                  name="close"
+                  size={Platform.OS === 'web' ? 42 : 20}
+                  />
+              </Pressable>
+              <View style={styles.searchBarDropDownView}>
+                <View style={styles.flex}>
+                  <SearchBar
+                    value={searchValue}
+                    onChangeText={setSearchValue}
+                  />
+                </View>
+                <View style={styles.flex}>
+                  <SelectionInputField
+                    showTitle={false}
+                    value={filterValue}
+                    dataArray={dropdownItems}
+                    onDataChange={setFilterValue}
+                    placeholder={'Select Filter'}
+                  />
+                </View>
+              </View>
+              <FlatList
+                w="100%"
+                showsVerticalScrollIndicator={true}
+                data={filteredData}
+                keyExtractor={(item) => item.patientInfo.patientId}
+                onRefresh={handlePullToRefresh}
+                refreshing={isLoading}
+                ListEmptyComponent={noDataMessage}
+                renderItem={({ item }) => (
+                  <HighlightsCard
+                    item={item}
+                    navigation={navigation}
+                    setModalVisible={setModalVisible}
+                  />
+                  )}
+                  testID="flatList"
+                  />
+            </View>
+          </TouchableWithoutFeedback>
+        </TouchableOpacity>
+      </Modal>
+    </>
   );
 }
 
@@ -358,10 +314,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   modalHeaderText: {
-    fontWeight: 'bold',
     marginBottom: 15,
+    marginTop: 10,
     textAlign: 'center',
     fontSize: Platform.OS === 'web' ? 18 : null,
+    fontSize: 25,
   },
   modalText: {
     marginTop: Platform.OS === 'web' ? 24 : 15,
@@ -376,38 +333,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     width: '100%',
     zIndex: 1,
+    justifyContent: 'space-between',
   },
-  searchBarView: {
-    flex: 1,
-  },
-  searchBarContainer: {
-    backgroundColor: 'white',
-    borderBottomColor: 'transparent',
-    borderTopColor: 'transparent',
-  },
-  searchBar: {
-    width: '50%',
-    justifyContent: 'flex-start',
-  },
-  dropDownView: {
-    flex: 1,
-    zIndex: 1,
-  },
-  dropDown: {
-    justifyContent: 'flex-end',
-    marginTop: 7,
-  },
-  dropDownWeb: {
-    justifyContent: 'flex-end',
-    marginTop: 10,
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 10,
-    borderColor: colors.primary_overlay_color,
-    display: 'flex',
-    flexDirection: 'row',
-    width: '95%',
-  },
+  flex: {
+    flex: 0.49,
+  }, 
+  iconNumber: {
+    borderRadius: 27, 
+    height: 27, 
+    width: 27, 
+    backgroundColor: colors.red, 
+    borderColor: colors.white_var1, 
+    borderWidth: 3, 
+    position: 'absolute',
+    top: -11,
+    right: -12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
 });
 
 export default PatientDailyHighlights;

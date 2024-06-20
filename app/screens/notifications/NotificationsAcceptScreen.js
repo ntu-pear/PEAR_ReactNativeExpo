@@ -14,6 +14,8 @@ import useNotifications from 'app/screens/notifications/useNotifications';
 import NotificationSortSelector from 'app/screens/notifications/NotificationsSortSelector';
 import { useFocusEffect } from '@react-navigation/native';
 import { useNotificationContext } from 'app/screens/notifications/NotificationContext';
+import globalStyles from 'app/utility/styles.js';
+import { View } from 'react-native';
 
 function NotificationsAcceptScreen(props) {
   const { notificationType } = props.route.params;
@@ -78,7 +80,7 @@ function NotificationsAcceptScreen(props) {
   };
 
   return (
-    <>
+    <View style={globalStyles.mainContentContainer}>
       {isLoading ? (
         <ActivityIndicator visible={true} />
       ) : (
@@ -113,7 +115,7 @@ function NotificationsAcceptScreen(props) {
           </VStack>
         </VStack>
       )}
-    </>
+    </View>
   );
 }
 

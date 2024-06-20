@@ -1,7 +1,8 @@
 import React from 'react';
 import { Box, Icon, Text, HStack, VStack } from 'native-base';
 import colors from 'app/config/colors';
-import { TouchableOpacity, Platform } from 'react-native';
+import { TouchableOpacity, Platform, StyleSheet } from 'react-native';
+// import { background } from 'native-base/lib/typescript/theme/styled-system';
 
 function AccountCard(props) {
   const { vectorIconComponent, text, navigation, routes } = props;
@@ -16,34 +17,18 @@ function AccountCard(props) {
 
   return (
     <TouchableOpacity onPress={handleOnPressToNextScreen}>
-      <VStack w="100%" alignItems="center">
-        <Box
-          rounded="lg"
-          borderWidth={Platform.OS === 'web' ? null : '1'}
-          borderColor={colors.primary_gray}
-          minW="100%"
-          minH={Platform.OS === 'web' ? null : '20'}
-        >
-          <VStack w="100%" space={4} flexWrap="wrap" mb="1">
-            <HStack space={5} alignItems="center">
+      <VStack style={styles.VStackOuter}>
+        <Box style={styles.CardBoxContainer}>
+          <VStack style={styles.VStackInner}>
+            <HStack style={styles.HStackWrapper}>
               <Icon
-                // Reference: Passing component to child
-                // https://stackoverflow.com/questions/39652686/pass-react-component-as-props
                 as={{ ...vectorIconComponent }}
                 top="3"
                 left="2"
                 color={colors.black_var1}
                 size="50"
               />
-              <Text
-                alignSelf="flex-start"
-                fontSize="lg"
-                mt={Platform.OS === 'web' ? '2' : '6'}
-                ml="1"
-                color={colors.black_var1}
-              >
-                {text}
-              </Text>
+              <Text style={styles.TextContent}>{text}</Text>
             </HStack>
           </VStack>
         </Box>
@@ -51,5 +36,37 @@ function AccountCard(props) {
     </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  CardBoxContainer: {
+    borderRadius: 10,
+    borderWidth: Platform.OS === 'web' ? null : 1,
+    borderColor: colors.primary_gray,
+    minWidth: '100%',
+    minHeight: Platform.OS === 'web' ? null : 20,
+  },
+  VStackOuter: {
+    width: '100%',
+    alignItems: 'center',
+    paddingVertical: 5,
+  },
+  VStackInner: {
+    width: '100%',
+    space: 4,
+    flexWrap: 'wrap',
+    marginBottom: 25,
+  },
+  TextContent: {
+    alignSelf: 'flex-start',
+    fontSize: 19,
+    marginTop: Platform.OS === 'web' ? 2 : 28,
+    marginLeft: 19,
+    color: colors.black_var1,
+  },
+  HStackWrapper: {
+    space: 5,
+    alignItems: 'center',
+  },
+});
 
 export default AccountCard;

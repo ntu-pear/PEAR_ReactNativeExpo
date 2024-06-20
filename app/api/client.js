@@ -1,14 +1,10 @@
 import { create } from 'apisauce';
 import authStorage from 'app/auth/authStorage';
 import cache from 'app/utility/cache';
-import { Platform } from 'react-native';
 
-const baseURL = 'https://coremvc.fyp2017.com/api';
-// for CORS error
-// API for local BE
-// const baseURLWeb = 'http://localhost:5383/api';
-// API for BE staging stage
-const baseURLWeb = 'https://ntu-fyp-pear-core.azurewebsites.net/api';
+const baseURL = 'http://172.21.148.180:5678/api'; // new NTU server
+// const baseURL = 'https://coremvc.fyp2017.com/api'; // old server
+
 const endpoint = '/User';
 const userRefreshToken = `${endpoint}/RefreshToken`;
 /*
@@ -16,7 +12,6 @@ const userRefreshToken = `${endpoint}/RefreshToken`;
  */
 const apiClient = create({
   // for local/ staging BE
-  // baseURL: Platform.OS === 'web' ? baseURLWeb : baseURL,
   baseURL,
 });
 // Method override on apiClient.get()
@@ -59,44 +54,59 @@ setHeader();
 // existing token with the refreshed token
 // TODO: FIX RefreshToken Issue [https://trello.com/c/LiDqXESB/163-fix-refreshtoken-issue]
 apiClient.addAsyncResponseTransform(async (response) => {
-  // const navigation = useNavigation();
+  // console.log('addAsyncResponseTransform');
   if (
     response &&
     response.status &&
     (response.status === 401 || response.status === 403)
   ) {
-    const accessToken = await authStorage.getToken('userAuthToken');
-    const refreshToken = await authStorage.getToken('userRefreshToken');
+    // if access token is invalid, begin renewal.
+    console.log('client.js: Renewing user tokens');
+    const unformattedUserAccessToken = await authStorage.getToken(
+      'userAuthToken',
+    );
+    const unformattedUserRefreshToken = await authStorage.getToken(
+      'userRefreshToken',
+    );
+
+    if(unformattedUserAccessToken == null && unformattedUserRefreshToken == null) {
+      return;
+    }
+
+    const accessToken = unformattedUserAccessToken.replace(/['"]+/g, '');
+    const refreshToken = unformattedUserRefreshToken.replace(/['"]+/g, '');
+    let bearerToken = accessToken;
     const body = JSON.stringify({ accessToken, refreshToken });
     const data = await apiClient.post(`${baseURL}${userRefreshToken}`, body);
-    // const res = JSON.stringify(tmp)
-    if (!data.ok || !data.data.success) {
-      // if refreshToken invalid, remove token
-      // await authStorage.removeToken();
-      // console.log("HELLO IM HERE")
-      // // TODO: Implement logout() here.
-      // navigation.navigate(routes.WELCOME);
-
-      if (data.data.title) {
+    // if token refresh is unsuccessful
+    if (!data.ok || !data.data.data.success) {
+      console.log('client.js: !data.ok || !data.data.data.success');
+      console.log(data);
+      if (data.data.message) {
         // TODO: include alert component
-        // return Promise.reject(data.data.title);
-        // console.log(data.data.title);
+        console.log('Error: ', data.data.error);
       }
-      // return Promise.reject(data.data.error);
-      // TODO: include alert component
-      // console.log(data.data.error);
       return Promise.resolve();
     }
-    const bearerToken = data.data.data.accessToken;
-    apiClient.setHeaders({
-      Authorization: `Bearer ${bearerToken}`,
-    });
-    // remove existing token
-    await authStorage.removeToken();
-    authStorage.storeToken('userAuthToken', data.data.data.accessToken);
-    authStorage.storeToken('userRefreshToken', data.data.data.refreshToken);
+    // if token refresh is successful and store the renewed tokens.
+    if (data.data.data.accessToken && data.data.data.refreshToken) {
+      await authStorage.storeToken('userAuthToken', data.data.data.accessToken);
+      await authStorage.storeToken(
+        'userRefreshToken',
+        data.data.data.refreshToken,
+      );
+      // set the new bearer token
+      bearerToken = data.data.data.accessToken;
+      apiClient.setHeaders({
+        Authorization: `Bearer ${bearerToken}`,
+      });
+      console.log('Token renewed');
+      console.log('New access token: ', data.data.data.accessToken);
+      console.log('New refresh token: ', data.data.data.refreshToken);
+    }
+    // retry API call
     if (response && response.config) {
-      // replace response.config.header's Authorization with the new Bearer token
+      // Replace response.config.header's Authorization with the new Bearer token
       response.config.headers
         ? (response.config.headers.Authorization = `Bearer ${bearerToken}`)
         : null;
@@ -104,9 +114,8 @@ apiClient.addAsyncResponseTransform(async (response) => {
       const res = await apiClient.any(response.config);
       // replace data
       response.data = res.data;
-    } else {
-      return Promise.resolve();
     }
+    return Promise.resolve();
   }
 });
 

@@ -1,8 +1,10 @@
+// Base
 import React from 'react';
+import { View } from 'native-base';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import colors from 'app/config/colors';
-// Import Constants
+// Navigations
 import routes from 'app/navigation/routes';
 import DashboardNavigator from 'app/navigation/DashboardNavigator';
 import PatientsNavigator from 'app/navigation/PatientsNavigator';
@@ -10,6 +12,7 @@ import ConfigNavigator from 'app/navigation/ConfigNavigator';
 import AccountNavigator from 'app/navigation/AccountNavigator';
 import NotificationNavigator from 'app/navigation/NotificationNavigator';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
+import useInactivityLogout from 'app/hooks/useInactivityLogout';
 
 // Refer to this doc: https://reactnavigation.org/docs/tab-based-navigation
 const Tab = createBottomTabNavigator();
@@ -34,83 +37,95 @@ function hideBottomTabOnSpecificRoute(route) {
 
 // Refer to this for configuration: https://reactnavigation.org/docs/bottom-tab-navigator
 function AppNavigator() {
+  const { panResponder } = useInactivityLogout();
   return (
-    <Tab.Navigator
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: colors.pink,
-        // tabBarInactiveTintColor: colors.black_var1,
-      }}
+    <View
+      {...panResponder.panHandlers}
+      style={{ height: '100%', width: '100%' }}
     >
-      <Tab.Screen
-        name={routes.DASHBOARD}
-        component={DashboardNavigator}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons
-              name="notebook-outline"
-              color={color}
-              size={size}
-            />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name={routes.NOTIFICATION}
-        component={NotificationNavigator}
-        options={({ route }) => ({
-          tabBarStyle: hideBottomTabOnSpecificRoute(route),
+      <Tab.Navigator
+        screenOptions={{
           headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons
-              name="bell-outline"
-              color={color}
-              size={size}
-            />
-          ),
-        })}
-      />
-      <Tab.Screen
-        name={routes.PATIENTS}
-        component={PatientsNavigator}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons
-              name="home-outline"
-              color={color}
-              size={size}
-            />
-          ),
+          tabBarActiveTintColor: colors.pink,
         }}
-      />
-      <Tab.Screen
-        name={routes.CONFIG}
-        component={ConfigNavigator}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons
-              name="cog-outline"
-              color={color}
-              size={size}
-            />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name={routes.ACCOUNT}
-        component={AccountNavigator}
-        options={({ route }) => ({
-          tabBarStyle: hideBottomTabOnSpecificRoute(route),
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons
-              name="account-circle-outline"
-              color={color}
-              size={size}
-            />
-          ),
-        })}
-      />
-    </Tab.Navigator>
+      >
+        <Tab.Screen
+          name={routes.DASHBOARD}
+          component={DashboardNavigator}
+          options={{
+            tabBarTestID: 'Dashboard_Tab',
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons
+                name="view-dashboard-outline"
+                color={color}
+                size={size}
+              />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name={routes.NOTIFICATION}
+          component={NotificationNavigator}
+          options={{
+            tabBarTestID: 'Notification_Tab',
+            tabBarStyle: ({ route }) => hideBottomTabOnSpecificRoute(route),
+            headerShown: false,
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons
+                name="bell-outline"
+                color={color}
+                size={size}
+              />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name={routes.PATIENTS}
+          component={PatientsNavigator}
+          options={{
+            tabBarTestID: 'Patients_Tab',
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons
+                name="home-outline"
+                color={color}
+                size={size}
+              />
+            ),
+          }}
+          screenOptions={{ unmountOnBlur: true }}
+        />
+        <Tab.Screen
+          name={routes.CONFIG}
+          component={ConfigNavigator}
+          options={{
+            tabBarTestID: 'Config_Tab',
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons
+                name="cog-outline"
+                color={color}
+                size={size}
+              />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name={routes.ACCOUNT}
+          component={AccountNavigator}
+          options={{
+            unmountOnBlur: true,
+            tabBarStyle: ({ route }) => hideBottomTabOnSpecificRoute(route),
+            tabBarTestID: 'Account_Tab',
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons
+                name="account-circle-outline"
+                color={color}
+                size={size}
+              />
+            ),
+          }}
+        />
+      </Tab.Navigator>
+    </View>
   );
 }
 
