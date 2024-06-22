@@ -29,7 +29,7 @@ const getPatientWeeklySchedule = async (patientIDs=[]) => {
   else {
     params = {};
   }
-  return await client.get(patientWeeklySchedule, params);
+  return await client.get(endpoint, params);
 };
 
 const getPatientAllTest = async () => {

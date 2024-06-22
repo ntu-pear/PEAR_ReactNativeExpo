@@ -86,7 +86,7 @@ Note: If you're on windows, you will probably only be able to run the `android` 
 1. cd to `./PEAR_REACTNATIVEEXPO` root folder.
 2. Remove `node_modules` folder and `package-lock.json` file. (Note: NOT `package.json`)
 3. run `npm install`.
-4. run `expo start`, and expo will begin running.
+4. run `npx expo start`, and expo will begin running.
    - To run `android` simulator. Hit the `a` key.
    - To run `ios` simulator. Hit the `i` key.
    - To run `web`. Hit the `w` key.
