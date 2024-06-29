@@ -5,6 +5,7 @@ import { Platform, Alert, ActivityIndicator, TouchableOpacity, StyleSheet, View 
 // import { background } from 'native-base/lib/typescript/theme/styled-system';
 
 import { useGetWeekDates } from 'app/hooks/useGetWeekDate';
+
 // API
 import scheduleAPI from 'app/api/schedule';
 
@@ -17,17 +18,7 @@ function ConfigCard(props) {
 
     switch (checkWeek) {
       case thisWeek:
-            const result = await scheduleAPI.generateThisWeek();
-            if (result.ok) {
-              console.log('Schedule for this week generated');
-              //console.log(result);
-              alertTitle = 'Schedule for this week generated' + '\n('+ thisWeek + ')';
-            }
-            else{
-              console.log('Error')
-              alertTitle = 'Something went wrong';
-            }
-                    
+          const result = await scheduleAPI.generateThisWeek();          
           break;
 
       case nextWeek:
@@ -38,6 +29,15 @@ function ConfigCard(props) {
 
       default:
           break;      
+      }
+
+      if (result.ok){
+        console.log('Schedule for this week generated');
+        alertTitle = 'Schedule for this week generated' + '\n('+ checkWeek + ')';
+      }
+      else{
+        console.log('Error')
+        alertTitle = 'Something went wrong';
       }
       Alert.alert(alertTitle);
   };

@@ -33,14 +33,6 @@ function ScheduleAccordion({}) {
     const [activeSections, setActiveSections] = useState([]);
     const [sections, setSections] = useState([]);
 
-    // const result = scheduleAPI.generateThisWeek();
-    //     if (result.ok) {
-    //     console.log('Schedule for this week generated');
-    //     alertTitle = 'Schedule for this week generated';
-    //     refreshData();
-    //     setIsModalVisible(false);
-    // }
-
     
     const handleScheduleOnPress = () => {
         return (
