@@ -1,5 +1,5 @@
+import { Center, VStack, HStack, ScrollView, View, Platform, StyleSheet } from 'native-base';
 import React, { useContext } from 'react';
-import { View } from 'native-base';
 import authStorage from 'app/auth/authStorage';
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
 import AuthContext from 'app/auth/context';
@@ -9,7 +9,14 @@ import jwt_decode from 'jwt-decode';
 import useInactivityLogout from 'app/hooks/useInactivityLogout';
 import globalStyles from 'app/utility/styles.js';
 import { useGetPersonalDetails } from 'app/hooks/useGetPersonalDetails';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import routes from 'app/navigation/routes';
+import ConfigCard from 'app/components/ConfigCard';
+import Icon from 'react-native-vector-icons/FontAwesome';
 // import authStorage from 'app/auth/authStorage';
+
+// Configurations
+import ScheduleAccordion from 'app/components/ScheduleAccordion';
 
 const getUserTokens = async () => {
   const accessToken1 = await authStorage.getToken('userAuthToken');
@@ -34,13 +41,9 @@ const getUserTokens = async () => {
 
 function ConfigScreen() {
   getUserTokens();
-  return (
-    <View
-      // {...panResponder.panHandlers}
-      style={{ height: '100%', width: '100%', backgroundColor: 'transparent' }}
-    >
-      <MessageDisplayCard TextMessage={'Configuration Screen'} />
-    </View>
+ 
+  return(
+  <ScheduleAccordion />
   );
 }
 

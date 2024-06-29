@@ -9,6 +9,7 @@ const patientWeeklySchedule = `${endpoint}/PatientLatestSchedules`;
 const patientAllTest = `${endpoint}/patientAllTest`;
 const patientTest = `${endpoint}/patientTest`;
 const systemTest = `${endpoint}/systemTest`;
+const generate = `${endpoint}/generate`; //test
 
 /*
  * List all functions here
@@ -56,6 +57,9 @@ const getSystemTest = async () => {
 }
 
 // **********************  POST REQUESTS *************************
+const generateThisWeek = async () => {
+  return await client.post(generate);
+}
 
 // ************************* UPDATE REQUESTS *************************
 
@@ -67,4 +71,5 @@ export default {
   getPatientAllTest,
   getPatientTest,
   getSystemTest,
+  generateThisWeek,
 };
