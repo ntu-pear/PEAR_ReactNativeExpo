@@ -15,20 +15,23 @@ function ConfigCard(props) {
 
   const handleOnPress = async() => {
     let alertTitle = '';
+    let result = null;
 
     switch (checkWeek) {
       case thisWeek:
-          const result = await scheduleAPI.generateThisWeek();          
-          break;
+        result = await scheduleAPI.generateThisWeek();       
+        break;
 
       case nextWeek:
-          break;
+        //result = 
+        break;
 
       case weekAfterNext:
-          break;
+        //result = 
+        break;
 
       default:
-          break;      
+        break;      
       }
 
       if (result.ok){
