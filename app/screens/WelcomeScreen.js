@@ -121,7 +121,13 @@ function WelcomeScreen(props) {
       setIsLoading(false);
       setIsError(true);
       setStatusCode(result.status);
-      setErrorMsg(errors.loginError);
+      
+      if(username == '' || password == ''){
+        setErrorMsg(errors.emptyParameters);
+      }
+      else{
+        setErrorMsg(errors.loginError);
+      }
       return;
     }
   };
@@ -250,7 +256,7 @@ function WelcomeScreen(props) {
                       color="green"
                       onPress={onPressLogin}
                       testingID="Login"
-                      isDisabled={isInputErrors}                   
+                      //isDisabled={isInputErrors} //for login button validation                  
                     />
                   )}
               </View>

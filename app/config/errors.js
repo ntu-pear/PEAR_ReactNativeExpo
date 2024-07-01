@@ -1,6 +1,6 @@
 export default {
   loginError: 'Invalid email and/or user role and/or password',
-  notEmptyError: 'Field cannot be empty',
+  emptyParameters: 'Field(s) cannot be left empty',
   notUnselectedError: 'Field must have a selection',
   alphaOnlyError: 'Field cannot contain numbers or symbols',
   nricFormatError: 'Invalid NRIC format',

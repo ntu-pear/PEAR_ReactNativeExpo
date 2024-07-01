@@ -26,8 +26,11 @@ function AccountScreen(props) {
 
   const onPressLogOut = async () => {
     console.log('Logging out!');
-    setUser(null);
+
+    setTimeout(() => {}, 250); //attempt to fix logout and login to wrong page issue
+
     await authStorage.removeToken();
+    setUser(null);
   };
 
   const retrieveCurrentUser = async () => {
