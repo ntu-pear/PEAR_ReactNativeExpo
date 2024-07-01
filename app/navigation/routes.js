@@ -12,7 +12,9 @@ export default Object.freeze({
   ABOUT: 'About',
   SETTINGS: 'Settings',
   CHANGE_PASSWORD: 'ChangePassword',
-
+  EMPTY: 'EMPTY',
+  EMPTY_SCREEN: 'EmptyScreen',
+  
   CONFIG: 'Config',
   CONFIG_SCREEN: 'ConfigScreen',
   DASHBOARD: 'Dashboard',

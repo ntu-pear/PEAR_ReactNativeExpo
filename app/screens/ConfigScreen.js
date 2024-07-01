@@ -13,7 +13,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import routes from 'app/navigation/routes';
 import ConfigCard from 'app/components/ConfigCard';
 import Icon from 'react-native-vector-icons/FontAwesome';
-// import authStorage from 'app/auth/authStorage';
 
 // Configurations
 import ScheduleAccordion from 'app/components/ScheduleAccordion';
