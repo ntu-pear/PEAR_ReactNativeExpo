@@ -81,6 +81,7 @@ function PatientVitalScreen(props) {
   const [statusCode, setStatusCode] = useState(200);
   const [isReloadList, setIsReloadList] = useState(true);
 
+  // Vital data related states
   const [originalVitalData, setOriginalVitalData] = useState([]);
   const [vitalData, setVitalData] = useState([]);
   const [vitalFormData, setVitalFormData] = useState({
@@ -91,7 +92,7 @@ function PatientVitalScreen(props) {
     diastolicBP: '',
     heartRate: '',
     spO2: '',
-    bloodSugarLevel: '',
+    bloodSugarlevel: '',
     height: '',
     weight: '',
     vitalRemarks: '',
@@ -159,7 +160,7 @@ function PatientVitalScreen(props) {
       diastolicBP: item.diastolicBP,
       heartRate: item.heartRate,
       spO2: item.spO2,
-      bloodSugarLevel: item.bloodSugarlevel,
+      bloodSugarlevel: item.bloodSugarlevel,
       vitalRemarks: item.vitalRemarks,
       afterMeal: item.afterMeal,
       createdDateTime: item.createdDateTime,
@@ -249,34 +250,86 @@ function PatientVitalScreen(props) {
     setIsLoading(false);
   };
 
-  const handleDeleteVital = async (vitalID) => {
-    Alert.alert(
-      'Confirm Delete',
-      'Are you sure you want to delete this vital?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'OK',
-          onPress: async () => {
-            setIsLoading(true);
+  // const handleDeleteVital = async (vitalID) => {
+  //   Alert.alert(
+  //     'Confirm Delete',
+  //     'Are you sure you want to delete this vital?',
+  //     [
+  //       { text: 'Cancel', style: 'cancel' },
+  //       {
+  //         text: 'OK',
+  //         onPress: async () => {
+  //           setIsLoading(true);
 
-            const result = await patientApi.deletePatientVital(
-              patientID,
-              vitalID,
-            ); // Assuming this API call exists
-            if (result.ok) {
-              refreshVitalData();
-              Alert.alert('Deleted', 'Vital deleted successfully');
-            } else {
-              Alert.alert('Error', 'Failed to delete vital');
-            }
+  //           const result = await patientApi.deletePatientVital(
+  //             patientID,
+  //             vitalID,
+  //           ); // Assuming this API call exists
+  //           if (result.ok) {
+  //             refreshVitalData();
+  //             Alert.alert('Deleted', 'Vital deleted successfully');
+  //           } else {
+  //             Alert.alert('Error', 'Failed to delete vital');
+  //           }
 
-            setIsLoading(false);
-          },
-        },
-      ],
-    );
-  };
+  //           setIsLoading(false);
+  //         },
+  //       },
+  //     ],
+  //   );
+  // };
+
+  // Ask user to confirm deletion of vital
+  const handleDeleteVital = (vitalID, patientID) => {
+    const tempData = vitalData.filter(x=>x.vitalID == vitalID && x.patientID == patientID)[0];
+
+    Alert.alert('Are you sure you wish to delete this item?', 
+    `Temperature: ${tempData.temperature} °C \n` +
+    `Weight: ${tempData.weight} kg \n` +
+    `Height: ${tempData.height} m \n` +
+    `systolicBP: ${tempData.systolicBP} mmHg \n` +
+    `diastolicBP: ${tempData.diastolicBP} mmHg\n` +
+    `heartRate: ${tempData.heartRate} bpm \n` +
+    `spO2: ${tempData.spO2}% \n` +
+    `bloodSugarLevel: ${tempData.bloodSugarlevel} mg/dL \n` +
+    `vitalRemarks: ${tempData.vitalRemarks}\n` +
+    `afterMeal: ${tempData.afterMeal}\n` +
+    `Created: ${formatDate(new Date(tempData.createdDateTime))}`, [
+      {
+        text: 'Cancel',
+        onPress: ()=>{},
+        style: 'cancel',
+      },
+      {text: 'OK', onPress: ()=>deleteVital(vitalID)},
+    ]);
+  }
+
+  // Delete vital
+  const deleteVital = async (vitalID) => {
+    setIsLoading(true);
+
+    let alertTitle = '';
+    let alertDetails = '';
+
+    const result = await patientApi.deletePatientVital(vitalID);
+    if (result.ok) {
+      refreshVitalData();
+      setIsModalVisible(false);
+      
+      alertTitle = 'Successfully deleted vital';
+    } else {
+      const errors = result.data?.message;
+      console.log("Error deleting vital", result)
+
+      result.data
+      ? (alertDetails = `\n${errors}\n\nPlease try again.`)
+      : (alertDetails = 'Please try again.');
+      
+      alertTitle = 'Error deleting vital';
+    }
+    
+    Alert.alert(alertTitle, alertDetails);
+  }
 
   // Navigate to patient profile on click profile image
   const onClickProfile = () => {
@@ -389,13 +442,14 @@ function PatientVitalScreen(props) {
           }
           data={vitalData}
           keyboardShouldPersistTaps="handled"
-          keyExtractor={(item) => item.VitalID}
+          keyExtractor={(item) => item.vitalID}
           renderItem={({ item }) => {
             return (
               <Swipeable
+                key={item.vitalID}
                 setIsScrolling={setIsScrolling}
-                onSwipeRight={() => handleDeleteVital(item.VitalID)}
-                onSwipeLeft={() => handleEditLog(item.VitalID)}
+                onSwipeRight={() => handleDeleteVital(item.vitalID, item.patientID)}
+                onSwipeLeft={() => handleEditVital(item.vitalID)}
                 underlay={<EditDeleteUnderlay />}
                 item={
                   <TouchableOpacity
@@ -415,7 +469,7 @@ function PatientVitalScreen(props) {
                       vitalRemarks={item.vitalRemarks}
                       afterMeal={item.afterMeal}
                       createdDateTime={item.createdDateTime}
-                      onDelete={() => handleDeleteVital(item.VitalID)}
+                      onDelete={() => handleDeleteVital(item.vitalID, item.patientID)}
                     />
                   </TouchableOpacity>
                 }

@@ -9,7 +9,15 @@ export default {
   mobilePhoneNoError: 'Mobile no. must start with the digit 8 or 9, and must have 8 digits.',
   postalCodeError: 'Postal code must have 6 digits',
   emailError: 'Invalid Email',
-  duplicatePrefNameError: 'Preferred name is already in use. Please enter a different value.'
+  duplicatePrefNameError: 'Preferred name is already in use. Please enter a different value.',
+  temperatureError: 'Temprature should be within range of 35.0 to 43.0.',
+  systolicBPError: 'Systolic BP should be between 70 to 160 and an integer.',
+  diastolicBPError: 'Diastolic BP should be between 40 to 120 and an integer.',
+  spO2Error: 'SpO2 should be between 60 to 120 and an integer.',
+  bloodSugarLevelError: 'Blood Sugar Level should be within 50 to 250.',
+  heartRateError: 'Heart Rate should be within 0 to 300.',
+  weightError: 'Weight should be within 0 to 200',
+  heightError: 'Height should be within 0 to 2',
 };
 
 export const getErrorMsgFromCode = (codr) => {
