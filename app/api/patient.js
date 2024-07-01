@@ -48,6 +48,11 @@ const patientProblemLogDelete = `${problemLogEndpoint}/delete`; //eslint-disable
 const patientMedicationAdd = `${medicationEndpoint}/add`; //eslint-disable-line no-unused-vars
 const patientMedicationUpdate = `${medicationEndpoint}/update`; //eslint-disable-line no-unused-vars
 const patientMedicationDelete = `${medicationEndpoint}/delete`; //eslint-disable-line no-unused-vars
+// Prescription
+const patientPrescriptionAdd = `${prescriptionEndpoint}/add`; //eslint-disable-line no-unused-vars
+const patientPrescriptionUpdate = `${prescriptionEndpoint}/update`; //eslint-disable-line no-unused-vars
+const patientPrescriptionDelete = `${prescriptionEndpoint}/delete`; //eslint-disable-line no-unused-vars
+
 /*
  * List all functions here
  * Refer to this api doc: https://github.com/infinitered/apisauce
@@ -302,6 +307,22 @@ const addPatientMedicalHistory = async (patientID, hxData) => {
   return client.post(patientMedicalHistoryAdd, payload);
 };
 
+const addPatientPrescription = async (patientID, prescriptionData) => {
+  const payload = {
+    patientID: patientID,
+    PrescriptionListID: prescriptionData.PrescriptionListID,
+    Dosage: prescriptionData.Dosage,
+    FrequencyPerDay: prescriptionData.FrequencyPerDay,
+    Instruction: prescriptionData.Instruction,
+    StartDate: prescriptionData.StartDate,
+    EndDate: prescriptionData.EndDate,
+    AfterMeal: prescriptionData.AfterMeal,
+    PrescriptionRemarks: prescriptionData.PrescriptionRemarks,
+    IsChronic: prescriptionData.IsChronic,
+  };
+  return client.post(patientPrescriptionAdd, payload);
+};
+
 // ************************* UPDATE REQUESTS *************************
 const updatePatient = async (data) => {
   const formData = new FormData();
@@ -348,7 +369,7 @@ const updatePatientVital = async (patientID, vitalData) => {
 };
 
 const deletePatientVital = async (vitalID) => {
-  return client.delete(patientVitalDelete, { vitalID });
+  return client.put(patientVitalDelete, { vitalID });
 };
 
 const updateMedication = async (patientID, medicationData) => {
@@ -377,6 +398,22 @@ const updateProblemLog = async (patientID, userID, logData) => {
   return client.put(patientProblemLogUpdate, payload);
 };
 
+const updatePrescription = async (patientID, prescriptionData) => {
+  const payload = {
+    patientID: patientID,
+    PrescriptionListID: prescriptionData.PrescriptionListID,
+    Dosage: prescriptionData.Dosage,
+    FrequencyPerDay: prescriptionData.FrequencyPerDay,
+    Instruction: prescriptionData.Instruction,
+    StartDate: prescriptionData.StartDate,
+    EndDate: prescriptionData.EndDate,
+    AfterMeal: prescriptionData.AfterMeal,
+    PrescriptionRemarks: prescriptionData.PrescriptionRemarks,
+    IsChronic: prescriptionData.IsChronic,
+  };
+  return client.put(patientPrescriptionUpdate, payload);
+};
+
 const deleteMedication = async (medicationData) => {
   const payload = {
     medicationID: medicationData.medicationID,
@@ -397,6 +434,14 @@ const deleteProblemLog = async (logData) => {
   };
   return client.put(patientProblemLogDelete, payload);
 };
+
+const deletePrescription = async (prescriptionData) => {
+  const payload = {
+    prescriptionId: prescriptionData.prescriptionId,
+  };
+  return client.put(patientPrescriptionDelete, payload);
+};
+
 /*
  * Expose your end points here
  */
@@ -419,6 +464,7 @@ export default {
   AddPatientMedicalHistory,
   addPatientMedication,
   addPatientMedicalHistory,
+  addPatientPrescription,
   updatePatient,
   updatePatientAllergy,
   deletePatientAllergy,
@@ -429,4 +475,6 @@ export default {
   deleteMedicalHistory,
   deleteProblemLog,
   updateProblemLog,
+  updatePrescription,
+  deletePrescription,
 };

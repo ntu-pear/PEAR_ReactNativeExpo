@@ -1,5 +1,5 @@
 // Libs
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Alert, Keyboard, StyleSheet, TouchableOpacity } from 'react-native';
 import { FlatList, View } from 'native-base';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -15,6 +15,9 @@ import routes from 'app/navigation/routes';
 
 // Configurations
 import colors from 'app/config/colors';
+
+// Auth
+import AuthContext from 'app/auth/context';
 
 // Components
 import ActivityIndicator from 'app/components/ActivityIndicator';
@@ -34,6 +37,10 @@ function PatientMedicationScreen(props) {
     patientID = patientId;
   }
   const navigation = useNavigation();
+
+  // User ID for edit/add operations
+  const { user } = useContext(AuthContext);
+  const userID = user ? user.userID : null;
 
   // Modal states
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -150,6 +157,7 @@ function PatientMedicationScreen(props) {
     if (patientID) {
       const response = await patientApi.getPatientMedication(patientID);
       if (response.ok) {
+        console.log(response.data.data)
         setOriginalUnparsedData(response.data.data != null ? [...response.data.data] : [])
         parseMedicationData(response.data.data != null ? response.data.data : []);
         setIsError(false);
@@ -168,7 +176,7 @@ function PatientMedicationScreen(props) {
     }
   };
 
-  // Get medication data from backend
+  // Get patient data from backend
   const getPatientData = async () => {
     if (patientID) {
       const response = await patientApi.getPatient(patientID);
@@ -231,7 +239,7 @@ function PatientMedicationScreen(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.addPatientMedication(patientID, tempData);
+    const result = await patientApi.addPatientMedication(patientID, userID,  tempData);
     if (result.ok) {
       console.log('submitting medication data', tempData);
       refreshMedData();
@@ -289,7 +297,7 @@ function PatientMedicationScreen(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.updateMedication(patientID, tempFormData);
+    const result = await patientApi.updateMedication(patientID, userID, tempFormData);
     if (result.ok) {
       refreshMedData();
       setIsModalVisible(false);

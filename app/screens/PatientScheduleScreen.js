@@ -147,7 +147,7 @@ function PatientScheduleScreen(props) {
     }
   };
 
-  // Get medication data from backend
+  // Get patient data from backend
   const getPatientData = async () => {
     if (patientID) {
       const response = await patientApi.getPatient(patientID);

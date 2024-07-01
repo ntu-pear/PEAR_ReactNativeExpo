@@ -170,7 +170,7 @@ function PatientProblemLog(props) {
     }))
   }
 
-  // Get medication data from backend
+  // Get patient data from backend
   const getPatientData = async () => {
     if (patientID) {
       const response = await patientApi.getPatient(patientID);
@@ -301,16 +301,16 @@ function PatientProblemLog(props) {
       refreshLogData();
       setIsModalVisible(false);
       
-      alertTitle = 'Successfully deleted medical history';
+      alertTitle = 'Successfully deleted problem log';
     } else {
       const errors = result.data?.message;
-      console.log("Error deleting medical history", result)
+      console.log("Error deleting problem log", result)
 
       result.data
       ? (alertDetails = `\n${errors}\n\nPlease try again.`)
       : (alertDetails = 'Please try again.');
       
-      alertTitle = 'Error deleting medical history';
+      alertTitle = 'Error deleting problem log';
     }
     
     Alert.alert(alertTitle, alertDetails);

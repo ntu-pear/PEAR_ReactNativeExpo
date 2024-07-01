@@ -124,12 +124,13 @@ function AddPatientVitalModalNEW({
           <Flex direction="row" justifyContent="space-between">
             <VStack space={4} flex={1} mr={2}>
               <InputField
-                title="Temperature (°C)"
                 isRequired
+                title="Temperature (°C)"
                 keyboardType="numeric"
                 value={vitalFormData.temperature}
                 onChangeText={handleVitalDataChange('temperature')}
                 onEndEditing={setIsTemperatureError}
+                dataType={'temperature'}
                 isInvalid={false}
               />
               <InputField
@@ -138,6 +139,8 @@ function AddPatientVitalModalNEW({
                 keyboardType="numeric"
                 value={vitalFormData.systolicBP}
                 onChangeText={handleVitalDataChange('systolicBP')}
+                onEndEditing={setIsSystolicBPError}
+                dataType={'systolicBP'}
                 isInvalid={false}
               />
               <InputField
@@ -146,6 +149,8 @@ function AddPatientVitalModalNEW({
                 keyboardType="numeric"
                 value={vitalFormData.diastolicBP}
                 onChangeText={handleVitalDataChange('diastolicBP')}
+                onEndEditing={setIsDiastolicBPError}
+                dataType={'diastolicBP'}
                 isInvalid={false}
               />
               <InputField
@@ -154,6 +159,8 @@ function AddPatientVitalModalNEW({
                 keyboardType="numeric"
                 value={vitalFormData.spO2}
                 onChangeText={handleVitalDataChange('spO2')}
+                onEndEditing={setIsSpO2Error}
+                dataType={'spO2'}
                 isInvalid={false}
               />
               <InputField
@@ -162,6 +169,8 @@ function AddPatientVitalModalNEW({
                 keyboardType="numeric"
                 value={vitalFormData.bloodSugarLevel}
                 onChangeText={handleVitalDataChange('bloodSugarLevel')}
+                onEndEditing={setIsBloodSugarLevelError}
+                dataType={'bloodSugarLevel'}
                 isInvalid={false}
               />
               <RadioButtonInput
@@ -181,6 +190,8 @@ function AddPatientVitalModalNEW({
                 keyboardType="numeric"
                 value={vitalFormData.height}
                 onChangeText={handleVitalDataChange('height')}
+                onEndEditing={setIsHeightError}
+                dataType={'height'}
                 isInvalid={false}
               />
               <InputField
@@ -189,6 +200,8 @@ function AddPatientVitalModalNEW({
                 keyboardType="numeric"
                 value={vitalFormData.weight}
                 onChangeText={handleVitalDataChange('weight')}
+                onEndEditing={setIsWeightError}
+                dataType={'weight'}
                 isInvalid={false}
               />
               <InputField
@@ -197,6 +210,8 @@ function AddPatientVitalModalNEW({
                 keyboardType="numeric"
                 value={vitalFormData.heartRate}
                 onChangeText={handleVitalDataChange('heartRate')}
+                onEndEditing={setIsHeartRateError}
+                dataType={'heartRate'}
                 isInvalid={false}
               />
               <InputField

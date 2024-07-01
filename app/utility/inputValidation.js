@@ -85,6 +85,64 @@ export const uniquePrefName = (value, list) => {
   }
 };
 
+export const temperatureFormat = (value) => {
+  //regular expression to match number with decimal places
+  const regex = /^-?\d+(\.\d+)?$/;
+
+  if (!regex.test(value)) {
+    return errors.temperatureError; // Invalid number format
+  }
+  
+  // Convert the value to a floating-point number
+  const temperature = parseFloat(value);
+
+  if (temperature < 35.0 || temperature > 42.0) {
+    return errors.temperatureError;
+  }
+};
+
+export const systolicBPRange = (value) => {
+  if (!(value >= 70 && value <= 160)) {
+    return errors.systolicBPError;
+  }
+};
+
+export const diastolicBPRange = (value) => {
+  if (!(value >= 40 && value <= 120)) {
+    return errors.diastolicBPError;
+  }
+};
+
+export const spO2Range = (value) => {
+  if (!(value >= 60 && value <= 120)) {
+    return errors.spO2Error;
+  }
+};
+
+export const bloodSugarLevelRange = (value) => {
+  if (!(value >= 50 && value <= 250)) {
+    return errors.bloodSugarLevelError;
+  }
+};
+
+export const heartRateRange = (value) => {
+  if (!(value >= 0 && value <= 300)) {
+    return errors.heartRateError;
+  }
+};
+
+export const weightRange = (value) => {
+  if (!(value >= 0 && value <= 200)) {
+    return errors.weightError;
+  }
+};
+
+export const heightRange = (value) => {
+  if (!(value >= 0 && value <= 2)) {
+    return errors.heightError;
+  }
+};
+
 export const validationFunctions = {
   name: [nameFormat],
   nric: [nricFormat, nricValid],
@@ -92,4 +150,12 @@ export const validationFunctions = {
   'mobile phone': [mobilePhoneNoFormat],
   email: [emailFormat],
   'postal code': [postalCodeFormat],
+  'temperature': [temperatureFormat],
+  'systolicBP' : [systolicBPRange],
+  'diastolicBP' : [diastolicBPRange],
+  'spO2' : [spO2Range],
+  'bloodSugarLevel': [bloodSugarLevelRange],
+  'heartRate' : [heartRateRange], 
+  'weight' : [weightRange],
+  'height' : [heightRange]
 };
