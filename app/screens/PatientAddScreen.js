@@ -54,7 +54,7 @@ function PatientAddScreen() {
       DOB: maximumDOB,
       StartDate: newDate,
       IsChecked: false, // additional item to check if user wants to enter EndDate value
-      EndDate: new Date(0), // default value of EndDate is beginning of Epoch time
+      EndDate: new Date(), // default value of EndDate is beginning of Epoch time
       PrivacyLevel: '2',
       UpdateBit: true,
       AutoGame: true,
@@ -150,7 +150,7 @@ function PatientAddScreen() {
       aspect: [4, 3],
       quality: 1,
     });
-    if (!result.cancelled) {
+    if (!result.canceled) {
       const newImageUri = 'file:///' + result.uri.split('file:/').join('');
 
       var newData = formData['patientInfo'];
@@ -176,7 +176,7 @@ function PatientAddScreen() {
     if (field === 'IsChecked') {
       newData[field] = !formData.patientInfo.IsChecked;
       if (!newData[field]) {
-        newData.EndDate = new Date(0); // if IsChecked is false, reset End Date to beginning of epoch time
+        newData.EndDate = new Date(); // if IsChecked is false, reset End Date to beginning of epoch time
       }
     } else if (field === 'PreferredLanguageListID') {
       newData[field] = parseInt(e);

@@ -119,7 +119,7 @@ function AccountEditScreen(props) {
       aspect: [4, 3],
       quality: 1,
     });
-    if (!result.cancelled) {
+    if (!result.canceled) {
       const newImageUri = 'file:///' + result.uri.split('file:/').join('');
 
       var newData = formData['patientInfo'];

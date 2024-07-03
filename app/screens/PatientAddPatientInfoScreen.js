@@ -551,8 +551,8 @@ function PatientAddPatientInfoScreen({
 }
 const styles = StyleSheet.create({
   formContainer: {
-    flex: 1,
-    alignItems: 'flex-start',
+    //flex: 1,
+    //alignItems: 'flex-start',
     justifyContent: 'center',
     paddingLeft: '10%',
     width: '90%',
