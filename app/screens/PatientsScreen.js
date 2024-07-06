@@ -420,7 +420,7 @@ function PatientsScreen({ navigation }) {
                 </TouchableOpacity>
               )}}
             />
-            <Center position="absolute" right="5" bottom="5%">
+            <Center position="absolute" right="5" bottom="15%">
               <Fab
                 backgroundColor={colors.pink}
                 icon={

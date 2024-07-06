@@ -370,7 +370,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
 
           <SelectionInputField
             isRequired
-            title={'Relationship'}
+            title={"Guardian is Patient's"}
             value={guardian.RelationshipID}
             placeholder={'Select Relationship'}
             onDataChange={handleFormData('RelationshipID', i)}
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
     }`,
   },
   dateSelectionContainer: {
-    width: '70%',
+    width: '100%',
   },
 });
 export default AddPatientGuardian;

@@ -280,7 +280,7 @@ function EditPatientInfoScreen(props) {
                 />
 
                 <InputField
-                  isRequired={formData.TempAddress ? formData.TempAddress.length > 0 : false}
+                  //isRequired={formData.TempAddress ? formData.TempAddress.length > 0 : false}
                   title={'Temporary Postal Code'}
                   value={formData.TempPostalCode}
                   onChangeText={handleFormData('TempPostalCode')}
