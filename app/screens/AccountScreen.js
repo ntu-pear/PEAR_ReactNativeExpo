@@ -26,8 +26,13 @@ function AccountScreen(props) {
 
   const onPressLogOut = async () => {
     console.log('Logging out!');
-    setUser(null);
-    await authStorage.removeToken();
+    userApi.logoutUser()
+    .then(() => authStorage.removeToken())
+    .then(() => setUser(null))
+    .catch(error => console.error('Logout failed:', error));
+    // console.log('Logging out!');
+    // setUser(null);
+    // await authStorage.removeToken();
   };
 
   const retrieveCurrentUser = async () => {

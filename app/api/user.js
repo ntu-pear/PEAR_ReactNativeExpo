@@ -57,6 +57,10 @@ const updateUser = async (data) => {
   return client.put(userUpdate, data, { headers });
 };
 
+const logoutUser = async() => {
+  return client.put(userLogout);
+}
+
 /*
  * Expose your end points here
  */
@@ -66,4 +70,5 @@ export default {
   getUser,
   updateUser,
   changePassword,
+  logoutUser
 };
