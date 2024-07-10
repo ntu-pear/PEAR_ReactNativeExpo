@@ -148,7 +148,7 @@ function AccountEditScreen(props) {
               <View style={styles.formContainer}>
                 <Center alignSelf="center">
                   <TouchableOpacity
-                    onPress={handleOnPressToImagePicker}
+                    onPress={pickImage}
                   >
                     <AspectRatio
                       w='70%'

@@ -37,7 +37,7 @@ export default Object.freeze({
   PATIENT_HOLIDAY: 'PatientHoliday',
   PATIENT_MEDICATION: 'PatientMedication',
   PATIENT_PHOTO_ALBUM: 'PatientPhotoAlbum',
-  PATIENT_PREFERENCE: 'PatientPreference',
+  ACTIVITY_PREFERENCE: 'ActivityPreference',
   PATIENT_PRESCRIPTION: 'PatientPrescription',
   PATIENT_PROBLEM_LOG: 'PatientProblemLog',
   PATIENT_VITAL: 'PatientVital',

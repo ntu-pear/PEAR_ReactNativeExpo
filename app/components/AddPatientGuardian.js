@@ -315,6 +315,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
             isRequired
             title={'Address'}
             value={guardian.Address}
+            dataType="address"
             onChangeText={handleFormData('Address', i)}
             onEndEditing={handleAddrError}
           />
@@ -333,6 +334,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
           <InputField
             title={'Temporary Address'}
             value={guardian.TempAddress}
+            dataType="address"
             onChangeText={handleFormData('TempAddress', i)}
             onEndEditing={handleTempAddrError}
           />

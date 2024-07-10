@@ -369,6 +369,7 @@ function EditPatientGuardianScreen(props) {
                   isRequired
                   title={'Address'}
                   value={formData.Address}
+                  dataType="address"
                   onChangeText={handleFormData('Address')}
                   onEndEditing={handleAddrError}
                 />
@@ -387,6 +388,7 @@ function EditPatientGuardianScreen(props) {
                 <InputField
                   title={'Temporary Address'}
                   value={formData.TempAddress}
+                  dataType="address"
                   onChangeText={handleFormData('TempAddress')}
                   onEndEditing={handleTempAddrError}
                 />
@@ -480,7 +482,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   dateSelectionContainer: {
-    width: '70%',
+    width: '100%',
   },
   saveButtonContainer: {
     alignItems: 'center',

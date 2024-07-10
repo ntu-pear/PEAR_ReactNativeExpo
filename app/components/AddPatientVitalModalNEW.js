@@ -186,7 +186,7 @@ function AddPatientVitalModalNEW({
             <VStack space={4} flex={1} ml={2}>
               <InputField
                 isRequired
-                title="Height (m)"
+                title="Height (cm)"
                 keyboardType="numeric"
                 value={vitalFormData.height}
                 onChangeText={handleVitalDataChange('height')}

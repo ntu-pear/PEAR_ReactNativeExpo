@@ -268,14 +268,14 @@ function PatientProfileScreen(props) {
                   <PatientProfileCard
                     vectorIconComponent={
                       <MaterialCommunityIcons
-                      name="emoticon-happy"
+                      name="dumbbell"
                         size={SCREEN_HEIGHT * 0.04}
                         color={colors.pink}
                         />
                     }
-                    text="Patient Preference"
+                    text="Activity Preference"
                     navigation={navigation}
-                    routes={routes.PATIENT_PREFERENCE}
+                    routes={routes.ACTIVITY_PREFERENCE}
                     patientProfile={patientProfile}
                     />
                   <PatientProfileCard

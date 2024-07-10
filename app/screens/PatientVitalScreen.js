@@ -286,7 +286,7 @@ function PatientVitalScreen(props) {
     Alert.alert('Are you sure you wish to delete this item?', 
     `Temperature: ${tempData.temperature} °C \n` +
     `Weight: ${tempData.weight} kg \n` +
-    `Height: ${tempData.height} m \n` +
+    `Height: ${tempData.height} cm \n` +
     `systolicBP: ${tempData.systolicBP} mmHg \n` +
     `diastolicBP: ${tempData.diastolicBP} mmHg\n` +
     `heartRate: ${tempData.heartRate} bpm \n` +
@@ -368,7 +368,7 @@ function PatientVitalScreen(props) {
       'Heart Rate (bpm)',
       'SpO2 (%)',
       'Blood Sugar (mmol/L)',
-      'Height (m)',
+      'Height (cm)',
       'Weight (kg)',
       'Remarks',
       'After Meal',

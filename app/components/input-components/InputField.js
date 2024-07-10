@@ -157,6 +157,7 @@ InputField.propTypes = {
     'password',
     'name',
     'nric',
+    'address',
     'home phone',
     'mobile phone',
     'email',

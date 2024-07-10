@@ -171,6 +171,14 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, d
       setUnMaskedGuardianNRIC(guardianData.guardian.nric);
       setGuardianInfoData([
         {
+          label: 'Preferred Name',
+          value: guardianData.guardian.preferredName || '-',
+        },
+        {
+          label: "Guardian is Patient's",
+          value: guardianData.guardian.relationship || '-',
+        },
+        {
           label: 'First Name',
           value: guardianData.guardian.firstName || '-',
         },
@@ -188,7 +196,7 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, d
         },
         {
           label: 'Gender',
-          value: guardianData.guardian.gender || '-',
+          value: guardianData.guardian.gender === 'F' ? 'Female' : 'Male'
         },
         {
           label: 'Address',
@@ -199,16 +207,8 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, d
           value: guardianData.guardian.email || '-',
         },
         {
-          label: "Relationship",
-          value: guardianData.guardian.relationship || '-',
-        },
-        {
           label: 'Contact Number',
           value: guardianData.guardian.contactNo || '-',
-        },
-        {
-          label: 'Preferred Name',
-          value: guardianData.guardian.preferredName || '-',
         },
         {
           label: 'Temp. Address',
@@ -245,7 +245,7 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, d
         },
         {
           label: 'Gender',
-          value: guardianData.additionalGuardian.gender || '-',
+          value: guardianData.additionalGuardian.gender === 'F' ? 'Female' : 'Male',
         },
         {
           label: 'Address',

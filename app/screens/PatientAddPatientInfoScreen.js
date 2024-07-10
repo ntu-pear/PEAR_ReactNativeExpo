@@ -51,8 +51,8 @@ function PatientAddPatientInfoScreen({
   // Set initial value for preferred language select field
   const [listOfLanguages, setListOfLanguages] = useState(
     parseSelectOptions([
-      'Cantonese',
       'English',
+      'Cantonese',
       'Hainanese',
       'Hakka',
       'Hindi',
@@ -385,6 +385,26 @@ function PatientAddPatientInfoScreen({
                     dataType="name"
                   />
 
+                  <InputField
+                    isRequired
+                    title={'Preferred Name'}
+                    value={patient.PreferredName}
+                    onChangeText={handleFormData('PreferredName')}
+                    onEndEditing={handlePrefNameError}                    
+                    dataType="name"
+                    otherProps={{prefNameList: prefNames}}
+                  />
+                  
+                  <SelectionInputField
+                    isRequired
+                    title={'Preferred Language'}
+                    placeholder={'Select Language'}
+                    onDataChange={handleFormData('PreferredLanguageListID')}
+                    value={patient.PreferredLanguageListID}
+                    dataArray={listOfLanguages}
+                    onEndEditing={handlePrefLanguageError}
+                  /> 
+
                   <SensitiveInputField
                     isRequired
                     title={'NRIC'}
@@ -394,7 +414,7 @@ function PatientAddPatientInfoScreen({
                     onEndEditing={handleNRICError}
                     dataType="nric"
                     maxLength={9}
-                  />  
+                  />
 
                   <View style={styles.dateSelectionContainer}>
                     <DateInputField
@@ -421,6 +441,7 @@ function PatientAddPatientInfoScreen({
                     isRequired
                     title={'Address'}
                     value={patient.Address}
+                    dataType="address"
                     onChangeText={handleFormData('Address')}
                     onEndEditing={handleAddrError}
                   />
@@ -439,6 +460,7 @@ function PatientAddPatientInfoScreen({
                   <InputField
                     title={'Temporary Address'}
                     value={patient.TempAddress}
+                    dataType="address"
                     onChangeText={handleFormData('TempAddress')}
                     onEndEditing={handleTempAddrError}
                   />
@@ -471,27 +493,7 @@ function PatientAddPatientInfoScreen({
                     dataType={'mobile phone'}
                     keyboardType='numeric'                      
                     maxLength={8}
-                  />                  
-
-                  <InputField
-                    isRequired
-                    title={'Preferred Name'}
-                    value={patient.PreferredName}
-                    onChangeText={handleFormData('PreferredName')}
-                    onEndEditing={handlePrefNameError}                    
-                    dataType="name"
-                    otherProps={{prefNameList: prefNames}}
-                  />
-                  
-                  <SelectionInputField
-                    isRequired
-                    title={'Preferred Language'}
-                    placeholder={'Select Language'}
-                    onDataChange={handleFormData('PreferredLanguageListID')}
-                    value={patient.PreferredLanguageListID}
-                    dataArray={listOfLanguages}
-                    onEndEditing={handlePrefLanguageError}
-                  />                 
+                  />                
 
                   <RadioButtonInput
                     isRequired

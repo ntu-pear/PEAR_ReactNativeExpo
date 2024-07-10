@@ -256,6 +256,7 @@ function EditPatientInfoScreen(props) {
                 <InputField
                   isRequired
                   title={'Address'}
+                  dataType="address"
                   value={formData.Address}
                   onChangeText={handleFormData('Address')}
                   onEndEditing={handleAddrError}
@@ -275,6 +276,7 @@ function EditPatientInfoScreen(props) {
                 <InputField
                   title={'Temporary Address'}
                   value={formData.TempAddress}
+                  dataType="address"
                   onChangeText={handleFormData('TempAddress')}
                   onEndEditing={handleTempAddrError}
                 />

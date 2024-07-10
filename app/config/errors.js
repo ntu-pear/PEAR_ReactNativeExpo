@@ -5,6 +5,7 @@ export default {
   alphaOnlyError: 'Field cannot contain numbers or symbols',
   nricFormatError: 'Invalid NRIC format',
   nricError: 'Invalid NRIC',
+  addressFormatError: 'Invalid Address format',
   homePhoneNoError: 'Home telephone no. must start with the digit 6, and must have 8 digits.',
   mobilePhoneNoError: 'Mobile no. must start with the digit 8 or 9, and must have 8 digits.',
   postalCodeError: 'Postal code must have 6 digits',
@@ -17,7 +18,7 @@ export default {
   bloodSugarLevelError: 'Blood Sugar Level should be within 50 to 250.',
   heartRateError: 'Heart Rate should be within 0 to 300.',
   weightError: 'Weight should be within 0 to 200',
-  heightError: 'Height should be within 0 to 2',
+  heightError: 'Height should be within 0 to 200',
 };
 
 export const getErrorMsgFromCode = (codr) => {

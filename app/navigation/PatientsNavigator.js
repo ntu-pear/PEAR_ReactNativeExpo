@@ -10,7 +10,7 @@ import PatientMedicalHistoryScreen from 'app/screens/PatientMedicalHistoryScreen
 import PatientAllergyScreen from 'app/screens/PatientAllergyScreen';
 import PatientHolidayScreen from 'app/screens/PatientHolidayScreen';
 import PatientPhotoAlbumScreen from 'app/screens/PatientPhotoAlbumScreen';
-import PatientPreferenceScreen from 'app/screens/PatientPreferenceScreen';
+import ActivityPreferenceScreen from 'app/screens/ActivityPreferenceScreen';
 import PatientPrescriptionScreen from 'app/screens/PatientPrescriptionScreen';
 import PatientProblemLog from 'app/screens/PatientProblemLogScreen';
 import PatientVitalScreen from 'app/screens/PatientVitalScreen';
@@ -94,8 +94,8 @@ function PatientsNavigator() {
         }}
       />
       <Stack.Screen
-        name={routes.PATIENT_PREFERENCE}
-        component={PatientPreferenceScreen}
+        name={routes.ACTIVITY_PREFERENCE}
+        component={ActivityPreferenceScreen}
         options={{
           headerShown: true,
           headerBackTitleVisible: false,

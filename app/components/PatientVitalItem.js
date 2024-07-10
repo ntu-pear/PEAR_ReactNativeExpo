@@ -38,7 +38,7 @@ const PatientVitalItem = ({
         <TextRow label="Heart Rate" value={`${heartRate} bpm`} />
         <TextRow label="SpO2" value={`${spO2}%`} />
         <TextRow label="Blood Sugar" value={`${bloodSugarlevel} mg/dL`} />
-        <TextRow label="Height" value={`${height} m`} />
+        <TextRow label="Height" value={`${height} cm`} />
         <TextRow label="Weight" value={`${weight} kg`} />
         <TextRow label="After Meal" value={afterMeal ? 'Yes' : 'No'} />
         <TextRow label="Remarks" value={vitalRemarks} />

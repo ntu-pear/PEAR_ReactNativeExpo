@@ -24,6 +24,12 @@ export const nricFormat = (value) => {
   }
 };
 
+export const addressFormat = (value) => {
+  if(!/^(?!\s)(?!.*\s{2})([a-zA-Z0-9\s,'-]*[a-zA-Z0-9,'-])$/.test(value)) {
+    return errors.addressFormatError;
+  }
+};
+
 export const nricValid = (value) => {
   const first = value[0];
   const digits = value.slice(1, -1);
@@ -138,7 +144,7 @@ export const weightRange = (value) => {
 };
 
 export const heightRange = (value) => {
-  if (!(value >= 0 && value <= 2)) {
+  if (!(value >= 0 && value <= 200)) {
     return errors.heightError;
   }
 };
@@ -146,6 +152,7 @@ export const heightRange = (value) => {
 export const validationFunctions = {
   name: [nameFormat],
   nric: [nricFormat, nricValid],
+  'address': [addressFormat],
   'home phone': [homePhoneNoFormat],
   'mobile phone': [mobilePhoneNoFormat],
   email: [emailFormat],
