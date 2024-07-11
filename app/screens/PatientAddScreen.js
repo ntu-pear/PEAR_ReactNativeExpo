@@ -176,7 +176,7 @@ function PatientAddScreen() {
     if (field === 'IsChecked') {
       newData[field] = !formData.patientInfo.IsChecked;
       if (!newData[field]) {
-        newData.EndDate = new Date(); // if IsChecked is false, reset End Date to beginning of epoch time
+        newData.EndDate = new Date(0); // if IsChecked is false, reset End Date to beginning of epoch time
       }
     } else if (field === 'PreferredLanguageListID') {
       newData[field] = parseInt(e);
