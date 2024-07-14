@@ -1,5 +1,5 @@
 export default {
-  loginError: 'Invalid email and/or user role and/or password',
+  loginError: 'Invalid credentials',
   emptyParameters: 'Field(s) cannot be left empty',
   notUnselectedError: 'Field must have a selection',
   alphaOnlyError: 'Field cannot contain numbers or symbols',
@@ -19,6 +19,7 @@ export default {
   heartRateError: 'Heart Rate should be within 0 to 300.',
   weightError: 'Weight should be within 0 to 200',
   heightError: 'Height should be within 0 to 200',
+  passwordFormatError: 'Password must be 8-16 characters long, and include at least one uppercase letter, one lowercase letter, one number, and one special character.'
 };
 
 export const getErrorMsgFromCode = (codr) => {

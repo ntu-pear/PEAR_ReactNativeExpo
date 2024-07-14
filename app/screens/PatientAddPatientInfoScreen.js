@@ -528,13 +528,19 @@ function PatientAddPatientInfoScreen({
 
                   {/* Rendered only when the specify date of leaving checkbox is selected. */}
                   {formData.patientInfo.IsChecked ? (
-                    <DateInputField
-                      title={'Date of Leaving'}
-                      value={patient.EndDate}
-                      handleFormData={handleFormData('EndDate')}
-                      hideDayOfWeek={true}
-                      onEndEditing={handleLeavingError}
-                    />
+                    <View style={styles.dateSelectionContainer}>
+                      <DateInputField
+                        title={'Date of Leaving'}
+                        value={patient.EndDate}
+                        handleFormData={handleFormData('EndDate')}
+                        hideDayOfWeek={true}
+                        onEndEditing={handleLeavingError}
+                        allowNull
+                        minimumInputDate={minimumJoiningDate}
+                        maximumInputDate={maximumJoiningDate}
+                        centerDate
+                      />
+                    </View>
                   ) : null}
                 </View>
               </VStack>
@@ -553,8 +559,8 @@ function PatientAddPatientInfoScreen({
 }
 const styles = StyleSheet.create({
   formContainer: {
-    //flex: 1,
-    //alignItems: 'flex-start',
+    flex: 1,
+    alignItems: 'flex-start',
     justifyContent: 'center',
     paddingLeft: '10%',
     width: '90%',

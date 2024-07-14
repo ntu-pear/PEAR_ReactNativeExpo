@@ -217,14 +217,22 @@ function EditPatientInfoScreen(props) {
   // form submission when save button is pressed
   const submitForm = async () => {
     let tempFormData = {...formData};
+    let alertTitle = '';
+    let alertDetails = '';
+
     if(tempFormData['EndDate'] == null) {
       tempFormData['EndDate'] = new Date(null).toISOString();
     }
+    
+    else if(tempFormData['EndDate'] < tempFormData['StartDate']) {
+      alertTitle = 'Error in Editing Patient Information';
+      alertDetails = 'Leave date cannot be earlier than join date!';
+      Alert.alert(alertTitle, alertDetails);
+
+      return null;
+    }
 
     const result = await patientApi.updatePatient(tempFormData);
-
-    let alertTitle = '';
-    let alertDetails = '';
 
     if (result.ok) {
       navigation.goBack(routes.PATIENT_INFORMATION, {
@@ -342,7 +350,8 @@ function EditPatientInfoScreen(props) {
                     hideDayOfWeek={true}
                     onEndEditing={handleLeavingError}
                     allowNull
-                    minimumInputDate={new Date()}
+                    minimumInputDate={minimumJoiningDate}
+                    maximumInputDate={maximumJoiningDate}
                     centerDate
                   />
                 </View>

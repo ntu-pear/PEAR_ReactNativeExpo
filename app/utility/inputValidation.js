@@ -24,8 +24,14 @@ export const nricFormat = (value) => {
   }
 };
 
+export const passwordFormat = (value) => {
+  if(!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,16}$/.test(value)) {
+    return errors.passwordFormatError;
+  }
+};
+
 export const addressFormat = (value) => {
-  if(!/^(?!\s)(?!.*\s{2})([a-zA-Z0-9\s,'-]*[a-zA-Z0-9,'-])$/.test(value)) {
+  if(!/^(?!\s)(?!.*\s{2})([a-zA-Z0-9\s,#-]*[a-zA-Z0-9])$/.test(value)) {
     return errors.addressFormatError;
   }
 };
@@ -164,5 +170,6 @@ export const validationFunctions = {
   'bloodSugarLevel': [bloodSugarLevelRange],
   'heartRate' : [heartRateRange], 
   'weight' : [weightRange],
-  'height' : [heightRange]
+  'height' : [heightRange],
+  password: [passwordFormat],
 };
