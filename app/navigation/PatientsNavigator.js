@@ -162,7 +162,7 @@ function PatientsNavigator() {
         options={{
           headerShown: true,
           headerBackTitleVisible: false,
-          title: 'Schedule',
+          title: 'Mobility Aid',
         }}
       />
       <Stack.Screen
