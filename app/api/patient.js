@@ -442,6 +442,10 @@ const deletePrescription = async (prescriptionData) => {
   return client.put(patientPrescriptionDelete, payload);
 };
 
+const deletePatient = async (userID) => {
+  return client.put(patientDelete, userID);
+};
+
 /*
  * Expose your end points here
  */
@@ -477,4 +481,5 @@ export default {
   updateProblemLog,
   updatePrescription,
   deletePrescription,
+  deletePatient,
 };

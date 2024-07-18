@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     maxWidth: 300,
     textAlign: 'center',
-    whiteSpace: 'pre-line',
+    //whiteSpace: 'pre-line',
   },
 });
 
