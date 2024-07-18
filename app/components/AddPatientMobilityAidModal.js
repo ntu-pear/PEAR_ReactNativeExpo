@@ -1,0 +1,158 @@
+// Libs
+import React, { useEffect, useState } from 'react';
+import { Modal, Button, VStack, Text } from 'native-base';
+import { StyleSheet, View } from 'react-native';
+
+// Components
+import InputField from './input-components/InputField';
+import AppButton from './AppButton';
+import SelectionInputField from './input-components/SelectionInputField';
+import RadioButtonInput from './input-components/RadioButtonsInput';
+
+// Hooks
+import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
+
+// Configurations
+import colors from 'app/config/colors';
+import AddEditModal from './AddEditModal';
+
+function AddPatientMobilityAidModal({
+  showModal,
+  modalMode,
+  formData,
+  setFormData,
+  onClose,
+  onSubmit,
+}) {
+  // Screen error state: This = true when the child components report error(input fields)
+  // Enables use of dynamic rendering of components when the page error = true/false.
+  const [isInputErrors, setIsInputErrors] = useState(false);
+  
+  // Options for mobility aid field
+  const { data: mobilityAidOptions } = useGetSelectionOptions('Mobility');
+
+  // Options for Condition
+  const conditionOptions = [
+    { label: 'Fully Recovered', value: true },
+    { label: 'Not Recovered', value: false },
+  ];
+
+  
+  // Input error states (Child components)
+  // This records the error states of each child component (ones that require tracking).
+  const [isMobilityRemarksError, setIsMobilityRemarksError] = useState(false);
+  const [isCreatedDateTimeError, setIsCreatedDateTimeError] = useState(false);
+
+  // This useEffect enables the page to show correct error checking.
+  // The main isInputErrors is responsible for the error state of the screen.
+  // This state will be true whenever any child input components are in error state.
+  useEffect(() => {
+    setIsInputErrors(
+        isMobilityRemarksError ||
+        isCreatedDateTimeError,
+    );
+  }, [
+    isMobilityRemarksError,
+    isCreatedDateTimeError,
+  ]);
+
+  
+  // Reset form
+  const resetForm = () => {
+    setFormData({    
+      "mobilityId": null,
+      "mobilityListId": 1,
+      "mobilityRemark": "",
+      "isRecovered": true,
+    });
+    setIsMobilityRemarksError(false);
+    setIsCreatedDateTimeError(false);
+  };
+
+  // When modal is closed, reset form
+  useEffect(() => {
+    if (!showModal) {
+      resetForm();
+    }
+  }, [showModal]);
+
+  const handleChange = (field, value) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      [field]: value,
+    }));
+  };
+
+  // Function to update data
+  const handleMobilityData = (field) => (e) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      [field]: field == 'mobilityListId' ? parseInt(e) : e,
+    }));
+  };
+
+  
+  // Handle form submission
+  const handleSubmit = () => {
+    if (!isInputErrors) {
+      onSubmit(formData);
+      onClose();
+    }
+  };
+
+  
+  return (
+    <AddEditModal
+      handleSubmit={handleSubmit}
+      isInputErrors={isInputErrors}
+      modalMode={modalMode}
+      onClose={onClose}
+      showModal={showModal}
+      modalTitle='Mobility Aid' 
+      modalContent={(
+        <>
+        <SelectionInputField
+          isRequired
+          title="Mobility Aid"
+          value={formData.mobilityListId}
+          dataArray={mobilityAidOptions}
+          onDataChange={handleMobilityData('mobilityListId')}
+        />
+        <InputField
+          title={'Remarks'}
+          value={formData.mobilityRemark}
+          onChangeText={handleMobilityData('mobilityRemark')}
+          onEndEditing={setIsMobilityRemarksError}
+          autoCapitalize='none'
+        />  
+        <RadioButtonInput
+          title={'Condition'}
+          isRequired={true}
+          value={formData.isRecovered}
+          dataArray={conditionOptions}
+          onChangeData={(newValue) => handleChange('isRecovered', newValue)}
+        />        
+        </>
+      )}
+    />
+  );
+}
+console.log(`Test 5`);
+const styles = StyleSheet.create({
+  modalHeader: {
+    backgroundColor: colors.green, // Change to your preferred green color
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalHeaderText: {
+    color: 'white', // Text color
+    fontSize: 18, // Adjust font size as needed
+    fontWeight: 'bold', // Optional: if you want the text to be bold
+    textTransform: 'uppercase',
+  },
+  dateSelectionContainer: {
+    width: '100%',
+  },
+});
+
+export default AddPatientMobilityAidModal;

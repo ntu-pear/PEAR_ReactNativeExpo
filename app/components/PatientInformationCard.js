@@ -51,7 +51,7 @@ function PatientInformationCard(props) {
 
   const MyComponent = () => {
     return (
-      <HStack space={'12%'} justifyContent="center">
+      <HStack space={'10%'} justifyContent="flex-end">
         <VStack>
           <Text thin fontSize={SCREEN_HEIGHT * 0.014} color={colors.light}>
             NRIC NO.
@@ -123,10 +123,9 @@ function PatientInformationCard(props) {
       borderBottomWidth="3"
       style={styles.container}
     >
-      <VStack space={'8%'} justifyContent="center" mb="16" mt="20" mr="20" ml="20" flex="1" >
-        <HStack space={'12%'} justifyContent="center">
+        <HStack space={'4%'} justifyContent="center">
           <Avatar
-            size={Platform.OS === 'web' ? '28vh' : SCREEN_HEIGHT * 0.15}
+            size={Platform.OS === 'web' ? '28vh' : SCREEN_HEIGHT * 0.11}
             bg={colors.pink}
             marginY="auto"
             source={
@@ -173,15 +172,14 @@ function PatientInformationCard(props) {
             {Platform.OS === 'web' ? MyComponent() : null}
           </VStack>
         </HStack>
-
         {Platform.OS === 'web' ? null : MyComponent()}
-      </VStack>
     </Box>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    height: 190,
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',

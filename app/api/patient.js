@@ -14,6 +14,7 @@ const medicalHistoryEndpoint = '/MedicalHistory';
 const medicationEndpoint = '/Medication';
 const activityEndpoint = '/Activity';
 const routineEndpoint = '/Routine';
+const mobilityEndpoint = '/Mobility';
 const patientList = `${endpoint}/patientList`;
 // `${endpoint}/patientListByUserId` changed to ${endpoint}/patientListByLoggedInCaregiver
 // to enable fetching caregiver specific patients
@@ -52,6 +53,11 @@ const patientMedicationDelete = `${medicationEndpoint}/delete`; //eslint-disable
 const patientPrescriptionAdd = `${prescriptionEndpoint}/add`; //eslint-disable-line no-unused-vars
 const patientPrescriptionUpdate = `${prescriptionEndpoint}/update`; //eslint-disable-line no-unused-vars
 const patientPrescriptionDelete = `${prescriptionEndpoint}/delete`; //eslint-disable-line no-unused-vars
+// Mobility
+const patientMobility = `${mobilityEndpoint}/PatientMobility`; //eslint-disable-line no-unused-vars
+const patientMobilityAdd = `${mobilityEndpoint}/add`; //eslint-disable-line no-unused-vars
+const patientMobilityUpdate = `${mobilityEndpoint}/update`; //eslint-disable-line no-unused-vars
+const patientMobilityDelete = `${mobilityEndpoint}/delete`; //eslint-disable-line no-unused-vars
 
 /*
  * List all functions here
@@ -189,6 +195,15 @@ const getPatientRoutine = async (patientID) => {
   return client.get(patientRoutine, params);
 };
 
+const getPatientMobility = async (patientID) => {
+  let params;
+  params = {
+    patientID,
+  };
+
+  return client.get(patientMobility, params);
+};
+
 // **********************  POST REQUESTS *************************
 const addPatient = (patientFormData) => {
   var patientData = new FormData();
@@ -323,6 +338,17 @@ const addPatientPrescription = async (patientID, prescriptionData) => {
   return client.post(patientPrescriptionAdd, payload);
 };
 
+const addPatientMobility = async (patientID, mobilityData) => {
+  const payload = {
+    patientID: patientID,
+    mobilityListId: mobilityData.mobilityListId,
+    mobilityListDesc: mobilityData.mobilityListDesc,
+    mobilityRemark: mobilityData.mobilityRemark,
+    isRecovered: mobilityData.isRecovered,
+  };
+  return client.post(patientMobilityAdd, payload);
+};
+
 // ************************* UPDATE REQUESTS *************************
 const updatePatient = async (data) => {
   const formData = new FormData();
@@ -414,6 +440,17 @@ const updatePrescription = async (patientID, prescriptionData) => {
   return client.put(patientPrescriptionUpdate, payload);
 };
 
+const updateMobility = async (patientID, mobilityData) => {
+  const payload = {
+    patientID: patientID,
+    mobilityListId: mobilityData.mobilityListId,
+    mobilityListDesc: mobilityData.mobilityListDesc,
+    mobilityRemark: mobilityData.mobilityRemark,
+    isRecovered: mobilityData.isRecovered,
+  };
+  return client.put(patientMobilityUpdate, payload);
+};
+
 const deleteMedication = async (medicationData) => {
   const payload = {
     medicationID: medicationData.medicationID,
@@ -442,6 +479,13 @@ const deletePrescription = async (prescriptionData) => {
   return client.put(patientPrescriptionDelete, payload);
 };
 
+const deleteMobility = async (mobilityData) => {
+  const payload = {
+    mobilityId: mobilityData.mobilityId,
+  };
+  return client.put(patientMobilityDelete, payload);
+};
+
 /*
  * Expose your end points here
  */
@@ -457,6 +501,7 @@ export default {
   getPatientMedicalHistory,
   getPatientMedication,
   getPatientRoutine,
+  getPatientMobility,
   addPatient,
   AddPatientAllergy,
   AddPatientVital,
@@ -465,6 +510,7 @@ export default {
   addPatientMedication,
   addPatientMedicalHistory,
   addPatientPrescription,
+  addPatientMobility,
   updatePatient,
   updatePatientAllergy,
   deletePatientAllergy,
@@ -477,4 +523,6 @@ export default {
   updateProblemLog,
   updatePrescription,
   deletePrescription,
+  updateMobility,
+  deleteMobility,
 };
