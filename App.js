@@ -65,8 +65,8 @@ export default function App() {
         <OfflineNotice />
         <NavigationContainer theme={MyTheme}>
           {/* {user ? <AppNavigator /> : <AuthNavigator />} using this had render issues
-          fix here: https://stackoverflow.com/questions/72800167/login-screen-rendering-twice-after-logout-on-react-navigation-6 */}
-    
+          Reference to render fix: https://stackoverflow.com/questions/72800167/login-screen-rendering-twice-after-logout-on-react-navigation-6 */}
+
           {/* <DebugNavigator/> */}
           <AppStackScreen user={user} />
         </NavigationContainer>
