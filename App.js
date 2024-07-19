@@ -11,6 +11,7 @@ import OfflineNotice from 'app/components/OfflineNotice';
 
 // Navigation or Routing related import
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AuthNavigator from 'app/navigation/AuthNavigator';
 import AppNavigator from 'app/navigation/AppNavigator';
 
@@ -19,6 +20,14 @@ import DebugNavigator from 'app/navigation/DebugNavigator';
 
 // Removal of token/user login persistence (see lines 36-37) -- Justin
 // import authStorage from './app/auth/authStorage';
+const AppStack = createNativeStackNavigator();
+
+const AppStackScreen = ({user}) => (
+  <AppStack.Navigator screenOptions={{ headerShown: false }}>
+    {user ? <AppStack.Screen name = "App" component={AppNavigator} /> : 
+            <AppStack.Screen name = "Auth" component={AuthNavigator} />}
+  </AppStack.Navigator>
+);
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -55,8 +64,11 @@ export default function App() {
       >
         <OfflineNotice />
         <NavigationContainer theme={MyTheme}>
-          {user ? <AppNavigator /> : <AuthNavigator />}
+          {/* {user ? <AppNavigator /> : <AuthNavigator />} using this had render issues
+          fix here: https://stackoverflow.com/questions/72800167/login-screen-rendering-twice-after-logout-on-react-navigation-6 */}
+    
           {/* <DebugNavigator/> */}
+          <AppStackScreen user={user} />
         </NavigationContainer>
       </AuthContext.Provider>
     </NativeBaseProvider>
