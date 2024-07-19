@@ -97,7 +97,8 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, d
         setPatientData([
           { label: 'First Name', value: patientProfile.firstName },
           { label: 'Last Name', value: patientProfile.lastName },
-          {label: 'NRIC', value: unMaskedPatientNRIC.replace(/\d{4}(\d{3})/, 'xxxx$1')},
+          {label: 'NRIC', 
+            value: patientProfile.nric.replace(/\d{4}(\d{3})/, 'xxxx$1')},
           {
             label: 'DOB',
             value: patientProfile.dob || '-',

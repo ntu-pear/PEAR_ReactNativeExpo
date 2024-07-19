@@ -177,12 +177,12 @@ function PatientsScreen({ navigation }) {
     viewMode === 'myPatients'
         ? await patientApi.getPatientListByLoggedInCaregiver(undefined, status)
         : await patientApi.getPatientList(undefined, status);
-    
+
     if(response.ok) {
       const listWithFullName = response.data.data.map(item => ({
         ...item,
         fullName: item.firstName.trim() + ' ' + item.lastName.trim(),
-      }));
+      })); //change type of sort here
 
       setOriginalListOfPatients([...listWithFullName]);
       setListOfPatients([...listWithFullName])
