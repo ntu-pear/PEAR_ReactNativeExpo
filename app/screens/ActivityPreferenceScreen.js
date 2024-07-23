@@ -1,6 +1,6 @@
 // Libs
 import React, { useContext, useEffect, useState, useCallback } from 'react';
-import { Dimensions, StyleSheet, SectionList, View, Text} from 'react-native';
+import { Dimensions, StyleSheet, SectionList, View, Text, Alert} from 'react-native';
 import routes from 'app/navigation/routes';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -16,12 +16,12 @@ import patientApi from 'app/api/patient';
 import DynamicTable from 'app/components/DynamicTable';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import AddButton from 'app/components/AddButton';
-import AddPatientAllergyModal from 'app/components/AddPatientAllergyModal';
+import AddActivityPreferenceModal from 'app/components/AddActivityPreferenceModal';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import LoadingWheel from 'app/components/LoadingWheel';
 
 function ActivityPreferenceScreen(props) {
-  let {patientID, patientId} = props.route.params;
+  let { patientID, patientId } = props.route.params;
   if (patientId) {
     patientID = patientId;
   }
@@ -29,6 +29,7 @@ function ActivityPreferenceScreen(props) {
 
   // Modal states
   const [showModal, setShowModal] = useState(false);
+  const [patientActivityIDs, setPatientActivityIDs] = useState([]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
@@ -45,35 +46,41 @@ function ActivityPreferenceScreen(props) {
   const [emptyLikesData, setEmptyLikesData] = useState(false);
   const [emptyDislikesData, setEmptyDislikesData] = useState(false);
 
-  // Refresh list when new medication is added or user requests refresh
+  // Refresh list when new activity is added or user requests refresh
   useFocusEffect(
     React.useCallback(() => {
       if (isReloadPatientList) {
         refreshActivityPreference();
         setIsReloadPatientList(false);
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isReloadPatientList]),
   );
 
   useEffect(() => {
     const getData = async () => {
-        setDislikedItems([]);
-        setLikedItems([]);
-        const response = await activity.getActivityPreference(patientID);
+      setDislikedItems([]);
+      setLikedItems([]);
+      const response = await activity.getActivityPreference(patientID);
 
-        if (response.data.data !== null) {
-            const { likedItems, notLikedItems } = splitData(response.data.data);
-            likedItems.length > 0 ? setLikedItems(likedItems) : setEmptyLikesData(true);
-            notLikedItems.length > 0 ? setDislikedItems(notLikedItems) : setEmptyDislikesData(true);
-        } else {
-            setEmptyLikesData(true);
-            setEmptyDislikesData(true);
-        }
+      if (response.data.data !== null) {
+        const { likedItems, notLikedItems } = splitData(response.data.data);
+        likedItems.length > 0 ? setLikedItems(likedItems) : setEmptyLikesData(true);
+        notLikedItems.length > 0 ? setDislikedItems(notLikedItems) : setEmptyDislikesData(true);
+      } else {
+        setEmptyLikesData(true);
+        setEmptyDislikesData(true);
+      }
     };
 
     getData();
-}, []);
+  }, [isReloadPatientList]);
+
+  useEffect(() => {
+    if (props.route.params.patientId) {
+      getPatientActivity(patientID);
+      console.log('patient ID Log: ', patientID);
+    }
+  }, [isReloadPatientList]);
 
   // Navigate to patient profile on click profile image
   const onClickProfile = () => {  
@@ -85,11 +92,7 @@ function ActivityPreferenceScreen(props) {
     setIsLoading(true);
     const promiseFunction = async () => {
       await getPatientData();
-      await getActivities();
     };
-    setIsLoading(false);
-    setEmptyLikesData(false);
-    setEmptyDislikesData(false); 
     promiseFunction();
   }
 
@@ -113,53 +116,54 @@ function ActivityPreferenceScreen(props) {
     }
   };
 
-  const getActivities = async () => {
-    // fetch full user profile information by calling api using user ID
-    if (patientID) {
-      const response = await activity.getActivityPreference(patientID);
-      if (response.ok) {
-        setIsError(false);
-        setIsRetry(false);
-        setStatusCode(response.status);
-      } else {
-        console.log('Request failed with status code: ', response.status);
-        setIsLoading(false);
-        setIsError(false);
-        setIsRetry(false);
-        setStatusCode(response.status);
-      }
+  // Get patient activity data
+  const getPatientActivity = async (id) => {
+    const response = await activity.getActivityPreference(id);
+    if (!response.ok) {
+      console.log('Request failed with status code: ', response.status);
+      setIsLoading(false);
+      return;
     }
+
+    const activityIDs = response.data.data?.map(
+      (activity) => activity.centreActivityID,
+    );
+    setPatientActivityIDs(activityIDs);
+    setIsLoading(false);
   };
 
-  // const handleModalSubmit = async (activityData) => {
+  const handleAddActivity = () => {
+    setShowModal(true);
+  };
 
-  //   let alertTitle = '';
-  //   let alertDetails = '';
+  const handleModalSubmit = async (activityData) => {
+    let alertTitle = '';
+    let alertDetails = '';
 
-  //   const result = await activity.addActivityPreference(patientID, activityData);
-  //   if (result.ok) {
-  //     console.log('submitting activity data', activityData);
-  //     getActivities(patientID);
-  //     setShowModal(false);
-
-  //     alertTitle = 'Successfully added activity';
-  //   } else {
-  //     const errors = result.data?.message;
-
-  //     result.data
-  //     ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-  //     : (alertDetails = 'Please try again.');
+    const result = await activity.addActivityPreference(patientID, activityData);
+    if (result.ok) {
+      await getPatientActivity(patientID);
+      setShowModal(false);
+      setIsReloadPatientList(true);
       
-  //     alertTitle = 'Error adding activity';
-  //   }
+      alertTitle = 'Successfully added activity';
+    } else {
+      const errors = result.data?.message;
 
-  //   Alert.alert(alertTitle, alertDetails);
-  // };
+      result.data
+      ? (alertDetails = `\n${errors}\n\nPlease try again.`)
+      : (alertDetails = 'Please try again.');
+      
+      alertTitle = 'Error adding activity';
+    }
 
+    Alert.alert(alertTitle, alertDetails);
+  };
+
+  //to split the array into different sectionlist to display
   const splitData = (data) => {
     const likedItems = data.filter(item => item.isLike);
     const notLikedItems = data.filter(item => !item.isLike);
-    
     return { likedItems, notLikedItems };
   };
 
@@ -174,7 +178,7 @@ function ActivityPreferenceScreen(props) {
                   <ProfileNameButton   
                     profilePicture={patientData.profilePicture}
                     profileLineOne={patientData.preferredName}
-                    profileLineTwo={(patientData.firstName + ' ' + patientData.lastName)}
+                    profileLineTwo={`${patientData.firstName} ${patientData.lastName}`}
                     handleOnPress={onClickProfile}
                     isPatient
                     isVertical={false}
@@ -187,7 +191,7 @@ function ActivityPreferenceScreen(props) {
           </View>
           <SectionList 
             sections={[{ title: 'Likes', data: emptyLikesData ? emptyData : likedItems }]}
-            renderItem={({ item, section }) => (
+            renderItem={({ item }) => (
               <Text style={emptyLikesData ? styles.noItem : styles.likedItems}>
                 {item.activityTitle}
               </Text>
@@ -209,17 +213,26 @@ function ActivityPreferenceScreen(props) {
             )}
             keyExtractor={(item, index) => index.toString()}
           />
+
+          <View style={styles.button}>
+            <AddButton title="Add Activity" onPress={handleAddActivity} />
+            <AddActivityPreferenceModal
+              showModal={showModal}
+              onClose={() => setShowModal(false)}
+              onSubmit={handleModalSubmit}
+              existingActivityIDs={patientActivityIDs}
+            />
+          </View>
         </View>
       )}
     </>
-    );
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     marginHorizontal: 20,
     marginVertical: 1,
-    
   },
   likedItems: {
     backgroundColor: '#d1e7dd',
@@ -243,6 +256,9 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: 'bold',
   },
+  button: {
+    paddingTop: 30,
+  }
 });
 
 export default ActivityPreferenceScreen;

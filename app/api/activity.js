@@ -10,6 +10,8 @@ const addPatientActivityPreference = `${endpoint}/add`;
 const updatePatientActivityPreference = `${endpoint}/update`;
 const deletePatientActivityPreference = `${endpoint}/delete`;
 
+const centreActivity = '/Activity/CentreActivity';
+
 /*
  * List all functions here
  * Refer to this api doc: https://github.com/infinitered/apisauce
@@ -26,13 +28,17 @@ const getActivityPreference = async (patientID) => {
   return client.get(patientActivityPreference, params);
 };
 
+const getCentreActivities = async () => {
+  return client.get(centreActivity);
+};
+
 // **********************  POST REQUESTS *************************
 
-const addActivityPreference = async (patientID, CentreActivityID, isLike) => {
+const addActivityPreference = async (patientID, data) => {
     const payload = {
         patientID: patientID,
-        CentreActivityID: CentreActivityID,
-        isLike: isLike,
+        centreActivityID: data.centreActivityID,
+        isLike: data.isLike,
       };
 
     return await client.post(addPatientActivityPreference, payload);
@@ -55,6 +61,7 @@ const deleteActivityPreference = async (data) => {
  */
 export default {
   getActivityPreference,
+  getCentreActivities,
   addActivityPreference,
   updateActivityPreference,
   deleteActivityPreference,

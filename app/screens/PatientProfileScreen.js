@@ -277,6 +277,7 @@ function PatientProfileScreen(props) {
                     navigation={navigation}
                     routes={routes.ACTIVITY_PREFERENCE}
                     patientProfile={patientProfile}
+                    patientId={patientID}
                     />
                   <PatientProfileCard
                     vectorIconComponent={
