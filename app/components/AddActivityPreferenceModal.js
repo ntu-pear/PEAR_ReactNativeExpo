@@ -127,6 +127,7 @@ function AddActivityPreferenceModal({
             <SelectionInputField
               isRequired
               title={'Activity'}
+              placeholder={'Select Activity'}
               onDataChange={handleActivityChange}
               value={activityData.centreActivityID}
               dataArray={activityList}
@@ -135,6 +136,7 @@ function AddActivityPreferenceModal({
             <SelectionInputField
               isRequired
               title={'Like/Dislike'}
+              placeholder={'Select Preference'}
               onDataChange={handleIsLikeChange}
               value={activityData.isLike}
               dataArray={isLikeList}
