@@ -179,12 +179,12 @@ function DashboardScreen({ navigation }) {
     const intervalId = setInterval(updateCurrentTimePosition, 60000); // Update every 1 minute
   
     return () => clearInterval(intervalId); // Clean up the interval on component unmount
-  }, [selectedDate]);
+  }, [selectedDate, originalSchedule]);
 
   const calculateCurrentTimePosition = (currentTime, startTime, endTime) => {
     const totalDuration = endTime - startTime;
-    const elapsed = (currentTime - startTime) + 300000; //manual offset of ~5min to align properly
-    return (elapsed / totalDuration) * 100; // Return percentage position
+    const elapsed = currentTime - startTime;
+    return Math.max(0, Math.min((elapsed / totalDuration) * 100, 100)); // Return percentage position
   };
 
   // Set screen to loading wheel when retrieving schedule from backend
