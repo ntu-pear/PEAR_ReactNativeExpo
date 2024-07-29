@@ -170,6 +170,7 @@ InputField.propTypes = {
     'heartRate',
     'weight',
     'height',
+    'frequencyPerDay'
   ]),
   keyboardType: TextInput.propTypes.keyboardType,
   variant: PropTypes.oneOf(['singleLine', 'multiLine']),

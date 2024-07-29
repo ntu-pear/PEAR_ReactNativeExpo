@@ -137,7 +137,7 @@ function AddPatientMobilityAidModal({
     />
   );
 }
-console.log(`Test 5`);
+
 const styles = StyleSheet.create({
   modalHeader: {
     backgroundColor: colors.green, // Change to your preferred green color

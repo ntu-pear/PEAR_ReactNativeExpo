@@ -15,6 +15,7 @@ const medicationEndpoint = '/Medication';
 const activityEndpoint = '/Activity';
 const routineEndpoint = '/Routine';
 const mobilityEndpoint = '/Mobility';
+const photoEndpoint = 'PatientPhoto'
 const patientList = `${endpoint}/patientList`;
 // `${endpoint}/patientListByUserId` changed to ${endpoint}/patientListByLoggedInCaregiver
 // to enable fetching caregiver specific patients
@@ -58,6 +59,11 @@ const patientMobility = `${mobilityEndpoint}/PatientMobility`; //eslint-disable-
 const patientMobilityAdd = `${mobilityEndpoint}/add`; //eslint-disable-line no-unused-vars
 const patientMobilityUpdate = `${mobilityEndpoint}/update`; //eslint-disable-line no-unused-vars
 const patientMobilityDelete = `${mobilityEndpoint}/delete`; //eslint-disable-line no-unused-vars
+// Photo Album
+const patientPhoto = `${photoEndpoint}/GetAlbumByCategory`; //eslint-disable-line no-unused-vars
+const patientPhotoAdd = `${photoEndpoint}/add`; //eslint-disable-line no-unused-vars
+const patientPhotoUpdate = `${photoEndpoint}/update`; //eslint-disable-line no-unused-vars
+const patientPhotoDelete = `${photoEndpoint}/delete`; //eslint-disable-line no-unused-vars
 
 /*
  * List all functions here
@@ -204,6 +210,25 @@ const getPatientMobility = async (patientID) => {
   return client.get(patientMobility, params);
 };
 
+const getPatientPhoto = async (patientID) => {
+  let params;
+  params = {
+    patientID,
+  };
+
+  return client.get(photoEndpoint, params);
+};
+
+const getPatientPhotoByCategory = async (patientID , albumCategoryListID) => {
+  let params;
+  params = {
+    patientID,
+    albumCategoryListID,
+  };
+
+  return client.get(patientPhoto, params);
+};
+
 // **********************  POST REQUESTS *************************
 const addPatient = (patientFormData) => {
   var patientData = new FormData();
@@ -325,15 +350,15 @@ const addPatientMedicalHistory = async (patientID, hxData) => {
 const addPatientPrescription = async (patientID, prescriptionData) => {
   const payload = {
     patientID: patientID,
-    PrescriptionListID: prescriptionData.PrescriptionListID,
-    Dosage: prescriptionData.Dosage,
-    FrequencyPerDay: prescriptionData.FrequencyPerDay,
-    Instruction: prescriptionData.Instruction,
-    StartDate: prescriptionData.StartDate,
-    EndDate: prescriptionData.EndDate,
-    AfterMeal: prescriptionData.AfterMeal,
-    PrescriptionRemarks: prescriptionData.PrescriptionRemarks,
-    IsChronic: prescriptionData.IsChronic,
+    prescriptionListID: prescriptionData.prescriptionListID,
+    dosage: prescriptionData.dosage,
+    frequencyPerDay: prescriptionData.frequencyPerDay,
+    instruction: prescriptionData.instruction,
+    startDate: prescriptionData.startDate,
+    endDate: prescriptionData.endDate,
+    afterMeal: prescriptionData.afterMeal,
+    prescriptionRemarks: prescriptionData.prescriptionRemarks,
+    isChronic: prescriptionData.isChronic,
   };
   return client.post(patientPrescriptionAdd, payload);
 };
@@ -427,15 +452,16 @@ const updateProblemLog = async (patientID, userID, logData) => {
 const updatePrescription = async (patientID, prescriptionData) => {
   const payload = {
     patientID: patientID,
-    PrescriptionListID: prescriptionData.PrescriptionListID,
-    Dosage: prescriptionData.Dosage,
-    FrequencyPerDay: prescriptionData.FrequencyPerDay,
-    Instruction: prescriptionData.Instruction,
-    StartDate: prescriptionData.StartDate,
-    EndDate: prescriptionData.EndDate,
-    AfterMeal: prescriptionData.AfterMeal,
-    PrescriptionRemarks: prescriptionData.PrescriptionRemarks,
-    IsChronic: prescriptionData.IsChronic,
+    prescriptionID: prescriptionData.prescriptionID,
+    prescriptionListID: prescriptionData.prescriptionListID,
+    dosage: prescriptionData.dosage,
+    frequencyPerDay: prescriptionData.frequencyPerDay,
+    instruction: prescriptionData.instruction,
+    startDate: prescriptionData.startDate,
+    endDate: prescriptionData.endDate,
+    afterMeal: prescriptionData.afterMeal,
+    prescriptionRemarks: prescriptionData.prescriptionRemarks,
+    isChronic: prescriptionData.isChronic,
   };
   return client.put(patientPrescriptionUpdate, payload);
 };
@@ -443,6 +469,7 @@ const updatePrescription = async (patientID, prescriptionData) => {
 const updateMobility = async (patientID, mobilityData) => {
   const payload = {
     patientID: patientID,
+    mobilityId: mobilityData.mobilityId,
     mobilityListId: mobilityData.mobilityListId,
     mobilityListDesc: mobilityData.mobilityListDesc,
     mobilityRemark: mobilityData.mobilityRemark,
@@ -474,7 +501,7 @@ const deleteProblemLog = async (logData) => {
 
 const deletePrescription = async (prescriptionData) => {
   const payload = {
-    prescriptionId: prescriptionData.prescriptionId,
+    prescriptionID: prescriptionData.prescriptionID,
   };
   return client.put(patientPrescriptionDelete, payload);
 };
@@ -482,6 +509,14 @@ const deletePrescription = async (prescriptionData) => {
 const deleteMobility = async (mobilityData) => {
   const payload = {
     mobilityId: mobilityData.mobilityId,
+  };
+  return client.put(patientMobilityDelete, payload);
+};
+
+const deletePhoto = async (patientID, photoData) => {
+  const payload = {
+    patientID : photoData.patientId,
+    patientPhotoId: photoData.patientPhotoId,
   };
   return client.put(patientMobilityDelete, payload);
 };
@@ -502,6 +537,8 @@ export default {
   getPatientMedication,
   getPatientRoutine,
   getPatientMobility,
+  getPatientPhoto,
+  getPatientPhotoByCategory,
   addPatient,
   AddPatientAllergy,
   AddPatientVital,
@@ -525,4 +562,6 @@ export default {
   deletePrescription,
   updateMobility,
   deleteMobility,
+
+  deletePhoto,
 };

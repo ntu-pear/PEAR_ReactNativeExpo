@@ -23,6 +23,7 @@ import ProfileNameButton from 'app/components/ProfileNameButton';
 import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
 import LoadingWheel from 'app/components/LoadingWheel';
 import Swipeable from 'app/components/swipeable-components/Swipeable';
+import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
 import DynamicTable from 'app/components/DynamicTable';
 import MobilityAidItem from 'app/components/MobilityAidItem';
 import AddPatientMobilityAidModal from 'app/components/AddPatientMobilityAidModal';
@@ -94,6 +95,7 @@ function PatientMobilityAidScreen(props) {
   const [formData, setFormData] = useState({ // for add/edit form
     "mobilityId": null,
     "mobilityListId": 1,
+    "mobilityListDesc": "",
     "mobilityRemark": "",
     "isRecovered": true,
   });
@@ -151,10 +153,11 @@ function PatientMobilityAidScreen(props) {
   // Parse data
   const parseMobilityData = (tempData) => {
     return tempData.map(item=>({ // for add/edit form
+      "mobilityId": item.mobilityId,
       "mobilityListId": item.mobilityListId,
       "mobilityRemark": item.mobilityRemark,
       "mobilityListDesc": item.mobilityListDesc,
-      "createdDateTime": item.date,
+      "date": item.date,
       "isRecovered": item.isRecovered,
     }))
   }
@@ -178,7 +181,7 @@ function PatientMobilityAidScreen(props) {
     }
   };
 
-  // Show form to add problem log when add button is clicked
+  // Show form to add mobility aid when add button is clicked
   const handleOnClickAddMobility = () => {
     setIsModalVisible(true);
     setModalMode('add');
@@ -212,6 +215,98 @@ function PatientMobilityAidScreen(props) {
     
     Alert.alert(alertTitle, alertDetails);
   };
+
+  // Edit mobility aid
+  const handleEditMobilityAid = (mobilityID) => {
+    setIsModalVisible(true);
+    setModalMode('edit');
+    
+    const tempMobilityData = mobilityData.filter(x=>x.mobilityId == mobilityID)[0];
+
+    setFormData({
+      "mobilityId": tempMobilityData.mobilityId,
+      "mobilityListId": tempMobilityData.mobilityListId,
+      "mobilityListDesc": tempMobilityData.mobilityListDesc,
+      "mobilityRemark": tempMobilityData.mobilityRemark,
+      "isRecovered": tempMobilityData.isRecovered,
+    })
+  }
+
+  // Submit data to edit mobility aid
+  const handleModalSubmitEdit = async () => {
+    setIsLoading(true);
+
+    let tempFormData = {...formData};
+
+    let alertTitle = '';
+    let alertDetails = '';
+
+    const result = await patientApi.updateMobility(patientID, tempFormData);
+    if (result.ok) {
+      refreshMobilityData();
+      setIsModalVisible(false);
+      
+      alertTitle = 'Successfully edited mobility aid';
+    } else {
+      const errors = result.data?.message;
+      console.log("Error editing mobility aid")
+
+      result.data
+      ? (alertDetails = `\n${errors}\n\nPlease try again.`)
+      : (alertDetails = 'Please try again.');
+      
+      alertTitle = 'Error editing mobility aid';
+    }
+    
+    Alert.alert(alertTitle, alertDetails);
+  };
+
+  // Ask user to confirm deletion of mobility aid
+  const handleDeleteMobilityAid = (mobilityID) => {
+    const tempData = mobilityData.filter(x=>x.mobilityId == mobilityID)[0];
+
+    Alert.alert('Are you sure you wish to delete this item?', 
+    `Mobility Aid: ${tempData.mobilityListDesc}\n` +
+    `Remark: ${tempData.mobilityRemark}\n` +
+    `Condition: ${tempData.isRecovered ? "Fully Recovered" : "Not Recovered"} \n` +
+    `Date: ${formatDate(new Date(tempData.date), true)}`, [
+      {
+        text: 'Cancel',
+        onPress: ()=>{},
+        style: 'cancel',
+      },
+      {text: 'OK', onPress: ()=>deleteMobilityAid(mobilityID)},
+    ]);
+  }
+
+  // Delete mobility aid
+  const deleteMobilityAid = async (mobilityID) => {
+    setIsLoading(true);
+
+    let tempData = {mobilityId: mobilityID};
+
+    let alertTitle = '';
+    let alertDetails = '';
+
+    const result = await patientApi.deleteMobility(tempData);
+    if (result.ok) {
+      refreshMobilityData();
+      setIsModalVisible(false);
+      
+      alertTitle = 'Successfully deleted mobility aid';
+    } else {
+      const errors = result.data?.message;
+      console.log("Error deleting mobility aid", result)
+
+      result.data
+      ? (alertDetails = `\n${errors}\n\nPlease try again.`)
+      : (alertDetails = 'Please try again.');
+      
+      alertTitle = 'Error deleting mobility aid';
+    }
+    
+    Alert.alert(alertTitle, alertDetails);
+  }
 
   // Navigate to patient profile on click profile image
   const onClickProfile = () => {  
@@ -301,11 +396,14 @@ function PatientMobilityAidScreen(props) {
             ListEmptyComponent={()=>noDataMessage(statusCode, isLoading, isError, 'No mobility aids found', true)}
             data={mobilityData}
             keyboardShouldPersistTaps='handled'
-            keyExtractor={item => (item.mobilityListId)}
+            keyExtractor={item => (item.mobilityId)}
             renderItem={({ item }) => { 
               return(
                 <Swipeable
                   setIsScrolling={setIsScrolling}
+                  onSwipeRight={()=>handleDeleteMobilityAid(item.mobilityId)}
+                  onSwipeLeft={()=>handleEditMobilityAid(item.mobilityId)}
+                  underlay={<EditDeleteUnderlay/>}
                   item={
                     <TouchableOpacity 
                       style={styles.logContainer} 
@@ -317,6 +415,8 @@ function PatientMobilityAidScreen(props) {
                         isRecovered={item.isRecovered}
                         mobilityListDesc={item.mobilityListDesc}
                         date={item.date}
+                        onDelete={()=>handleDeleteMobilityAid(item.mobilityId)}
+                        onEdit={()=>handleEditMobilityAid(item.mobilityId)}
                         />
                     </TouchableOpacity>
                   }
@@ -332,6 +432,8 @@ function PatientMobilityAidScreen(props) {
                 widthData={[200, 200, 200, 200]}
                 screenName={'patient mobility aid'}
                 noDataMessage={noDataMessage(statusCode, isLoading, isError, 'No mobility aids found', false)}
+                del={true}
+                edit={true}
                 />
             </View>
           )}
@@ -347,7 +449,7 @@ function PatientMobilityAidScreen(props) {
             formData={formData}
             setFormData={setFormData}
             onClose={()=>setIsModalVisible(false)}
-            onSubmit={handleModalSubmitAdd}
+            onSubmit={modalMode == 'add' ? handleModalSubmitAdd : handleModalSubmitEdit}
           />
         </View>
       )

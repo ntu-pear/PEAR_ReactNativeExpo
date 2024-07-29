@@ -277,7 +277,7 @@ function PatientProblemLog(props) {
     `Author: ${tempData.authorName}\n` +
     `Description: ${tempData.problemLogListDesc}\n` +
     `Remarks: ${tempData.problemLogRemarks}\n` +
-    `Created: ${formatDate(new Date(tempData.createdDateTime))}`, [
+    `Created: ${formatDate(new Date(tempData.createdDateTime), true)}`, [
       {
         text: 'Cancel',
         onPress: ()=>{},

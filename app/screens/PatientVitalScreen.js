@@ -294,7 +294,7 @@ function PatientVitalScreen(props) {
     `bloodSugarLevel: ${tempData.bloodSugarlevel} mg/dL \n` +
     `vitalRemarks: ${tempData.vitalRemarks}\n` +
     `afterMeal: ${tempData.afterMeal}\n` +
-    `Created: ${formatDate(new Date(tempData.createdDateTime))}`, [
+    `Created: ${formatDate(new Date(tempData.createdDateTime), true)}`, [
       {
         text: 'Cancel',
         onPress: ()=>{},

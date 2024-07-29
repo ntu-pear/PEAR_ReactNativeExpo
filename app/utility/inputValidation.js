@@ -155,6 +155,12 @@ export const heightRange = (value) => {
   }
 };
 
+export const frequencyPerDayRange = (value) => {
+  if (!(value >= 1 && value <= 24)) {
+    return errors.frequencyPerDayError;
+  }
+};
+
 export const validationFunctions = {
   name: [nameFormat],
   nric: [nricFormat, nricValid],
@@ -171,5 +177,6 @@ export const validationFunctions = {
   'heartRate' : [heartRateRange], 
   'weight' : [weightRange],
   'height' : [heightRange],
+  'frequencyPerDay': [frequencyPerDayRange],
   password: [passwordFormat],
 };
