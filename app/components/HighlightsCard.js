@@ -107,6 +107,7 @@ function HighlightsCard({ item, setModalVisible }) {
   };
 
   const handleNavigation = (element) => {
+    setModalVisible(false);
     switch (element.highlightTypeID) {
       // new prescription
       case 1:
