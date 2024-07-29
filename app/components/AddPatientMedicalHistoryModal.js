@@ -127,6 +127,7 @@ function AddPatientMedicalHistoryModal({
             value={formData.medicalEstimatedDate}
             hideDayOfWeek={true}
             handleFormData={handleHxData('medicalEstimatedDate')}
+            maximumInputDate={new Date()}
           />
           </View>
         </>

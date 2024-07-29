@@ -150,7 +150,7 @@ function EditPatientSocialHistScreen(props) {
     { value: 8, label: 'Hedgehog' },
     { value: 9, label: 'Tortoise' },
     { value: 10, label: 'Spider' },
-    { value: 11, label: 'Unicorn' },
+    { value: 11, label: 'None' },
   ]);
 
   const [listOfDiet, setListOfDiet] = useState([
