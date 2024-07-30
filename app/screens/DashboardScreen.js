@@ -93,6 +93,7 @@ function DashboardScreen({ navigation }) {
   const [sort, setSort] = useState(sortFilterInitialState);
   const [dropdown, setDropdown] = useState(sortFilterInitialState);
   const [datetime, setDatetime] = useState(sortFilterInitialState);
+  const [currentTimePosition, setCurrentTimePosition] = useState(null);
 
   // Filter details related state
   // Details of filter options
@@ -161,6 +162,30 @@ function DashboardScreen({ navigation }) {
       }
     }))
   }, [originalScheduleWeekly]);
+
+  useEffect(() => {
+    const updateCurrentTimePosition = () => {
+      const timeNow = new Date();
+      const startTime = new Date(selectedDate);
+      startTime.setHours(9, 0, 0, 0); // Assuming schedule starts at 9 AM
+      const endTime = new Date(selectedDate);
+      endTime.setHours(17, 0, 0, 0); // Assuming schedule ends at 5 PM
+  
+      const position = calculateCurrentTimePosition(timeNow, startTime, endTime);
+      setCurrentTimePosition(position);
+    };
+  
+    updateCurrentTimePosition();
+    const intervalId = setInterval(updateCurrentTimePosition, 60000); // Update every 1 minute
+  
+    return () => clearInterval(intervalId); // Clean up the interval on component unmount
+  }, [selectedDate, originalSchedule]);
+
+  const calculateCurrentTimePosition = (currentTime, startTime, endTime) => {
+    const totalDuration = endTime - startTime;
+    const elapsed = currentTime - startTime;
+    return Math.max(0, Math.min((elapsed / totalDuration) * 100, 100)); // Return percentage position
+  };
 
   // Set screen to loading wheel when retrieving schedule from backend
   // Note: Once the data is retrieved from backend, setIsLoading is set to false momentarily so SearchFilterBar can render and initialize data
@@ -620,7 +645,7 @@ function DashboardScreen({ navigation }) {
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={{flexGrow: 1, alignItems: 'center', justifyContent: item.activities.length > 0 ? 'flex-start': 'center'}}
                   >
-                    <HStack>
+                    <HStack styles={styles.hStack}>
                       {item.activities.map((activity, i) => (
                         <ActivityCard
                           key={i}
@@ -635,6 +660,9 @@ function DashboardScreen({ navigation }) {
                           navigation={navigation}
                         />
                       ))}
+                      {currentTimePosition !== null && (
+                        <View style={[styles.currentTimeLine, {left: `${currentTimePosition}%`}]} />
+                      )}
                     </HStack>                
                   </ScrollView>
                 </HStack>
@@ -673,6 +701,16 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: 'lightgrey',
     padding: 4,
+  },
+  currentTimeLine: {
+    position: 'absolute',
+    height: '100%',
+    width: 2,
+    backgroundColor: 'red',
+  },
+  hStack: {
+    flexDirection: 'row',
+    position: 'relative',
   },
 });
 

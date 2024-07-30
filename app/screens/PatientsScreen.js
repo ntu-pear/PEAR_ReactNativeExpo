@@ -17,6 +17,7 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
 import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
+import BackToTopButton from 'app/components/BackToTopButton';
 
 // Utilities
 import { isEmptyObject, noDataMessage, sortFilterInitialState } from 'app/utility/miscFunctions';
@@ -437,6 +438,7 @@ function PatientsScreen({ navigation }) {
                 shadow={2}
                 size="sm"
               />
+            <BackToTopButton flatListRef={patientListRef} position="bottom-right" offset={17.5} />
             </Center>
           </View>
         </View>
