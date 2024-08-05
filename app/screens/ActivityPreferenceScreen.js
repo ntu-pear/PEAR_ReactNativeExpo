@@ -1,7 +1,6 @@
 // Libs
-import React, { useContext, useEffect, useState, useCallback } from 'react';
-import { Dimensions, StyleSheet, SectionList, View, Text, Alert} from 'react-native';
-import routes from 'app/navigation/routes';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Dimensions, StyleSheet, SectionList, View, Text, Alert, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
@@ -42,9 +41,7 @@ function ActivityPreferenceScreen(props) {
   const [likedItems, setLikedItems] = useState([]);
   const [dislikedItems, setDislikedItems] = useState([]);
 
-  const [emptyData, setEmptyData] = useState([{"activityTitle": "None"}]);
-  const [emptyLikesData, setEmptyLikesData] = useState(false);
-  const [emptyDislikesData, setEmptyDislikesData] = useState(false);
+  const [emptyData, setEmptyData] = useState([{ "activityTitle": "None" }]);
 
   // Refresh list when new activity is added or user requests refresh
   useFocusEffect(
@@ -64,11 +61,11 @@ function ActivityPreferenceScreen(props) {
 
       if (response.data.data !== null) {
         const { likedItems, notLikedItems } = splitData(response.data.data);
-        likedItems.length > 0 ? setLikedItems(likedItems) : setEmptyLikesData(true);
-        notLikedItems.length > 0 ? setDislikedItems(notLikedItems) : setEmptyDislikesData(true);
+        setLikedItems(likedItems.length > 0 ? likedItems : emptyData);
+        setDislikedItems(notLikedItems.length > 0 ? notLikedItems : emptyData);
       } else {
-        setEmptyLikesData(true);
-        setEmptyDislikesData(true);
+        setLikedItems(emptyData);
+        setDislikedItems(emptyData);
       }
     };
 
@@ -160,71 +157,99 @@ function ActivityPreferenceScreen(props) {
     Alert.alert(alertTitle, alertDetails);
   };
 
-  //to split the array into different sectionlist to display
+  const handleDeleteActivity = async (activityID) => {
+    Alert.alert(
+      'Are you sure you wish to delete this item?',
+      '',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => {},
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: async () => {
+            const result = await activity.deleteActivityPreference(activityID);
+            if (result.ok) {
+              Alert.alert('Success', 'Activity preference deleted successfully');
+              setIsReloadPatientList(true);
+            } else {
+              Alert.alert('Error', 'Failed to delete activity preference');
+            }
+          },
+        },
+      ],
+    );
+  };
+
+  // Split the array into different sections for SectionList
   const splitData = (data) => {
     const likedItems = data.filter(item => item.isLike);
     const notLikedItems = data.filter(item => !item.isLike);
     return { likedItems, notLikedItems };
   };
 
+  const renderItem = ({ item }) => (
+    <View style={styles.itemContainer}>
+      <Text style={item.activityTitle === "None" ? styles.noItem : item.isLike ? styles.likedItems : styles.dislikedItems}>
+        {item.activityTitle}
+      </Text>
+      {item.activityTitle !== "None" && (
+        <TouchableOpacity onPress={() => handleDeleteActivity(item)}>
+          <MaterialCommunityIcons name="delete" size={35} color="red" />
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+
   return (
     <>{isLoading ? (
       <ActivityIndicator visible />
-      ) : (
-        <View style={styles.container}>
-          <View style={{justifyContent: 'space-between'}}>            
-            <View style={{alignSelf: 'center', marginTop: 15, maxHeight: 120}} >
-              {!isEmptyObject(patientData) ? (
-                  <ProfileNameButton   
-                    profilePicture={patientData.profilePicture}
-                    profileLineOne={patientData.preferredName}
-                    profileLineTwo={`${patientData.firstName} ${patientData.lastName}`}
-                    handleOnPress={onClickProfile}
-                    isPatient
-                    isVertical={false}
-                    size={90}
-                    />
-              ) : (
-                <LoadingWheel/>
-                )}
-            </View>  
-          </View>
-          <SectionList 
-            sections={[{ title: 'Likes', data: emptyLikesData ? emptyData : likedItems }]}
-            renderItem={({ item }) => (
-              <Text style={emptyLikesData ? styles.noItem : styles.likedItems}>
-                {item.activityTitle}
-              </Text>
+    ) : (
+      <View style={styles.container}>
+        <View style={{ justifyContent: 'space-between' }}>
+          <View style={{ alignSelf: 'center', marginTop: 15, maxHeight: 120 }} >
+            {!isEmptyObject(patientData) ? (
+              <ProfileNameButton
+                profilePicture={patientData.profilePicture}
+                profileLineOne={patientData.preferredName}
+                profileLineTwo={`${patientData.firstName} ${patientData.lastName}`}
+                handleOnPress={onClickProfile}
+                isPatient
+                isVertical={false}
+                size={90}
+              />
+            ) : (
+              <LoadingWheel />
             )}
-            renderSectionHeader={({ section }) => (
-              <Text style={styles.header}>{section.title}</Text>
-            )}
-            keyExtractor={(item, index) => index.toString()}
-          />
-          <SectionList
-            sections={[{ title: 'Dislikes', data: emptyDislikesData ? emptyData : dislikedItems }]}
-            renderItem={({ item }) => (
-              <Text style={emptyDislikesData ? styles.noItem : styles.dislikedItems}>
-                {item.activityTitle}
-              </Text>
-            )}
-            renderSectionHeader={({ section }) => (
-              <Text style={styles.header}>{section.title}</Text>
-            )}
-            keyExtractor={(item, index) => index.toString()}
-          />
-
-          <View style={styles.button}>
-            <AddButton title="Add Activity" onPress={handleAddActivity} />
-            <AddActivityPreferenceModal
-              showModal={showModal}
-              onClose={() => setShowModal(false)}
-              onSubmit={handleModalSubmit}
-              existingActivityIDs={patientActivityIDs}
-            />
           </View>
         </View>
-      )}
+        {(likedItems.length > 0 || dislikedItems.length > 0) && (
+          <SectionList
+            sections={[
+              { title: 'Likes', data: likedItems },
+              { title: 'Dislikes', data: dislikedItems }
+            ]}
+            renderItem={renderItem}
+            renderSectionHeader={({ section }) => (
+              <Text style={styles.header}>{section.title}</Text>
+            )}
+            keyExtractor={(item, index) => index.toString()}
+          />
+        )}
+
+        <View style={styles.button}>
+          <AddButton title="Add Activity" onPress={handleAddActivity} />
+          <AddActivityPreferenceModal
+            showModal={showModal}
+            onClose={() => setShowModal(false)}
+            onSubmit={handleModalSubmit}
+            existingActivityIDs={patientActivityIDs}
+          />
+        </View>
+      </View>
+    )}
     </>
   );
 }
@@ -234,22 +259,32 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginVertical: 1,
   },
+  itemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   likedItems: {
-    backgroundColor: '#d1e7dd',
+    backgroundColor: '#C6EBC5',
     fontSize: 15,
     padding: 20,
     marginVertical: 3,
+    borderRadius: 30,
+    flex: 1,
   },
   dislikedItems: {
-    backgroundColor: '#f8d7da',
+    backgroundColor: '#FF8F8F',
     fontSize: 15,
     padding: 20,
     marginVertical: 3,
+    borderRadius: 30,
+    flex: 1,
   },
   noItem: {
     fontSize: 15,
     padding: 20,
     marginVertical: 3,
+    flex: 1,
   },
   header: {
     paddingTop: 15,

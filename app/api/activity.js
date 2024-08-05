@@ -20,12 +20,11 @@ const centreActivity = '/Activity/CentreActivity';
 // **********************  GET REQUESTS *************************
 
 const getActivityPreference = async (patientID) => {
-  let params;
-  params = {
-    patientID,
+  const payload = {
+    patientID: patientID,
   };
   
-  return client.get(patientActivityPreference, params);
+  return client.get(patientActivityPreference, payload);
 };
 
 const getCentreActivities = async () => {
@@ -53,7 +52,10 @@ const updateActivityPreference = async (data) => {
 };
 
 const deleteActivityPreference = async (data) => {
-    return client.put(deletePatientActivityPreference, data);
+  const payload = {
+    centreActivityPreferenceID: data.centreActivityPreferenceID,
+  };
+  return client.put(deletePatientActivityPreference, payload);
 };
 
 /*

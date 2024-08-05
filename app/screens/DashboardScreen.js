@@ -163,16 +163,25 @@ function DashboardScreen({ navigation }) {
     }))
   }, [originalScheduleWeekly]);
 
+  const isSameDay = (date1, date2) => {
+    return date1.getFullYear() === date2.getFullYear() &&
+           date1.getMonth() === date2.getMonth() &&
+           date1.getDate() === date2.getDate();
+  };
+  
   useEffect(() => {
     const updateCurrentTimePosition = () => {
       const timeNow = new Date();
-      const startTime = new Date(selectedDate);
-      startTime.setHours(9, 0, 0, 0); // Assuming schedule starts at 9 AM
-      const endTime = new Date(selectedDate);
-      endTime.setHours(17, 0, 0, 0); // Assuming schedule ends at 5 PM
-  
-      const position = calculateCurrentTimePosition(timeNow, startTime, endTime);
-      setCurrentTimePosition(position);
+      if (isSameDay(timeNow, selectedDate)) {
+        const startTime = new Date(selectedDate);
+        startTime.setHours(9, 0, 0, 0); // Assuming schedule starts at 9 AM
+        const endTime = new Date(selectedDate);
+        endTime.setHours(17, 0, 0, 0); // Assuming schedule ends at 5 PM
+        const position = calculateCurrentTimePosition(timeNow, startTime, endTime);
+        setCurrentTimePosition(position);
+      } else {
+        setCurrentTimePosition(null);
+      }
     };
   
     updateCurrentTimePosition();
