@@ -32,7 +32,8 @@ import typography from 'app/config/typography';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import InformationCard from 'app/components/InformationCard';
 
-function PatientInformationAccordion({patientID, patientProfile, guardianData, doctorsNoteData, socialHistoryData}) {
+// function PatientInformationAccordion({patientID, patientProfile, guardianData, doctorsNoteData, socialHistoryData}) {
+function PatientInformationAccordion({patientID, patientProfile, guardianData, socialHistoryData}) {
   // const { displayPicUrl, firstName, lastName, patientID } = props.route.params;
   const navigation = useNavigation();
   // const [isLoading, setIsLoading] = useState(true);
@@ -51,7 +52,7 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, d
   const [patientData, setPatientData] = useState([]);
   const [preferenceData, setPreferences] = useState([]);
   // const [doctorsNoteData, setDoctorNoteData] = useState([]);
-  const [doctorsNoteInfo, setDoctorNoteInfo] = useState([]);
+  // const [doctorsNoteInfo, setDoctorNoteInfo] = useState([]);
   const [unMaskedPatientNRIC, setUnMaskedPatientNRIC] = useState('');
   const [unMaskedGuardianNRIC, setUnMaskedGuardianNRIC] = useState('');
   const [unMasked2ndGuardianNRIC, setUnMasked2ndGuardianNRIC] = useState('');
@@ -140,30 +141,30 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, d
     }
   }, [unMaskedPatientNRIC]);
 
-  useEffect(() => {
-    mounted.current = true;
-    if (doctorsNoteData !== null && Object.keys(doctorsNoteData).length>0 && mounted.current) {
-      var lastItem = doctorsNoteData.pop();
-      setDoctorNoteInfo([
-        {
-          label: "Date",
-          value: lastItem.date || '-',
-        },
-        {
-          label: "Doctor's Name",
-          value: lastItem.doctorName || '-',
-        },
-        {
-          label: "Doctor's ID",
-          value: lastItem.doctorId || '-',
-        },
-        {
-          label: "Doctor's Remarks",
-          value: lastItem.doctorRemarks || '-',
-        },
-      ]);
-    }
-  }, [doctorsNoteData]);
+  // useEffect(() => {
+  //   mounted.current = true;
+  //   if (doctorsNoteData !== null && Object.keys(doctorsNoteData).length>0 && mounted.current) {
+  //     var lastItem = doctorsNoteData.pop();
+  //     setDoctorNoteInfo([
+  //       {
+  //         label: "Date",
+  //         value: lastItem.date || '-',
+  //       },
+  //       {
+  //         label: "Doctor's Name",
+  //         value: lastItem.doctorName || '-',
+  //       },
+  //       {
+  //         label: "Doctor's ID",
+  //         value: lastItem.doctorId || '-',
+  //       },
+  //       {
+  //         label: "Doctor's Remarks",
+  //         value: lastItem.doctorRemarks || '-',
+  //       },
+  //     ]);
+  //   }
+  // }, [doctorsNoteData]);
 
   useEffect(() => {
     mounted.current = true;
@@ -372,7 +373,7 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, d
       setGuardianInfoData([]);
       setSecondGuardianInfoData([]);
       // setDoctorNoteData([]);
-      setDoctorNoteInfo([]);
+      // setDoctorNoteInfo([]);
       // setIsLoading(true);
       // setIsPatientLoading(true);
       // setIsSocialHistoryLoading(true);
@@ -472,10 +473,10 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, d
         title: 'Patient Preferences',
         content: preferenceData
       },
-      {
-        title: "Doctor's Notes",
-        content: doctorsNoteInfo
-      },
+      // {
+      //   title: "Doctor's Notes",
+      //   content: doctorsNoteInfo
+      // },
       {
         title: 'Guardian(s) Information',
         content: guardianInfoData
@@ -485,7 +486,8 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, d
         content: socialHistoryInfo
       }
     ]);
-  }, [patientData, doctorsNoteInfo, guardianInfoData, secondGuardianInfoData, socialHistoryInfo]);
+    // }, [patientData, doctorsNoteInfo, guardianInfoData, secondGuardianInfoData, socialHistoryInfo]);
+      }, [patientData, guardianInfoData, secondGuardianInfoData, socialHistoryInfo]);
 
   function renderHeader(section, _, isActive) {
     return (

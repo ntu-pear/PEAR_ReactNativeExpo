@@ -14,6 +14,7 @@ import PatientProblemLog from 'app/screens/PatientProblemLogScreen';
 import PatientVitalScreen from 'app/screens/PatientVitalScreen';
 import PatientRoutineScreen from 'app/screens/PatientRoutineScreen';
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
+import DoctorNoteScreen from 'app/screens/DoctorNoteScreen';
 
 // Import Constants from Routes
 import routes from 'app/navigation/routes';
@@ -163,7 +164,7 @@ function DashboardNavigator() {
         options={{
           headerShown: true,
           headerBackTitleVisible: false,
-          title: 'Schedule',
+          title: 'Mobility Aid',
         }}
       />
       <Stack.Screen
@@ -200,6 +201,15 @@ function DashboardNavigator() {
           headerShown: true,
           headerBackTitleVisible: false,
           title: 'Edit Patient Social History',
+        }}
+      />
+      <Stack.Screen
+        name={routes.DOCTORNOTE_SCREEN}
+        component={DoctorNoteScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Doctor Note',
         }}
       />
     </Stack.Navigator>

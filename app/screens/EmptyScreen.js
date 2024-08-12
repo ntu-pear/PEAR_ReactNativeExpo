@@ -4,14 +4,14 @@ import colors from 'app/config/colors';
 
 function EmptyScreen() {
     return (<Text style={styles.redText}>
-                Access Denied
+                Only Supervisor role may access this feature
             </Text>);
 }
   
 const styles = StyleSheet.create({
 redText: {
     alignSelf: "center",
-    fontSize: 50,
+    fontSize: 35,
     color: colors.red,
 },
 });

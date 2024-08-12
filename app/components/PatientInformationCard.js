@@ -44,7 +44,11 @@ function PatientInformationCard(props) {
 
   const extractFullYear = (dob) => {
     const _date = new Date(dob);
-    return `${_date.getDate()}-${_date.getMonth()+1}-${_date.getFullYear()}`;
+
+    const day = String(_date.getDate()).padStart(2, '0');
+    const month = String(_date.getMonth() + 1).padStart(2, '0');
+    const year = _date.getFullYear();
+    return `${day}-${month}-${year}`;
   };
 
   const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -94,7 +98,7 @@ function PatientInformationCard(props) {
           >
             {`${calcAge(patientProfile?.dob)}`}
           </Text>
-          <Text
+          {/* <Text
             thin
             fontSize={SCREEN_HEIGHT * 0.014}
             mt="2"
@@ -109,6 +113,22 @@ function PatientInformationCard(props) {
             color={colors.light}
           >
             {`${patientProfile?.preferredLanguage}`}
+          </Text> */}
+          <Text
+            thin
+            fontSize={SCREEN_HEIGHT * 0.014}
+            mt="2"
+            color={colors.light}
+          >
+            Mobile Number
+          </Text>
+          <Text
+            bold
+            fontSize={SCREEN_HEIGHT * 0.024}
+            lineHeight="xs"
+            color={colors.light}
+          >
+            {patientProfile.handphoneNo !== null && patientProfile.handphoneNo !== '' ? patientProfile.handphoneNo : '-'}
           </Text>
         </VStack>
       </HStack>
@@ -147,15 +167,15 @@ function PatientInformationCard(props) {
           </Avatar>
           <VStack space={'8%'}>
             <VStack>
-              <Text
+              {/* <Text
                 bold
                 fontSize={SCREEN_HEIGHT * 0.034}
                 color={colors.light}
               >
                 {`${patientProfile?.firstName} ${patientProfile?.lastName}`}
-              </Text>
+              </Text> */}
               <Text
-                italic
+                bold
                 fontSize={SCREEN_HEIGHT * 0.024}
                 color={colors.light}
               >
@@ -167,6 +187,13 @@ function PatientInformationCard(props) {
                 color={colors.light}
               >
                 {patientProfile?.gender === 'F' ? 'Female' : 'Male'}
+              </Text>
+              <Text
+                thin
+                fontSize={SCREEN_HEIGHT * 0.024}
+                color={colors.light}
+              >
+                {`${patientProfile?.preferredLanguage}`}
               </Text>
             </VStack>
             {Platform.OS === 'web' ? MyComponent() : null}

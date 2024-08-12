@@ -228,8 +228,8 @@ function ActivityPreferenceScreen(props) {
         {(likedItems.length > 0 || dislikedItems.length > 0) && (
           <SectionList
             sections={[
-              { title: 'Likes', data: likedItems },
-              { title: 'Dislikes', data: dislikedItems }
+              { title: 'Activities liked', data: likedItems },
+              { title: 'Activities disliked', data: dislikedItems }
             ]}
             renderItem={renderItem}
             renderSectionHeader={({ section }) => (
@@ -240,7 +240,7 @@ function ActivityPreferenceScreen(props) {
         )}
 
         <View style={styles.button}>
-          <AddButton title="Add Activity" onPress={handleAddActivity} />
+          <AddButton title="Add Activity Preference" onPress={handleAddActivity} />
           <AddActivityPreferenceModal
             showModal={showModal}
             onClose={() => setShowModal(false)}

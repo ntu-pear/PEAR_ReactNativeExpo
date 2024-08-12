@@ -46,7 +46,7 @@ function ScheduleAccordion({}) {
                     <ConfigCard
                         checkWeek={nextWeek}
                         vectorIconComponent={<MaterialCommunityIcons name="calendar" />}
-                        text={'1 Week later (' + nextWeek + ')'}
+                        text={'Next week (' + nextWeek + ')'}
                     />
                     <ConfigCard
                         checkWeek={weekAfterNext}

@@ -86,7 +86,7 @@ function AppNavigator() {
             tabBarTestID: 'Patients_Tab',
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons
-                name="home-outline"
+                name="account-group-outline"
                 color={color}
                 size={size}
               />

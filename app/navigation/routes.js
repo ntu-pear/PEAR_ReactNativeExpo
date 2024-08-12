@@ -14,7 +14,8 @@ export default Object.freeze({
   CHANGE_PASSWORD: 'ChangePassword',
   EMPTY: 'EMPTY',
   EMPTY_SCREEN: 'EmptyScreen',
-  
+  DOCTORNOTE_SCREEN: 'DoctorNoteScreen',
+
   CONFIG: 'Config',
   CONFIG_SCREEN: 'ConfigScreen',
   DASHBOARD: 'Dashboard',

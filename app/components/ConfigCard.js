@@ -3,15 +3,18 @@ import { Box, Icon, Text, HStack, VStack } from 'native-base';
 import colors from 'app/config/colors';
 import { Platform, Alert, ActivityIndicator, TouchableOpacity, StyleSheet, View } from 'react-native';
 // import { background } from 'native-base/lib/typescript/theme/styled-system';
+import { useNavigation } from '@react-navigation/native';
 
 import { useGetWeekDates } from 'app/hooks/useGetWeekDate';
 
 // API
 import scheduleAPI from 'app/api/schedule';
+import routes from 'app/navigation/routes';
 
 function ConfigCard(props) {
   const { vectorIconComponent, text, checkWeek} = props;
   const { thisWeek, nextWeek, weekAfterNext } = useGetWeekDates();
+  const navigation = useNavigation();
 
   const handleOnPress = async() => {
     let alertTitle = '';
@@ -37,12 +40,38 @@ function ConfigCard(props) {
       if (result.ok){
         console.log('Schedule for this week generated');
         alertTitle = 'Schedule for this week generated' + '\n('+ checkWeek + ')';
+
+        Alert.alert(
+          alertTitle,
+          '',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                Alert.alert(
+                  'Do you want to view the schedule?\n(redirected to dashboard)',
+                  '',
+                  [
+                    {
+                      text: 'No',
+                      style: 'cancel',
+                    },
+                    {
+                      text: 'Yes',
+                      onPress: () => navigation.navigate(routes.DASHBOARD_SCREEN),
+                    },
+                  ],
+                );
+              },
+            },
+          ],
+        );
       }
       else{
         console.log('Error')
         alertTitle = 'Something went wrong';
+        Alert.alert(alertTitle);
       }
-      Alert.alert(alertTitle);
   };
 
   return (

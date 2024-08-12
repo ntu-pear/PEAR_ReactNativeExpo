@@ -11,7 +11,7 @@ import colors from 'app/config/colors';
 import { useNavigation } from '@react-navigation/native';
 
 function PatientProfileCard(props) {
-  const { vectorIconComponent, text, routes, patientProfile, patientId } =
+  const { vectorIconComponent, text, routes, patientProfile, patientId, style } =
     props;
 
   const navigation = useNavigation();
@@ -29,7 +29,7 @@ function PatientProfileCard(props) {
     <TouchableOpacity
       onPress={handleOnPressToNextScreen}
       testID="patientProfileCard"
-      style={styles.container}
+      style={[styles.container, style]}
       
     >
         

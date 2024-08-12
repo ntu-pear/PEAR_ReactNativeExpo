@@ -1,18 +1,9 @@
 // Libs
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
-import {
-  Box,
-  Container,
-  FlatList,
-  HStack,
-  ScrollView,
-  Stack,
-  View,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from 'native-base';
+import { StyleSheet, Text, TouchableOpacity, Dimensions } from 'react-native';
+import {Box, Container, FlatList, HStack, ScrollView, Stack, View, ChevronLeftIcon, ChevronRightIcon, Center, Fab, Icon} from 'native-base';
 import { useFocusEffect } from '@react-navigation/native';
+import { MaterialIcons } from '@expo/vector-icons';
 
 // API
 import scheduleApi from 'app/api/schedule'
@@ -28,6 +19,7 @@ import DateInputField from 'app/components/input-components/DateInputField';
 import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import ActivityIndicator from 'app/components/ActivityIndicator';
+import BackToTopButton from 'app/components/BackToTopButton';
 
 // Utilities
 import globalStyles from 'app/utility/styles.js';
@@ -94,6 +86,10 @@ function DashboardScreen({ navigation }) {
   const [dropdown, setDropdown] = useState(sortFilterInitialState);
   const [datetime, setDatetime] = useState(sortFilterInitialState);
   const [currentTimePosition, setCurrentTimePosition] = useState(null);
+  const [scheduleXOffset, setScheduleXOffset] = useState(0);
+  const [tempOffset, setTempOffset] = useState(0);
+  
+  const SCREEN_WIDTH = Dimensions.get('window').width;
 
   // Filter details related state
   // Details of filter options
@@ -172,14 +168,23 @@ function DashboardScreen({ navigation }) {
   useEffect(() => {
     const updateCurrentTimePosition = () => {
       const timeNow = new Date();
-      if (isSameDay(timeNow, selectedDate)) {
+      const tempTime = timeNow.getHours();
+
+      if (isSameDay(timeNow, selectedDate) && tempTime >= 9 && tempTime < 17) { //to display only on actual day 9-5
         const startTime = new Date(selectedDate);
         startTime.setHours(9, 0, 0, 0); // Assuming schedule starts at 9 AM
         const endTime = new Date(selectedDate);
         endTime.setHours(17, 0, 0, 0); // Assuming schedule ends at 5 PM
         const position = calculateCurrentTimePosition(timeNow, startTime, endTime);
         setCurrentTimePosition(position);
+
+        if(tempTime >= 11 && tempTime < 17){
+          setTempOffset((SCREEN_WIDTH/4)+(200*(tempTime%11))); //to move schedule to current time
+        }else{
+          setTempOffset(0);
+        }
       } else {
+        setTempOffset(0);
         setCurrentTimePosition(null);
       }
     };
@@ -456,6 +461,8 @@ function DashboardScreen({ navigation }) {
     });
 
     scheduleRef.current?.scrollToOffset({offset: 0, animated: true});
+    setScheduleXOffset(tempOffset);
+
     setIsLoading(false);    
   }
 
@@ -464,8 +471,8 @@ function DashboardScreen({ navigation }) {
     setSelectedDate(previous);
     updateSchedule({tempSelectedDate: previous});
     onToggleSelectedDate(previous);
-    // setIsLoading(true);
     setIsDataInitialized(true);
+    setIsReloadSchedule(true);
   };
 
   const handleNextDate = () => {
@@ -474,7 +481,7 @@ function DashboardScreen({ navigation }) {
     updateSchedule({tempSelectedDate: next});
     onToggleSelectedDate(next);
     setIsDataInitialized(true);
-    // setIsLoading(true);
+    setIsReloadSchedule(true);
   };
 
   // When user toggles date, update filter details and selected datetime filter accordingly
@@ -528,6 +535,16 @@ function DashboardScreen({ navigation }) {
 
   const onClickPatientProfile = (patientID) => {
     navigation.push(routes.PATIENT_PROFILE, { id: patientID });
+  }
+
+  const handleOnClickHome = () => {
+    const today = new Date();
+    setSelectedDate(today);
+    updateSchedule({ tempSelectedDate: today });
+    setScheduleXOffset(tempOffset);
+    console.log("XOffset",scheduleXOffset);
+
+    setIsReloadSchedule(true);
   }
 
   const showStartDate = () => {
@@ -649,6 +666,7 @@ function DashboardScreen({ navigation }) {
                     ) : null}
                   </Container>
                   <ScrollView
+                    contentOffset={{x: scheduleXOffset}}
                     horizontal={true}
                     width="100%"
                     showsHorizontalScrollIndicator={false}
@@ -679,6 +697,29 @@ function DashboardScreen({ navigation }) {
             )
           }}
         />
+        <Center position="absolute" right="5" bottom="8%">
+          <Fab
+            backgroundColor={colors.green}
+            icon={
+              <Icon
+                as={MaterialIcons}
+                color={colors.white}
+                name="home"
+                size="lg"
+                placement="bottom-right"
+              />
+            }
+            onPress={handleOnClickHome}
+            renderInPortal={false}
+            shadow={2}
+            size="sm"
+          />
+          <BackToTopButton 
+          flatListRef={scheduleRef} 
+          position="bottom-right" 
+          offset={17.5} 
+          />
+        </Center>
       </View>
       )}
     </>

@@ -40,7 +40,7 @@ function PatientMedicationScreen(props) {
 
   // User ID for edit/add operations
   const { user } = useContext(AuthContext);
-  const userID = user ? user.userID : null;
+  //const userID = user ? user.userID : null;
 
   // Modal states
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -157,7 +157,6 @@ function PatientMedicationScreen(props) {
     if (patientID) {
       const response = await patientApi.getPatientMedication(patientID);
       if (response.ok) {
-        console.log(response.data.data)
         setOriginalUnparsedData(response.data.data != null ? [...response.data.data] : [])
         parseMedicationData(response.data.data != null ? response.data.data : []);
         setIsError(false);
@@ -239,7 +238,7 @@ function PatientMedicationScreen(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.addPatientMedication(patientID, userID,  tempData);
+    const result = await patientApi.addPatientMedication(patientID, tempData);
     if (result.ok) {
       console.log('submitting medication data', tempData);
       refreshMedData();
@@ -297,7 +296,7 @@ function PatientMedicationScreen(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.updateMedication(patientID, userID, tempFormData);
+    const result = await patientApi.updateMedication(patientID, tempFormData);
     if (result.ok) {
       refreshMedData();
       setIsModalVisible(false);

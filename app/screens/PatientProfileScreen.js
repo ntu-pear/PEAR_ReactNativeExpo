@@ -1,6 +1,6 @@
 // Libs
 import React, { useState, useEffect } from 'react';
-import { Dimensions } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
 import { Center, VStack, HStack, ScrollView, View } from 'native-base';
 import {
   MaterialCommunityIcons,
@@ -11,7 +11,7 @@ import {
 
 // API
 import patientApi from 'app/api/patient';
-import doctorNoteApi from 'app/api/doctorNote';
+// import doctorNoteApi from 'app/api/doctorNote';
 import guardianApi from 'app/api/guardian';
 import socialHistoryApi from 'app/api/socialHistory';
 
@@ -28,14 +28,14 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 function PatientProfileScreen(props) {
   const { navigation, route } = props;
   const [patientProfile, setPatientProfile] = useState({});
-  const [doctorsNoteData, setDoctorNoteData] = useState([]);
+  // const [doctorsNoteData, setDoctorNoteData] = useState([]);
   const [guardianData, setGuardianData] = useState([]);
   const [socialHistoryData, setSocialHistoryData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isPatientLoading, setIsPatientLoading] = useState(true);
   const [isSocialHistoryLoading, setIsSocialHistoryLoading] = useState(true);
   const [isGuardianLoading, setIsGuardianLoading] = useState(true);
-  const [isDoctorsNoteLoading, setIsDoctorsNoteLoading] = useState(true);
+  // const [isDoctorsNoteLoading, setIsDoctorsNoteLoading] = useState(true);
   const [patientID, setPatientID] = useState(route.params.id);
 
   useEffect(() => {
@@ -43,7 +43,7 @@ function PatientProfileScreen(props) {
     console.log('id', route.params.id);
     setIsLoading(true);
     getPatient(route.params.id);
-    retrieveDoctorsNote(route.params.id);
+    // retrieveDoctorsNote(route.params.id);
     retrieveGuardian(route.params.id);
     retrieveSocialHistory(route.params.id);
   }, [route.params.id, route.params.patientProfile]);
@@ -66,17 +66,17 @@ function PatientProfileScreen(props) {
     // console.log('Request successful with response: ', response);
   };
 
-  const retrieveDoctorsNote = async (id) => {
-    setIsDoctorsNoteLoading(true);
-    const response = await doctorNoteApi.getDoctorNote(id);
-    if (!response.ok) {
-      console.log('Request failed with status code: ', response.status);
-      // setIsDoctorsNoteLoading(false);
-      return;
-    }
-    // setIsDoctorsNoteLoading(false);
-    setDoctorNoteData(response.data.data);
-  };
+  // const retrieveDoctorsNote = async (id) => {
+  //   setIsDoctorsNoteLoading(true);
+  //   const response = await doctorNoteApi.getDoctorNote(id);
+  //   if (!response.ok) {
+  //     console.log('Request failed with status code: ', response.status);
+  //     // setIsDoctorsNoteLoading(false);
+  //     return;
+  //   }
+  //   // setIsDoctorsNoteLoading(false);
+  //   setDoctorNoteData(response.data.data);
+  // };
 
   const retrieveGuardian = async (id) => {
     setIsGuardianLoading(true);
@@ -117,14 +117,22 @@ function PatientProfileScreen(props) {
     if(guardianData !== undefined && guardianData.length !== 0){
       setIsGuardianLoading(false);
     }
-    if(doctorsNoteData !== undefined){
-      setIsDoctorsNoteLoading(false);
-    }
-    if(isPatientLoading === false && isSocialHistoryLoading === false && isGuardianLoading === false && isDoctorsNoteLoading === false ){
+    // if(doctorsNoteData !== undefined){
+    //   setIsDoctorsNoteLoading(false);
+    // }
+    // if(isPatientLoading === false && isSocialHistoryLoading === false && isGuardianLoading === false && isDoctorsNoteLoading === false ){
+    //   setIsLoading(false);
+    // }
+
+    if(isPatientLoading === false && isSocialHistoryLoading === false && isGuardianLoading === false){
       setIsLoading(false);
     }
+
+  // }, [patientProfile, isPatientLoading, socialHistoryData, isSocialHistoryLoading, 
+  //   guardianData, isGuardianLoading, doctorsNoteData, isDoctorsNoteLoading]);
+
   }, [patientProfile, isPatientLoading, socialHistoryData, isSocialHistoryLoading, 
-    guardianData, isGuardianLoading, doctorsNoteData, isDoctorsNoteLoading]);
+    guardianData, isGuardianLoading]);
 
   const SCREEN_HEIGHT = Dimensions.get('window').height;
 
@@ -319,13 +327,47 @@ function PatientProfileScreen(props) {
                     patientProfile={patientProfile}
                   />
                 </View>
+                {/* //temporary values for doctor icon, change later */}
+                <View flexDirection='row' width='100%'> 
+                  <PatientProfileCard
+                    vectorIconComponent={
+                      <MaterialCommunityIcons
+                        name="doctor"
+                        size={SCREEN_HEIGHT * 0.04}
+                        color={colors.pink}
+                      />
+                    }
+                    text="Doctor's Note"
+                    navigation={navigation}
+                    routes={routes.DOCTORNOTE_SCREEN}
+                    patientProfile={patientProfile}
+                  />
+
+                  {/* Below are empty placeholder icons to fix doctor note position, only edit if you know what you're doing */}
+                  <PatientProfileCard
+                    routes={routes.DOCTORNOTE_SCREEN}
+                    navigation={navigation}
+                    style={styles.container}
+                    patientProfile={patientProfile}/>
+                  <PatientProfileCard
+                    routes={routes.DOCTORNOTE_SCREEN}
+                    navigation={navigation}
+                    style={styles.container}
+                    patientProfile={patientProfile}/>
+                  <PatientProfileCard
+                    routes={routes.DOCTORNOTE_SCREEN}
+                    navigation={navigation}
+                    style={styles.container}
+                    patientProfile={patientProfile}/>
+
+                </View>
             </ScrollView>
             <View w="100%" style={{flex: 1}}>
               <PatientInformationAccordion 
                 patientID={patientID}
                 patientProfile={patientProfile}
                 guardianData={guardianData}
-                doctorsNoteData={doctorsNoteData}
+                // doctorsNoteData={doctorsNoteData}
                 socialHistoryData={socialHistoryData}
               />
             </View>              
@@ -335,5 +377,16 @@ function PatientProfileScreen(props) {
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderColor: '#FFFFFF',
+    flex: 1,
+    margin:'3%',
+    aspectRatio: 1.1,
+  },
+});
 
 export default PatientProfileScreen;

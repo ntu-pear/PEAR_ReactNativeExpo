@@ -101,7 +101,6 @@ function AddPatientMedicalHistoryModal({
           value={formData.informationSource}
           onChangeText={handleHxData('informationSource')}
           onEndEditing={setIsInformationSourceError}
-          autoCapitalize='none'
         />
         <InputField
           isRequired={true}
@@ -109,7 +108,6 @@ function AddPatientMedicalHistoryModal({
           value={formData.medicalDetails}
           onChangeText={handleHxData('medicalDetails')}
           onEndEditing={setIsMedicalDetailsError}
-          autoCapitalize='none'
         />
         <InputField
           isRequired={true}
@@ -117,7 +115,6 @@ function AddPatientMedicalHistoryModal({
           value={formData.medicalRemarks}
           onChangeText={handleHxData('medicalRemarks')}
           onEndEditing={setIsMedicalRemarksError}
-          autoCapitalize='none'
         />
         <View style={styles.dateSelectionContainer}>
           <DateInputField

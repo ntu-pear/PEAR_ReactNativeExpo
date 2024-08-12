@@ -183,10 +183,10 @@ const getPatientMedicalHistory = async (patientID) => {
   return client.get(patientMedicalHistory, params);
 };
 
-const getPatientMedication = async (patientID) => {
+const getPatientMedication = async (medicationID) => {
   let params;
   params = {
-    patientID,
+    medicationID,
   };
 
   return client.get(medicationEndpoint, params);

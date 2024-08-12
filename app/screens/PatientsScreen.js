@@ -438,7 +438,11 @@ function PatientsScreen({ navigation }) {
                 shadow={2}
                 size="sm"
               />
-            <BackToTopButton flatListRef={patientListRef} position="bottom-right" offset={17.5} />
+              <BackToTopButton 
+                flatListRef={patientListRef}
+                position="bottom-right"
+                offset={17.5} 
+              />
             </Center>
           </View>
         </View>
