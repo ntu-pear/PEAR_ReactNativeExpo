@@ -162,6 +162,7 @@ function PatientAddPatientInfoScreen({
   // Get patient preferred names from API
   useEffect(() => {
     getPrefNames();
+    patient.EndDate = new Date(null); //to set inital value of enddate to null, unless updated via selection
   }, []);
 
   // Get list of preferred names from backend to detect duplicate preferred names
@@ -507,7 +508,7 @@ function PatientAddPatientInfoScreen({
                   <View style={styles.dateSelectionContainer}>
                     <DateInputField
                       isRequired
-                      title={'Date of Joining'}
+                      title={'Start Date'}
                       value={patient.StartDate}
                       hideDayOfWeek={true}
                       handleFormData={handleFormData('StartDate')}
@@ -518,7 +519,7 @@ function PatientAddPatientInfoScreen({
                   </View>
 
                   <SingleOptionCheckBox
-                    title={'Check this box to specify Date of Leaving'}
+                    title={'Check this box to specify End Date'}
                     value={patient.IsChecked}
                     onChangeData={handleFormData('IsChecked')}
                     accessibilityText={
@@ -527,10 +528,10 @@ function PatientAddPatientInfoScreen({
                   />
 
                   {/* Rendered only when the specify date of leaving checkbox is selected. */}
-                  {formData.patientInfo.IsChecked ? (
+                  {patient.IsChecked ? (
                     <View style={styles.dateSelectionContainer}>
                       <DateInputField
-                        title={'Date of Leaving'}
+                        title={'End Date'}
                         value={patient.EndDate}
                         handleFormData={handleFormData('EndDate')}
                         hideDayOfWeek={true}

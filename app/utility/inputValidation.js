@@ -31,7 +31,7 @@ export const passwordFormat = (value) => {
 };
 
 export const addressFormat = (value) => {
-  if(!/^(?!\s)(?!.*\s{2})([a-zA-Z0-9\s,#-]*[a-zA-Z0-9])$/.test(value)) {
+  if (!/^$|^(?!\s)([a-zA-Z0-9\s,#-]*[a-zA-Z0-9])$/.test(value)) {
     return errors.addressFormatError;
   }
 };
@@ -86,7 +86,7 @@ export const postalCodeFormat = (value) => {
 };
 
 export const emailFormat = (value) => {
-  if (!/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/.test(value)) {
+  if (!/^$|^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/.test(value)) {
     return errors.emailError;
   }
 };

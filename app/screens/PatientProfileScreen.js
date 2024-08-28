@@ -1,7 +1,8 @@
 // Libs
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
 import { Center, VStack, HStack, ScrollView, View } from 'native-base';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import {
   MaterialCommunityIcons,
   MaterialIcons,
@@ -38,15 +39,26 @@ function PatientProfileScreen(props) {
   // const [isDoctorsNoteLoading, setIsDoctorsNoteLoading] = useState(true);
   const [patientID, setPatientID] = useState(route.params.id);
 
-  useEffect(() => {
-    // navigated from Highlights Modal or Dashboard Screen
-    console.log('id', route.params.id);
-    setIsLoading(true);
-    getPatient(route.params.id);
-    // retrieveDoctorsNote(route.params.id);
-    retrieveGuardian(route.params.id);
-    retrieveSocialHistory(route.params.id);
-  }, [route.params.id, route.params.patientProfile]);
+  const scrollViewRef = useRef(null);
+
+  // useEffect(() => {
+  //   // navigated from Highlights Modal or Dashboard Screen
+  //   console.log('id', patientID);
+  //   setIsLoading(true);
+  //   getPatient(patientID);
+  //   // retrieveDoctorsNote(patientID);
+  //   retrieveGuardian(patientID);
+  //   retrieveSocialHistory(patientID);
+  // }, [patientID, route.params.patientProfile]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setIsLoading(true);
+      getPatient(patientID);
+      retrieveGuardian(route.params.id);
+      retrieveSocialHistory(route.params.id);
+    }, [])
+  );
 
   // Retrieval of Patient Info, Doctor's Notes, Guardian Info and Social History
   const getPatient = async (id) => {
@@ -149,6 +161,7 @@ function PatientProfileScreen(props) {
               flexGrow: 1,
               flexDirection: 'column',
             }}
+            ref={scrollViewRef}
           >
             <View w="100%" style={{ flex: 1 }}>
               <PatientInformationCard
@@ -369,6 +382,7 @@ function PatientProfileScreen(props) {
                 guardianData={guardianData}
                 // doctorsNoteData={doctorsNoteData}
                 socialHistoryData={socialHistoryData}
+                scrollViewRef={scrollViewRef}
               />
             </View>              
           </ScrollView>

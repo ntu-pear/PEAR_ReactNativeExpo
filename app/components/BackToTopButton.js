@@ -3,11 +3,12 @@ import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 
-const BackToTopButton = ({ flatListRef, position = 'bottom-right', offset = 20 }) => {
+const BackToTopButton = ({ flatListRef, position = 'bottom-right', offset}) => {
     const handlePress = () => {
         if (flatListRef && flatListRef.current) {
             flatListRef.current.scrollToOffset({ offset: 0, animated: true });
-        }};
+        }
+    };
 
     const getButtonStyle = () => {
         let positionStyle = {};

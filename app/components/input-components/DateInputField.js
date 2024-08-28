@@ -15,6 +15,9 @@ import { MaterialIcons } from '@expo/vector-icons';
 import typography from 'app/config/typography';
 import colors from 'app/config/colors';
 
+// Hook
+import formatDateTime from 'app/hooks/useFormatDateTime.js';
+
 // Components
 import ErrorMessage from 'app/components/ErrorMessage';
 import RequiredIndicator from '../RequiredIndicator';
@@ -112,7 +115,7 @@ function DateInputField({
 
   const setFieldText = () => {
     if(value != null) {
-      return mode == 'date' ? formatDate(value, hideDayOfWeek) : formatTimeAMPM(value);
+      return mode == 'date' ? formatDateTime(value, true) : formatTimeAMPM(value);
     }  else {
       return placeholder;
     }

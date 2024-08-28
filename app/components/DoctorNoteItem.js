@@ -6,8 +6,9 @@ import { FontAwesome5 } from '@expo/vector-icons';
 // Configurations
 import colors from 'app/config/colors';
 
-// Utilities
-import { formatDate } from 'app/utility/miscFunctions';
+// Hook
+import formatDateTime from 'app/hooks/useFormatDateTime.js';
+
 
 const DoctorNoteItem = ({
   date,
@@ -26,7 +27,7 @@ const DoctorNoteItem = ({
         <TextRow label="Remarks" value={doctorRemarks} />
         <TextRow
           label="Created"
-          value={formatDate(new Date(date), true)}
+          value={formatDateTime(new Date(date), true)}
         />
       </View>
     </View>

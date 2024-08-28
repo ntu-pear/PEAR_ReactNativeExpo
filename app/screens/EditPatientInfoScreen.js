@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { Box, VStack, FlatList, Text } from 'native-base';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 // Configurations
 import routes from 'app/navigation/routes';
@@ -20,8 +21,9 @@ import AppButton from 'app/components/AppButton';
 import { parseSelectOptions } from 'app/utility/miscFunctions';
 
 function EditPatientInfoScreen(props) {
-  const { navigation, patientProfile } = props.route.params;
+  const { patientProfile } = props.route.params;
 
+  const navigation = useNavigation();
   // Set initial value for preferred language select field
   const [listOfLanguages, setListOfLanguages] = useState(
     parseSelectOptions([
@@ -220,7 +222,7 @@ function EditPatientInfoScreen(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    if(tempFormData['EndDate'] == null) {
+    if(tempFormData['EndDate'] === "1970-01-01T00:00:00" || tempFormData['EndDate'] === "1970-01-01T00:00:000Z") {
       tempFormData['EndDate'] = new Date(null).toISOString();
     }
     
@@ -235,7 +237,7 @@ function EditPatientInfoScreen(props) {
     const result = await patientApi.updatePatient(tempFormData);
 
     if (result.ok) {
-      navigation.goBack(routes.PATIENT_INFORMATION, {
+      navigation.goBack(routes.PATIENT_PROFILE, {
         navigation: navigation,
       });
       alertTitle = 'Saved Successfully';
@@ -332,7 +334,7 @@ function EditPatientInfoScreen(props) {
                 <View style={styles.dateSelectionContainer}>
                   <DateInputField
                     isRequired
-                    title={'Date of Joining'}
+                    title={'Start Date'}
                     value={new Date(formData['StartDate'])}
                     hideDayOfWeek={true}
                     handleFormData={handleFormData('StartDate')}
@@ -344,8 +346,8 @@ function EditPatientInfoScreen(props) {
 
                 <View style={styles.dateSelectionContainer}>
                   <DateInputField
-                    title={'Date of Leaving'}
-                    value={formData['EndDate'] == "1970-01-01T00:00:00" || formData['EndDate'] == null ? null : new Date(formData['EndDate'])}
+                    title={'End Date'}
+                    value={formData['EndDate'] === "1970-01-01T00:00:00" ? null : new Date(formData['EndDate'])}
                     handleFormData={handleFormData('EndDate')}
                     hideDayOfWeek={true}
                     onEndEditing={handleLeavingError}

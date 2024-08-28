@@ -31,7 +31,7 @@ function AccountViewScreen(props) {
     { label: 'NRIC', value: unMaskedUserNRIC.replace(/\d{4}(\d{3})/, 'xxxx$1') },
     {
       label: 'Gender',
-      value: userProfile.gender === 'F' ? 'Female' : 'Male',
+      value: userProfile.gender === 'F' ? 'FEMALE' : 'MALE',
     },
     {
       label: 'DOB',

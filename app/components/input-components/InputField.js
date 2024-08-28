@@ -89,6 +89,7 @@ function InputField({
       if (autoCapitalize == 'characters') {
         value = value.toUpperCase();
       }
+        value = value.trim().replace(/\s{2,}/g, ' ');
     } else {
       value = '';
     }

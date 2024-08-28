@@ -135,7 +135,15 @@ function DashboardScreen({ navigation }) {
       }
     }, [isReloadSchedule]),
     );
-    
+  
+  // Refresh schedule when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      refreshSchedule();
+      setScheduleXOffset(tempOffset);
+    }, [])
+  );
+
   // Refresh schedule from backend when user switches between 'My Patients' and 'All Patients'
   useEffect(() => {
     refreshSchedule();
@@ -460,9 +468,7 @@ function DashboardScreen({ navigation }) {
       tempSearchMode: tempSearchMode,
     });
 
-    scheduleRef.current?.scrollToOffset({offset: 0, animated: true});
     setScheduleXOffset(tempOffset);
-
     setIsLoading(false);    
   }
 

@@ -12,6 +12,9 @@ import colors from 'app/config/colors';
 import routes from 'app/navigation/routes';
 import { useNavigate } from 'react-router-dom';
 
+// Hook
+import formatDateTime from 'app/hooks/useFormatDateTime.js';
+
 function PatientInformationCard(props) {
   const { patientProfile, navigation } = props;
   const [displayPicUrl, setDisplayPicUrl] = //eslint-disable-line no-unused-vars
@@ -42,14 +45,14 @@ function PatientInformationCard(props) {
     return today - _dob;
   };
 
-  const extractFullYear = (dob) => {
-    const _date = new Date(dob);
+  // const extractFullYear = (dob) => {
+  //   const _date = new Date(dob);
 
-    const day = String(_date.getDate()).padStart(2, '0');
-    const month = String(_date.getMonth() + 1).padStart(2, '0');
-    const year = _date.getFullYear();
-    return `${day}-${month}-${year}`;
-  };
+  //   const day = String(_date.getDate()).padStart(2, '0');
+  //   const month = String(_date.getMonth() + 1).padStart(2, '0');
+  //   const year = _date.getFullYear();
+  //   return `${day}-${month}-${year}`;
+  // };
 
   const SCREEN_HEIGHT = Dimensions.get('window').height;
 
@@ -82,7 +85,7 @@ function PatientInformationCard(props) {
             lineHeight="xs"
             color={colors.light}
           >
-            {`${extractFullYear(patientProfile?.dob)}`}
+            {`${formatDateTime(patientProfile?.dob,true)}`}
           </Text>
         </VStack>
 
@@ -186,7 +189,7 @@ function PatientInformationCard(props) {
                 fontSize={SCREEN_HEIGHT * 0.024}
                 color={colors.light}
               >
-                {patientProfile?.gender === 'F' ? 'Female' : 'Male'}
+                {patientProfile?.gender === 'F' ? 'FEMALE' : 'MALE'}
               </Text>
               <Text
                 thin

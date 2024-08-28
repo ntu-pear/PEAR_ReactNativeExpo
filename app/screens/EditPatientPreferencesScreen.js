@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { Box, VStack, FlatList } from 'native-base'
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 // Configurations
 import routes from 'app/navigation/routes';
@@ -22,8 +23,10 @@ import { parseSelectOptions } from 'app/utility/miscFunctions';
 import InputField from 'app/components/input-components/InputField';
 
 function EditPatientPreferencesScreen(props) {
-  const { navigation, patientProfile } = props.route.params;
+  const { patientProfile } = props.route.params;
   const [isLoading, setIsLoading] = useState(true);
+  
+  const navigation = useNavigation();
   
   // Variables relatied to retrieving preferred language select options from API
   const {
@@ -185,7 +188,7 @@ function EditPatientPreferencesScreen(props) {
     let alertDetails = '';
 
     if (result.ok) {
-      navigation.goBack(routes.PATIENT_INFORMATION, {
+      navigation.goBack(routes.PATIENT_PROFILE, {
         navigation: navigation,
       });
       alertTitle = 'Saved Successfully';

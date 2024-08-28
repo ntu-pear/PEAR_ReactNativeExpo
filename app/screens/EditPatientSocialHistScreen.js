@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { Box, VStack, FlatList } from 'native-base'
-
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 // Configurations
 import routes from 'app/navigation/routes';
 
@@ -19,8 +19,10 @@ import AppButton from 'app/components/AppButton';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 
 function EditPatientSocialHistScreen(props) {
-  const { navigation, socialHistory, patientID } = props.route.params;
+  const { socialHistory, patientID } = props.route.params;
 
+  const navigation = useNavigation();
+  
   // retrive list data from database using useGetSelectionOptions
   const {
     data: liveWithData,
@@ -410,7 +412,7 @@ function EditPatientSocialHistScreen(props) {
     let alertDetails = '';
 
     if (result.ok) {
-      navigation.goBack(routes.PATIENT_INFORMATION, {
+      navigation.goBack(routes.PATIENT_PROFILE, {
         navigation: navigation,
       });
       alertTitle = 'Saved Successfully';

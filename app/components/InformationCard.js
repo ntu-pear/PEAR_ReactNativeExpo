@@ -81,8 +81,8 @@ function InformationCard({ displayData, title, subtitle, handleOnPress=null, unM
                   data.value === 1 ? 'Yes' :
                   data.value === true ? 'Yes' :
                   data.value === 0 ? 'No' :
-                  data.value === null ? 'Not available' :
-                  data.value === 'null' ? 'Not available' :
+                  data.value === null ? '-' :
+                  data.value === 'null' ? '-' :
                   data.value === '-' ? '-' :
                   data.label === 'DOB' ? `${formatDateTime(data.value, true)}` : 
                   data.label === 'Start Date' ? `${formatDateTime(data.value, true)}` : 

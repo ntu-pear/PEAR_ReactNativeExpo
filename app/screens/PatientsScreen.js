@@ -301,8 +301,6 @@ function PatientsScreen({ navigation }) {
         tempSearchMode: tempSearchMode,
       });
       
-      // Scroll to top of list
-      patientListRef.current?.scrollToOffset({offset: 0, animated: true});
       setIsLoading(false);    
     }   
   }

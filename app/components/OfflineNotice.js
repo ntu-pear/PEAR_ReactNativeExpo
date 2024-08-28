@@ -9,7 +9,18 @@ import colors from 'app/config/colors';
 function OfflineNotice(props) {
   const netInfo = useNetInfo();
 
-  if (netInfo.type !== 'unknown' && netInfo.isInternetReachable === false) {
+  // if (netInfo.type !== 'unknown' && netInfo.isInternetReachable === false) {
+  //   if(!(netInfo.type == 'wifi' && netInfo.isConnected == true && netInfo.details.strength > 0)) {
+  //     return (
+  //       <View style={styles.container}>
+  //         <AppText style={styles.text}>No Internet Connection</AppText>
+  //       </View>
+  //     );
+  //   }
+  // }
+
+  //  commented out isInternetReachable as vpn might cause connection to be wonky
+  if (netInfo.type !== 'unknown' && !netInfo.isConnected) {
     return (
       <View style={styles.container}>
         <AppText style={styles.text}>No Internet Connection</AppText>
@@ -28,8 +39,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'absolute',
     top: Constants.statusBarHeight,
-    width: '100%',
+    width: '30%',
     zIndex: 1,
+    left: '35%',
+    borderRadius: 30,
   },
   text: {
     color: colors.white,

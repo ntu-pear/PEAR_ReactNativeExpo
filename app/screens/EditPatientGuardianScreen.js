@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { Box, VStack, FlatList } from 'native-base';
-
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 // Configurations
 import routes from 'app/navigation/routes';
 
@@ -23,9 +23,10 @@ import { parseSelectOptions } from 'app/utility/miscFunctions';
 import InputField from 'app/components/input-components/InputField';
 
 function EditPatientGuardianScreen(props) {
-  const { navigation, guardianProfile } = props.route.params;
+  const { guardianProfile } = props.route.params;
   const [isLoading, setIsLoading] = useState(true);
 
+  const navigation = useNavigation();
   // Maximum and minimum valid joining dates
   const minimumJoiningDate = new Date();
   minimumJoiningDate.setDate(minimumJoiningDate.getDate() - 30); // 30 days ago
@@ -298,7 +299,7 @@ function EditPatientGuardianScreen(props) {
     let alertDetails = '';
 
     if (result.ok) {
-      navigation.goBack(routes.PATIENT_INFORMATION, {
+      navigation.goBack(routes.PATIENT_PROFILE, {
         navigation: navigation,
         ...guardianProfile,
       });
@@ -426,7 +427,7 @@ function EditPatientGuardianScreen(props) {
 
                 <SelectionInputField
                   isRequired
-                  title={'Relationship'}
+                  title={"Guardian is Patient's"}
                   placeholder={guardianProfile.relationship}
                   onDataChange={handleFormData('RelationshipID')}
                   value={guardianProfile.relationship}
