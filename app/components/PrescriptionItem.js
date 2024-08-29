@@ -11,7 +11,6 @@ import colors from 'app/config/colors';
 import { formatDate } from 'app/utility/miscFunctions';
 import EditDeleteBtn from './EditDeleteBtn';
 import formatDateTime from 'app/hooks/useFormatDateTime.js';
-import PropTypes from 'prop-types';
 
 const PrescriptionItem = ({
   date,
@@ -27,6 +26,15 @@ const PrescriptionItem = ({
   onDelete,
   onEdit
 }) => {  
+
+   // Get the current date and set time to midnight for comparison
+   const currentDate = new Date();
+ 
+   // Parse the endDate from props
+   const endDateObj = new Date(endDate);
+ 
+   // Determine if editing is allowed
+   const canEdit = endDateObj > currentDate;
     return (
         <View style={styles.container}>
           <Icon
@@ -39,7 +47,7 @@ const PrescriptionItem = ({
             <TextRow label="Time" value={formatDateTime(new Date(date), false)} />
             <TextRow label="Drug Name" value={prescriptionListDesc} />
             <TextRow label="Dosage" value={dosage} />
-            <NumberRow label="Frequency Per Day" value={frequencyPerDay} />
+            <NumberRow label="Frequency Per Day" value={frequencyPerDay.toString()} />
             <TextRow label="Instruction" value={instruction} />
             <TextRow label="Start Date" value={formatDate(new Date(startDate), true)} />
             <TextRow label="End Date" value={formatDate(new Date(endDate), true)} />
@@ -47,7 +55,7 @@ const PrescriptionItem = ({
             <TextRow label="Remarks" value={prescriptionRemarks} />
             <TextRow label="Chronic" value={isChronic ? 'Yes' : 'No'} />
           </View>
-          <EditDeleteBtn onDelete={onDelete} onEdit={onEdit}/>
+          <EditDeleteBtn onDelete={onDelete} onEdit={canEdit ? onEdit : null}/>
         </View>
       );
     };

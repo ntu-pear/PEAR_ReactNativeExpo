@@ -48,15 +48,15 @@ function PatientVitalScreen(props) {
   const [displayMode, setDisplayMode] = useState('rows');
   const DISPLAY_MODES = ['rows', 'table'];
 
-  const SEARCH_OPTIONS = ['Created Datetime'];
+  const SEARCH_OPTIONS = ['Date'];
 
   // Sort and Filter options
-  const SORT_OPTIONS = ['Created Datetime'];
-  const FILTER_OPTIONS = ['Created Datetime'];
+  const SORT_OPTIONS = ['Date'];
+  const FILTER_OPTIONS = ['Date'];
 
   // Mapping for fields
   const FIELD_MAPPING = {
-    'Created Datetime': 'createdDateTime',
+    'Date': 'createdDateTime',
   };
 
   // Search, sort, and filter related states
@@ -67,7 +67,7 @@ function PatientVitalScreen(props) {
 
   // Filter details state
   const [filterOptionDetails, setFilterOptionDetails] = useState({
-    'Created Datetime': {
+    'Date': {
       type: 'date',
       options: { min: {}, max: {} },
       isFilter: true,
@@ -199,6 +199,9 @@ function PatientVitalScreen(props) {
     let alertTitle = '';
     let alertDetails = '';
 
+  // Create and store the original FormData
+  const originalVitalFormData = {... tempVitalFormData};
+
     const result = await patientApi.AddPatientVital(
       patientID,
       tempVitalFormData,
@@ -216,6 +219,7 @@ function PatientVitalScreen(props) {
         : (alertDetails = 'Please try again.');
 
       alertTitle = 'Error adding vital data';
+      setVitalFormData(originalVitalFormData);
     }
     Alert.alert(alertTitle, alertDetails);
     setIsLoading(false);

@@ -21,7 +21,6 @@ export default function useFormatDateTime(strDate, boolDate) {
 
   if (boolDate){
     const originalDate = new Date(strDate);
-    const adjustedDateTime = new Date(originalDate.getTime() - 8 * 60 * 60 * 1000);
     
     const day = originalDate.getDate();
     const month = originalDate.getMonth() + 1;
@@ -31,7 +30,7 @@ export default function useFormatDateTime(strDate, boolDate) {
     return formattedDate;
   } else {
     const originalDateTime = new Date(strDate);
-    const adjustedDateTime = new Date(originalDateTime.getTime() - 8 * 60 * 60 * 1000);
+    const adjustedDateTime = new Date(originalDateTime.getTime());
 
     // Format the time as "h:mm A" (e.g., "10:24 AM")
     const formattedTime = formatAMPM(adjustedDateTime);

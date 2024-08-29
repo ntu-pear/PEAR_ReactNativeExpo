@@ -13,7 +13,6 @@ import RadioButtonInput from './input-components/RadioButtonsInput';
 import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
 // Configurations
-import colors from 'app/config/colors';
 import AddEditModal from './AddEditModal';
 
 function AddPatientMobilityAidModal({
@@ -123,7 +122,7 @@ function AddPatientMobilityAidModal({
           value={formData.mobilityRemark}
           onChangeText={handleMobilityData('mobilityRemark')}
           onEndEditing={setIsMobilityRemarksError}
-          autoCapitalize='none'
+          autoCapitalize="characters"
         />  
         <RadioButtonInput
           title={'Condition'}
@@ -138,21 +137,5 @@ function AddPatientMobilityAidModal({
   );
 }
 
-const styles = StyleSheet.create({
-  modalHeader: {
-    backgroundColor: colors.green, // Change to your preferred green color
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalHeaderText: {
-    color: 'white', // Text color
-    fontSize: 18, // Adjust font size as needed
-    fontWeight: 'bold', // Optional: if you want the text to be bold
-    textTransform: 'uppercase',
-  },
-  dateSelectionContainer: {
-    width: '100%',
-  },
-});
 
 export default AddPatientMobilityAidModal;

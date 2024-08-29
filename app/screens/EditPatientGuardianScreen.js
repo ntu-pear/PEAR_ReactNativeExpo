@@ -9,7 +9,7 @@ import routes from 'app/navigation/routes';
 // Hooks
 import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
-//API
+// API
 import guardianApi from 'app/api/guardian';
 
 // Components
@@ -18,9 +18,10 @@ import DateInputField from 'app/components/input-components/DateInputField';
 import AppButton from 'app/components/AppButton';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import RadioButtonInput from 'app/components/input-components/RadioButtonsInput';
-import SensitiveInputField from 'app/components/input-components/SensitiveInputField';
-import { parseSelectOptions } from 'app/utility/miscFunctions';
 import InputField from 'app/components/input-components/InputField';
+
+// Utilities
+import { parseSelectOptions } from 'app/utility/miscFunctions';
 
 function EditPatientGuardianScreen(props) {
   const { navigation, guardianProfile } = props.route.params;
