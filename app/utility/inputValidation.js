@@ -150,7 +150,7 @@ export const weightRange = (value) => {
 };
 
 export const heightRange = (value) => {
-  if (!(value >= 0 && value <= 200)) {
+  if (!(value >= 0 && value <= 2)) {
     return errors.heightError;
   }
 };

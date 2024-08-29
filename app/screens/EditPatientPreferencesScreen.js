@@ -17,10 +17,10 @@ import patientApi from 'app/api/patient';
 import AppButton from 'app/components/AppButton';
 import SelectionInputField from 'app/components/input-components/SelectionInputField';
 import ActivityIndicator from 'app/components/ActivityIndicator';
+import InputField from 'app/components/input-components/InputField';
 
 // Utilities
 import { parseSelectOptions } from 'app/utility/miscFunctions';
-import InputField from 'app/components/input-components/InputField';
 
 function EditPatientPreferencesScreen(props) {
   const { patientProfile } = props.route.params;

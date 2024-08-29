@@ -1,12 +1,10 @@
 // Libs
 import React, { useEffect, useState } from 'react';
-import { Modal, Button, VStack, Text } from 'native-base';
-import { StyleSheet, View } from 'react-native';
+import { Modal, Button, Text } from 'native-base';
+import { StyleSheet, Keyboard, View } from 'react-native';
 
 // Components
-import InputField from './input-components/InputField';
 import AppButton from './AppButton';
-import DateInputField from './input-components/DateInputField';
 
 // Configurations
 import colors from 'app/config/colors';
@@ -20,9 +18,32 @@ function AddEditModal({
   handleSubmit,
   isInputErrors=false,
 }) {
+  const [keyboardOffset, setKeyboardOffset] = useState(0);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (event) => {
+      const { height } = event.endCoordinates;
+      setKeyboardOffset(height);
+    });
+
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardOffset(0);
+    });
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
 
   return (
     <Modal isOpen={showModal} onClose={onClose}>
+      <View
+        style={[
+          styles.centeredView,
+          { marginBottom: keyboardOffset }, // Adjust margin based on keyboardOffset
+        ]}
+      >
       <Modal.Content maxWidth="65%">
         <Modal.CloseButton />
         <Modal.Header style={styles.modalHeader}>
@@ -45,6 +66,7 @@ function AddEditModal({
           </Button.Group>
         </Modal.Footer>
       </Modal.Content>
+      </View>
     </Modal>
   );
 }
@@ -60,7 +82,7 @@ const styles = StyleSheet.create({
     fontSize: 18, // Adjust font size as needed
     fontWeight: 'bold', // Optional: if you want the text to be bold
     textTransform: 'uppercase',
-  },  
+  }, 
 });
 
 export default AddEditModal;

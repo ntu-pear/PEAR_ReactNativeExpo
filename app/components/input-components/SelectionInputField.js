@@ -45,7 +45,7 @@ function SelectionInputField({
   const [selectedValue, setSelectedValue] = useState(
     //value ? value : Object.keys(isDisabledItems).length > 0 ? null : dataArray[0].value,
     // uncomment ^ if want value to show in selectioninputfield
-    null
+    value ? value : null
   );
 
 

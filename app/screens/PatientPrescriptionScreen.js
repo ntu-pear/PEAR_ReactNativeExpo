@@ -8,7 +8,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import patientApi from 'app/api/patient';
 
 // Utilities
-import { formatTimeHM24, convertTimeMilitary, isEmptyObject, noDataMessage, sortFilterInitialState, formatMilitaryToAMPM, formatDate, formatTimeAMPM } from 'app/utility/miscFunctions';
+import { isEmptyObject, noDataMessage, sortFilterInitialState, formatDate } from 'app/utility/miscFunctions';
 
 // Navigation
 import routes from 'app/navigation/routes';
@@ -235,7 +235,7 @@ function PatientPrescriptionScreen(props) {
       "prescriptionID": tempPrescriptionFormData.prescriptionID,
       "prescriptionListID": tempPrescriptionFormData.prescriptionListID,
       "dosage": tempPrescriptionFormData.dosage,
-      "frequencyPerDay": tempPrescriptionFormData.frequencyPerDay,
+      "frequencyPerDay": tempPrescriptionFormData.frequencyPerDay.toString(),
       "isChronic": tempPrescriptionFormData.isChronic,
       "instruction": tempPrescriptionFormData.instruction,
       "startDate": new Date(tempPrescriptionFormData.startDate),

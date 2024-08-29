@@ -54,15 +54,15 @@ function PatientProblemLog(props) {
   const DISPLAY_MODES = ['rows', 'table'];
   
   // Sort options 
-  const SORT_OPTIONS = ['Created Datetime', 'Author'];
+  const SORT_OPTIONS = ['Date', 'Author'];
 
   // Filter options
-  const FILTER_OPTIONS = ['Created Datetime'];
+  const FILTER_OPTIONS = ['Date'];
   
   // Mapping between sort/filter/search names and the respective field in the patient data retrieved from the backend
   const FIELD_MAPPING = {
     'Description': 'problemLogListDesc',
-    'Created Datetime': 'createdDateTime',
+    'Date': 'createdDateTime',
     'Author': 'authorName'
   };
   
@@ -83,7 +83,7 @@ function PatientProblemLog(props) {
   //            since some filters like patient status may be used to make an API call instead of normal filtering
   // --------------------------
   const [filterOptionDetails, setFilterOptionDetails] = useState({
-    'Created Datetime': {
+    'Date': {
       'type': 'date',
       'options': {'min': {}, 'max': {},},
       'isFilter': true,

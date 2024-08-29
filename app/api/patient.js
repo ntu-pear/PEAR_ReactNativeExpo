@@ -15,7 +15,7 @@ const medicationEndpoint = '/Medication';
 const activityEndpoint = '/Activity';
 const routineEndpoint = '/Routine';
 const mobilityEndpoint = '/Mobility';
-const photoEndpoint = 'PatientPhoto'
+const photoEndpoint = '/PatientPhoto'
 const patientList = `${endpoint}/patientList`;
 // `${endpoint}/patientListByUserId` changed to ${endpoint}/patientListByLoggedInCaregiver
 // to enable fetching caregiver specific patients
@@ -562,6 +562,5 @@ export default {
   deletePrescription,
   updateMobility,
   deleteMobility,
-
   deletePhoto,
 };

@@ -47,21 +47,23 @@ function PatientMobilityAidScreen(props) {
   const DISPLAY_MODES = ['rows', 'table'];
 
   // Sort options 
-  const SORT_OPTIONS = ['Created Datetime'];
+  const SORT_OPTIONS = ['Date'];
 
   // Filter options
-  const FILTER_OPTIONS = ['Created Datetime'];
+  const FILTER_OPTIONS = ['Date', 'Condition'];
   
   // Mapping between sort/filter/search names and the respective field in the patient data retrieved from the backend
   const FIELD_MAPPING = {
     'Mobility Aid': 'mobilityListDesc',
-    'Created Datetime': 'date',
+    'Date': 'date',
+    'Condition': 'isRecovered',
   };
 
   // Search, sort, and filter related states
   const [isDataInitialized, setIsDataInitialized] = useState(false);
   const [sort, setSort] = useState(sortFilterInitialState);
   const [searchQuery, setSearchQuery] = useState('');
+  const [dropdown, setDropdown] = useState(sortFilterInitialState);
   const [datetime, setDatetime] = useState(sortFilterInitialState);
 
   // Filter details related state
@@ -75,12 +77,18 @@ function PatientMobilityAidScreen(props) {
   //            since some filters like patient status may be used to make an API call instead of normal filtering
   // --------------------------
   const [filterOptionDetails, setFilterOptionDetails] = useState({
-    'Created Datetime': {
+    'Date': {
       'type': 'date',
-      'options': {'min': {}, 'max': {},},
+      'options': {'min': {}, 'max': {}},
+      'isFilter': true,
+    },
+    'Condition': {
+      'type': 'dropdown',
+      'options': {'Fully Recovered': true, 'Not Recovered': false}, // define custom options and map to corresponding values
       'isFilter': true,
     },
   });
+
 
   // API call related states
   const [isLoading, setIsLoading] = useState(false);
@@ -124,6 +132,7 @@ function PatientMobilityAidScreen(props) {
     };
     promiseFunction();
   };
+
 
   // Get mobility data from backend
   const getMobilityData = async () => {
@@ -375,6 +384,8 @@ function PatientMobilityAidScreen(props) {
                 setSort={setSort}
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
+                dropdown={dropdown}
+                setDropdown={setDropdown}
                 initializeData={isDataInitialized}
                 onInitialize={()=>setIsDataInitialized(false)}
                 itemType='mobility aid'

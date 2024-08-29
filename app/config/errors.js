@@ -18,7 +18,7 @@ export default {
   bloodSugarLevelError: 'Blood Sugar Level should be within 50 to 250.',
   heartRateError: 'Heart Rate should be within 0 to 300.',
   weightError: 'Weight should be within 0 to 200',
-  heightError: 'Height should be within 0 to 200',
+  heightError: 'Height should be within 0 to 2 metres',
   passwordFormatError: 'Password must be 8-16 characters long, and include at least one uppercase letter, one lowercase letter, one number, and one special character.',
   frequencyPerDayError: 'Frequency Per Day is an integer and have an input of 1 to 24.'
 };

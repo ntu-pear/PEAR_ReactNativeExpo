@@ -176,8 +176,10 @@ function SearchFilterBar({
         if(datetimeFilterType in tempSelDatetimeFilters[filter] && tempSelDatetimeFilters[filter][datetimeFilterType] != null) {          
           const datetimeType = filterOptionDetails[filter]['type'];
           let selectedDatetime = null;
-          if(datetimeType == 'date') {
+          if(datetimeType == 'date' && datetimeFilterType == 'min') {
             selectedDatetime = new Date(tempSelDatetimeFilters[filter][datetimeFilterType].setHours(0,0,0));
+          } else if(datetimeType == 'date' && datetimeFilterType == 'max') {
+            selectedDatetime = new Date(tempSelDatetimeFilters[filter][datetimeFilterType].setHours(23,59,59));
           } else if(datetimeType == 'time') {
             selectedDatetime = setSecondsToZero(new Date(tempSelDatetimeFilters[filter][datetimeFilterType]));
           }
@@ -238,7 +240,7 @@ function SearchFilterBar({
 
     if(datetimeFilterType == 'min') {
       filteredList = filteredList.filter((obj) => (
-        new Date(obj[fieldKey]) >= selectedDatetime)) || []
+        new Date(obj[fieldKey]) >= selectedDatetime )) || []
     } else if(datetimeFilterType == 'max') {
       filteredList = filteredList.filter((obj) => (
         new Date(obj[fieldKey]) <= selectedDatetime)) || []      

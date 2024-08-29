@@ -14,7 +14,6 @@ import RadioButtonInput from './input-components/RadioButtonsInput';
 import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
 // Configurations
-import colors from 'app/config/colors';
 import AddEditModal from './AddEditModal';
 
 function AddPatientPrescriptionModal({
@@ -34,8 +33,8 @@ function AddPatientPrescriptionModal({
 
   // Options for chronic
   const chronicOptions = [
-    { label: 'Short term', value: true },
-    { label: 'Long Term', value: false },
+    { label: 'Long Term', value: true },
+    { label: 'Short Term', value: false },
     
   ];
 
@@ -79,10 +78,9 @@ function AddPatientPrescriptionModal({
   // Reset form
   const resetForm = () => {
     setFormData({    
-      "prescriptionID": null,
       "prescriptionListID": 1,
       "dosage": "",
-      "frequencyPerDay": 1,
+      "frequencyPerDay": "",
       "isChronic": true,
       "instruction": "",
       "startDate": new Date(),
@@ -105,7 +103,14 @@ function AddPatientPrescriptionModal({
     }
   }, [showModal]);
 
-  // Function to update  data
+  const handleChange = (field, value) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      [field]: value,
+    }));
+  };
+
+  // Function to update data
   const handlePrescriptionData = (field) => (e) => {
     setFormData((prevState) => ({
       ...prevState,
@@ -128,7 +133,8 @@ function AddPatientPrescriptionModal({
       modalMode={modalMode}
       onClose={onClose}
       showModal={showModal}
-      modalTitle='Prescription' 
+      modalTitle='Prescription'
+       
       modalContent={(
         <>
         <SelectionInputField
@@ -138,14 +144,16 @@ function AddPatientPrescriptionModal({
           dataArray={prescriptionOptions}
           onDataChange={handlePrescriptionData('prescriptionListID')}
         />        
+        
         <InputField
           isRequired
           title={'Dosage'}
           value={formData.dosage}
           onChangeText={handlePrescriptionData('dosage')}
           onEndEditing={setIsDosageError}
-          autoCapitalize='none'
+          autoCapitalize="characters"
         />
+
         <RadioButtonInput
           title={'To be taken'}
           isRequired={true}
@@ -178,7 +186,7 @@ function AddPatientPrescriptionModal({
           value={formData.instruction}
           onChangeText={handlePrescriptionData('instruction')}
           onEndEditing={setIsInstructionError}
-          autoCapitalize='none'
+          autoCapitalize="characters"
         />
         <View style={styles.dateSelectionContainer}>
           <DateInputField
@@ -188,6 +196,7 @@ function AddPatientPrescriptionModal({
             hideDayOfWeek={true}
             handleFormData={handlePrescriptionData('startDate')}
             onEndEditing={setIsStartDateError}
+            minimumInputDate={new Date(new Date().getFullYear() - 20, 0, 1)}
             maximumInputDate={formData.endDate}
           />
         </View>  
@@ -208,8 +217,8 @@ function AddPatientPrescriptionModal({
           value={formData.prescriptionRemarks}
           onChangeText={handlePrescriptionData('prescriptionRemarks')}
           onEndEditing={setIsPrescriptionRemarksError}
-          autoCapitalize='none'
-        />           
+          autoCapitalize="characters"
+        />     
         </>
       )}
     />
@@ -217,17 +226,6 @@ function AddPatientPrescriptionModal({
 }
 
 const styles = StyleSheet.create({
-  modalHeader: {
-    backgroundColor: colors.green, // Change to your preferred green color
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalHeaderText: {
-    color: 'white', // Text color
-    fontSize: 18, // Adjust font size as needed
-    fontWeight: 'bold', // Optional: if you want the text to be bold
-    textTransform: 'uppercase',
-  },
   dateSelectionContainer: {
     width: '100%',
   },
