@@ -134,7 +134,6 @@ function AddPatientPrescriptionModal({
       onClose={onClose}
       showModal={showModal}
       modalTitle='Prescription'
-       
       modalContent={(
         <>
         <SelectionInputField

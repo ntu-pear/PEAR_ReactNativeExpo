@@ -398,8 +398,11 @@ const updatePatientAllergy = async (patientID, allergyData) => {
   return client.put(patientAllergyUpdate, payload);
 };
 
-const deletePatientAllergy = async (allergyID) => {
-  return client.delete(patientAllergyDelete, { allergyID });
+const deletePatientAllergy = async (allergyData) => {
+  const payload = {
+    allergyID: allergyData.allergyID,
+  };
+  return client.put(patientAllergyDelete, payload);
 };
 
 const updatePatientVital = async (patientID, vitalData) => {

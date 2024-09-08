@@ -1,7 +1,7 @@
 // Libs
 import React, { useEffect, useState } from 'react';
-import { Modal, Button, VStack, Text } from 'native-base';
-import { StyleSheet, View } from 'react-native';
+import { Modal, Button, VStack, Text, Flex } from 'native-base';
+import { StyleSheet } from 'react-native';
 
 // Components
 import SelectionInputField from './input-components/SelectionInputField';
@@ -13,39 +13,85 @@ import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 import colors from 'app/config/colors';
 
 // Configurations
+import AddEditModal from './AddEditModal';
 
 function AddPatientAllergyModal({
   showModal,
+  modalMode,
+  allergyFormData,
+  setAllergyFormData,
   onClose,
   onSubmit,
   existingAllergyIDs,
 }) {
-  // Variables relatied to retrieving allergy and reaction select options from API
   const [allergyData, setAllergyData] = useState({
-    AllergyListID: 0,
-    AllergyReactionListID: 13,
+    AllergyListID: null,
+    AllergyReactionListID: null,
     AllergyRemarks: '',
   });
 
+  // Error states for each input field
+  const [isInputErrors, setIsInputErrors] = useState(false);
   const [isAllergyError, setIsAllergyError] = useState(false);
   const [isReactionError, setIsReactionError] = useState(false);
   const [isRemarksError, setIsRemarksError] = useState(false);
+
+  // State to manage disabled options
   const [disabledAllergyOptions, setDisabledAllergyOptions] = useState({});
 
   const { data: allergies } = useGetSelectionOptions('Allergy');
-  const sortedAllergies = allergies.sort((a, b) => a.value - b.value);
-
+  const sortedAllergies = allergies?.sort((a, b) => a.value - b.value) || [];
+  
   const { data: reactions } = useGetSelectionOptions('AllergyReaction');
-  const sortedReactions = reactions.sort((a, b) => a.value - b.value);
+  const sortedReactions = reactions?.sort((a, b) => a.value - b.value) || [];
 
-  // Update field values
+  // Filter out allergyID1 and allergyID2 if there is an existing allergy
+  const hiddenAllergyIDs = [1, 2]; // AllergyID1 and AllergyID2
+  const filteredAllergies = existingAllergyIDs.length > 0
+    ? sortedAllergies.filter(allergy => !hiddenAllergyIDs.includes(allergy.value))
+    : sortedAllergies;
+
+  // Error handling useEffect
+  useEffect(() => {
+    setIsInputErrors(isAllergyError || isReactionError || isRemarksError);
+  }, [isAllergyError, isReactionError, isRemarksError]);
+
+  // Reset form to initial state
+  const resetForm = () => {
+    setAllergyData({
+      AllergyListID: null,
+      AllergyReactionListID: null,
+      AllergyRemarks: '',
+    });
+    setIsAllergyError(false);
+    setIsReactionError(false);
+    setIsRemarksError(false);
+  };
+
+  // When modal is closed, reset the form
+  useEffect(() => {
+    if (!showModal) {
+      resetForm();
+    }
+  }, [showModal]);
+
+  // Update disabled options based on existing allergies
+  useEffect(() => {
+    const newDisabledOptions = {};
+    existingAllergyIDs.forEach((id) => {
+      newDisabledOptions[id] = true;
+    });
+    setDisabledAllergyOptions(newDisabledOptions);
+  }, [existingAllergyIDs, allergies]);
+
+  // Handle form data change
   const handleAllergyChange = (value) => {
     if (value < 3) {
       setAllergyData({
         ...allergyData,
         AllergyListID: value,
-        AllergyReactionListID: 13,
-        AllergyRemarks: '',
+        AllergyReactionListID: 1,
+        AllergyRemarks: 'NIL',
       });
       setIsReactionError(false);
       setIsRemarksError(false);
@@ -53,7 +99,8 @@ function AddPatientAllergyModal({
       setAllergyData({
         ...allergyData,
         AllergyListID: value,
-        AllergyReactionListID: 13,
+        AllergyReactionListID: null,  // Reset when selecting value > 2
+        AllergyRemarks: '',           // Clear remarks as well
       });
     }
   };
@@ -66,109 +113,62 @@ function AddPatientAllergyModal({
     setAllergyData({ ...allergyData, AllergyRemarks: value });
   };
 
-  const resetForm = () => {
-    setAllergyData({
-      AllergyListID: null,
-      AllergyReactionListID: null,
-      AllergyRemarks: '',
-    });
-    setIsAllergyError(false);
-    setIsReactionError(false);
-    setIsRemarksError(false);
-    // Reset any other state related to the form here
-  };
-
-  useEffect(() => {
-    if (!showModal) {
-      resetForm();
-    }
-  }, [showModal]);
-
-  useEffect(() => {
-    const newDisabledOptions = {};
-    existingAllergyIDs.forEach((id) => {
-      newDisabledOptions[id] = true;
-    });
-    setDisabledAllergyOptions(newDisabledOptions);
-  }, [existingAllergyIDs, allergies]);
-
   // Handle form submission
   const handleSubmit = () => {
-    if (!isAllergyError && !isReactionError && !isRemarksError) {
+    if (!isInputErrors) {
       onSubmit(allergyData);
       onClose();
     }
   };
 
   return (
-    <Modal isOpen={showModal} onClose={onClose}>
-      <Modal.Content maxWidth="400px">
-        <Modal.CloseButton />
-        <Modal.Header style={styles.modalHeader}>
-          <Text style={styles.modalHeaderText}>Add Allergy</Text>
-        </Modal.Header>
-        <Modal.Body>
-          <VStack space={3}>
-            <SelectionInputField
-              isRequired
-              title={'Allergy'}
-              onDataChange={handleAllergyChange}
-              value={allergyData.AllergyListID}
-              dataArray={sortedAllergies}
-              onEndEditing={setIsAllergyError}
-              isDisabledItems={disabledAllergyOptions}
-            />
-            {allergyData.AllergyListID > 2 ? (
-              <>
-                <SelectionInputField
-                  isRequired={allergyData.AllergyListID > 2 ? true : false}
-                  title={'Reaction'}
-                  onDataChange={handleReactionChange}
-                  value={allergyData.AllergyReactionListID}
-                  dataArray={sortedReactions}
-                  onEndEditing={setIsReactionError}
-                />
-
-                <InputField
-                  isRequired={allergyData.AllergyListID > 2 ? true : false}
-                  title={'Remarks'}
-                  value={allergyData.AllergyRemarks}
-                  onChangeText={handleRemarksChange}
-                  variant={'multiLine'}
-                  onEndEditing={setIsRemarksError}
-                  hideError={true}
-                />
-              </>
-            ) : null}
-          </VStack>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button.Group space={2}>
-            <AppButton color="red" title="Cancel" onPress={onClose}></AppButton>
-            <AppButton
-              onPress={handleSubmit}
-              title="Submit"
-              color="green"
-            ></AppButton>
-          </Button.Group>
-        </Modal.Footer>
-      </Modal.Content>
-    </Modal>
+    <AddEditModal
+      handleSubmit={handleSubmit}
+      isInputErrors={isInputErrors}
+      modalMode={modalMode}
+      onClose={onClose}
+      showModal={showModal}
+      modalTitle='Allergy'
+      modalContent={(
+        <>
+          <SelectionInputField
+            isRequired={allergyData.AllergyListID > 2}
+            title="Allergy"
+            onDataChange={handleAllergyChange}
+            value={allergyData.AllergyListID}
+            dataArray={filteredAllergies}
+            onEndEditing={() => setIsAllergyError(false)}
+            isDisabledItems={disabledAllergyOptions}
+            isInvalid={isAllergyError}
+          />
+          {allergyData.AllergyListID > 2 && (
+            <>
+              <SelectionInputField
+                isRequired
+                title="Reaction"
+                onDataChange={handleReactionChange}
+                value={allergyData.AllergyReactionListID}
+                dataArray={sortedReactions}
+                onEndEditing={setIsReactionError}
+                isInvalid={isReactionError}
+              />
+              <InputField
+                isRequired
+                title="Remarks"
+                value={allergyData.AllergyRemarks}
+                onChangeText={handleRemarksChange}
+                variant="multiLine"
+                onEndEditing={setIsRemarksError}
+                isInvalid={isRemarksError}
+              />
+            </>
+          )}
+        </>
+      )}
+    />
   );
-}
 
-const styles = StyleSheet.create({
-  modalHeader: {
-    backgroundColor: colors.green, // Change to your preferred green color
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalHeaderText: {
-    color: 'white', // Text color
-    fontSize: 18, // Adjust font size as needed
-    fontWeight: 'bold', // Optional: if you want the text to be bold
-    textTransform: 'uppercase',
-  },
-});
+}
+  
 
 export default AddPatientAllergyModal;

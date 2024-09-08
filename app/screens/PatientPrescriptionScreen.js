@@ -421,6 +421,7 @@ function PatientPrescriptionScreen(props) {
                 DISPLAY_MODES={DISPLAY_MODES}
                 /> 
             </View>
+          </View>
           {displayMode == 'rows' ? (
             <FlatList
             onTouchStart={()=>Keyboard.dismiss()}
@@ -479,7 +480,6 @@ function PatientPrescriptionScreen(props) {
       />
       </View>
     )}  
-    </View>
     <View style={styles.addBtn}>
       <AddButton title="Add Prescription" onPress={handleOnClickAddPrescription}/>
       </View>
