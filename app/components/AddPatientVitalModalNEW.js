@@ -219,6 +219,7 @@ function AddPatientVitalModalNEW({
                 title="Remarks"
                 value={vitalFormData.vitalRemarks}
                 onChangeText={handleVitalDataChange('vitalRemarks')}
+                onEndEditing={setIsVitalRemarksError}
                 variant="multiLine"
                 isInvalid={false}
               />

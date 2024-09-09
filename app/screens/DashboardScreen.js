@@ -139,6 +139,8 @@ function DashboardScreen({ navigation }) {
   // Refresh schedule when screen comes into focus
   useFocusEffect(
     React.useCallback(() => {
+      const today = new Date();
+      setSelectedDate(today);
       refreshSchedule();
       setScheduleXOffset(tempOffset);
     }, [])
@@ -148,6 +150,10 @@ function DashboardScreen({ navigation }) {
   useEffect(() => {
     refreshSchedule();
   }, [viewMode]);
+
+  useEffect(() => {
+    refreshSchedule();
+  }, [selectedDate]);
 
   // Refresh schedule if isRetry is set to true
   useEffect(() => {
@@ -255,11 +261,11 @@ function DashboardScreen({ navigation }) {
       setOriginalScheduleWeekly({});
       setOriginalSchedule([]);
       setSchedule([]);
-      setIsLoading(false);
       setIsError(true);
       setStatusCode(response.status);
       setIsRetry(true);
     }
+    setIsLoading(false);
   };
 
   // Retrieve patient list from backend
@@ -278,11 +284,11 @@ function DashboardScreen({ navigation }) {
       setStatusCode(response.status);
     } else {
       console.log('Error getting schedule:',response)
-      setIsLoading(false);
       setIsError(true);
       setStatusCode(response.status);
       setIsRetry(true);
     }
+    setIsLoading(false);
   };
 
   // Parse data returned by api to required format to display schedule

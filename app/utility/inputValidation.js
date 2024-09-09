@@ -138,19 +138,19 @@ export const bloodSugarLevelRange = (value) => {
 };
 
 export const heartRateRange = (value) => {
-  if (!(value >= 0 && value <= 300)) {
+  if (!(value >= 1 && value <= 300)) {
     return errors.heartRateError;
   }
 };
 
 export const weightRange = (value) => {
-  if (!(value >= 0 && value <= 200)) {
+  if (!(value >= 1 && value <= 200)) {
     return errors.weightError;
   }
 };
 
 export const heightRange = (value) => {
-  if (!(value >= 0 && value <= 200)) {
+  if (!(value >= 1 && value <= 200)) {
     return errors.heightError;
   }
 };
@@ -158,6 +158,12 @@ export const heightRange = (value) => {
 export const frequencyPerDayRange = (value) => {
   if (!(value >= 1 && value <= 24)) {
     return errors.frequencyPerDayError;
+  }
+};
+
+export const emptyEntry = (value) => { //remove this if got issue with fields that can be empty but does not allow
+  if (!value) {
+    return errors.generalError;
   }
 };
 
@@ -179,4 +185,5 @@ export const validationFunctions = {
   'height' : [heightRange],
   'frequencyPerDay': [frequencyPerDayRange],
   password: [passwordFormat],
+  general: [emptyEntry],
 };
