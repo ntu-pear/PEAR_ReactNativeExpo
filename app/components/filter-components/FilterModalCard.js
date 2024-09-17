@@ -20,6 +20,7 @@ import DateInputField from '../input-components/DateInputField';
 import { isEmptyObject, parseAutoCompleteOptions, parseSelectOptions, sortFilterInitialState, updateState } from 'app/utility/miscFunctions';
 
 const FilterModalCard = ({
+  testID='',
   modalVisible,
   setModalVisible,
 
@@ -469,8 +470,9 @@ const FilterModalCard = ({
   }
 
   return (
-    <View>
+    <View testID={testID}>
       <TouchableOpacity 
+        testID={`${testID}_icon`}
         style={styles.filterIcon}
         onPress={() => updateState(setIsModalVisible, setModalVisible, true)}
         >
@@ -503,6 +505,7 @@ const FilterModalCard = ({
                 <View>
                   <Text style={styles.textStyle}>Sort by</Text>
                   <ScrollView
+                    testID={`${testID}_sort`}
                     horizontal={true}
                     flex={1}
                     showsHorizontalScrollIndicator={false}
@@ -511,6 +514,7 @@ const FilterModalCard = ({
                       {
                         sort['filterOptions'].map((item) => (
                           <Chip
+                            testID={`${testID}_sort_${item.label}`}
                             key={item.value}
                             title={item.label}
                             onPress={() => handleOnSelectChipSort(item)}
@@ -537,9 +541,9 @@ const FilterModalCard = ({
                 </View>
               ) : null}
               {!isEmptyObject(chip['filterOptions']) ? (
-                <View style={styles.filterContainer}>
+                <View style={styles.filterContainer} testID={`${testID}_chip`}>
                   {Object.keys(chip['sel']).map((filter) => 
-                    <View key={filter}>
+                    <View key={filter} testID={`${testID}_chip_${filter}`}>
                       <Text style={styles.textStyle}>{filter}</Text>
                       <ScrollView
                         horizontal={true}
@@ -550,6 +554,7 @@ const FilterModalCard = ({
                           {
                             chip['filterOptions'][filter].map((item) => (
                               <Chip
+                                testID={`${testID}_chip_${filter}_${item.label}`}
                                 key={item.value}
                                 title={item.label}
                                 onPress={() => handleOnSelectChipFilter(item, filter)}
@@ -567,12 +572,13 @@ const FilterModalCard = ({
                 </View>                
               ): null}
               {!isEmptyObject(dropdown['filterOptions']) ? (
-                <View style={styles.filterContainer}>
+                <View style={styles.filterContainer} testID={`${testID}_dropdown`}>
                   <View>
                     {Object.keys(dropdown['filterOptions']).map((filter) => 
                       <View key={filter}>
                         <Text style={styles.textStyle}>{filter}</Text>
                         <SelectionInputField
+                          testID={`${testID}_dropdown_${filter}`}
                           dataArray={dropdown['filterOptions'][filter]}
                           showTitle={false}
                           onDataChange={(item) => handleOnSelectDropdownFilter(item, filter)}
@@ -585,11 +591,12 @@ const FilterModalCard = ({
                 </View>
               ): null}
               {!isEmptyObject(autocomplete['filterOptions']) ? (
-                <View style={styles.filterContainer}>
+                <View style={styles.filterContainer} testID={`${testID}_auto`}>
                     {Object.keys(autocomplete['filterOptions']).map((filter) => 
                       (<View key={filter}>
                         <Text style={styles.textStyle}>{filter}</Text>
                         <AutocompleteDropdown
+                          testID={`${testID}_auto_${filter}`}
                           ref={searchRefs[filter]}
                           closeOnBlur={false}
                           dataSet={autocomplete['filterOptions'][filter]}
@@ -609,15 +616,16 @@ const FilterModalCard = ({
                 </View>
               ): null}
             {!isEmptyObject(datetime['filterOptions']) ? (
-              <View style={styles.filterContainer}>
+              <View style={styles.filterContainer} testID={`${testID}_datetime`}>
                 {Object.keys(datetime['filterOptions']).map((filter) => (
-                  <View key={filter}>
+                  <View key={filter} testID={`${testID}_datetime_${filter}`}>
                     <Text style={styles.textStyle}>{filter}{!('min' in datetime['filterOptions'][filter]) ? ' (Maximum)' : ''}{!('max' in datetime['filterOptions'][filter]) ? ' (Minimum)' : ''} </Text>
                     <View style={styles.datetimeFilterContainer}>
                       <LocalizationProvider dateAdapter={AdapterDayjs}>
                         {'min' in datetime['filterOptions'][filter] ? (
                           <View style={{flex:'max' in datetime['filterOptions'][filter] ? 0.5 : 1 }}>
                             <DateInputField
+                              testID={`${testID}_datetime_min_${filter}`}
                               hideDayOfWeek
                               allowNull
                               mode={filterOptionDetails[filter]['type']}
@@ -638,6 +646,7 @@ const FilterModalCard = ({
                         {'max' in datetime['filterOptions'][filter] ? (                      
                           <View style={{flex: 'min' in datetime['filterOptions'][filter] ? 0.5 : 1}}>
                             <DateInputField
+                              testID={`${testID}_datetime_max_${filter}`}
                               hideDayOfWeek
                               allowNull
                               mode={filterOptionDetails[filter]['type']}
@@ -653,7 +662,7 @@ const FilterModalCard = ({
                       </LocalizationProvider>
                     </View>
                     {checkTimeFilterError(filter) ? (
-                      <Text style={styles.errorMsg}>Start time cannot be greater than end time</Text>
+                      <Text testID={`${testID}_date_error_${filter}`} style={[styles.errorMsg, styles.textStyle]}>Start time cannot be greater than end time</Text>
                     ) : null}
                   </View>
                 ))}
@@ -663,6 +672,7 @@ const FilterModalCard = ({
             <Modal.Footer backgroundColor={colors.white}>
               <Button.Group space={2}>
                 <Button
+                  testID={`${testID}_reset`}
                   variant="ghost"
                   colorScheme="blueGray"
                   onPress={() => {
@@ -672,6 +682,7 @@ const FilterModalCard = ({
                   Reset
                 </Button>
                 <Button
+                  testID={`${testID}_apply`}
                   backgroundColor={checkFilterError() ? colors.gray : colors.green}
                   onPress={() => {
                     handleApply();

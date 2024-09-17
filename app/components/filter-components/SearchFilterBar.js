@@ -18,6 +18,7 @@ import { isEmptyObject, parseSelectOptions, setSecondsToZero, sortArray, sortFil
 import DisplayModeComponent from './DisplayModeComponent';
 
 function SearchFilterBar({
+  testID='',
   originalList=[],
   setList=()=>{},
   setIsLoading=()=>{},
@@ -334,6 +335,7 @@ function SearchFilterBar({
   const filterComponent = () => {
     return (
       <FilterModalCard
+        testID={`${testID}_filter`}
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
 
@@ -370,30 +372,11 @@ function SearchFilterBar({
   const countComponent = () => {
     return (
       itemCount != null ? (
-        <View style={styles.itemCount}>
+        <View style={styles.itemCount} testID={`${testID}_count`}>
           <Text>No. of {itemType}: {itemCount}</Text>
         </View>
       ) : null
     )
-  }
-
-  const indicatorComponent = () => {
-    {hideIndicator ? null : (
-      <View style={{justifyContent: 'center', flex: 1, marginTop: 2, flexDirection: 'row'}}>
-        <FilterIndicator
-          modalVisible={modalVisible}
-          setModalVisible={setModalVisible}
-          filterOptionDetails={filterOptionDetails}
-          sort={sort}
-          setSort={setSort}
-          dropdown={dropdown}
-          chip={chip}
-          autocomplete={autocomplete}
-          datetime={datetime}
-          handleSortFilter={handleSearchSortFilter}
-        />
-      </View>
-    )}
   }
 
   const displayModeComponent = () => {
@@ -401,6 +384,7 @@ function SearchFilterBar({
       displayMode != '' ? (
         <View style={{justifyContent: 'center'}}>
           <DisplayModeComponent
+            testID={`${testID}_displayMode`}
             DISPLAY_MODES={DISPLAY_MODES}
             displayMode={displayMode}
             setDisplayMode={setDisplayMode}
@@ -410,9 +394,32 @@ function SearchFilterBar({
     )
   }
 
+  const filterIndicatorComponent = () => {
+    if(!hideIndicator) {
+      return (
+        <View style={{justifyContent: 'center', flex: 1, marginTop: 2, flexDirection: 'row'}}>
+          <FilterIndicator
+              testID={`${testID}_indicator`}
+              modalVisible={modalVisible}
+              setModalVisible={setModalVisible}
+              filterOptionDetails={filterOptionDetails}
+              sort={sort}
+              setSort={setSort}
+              dropdown={dropdown}
+              chip={chip}
+              autocomplete={autocomplete}
+              datetime={datetime}
+              handleSortFilter={handleSearchSortFilter}
+            />
+        </View>
+      )
+    }
+  }
+
   const searchBarComponent = () => {
     return (
       <SearchBar 
+        testID={`${testID}_search`}
         onChangeText={handleSearch}
         value={searchQuery}
         autoCapitalize='characters'
@@ -427,12 +434,18 @@ function SearchFilterBar({
 
   const tabBarComponent = () => {
     return (
-      <TabBar
-        TABS={VIEW_MODES}
-        curTab={viewMode}
-        setCurTab={setViewMode}
-        handleSwitchTab={handleOnToggleViewMode}
-      />
+      !isEmptyObject(VIEW_MODES) ? (
+        <>
+          <TabBar
+            testID={`${testID}_tabBar`}
+            TABS={VIEW_MODES}
+            curTab={viewMode}
+            setCurTab={setViewMode}
+            handleSwitchTab={handleOnToggleViewMode}
+            />
+          <Divider />
+        </>
+      ) : null
     )
   }
 
@@ -448,36 +461,17 @@ function SearchFilterBar({
   }
 
   return (
-    <Center backgroundColor={colors.white_var1} zindex={1}> 
-      {!isEmptyObject(VIEW_MODES) ? (
-        <>
-          {tabBarComponent()}
-          <Divider />
-        </>
-      ) : null}
+    <Center testID={testID} backgroundColor={colors.white_var1} zindex={1}> 
+        {tabBarComponent()}
         {hideSearchBar ? (
           <View flexDirection='row' style={{alignItems: 'center', justifyContent: 'space-between', width: '100%'}} >
             {countComponent()}
-            {hideIndicator ? null : (
-            <View style={{justifyContent: 'center', flex: 1, marginTop: 2, flexDirection: 'row'}}>
-              <FilterIndicator
-                modalVisible={modalVisible}
-                setModalVisible={setModalVisible}
-                filterOptionDetails={filterOptionDetails}
-                sort={sort}
-                setSort={setSort}
-                dropdown={dropdown}
-                chip={chip}
-                autocomplete={autocomplete}
-                datetime={datetime}
-                handleSortFilter={handleSearchSortFilter}
-              />
-            </View>
-          )}
+            {filterIndicatorComponent()} 
             {verticalDividerComponent()}
             {filterComponent()}
           </View>
         ) : (
+          <>
           <View style={styles.optionsContainer}>
             {searchBarComponent()}
             <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
@@ -485,30 +479,12 @@ function SearchFilterBar({
               {displayModeComponent()}              
             </View>
           </View>
-        )}
-      {hideSearchBar ? null : (
-        <View
-        style={[styles.optionsContainer, {paddingTop: 0}]}
-      >
+      <View style={[styles.optionsContainer, {paddingTop: 0}]}>
         {countComponent()}
         {verticalDividerComponent()}
-        {hideIndicator ? null : (
-      <View style={{justifyContent: 'center', flex: 1, marginTop: 2, flexDirection: 'row'}}>
-        <FilterIndicator
-          modalVisible={modalVisible}
-          setModalVisible={setModalVisible}
-          filterOptionDetails={filterOptionDetails}
-          sort={sort}
-          setSort={setSort}
-          dropdown={dropdown}
-          chip={chip}
-          autocomplete={autocomplete}
-          datetime={datetime}
-          handleSortFilter={handleSearchSortFilter}
-        />
+        {filterIndicatorComponent()}
       </View>
-    )}
-      </View>
+      </>
       )}      
       <Divider/>
     </Center>

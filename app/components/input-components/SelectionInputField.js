@@ -12,6 +12,7 @@ import ErrorMessage from 'app/components/ErrorMessage';
 import RequiredIndicator from '../RequiredIndicator';
 
 function SelectionInputField({
+  testID='',
   isRequired = false,
   hideError = true,
   showTitle = true,
@@ -87,7 +88,7 @@ function SelectionInputField({
   };  
 
   return (
-    <View style={styles.componentContainer}>
+    <View testID={testID} style={styles.componentContainer}>
       <VStack>
         {showTitle ? (
           <Text style={styles.titleMsg}>
@@ -97,6 +98,7 @@ function SelectionInputField({
           <></>
         )}
         <Select
+          testID={`${testID}_input`}
           accessibilityLabel={title}
           borderRadius="25"
           fontFamily={
@@ -120,7 +122,7 @@ function SelectionInputField({
         </Select>
         {hideError && !error.errorMsg ? 
         null : (
-        <ErrorMessage message={error.errorMsg}/>
+        <ErrorMessage testID={`${testID}_input`} message={error.errorMsg}/>
         )}   
         </VStack>
     </View>

@@ -258,6 +258,7 @@ function PatientAddScreen() {
     case 1:
       return (
         <PatientAddPatientInfoScreen
+          testID='addPatients_patient'
           nextQuestionHandler={nextQuestionHandler}
           handleFormData={handlePatientData}
           formData={formData}
@@ -267,6 +268,7 @@ function PatientAddScreen() {
     case 2:
       return (
         <PatientAddGuardianScreen
+          testID='addPatients_guardian'
           nextQuestionHandler={nextQuestionHandler}
           prevQuestionHandler={prevQuestionHandler}
           handleFormData={handleGuardianData}
@@ -282,6 +284,7 @@ function PatientAddScreen() {
       } 
       return (
         <PatientAddAllergyScreen
+          testID='addPatients_allergy'
           nextQuestionHandler={nextQuestionHandler}
           prevQuestionHandler={prevQuestionHandler}
           handleFormData={handleAllergyData}

@@ -214,6 +214,7 @@ function WelcomeScreen(props) {
               </View>
               <View style={styles.inputContainer}>
                 <SelectionInputField
+                  testID="role"
                   isRequired
                   showTitle={false}
                   title="Select Role"
@@ -255,7 +256,7 @@ function WelcomeScreen(props) {
                       title="Login"
                       color="green"
                       onPress={onPressLogin}
-                      testingID="Login"
+                      testID="login"
                       //isDisabled={isInputErrors} //for login button validation                  
                     />
                   )}

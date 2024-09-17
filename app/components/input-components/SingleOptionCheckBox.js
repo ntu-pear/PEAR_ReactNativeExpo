@@ -5,12 +5,18 @@ import typography from 'app/config/typography';
 import colors from 'app/config/colors';
 import Checkbox from 'expo-checkbox';
 
-function SingleOptionCheckBox({ title, value, onChangeData }) {
+function SingleOptionCheckBox({ 
+  testID='', 
+  title, 
+  value, 
+  onChangeData 
+}) {
   return (
     <View style={styles.ComponentContainer}>
       <HStack justifyContent="space-between" alignItems="center">
         <Text style={styles.TitleMsg}>{title}</Text>
         <Checkbox
+          testID={`${testID}`}
           disabled={false}
           value={value}
           onValueChange={(newValue) => onChangeData(newValue)}

@@ -566,9 +566,11 @@ function DashboardScreen({ navigation }) {
       <ActivityIndicator visible />
     ) : (
       <View
+        testID='dashboard'
         style={globalStyles.mainContentContainer}
       >
         <SearchFilterBar
+          testID='searchFilter'
           originalList={originalSchedule}
           setList={setSchedule}
           setIsLoading={setIsLoading}
