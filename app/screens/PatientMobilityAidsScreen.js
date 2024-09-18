@@ -27,7 +27,6 @@ import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUn
 import DynamicTable from 'app/components/DynamicTable';
 import MobilityAidItem from 'app/components/MobilityAidItem';
 import AddPatientMobilityAidModal from 'app/components/AddPatientMobilityAidModal';
-import AlertModal from 'app/components/AlertModal';
 
 function PatientMobilityAidScreen(props) {
   let {patientID, patientId} = props.route.params;
@@ -36,17 +35,12 @@ function PatientMobilityAidScreen(props) {
   }
 
   const testID = `mobility_aid_screen_${patientID}`;
-
+  
   const navigation = useNavigation();
 
   // Modal states
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // either 'add' or 'edit'
-
-  // Alert Modal states
-  const [modalTitle, setModalTitle] = useState('');
-  const [modalMessage, setModalMessage] = useState('');
-  const [modalTestID, setModalTestID] = useState('');
   
   // Options for user to search by
   const SEARCH_OPTIONS = ['Mobility Aid'];
@@ -460,7 +454,7 @@ function PatientMobilityAidScreen(props) {
             </View>
           )}
           <View style={styles.addBtn}>
-            <AddButton 
+            <AddButton
               testID={`${testID}_addMobilityAid`}
               title="Add Mobility Aid"
               onPress={handleOnClickAddMobility}
