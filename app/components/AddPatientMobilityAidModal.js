@@ -16,6 +16,7 @@ import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 import AddEditModal from './AddEditModal';
 
 function AddPatientMobilityAidModal({
+  testID,
   showModal,
   modalMode,
   formData,
@@ -102,6 +103,7 @@ function AddPatientMobilityAidModal({
   
   return (
     <AddEditModal
+      testID={testID}
       handleSubmit={handleSubmit}
       isInputErrors={isInputErrors}
       modalMode={modalMode}
@@ -111,6 +113,7 @@ function AddPatientMobilityAidModal({
       modalContent={(
         <>
         <SelectionInputField
+          testID={`${testID}_mobility_aid_input`}
           isRequired
           title="Mobility Aid"
           value={formData.mobilityListId}
@@ -118,6 +121,7 @@ function AddPatientMobilityAidModal({
           onDataChange={handleMobilityData('mobilityListId')}
         />
         <InputField
+          testID={`${testID}_remarks_input`}
           title={'Remarks'}
           value={formData.mobilityRemark}
           onChangeText={handleMobilityData('mobilityRemark')}
@@ -125,6 +129,7 @@ function AddPatientMobilityAidModal({
           autoCapitalize="characters"
         />  
         <RadioButtonInput
+          testID={`${testID}_condition_radio`}
           title={'Condition'}
           isRequired={true}
           value={formData.isRecovered}

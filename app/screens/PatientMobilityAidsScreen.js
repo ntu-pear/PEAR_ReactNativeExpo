@@ -27,17 +27,26 @@ import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUn
 import DynamicTable from 'app/components/DynamicTable';
 import MobilityAidItem from 'app/components/MobilityAidItem';
 import AddPatientMobilityAidModal from 'app/components/AddPatientMobilityAidModal';
+import AlertModal from 'app/components/AlertModal';
 
 function PatientMobilityAidScreen(props) {
   let {patientID, patientId} = props.route.params;
   if (patientId) {
     patientID = patientId;
   }
+
+  const testID = `mobility_aid_screen_${patientID}`;
+
   const navigation = useNavigation();
 
   // Modal states
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // either 'add' or 'edit'
+
+  // Alert Modal states
+  const [modalTitle, setModalTitle] = useState('');
+  const [modalMessage, setModalMessage] = useState('');
+  const [modalTestID, setModalTestID] = useState('');
   
   // Options for user to search by
   const SEARCH_OPTIONS = ['Mobility Aid'];
@@ -352,7 +361,7 @@ function PatientMobilityAidScreen(props) {
     isLoading ? (
       <ActivityIndicator visible />
     ) : (
-      <View style={styles.container}>  
+      <View testID={testID} style={styles.container}>  
         <View style={{justifyContent: 'space-between'}}>            
           <View style={{alignSelf: 'center', marginTop: 15, maxHeight: 120}} >
             {!isEmptyObject(patientData) ? (
@@ -414,14 +423,16 @@ function PatientMobilityAidScreen(props) {
                   setIsScrolling={setIsScrolling}
                   onSwipeRight={()=>handleDeleteMobilityAid(item.mobilityId)}
                   onSwipeLeft={()=>handleEditMobilityAid(item.mobilityId)}
-                  underlay={<EditDeleteUnderlay/>}
+                  underlay={<EditDeleteUnderlay testID={`${testID}_${item.mobilityId}_underlay`}/>}
                   item={
-                    <TouchableOpacity 
+                    <TouchableOpacity
+                      testID={`${testID}_${item.mobilityId}_touchable`} 
                       style={styles.logContainer} 
                       activeOpacity={1} 
                       disabled={!isScrolling}
                     >
                       <MobilityAidItem
+                        testID={`${testID}_${item.mobilityId}`}
                         mobilityRemarks={item.mobilityRemark}
                         isRecovered={item.isRecovered}
                         mobilityListDesc={item.mobilityListDesc}
@@ -450,11 +461,13 @@ function PatientMobilityAidScreen(props) {
           )}
           <View style={styles.addBtn}>
             <AddButton 
+              testID={`${testID}_addMobilityAid`}
               title="Add Mobility Aid"
               onPress={handleOnClickAddMobility}
               />
           </View>
           <AddPatientMobilityAidModal
+            testID={`${testID}_modal`}
             showModal={isModalVisible}
             modalMode={modalMode}
             formData={formData}

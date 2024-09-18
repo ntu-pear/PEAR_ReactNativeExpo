@@ -7,10 +7,10 @@ import { MaterialIcons } from '@expo/vector-icons';
 // Configurations
 import colors from 'app/config/colors';
 
-const EditDeleteUnderlay = () => {
+const EditDeleteUnderlay = (testID) => {
   return (
     <View style={styles.underlayContainer}>
-      <View backgroundColor={colors.green} style={styles.underlay}>
+      <View testID={`${testID}_edit`} backgroundColor={colors.green} style={styles.underlay}>
         <Icon 
           as={
             <MaterialIcons 
@@ -21,7 +21,7 @@ const EditDeleteUnderlay = () => {
           color={colors.white}
         />
       </View>
-      <View backgroundColor={colors.red} style={styles.underlay}>
+      <View testID={`${testID}_delete`} backgroundColor={colors.red} style={styles.underlay}>
         <Icon 
           as={
             <MaterialIcons 

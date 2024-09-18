@@ -8,18 +8,19 @@ import colors from 'app/config/colors';
 
 
 const EditDeleteBtn = ({
+  testID,
   onEdit,
   onDelete
 }) => {  
   return (
     <View style={styles.editDelContainer}>
       {onEdit ? (
-        <TouchableOpacity style={styles.editBtn} onPress={onEdit}>
+        <TouchableOpacity testID={`${testID}_edit`} style={styles.editBtn} onPress={onEdit}>
           <Text style={{color: colors.green, fontSize: 16}}>Edit</Text>
         </TouchableOpacity>
       ) : null}
       {onDelete ? (
-        <TouchableOpacity style={styles.delBtn} onPress={onDelete}>
+        <TouchableOpacity testID={`${testID}_delete`} style={styles.delBtn} onPress={onDelete}>
           <Text style={{color: colors.red, fontSize: 16}}>Delete</Text>
         </TouchableOpacity>
       ) : null}

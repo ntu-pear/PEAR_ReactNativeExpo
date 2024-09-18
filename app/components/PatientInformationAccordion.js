@@ -474,7 +474,7 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, s
 
   function renderHeader(section, _, isActive) {
     return (
-      <View style={styles.accordHeader}>
+      <View testID={`accordion_${section.title.replace(/\s+/g, '_')}_header`} style={styles.accordHeader}>
         <Text style={styles.accordTitle}>{section.title}</Text>
         <Icon name={ isActive ? 'chevron-up' : 'chevron-down' } size={30} color={colors.white_var1} />
       </View>
@@ -483,7 +483,7 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, s
 
   function renderContent(section, _, isActive) {
     return (
-      <View style={styles.accordBody}>
+      <View testID={`accordion_${section.title.replace(/\s+/g, '_')}_content`} style={styles.accordBody}>
         <InformationCard
           title={section.title}
           subtitle={(section.title === 'Guardian(s) Information' && isSecondGuardian) ? 'Guardian 1' : null}

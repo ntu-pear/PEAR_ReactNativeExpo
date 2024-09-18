@@ -6,12 +6,13 @@ import { FontAwesome } from '@expo/vector-icons';
 
 function AddButton(props) {
   // Destructure props
-  const { title, onPress, color = 'green', isDisabled = false } = props;
+  const { title, onPress, color = 'green', isDisabled = false , testID } = props;
 
   // replacement of TouchableOpacity with Button to enable isDisabled property - Russell
   return (
     <View style={styles.buttonContainer}>
       <Button
+        testID={testID}
         style={[styles.button, { backgroundColor: colors[color] }]}
         isDisabled={isDisabled}
         onPress={onPress}

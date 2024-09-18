@@ -389,7 +389,8 @@ function PatientsScreen({ navigation }) {
               style={styles.patientListContainer}
               renderItem={({ item, index }) => {
               return (
-                <TouchableOpacity 
+                <TouchableOpacity
+                  testID={`patientprofile_${item.patientID}`}
                   style={styles.patientRowContainer} 
                   key={index}
                   onPress={() => handleOnClickPatientItem(item.patientID)}

@@ -12,6 +12,7 @@ import { formatDate } from 'app/utility/miscFunctions';
 import EditDeleteBtn from './EditDeleteBtn';
 
 const MobilityAidItem = ({
+  testID='',
   mobilityRemarks,
   mobilityListDesc,
   isRecovered,
@@ -20,7 +21,7 @@ const MobilityAidItem = ({
   onEdit
 }) => {  
     return (
-        <View style={styles.container}>
+        <View testID={testID} style={styles.container}>
           <Icon
             as={<MaterialCommunityIcons name="wheelchair-accessibility" />}
             size={12}
@@ -35,7 +36,7 @@ const MobilityAidItem = ({
               value={formatDate(new Date(date), true)}
             />
           </View>
-          <EditDeleteBtn onDelete={onDelete} onEdit={onEdit}/>
+          <EditDeleteBtn testID={testID} onDelete={onDelete} onEdit={onEdit}/>
         </View>
       );
     };

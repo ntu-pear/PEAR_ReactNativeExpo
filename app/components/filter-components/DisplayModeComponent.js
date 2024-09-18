@@ -8,6 +8,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import colors from 'app/config/colors';
 
 function DisplayModeComponent({ 
+  testID='',
   ICON_MAPPING={'list': 'format-list-bulleted', 'table': 'grid-on', 'rows': 'view-list', 'grid': 'grid-view'},
   DISPLAY_MODES=[],
   displayMode,
@@ -19,6 +20,7 @@ function DisplayModeComponent({
   }
   return (
     <TouchableOpacity 
+        testID={testID}
         onPress={handleToggleDisplayMode}
         style={{alignItems: 'center', justifyContent: 'center', width: 45}}
         >

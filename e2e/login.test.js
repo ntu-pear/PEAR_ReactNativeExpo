@@ -7,158 +7,77 @@ describe('Login tests', () => {
     await device.reloadReactNative();
   });
 
-  it('Login: login button disabled by default', async () => {
-    // Ensure all expected elements in the loginScreen are present.
+  // Ensure all expected elements in the loginScreen are present.
+  const checkLoginElements = async () => {
     await expect(element(by.id('loginContentContainer'))).toBeVisible();
     await expect(element(by.id('username_input'))).toBeVisible();
     await expect(element(by.id('password_input'))).toBeVisible();
     await expect(element(by.id('role_input'))).toBeVisible();
     await expect(element(by.id('login'))).toBeVisible();
     await expect(element(by.text('Forgot Password?'))).toBeVisible();
+  };
 
-    await expect(
-      element(
-        by.traits(['button', 'disabled']).and(
-        by.id('login'))
-    )).toExist();
+  // Test user input
+  const enterCredentials = async (username, role, password) => {
+    await element(by.id('username_input')).tap();
+    await element(by.id('username_input')).typeText(username);
+    await element(by.id('role_input')).tap();
+    await element(by.text(role)).tap();
+    await element(by.id('password_input')).tap();
+    await element(by.id('password_input')).typeText(password);
+    await element(by.id('loginContentContainer')).tap();
+  };
+
+  const verifyErrorMessage = async (errorId, expectedMessage) => {
+    await waitFor(element(by.id(errorId))).toHaveText(expectedMessage);
+  };
+
+  it('Login: login button disabled by default', async () => {
+    await checkLoginElements();
+    await expect(element(by.traits(['button', 'disabled']).and(by.id('login')))).toExist();
   });
 
   it('Login: invalid credentials (username)', async () => {
-    // Ensure all expected elements in the loginScreen are present.
-    await expect(element(by.id('loginContentContainer'))).toBeVisible();
-    await expect(element(by.id('username_input'))).toBeVisible();
-    await expect(element(by.id('password_input'))).toBeVisible();
-    await expect(element(by.id('role_input'))).toBeVisible();
-    await expect(element(by.id('login'))).toBeVisible();
-    await expect(element(by.text('Forgot Password?'))).toBeVisible();
-
-    // Test user input
-    await element(by.id('username_input')).tap();
-    await element(by.id('username_input')).typeText('wrong@gmail.com');
-    await element(by.id('role_input')).tap();
-    await element(by.text('Supervisor')).tap();
-    await element(by.id('password_input')).tap();
-    await element(by.id('password_input')).typeText('Supervisor!23');
-    await element(by.id('loginContentContainer')).tap();
+    await checkLoginElements();
+    await enterCredentials('wrong@gmail.com', 'Supervisor', 'Supervisor!23');
     await element(by.id('login')).longPress();
-
-    await waitFor(element(by.id('loginError'))).toHaveText(
-      'Invalid email and/or password',
-    );
+    await verifyErrorMessage('loginError', 'Invalid email and/or password');
   });
 
   it('Login: invalid credentials (user role)', async () => {
-    // Ensure all expected elements in the loginScreen are present.
-    await expect(element(by.id('loginContentContainer'))).toBeVisible();
-    await expect(element(by.id('username_input'))).toBeVisible();
-    await expect(element(by.id('password_input'))).toBeVisible();
-    await expect(element(by.id('role_input'))).toBeVisible();
-    await expect(element(by.id('login'))).toBeVisible();
-    await expect(element(by.text('Forgot Password?'))).toBeVisible();
-
-    // Test user input
-    await element(by.id('username_input')).tap();
-    await element(by.id('username_input')).typeText('jess@gmail.com');
-    await element(by.id('role_input')).tap();
-    await element(by.text('Caregiver')).tap();
-    await element(by.id('password_input')).tap();
-    await element(by.id('password_input')).typeText('Supervisor!23');
-    await element(by.id('loginContentContainer')).tap();
+    await checkLoginElements();
+    await enterCredentials('jess@gmail.com', 'Caregiver', 'Supervisor!23');
     await element(by.id('login')).longPress();
-
-    await waitFor(element(by.id('loginError'))).toHaveText(
-      'Invalid email and/or password',
-    );
+    await verifyErrorMessage('loginError', 'Invalid email and/or password');
   });
 
   it('Login: invalid credentials (password)', async () => {
-    // Ensure all expected elements in the loginScreen are present.
-    await expect(element(by.id('loginContentContainer'))).toBeVisible();
-    await expect(element(by.id('username_input'))).toBeVisible();
-    await expect(element(by.id('password_input'))).toBeVisible();
-    await expect(element(by.id('role_input'))).toBeVisible();
-    await expect(element(by.id('login'))).toBeVisible();
-    await expect(element(by.text('Forgot Password?'))).toBeVisible();
-
-    // Test user input
-    await element(by.id('username_input')).tap();
-    await element(by.id('username_input')).typeText('jess@gmail.com');
-    await element(by.id('role_input')).tap();
-    await element(by.text('Supervisor')).tap();
-    await element(by.id('password_input')).tap();
-    await element(by.id('password_input')).typeText('wrong');
-    await element(by.id('loginContentContainer')).tap();
+    await checkLoginElements();
+    await enterCredentials('jess@gmail.com', 'Supervisor', 'wrong');
     await element(by.id('login')).longPress();
-
-    await waitFor(element(by.id('loginError'))).toHaveText(
-      'Invalid email and/or password',
-    );
+    await verifyErrorMessage('loginError', 'Invalid email and/or password');
   });
 
   it('Login: incomplete credentials (no username)', async () => {
-    // Ensure all expected elements in the loginScreen are present.
-    await expect(element(by.id('loginContentContainer'))).toBeVisible();
-    await expect(element(by.id('username_input'))).toBeVisible();
-    await expect(element(by.id('password_input'))).toBeVisible();
-    await expect(element(by.id('login'))).toBeVisible();
-    await expect(element(by.text('Forgot Password?'))).toBeVisible();
-
-    // Test user input
+    await checkLoginElements();
     await element(by.id('username_input')).tap();
-    await element(by.id('loginContentContainer')).tap();
-
-    await waitFor(element(by.id('username_error'))).toHaveText(
-          'is required',
-        );
-    await expect(
-      element(
-        by.traits(['button', 'disabled']).and(
-        by.id('login'))
-    )).toExist();
+    await element(by.id('loginContentContainer')).tap(); 
+    await verifyErrorMessage('username_error', 'is required');
+    await expect(element(by.traits(['button', 'disabled']).and(by.id('login')))).toExist();
   });
 
   it('Login: incomplete credentials (no password)', async () => {
-    // Ensure all expected elements in the loginScreen are present.
-    await expect(element(by.id('loginContentContainer'))).toBeVisible();
-    await expect(element(by.id('username_input'))).toBeVisible();
-    await expect(element(by.id('password_input'))).toBeVisible();
-    await expect(element(by.id('login'))).toBeVisible();
-    await expect(element(by.text('Forgot Password?'))).toBeVisible();
-
-    // Test user input
-    await element(by.id('password_input')).tap();
+    await checkLoginElements();
+    await element(by.id('password_input')).tap(); 
     await element(by.id('loginContentContainer')).tap();
-
-    await waitFor(element(by.id('password_error'))).toHaveText(
-          'is required',
-        );
-    await expect(
-      element(
-        by.traits(['button', 'disabled']).and(
-        by.id('login'))
-    )).toExist();
+    await verifyErrorMessage('password_error', 'is required');
+    await expect(element(by.traits(['button', 'disabled']).and(by.id('login')))).toExist();
   });
 
   it('Login: valid credentials', async () => {
-    // Ensure all expected elements in the loginScreen are present.
-    await expect(element(by.id('loginContentContainer'))).toBeVisible();
-    await expect(element(by.id('username_input'))).toBeVisible();
-    await expect(element(by.id('password_input'))).toBeVisible();
-    await expect(element(by.id('role_input'))).toBeVisible();
-    await expect(element(by.id('login'))).toBeVisible();
-    await expect(element(by.text('Forgot Password?'))).toBeVisible();
-
-    // Test user input
-    await element(by.id('username_input')).tap();
-    await element(by.id('username_input')).typeText('jess@gmail.com');
-    await element(by.id('role_input')).tap();
-    await element(by.text('Supervisor')).tap();
-    await element(by.id('password_input')).tap();
-    await element(by.id('password_input')).typeText('Supervisor!23');
-    await element(by.id('loginContentContainer')).tap();
+    await checkLoginElements();
+    await enterCredentials('jess@gmail.com', 'Supervisor', 'Supervisor!23');
     await element(by.id('login')).longPress();
-
-    // Successful login -> should see Patient Daily Highlights popup.
     await expect(element(by.text('Patients Daily Highlights'))).toBeVisible();
   });
 })

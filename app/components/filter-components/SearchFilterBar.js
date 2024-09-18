@@ -1,7 +1,7 @@
 // Libs
 import { useState } from 'react';
 import { Center, Divider } from 'native-base';
-import { Text, StyleSheet, View } from 'react-native';
+import { Text, StyleSheet, View , Platform} from 'react-native';
 
 // Configurations
 import colors from 'app/config/colors';

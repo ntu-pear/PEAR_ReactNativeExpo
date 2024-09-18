@@ -113,7 +113,7 @@ describe('Dashboard tests', () => {
       await expect(element(by.id('searchFilter_filter_reset'))).toBeVisible();
     });
   
-    // need test data 
+  
     it('Dashboard: apply sort/filter (All Patients)', async () => {
       await element(by.id('searchFilter_filter_sort_Full Name')).tap();
       await element(by.id('searchFilter_filter_dropdown_Activity Type')).tap();

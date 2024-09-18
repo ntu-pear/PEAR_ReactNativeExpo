@@ -1,6 +1,6 @@
 // Libs
 import { Text, TouchableOpacity } from 'react-native';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View , Platform} from 'react-native';
 
 // Configurations
 import colors from 'app/config/colors';

@@ -163,7 +163,7 @@ function PatientProfileScreen(props) {
             }}
             ref={scrollViewRef}
           >
-            <View w="100%" style={{ flex: 1 }}>
+            <View testID={'profile'} w="100%" style={{ flex: 1 }}>
               <PatientInformationCard
                 patientProfile={patientProfile}
                 navigation={navigation}
@@ -182,6 +182,7 @@ function PatientProfileScreen(props) {
                         color={colors.pink}
                       />
                     }
+                    testID={`allergy_${patientID}`}
                     text="Allergy"
                     navigation={navigation}
                     routes={routes.PATIENT_ALLERGY}
@@ -196,6 +197,7 @@ function PatientProfileScreen(props) {
                         color={colors.pink}
                         />
                     }
+                    testID={'vital'}
                     text="Vital"
                     navigation={navigation}
                     routes={routes.PATIENT_VITAL}
@@ -210,6 +212,7 @@ function PatientProfileScreen(props) {
                         color={colors.pink}
                       />
                     }
+                    testID={'medication'}
                     text="Medication"
                     navigation={navigation}
                     routes={routes.PATIENT_MEDICATION}
@@ -224,6 +227,7 @@ function PatientProfileScreen(props) {
                       color={colors.pink}
                       />
                     }
+                    testID={'prescription'}
                     text="Prescriptions"
                     navigation={navigation}
                     routes={routes.PATIENT_PRESCRIPTION}
@@ -240,6 +244,7 @@ function PatientProfileScreen(props) {
                         color={colors.pink}
                       />
                     }
+                    testID={'problemLog'}
                     text="Problem Log"
                     navigation={navigation}
                     routes={routes.PATIENT_PROBLEM_LOG}
@@ -253,6 +258,7 @@ function PatientProfileScreen(props) {
                         color={colors.pink}
                       />
                     }
+                    testID={'medicalHistory'}
                     text="Medical History"
                     navigation={navigation}
                     routes={routes.PATIENT_MEDICAL_HISTORY}
@@ -266,6 +272,7 @@ function PatientProfileScreen(props) {
                         color={colors.pink}
                         />
                     }
+                    testID={'activityRoutine'}
                     text="Activity Routine"
                     navigation={navigation}
                     routes={routes.PATIENT_ROUTINE}
@@ -279,6 +286,7 @@ function PatientProfileScreen(props) {
                       color={colors.pink}
                       />
                     }
+                    testID={'schedule'}
                     text="Schedule"
                     navigation={navigation}
                     routes={routes.PATIENT_SCHEDULE}
@@ -294,6 +302,7 @@ function PatientProfileScreen(props) {
                         color={colors.pink}
                         />
                     }
+                    testID={'activityPreference'}
                     text="Activity Preference"
                     navigation={navigation}
                     routes={routes.ACTIVITY_PREFERENCE}
@@ -308,6 +317,7 @@ function PatientProfileScreen(props) {
                         color={colors.pink}
                         />
                     }
+                    testID={'photoAlbum'}
                     text="Photo Album"
                     navigation={navigation}
                     routes={routes.PATIENT_PHOTO_ALBUM}
@@ -321,6 +331,7 @@ function PatientProfileScreen(props) {
                         color={colors.pink}
                       />
                     }
+                    testID={'holiday'}
                     text="Holiday"
                     navigation={navigation}
                     routes={routes.PATIENT_HOLIDAY}
@@ -334,6 +345,7 @@ function PatientProfileScreen(props) {
                         color={colors.pink}
                         />
                       }
+                      testID={`mobilityAid_${patientID}`}
                       text="Mobility Aids"
                       navigation={navigation}
                     routes={routes.PATIENT_MOBILITY_AIDS}
@@ -350,6 +362,7 @@ function PatientProfileScreen(props) {
                         color={colors.pink}
                       />
                     }
+                    testID={'doctorNote'}
                     text="Doctor's Note"
                     navigation={navigation}
                     routes={routes.DOCTORNOTE_SCREEN}
