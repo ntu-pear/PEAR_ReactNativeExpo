@@ -22,7 +22,6 @@ export default {
   heightError: 'Height should be within 1 to 200.',
   passwordFormatError: 'Password must be 8-16 characters long, and include at least one uppercase letter, one lowercase letter, one number, and one special character.',
   frequencyPerDayError: 'Frequency Per Day is an integer and have an input of 1 to 24.',
-  generalError: 'Field cannot be left empty.',
 };
 
 export const getErrorMsgFromCode = (codr) => {

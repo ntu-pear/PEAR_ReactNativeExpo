@@ -161,12 +161,6 @@ export const frequencyPerDayRange = (value) => {
   }
 };
 
-export const emptyEntry = (value) => { //remove this if got issue with fields that can be empty but does not allow
-  if (!value) {
-    return errors.generalError;
-  }
-};
-
 export const validationFunctions = {
   name: [nameFormat],
   nric: [nricFormat, nricValid],
@@ -185,5 +179,4 @@ export const validationFunctions = {
   'height' : [heightRange],
   'frequencyPerDay': [frequencyPerDayRange],
   password: [passwordFormat],
-  general: [emptyEntry],
 };
