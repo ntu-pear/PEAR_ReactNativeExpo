@@ -1,5 +1,6 @@
 export default {
   loginError: 'Invalid credentials',
+  notEmptyError: 'Field cannot be empty',
   emptyParameters: 'Field(s) cannot be left empty',
   notUnselectedError: 'Field must have a selection',
   alphaOnlyError: 'Field cannot contain numbers or symbols',

@@ -541,9 +541,9 @@ function DashboardScreen({ navigation }) {
     return true;
   }
 
-  const handlePullToRefresh = () => {
-    refreshSchedule();
-  };
+  // const handlePullToRefresh = () => {
+  //   refreshSchedule();
+  // };
 
   const onClickPatientProfile = (patientID) => {
     navigation.push(routes.PATIENT_PROFILE, { id: patientID });
@@ -649,7 +649,7 @@ function DashboardScreen({ navigation }) {
         </Stack>
         <FlatList
           ref={scheduleRef}
-          onRefresh={handlePullToRefresh}
+          onRefresh={refreshSchedule}
           refreshing={isLoading}
           ListEmptyComponent={()=>noDataMessage(statusCode, isLoading, isError, 'No schedules found', true)}
           data={checkAllEmptySchedules(schedule) ? [] : schedule}

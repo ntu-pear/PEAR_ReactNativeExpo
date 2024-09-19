@@ -20,7 +20,7 @@ import SearchBar from './input-components/SearchBar';
 
 function PatientDailyHighlights() {
   // State controlling whether modal is visible or not
-  const [modalVisible, setModalVisible] = useState(false); //set as true if want to display highlight page on start
+  const [modalVisible, setModalVisible] = useState(true); //set as true if want to display highlight page on start
 
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
