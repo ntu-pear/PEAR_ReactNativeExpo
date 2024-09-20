@@ -7,6 +7,9 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 // Utilities
 import { formatTimeHM24, convertTimeMilitary, isEmptyObject, noDataMessage, sortFilterInitialState, formatMilitaryToAMPM, formatDate, formatTimeAMPM } from 'app/utility/miscFunctions';
 
+// Navigation
+import routes from 'app/navigation/routes';
+
 //API
 import activity from 'app/api/activity';
 import patientApi from 'app/api/patient';
@@ -24,6 +27,9 @@ function ActivityPreferenceScreen(props) {
   if (patientId) {
     patientID = patientId;
   }
+
+  const testID = `activity_preference_screen_${patientID}`;
+
   const navigation = useNavigation();
 
   // Modal states
@@ -212,6 +218,7 @@ function ActivityPreferenceScreen(props) {
           <View style={{ alignSelf: 'center', marginTop: 15, maxHeight: 120 }} >
             {!isEmptyObject(patientData) ? (
               <ProfileNameButton
+                testID={`${testID}_profileNameButton`}  
                 profilePicture={patientData.profilePicture}
                 profileLineOne={patientData.preferredName}
                 profileLineTwo={`${patientData.firstName} ${patientData.lastName}`}

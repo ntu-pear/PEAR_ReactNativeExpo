@@ -38,6 +38,9 @@ function PatientMedicalHistory(props) {
   if (patientId) {
     patientID = patientId;
   }
+
+  const testID = `medical_history_screen_${patientID}`;
+
   const navigation = useNavigation();
 
   // Modal states
@@ -317,7 +320,8 @@ function PatientMedicalHistory(props) {
           <View style={{justifyContent: 'space-between'}}>            
             <View style={{alignSelf: 'center', marginTop: 15, maxHeight: 120}} >
               {!isEmptyObject(patientData) ? (
-                  <ProfileNameButton   
+                  <ProfileNameButton
+                    testID={`${testID}_profileNameButton`}    
                     profilePicture={patientData.profilePicture}
                     profileLineOne={patientData.preferredName}
                     profileLineTwo={(patientData.firstName + ' ' + patientData.lastName)}

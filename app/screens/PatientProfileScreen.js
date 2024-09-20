@@ -155,6 +155,7 @@ function PatientProfileScreen(props) {
       ) : (
         <Center backgroundColor={colors.white_var1} style={{ flex: 1 }}>
           <ScrollView
+            testID={`${patientID}_scroll_view`}
             w="100%"
             h="100%"
             contentContainerStyle={{
@@ -197,7 +198,7 @@ function PatientProfileScreen(props) {
                         color={colors.pink}
                         />
                     }
-                    testID={'vital'}
+                    testID={`vital_${patientID}`}
                     text="Vital"
                     navigation={navigation}
                     routes={routes.PATIENT_VITAL}
@@ -212,7 +213,7 @@ function PatientProfileScreen(props) {
                         color={colors.pink}
                       />
                     }
-                    testID={'medication'}
+                    testID={`medication_${patientID}`}
                     text="Medication"
                     navigation={navigation}
                     routes={routes.PATIENT_MEDICATION}
@@ -227,7 +228,7 @@ function PatientProfileScreen(props) {
                       color={colors.pink}
                       />
                     }
-                    testID={'prescription'}
+                    testID={`prescription_${patientID}`}
                     text="Prescriptions"
                     navigation={navigation}
                     routes={routes.PATIENT_PRESCRIPTION}
@@ -244,7 +245,7 @@ function PatientProfileScreen(props) {
                         color={colors.pink}
                       />
                     }
-                    testID={'problemLog'}
+                    testID={`problemLog_${patientID}`}
                     text="Problem Log"
                     navigation={navigation}
                     routes={routes.PATIENT_PROBLEM_LOG}
@@ -258,7 +259,7 @@ function PatientProfileScreen(props) {
                         color={colors.pink}
                       />
                     }
-                    testID={'medicalHistory'}
+                    testID={`medicalHistory_${patientID}`}
                     text="Medical History"
                     navigation={navigation}
                     routes={routes.PATIENT_MEDICAL_HISTORY}
@@ -272,7 +273,7 @@ function PatientProfileScreen(props) {
                         color={colors.pink}
                         />
                     }
-                    testID={'activityRoutine'}
+                    testID={`activityRoutine_${patientID}`}
                     text="Activity Routine"
                     navigation={navigation}
                     routes={routes.PATIENT_ROUTINE}
@@ -286,7 +287,7 @@ function PatientProfileScreen(props) {
                       color={colors.pink}
                       />
                     }
-                    testID={'schedule'}
+                    testID={`schedule_${patientID}`}
                     text="Schedule"
                     navigation={navigation}
                     routes={routes.PATIENT_SCHEDULE}
@@ -302,7 +303,7 @@ function PatientProfileScreen(props) {
                         color={colors.pink}
                         />
                     }
-                    testID={'activityPreference'}
+                    testID={`activityPreference_${patientID}`}
                     text="Activity Preference"
                     navigation={navigation}
                     routes={routes.ACTIVITY_PREFERENCE}
@@ -317,7 +318,7 @@ function PatientProfileScreen(props) {
                         color={colors.pink}
                         />
                     }
-                    testID={'photoAlbum'}
+                    testID={`photoAlbum_${patientID}`}
                     text="Photo Album"
                     navigation={navigation}
                     routes={routes.PATIENT_PHOTO_ALBUM}
@@ -331,7 +332,7 @@ function PatientProfileScreen(props) {
                         color={colors.pink}
                       />
                     }
-                    testID={'holiday'}
+                    testID={`holiday_${patientID}`}
                     text="Holiday"
                     navigation={navigation}
                     routes={routes.PATIENT_HOLIDAY}
@@ -362,7 +363,7 @@ function PatientProfileScreen(props) {
                         color={colors.pink}
                       />
                     }
-                    testID={'doctorNote'}
+                    testID={`doctorNote_${patientID}`}
                     text="Doctor's Note"
                     navigation={navigation}
                     routes={routes.DOCTORNOTE_SCREEN}

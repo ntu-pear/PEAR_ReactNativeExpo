@@ -14,6 +14,7 @@ import colors from 'app/config/colors';
 import { formatDate } from 'app/utility/miscFunctions';
 
 function ProfileNameButton({
+  testID='',
   profilePicture,
   profileLineOne,
   profileLineTwo,
@@ -58,7 +59,7 @@ function ProfileNameButton({
   
   return (
     <View alignItems="center">
-      <TouchableOpacity onPress={handleOnPress}>
+      <TouchableOpacity testID={testID} onPress={handleOnPress}>
         <View style={containerStyle}>
           <Image
             style={customProfilePictureStyle}

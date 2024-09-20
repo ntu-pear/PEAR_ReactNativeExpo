@@ -28,9 +28,9 @@ const MobilityAidItem = ({
             color={colors.green}
           />
           <View style={styles.textContainer}>
-            <TextRow label="Mobility Aid" value={mobilityListDesc} />
-            <TextRow label="Remark" value={mobilityRemarks} />
-            <TextRow label="Condition" value={isRecovered ? 'Fully Recovered' : 'Not Recovered'} />
+            <TextRow testID={`${testID}_mobilityAid`} label="Mobility Aid" value={mobilityListDesc} />
+            <TextRow testID={`${testID}_mobilityRemarks`} label="Remark" value={mobilityRemarks} />
+            <TextRow testID={`${testID}_condition`} label="Condition" value={isRecovered ? 'Fully Recovered' : 'Not Recovered'} />
             <TextRow
               label="Date"
               value={formatDate(new Date(date), true)}
@@ -42,10 +42,10 @@ const MobilityAidItem = ({
     };
 
 // Helper component for rendering text rows
-const TextRow = ({ label, value }) => (
+const TextRow = ({ testID, label, value }) => (
     <View style={styles.row}>
-      <Text style={styles.label}>{label}:</Text>
-      <Text style={styles.value}>{value}</Text>
+      <Text testID={`${testID}_label`} style={styles.label}>{label}:</Text>
+      <Text testID={`${testID}_value`} style={styles.value}>{value}</Text>
     </View>
   );
 

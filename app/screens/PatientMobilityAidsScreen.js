@@ -27,6 +27,7 @@ import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUn
 import DynamicTable from 'app/components/DynamicTable';
 import MobilityAidItem from 'app/components/MobilityAidItem';
 import AddPatientMobilityAidModal from 'app/components/AddPatientMobilityAidModal';
+import CustomAlert from 'app/components/CustomAlert';
 
 function PatientMobilityAidScreen(props) {
   let {patientID, patientId} = props.route.params;
@@ -35,12 +36,13 @@ function PatientMobilityAidScreen(props) {
   }
 
   const testID = `mobility_aid_screen_${patientID}`;
-  
+
   const navigation = useNavigation();
 
   // Modal states
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // either 'add' or 'edit'
+  const [customAlert, setCustomAlert] = useState(null);
   
   // Options for user to search by
   const SEARCH_OPTIONS = ['Mobility Aid'];
@@ -225,7 +227,18 @@ function PatientMobilityAidScreen(props) {
       alertTitle = 'Error adding mobility aid';
     }
     
-    Alert.alert(alertTitle, alertDetails);
+      Alert.alert(
+        alertTitle,
+        alertDetails,
+        [
+          {
+            text: 'OK',
+            onPress: () => console.log('OK Pressed'),
+            testID: `${testID}_add_alert_ok`,  
+          },
+        ],
+        { cancelable: false }
+      );
   };
 
   // Edit mobility aid
@@ -270,7 +283,18 @@ function PatientMobilityAidScreen(props) {
       alertTitle = 'Error editing mobility aid';
     }
     
-    Alert.alert(alertTitle, alertDetails);
+    Alert.alert(
+      alertTitle,
+      alertDetails,
+      [
+        {
+          text: 'OK',
+          onPress: () => console.log('OK Pressed'),
+          testID: `${testID}_edit_alert_ok`,  
+        },
+      ],
+      { cancelable: false }
+    );
   };
 
   // Ask user to confirm deletion of mobility aid
@@ -284,10 +308,15 @@ function PatientMobilityAidScreen(props) {
     `Date: ${formatDate(new Date(tempData.date), true)}`, [
       {
         text: 'Cancel',
-        onPress: ()=>{},
+        onPress: () => {},
         style: 'cancel',
+        testID: `${testID}_delete_alert_cancel`,  
       },
-      {text: 'OK', onPress: ()=>deleteMobilityAid(mobilityID)},
+      {
+        text: 'OK', 
+        onPress: () => deleteMobilityAid(mobilityID),
+        testID: `${testID}_delete_alert_ok`,   
+      },
     ]);
   }
 
@@ -317,7 +346,18 @@ function PatientMobilityAidScreen(props) {
       alertTitle = 'Error deleting mobility aid';
     }
     
-    Alert.alert(alertTitle, alertDetails);
+    Alert.alert(
+      alertTitle,
+      alertDetails,
+      [
+        {
+          text: 'OK',
+          onPress: () => console.log('OK Pressed'),
+          testID: `${testID}_delete_alert_ok`,  
+        },
+      ],
+      { cancelable: false }
+    );
   }
 
   // Navigate to patient profile on click profile image
@@ -359,7 +399,8 @@ function PatientMobilityAidScreen(props) {
         <View style={{justifyContent: 'space-between'}}>            
           <View style={{alignSelf: 'center', marginTop: 15, maxHeight: 120}} >
             {!isEmptyObject(patientData) ? (
-                <ProfileNameButton   
+                <ProfileNameButton
+                  testID={`${testID}_profileNameButton`}   
                   profilePicture={patientData.profilePicture}
                   profileLineOne={patientData.preferredName}
                   profileLineTwo={(patientData.firstName + ' ' + patientData.lastName)}
@@ -401,6 +442,7 @@ function PatientMobilityAidScreen(props) {
           </View> 
           {displayMode == 'rows' ? (
             <FlatList
+            testID={`${testID}_flatlist`}
             onTouchStart={()=>Keyboard.dismiss()}
             onScrollBeginDrag={() => setIsScrolling(true)}
             onScrollEndDrag={() => setIsScrolling(false)}
@@ -417,7 +459,7 @@ function PatientMobilityAidScreen(props) {
                   setIsScrolling={setIsScrolling}
                   onSwipeRight={()=>handleDeleteMobilityAid(item.mobilityId)}
                   onSwipeLeft={()=>handleEditMobilityAid(item.mobilityId)}
-                  underlay={<EditDeleteUnderlay testID={`${testID}_${item.mobilityId}_underlay`}/>}
+                  underlay={<EditDeleteUnderlay />}
                   item={
                     <TouchableOpacity
                       testID={`${testID}_${item.mobilityId}_touchable`} 
@@ -461,7 +503,7 @@ function PatientMobilityAidScreen(props) {
               />
           </View>
           <AddPatientMobilityAidModal
-            testID={`${testID}_modal`}
+            testID={`${testID}_modal_${modalMode === 'add' ? 'add' : 'edit'}`}
             showModal={isModalVisible}
             modalMode={modalMode}
             formData={formData}

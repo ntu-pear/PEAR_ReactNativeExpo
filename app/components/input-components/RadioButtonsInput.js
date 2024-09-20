@@ -82,7 +82,7 @@ function RadioButtonInput({
             {dataArray.map((item) => (
               <View style={styles.radioButtonContainer} key={item.value}>
                 <RadioButton.Item
-                  testID={`${testID}_item.label`}
+                  testID={`${testID}_${item.label.replace(/\\s+/g, '')}`}
                   key={item.value}
                   value={item.value}
                   label={item.label}

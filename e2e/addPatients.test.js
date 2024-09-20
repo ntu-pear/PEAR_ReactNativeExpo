@@ -103,33 +103,33 @@ describe('Add Patients Tests', () => {
       await element(by.id('addPatients')).tap();
     });
   
-    // it('Add Patients: patient info - valid data', async () => {
-    //   // Verify the title is visible
-    //   await expect(element(by.id(`${baseID}_title`))).toBeVisible();
+    it('Add Patients: patient info - valid data', async () => {
+      // Verify the title is visible
+      await expect(element(by.id(`${baseID}_title`))).toBeVisible();
     
-    //   for (const [key, value] of Object.entries(testData.validData)) {
-    //     const fieldId = `${baseID}_${key}_input`;
+      for (const [key, value] of Object.entries(testData.validData)) {
+        const fieldId = `${baseID}_${key}_input`;
         
-    //     // Tap on the input field to focus
-    //     await element(by.id(fieldId)).tap();
+        // Tap on the input field to focus
+        await element(by.id(fieldId)).tap();
         
-    //     // Type the text into the input field
-    //     await element(by.id(fieldId)).typeText(value);
+        // Type the text into the input field
+        await element(by.id(fieldId)).typeText(value);
         
-    //     // Dismiss the keyboard
-    //     await device.pressBack();
+        // Dismiss the keyboard
+        await device.pressBack();
         
-    //     // Check if error message is not visible
-    //     await expect(element(by.id(`${fieldId}_error`))).not.toBeVisible();
+        // Check if error message is not visible
+        await expect(element(by.id(`${fieldId}_error`))).not.toBeVisible();
         
-    //     // Scroll down to ensure next input is visible if needed
-    //     await element(by.id(baseID)).scroll(100, 'down');
-    //   }
+        // Scroll down to ensure next input is visible if needed
+        await element(by.id(baseID)).scroll(150, 'down');
+      }
     
-    //   // Perform actions after filling the form
-    //   await isButtonDisabled(`${baseID}_bottomBtns_prev`);
-    //   await isButtonEnabled(`${baseID}_bottomBtns_next`);
-    // });
+      // Perform actions after filling the form
+      await isButtonDisabled(`${baseID}_bottomBtns_prev`);
+      await isButtonEnabled(`${baseID}_bottomBtns_next`);
+    });
     
     // not implemented yet, will do this after covering this aspect.
     // it('Add Patients: patient info - erase input', async () => {
@@ -180,7 +180,7 @@ describe('Add Patients Tests', () => {
           await expect(element(by.id(`${fieldId}_error`))).not.toBeVisible();
         }
   
-        await element(by.id(baseID)).scroll(100, 'down');
+        await element(by.id(baseID)).scroll(150, 'down');
       }
   
       await isButtonDisabled(`${baseID}_bottomBtns_next`);

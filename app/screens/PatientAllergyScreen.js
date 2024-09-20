@@ -35,6 +35,8 @@ function PatientAllergyScreen(props) {
   if (patientId) {
     patientID = patientId;
   }
+  const testID = `allergy_screen_${patientID}`;
+
   const navigation = useNavigation();
 
   // Options for user to search by
@@ -305,6 +307,7 @@ function PatientAllergyScreen(props) {
         <View style={{ alignSelf: 'center', marginTop: 15, maxHeight: 120 }}>
           {!isEmptyObject(patientData) ? (
             <ProfileNameButton
+              testID={`${testID}_profileNameButton`}   
               profilePicture={patientData.profilePicture}
               profileLineOne={patientData.preferredName}
               profileLineTwo={

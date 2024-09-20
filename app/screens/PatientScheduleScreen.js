@@ -30,6 +30,8 @@ function PatientScheduleScreen(props) {
     patientID = patientId;
   }
 
+  const testID = `schedule_screen_${patientID}`;
+
   const navigation = useNavigation();
   
   // Ref used to programmatically scroll to beginning of list
@@ -336,7 +338,8 @@ function PatientScheduleScreen(props) {
         <View style={{justifyContent: 'space-between'}}>            
           <View style={{alignSelf: 'center', marginTop: 15, maxHeight: 120}} >
             {!isEmptyObject(patientInfo) ? (
-              <ProfileNameButton   
+              <ProfileNameButton
+                testID={`${testID}_profileNameButton`}     
                 profilePicture={patientInfo.profilePicture}
                 profileLineOne={patientInfo.preferredName}
                 profileLineTwo={(patientInfo.firstName + ' ' + patientInfo.lastName)}

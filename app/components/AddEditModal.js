@@ -49,7 +49,7 @@ function AddEditModal({
       <Modal.Content maxWidth="65%">
         <Modal.CloseButton />
         <Modal.Header style={styles.modalHeader}>
-          <Text testID={`${testID}_cancel_button`} style={styles.modalHeaderText}>{modalMode} {modalTitle}</Text>
+          <Text style={styles.modalHeaderText}>{modalMode} {modalTitle}</Text>
         </Modal.Header>
         <Modal.Body>
           <View> 
@@ -58,8 +58,9 @@ function AddEditModal({
         </Modal.Body>
         <Modal.Footer>
           <Button.Group space={2}>
-            <AppButton testID={`${testID}_submit_button`} color="red" title="Cancel" onPress={onClose}></AppButton>
+            <AppButton testID={`${testID}_cancel_button`} color="red" title="Cancel" onPress={onClose}></AppButton>
             <AppButton
+              testID={`${testID}_submit_button`}
               onPress={handleSubmit}
               title="Submit"
               color="green"

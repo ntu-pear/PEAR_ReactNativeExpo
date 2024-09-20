@@ -36,6 +36,9 @@ function PatientProblemLog(props) {
   if (patientId) {
     patientID = patientId;
   }
+
+  const testID = `problem_log_screen_${patientID}`;
+
   const navigation = useNavigation();
   
   // User ID for edit/add operations
@@ -362,7 +365,8 @@ function PatientProblemLog(props) {
           <View style={{justifyContent: 'space-between'}}>            
             <View style={{alignSelf: 'center', marginTop: 15, maxHeight: 120}} >
               {!isEmptyObject(patientData) ? (
-                  <ProfileNameButton   
+                  <ProfileNameButton
+                    testID={`${testID}_profileNameButton`}    
                     profilePicture={patientData.profilePicture}
                     profileLineOne={patientData.preferredName}
                     profileLineTwo={(patientData.firstName + ' ' + patientData.lastName)}

@@ -60,10 +60,11 @@ function PatientInformationCard(props) {
     return (
       <HStack space={'10%'} justifyContent="flex-end">
         <VStack>
-          <Text thin fontSize={SCREEN_HEIGHT * 0.014} color={colors.light}>
+          <Text testID="nric_label" thin fontSize={SCREEN_HEIGHT * 0.014} color={colors.light}>
             NRIC NO.
           </Text>
           <Text
+            testID="nric_value"
             bold
             fontSize={SCREEN_HEIGHT * 0.024}
             lineHeight="xs"
@@ -72,6 +73,7 @@ function PatientInformationCard(props) {
             {`${patientProfile?.nric}`}
           </Text>
           <Text
+            testID="dob_label"
             thin
             fontSize={SCREEN_HEIGHT * 0.014}
             mt="2"
@@ -80,6 +82,7 @@ function PatientInformationCard(props) {
             DATE OF BIRTH
           </Text>
           <Text
+            testID="dob_value"
             bold
             fontSize={SCREEN_HEIGHT * 0.024}
             lineHeight="xs"
@@ -90,10 +93,11 @@ function PatientInformationCard(props) {
         </VStack>
 
         <VStack>
-          <Text thin fontSize={SCREEN_HEIGHT * 0.014} color={colors.light}>
+          <Text testID="age_label" thin fontSize={SCREEN_HEIGHT * 0.014} color={colors.light}>
             AGE
           </Text>
           <Text
+            testID="age_value"
             bold
             fontSize={SCREEN_HEIGHT * 0.024}
             lineHeight="xs"
@@ -118,6 +122,7 @@ function PatientInformationCard(props) {
             {`${patientProfile?.preferredLanguage}`}
           </Text> */}
           <Text
+            testID="mobile_number_label"
             thin
             fontSize={SCREEN_HEIGHT * 0.014}
             mt="2"
@@ -126,6 +131,7 @@ function PatientInformationCard(props) {
             Mobile Number
           </Text>
           <Text
+            testID="mobile_number_value"
             bold
             fontSize={SCREEN_HEIGHT * 0.024}
             lineHeight="xs"
@@ -148,6 +154,7 @@ function PatientInformationCard(props) {
     >
         <HStack space={'4%'} justifyContent="center">
           <Avatar
+            testID="patient_profile_picture"
             size={Platform.OS === 'web' ? '28vh' : SCREEN_HEIGHT * 0.11}
             bg={colors.pink}
             marginY="auto"
@@ -178,6 +185,7 @@ function PatientInformationCard(props) {
                 {`${patientProfile?.firstName} ${patientProfile?.lastName}`}
               </Text> */}
               <Text
+                testID="patient_preferred_name"
                 bold
                 fontSize={SCREEN_HEIGHT * 0.024}
                 color={colors.light}
@@ -185,6 +193,7 @@ function PatientInformationCard(props) {
                 {`${patientProfile?.preferredName}`}
               </Text>
               <Text
+                testID="patient_gender"
                 italic
                 fontSize={SCREEN_HEIGHT * 0.024}
                 color={colors.light}
@@ -192,6 +201,7 @@ function PatientInformationCard(props) {
                 {patientProfile?.gender === 'F' ? 'FEMALE' : 'MALE'}
               </Text>
               <Text
+                testID="patient_preferred_language"
                 thin
                 fontSize={SCREEN_HEIGHT * 0.024}
                 color={colors.light}

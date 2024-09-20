@@ -36,6 +36,9 @@ function PatientPrescriptionScreen(props) {
   if (patientId) {
     patientID = patientId;
   }
+
+  const testID = `prescription_screen_${patientID}`;
+
   const navigation = useNavigation();
 
   // Modal states
@@ -384,7 +387,8 @@ function PatientPrescriptionScreen(props) {
       <View style={{justifyContent: 'space-between'}}>            
             <View style={{alignSelf: 'center', marginTop: 15, maxHeight: 120}} >
               {!isEmptyObject(patientData) ? (
-                  <ProfileNameButton   
+                  <ProfileNameButton
+                    testID={`${testID}_profileNameButton`}    
                     profilePicture={patientData.profilePicture}
                     profileLineOne={patientData.preferredName}
                     profileLineTwo={(patientData.firstName + ' ' + patientData.lastName)}

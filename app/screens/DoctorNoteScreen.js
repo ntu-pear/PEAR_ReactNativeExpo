@@ -36,6 +36,9 @@ function DoctorNoteScreen(props) {
   if (patientId) {
     patientID = patientId;
   }
+
+  const testID = `doctor_note_screen_${patientID}`;
+
   const navigation = useNavigation();
 
   // API call related states
@@ -173,6 +176,7 @@ function DoctorNoteScreen(props) {
           <View style={{ alignSelf: 'center', marginTop: 15, maxHeight: 120 }}>
             {!isEmptyObject(patientData) ? (
             <ProfileNameButton
+              testID={`${testID}_profileNameButton`}  
               profilePicture={patientData.profilePicture}
               profileLineOne={patientData.preferredName}
               profileLineTwo={

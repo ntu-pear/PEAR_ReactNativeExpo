@@ -38,6 +38,9 @@ function PatientVitalScreen(props) {
   if (patientId) {
     patientID = patientId;
   }
+
+  const testID = `vital_screen_${patientID}`;
+
   const navigation = useNavigation();
 
   // Modal states
@@ -388,6 +391,7 @@ function PatientVitalScreen(props) {
         <View style={{ alignSelf: 'center', marginTop: 15, maxHeight: 120 }}>
           {!isEmptyObject(patientData) ? (
             <ProfileNameButton
+              testID={`${testID}_profileNameButton`} 
               profilePicture={patientData.profilePicture}
               profileLineOne={patientData.preferredName}
               profileLineTwo={
