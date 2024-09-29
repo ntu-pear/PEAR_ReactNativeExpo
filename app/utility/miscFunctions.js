@@ -204,7 +204,7 @@ export const isMonday = (selectedDate) => {
 // Return date of the week's Sunday
 export const getSunday = () => {    
   let date = new Date(getMonday());
-  date.setDate(date.getDate() + 6);
+  date.setDate(date.getDate() + 6 + 7); //edited a +7 to show the next week too.
   return date;
 }
 

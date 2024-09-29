@@ -118,6 +118,7 @@ function AddPatientMobilityAidModal({
           onDataChange={handleMobilityData('mobilityListId')}
         />
         <InputField
+          isRequired
           title={'Remarks'}
           value={formData.mobilityRemark}
           onChangeText={handleMobilityData('mobilityRemark')}
