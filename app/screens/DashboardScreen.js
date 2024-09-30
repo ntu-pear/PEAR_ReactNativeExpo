@@ -246,7 +246,17 @@ function DashboardScreen({ navigation }) {
         : await scheduleApi.getPatientWeeklySchedule();
     
     if(response.ok) {
-      parseScheduleData({tempPatientInfo:tempPatientInfo, tempSchedule:response.data.data})
+      const scheduleData = response.data?.data ?? []; // Safely access and default to an empty array if undefined/null
+
+      if (scheduleData.length > 0) {
+        parseScheduleData({ tempPatientInfo: tempPatientInfo, tempSchedule: scheduleData });
+      } else {
+        console.log('No schedule found');
+        // Handle cases where there is no schedule (maybe set empty state)
+        setOriginalScheduleWeekly({});
+        setOriginalSchedule([]);
+        setSchedule([]);
+      }
       setIsError(false);
       setIsRetry(false);
       setStatusCode(response.status);
