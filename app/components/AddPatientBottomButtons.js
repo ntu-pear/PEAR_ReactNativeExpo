@@ -29,6 +29,7 @@ function AddPatientBottomButtons({
   return (
     <Box testID={testID} mt={8} mb={8}>
       <Flex testID={testID} w={Platform.OS === 'web' ? 40 : '80%'} direction="row">
+        {prevQuestionHandler != null && (
         <Button
           testID={`${testID}_prev`}
           width={12}
@@ -44,7 +45,7 @@ function AddPatientBottomButtons({
           }
           borderRadius="full"
         />
-
+      )}
         <Spacer />
         {list ? (
           list.length === 1 ? (
@@ -107,6 +108,7 @@ function AddPatientBottomButtons({
           )
         ) : null}
         <Spacer />
+        {nextQuestionHandler != null && (
         <Button
           testID={`${testID}_next`}
           width={12}
@@ -128,6 +130,7 @@ function AddPatientBottomButtons({
           borderRadius="full"
           list={list}
         />
+      )}   
       </Flex>
       {submit ? (
         <Box mt={8}>

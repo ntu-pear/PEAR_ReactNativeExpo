@@ -138,19 +138,19 @@ export const bloodSugarLevelRange = (value) => {
 };
 
 export const heartRateRange = (value) => {
-  if (!(value >= 0 && value <= 300)) {
+  if (!(value >= 1 && value <= 300)) {
     return errors.heartRateError;
   }
 };
 
 export const weightRange = (value) => {
-  if (!(value >= 0 && value <= 200)) {
+  if (!(value >= 1 && value <= 200)) {
     return errors.weightError;
   }
 };
 
 export const heightRange = (value) => {
-  if (!(value >= 0 && value <= 2)) {
+  if (!(value >= 1 && value <= 200)) {
     return errors.heightError;
   }
 };

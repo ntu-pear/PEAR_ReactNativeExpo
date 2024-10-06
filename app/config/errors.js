@@ -1,5 +1,6 @@
 export default {
   loginError: 'Invalid credentials',
+  notEmptyError: 'Field cannot be empty',
   emptyParameters: 'Field(s) cannot be left empty',
   notUnselectedError: 'Field must have a selection',
   alphaOnlyError: 'Field cannot contain numbers or symbols',
@@ -16,11 +17,11 @@ export default {
   diastolicBPError: 'Diastolic BP should be between 40 to 120 and an integer.',
   spO2Error: 'SpO2 should be between 60 to 120 and an integer.',
   bloodSugarLevelError: 'Blood Sugar Level should be within 50 to 250.',
-  heartRateError: 'Heart Rate should be within 0 to 300.',
-  weightError: 'Weight should be within 0 to 200',
-  heightError: 'Height should be within 0 to 2 metres',
+  heartRateError: 'Heart Rate should be within 1 to 300.',
+  weightError: 'Weight should be within 1 to 200.',
+  heightError: 'Height should be within 1 to 200.',
   passwordFormatError: 'Password must be 8-16 characters long, and include at least one uppercase letter, one lowercase letter, one number, and one special character.',
-  frequencyPerDayError: 'Frequency Per Day is an integer and have an input of 1 to 24.'
+  frequencyPerDayError: 'Frequency Per Day is an integer and have an input of 1 to 24.',
 };
 
 export const getErrorMsgFromCode = (codr) => {

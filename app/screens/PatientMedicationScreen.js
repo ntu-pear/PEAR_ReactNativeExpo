@@ -57,7 +57,7 @@ function PatientMedicationScreen(props) {
   const DISPLAY_MODES = ['rows', 'table'];
   
   // Sort options 
-  const SORT_OPTIONS = ['Medication', 'Medication Time', 'Start Date', 'End Date'];
+  const SORT_OPTIONS = ['End Date', 'Medication', 'Medication Time', 'Start Date', ];
 
   // Filter options
   const FILTER_OPTIONS = ['Medication Time', 'Start Date', 'End Date'];

@@ -389,7 +389,7 @@ function PatientAllergyScreen(props) {
         <DynamicTable
           headerData={getTableHeaderData()}
           rowData={getTableRowData()}
-          widthData={[200, 200, 200, 200, 200]}
+          widthData={[125, 100, 110, 175, 200]}
           screenName={'patient allergy'}
           noDataMessage={noDataMessage(statusCode, isLoading, isError, 'No allergies found', false)}
           del={true}

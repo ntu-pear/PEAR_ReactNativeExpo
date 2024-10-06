@@ -26,6 +26,10 @@ const MedicationItem = ({
   onEdit,
   onDelete
 }) => {  
+  
+  //to check if the medication has ended
+  const isMedicationEnded = new Date(medEndDate) < new Date();
+
   // Get user confirmation to save adminstration status of medication
   const onClickAdminister = () => {
     Alert.alert('Confirm medication adminstration', 
@@ -57,7 +61,7 @@ const MedicationItem = ({
   return (
     <View>
       <View 
-        style={[styles.medContainer]}>
+        style={[styles.medContainer, isMedicationEnded && styles.medEndedContainer]}>
         <Icon
           as={
             <MaterialIcons 
@@ -109,13 +113,14 @@ const MedicationItem = ({
         </View>
       </View>
       <TouchableOpacity 
-        style={[styles.administerContainer, {backgroundColor: canAdminister() ? colors.green : colors.light_gray}]} 
+        style={[styles.administerContainer, {backgroundColor: canAdminister() && !isMedicationEnded ? colors.green : colors.light_gray}]} 
         onPress={canAdminister() ? onClickAdminister : ()=>{}}
         activeOpacity={canAdminister() ? null : 1}
+        disabled={!canAdminister() || isMedicationEnded}
       >
-        <Text style={styles.medText} color={colors.white}>{canAdminister() ? 'Click to log medicine administration' : 'Cannot administer today'}</Text>
+        <Text style={styles.medText} color={colors.white}>{canAdminister() && !isMedicationEnded ? 'Click to log medicine administration' : 'Cannot administer today'}</Text>
       </TouchableOpacity>
-      <EditDeleteBtn onDelete={onDelete} onEdit={onEdit}/>
+      <EditDeleteBtn onDelete={!isMedicationEnded ? onDelete : null} onEdit={!isMedicationEnded ? onEdit : null}/>
     </View>
   );
 };
@@ -128,6 +133,9 @@ const styles = StyleSheet.create({
     padding: 20, 
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
+  },
+  medEndedContainer: {
+    backgroundColor: colors.primary_gray,
   },
   medTextContainer: {
     flex: 1

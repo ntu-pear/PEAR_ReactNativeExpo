@@ -122,6 +122,7 @@ function AddPatientMobilityAidModal({
         />
         <InputField
           testID={`${testID}_remarks_input`}
+          isRequired
           title={'Remarks'}
           value={formData.mobilityRemark}
           onChangeText={handleMobilityData('mobilityRemark')}

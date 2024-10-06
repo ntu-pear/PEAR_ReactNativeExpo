@@ -139,6 +139,8 @@ function DashboardScreen({ navigation }) {
   // Refresh schedule when screen comes into focus
   useFocusEffect(
     React.useCallback(() => {
+      const today = new Date();
+      setSelectedDate(today);
       refreshSchedule();
       setScheduleXOffset(tempOffset);
     }, [])
@@ -148,6 +150,10 @@ function DashboardScreen({ navigation }) {
   useEffect(() => {
     refreshSchedule();
   }, [viewMode]);
+
+  useEffect(() => {
+    refreshSchedule();
+  }, [selectedDate]);
 
   // Refresh schedule if isRetry is set to true
   useEffect(() => {
@@ -246,7 +252,17 @@ function DashboardScreen({ navigation }) {
         : await scheduleApi.getPatientWeeklySchedule();
     
     if(response.ok) {
-      parseScheduleData({tempPatientInfo:tempPatientInfo, tempSchedule:response.data.data})
+      const scheduleData = response.data?.data ?? []; // Safely access and default to an empty array if undefined/null
+
+      if (scheduleData.length > 0) {
+        parseScheduleData({ tempPatientInfo: tempPatientInfo, tempSchedule: scheduleData });
+      } else {
+        console.log('No schedule found');
+        // Handle cases where there is no schedule (maybe set empty state)
+        setOriginalScheduleWeekly({});
+        setOriginalSchedule([]);
+        setSchedule([]);
+      }
       setIsError(false);
       setIsRetry(false);
       setStatusCode(response.status);
@@ -255,11 +271,11 @@ function DashboardScreen({ navigation }) {
       setOriginalScheduleWeekly({});
       setOriginalSchedule([]);
       setSchedule([]);
-      setIsLoading(false);
       setIsError(true);
       setStatusCode(response.status);
       setIsRetry(true);
     }
+    setIsLoading(false);
   };
 
   // Retrieve patient list from backend
@@ -278,11 +294,11 @@ function DashboardScreen({ navigation }) {
       setStatusCode(response.status);
     } else {
       console.log('Error getting schedule:',response)
-      setIsLoading(false);
       setIsError(true);
       setStatusCode(response.status);
       setIsRetry(true);
     }
+    setIsLoading(false);
   };
 
   // Parse data returned by api to required format to display schedule
@@ -535,9 +551,9 @@ function DashboardScreen({ navigation }) {
     return true;
   }
 
-  const handlePullToRefresh = () => {
-    refreshSchedule();
-  };
+  // const handlePullToRefresh = () => {
+  //   refreshSchedule();
+  // };
 
   const onClickPatientProfile = (patientID) => {
     navigation.push(routes.PATIENT_PROFILE, { id: patientID });
@@ -645,7 +661,7 @@ function DashboardScreen({ navigation }) {
         </Stack>
         <FlatList
           ref={scheduleRef}
-          onRefresh={handlePullToRefresh}
+          onRefresh={refreshSchedule}
           refreshing={isLoading}
           ListEmptyComponent={()=>noDataMessage(statusCode, isLoading, isError, 'No schedules found', true)}
           data={checkAllEmptySchedules(schedule) ? [] : schedule}
