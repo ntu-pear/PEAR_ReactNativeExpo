@@ -11,6 +11,7 @@ import formatDateTime from 'app/hooks/useFormatDateTime.js';
 import EditDeleteBtn from './EditDeleteBtn';
 
 const PatientAllergyItem = ({
+  testID='',
   createdDate,
   allergyListDesc,
   allergyReaction,
@@ -18,29 +19,29 @@ const PatientAllergyItem = ({
   onDelete,
 }) => {
   return (
-    <View style={styles.container}>
+    <View testID={testID} style={styles.container}>
       <Icon
         as={<MaterialCommunityIcons name="allergy" />}
         size={12}
         color={colors.green}
       />
       <View style={styles.textContainer}>
-        <TextRow label="Date" value={formatDateTime(new Date(createdDate), true)}/>
-        <TextRow label="Time" value={formatDateTime(new Date(createdDate), false)}/>
-        <TextRow label="Allergic To" value={allergyListDesc} />
-        <TextRow label="Reaction" value={allergyReaction} />
-        <TextRow label="Notes" value={allergyRemarks} />
+        <TextRow testID={`${testID}_created_date`} label="Date" value={formatDateTime(new Date(createdDate), true)}/>
+        <TextRow testID={`${testID}_created_time`} label="Time" value={formatDateTime(new Date(createdDate), false)}/>
+        <TextRow testID={`${testID}_allergy`} label="Allergic To" value={allergyListDesc} />
+        <TextRow testID={`${testID}_reaction`} label="Reaction" value={allergyReaction} />
+        <TextRow testID={`${testID}_notes`} label="Notes" value={allergyRemarks} />
       </View>
-      <EditDeleteBtn onDelete={onDelete}/>
+      <EditDeleteBtn testID={testID} onDelete={onDelete}/>
     </View>
   );
 };
 
 // Helper component for rendering text rows
-const TextRow = ({ label, value }) => (
+const TextRow = ({ testID, label, value }) => (
   <View style={styles.row}>
-    <Text style={styles.label}>{label}:</Text>
-    <Text style={styles.value}>{value}</Text>
+    <Text testID={`${testID}_label`} style={styles.label}>{label}:</Text>
+    <Text testID={`${testID}_value`} style={styles.value}>{value}</Text>
   </View>
 );
 

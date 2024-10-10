@@ -19,6 +19,8 @@ function ResetPasswordScreen(props) {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
+  const testID = "reset_password_screen";
+
   const handleEmail = (e) => {
     setEmail(e);
   };
@@ -76,7 +78,7 @@ function ResetPasswordScreen(props) {
   };
 
   return (
-    <View>
+    <View testID={testID}>
       <VStack>
         <Center>
           <Center w={Platform.OS === 'web' ? '62.5%' : '100%' }>

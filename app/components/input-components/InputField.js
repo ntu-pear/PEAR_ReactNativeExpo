@@ -120,7 +120,7 @@ function InputField({
   };
 
   return (
-    <View testID={testID} style={styles.componentContainer} >
+    <View style={styles.componentContainer} >
       <VStack>
         {showTitle ? (
           <Text style={styles.titleMsg}>
@@ -147,7 +147,7 @@ function InputField({
           {...otherProps}
         />
         {hideError && !error.errorMsg ? null : (
-          <ErrorMessage testID={`${testID}_error`} message={error.errorMsg} />
+          <ErrorMessage testID={`${testID}_input_error`} message={error.errorMsg} />
         )}
       </VStack>
     </View>

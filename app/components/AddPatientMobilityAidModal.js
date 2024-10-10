@@ -113,7 +113,7 @@ function AddPatientMobilityAidModal({
       modalContent={(
         <>
         <SelectionInputField
-          testID={`${testID}_mobility_aid_input`}
+          testID={`${testID}_mobility_aid_select`}
           isRequired
           title="Mobility Aid"
           value={formData.mobilityListId}
@@ -121,7 +121,7 @@ function AddPatientMobilityAidModal({
           onDataChange={handleMobilityData('mobilityListId')}
         />
         <InputField
-          testID={`${testID}_remarks_input`}
+          testID={`${testID}_remarks`}
           isRequired
           title={'Remarks'}
           value={formData.mobilityRemark}

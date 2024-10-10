@@ -117,12 +117,12 @@ function SelectionInputField({
           {...otherProps}
         >
           {dataArray.map((item) => (
-            <Select.Item key={item} label={item.label} value={item.value} isDisabled={isDisabledItems ? isDisabledItems[item.value] : false}/>
+            <Select.Item testID={`${testID}_${item.label}`} key={item} label={item.label} value={item.value} isDisabled={isDisabledItems ? isDisabledItems[item.value] : false}/>
           ))}
         </Select>
         {hideError && !error.errorMsg ? 
         null : (
-        <ErrorMessage testID={`${testID}_input`} message={error.errorMsg}/>
+        <ErrorMessage testID={testID} message={error.errorMsg}/>
         )}   
         </VStack>
     </View>

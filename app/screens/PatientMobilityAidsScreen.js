@@ -27,7 +27,6 @@ import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUn
 import DynamicTable from 'app/components/DynamicTable';
 import MobilityAidItem from 'app/components/MobilityAidItem';
 import AddPatientMobilityAidModal from 'app/components/AddPatientMobilityAidModal';
-import CustomAlert from 'app/components/CustomAlert';
 
 function PatientMobilityAidScreen(props) {
   let {patientID, patientId} = props.route.params;
@@ -42,7 +41,6 @@ function PatientMobilityAidScreen(props) {
   // Modal states
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // either 'add' or 'edit'
-  const [customAlert, setCustomAlert] = useState(null);
   
   // Options for user to search by
   const SEARCH_OPTIONS = ['Mobility Aid'];
@@ -227,18 +225,7 @@ function PatientMobilityAidScreen(props) {
       alertTitle = 'Error adding mobility aid';
     }
     
-      Alert.alert(
-        alertTitle,
-        alertDetails,
-        [
-          {
-            text: 'OK',
-            onPress: () => console.log('OK Pressed'),
-            testID: `${testID}_add_alert_ok`,  
-          },
-        ],
-        { cancelable: false }
-      );
+    Alert.alert(alertTitle, alertDetails);
   };
 
   // Edit mobility aid
@@ -283,18 +270,7 @@ function PatientMobilityAidScreen(props) {
       alertTitle = 'Error editing mobility aid';
     }
     
-    Alert.alert(
-      alertTitle,
-      alertDetails,
-      [
-        {
-          text: 'OK',
-          onPress: () => console.log('OK Pressed'),
-          testID: `${testID}_edit_alert_ok`,  
-        },
-      ],
-      { cancelable: false }
-    );
+    Alert.alert(alertTitle, alertDetails);
   };
 
   // Ask user to confirm deletion of mobility aid
@@ -309,13 +285,11 @@ function PatientMobilityAidScreen(props) {
       {
         text: 'Cancel',
         onPress: () => {},
-        style: 'cancel',
-        testID: `${testID}_delete_alert_cancel`,  
+        style: 'cancel', 
       },
       {
         text: 'OK', 
-        onPress: () => deleteMobilityAid(mobilityID),
-        testID: `${testID}_delete_alert_ok`,   
+        onPress: () => deleteMobilityAid(mobilityID), 
       },
     ]);
   }
@@ -346,18 +320,7 @@ function PatientMobilityAidScreen(props) {
       alertTitle = 'Error deleting mobility aid';
     }
     
-    Alert.alert(
-      alertTitle,
-      alertDetails,
-      [
-        {
-          text: 'OK',
-          onPress: () => console.log('OK Pressed'),
-          testID: `${testID}_delete_alert_ok`,  
-        },
-      ],
-      { cancelable: false }
-    );
+    Alert.alert(alertTitle, alertDetails);
   }
 
   // Navigate to patient profile on click profile image

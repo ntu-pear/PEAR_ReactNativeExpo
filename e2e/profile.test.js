@@ -172,7 +172,7 @@ describe('Patient Profile tests', () => {
         // await expect(element(by.id(`photoAlbum_${patientID}`))).toBeVisible();
         // await element(by.id(`photoAlbum_${patientID}`)).tap()
 
-        // commented out as routine not implemented yet.
+        // commented out as holiday is not implemented yet.
         // await expect(element(by.id(`holiday_${patientID}`))).toBeVisible();
         // await element(by.id(`holiday_${patientID}`)).tap()
 

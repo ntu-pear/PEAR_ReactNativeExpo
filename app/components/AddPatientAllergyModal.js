@@ -16,6 +16,7 @@ import colors from 'app/config/colors';
 import AddEditModal from './AddEditModal';
 
 function AddPatientAllergyModal({
+  testID,
   showModal,
   modalMode,
   allergyFormData,
@@ -25,9 +26,9 @@ function AddPatientAllergyModal({
   existingAllergyIDs,
 }) {
   const [allergyData, setAllergyData] = useState({
-    AllergyListID: null,
-    AllergyReactionListID: null,
-    AllergyRemarks: '',
+    AllergyListID: 1,
+    AllergyReactionListID: 1,
+    AllergyRemarks: 'NIL',
   });
 
   // Error states for each input field
@@ -58,11 +59,25 @@ function AddPatientAllergyModal({
 
   // Reset form to initial state
   const resetForm = () => {
+  
+    // Find the next available Allergy ID that is not in existingAllergyIDs
+    let nextAvailableAllergyID = null;
+
+    // Take the whole range of allergies
+    for (let i = 3; i <= 13; i++) {
+      if (!existingAllergyIDs.includes(i)) {
+        nextAvailableAllergyID = i;
+        break;
+      }
+    }
+
     setAllergyData({
-      AllergyListID: null,
-      AllergyReactionListID: null,
-      AllergyRemarks: '',
+      // if all allergies taken after finding nextAvaiableAllergy, then default fallback to Corn
+      AllergyListID: existingAllergyIDs.length > 0 ? (nextAvailableAllergyID || 3) : 1, 
+      AllergyReactionListID: existingAllergyIDs.length > 0 ? 2 : 1,
+      AllergyRemarks: existingAllergyIDs.length > 0 ? '' : 'NIL',
     });
+
     setIsAllergyError(false);
     setIsReactionError(false);
     setIsRemarksError(false);
@@ -99,8 +114,8 @@ function AddPatientAllergyModal({
       setAllergyData({
         ...allergyData,
         AllergyListID: value,
-        AllergyReactionListID: null,  // Reset when selecting value > 2
-        AllergyRemarks: '',           // Clear remarks as well
+        AllergyReactionListID: 2,  
+        AllergyRemarks: '',      
       });
     }
   };
@@ -123,6 +138,7 @@ function AddPatientAllergyModal({
 
   return (
     <AddEditModal
+      testID={testID}
       handleSubmit={handleSubmit}
       isInputErrors={isInputErrors}
       modalMode={modalMode}
@@ -132,7 +148,8 @@ function AddPatientAllergyModal({
       modalContent={(
         <>
           <SelectionInputField
-            isRequired={allergyData.AllergyListID > 2}
+            testID={`${testID}_allergy_select`}
+            isRequired
             title="Allergy"
             onDataChange={handleAllergyChange}
             value={allergyData.AllergyListID}
@@ -144,6 +161,7 @@ function AddPatientAllergyModal({
           {allergyData.AllergyListID > 2 && (
             <>
               <SelectionInputField
+                testID={`${testID}_reaction_select`}
                 isRequired
                 title="Reaction"
                 onDataChange={handleReactionChange}
@@ -153,6 +171,7 @@ function AddPatientAllergyModal({
                 isInvalid={isReactionError}
               />
               <InputField
+                testID={`${testID}_remarks`}
                 isRequired
                 title="Remarks"
                 value={allergyData.AllergyRemarks}

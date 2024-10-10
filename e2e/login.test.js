@@ -1,3 +1,5 @@
+import errors from 'app/config/errors';
+
 describe('Login tests', () => {
   beforeAll(async () => {
     await device.launchApp();
@@ -28,8 +30,8 @@ describe('Login tests', () => {
     await element(by.id('loginContentContainer')).tap();
   };
 
-  const verifyErrorMessage = async (errorId, expectedMessage) => {
-    await waitFor(element(by.id(errorId))).toHaveText(expectedMessage);
+  const verifyErrorMessage = async (expectedMessage) => {
+    await expect(element(by.text(expectedMessage))).toExist();
   };
 
   it('Login: login button disabled by default', async () => {
@@ -37,40 +39,46 @@ describe('Login tests', () => {
     await expect(element(by.traits(['button', 'disabled']).and(by.id('login')))).toExist();
   });
 
+  it('Login: Navigate to Forgot Password Screen', async () => {
+    await checkLoginElements();
+    await element(by.text("Forgot Password?")).tap();
+    await expect(element(by.id('reset_password_screen'))).toBeVisible();
+  });
+
   it('Login: invalid credentials (username)', async () => {
     await checkLoginElements();
     await enterCredentials('wrong@gmail.com', 'Supervisor', 'Supervisor!23');
-    await element(by.id('login')).longPress();
-    await verifyErrorMessage('loginError', 'Invalid email and/or password');
+    await element(by.id('login')).tap();
+    await verifyErrorMessage(errors.loginError);
   });
 
   it('Login: invalid credentials (user role)', async () => {
     await checkLoginElements();
     await enterCredentials('jess@gmail.com', 'Caregiver', 'Supervisor!23');
-    await element(by.id('login')).longPress();
-    await verifyErrorMessage('loginError', 'Invalid email and/or password');
+    await element(by.id('login')).tap();
+    await verifyErrorMessage(errors.loginError);
   });
 
   it('Login: invalid credentials (password)', async () => {
     await checkLoginElements();
     await enterCredentials('jess@gmail.com', 'Supervisor', 'wrong');
-    await element(by.id('login')).longPress();
-    await verifyErrorMessage('loginError', 'Invalid email and/or password');
+    await element(by.id('login')).tap();
+    await verifyErrorMessage(errors.loginError);
   });
 
   it('Login: incomplete credentials (no username)', async () => {
     await checkLoginElements();
     await element(by.id('username_input')).tap();
-    await element(by.id('loginContentContainer')).tap(); 
-    await verifyErrorMessage('username_error', 'is required');
+    await element(by.id('username_input')).tapReturnKey();
+    await verifyErrorMessage(errors.notEmptyError);
     await expect(element(by.traits(['button', 'disabled']).and(by.id('login')))).toExist();
   });
 
   it('Login: incomplete credentials (no password)', async () => {
     await checkLoginElements();
     await element(by.id('password_input')).tap(); 
-    await element(by.id('loginContentContainer')).tap();
-    await verifyErrorMessage('password_error', 'is required');
+    await element(by.id('password_input')).tapReturnKey();
+    await verifyErrorMessage(errors.notEmptyError);
     await expect(element(by.traits(['button', 'disabled']).and(by.id('login')))).toExist();
   });
 

@@ -39,7 +39,7 @@ function SensitiveInputField({
   };
 
   return (
-    <View testID={testID} style={styles.ComponentContainer}>
+    <View style={styles.ComponentContainer}>
       <VStack>
         <InputField
           testID={testID}

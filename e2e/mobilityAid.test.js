@@ -10,6 +10,7 @@ describe('Mobility Aid tests', () => {
     //within the mobility aid screen, this will be easier to navigate
     const baseID = `mobility_aid_screen_${patientID}`;
 
+    //to be able to track the new mobility aid being added
     const regexPattern = new RegExp(`${baseID}_(\\d+)`);
     let expectedItemCount = 2;
 
@@ -69,13 +70,13 @@ describe('Mobility Aid tests', () => {
     it('Mobility Aid: Add Mobility Aid - Submit', async () => {
         
         await element(by.id(`${baseID}_addMobilityAid`)).tap();
-        await element(by.id(`${baseID}_modal_add_mobility_aid_input`)).tap();
+        await element(by.id(`${baseID}_modal_add_mobility_aid_select`)).tap();
         await element(by.text('Walkers')).tap();
 
         // temporaily do not include remarks for add
-        // await element(by.id(`${baseID}_modal_add_remarks_input`)).tap();
-        // await element(by.id(`${baseID}_modal_add_remarks_input`)).typeText('Some remarks');
-        // await element(by.id(`${baseID}_modal_add_remarks_input`)).tapReturnKey();
+        await element(by.id(`${baseID}_modal_add_remarks_input`)).tap();
+        await element(by.id(`${baseID}_modal_add_remarks_input`)).typeText('Some remarks');
+        await element(by.id(`${baseID}_modal_add_remarks_input`)).tapReturnKey();
         
         //change from default option of fully recovered to not recovered
         await element(by.id(`${baseID}_modal_add_condition_radio_Not Recovered`)).tap();
@@ -129,13 +130,14 @@ describe('Mobility Aid tests', () => {
         
         await element(by.id(`${baseID}_${mobilityId}_edit`)).tap();
         
-        await element(by.id(`${baseID}_modal_edit_mobility_aid_input`)).tap();
+        await element(by.id(`${baseID}_modal_edit_mobility_aid_select`)).tap();
         await element(by.text('Crutches')).tap();
         
         // temporaily do not include remarks for edit
-        // await element(by.id(`${baseID}_modal_edit_remarks_input`)).tap();
-        // await element(by.id(`${baseID}_modal_edit_remarks_input`)).typeText('New remarks');
-        // await element(by.id(`${baseID}_modal_edit_remarks_input`)).tapReturnKey();
+        await element(by.id(`${baseID}_modal_edit_remarks_input`)).tap();
+        await element(by.id(`${baseID}_modal_edit_remarks_input`)).clearText();
+        await element(by.id(`${baseID}_modal_edit_remarks_input`)).typeText('New remarks');
+        await element(by.id(`${baseID}_modal_edit_remarks_input`)).tapReturnKey();
 
         await element(by.id(`${baseID}_modal_edit_cancel_button`)).tap();
         
@@ -148,8 +150,13 @@ describe('Mobility Aid tests', () => {
         // Swipe right to show edit option
         await element(by.id(`${baseID}_${mobilityId}`)).swipe('right','slow')
         
-        await element(by.id(`${baseID}_modal_edit_mobility_aid_input`)).tap();
+        await element(by.id(`${baseID}_modal_edit_mobility_aid_select`)).tap();
         await element(by.text('Crutches')).tap();
+
+        await element(by.id(`${baseID}_modal_edit_remarks_input`)).tap();
+        await element(by.id(`${baseID}_modal_edit_remarks_input`)).clearText();
+        await element(by.id(`${baseID}_modal_edit_remarks_input`)).typeText('New remarks');
+        await element(by.id(`${baseID}_modal_edit_remarks_input`)).tapReturnKey();
         
         //change to fully recovered
         await element(by.id(`${baseID}_modal_edit_condition_radio_Fully Recovered`)).tap();

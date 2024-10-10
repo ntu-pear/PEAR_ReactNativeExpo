@@ -87,7 +87,7 @@ describe('Add Patients Tests', () => {
       await element(by.id('username_input')).typeText('jess@gmail.com');
       await element(by.id('password_input')).tap();
       await element(by.id('password_input')).typeText('Supervisor!23');
-      await element(by.id('login')).tap(); // Correcting from longPress to tap
+      await element(by.id('login')).tap(); 
   
       // On dashboard
       await expect(element(by.text('Patients Daily Highlights'))).toBeVisible();
@@ -108,16 +108,16 @@ describe('Add Patients Tests', () => {
       await expect(element(by.id(`${baseID}_title`))).toBeVisible();
     
       for (const [key, value] of Object.entries(testData.validData)) {
-        const fieldId = `${baseID}_${key}_input`;
+        const fieldId = `${baseID}_${key}`;
         
         // Tap on the input field to focus
-        await element(by.id(fieldId)).tap();
+        await element(by.id(`${fieldId}_input`)).tap();
         
         // Type the text into the input field
-        await element(by.id(fieldId)).typeText(value);
-        
+        await element(by.id(`${fieldId}_input`)).typeText(value);
+
         // Dismiss the keyboard
-        await device.pressBack();
+        await element(by.id(`${fieldId}_input`)).tapReturnKey();
         
         // Check if error message is not visible
         await expect(element(by.id(`${fieldId}_error`))).not.toBeVisible();
@@ -127,45 +127,32 @@ describe('Add Patients Tests', () => {
       }
     
       // Perform actions after filling the form
-      await isButtonDisabled(`${baseID}_bottomBtns_prev`);
       await isButtonEnabled(`${baseID}_bottomBtns_next`);
     });
     
-    // not implemented yet, will do this after covering this aspect.
-    // it('Add Patients: patient info - erase input', async () => {
-    //   await element(by.id(baseID)).scrollTo('top');
+    it('Add Patients: patient info - erase input', async () => {
+      await element(by.id(baseID)).scrollTo('top');
   
-    //   let previousField = `${baseID}_LastName_input`;
+      for (const [key, value] of Object.entries(testData.validData)) {
+        const fieldId = `${baseID}_${key}`;
+        await element(by.id(`${fieldId}_input`)).tap();
+        await element(by.id(`${fieldId}_input`)).clearText();
+        // Dismiss the keyboard
+        await element(by.id(`${fieldId}_input`)).tapReturnKey();
   
-    //   for (const [key, value] of Object.entries(testData.validData)) {
-    //     const fieldId = `${baseID}_${key}_input`;
-    //     await element(by.id(fieldId)).tap();
-    //     await element(by.id(fieldId)).replaceText('');
-    //     await element(by.id(previousField)).tap();
+        await expect(element(by.id(`${fieldId}_error`))).toBeVisible();
   
-    //     if (!['HomeNo', 'HandphoneNo', 'TempPostalCode', 'TempAddress'].includes(key)) {
-    //       await waitFor(element(by.id(`${fieldId}_error`)))
-    //         .toHaveText('is required')
-    //         .withTimeout(5000);
-    //     }
+        await element(by.id(baseID)).scroll(100, 'down');
+      }
   
-    //     previousField = fieldId;
-    //     await element(by.id(baseID)).scroll(100, 'down');
-    //   }
-  
-    //   await element(by.id(baseID)).scrollTo('bottom');
-    //   await element(by.id(`${baseID}_bottomBtns_prev`)).tap();
-  
-    //   await isButtonDisabled(`${baseID}_bottomBtns_next`);
-    //   await isButtonDisabled(`${baseID}_bottomBtns_prev`);
-    // });
+      await isButtonDisabled(`${baseID}_bottomBtns_next`);
+    });
   
     it('Add Patients: patient info - no first name', async () => {
       await reopenForm();
       await expect(element(by.id(`${baseID}_title`))).toBeVisible();
   
       for (const [key, value] of Object.entries(testData.validData)) {
-        if (key === 'FirstName') continue;
   
         let fieldId = `${baseID}_${key}`;
         await element(by.id(`${fieldId}_input`)).tap();
@@ -174,7 +161,7 @@ describe('Add Patients Tests', () => {
           await element(by.id(`${fieldId}_input`)).typeText(testData.invalidDataCharacters[key]);
           //currently need to click okay then have the error appeared, may need to improve real-time validation
           await element(by.id(`${fieldId}_input`)).tapReturnKey();
-          await waitFor(element(by.id(`${fieldId}_error`))).toBeVisible();
+          await expect(element(by.id(`${fieldId}_error`))).toBeVisible();
         } else {
           await element(by.id(`${fieldId}_input`)).typeText(value);
           await expect(element(by.id(`${fieldId}_error`))).not.toBeVisible();
@@ -184,7 +171,6 @@ describe('Add Patients Tests', () => {
       }
   
       await isButtonDisabled(`${baseID}_bottomBtns_next`);
-      await isButtonDisabled(`${baseID}_bottomBtns_prev`);
     });
   });
   

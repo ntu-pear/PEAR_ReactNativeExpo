@@ -302,7 +302,7 @@ function PatientAllergyScreen(props) {
   return isLoading ? (
     <ActivityIndicator visible />
   ) : (
-    <View style={styles.container}>
+    <View testID={testID} style={styles.container}>
       <View style={{ justifyContent: 'space-between' }}>
         <View style={{ alignSelf: 'center', marginTop: 15, maxHeight: 120 }}>
           {!isEmptyObject(patientData) ? (
@@ -349,6 +349,7 @@ function PatientAllergyScreen(props) {
       </View>
       {displayMode == 'rows' ? (
             <FlatList
+            testID={`${testID}_flatlist`}
             onTouchStart={()=>Keyboard.dismiss()}
             onScrollBeginDrag={() => setIsScrolling(true)}
             onScrollEndDrag={() => setIsScrolling(false)}
@@ -366,12 +367,14 @@ function PatientAllergyScreen(props) {
                   onSwipeRight={()=>handleDeleteAllergy(item.allergyID)}
                   underlay={<EditDeleteUnderlay/>}
                   item={
-                    <TouchableOpacity 
+                    <TouchableOpacity
+                      testID={`${testID}_${item.allergyID}_touchable`}
                       style={styles.logContainer} 
                       activeOpacity={1} 
                       disabled={!isScrolling}
                     >
                       <PatientAllergyItem
+                        testID={`${testID}_${item.allergyID}`}
                         createdDate={item.createdDate}
                         allergyListDesc={item.allergyListDesc}
                         allergyReaction={item.allergyReaction}
@@ -397,9 +400,13 @@ function PatientAllergyScreen(props) {
       </View>
       )}
       <View style={styles.addBtn}>
-        <AddButton title="Add Allergy" onPress={handleAddAllergy} />
+        <AddButton
+          testID={`${testID}_addAllergy`} 
+          title="Add Allergy" 
+          onPress={handleAddAllergy} />
       </View>
       <AddPatientAllergyModal
+        testID={`${testID}_modal_${modalMode === 'add' ? 'add' : 'edit'}`}
         showModal={isModalVisible}
         modalMode={modalMode}
         onClose={() => setIsModalVisible(false)}

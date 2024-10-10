@@ -4,7 +4,7 @@ import { FormControl } from 'native-base';
 import { MaterialIcons } from '@expo/vector-icons';
 import colors from 'app/config/colors';
 
-function ErrorMessage({ message, visible = true, testID }) {
+function ErrorMessage({ message, visible = true, testID = '' }) {
   if (!visible) {
     return null;
   }
