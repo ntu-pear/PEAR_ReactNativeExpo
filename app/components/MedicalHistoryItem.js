@@ -8,7 +8,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import colors from 'app/config/colors';
 
 // Utilities
-import { formatDate } from 'app/utility/miscFunctions';
+import formatDateTime from 'app/hooks/useFormatDateTime.js';
 import EditDeleteBtn from './EditDeleteBtn';
 
 const MedicalHistoryItem = ({
@@ -61,7 +61,7 @@ const MedicalHistoryItem = ({
           <View style={{flexDirection: 'row',  marginLeft: 20}}>
             <Text>
               <Text style={[styles.medText, styles.bold]}>Estimated Date: </Text>
-              <Text style={[styles.medText]}>{formatDate(new Date(medicalEstimatedDate), true)}</Text>
+              <Text style={[styles.medText]}>{formatDateTime(new Date(medicalEstimatedDate), true)}</Text>
             </Text>
           </View>
           ): null}

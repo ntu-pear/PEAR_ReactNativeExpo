@@ -8,7 +8,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import colors from 'app/config/colors';
 
 // Utilities
-import { formatDate } from 'app/utility/miscFunctions';
+import formatDateTime from 'app/hooks/useFormatDateTime.js';
 import EditDeleteBtn from './EditDeleteBtn';
 
 const ProblemLogItem = ({
@@ -62,7 +62,7 @@ const ProblemLogItem = ({
           <View style={{flexDirection: 'row',  marginLeft: 20}}>
             <Text>
               <Text style={[styles.text, styles.bold]}>Created: </Text>
-              <Text style={[styles.text]}>{formatDate(new Date(createdDateTime), true)}</Text>
+              <Text style={[styles.text]}>{formatDateTime(new Date(createdDateTime), true)}</Text>
             </Text>
           </View>
           ): null}
