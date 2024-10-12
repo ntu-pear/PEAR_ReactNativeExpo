@@ -1,6 +1,6 @@
 // Libs
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, Dimensions } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, Dimensions, Alert } from 'react-native';
 import {Box, Container, FlatList, HStack, ScrollView, Stack, View, ChevronLeftIcon, ChevronRightIcon, Center, Fab, Icon} from 'native-base';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -136,15 +136,15 @@ function DashboardScreen({ navigation }) {
     }, [isReloadSchedule]),
     );
   
-  // Refresh schedule when screen comes into focus
-  useFocusEffect(
-    React.useCallback(() => {
-      const today = new Date();
-      setSelectedDate(today);
-      refreshSchedule();
-      setScheduleXOffset(tempOffset);
-    }, [])
-  );
+  // // Refresh schedule when screen comes into focus
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     const today = new Date();
+  //     setSelectedDate(today);
+  //     refreshSchedule();
+  //     setScheduleXOffset(tempOffset);
+  //   }, [])
+  // );
 
   // Refresh schedule from backend when user switches between 'My Patients' and 'All Patients'
   useEffect(() => {
@@ -152,7 +152,8 @@ function DashboardScreen({ navigation }) {
   }, [viewMode]);
 
   useEffect(() => {
-    refreshSchedule();
+    updateSchedule({tempSelectedDate: selectedDate});
+    setIsDataInitialized(true);
   }, [selectedDate]);
 
   // Refresh schedule if isRetry is set to true
@@ -237,10 +238,20 @@ function DashboardScreen({ navigation }) {
 
   // Update schedule to display based on selected date
   const updateSchedule = ({tempScheduleWeekly=originalScheduleWeekly, tempSelectedDate=selectedDate}) => {
-    if(!isEmptyObject(tempScheduleWeekly)) {      
-      const currentDate = formatDate(tempSelectedDate, true);
-      setOriginalSchedule([...tempScheduleWeekly[currentDate]]);
-      setSchedule([...tempScheduleWeekly[currentDate]]);
+    try {
+      if(!isEmptyObject(tempScheduleWeekly)) {      
+        const currentDate = formatDate(tempSelectedDate, true);
+        setOriginalSchedule([...tempScheduleWeekly[currentDate]]);
+        setSchedule([...tempScheduleWeekly[currentDate]]);
+      }
+    }catch (error) {
+      console.error("Error updating schedule:", error);
+      Alert.alert(
+        "Error",
+        "There was an error updating the schedule. Please try again later.",
+        [{text: "OK",}]
+      );
+      return;
     }
   }
 
@@ -494,7 +505,6 @@ function DashboardScreen({ navigation }) {
     updateSchedule({tempSelectedDate: previous});
     onToggleSelectedDate(previous);
     setIsDataInitialized(true);
-    setIsReloadSchedule(true);
   };
 
   const handleNextDate = () => {
@@ -503,7 +513,6 @@ function DashboardScreen({ navigation }) {
     updateSchedule({tempSelectedDate: next});
     onToggleSelectedDate(next);
     setIsDataInitialized(true);
-    setIsReloadSchedule(true);
   };
 
   // When user toggles date, update filter details and selected datetime filter accordingly
@@ -564,6 +573,7 @@ function DashboardScreen({ navigation }) {
     setSelectedDate(today);
     updateSchedule({ tempSelectedDate: today });
     setScheduleXOffset(tempOffset);
+    setIsDataInitialized(true);
     console.log("XOffset",scheduleXOffset);
 
     setIsReloadSchedule(true);
