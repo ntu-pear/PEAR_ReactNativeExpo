@@ -10,6 +10,7 @@ import AppButton from './AppButton';
 import colors from 'app/config/colors';
 
 function AddEditModal({
+  testID='',
   showModal,
   modalMode,
   modalContent,
@@ -39,6 +40,7 @@ function AddEditModal({
   return (
     <Modal isOpen={showModal} onClose={onClose}>
       <View
+        testID={testID} 
         style={[
           styles.centeredView,
           { marginBottom: keyboardOffset }, // Adjust margin based on keyboardOffset
@@ -56,8 +58,9 @@ function AddEditModal({
         </Modal.Body>
         <Modal.Footer>
           <Button.Group space={2}>
-            <AppButton color="red" title="Cancel" onPress={onClose}></AppButton>
+            <AppButton testID={`${testID}_cancel_button`} color="red" title="Cancel" onPress={onClose}></AppButton>
             <AppButton
+              testID={`${testID}_submit_button`}
               onPress={handleSubmit}
               title="Submit"
               color="green"
