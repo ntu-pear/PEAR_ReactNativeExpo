@@ -7,7 +7,7 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import colors from 'app/config/colors';
 
 // Utilities
-import { formatDate } from 'app/utility/miscFunctions';
+import formatDateTime from 'app/hooks/useFormatDateTime.js';
 import EditDeleteBtn from './EditDeleteBtn';
 
 const PatientVitalItem = ({
@@ -44,7 +44,7 @@ const PatientVitalItem = ({
         <TextRow label="Remarks" value={vitalRemarks} />
         <TextRow
           label="Created"
-          value={formatDate(new Date(createdDateTime), true)}
+          value={formatDateTime(new Date(createdDateTime), true)}
         />
       </View>
       <EditDeleteBtn onDelete={onDelete}/>

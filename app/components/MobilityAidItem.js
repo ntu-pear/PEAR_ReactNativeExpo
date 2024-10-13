@@ -8,7 +8,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import colors from 'app/config/colors';
 
 // Utilities
-import { formatDate } from 'app/utility/miscFunctions';
+import formatDateTime from 'app/hooks/useFormatDateTime.js';
 import EditDeleteBtn from './EditDeleteBtn';
 
 const MobilityAidItem = ({
@@ -33,7 +33,7 @@ const MobilityAidItem = ({
             <TextRow testID={`${testID}_condition`} label="Condition" value={isRecovered ? 'Fully Recovered' : 'Not Recovered'} />
             <TextRow
               label="Date"
-              value={formatDate(new Date(date), true)}
+              value={formatDateTime(new Date(date), true)}
             />
           </View>
           <EditDeleteBtn testID={testID} onDelete={onDelete} onEdit={onEdit}/>

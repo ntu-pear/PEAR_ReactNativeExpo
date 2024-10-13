@@ -49,8 +49,8 @@ const PrescriptionItem = ({
             <TextRow label="Dosage" value={dosage} />
             <NumberRow label="Frequency Per Day" value={frequencyPerDay.toString()} />
             <TextRow label="Instruction" value={instruction} />
-            <TextRow label="Start Date" value={formatDate(new Date(startDate), true)} />
-            <TextRow label="End Date" value={formatDate(new Date(endDate), true)} />
+            <TextRow label="Start Date" value={formatDateTime(new Date(startDate), true)} />
+            <TextRow label="End Date" value={formatDateTime(new Date(endDate), true)} />
             <TextRow label="After Meal" value={afterMeal ? 'Yes' : 'No'} />
             <TextRow label="Remarks" value={prescriptionRemarks} />
             <TextRow label="Chronic" value={isChronic ? 'Yes' : 'No'} />

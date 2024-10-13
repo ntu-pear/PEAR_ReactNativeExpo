@@ -28,7 +28,7 @@ function AddPatientPrescriptionModal({
   // Enables use of dynamic rendering of components when the page error = true/false.
   const [isInputErrors, setIsInputErrors] = useState(false);
 
-  // Options for problem field
+  // Options for prescription field
   const { data: prescriptionOptions } = useGetSelectionOptions('Prescription');
 
   // Options for chronic

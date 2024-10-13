@@ -507,7 +507,7 @@ function PatientVitalScreen(props) {
         </View>
       )}
       <View style={styles.addBtn}>
-        <AddButton title="Add Vital Data" onPress={handleOnClickAddVital} />
+        <AddButton title="Add Vital" onPress={handleOnClickAddVital} />
       </View>
       <AddPatientVitalModalNEW
         showModal={isModalVisible}

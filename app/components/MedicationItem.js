@@ -9,6 +9,7 @@ import colors from 'app/config/colors';
 
 // Utilities
 import { formatDate, formatTimeAMPM, setTimeToZero } from 'app/utility/miscFunctions';
+import formatDateTime from 'app/hooks/useFormatDateTime.js';
 import EditDeleteBtn from './EditDeleteBtn';
 
 const MedicationItem = ({
@@ -95,7 +96,7 @@ const MedicationItem = ({
             <View style={{flexDirection: 'row',  marginLeft: 20}}>
               <Text>
                 <Text style={[styles.medText, styles.bold]}>Start Date: </Text>
-                <Text style={[styles.medText]}>{formatDate(new Date(medStartDate), true)}</Text>
+                <Text style={[styles.medText]}>{formatDateTime(new Date(medStartDate), true)}</Text>
               </Text>
             </View>
             ): null}
@@ -103,13 +104,13 @@ const MedicationItem = ({
             <View style={{flexDirection: 'row',  marginLeft: 20}}>
               <Text>
                 <Text style={[styles.medText, styles.bold]}>End Date: </Text>
-                <Text style={[styles.medText]}>{formatDate(new Date(medEndDate), true)}</Text>
+                <Text style={[styles.medText]}>{formatDateTime(new Date(medEndDate), true)}</Text>
               </Text>
             </View>
             ): null}
         </View>
         <View>
-          <Text style={styles.medTime}>{formatTimeAMPM(medTime)}</Text>
+          <Text style={styles.medTime}>{formatDateTime(new Date(medTime),false)}</Text>
         </View>
       </View>
       <TouchableOpacity 

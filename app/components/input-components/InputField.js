@@ -133,6 +133,7 @@ function InputField({
           textAlignVertical={variant === 'multiLine' ? 'top' : 'center'}
           autoCapitalize="none"
           borderRadius="25"
+          minWidth="full"
           height={variant === 'multiLine' ? '150' : '50'}
           value={inputText}
           onChangeText={handleOnChangeText}
