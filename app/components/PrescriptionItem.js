@@ -8,11 +8,11 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import colors from 'app/config/colors';
 
 // Utilities
-import { formatDate } from 'app/utility/miscFunctions';
 import EditDeleteBtn from './EditDeleteBtn';
 import formatDateTime from 'app/hooks/useFormatDateTime.js';
 
 const PrescriptionItem = ({
+  testID='',
   date,
   prescriptionListDesc,
   dosage,
@@ -36,43 +36,43 @@ const PrescriptionItem = ({
    // Determine if editing is allowed
    const canEdit = endDateObj > currentDate;
     return (
-        <View style={styles.container}>
+        <View testID={testID} style={styles.container}>
           <Icon
             as={<FontAwesome5 name="prescription-bottle" />}
             size={12}
             color={colors.green}
           />
           <View style={styles.textContainer}>
-            <TextRow label="Date" value={formatDateTime(new Date(date), true)} />
-            <TextRow label="Time" value={formatDateTime(new Date(date), false)} />
-            <TextRow label="Drug Name" value={prescriptionListDesc} />
-            <TextRow label="Dosage" value={dosage} />
-            <NumberRow label="Frequency Per Day" value={frequencyPerDay.toString()} />
-            <TextRow label="Instruction" value={instruction} />
-            <TextRow label="Start Date" value={formatDateTime(new Date(startDate), true)} />
-            <TextRow label="End Date" value={formatDateTime(new Date(endDate), true)} />
-            <TextRow label="After Meal" value={afterMeal ? 'Yes' : 'No'} />
-            <TextRow label="Remarks" value={prescriptionRemarks} />
-            <TextRow label="Chronic" value={isChronic ? 'Yes' : 'No'} />
+            <TextRow testID={`${testID}_created_date`} label="Date" value={formatDateTime(new Date(date), true)} />
+            <TextRow testID={`${testID}_created_time`} label="Time" value={formatDateTime(new Date(date), false)} />
+            <TextRow testID={`${testID}_prescription`} label="Drug Name" value={prescriptionListDesc} />
+            <TextRow testID={`${testID}_dosage`} label="Dosage" value={dosage} />
+            <NumberRow testID={`${testID}_frequency`} label="Frequency Per Day" value={frequencyPerDay.toString()} />
+            <TextRow testID={`${testID}_instruction`} label="Instruction" value={instruction} />
+            <TextRow testID={`${testID}_start_date`} label="Start Date" value={formatDateTime(new Date(startDate), true)} />
+            <TextRow testID={`${testID}_end_date`} label="End Date" value={formatDateTime(new Date(endDate), true)} />
+            <TextRow testID={`${testID}_meal`} label="After Meal" value={afterMeal ? 'Yes' : 'No'} />
+            <TextRow testID={`${testID}_remarks`} label="Remarks" value={prescriptionRemarks} />
+            <TextRow testID={`${testID}_chronic`} label="Chronic" value={isChronic ? 'Yes' : 'No'} />
           </View>
-          <EditDeleteBtn onDelete={onDelete} onEdit={canEdit ? onEdit : null}/>
+          <EditDeleteBtn testID={testID} onDelete={onDelete} onEdit={canEdit ? onEdit : null}/>
         </View>
       );
     };
 
 // Helper component for rendering text rows
-const TextRow = ({ label, value }) => (
+const TextRow = ({ testID, label, value }) => (
     <View style={styles.row}>
-      <Text style={styles.label}>{label}:</Text>
-      <Text style={styles.value}>{value}</Text>
+      <Text testID={`${testID}_label`} style={styles.label}>{label}:</Text>
+      <Text testID={`${testID}_value`} style={styles.value}>{value}</Text>
     </View>
   );
 
   // Helper component for rendering number rows
-const NumberRow = ({ label, value }) => (
+const NumberRow = ({ testID, label, value }) => (
     <View style={styles.row}>
-      <Text style={styles.label}>{label}:</Text>
-      <Text style={styles.value}>{value.toString()}</Text>
+      <Text testID={`${testID}_label`} style={styles.label}>{label}:</Text>
+      <Text testID={`${testID}_value`} style={styles.value}>{value.toString()}</Text>
     </View>
   );
 

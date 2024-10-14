@@ -5,10 +5,6 @@ describe('Login tests', () => {
     await device.launchApp();
   });  
 
-  beforeEach(async () => {
-    await device.reloadReactNative();
-  });
-
   // Ensure all expected elements in the loginScreen are present.
   const checkLoginElements = async () => {
     await expect(element(by.id('loginContentContainer'))).toBeVisible();
@@ -22,10 +18,12 @@ describe('Login tests', () => {
   // Test user input
   const enterCredentials = async (username, role, password) => {
     await element(by.id('username_input')).tap();
+    await element(by.id('username_input')).clearText();
     await element(by.id('username_input')).typeText(username);
     await element(by.id('role_input')).tap();
     await element(by.text(role)).tap();
     await element(by.id('password_input')).tap();
+    await element(by.id('password_input')).clearText();
     await element(by.id('password_input')).typeText(password);
     await element(by.id('loginContentContainer')).tap();
   };
@@ -39,10 +37,11 @@ describe('Login tests', () => {
     await expect(element(by.traits(['button', 'disabled']).and(by.id('login')))).toExist();
   });
 
-  it('Login: Navigate to Forgot Password Screen', async () => {
+  it('Login: Navigate between Login Screen and Forgot Password Screen', async () => {
     await checkLoginElements();
     await element(by.text("Forgot Password?")).tap();
     await expect(element(by.id('reset_password_screen'))).toBeVisible();
+    await device.pressBack();
   });
 
   it('Login: invalid credentials (username)', async () => {
@@ -69,6 +68,7 @@ describe('Login tests', () => {
   it('Login: incomplete credentials (no username)', async () => {
     await checkLoginElements();
     await element(by.id('username_input')).tap();
+    await element(by.id('username_input')).clearText();
     await element(by.id('username_input')).tapReturnKey();
     await verifyErrorMessage(errors.notEmptyError);
     await expect(element(by.traits(['button', 'disabled']).and(by.id('login')))).toExist();
@@ -76,7 +76,10 @@ describe('Login tests', () => {
 
   it('Login: incomplete credentials (no password)', async () => {
     await checkLoginElements();
+    await element(by.id('username_input')).tap();
+    await element(by.id('username_input')).typeText('jess@gmail.com');
     await element(by.id('password_input')).tap(); 
+    await element(by.id('password_input')).clearText();
     await element(by.id('password_input')).tapReturnKey();
     await verifyErrorMessage(errors.notEmptyError);
     await expect(element(by.traits(['button', 'disabled']).and(by.id('login')))).toExist();

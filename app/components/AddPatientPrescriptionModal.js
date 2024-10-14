@@ -17,6 +17,7 @@ import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 import AddEditModal from './AddEditModal';
 
 function AddPatientPrescriptionModal({
+  testID,
   showModal,
   modalMode,
   formData,
@@ -128,6 +129,7 @@ function AddPatientPrescriptionModal({
   
   return (
     <AddEditModal
+      testID={testID}
       handleSubmit={handleSubmit}
       isInputErrors={isInputErrors}
       modalMode={modalMode}
@@ -137,6 +139,7 @@ function AddPatientPrescriptionModal({
       modalContent={(
         <>
         <SelectionInputField
+          testID={`${testID}_prescription_select`}
           isRequired
           title="Prescription"
           value={formData.prescriptionListID}
@@ -145,6 +148,7 @@ function AddPatientPrescriptionModal({
         />        
         
         <InputField
+          testID={`${testID}_dosage`}
           isRequired
           title={'Dosage'}
           value={formData.dosage}
@@ -154,6 +158,7 @@ function AddPatientPrescriptionModal({
         />
 
         <RadioButtonInput
+          testID={`${testID}_meal_taken_radio`}
           title={'To be taken'}
           isRequired={true}
           value={formData.afterMeal}
@@ -161,6 +166,7 @@ function AddPatientPrescriptionModal({
           onChangeData={(newValue) => handleChange('afterMeal', newValue)}
         />
         <InputField
+          testID={`${testID}_frequency`}
           isRequired
           title={'Frequency Per Day'}
           keyboardType="numeric"
@@ -173,6 +179,7 @@ function AddPatientPrescriptionModal({
           maxLength={2}
         />
         <RadioButtonInput
+          testID={`${testID}_period_radio`}
           title={'Period'}
           isRequired={true}
           value={formData.isChronic}
@@ -180,6 +187,7 @@ function AddPatientPrescriptionModal({
           onChangeData={(newValue) => handleChange('isChronic', newValue)}
         />
         <InputField
+          testID={`${testID}_instruction`}
           isRequired
           title={'Instruction'}
           value={formData.instruction}
@@ -189,6 +197,7 @@ function AddPatientPrescriptionModal({
         />
         <View style={styles.dateSelectionContainer}>
           <DateInputField
+            testID={`${testID}_start_date`}
             isRequired
             title={'Start Date'}
             value={formData.startDate}
@@ -201,6 +210,7 @@ function AddPatientPrescriptionModal({
         </View>  
         <View style={styles.dateSelectionContainer}>
           <DateInputField
+            testID={`${testID}_end_date`}
             isRequired
             title={'End Date'}
             value={formData.endDate}
@@ -211,6 +221,7 @@ function AddPatientPrescriptionModal({
           />
         </View>
         <InputField
+          testID={`${testID}_remarks`}
           isRequired={true}
           title={'Remarks'}
           value={formData.prescriptionRemarks}

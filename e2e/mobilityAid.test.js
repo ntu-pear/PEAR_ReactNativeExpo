@@ -3,8 +3,8 @@ describe('Mobility Aid tests', () => {
       await device.launchApp();
     });  
 
-    //will be using patient Bi Gong for this test, temporaily use for all easier(future can use different people which are pre-loaded)
-    const patientID =  4;
+    //will be using patient Detox for testing
+    const patientID =  1019;
     let mobilityId = 4;
 
     //within the mobility aid screen, this will be easier to navigate
@@ -12,7 +12,9 @@ describe('Mobility Aid tests', () => {
 
     //to be able to track the new mobility aid being added
     const regexPattern = new RegExp(`${baseID}_(\\d+)`);
-    let expectedItemCount = 2;
+    let expectedItemCount = 1;
+
+    const mobilityAids  = ['Cane', 'Crutches', 'Walkers', 'Gait trainers', 'Scooter', 'Wheelchairs',]
 
     it('Mobility Aid: View Mobility Aid', async () => {
         // Login
@@ -41,11 +43,6 @@ describe('Mobility Aid tests', () => {
         await element(by.id('Patients_Tab')).tap()
         await expect(element(by.id('patients'))).toBeVisible();
 
-        //see if can go to All Patients and click on that patient instead.
-        await expect(element(by.id('patients_searchFilter_tabBar'))).toBeVisible();
-        await expect(element(by.id('patients_searchFilter_tabBar_All Patients'))).toBeVisible()
-        await element(by.id('patients_searchFilter_tabBar_All Patients')).tap()
-
         //go to that patient profile
         await element(by.id(`patientprofile_${patientID}`)).tap();
         
@@ -55,8 +52,8 @@ describe('Mobility Aid tests', () => {
 
         // Check if the patient mobility page is visible
         await expect(element(by.id(baseID))).toBeVisible();
-        await expect(element(by.id(`${baseID}_${mobilityId}`))).toBeVisible();
-        await expect(element(by.id(`${baseID}_${mobilityId}_touchable`))).toBeVisible();
+        await expect(element(by.id(regexPattern)).atIndex(0)).toBeNotVisible();
+        await expect(element(by.text('No mobility aids found'))).toExist();
     });
 
     it('Mobility Aid: Add Mobility Aid - Cancel', async () => {
@@ -67,13 +64,33 @@ describe('Mobility Aid tests', () => {
 
     });
 
+    it('Allergy: Add Mobility Aid - Submit button disabled without input', async () => {
+        
+        await element(by.id(`${baseID}_addMobilityAid`)).tap();
+        await expect(element(by.id(`${baseID}_modal_add`))).toBeVisible();
+
+        const attributes = await element(by.id(`${baseID}_modal_add_submit_button`)).getAttributes();
+        // import jestExpect from 'expect';
+        const jestExpect = require('expect').default;
+        //alpha means the opacity value of the value.
+        jestExpect(attributes.alpha).toBe(0.4);
+
+        await element(by.id(`${baseID}_modal_add_cancel_button`)).tap();
+
+    });
+
     it('Mobility Aid: Add Mobility Aid - Submit', async () => {
         
         await element(by.id(`${baseID}_addMobilityAid`)).tap();
         await element(by.id(`${baseID}_modal_add_mobility_aid_select`)).tap();
+
+        //check if all mobility aids are present in the selection input
+        for (let i = 0; i < mobilityAids.length; i++) {
+            await expect(element(by.text(mobilityAids[i]))).toBeVisible();
+        }
+
         await element(by.text('Walkers')).tap();
 
-        // temporaily do not include remarks for add
         await element(by.id(`${baseID}_modal_add_remarks_input`)).tap();
         await element(by.id(`${baseID}_modal_add_remarks_input`)).typeText('Some remarks');
         await element(by.id(`${baseID}_modal_add_remarks_input`)).tapReturnKey();
@@ -93,14 +110,10 @@ describe('Mobility Aid tests', () => {
     it('Mobility Aid: Updated number of Mobility Aids after Addition', async () => {
         
         //read in the flatlist
-        await waitFor(element(by.id(`${baseID}_flatlist`)))
-            .toBeVisible()
-            .withTimeout(3000);  
+        await expect(element(by.id(`${baseID}_flatlist`))).toBeVisible()
 
         for (let i = 0; i < expectedItemCount; i++) {
-            await waitFor(element(by.id(regexPattern)).atIndex(i))
-                .toBeVisible()
-                .withTimeout(3000);
+            await expect(element(by.id(regexPattern)).atIndex(i)).toBeVisible();
         }
 
         // Check for no additional items
@@ -133,10 +146,8 @@ describe('Mobility Aid tests', () => {
         await element(by.id(`${baseID}_modal_edit_mobility_aid_select`)).tap();
         await element(by.text('Crutches')).tap();
         
-        // temporaily do not include remarks for edit
         await element(by.id(`${baseID}_modal_edit_remarks_input`)).tap();
-        await element(by.id(`${baseID}_modal_edit_remarks_input`)).clearText();
-        await element(by.id(`${baseID}_modal_edit_remarks_input`)).typeText('New remarks');
+        await element(by.id(`${baseID}_modal_edit_remarks_input`)).replaceText('New remarks');
         await element(by.id(`${baseID}_modal_edit_remarks_input`)).tapReturnKey();
 
         await element(by.id(`${baseID}_modal_edit_cancel_button`)).tap();
@@ -154,8 +165,7 @@ describe('Mobility Aid tests', () => {
         await element(by.text('Crutches')).tap();
 
         await element(by.id(`${baseID}_modal_edit_remarks_input`)).tap();
-        await element(by.id(`${baseID}_modal_edit_remarks_input`)).clearText();
-        await element(by.id(`${baseID}_modal_edit_remarks_input`)).typeText('New remarks');
+        await element(by.id(`${baseID}_modal_edit_remarks_input`)).replaceText('New remarks');
         await element(by.id(`${baseID}_modal_edit_remarks_input`)).tapReturnKey();
         
         //change to fully recovered
@@ -216,19 +226,15 @@ describe('Mobility Aid tests', () => {
         
         expectedItemCount -= 1;
 
-        //read in the flatlist
-        await waitFor(element(by.id(`${baseID}_flatlist`)))
-            .toBeVisible()
-            .withTimeout(3000);  
+       //read in the flatlist
+       await expect(element(by.id(`${baseID}_flatlist`))).toBeVisible()  
 
-        for (let i = 0; i < expectedItemCount; i++) {
-            await waitFor(element(by.id(regexPattern)).atIndex(i))
-                .toBeVisible()
-                .withTimeout(3000);
-        }
+       for (let i = 0; i < expectedItemCount; i++) {
+           await expect(element(by.id(regexPattern)).atIndex(i)).toBeVisible();
+       }
 
-        // Check for no additional items
-        await expect(element(by.id(regexPattern)).atIndex(expectedItemCount)).toBeNotVisible();
+       // Check for no additional items
+       await expect(element(by.id(regexPattern)).atIndex(expectedItemCount)).toBeNotVisible();
         
     });  
 

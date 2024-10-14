@@ -116,11 +116,6 @@ function AddPatientVitalModalNEW({
     if (!isInputErrors) {
       onSubmit(vitalFormData);
       onClose();
-
-      // if(!onSubmit(vitalFormData).ok){ //temp fix for onsubmit fail for 1-2m 
-      //   return;
-      // }
-      // onClose();
     }
   };
 

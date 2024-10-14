@@ -8,6 +8,7 @@ import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import AddPatientProgress from 'app/components/AddPatientProgress';
 
 function PatientAddGuardianScreen({nextQuestionHandler,
+  testID='',
   prevQuestionHandler,
   formData,
   handleFormData,
@@ -81,10 +82,12 @@ function PatientAddGuardianScreen({nextQuestionHandler,
         <AddPatientProgress value={60} />
       </Center>
       <SectionList
+        testID={testID}
         sections={[{ data: guardianInfoDisplay }]}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item, index }) => (
           <AddPatientGuardian
+            testID={testID}
             key={item}
             i={index}
             title={index + 1}
@@ -96,6 +99,7 @@ function PatientAddGuardianScreen({nextQuestionHandler,
         ListFooterComponent={() => (
           <View style={{ alignItems: 'center', justifyContent: 'center' }}>
             <AddPatientBottomButtons
+              testID={`${testID}_bottomBtns`}
               list={guardianInfoDisplay}
               nextQuestionHandler={() =>
                 nextQuestionHandler(formData, 'guardian', guardianInfoDisplay)

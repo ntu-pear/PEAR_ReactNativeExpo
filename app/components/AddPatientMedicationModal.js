@@ -208,7 +208,7 @@ function AddPatientMedicationModal({
           value={formData.instruction}
           onChangeText={handleMedicationData('instruction')}
           onEndEditing={setIsInstructionError}
-          autoCapitalize='none'
+          autoCapitalize="characters"
         />
         <InputField
           isRequired={true}
@@ -216,7 +216,7 @@ function AddPatientMedicationModal({
           value={formData.prescriptionRemarks}
           onChangeText={handleMedicationData('prescriptionRemarks')}
           onEndEditing={setIsPrescriptionRemarksError}
-          autoCapitalize='none'
+          autoCapitalize="characters"
         />
         <View style={styles.dateSelectionContainer}>
           <DateInputField

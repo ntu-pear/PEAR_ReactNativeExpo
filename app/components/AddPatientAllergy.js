@@ -18,7 +18,7 @@ import SelectionInputField from 'app/components/input-components/SelectionInputF
 import LoadingWheel from 'app/components/LoadingWheel';
 import InputField from './input-components/InputField';
 
-function AddPatientAllergy({ i, title, formData, handleFormData, onError }) {
+function AddPatientAllergy({ i, title, formData, handleFormData, onError, testID }) {
   const page = 'allergyInfo';
   const allergy = formData[page][i];
 
@@ -193,6 +193,7 @@ function AddPatientAllergy({ i, title, formData, handleFormData, onError }) {
           <View style={styles.titleContainer}>
             {title === 1 ? null : <Divider w="80%" mt={10} />}
             <Text
+              testID={`${testID}_title`}
               marginTop={6}
               bold
               fontSize="2xl"
@@ -203,6 +204,7 @@ function AddPatientAllergy({ i, title, formData, handleFormData, onError }) {
             </Text>
           </View>
           <SelectionInputField
+            testID={`${testID}_AllergyListID`}
             isRequired
             title={'Select Allergy'}
             placeholder={'Select Allergy'}
@@ -215,6 +217,7 @@ function AddPatientAllergy({ i, title, formData, handleFormData, onError }) {
           {allergy.AllergyListID > 2 ? (
             <>
               <SelectionInputField
+                testID={`${testID}_ReactionListID`}
                 isRequired={allergy.AllergyListID > 2 ? true : false}
                 title={'Select Reaction'}
                 placeholder={'Select Reaction'}
@@ -225,6 +228,7 @@ function AddPatientAllergy({ i, title, formData, handleFormData, onError }) {
               />
 
               <InputField
+                testID={`${testID}_AllergyRemarks`}
                 isRequired={allergy.AllergyListID > 2 ? true : false}
                 title={'Remarks'}
                 value={allergy.AllergyRemarks}

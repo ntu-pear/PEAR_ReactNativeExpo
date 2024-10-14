@@ -383,7 +383,7 @@ function PatientPrescriptionScreen(props) {
   return isLoading ? (
     <ActivityIndicator visible />
   ) : (
-    <View style={styles.container}>
+    <View testID={testID} style={styles.container}>
       <View style={{justifyContent: 'space-between'}}>            
             <View style={{alignSelf: 'center', marginTop: 15, maxHeight: 120}} >
               {!isEmptyObject(patientData) ? (
@@ -428,6 +428,7 @@ function PatientPrescriptionScreen(props) {
           </View>
           {displayMode == 'rows' ? (
             <FlatList
+            testID={`${testID}_flatlist`}
             onTouchStart={()=>Keyboard.dismiss()}
             onScrollBeginDrag={() => setIsScrolling(true)}
             onScrollEndDrag={() => setIsScrolling(false)}
@@ -446,12 +447,14 @@ function PatientPrescriptionScreen(props) {
                   onSwipeLeft={()=>handleEditPrescription(item.prescriptionID)}
                   underlay={<EditDeleteUnderlay/>}
                   item={
-                    <TouchableOpacity 
+                    <TouchableOpacity
+                      testID={`${testID}_${item.prescriptionID}_touchable`} 
                       style={styles.logContainer} 
                       activeOpacity={1} 
                       disabled={!isScrolling}
                     >
                       <PrescriptionItem
+                        testID={`${testID}_${item.prescriptionID}`}
                         date={item.date}
                         prescriptionListDesc={item.prescriptionListDesc}
                         dosage={item.dosage}
@@ -485,9 +488,14 @@ function PatientPrescriptionScreen(props) {
       </View>
     )}  
     <View style={styles.addBtn}>
-      <AddButton title="Add Prescription" onPress={handleOnClickAddPrescription}/>
+      <AddButton 
+        testID={`${testID}_addPrescription`} 
+        title="Add Prescription" 
+        onPress={handleOnClickAddPrescription}
+      />
       </View>
         <AddPatientPrescriptionModal
+          testID={`${testID}_modal_${modalMode === 'add' ? 'add' : 'edit'}`}
           showModal={isModalVisible}
           modalMode={modalMode}
           formData={formData}

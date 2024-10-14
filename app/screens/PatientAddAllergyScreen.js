@@ -8,6 +8,7 @@ import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import AddPatientProgress from 'app/components/AddPatientProgress';
 
 function PatientAddAllergyScreen({
+  testID,
   prevQuestionHandler,
   formData,
   handleFormData,
@@ -66,10 +67,12 @@ function PatientAddAllergyScreen({
         <AddPatientProgress value={100} />
       </Center>
       <SectionList
+        testID={testID}
         sections={[{ data: allergyInfoDisplay }]}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item, index }) => (
           <AddPatientAllergy
+            testID={testID}
             key={item}
             i={index}
             title={index + 1}
@@ -82,6 +85,7 @@ function PatientAddAllergyScreen({
         ListFooterComponent={() => (
           <View style={{ alignItems: 'center', justifyContent: 'center' }}>
             <AddPatientBottomButtons
+              testID={`${testID}_bottomBtns`}
               list={allergyInfoDisplay}
               prevQuestionHandler={() =>
                 prevQuestionHandler('allergy', allergyInfoDisplay)

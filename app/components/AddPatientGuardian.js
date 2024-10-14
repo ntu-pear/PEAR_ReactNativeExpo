@@ -22,7 +22,7 @@ import SensitiveInputField from './input-components/SensitiveInputField';
 import { parseSelectOptions } from 'app/utility/miscFunctions';
 import SelectionInputField from './input-components/SelectionInputField';
 
-function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
+function AddPatientGuardian({ i, title, formData, handleFormData, onError, testID }) {
   const page = 'guardianInfo';
   const guardian = formData[page][i];
 
@@ -251,6 +251,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
           <View style={styles.titleContainer}>
             {title == 1 ? null : <Divider w="80%" mt={10} />}
             <Text
+              testID={`${testID}_title`}
               marginTop={6}
               bold
               fontSize="2xl"
@@ -262,6 +263,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
           </View>
 
           <InputField
+            testID={`${testID}_FirstName`}
             isRequired
             title={'First Name'}
             value={guardian.FirstName}
@@ -271,6 +273,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
           />
 
           <InputField
+            testID={`${testID}_LastName`}
             isRequired
             title={'Last Name'}
             value={guardian.LastName}
@@ -280,6 +283,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
           />
 
           <SensitiveInputField
+            testID={`${testID}_NRIC`}
             isRequired
             title={'NRIC'}
             autoCapitalize="characters"
@@ -292,6 +296,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
 
           <View style={styles.dateSelectionContainer}>
             <DateInputField
+              testID={`${testID}_DOB`}
               isRequired
               selectionMode={'DOB'}
               hideDayOfWeek={true}
@@ -303,6 +308,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
           </View>
 
           <RadioButtonInput
+            testID={`${testID}_Gender`}
             isRequired
             title={'Gender'}
             value={guardian.Gender}
@@ -312,6 +318,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
           />
 
           <InputField
+            testID={`${testID}_Address`}
             isRequired
             title={'Address'}
             value={guardian.Address}
@@ -321,6 +328,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
           />
 
           <InputField
+            testID={`${testID}_PostalCode`}
             isRequired
             title={'Postal Code'}
             value={guardian.PostalCode}
@@ -332,6 +340,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
           />
 
           <InputField
+            testID={`${testID}_TempAddress`}
             title={'Temporary Address'}
             value={guardian.TempAddress}
             dataType="address"
@@ -340,6 +349,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
           />
 
           <InputField
+            testID={`${testID}_TempPostalCode`}
             isRequired={guardian.TempAddress.length > 0}
             title={'Temporary Postal Code'}
             value={guardian.TempPostalCode}
@@ -351,6 +361,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
           />
           
           <InputField
+            testID={`${testID}_ContactNo`}
             isRequired
             title={'Mobile No.'}
             value={guardian.ContactNo}
@@ -362,6 +373,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
           />
 
           <InputField
+            testID={`${testID}_PreferredName`}
             isRequired
             title={'Preferred Name'}
             value={guardian.PreferredName}
@@ -372,6 +384,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError }) {
 
           <SelectionInputField
             isRequired
+            testID={`${testID}_RelationshipID`}
             title={"Guardian is Patient's"}
             value={guardian.RelationshipID}
             placeholder={'Select Relationship'}

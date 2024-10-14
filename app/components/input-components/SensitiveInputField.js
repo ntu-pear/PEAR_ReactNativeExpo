@@ -54,7 +54,7 @@ function SensitiveInputField({
           InputRightElement={
             <Icon
               as={
-                <MaterialIcons name={show ? 'visibility' : 'visibility-off'} />
+                <MaterialIcons testID={`${testID}_mask`} name={show ? 'visibility' : 'visibility-off'} />
               }
               color={colors.black}
               mr="5"

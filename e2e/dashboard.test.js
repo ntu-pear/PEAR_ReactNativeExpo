@@ -111,10 +111,13 @@ describe('Dashboard tests', () => {
       await expect(element(by.id('searchFilter_filter_datetime_max_Activity Time'))).toBeVisible();
       await expect(element(by.id('searchFilter_filter_apply'))).toBeVisible();
       await expect(element(by.id('searchFilter_filter_reset'))).toBeVisible();
+
+      await element(by.id('searchFilter_filter_apply')).tap()
     });
   
-  
+    //to ensure this works, there has to be a schedule found, will have error if no schedules found in dashboard
     it('Dashboard: apply sort/filter (All Patients)', async () => {
+      await element(by.id('searchFilter_filter_icon')).tap();
       await element(by.id('searchFilter_filter_sort_Full Name')).tap();
       await element(by.id('searchFilter_filter_dropdown_Activity Type')).tap();
       await element(by.text('Sewing')).tap();

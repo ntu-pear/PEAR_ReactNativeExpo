@@ -3,8 +3,8 @@ describe('Patient Profile tests', () => {
       await device.launchApp();
     });  
 
-    //will be using patient Jeline Mao for this test, temporaily use for all easier(future can use different people which are pre-loaded)
-    const patientID =  5;
+    //will be using patient Detox to do automated testing
+    const patientID =  1019;
 
     it('Patient Profile: View Patient Profile : Information Card', async () => {
         // Login
@@ -33,11 +33,6 @@ describe('Patient Profile tests', () => {
         await element(by.id('Patients_Tab')).tap()
         await expect(element(by.id('patients'))).toBeVisible();
 
-        //see if can go to All Patients and click on that patient instead.
-        await expect(element(by.id('patients_searchFilter_tabBar'))).toBeVisible();
-        await expect(element(by.id('patients_searchFilter_tabBar_All Patients'))).toBeVisible()
-        await element(by.id('patients_searchFilter_tabBar_All Patients')).tap()
-
         //go to that patient profile
         await element(by.id(`patientprofile_${patientID}`)).tap();
 
@@ -45,27 +40,27 @@ describe('Patient Profile tests', () => {
         await expect(element(by.id("patient_profile_picture"))).toBeVisible();
 
         await expect(element(by.id("patient_preferred_name"))).toBeVisible();
-        await expect(element(by.id('patient_preferred_name'))).toHaveText('Jeline');
+        await expect(element(by.id('patient_preferred_name'))).toHaveText('DETOX');
 
         await expect(element(by.id("patient_gender"))).toBeVisible();
         await expect(element(by.id('patient_gender'))).toHaveText('FEMALE');
 
         await expect(element(by.id("patient_preferred_language"))).toBeVisible();
-        await expect(element(by.id('patient_preferred_language'))).toHaveText('Cantonese');
+        await expect(element(by.id('patient_preferred_language'))).toHaveText('Japanese');
 
         //check righthand side portion of the patient information card
 
         await expect(element(by.id("nric_label"))).toBeVisible();
-        await expect(element(by.id('nric_value'))).toHaveText('Sxxxx481J');
+        await expect(element(by.id('nric_value'))).toHaveText('Sxxxx620H');
     
         await expect(element(by.id("dob_label"))).toBeVisible();
-        await expect(element(by.id('dob_value'))).toHaveText('05-MAY-1980');
+        await expect(element(by.id('dob_value'))).toHaveText('01-SEP-1964');
     
         await expect(element(by.id("age_label"))).toBeVisible();
-        await expect(element(by.id('age_value'))).toHaveText('44');
+        await expect(element(by.id('age_value'))).toHaveText('60');
     
         await expect(element(by.id("mobile_number_label"))).toBeVisible();
-        await expect(element(by.id('mobile_number_value'))).toHaveText('92222816');
+        await expect(element(by.id('mobile_number_value'))).toHaveText('-');
 
     });
 

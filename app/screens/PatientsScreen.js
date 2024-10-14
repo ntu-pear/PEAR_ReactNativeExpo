@@ -380,6 +380,7 @@ function PatientsScreen({ navigation }) {
           />
           <View style={{height:'85%'}}>
             <FlatList
+              testID="patients_flatlist"
               ref={patientListRef}
               marginBottom={'20'}
               onRefresh={refreshPatientData}

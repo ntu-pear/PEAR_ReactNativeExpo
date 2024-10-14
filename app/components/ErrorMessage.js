@@ -10,7 +10,7 @@ function ErrorMessage({ message, visible = true, testID = '' }) {
   }
 
   return (
-    <FormControl isInvalid>
+    <FormControl testID={testID} isInvalid>
       <FormControl.ErrorMessage
         leftIcon={message ? (
           <MaterialIcons name="warning" color={colors.red} size={17} />
