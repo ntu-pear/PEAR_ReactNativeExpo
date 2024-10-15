@@ -16,7 +16,7 @@ describe('Mobility Aid tests', () => {
 
     const mobilityAids  = ['Cane', 'Crutches', 'Walkers', 'Gait trainers', 'Scooter', 'Wheelchairs',]
 
-    it('Mobility Aid: View Mobility Aid', async () => {
+    it('Mobility Aid: View Mobility Aid Screen', async () => {
         // Login
         await expect(element(by.id('loginContentContainer'))).toBeVisible();
         await expect(element(by.id('username_input'))).toBeVisible();
@@ -64,7 +64,7 @@ describe('Mobility Aid tests', () => {
 
     });
 
-    it('Allergy: Add Mobility Aid - Submit button disabled without input', async () => {
+    it('Mobility Aid: Add Mobility Aid - Submit button disabled without input', async () => {
         
         await element(by.id(`${baseID}_addMobilityAid`)).tap();
         await expect(element(by.id(`${baseID}_modal_add`))).toBeVisible();
