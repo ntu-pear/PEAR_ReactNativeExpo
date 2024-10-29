@@ -2,75 +2,78 @@
 module.exports = {
   testRunner: {
     args: {
-      '$0': 'jest',
-      config: 'e2e/jest.config.js'
+      $0: 'jest',
+      config: 'e2e/jest.config.js',
     },
     jest: {
-      setupTimeout: 180000
-    }
+      setupTimeout: 180000,
+    },
   },
   logLevel: 'info',
   apps: {
     'ios.debug': {
       type: 'ios.app',
       binaryPath: 'ios/build/Build/Products/Debug-iphonesimulator/YOUR_APP.app',
-      build: 'xcodebuild -workspace ios/YOUR_APP.xcworkspace -scheme YOUR_APP -configuration Debug -sdk iphonesimulator -derivedDataPath ios/build'
+      build:
+        'xcodebuild -workspace ios/YOUR_APP.xcworkspace -scheme YOUR_APP -configuration Debug -sdk iphonesimulator -derivedDataPath ios/build',
     },
     'ios.release': {
       type: 'ios.app',
-      binaryPath: 'ios/build/Build/Products/Release-iphonesimulator/YOUR_APP.app',
-      build: 'xcodebuild -workspace ios/YOUR_APP.xcworkspace -scheme YOUR_APP -configuration Release -sdk iphonesimulator -derivedDataPath ios/build'
+      binaryPath:
+        'ios/build/Build/Products/Release-iphonesimulator/YOUR_APP.app',
+      build:
+        'xcodebuild -workspace ios/YOUR_APP.xcworkspace -scheme YOUR_APP -configuration Release -sdk iphonesimulator -derivedDataPath ios/build',
     },
     'android.debug': {
       type: 'android.apk',
       binaryPath: 'android/app/build/outputs/apk/debug/app-debug.apk',
-      build: 'cd android && gradlew assembleDebug assembleAndroidTest -DtestBuildType=debug',
-      reversePorts: [
-        8081
-      ]
+      build:
+        'cd android && ./gradlew assembleDebug assembleAndroidTest -DtestBuildType=debug',
+      reversePorts: [8081],
     },
     'android.release': {
       type: 'android.apk',
       binaryPath: 'android/app/build/outputs/apk/release/app-release.apk',
-      build: 'cd android && gradlew assembleRelease assembleAndroidTest -DtestBuildType=release'
-    }
+      build:
+        'cd android && ./gradlew assembleRelease assembleAndroidTest -DtestBuildType=release',
+    },
   },
   devices: {
     simulator: {
       type: 'ios.simulator',
       device: {
-        type: 'iPhone 12'
-      }
+        type: 'iPhone 12',
+      },
     },
     attached: {
       type: 'android.attached',
       device: {
-        adbName: 'SM_G960F'
-      }
+        adbName: 'SM_G960F',
+      },
     },
     emulator: {
       type: 'android.emulator',
       device: {
-        avdName: 'FYP_-_Test_Tablet'
-      }
-    }
+        avdName: 'FYP_-_Test_Tablet',
+      },
+    },
   },
   configurations: {
     'ios.sim.debug': {
       device: 'simulator',
-      app: 'ios.debug'
+      app: 'ios.debug',
     },
     'ios.sim.release': {
       device: 'simulator',
-      app: 'ios.release'
+      app: 'ios.release',
     },
     'android.att.debug': {
       device: 'attached',
-      app: 'android.debug'
+      app: 'android.debug',
     },
     'android.att.release': {
       device: 'attached',
-      app: 'android.release'
+      app: 'android.release',
     },
     'android.emu.debug': {
       device: 'emulator',
@@ -78,7 +81,7 @@ module.exports = {
     },
     'android.emu.release': {
       device: 'emulator',
-      app: 'android.release'
+      app: 'android.release',
     },
   },
 };
