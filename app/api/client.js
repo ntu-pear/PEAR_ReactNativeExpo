@@ -2,7 +2,7 @@ import { create } from 'apisauce';
 import authStorage from 'app/auth/authStorage';
 import cache from 'app/utility/cache';
 
-const baseURL = 'http://172.21.148.179:5678/api'; // new NTU server - changes to new api
+const baseURL = 'http://172.21.148.180:5678/api'; // new NTU server - changes to new api
 // const baseURL = 'https://coremvc.fyp2017.com/api'; // old server
 
 const endpoint = '/User';

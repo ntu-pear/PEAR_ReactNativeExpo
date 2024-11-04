@@ -1,13 +1,24 @@
 // Libs
 import React, { useState, useCallback } from 'react';
-import { Alert, StyleSheet, View, FlatList, TouchableOpacity, Keyboard } from 'react-native';
+import {
+  Alert,
+  StyleSheet,
+  View,
+  FlatList,
+  TouchableOpacity,
+  Keyboard,
+} from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 // API
 import patientApi from 'app/api/patient';
 
 // Utilities
-import { isEmptyObject, noDataMessage , sortFilterInitialState} from 'app/utility/miscFunctions';
+import {
+  isEmptyObject,
+  noDataMessage,
+  sortFilterInitialState,
+} from 'app/utility/miscFunctions';
 
 // Navigation
 import routes from 'app/navigation/routes';
@@ -28,10 +39,10 @@ import LoadingWheel from 'app/components/LoadingWheel';
 import DynamicTable from 'app/components/DynamicTable';
 import Swipeable from 'app/components/swipeable-components/Swipeable';
 import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
-import PatientAllergyItem from 'app/components/PatientAllergyItem'; 
+import PatientAllergyItem from 'app/components/PatientAllergyItem';
 
 function PatientAllergyScreen(props) {
-  let {patientID, patientId} = props.route.params;
+  let { patientID, patientId } = props.route.params;
   if (patientId) {
     patientID = patientId;
   }
@@ -42,21 +53,21 @@ function PatientAllergyScreen(props) {
   // Options for user to search by
   const SEARCH_OPTIONS = ['Allergy'];
 
-  // Display mode options  
+  // Display mode options
   const [displayMode, setDisplayMode] = useState('rows');
   const DISPLAY_MODES = ['rows', 'table'];
 
-  // Sort options 
+  // Sort options
   const SORT_OPTIONS = ['Date'];
 
   // Filter options
   const FILTER_OPTIONS = ['Date'];
-  
+
   // Mapping between sort/filter/search names and the respective field in the patient data retrieved from the backend
   const FIELD_MAPPING = {
-    'Allergy': 'allergyListDesc',
-    'Reaction': 'allergyReaction',
-    'Date': 'createdDate',
+    Allergy: 'allergyListDesc',
+    Reaction: 'allergyReaction',
+    Date: 'createdDate',
   };
 
   // Search, sort, and filter related states
@@ -76,10 +87,10 @@ function PatientAllergyScreen(props) {
   //            since some filters like patient status may be used to make an API call instead of normal filtering
   // --------------------------
   const [filterOptionDetails, setFilterOptionDetails] = useState({
-    'Date': {
-      'type': 'date',
-      'options': {'min': {}, 'max': {}},
-      'isFilter': true,
+    Date: {
+      type: 'date',
+      options: { min: {}, max: {} },
+      isFilter: true,
     },
   });
 
@@ -103,11 +114,11 @@ function PatientAllergyScreen(props) {
   const [originalAllergyData, setOriginalAllergyData] = useState([]);
   const [allergyData, setAllergyData] = useState([]);
   const [allergyFormData, setAllergyFormData] = useState({
-    "allergyID": null,
-    "allergyListID": 1,
-    "allergyListDesc": "",
-    "allergyReaction" : "",
-    "allergyRemarks": "",
+    allergyID: null,
+    allergyListID: 1,
+    allergyListDesc: '',
+    allergyReaction: '',
+    allergyRemarks: '',
   });
 
   useFocusEffect(
@@ -116,7 +127,7 @@ function PatientAllergyScreen(props) {
         refreshAllergyData();
         setIsReloadPatientList(false);
       }
-    }, [isReloadPatientList])
+    }, [isReloadPatientList]),
   );
 
   const refreshAllergyData = () => {
@@ -152,16 +163,16 @@ function PatientAllergyScreen(props) {
     if (patientID) {
       const response = await patientApi.getPatientAllergy(patientID);
       if (response.ok) {
-        console.log(response.data.data)
-        setOriginalAllergyData([...response.data.data]);    
+        console.log(response.data.data);
+        setOriginalAllergyData([...response.data.data]);
         setAllergyData(parseAllergyData([...response.data.data]));
         // Extract existing allergy IDs
         const allergyIDs = response.data.data.map(
-        (allergy) => allergy.allergyListID
+          (allergy) => allergy.allergyListID,
         );
-        setPatientAllergyIDs(allergyIDs);    
+        setPatientAllergyIDs(allergyIDs);
         setIsDataInitialized(true);
-        setIsLoading(false);  
+        setIsLoading(false);
         setIsError(false);
         setIsRetry(false);
         setStatusCode(response.status);
@@ -169,7 +180,7 @@ function PatientAllergyScreen(props) {
         console.log('Request failed with status code: ', response.status);
         setOriginalAllergyData([]);
         setAllergyData([]);
-        setPatientAllergyIDs([]);  // Reset allergy IDs
+        setPatientAllergyIDs([]); // Reset allergy IDs
         setIsLoading(false);
         setIsError(true);
         setStatusCode(response.status);
@@ -180,15 +191,16 @@ function PatientAllergyScreen(props) {
 
   // Parse data
   const parseAllergyData = (tempData) => {
-    return tempData.map(item=>({ // for add/edit form
-      "allergyID": item.allergyID,
-      "allergyListID": item.allergyListID,
-      "allergyRemarks": item.allergyRemarks,
-      "allergyListDesc": item.allergyListDesc,
-      "allergyReaction": item.allergyReaction,
-      "createdDate": item.createdDate,
-    }))
-  }
+    return tempData.map((item) => ({
+      // for add/edit form
+      allergyID: item.allergyID,
+      allergyListID: item.allergyListID,
+      allergyRemarks: item.allergyRemarks,
+      allergyListDesc: item.allergyListDesc,
+      allergyReaction: item.allergyReaction,
+      createdDate: item.createdDate,
+    }));
+  };
 
   const handleAddAllergy = () => {
     setIsModalVisible(true);
@@ -212,9 +224,9 @@ function PatientAllergyScreen(props) {
       const errors = result.data?.message;
 
       result.data
-      ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-      : (alertDetails = 'Please try again.');
-      
+        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
+        : (alertDetails = 'Please try again.');
+
       alertTitle = 'Error adding allergy';
     }
 
@@ -223,28 +235,31 @@ function PatientAllergyScreen(props) {
 
   // Ask user to confirm deletion of allergy
   const handleDeleteAllergy = (allergyID) => {
-    const tempData = allergyData.filter(x=>x.allergyID == allergyID)[0];
+    const tempData = allergyData.filter((x) => x.allergyID == allergyID)[0];
 
-    Alert.alert('Are you sure you wish to delete this item?', 
-    `Date: ${formatDateTime(new Date(tempData.createdDate), true)}\n` +
-    `Time: ${formatDateTime(new Date(tempData.createdDate), false)}\n` +
-    `Allergic To: ${tempData.allergyListDesc}\n` +
-    `Reaction: ${tempData.allergyReaction}\n` +
-    `Notes: ${tempData.allergyRemarks}\n` , [
-      {
-        text: 'Cancel',
-        onPress: ()=>{},
-        style: 'cancel',
-      },
-      {text: 'OK', onPress: ()=>deleteAllergy(allergyID)},
-    ]);
-  }
+    Alert.alert(
+      'Are you sure you wish to delete this item?',
+      `Date: ${formatDateTime(new Date(tempData.createdDate), true)}\n` +
+        `Time: ${formatDateTime(new Date(tempData.createdDate), false)}\n` +
+        `Allergic To: ${tempData.allergyListDesc}\n` +
+        `Reaction: ${tempData.allergyReaction}\n` +
+        `Notes: ${tempData.allergyRemarks}\n`,
+      [
+        {
+          text: 'Cancel',
+          onPress: () => {},
+          style: 'cancel',
+        },
+        { text: 'OK', onPress: () => deleteAllergy(allergyID) },
+      ],
+    );
+  };
 
   // Delete allergy
   const deleteAllergy = async (allergyID) => {
     setIsLoading(true);
 
-    let tempData = {allergyID: allergyID};
+    let tempData = { allergyID: allergyID };
 
     let alertTitle = '';
     let alertDetails = '';
@@ -253,50 +268,51 @@ function PatientAllergyScreen(props) {
     if (result.ok) {
       refreshAllergyData();
       setIsModalVisible(false);
-      
+
       alertTitle = 'Successfully deleted allergy';
     } else {
       const errors = result.data?.message;
-      console.log("Error deleting allergy", result)
+      console.log('Error deleting allergy', result);
 
       result.data
-      ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-      : (alertDetails = 'Please try again.');
-      
+        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
+        : (alertDetails = 'Please try again.');
+
       alertTitle = 'Error deleting allergy';
     }
-    
+
     Alert.alert(alertTitle, alertDetails);
-  }
+  };
 
   const onClickProfile = () => {
     navigation.navigate(routes.PATIENT_PROFILE, { id: patientID });
   };
 
   const getTableRowData = () => {
-    return allergyData.map(({ patientID, allergyID, allergyListID, allergyReactionListID, ...item }) => {
+    return allergyData.map(
+      ({
+        patientID,
+        allergyID,
+        allergyListID,
+        allergyReactionListID,
+        ...item
+      }) => {
+        // Convert the rest of the item properties and handle the date separately
+        let rowData = [
+          formatDateTime(new Date(item.createdDate), true),
+          formatDateTime(new Date(item.createdDate), false),
+          item.allergyListDesc,
+          item.allergyReaction,
+          item.allergyRemarks,
+        ];
 
-      // Convert the rest of the item properties and handle the date separately
-      let rowData = [
-        formatDateTime(new Date(item.createdDate), true),
-        formatDateTime(new Date(item.createdDate), false),
-        item.allergyListDesc,
-        item.allergyReaction,
-        item.allergyRemarks, 
-      ];
-
-      return rowData;
-    });
+        return rowData;
+      },
+    );
   };
 
   const getTableHeaderData = () => {
-    return [
-      'Date',
-      'Time',
-      'Allergic To',
-      'Reaction',
-      'Notes',
-    ];
+    return ['Date', 'Time', 'Allergic To', 'Reaction', 'Notes'];
   };
 
   return isLoading ? (
@@ -307,7 +323,7 @@ function PatientAllergyScreen(props) {
         <View style={{ alignSelf: 'center', marginTop: 15, maxHeight: 120 }}>
           {!isEmptyObject(patientData) ? (
             <ProfileNameButton
-              testID={`${testID}_profileNameButton`}   
+              testID={`${testID}_profileNameButton`}
               profilePicture={patientData.profilePicture}
               profileLineOne={patientData.preferredName}
               profileLineTwo={
@@ -323,87 +339,102 @@ function PatientAllergyScreen(props) {
           )}
         </View>
         <View>
-              <SearchFilterBar
-                originalList={originalAllergyData}
-                setList={setAllergyData}
-                SEARCH_OPTIONS={SEARCH_OPTIONS}
-                FIELD_MAPPING={FIELD_MAPPING}
-                SORT_OPTIONS={SORT_OPTIONS}
-                FILTER_OPTIONS={FILTER_OPTIONS}
-                filterOptionDetails={filterOptionDetails}
-                datetime={datetime}
-                setDatetime={setDatetime}
-                sort={sort}
-                setSort={setSort}
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                initializeData={isDataInitialized}
-                onInitialize={()=>setIsDataInitialized(false)}
-                itemType='allergy'
-                itemCount={allergyData.length}
-                displayMode={displayMode}
-                setDisplayMode={setDisplayMode}
-                DISPLAY_MODES={DISPLAY_MODES}
-                /> 
-            </View>
+          <SearchFilterBar
+            originalList={originalAllergyData}
+            setList={setAllergyData}
+            SEARCH_OPTIONS={SEARCH_OPTIONS}
+            FIELD_MAPPING={FIELD_MAPPING}
+            SORT_OPTIONS={SORT_OPTIONS}
+            FILTER_OPTIONS={FILTER_OPTIONS}
+            filterOptionDetails={filterOptionDetails}
+            datetime={datetime}
+            setDatetime={setDatetime}
+            sort={sort}
+            setSort={setSort}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            initializeData={isDataInitialized}
+            onInitialize={() => setIsDataInitialized(false)}
+            itemType="allergy"
+            itemCount={allergyData.length}
+            displayMode={displayMode}
+            setDisplayMode={setDisplayMode}
+            DISPLAY_MODES={DISPLAY_MODES}
+          />
+        </View>
       </View>
       {displayMode == 'rows' ? (
-            <FlatList
-            testID={`${testID}_flatlist`}
-            onTouchStart={()=>Keyboard.dismiss()}
-            onScrollBeginDrag={() => setIsScrolling(true)}
-            onScrollEndDrag={() => setIsScrolling(false)}
-            onRefresh={refreshAllergyData}
-            refreshing={isLoading}
-            height={'72%'}
-            ListEmptyComponent={()=>noDataMessage(statusCode, isLoading, isError, 'No allergies found', true)}
-            data={allergyData}
-            keyboardShouldPersistTaps='handled'
-            keyExtractor={item => (item.allergyID)}
-            renderItem={({ item }) => { 
-              return(
-                <Swipeable
-                  setIsScrolling={setIsScrolling}
-                  onSwipeRight={()=>handleDeleteAllergy(item.allergyID)}
-                  underlay={<EditDeleteUnderlay/>}
-                  item={
-                    <TouchableOpacity
-                      testID={`${testID}_${item.allergyID}_touchable`}
-                      style={styles.logContainer} 
-                      activeOpacity={1} 
-                      disabled={!isScrolling}
-                    >
-                      <PatientAllergyItem
-                        testID={`${testID}_${item.allergyID}`}
-                        createdDate={item.createdDate}
-                        allergyListDesc={item.allergyListDesc}
-                        allergyReaction={item.allergyReaction}
-                        allergyRemarks={item.allergyRemarks}
-                        onDelete={()=>handleDeleteAllergy(item.allergyID)}
-                        />
-                    </TouchableOpacity>
-                  }
-                />
-              )           
-            }}
-            />
-          ) : (
-      <View style={{ height: '72%', marginBottom: 20, marginHorizontal: 40 }}>
-        <DynamicTable
-          headerData={getTableHeaderData()}
-          rowData={getTableRowData()}
-          widthData={[125, 100, 110, 175, 200]}
-          screenName={'patient allergy'}
-          noDataMessage={noDataMessage(statusCode, isLoading, isError, 'No allergies found', false)}
-          del={true}
+        <FlatList
+          testID={`${testID}_flatlist`}
+          onTouchStart={() => Keyboard.dismiss()}
+          onScrollBeginDrag={() => setIsScrolling(true)}
+          onScrollEndDrag={() => setIsScrolling(false)}
+          onRefresh={refreshAllergyData}
+          refreshing={isLoading}
+          height={'72%'}
+          ListEmptyComponent={() =>
+            noDataMessage(
+              statusCode,
+              isLoading,
+              isError,
+              'No allergies found',
+              true,
+            )
+          }
+          data={allergyData}
+          keyboardShouldPersistTaps="handled"
+          keyExtractor={(item) => item.allergyID}
+          renderItem={({ item }) => {
+            return (
+              <Swipeable
+                setIsScrolling={setIsScrolling}
+                onSwipeRight={() => handleDeleteAllergy(item.allergyID)}
+                underlay={<EditDeleteUnderlay />}
+                item={
+                  <TouchableOpacity
+                    testID={`${testID}_${item.allergyID}_touchable`}
+                    style={styles.logContainer}
+                    activeOpacity={1}
+                    disabled={!isScrolling}
+                  >
+                    <PatientAllergyItem
+                      testID={`${testID}_${item.allergyID}`}
+                      createdDate={item.createdDate}
+                      allergyListDesc={item.allergyListDesc}
+                      allergyReaction={item.allergyReaction}
+                      allergyRemarks={item.allergyRemarks}
+                      onDelete={() => handleDeleteAllergy(item.allergyID)}
+                    />
+                  </TouchableOpacity>
+                }
+              />
+            );
+          }}
         />
-      </View>
+      ) : (
+        <View style={{ height: '72%', marginBottom: 20, marginHorizontal: 40 }}>
+          <DynamicTable
+            headerData={getTableHeaderData()}
+            rowData={getTableRowData()}
+            widthData={[125, 100, 110, 175, 200]}
+            screenName={'patient allergy'}
+            noDataMessage={noDataMessage(
+              statusCode,
+              isLoading,
+              isError,
+              'No allergies found',
+              false,
+            )}
+            del={true}
+          />
+        </View>
       )}
       <View style={styles.addBtn}>
         <AddButton
-          testID={`${testID}_addAllergy`} 
-          title="Add Allergy" 
-          onPress={handleAddAllergy} />
+          testID={`${testID}_addAllergy`}
+          title="Add Allergy"
+          onPress={handleAddAllergy}
+        />
       </View>
       <AddPatientAllergyModal
         testID={`${testID}_modal_${modalMode === 'add' ? 'add' : 'edit'}`}
