@@ -99,6 +99,13 @@ function PatientPhotoAlbum(props) {
   // isFilter - whether the filter is actually to be used for filtering,
   //            since some filters like patient status may be used to make an API call instead of normal filtering
   // --------------------------
+  const [filterOptionDetails, setFilterOptionDetails] = useState({
+    Date: {
+      type: 'date',
+      options: { min: {}, max: {} },
+      isFilter: true,
+    },
+  });
 
   // API call related states
   const [isLoading, setIsLoading] = useState(false);
@@ -121,7 +128,9 @@ function PatientPhotoAlbum(props) {
     albumCategoryListID: 1,
     patientPhotoID: null,
   });
-  const [patientAlbumIDs, setPatientAlbumIDs] = useState([]);
+
+  // const [patientAlbumIDs, setPatientAlbumIDs] = useState([]);
+  const [patientPhotoIDs, setPatientPhotoIDs] = useState([]);
 
   // //MODIFIED
   // const [photoItems, setPhotoItems] = useState([]);
@@ -143,56 +152,73 @@ function PatientPhotoAlbum(props) {
     }, [isReloadList]),
   );
 
+  // useEffect(() => {
+  //   console.log("Updated photoData:", photoData);
+  // }, [photoData]);
 
-  useEffect(() => {
-    console.log("Updated photoData:", photoData);
-  }, [photoData]);
-  
-  // // Set isLoading to true when retrieving data
-  // const refreshLogData = () => {
-  //   setIsLoading(true);
-  //   const promiseFunction = async () => {
-  //     await getLogData();
-  //     await getPatientData();
-  //   };
-  //   promiseFunction();
-  // }
+  //////////////////////////////////////////////////////////////
+  //MODIFIED FOR PHOTO
+  // Get patient photo from backend
+  const [patientPhoto, setPatientPhoto] = useState(null);
 
-  // // Get problem log data from backend
-  // const getLogData = async () => {
-  //   if (patientID) {
-  //     const response = await patientApi.getPatientProblemLog(patientID);
-  //     if (response.ok) {
-  //       console.log(response.data.data)
-  //       setOriginalData([...response.data.data]);
-  //       setData(parseLogData([...response.data.data]));
-  //       setIsDataInitialized(true);
-  //       setIsLoading(false);
-  //       setIsError(false);
-  //       setIsRetry(false);
-  //       setStatusCode(response.status);
-  //     } else {
-  //       console.log('Request failed with status code: ', response.status);
-  //       setOriginalData([]);
-  //       setData([]);
-  //       setIsLoading(false);
-  //       setIsError(true);
-  //       setStatusCode(response.status);
-  //       setIsRetry(true);
-  //     }
-  //   }
-  // };
+  // Set isLoading to true when retrieving data
+  const refreshPhotoData = () => {
+    setIsLoading(true);
+    const promiseFunction = async () => {
+      await getPhotoData();
+      await getPatientData();
+    };
+    promiseFunction();
+  };
 
-  // // Parse data
-  // const parseLogData = (tempData) => {
-  //   return tempData.map(item=>({ // for add/edit form
-  //     "problemLogID": item.problemLogID,
-  //     "problemLogRemarks": item.problemLogRemarks,
-  //     "authorName": item.authorName,
-  //     "problemLogListDesc": item.problemLogListDesc,
-  //     "createdDateTime": item.createdDateTime,
-  //   }))
-  // }
+  // Get photo data from backend
+  const getPhotoData = async () => {
+    if (patientID) {
+      const response = await patientApi.getPatientPhoto(patientID);
+      if (response.ok) {
+        console.log(response.data.data);
+        // setPatientPhoto(response.data.data); // Store photo data separately
+        // setOriginalData([...response.data.data]);
+        setPhotoData(parsePhotoData([...response.data.data]));
+        // Extract existing photo IDs
+        const photoIDs = response.data.data.map(
+          (photo) => photo.patientPhotoID,
+        );
+        setPatientPhotoIDs(photoIDs); //testing
+        setIsDataInitialized(true);
+        setIsLoading(false);
+        setIsError(false);
+        setIsRetry(false);
+        setStatusCode(response.status);
+      } else {
+        console.log('Request failed with status code: ', response.status);
+        setOriginalData([]);
+        setPhotoData([]);
+        // setPatientPhoto(null); // Reset photo data in case of an error
+        setPatientPhotoIDs([]); // testing
+        setIsLoading(false);
+        setIsError(true);
+        setStatusCode(response.status);
+        setIsRetry(true);
+      }
+    }
+  };
+
+  // Parse photo album data
+  const parsePhotoData = (tempData) => {
+    return tempData.map((item) => ({
+      patientPhotoID: item.patientPhotoID.toString(),
+      photoPath: item.photoPath || null, // Handle null values
+      albumCategoryName: item.albumCategoryName,
+      albumCategoryListID: item.albumCategoryListID,
+      // startDate: item.holidayExperience
+      //   ? item.holidayExperience.startDate
+      //   : null,
+      photoDetails: item.photoDetails || null,
+    }));
+  };
+
+  //////////////////////////////////////////////////////////////
 
   // Get patient data from backend
   const getPatientData = async () => {
@@ -214,126 +240,26 @@ function PatientPhotoAlbum(props) {
     }
   };
 
-  //////////////////////////////////////////////////////////////
-  //MODIFIED FOR PHOTO
-  // Get patient photo from backend
-  const [patientPhoto, setPatientPhoto] = useState(null);
-
-  const getPhotoData = async () => {
-    if (patientID) {
-      const response = await patientApi.getPatientPhoto(patientID);
-      // console.log(response.data.data);
-      if (response.ok) {
-        // setPatientPhoto(response.data.data); // Store photo data separately
-        // setOriginalData([...response.data.data]);
-        setPhotoData(parsePhotoData([...response.data.data]));
-        // Extract existing album photo IDs
-        const albumIDs = response.data.data.map(
-          (album) => album.albumCategoryListID,
-        );
-        setPatientAlbumIDs(albumIDs);
-        setIsDataInitialized(true);
-        setIsLoading(false);
-        setIsError(false);
-        setIsRetry(false);
-        setStatusCode(response.status);
-      } else {
-        console.log('Request failed with status code: ', response.status);
-        setOriginalData([]);
-        setPhotoData([]);
-        // setPatientPhoto(null); // Reset photo data in case of an error
-        setIsLoading(false);
-        setIsError(true);
-        setStatusCode(response.status);
-        setIsRetry(true);
-      }
-    }
-  };
-
-  // const photoItems = response.data.map((item) => ({
-  //   id: item.patientPhotoID,
-  //   imageUri: item.photoPath || null, // Handle null values
-  //   labelText: item.albumCategoryName,
-  //   date: item.holidayExperience ? item.holidayExperience.startDate : null, // Or any other relevant date field
-  //   details: item.photoDetails || null,
-  //   isActive: true // or any other logic for active status if needed
-  // }));
-  const [filterOptionDetails, setFilterOptionDetails] = useState({
-    Date: {
-      type: 'date',
-      options: { min: {}, max: {} },
-      isFilter: true,
-    },
-  });
-
-  // Parse photo album data
-  const parsePhotoData = (tempData) => {
-    return tempData.map((item) => ({
-      patientPhotoID: item.patientPhotoID.toString(),
-      photoPath: item.photoPath || null, // Handle null values
-      albumCategoryName: item.albumCategoryName,
-      albumCategoryListID: item.albumCategoryListID,
-      // startDate: item.holidayExperience
-      //   ? item.holidayExperience.startDate
-      //   : null,
-      photoDetails: item.photoDetails || null,
-    }));
-  };
-
-  // Set isLoading to true when retrieving data
-  const refreshPhotoData = () => {
-    setIsLoading(true);
-    const promiseFunction = async () => {
-      await getPhotoData();
-      await getPatientData();
-    };
-    promiseFunction();
-  };
-
-  // // Set isLoading to true when retrieving data
-  // const refreshPhotoData = async () => {
-  //   setIsLoading(true);
-  //   try {
-  //     await Promise.all([getPhotoData(), getPatientData()]);
-  //     // Successfully fetched data, so reset error states if needed
-  //     setIsError(false);
-  //     setIsRetry(false);
-  //   } catch (error) {
-  //     console.error('Data fetch failed:', error);
-  //     setIsError(true);
-  //     setIsRetry(true);
-  //     setPhotoData([]); // Clear photo data in case of an error
-  //   } finally {
-  //     setIsLoading(false); // Stop loading after async calls complete
-  //   }
-  // };
-
-  //////////////////////////////////////////////////////////////
-
   // Show form to add problem log when add button is clicked
   const handleOnClickAddLog = () => {
     setIsModalVisible(true);
     setModalMode('add');
   };
 
-  // Submit data to add problem log
-  const handleModalSubmitAdd = async (tempLogFormData) => {
+  // Submit data to add photo
+  const handleModalSubmitAdd = async (tempPhotoData) => {
     setIsLoading(true);
 
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.addPatientProblemLog(
-      patientID,
-      userID,
-      tempLogFormData,
-    );
+    const result = await patientApi.addPatientPhoto(patientID, tempPhotoData);
     if (result.ok) {
-      console.log('submitting problem log data', tempLogFormData);
-      refreshLogData();
+      console.log('submitting problem log data', tempPhotoData);
+      refreshPhotoData();
       setIsModalVisible(false);
 
-      alertTitle = 'Successfully added problem log';
+      alertTitle = 'Successfully added photo';
     } else {
       const errors = result.data?.message;
 
@@ -343,28 +269,30 @@ function PatientPhotoAlbum(props) {
         ? (alertDetails = `\n${errors}\n\nPlease try again.`)
         : (alertDetails = 'Please try again.');
 
-      alertTitle = 'Error adding problem log';
+      alertTitle = 'Error adding photo';
     }
 
     Alert.alert(alertTitle, alertDetails);
   };
 
-  // Edit problem log
-  const handleEditLog = (logID) => {
+  // Edit photo
+  const handleEditLog = (photoID) => {
     setIsModalVisible(true);
     setModalMode('edit');
 
-    const tempLogData = data.filter((x) => x.problemLogID == logID)[0];
+    const tempPhotoData = photoData.filter(
+      (x) => x.patientPhotoID == photoID,
+    )[0];
 
     setFormData({
-      problemLogID: tempLogData.problemLogID,
-      problemLogListID: tempLogData.problemLogListID,
-      problemLogListDesc: tempLogData.problemLogListDesc,
-      problemLogRemarks: tempLogData.problemLogRemarks,
+      photoDetails: tempPhotoData.photoDetails,
+      albumCategoryName: tempPhotoData.albumCategoryName,
+      albumCategoryListID: tempPhotoData.albumCategoryListID,
+      patientPhotoID: tempPhotoData.patientPhotoID,
     });
   };
 
-  // Submit data to edit problem log
+  // Submit data to edit photo
   const handleModalSubmitEdit = async () => {
     setIsLoading(true);
 
@@ -373,75 +301,69 @@ function PatientPhotoAlbum(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.updateProblemLog(
-      patientID,
-      userID,
-      tempFormData,
-    );
+    const result = await patientApi.updatePatientPhoto(patientID, tempFormData);
     if (result.ok) {
-      refreshLogData();
+      refreshPhotoData();
       setIsModalVisible(false);
 
-      alertTitle = 'Successfully edited problem log';
+      alertTitle = 'Successfully edited photo';
     } else {
       const errors = result.data?.message;
-      console.log('Error editing problem log');
+      console.log('Error editing photo');
 
       result.data
         ? (alertDetails = `\n${errors}\n\nPlease try again.`)
         : (alertDetails = 'Please try again.');
 
-      alertTitle = 'Error editing log data';
+      alertTitle = 'Error editing photo';
     }
 
     Alert.alert(alertTitle, alertDetails);
   };
 
   // Ask user to confirm deletion of problem log
-  const handleDeleteLog = (logID) => {
-    const tempData = data.filter((x) => x.problemLogID == logID)[0];
+  const handleDeletePhoto = (photoID) => {
+    const tempData = photoData.filter((x) => x.patientPhotoID == photoID)[0];
 
     Alert.alert(
       'Are you sure you wish to delete this item?',
-      `Author: ${tempData.authorName}\n` +
-        `Description: ${tempData.problemLogListDesc}\n` +
-        `Remarks: ${tempData.problemLogRemarks}\n` +
-        `Created: ${formatDate(new Date(tempData.createdDateTime), true)}`,
+      `Album Name: ${tempData.albumCategoryName}\n` +
+        `Description: ${tempData.photoDetails}\n`,
       [
         {
           text: 'Cancel',
           onPress: () => {},
           style: 'cancel',
         },
-        { text: 'OK', onPress: () => deleteLog(logID) },
+        { text: 'OK', onPress: () => deletePhoto(photoID) },
       ],
     );
   };
 
-  // Delete probem log
-  const deleteLog = async (logID) => {
+  // Delete photo
+  const deletePhoto = async (photoID) => {
     setIsLoading(true);
 
-    let tempData = { problemLogID: logID };
+    let tempData = { patientPhotoID: photoID };
 
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.deleteProblemLog(tempData);
+    const result = await patientApi.deletePatientPhoto(tempData);
     if (result.ok) {
-      refreshLogData();
+      refreshPhotoData();
       setIsModalVisible(false);
 
-      alertTitle = 'Successfully deleted problem log';
+      alertTitle = 'Successfully deleted photo';
     } else {
       const errors = result.data?.message;
-      console.log('Error deleting problem log', result);
+      console.log('Error deleting photo', result);
 
       result.data
         ? (alertDetails = `\n${errors}\n\nPlease try again.`)
         : (alertDetails = 'Please try again.');
 
-      alertTitle = 'Error deleting problem log';
+      alertTitle = 'Error deleting photo';
     }
 
     Alert.alert(alertTitle, alertDetails);
@@ -452,10 +374,11 @@ function PatientPhotoAlbum(props) {
     navigation.navigate(routes.PATIENT_PROFILE, { id: patientID });
   };
 
+  // NEED TO EDIT!!! (COME  BACK LTR)
   // Return formatted row data for table display
   // Note: keys originally ordered like ['ID', 'Author', 'Description', 'Created Datetime', 'Remarks']
   const getTableRowData = () => {
-    const dataNoIDs = data.map(
+    const dataNoIDs = photoData.map(
       ({ patientID, userID, problemLogListID, ...rest }) => rest,
     );
 
@@ -481,6 +404,7 @@ function PatientPhotoAlbum(props) {
     return tempLogData;
   };
 
+  // NEED TO EDIT!!! (COME  BACK LTR)
   // Return formatted header data for table display
   // Note: keys originally ordered like ['ID', 'Author', 'Description', 'Created Datetime', 'Remarks']
   const getTableHeaderData = () => {
@@ -504,7 +428,6 @@ function PatientPhotoAlbum(props) {
     },
   ];
 
-  // console.log('Photo Items:', photoItems);
   return isLoading ? (
     <ActivityIndicator visible />
   ) : (
@@ -545,7 +468,7 @@ function PatientPhotoAlbum(props) {
             setSearchQuery={setSearchQuery}
             initializeData={isDataInitialized}
             onInitialize={() => setIsDataInitialized(false)}
-            itemType="albums"
+            itemType="photo"
             itemCount={photoData.length}
             displayMode={displayMode}
             setDisplayMode={setDisplayMode}
@@ -558,7 +481,7 @@ function PatientPhotoAlbum(props) {
       {console.log('Length of photoData:', photoData.length)}
       {displayMode == 'rows' ? (
         <FlatList
-          key={photoData.length}
+          // key={photoData.length}
           onTouchStart={() => Keyboard.dismiss()}
           onScrollBeginDrag={() => setIsScrolling(true)}
           onScrollEndDrag={() => setIsScrolling(false)}
@@ -583,12 +506,12 @@ function PatientPhotoAlbum(props) {
             console.log('Rendering item:', item.photoPath);
             console.log('Rendering item:', item.albumCategoryName);
             console.log('Rendering item:', item.photoDetails);
-            console.log('Length of photoData INSIDE:', photoData.length)
+            console.log('Length of photoData INSIDE:', photoData.length);
             return (
               <Swipeable
                 setIsScrolling={setIsScrolling}
-                // onSwipeRight={()=>handleDeleteLog(item.problemLogID)}
-                // onSwipeLeft={()=>handleEditLog(item.problemLogID)}
+                // onSwipeRight={()=>handleDeletePhoto(item.patientPhotoID)}
+                // onSwipeLeft={()=>handleEditPhoto(item.patientPhotoID)}
                 underlay={<EditDeleteUnderlay />}
                 item={
                   <TouchableOpacity

@@ -15,7 +15,7 @@ const medicationEndpoint = '/Medication';
 const activityEndpoint = '/Activity';
 const routineEndpoint = '/Routine';
 const mobilityEndpoint = '/Mobility';
-const photoEndpoint = '/PatientPhoto'
+const photoEndpoint = '/PatientPhoto';
 const patientList = `${endpoint}/patientList`;
 // `${endpoint}/patientListByUserId` changed to ${endpoint}/patientListByLoggedInCaregiver
 // to enable fetching caregiver specific patients
@@ -219,7 +219,7 @@ const getPatientPhoto = async (patientID) => {
   return client.get(photoEndpoint, params);
 };
 
-const getPatientPhotoByCategory = async (patientID , albumCategoryListID) => {
+const getPatientPhotoByCategory = async (patientID, albumCategoryListID) => {
   let params;
   params = {
     patientID,
@@ -374,6 +374,17 @@ const addPatientMobility = async (patientID, mobilityData) => {
   return client.post(patientMobilityAdd, payload);
 };
 
+const addPatientPhoto = async (patientID, photoData) => {
+  const payload = {
+    patientID: patientID,
+    patientPhotoID: photoData.patientPhotoID,
+    photoPath: photoData.photoPath,
+    albumCategoryName: photoData.albumCategoryName,
+    albumCategoryListID: photoData.albumCategoryListID,
+  };
+  return client.post(patientPhotoAdd, payload);
+};
+
 // ************************* UPDATE REQUESTS *************************
 const updatePatient = async (data) => {
   const formData = new FormData();
@@ -481,6 +492,17 @@ const updateMobility = async (patientID, mobilityData) => {
   return client.put(patientMobilityUpdate, payload);
 };
 
+const updatePatientPhoto = async (patientID, photoData) => {
+  const payload = {
+    patientID: patientID,
+    patientPhotoID: photoData.patientPhotoID,
+    photoPath: photoData.photoPath,
+    albumCategoryName: photoData.albumCategoryName,
+    albumCategoryListID: photoData.albumCategoryListID,
+  };
+  return client.put(patientPhotoUpdate, payload);
+};
+
 const deleteMedication = async (medicationData) => {
   const payload = {
     medicationID: medicationData.medicationID,
@@ -516,12 +538,11 @@ const deleteMobility = async (mobilityData) => {
   return client.put(patientMobilityDelete, payload);
 };
 
-const deletePhoto = async (patientID, photoData) => {
+const deletePatientPhoto = async (photoData) => {
   const payload = {
-    patientID : photoData.patientId,
-    patientPhotoId: photoData.patientPhotoId,
+    patientPhotoID: photoData.patientPhotoID,
   };
-  return client.put(patientMobilityDelete, payload);
+  return client.put(patientPhotoDelete, payload);
 };
 
 /*
@@ -551,6 +572,7 @@ export default {
   addPatientMedicalHistory,
   addPatientPrescription,
   addPatientMobility,
+  addPatientPhoto,
   updatePatient,
   updatePatientAllergy,
   deletePatientAllergy,
@@ -565,5 +587,6 @@ export default {
   deletePrescription,
   updateMobility,
   deleteMobility,
-  deletePhoto,
+  updatePatientPhoto,
+  deletePatientPhoto,
 };
