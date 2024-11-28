@@ -12,32 +12,24 @@ const PhotoGridItem = ({
   albumCategoryName,
   photoDetails,
 }) => {
-  // Log each prop to verify they are passed correctly
-  console.log('PhotoGridItem props:', {
-    patientPhotoID,
-    photoPath,
-    albumCategoryName,
-    photoDetails,
-  });
-
+  console.log('Rendering PhotoGridItem with ID:', patientPhotoID);
+  console.log('Photo path:', photoPath);
+  console.log('Album category:', albumCategoryName);
+  console.log('Photo details:', photoDetails);
   return (
     <View style={styles.container}>
-      <Image
-        source={
-          photoPath
-            ? { uri: photoPath }
-            : {
-                uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1730400494/Patient/Yan_Yi_Sxxxx148C/Family/tygjuwvopmrafe59rkfq.jpg',
-              }
-        }
-        style={styles.image}
-        resizeMode="cover"
+      <Image 
+        source={photoPath ? { uri: photoPath } : { uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1730400494/Patient/Yan_Yi_Sxxxx148C/Family/tygjuwvopmrafe59rkfq.jpg' }} 
+        style={styles.image} 
+        resizeMode="cover" 
       />
       <View style={styles.descriptionContainer}>
         {albumCategoryName && (
           <Text style={styles.categoryText}>{albumCategoryName}</Text>
         )}
-        {photoDetails && <Text style={styles.detailsText}>{photoDetails}</Text>}
+        {photoDetails && (
+          <Text style={styles.detailsText}>{photoDetails}</Text>
+        )}
       </View>
     </View>
   );
@@ -76,6 +68,8 @@ const styles = StyleSheet.create({
 });
 
 export default PhotoGridItem;
+
+
 
 // import React, { useEffect, useState } from 'react';
 // import {
@@ -142,10 +136,10 @@ export default PhotoGridItem;
 //             alt="photo_album_image"
 //             onError={handleImageError}
 //             source={
-//               imageUri
-//                 ? isError
+//               imageUri 
+//                 ? isError 
 //                   ? DefaultImage
-//                   : { uri: `${imageUri}` }
+//                   : { uri: `${imageUri}` } 
 //                 : DefaultImage
 //             }
 //           />
@@ -213,6 +207,7 @@ export default PhotoGridItem;
 // });
 
 // export default PhotoGridItem;
+
 
 // // PhotoGrid.js CODE 1
 // import React from 'react';
@@ -296,6 +291,7 @@ export default PhotoGridItem;
 
 // export default PhotoGrid;
 
+
 // //CODE 2
 
 // // Libs
@@ -317,7 +313,7 @@ export default PhotoGridItem;
 //   uploadDate,
 //   onDelete,
 //   onEdit,
-// }) => {
+// }) => {  
 //   return (
 //     <View style={styles.container}>
 //       <TouchableOpacity style={styles.imageContainer}>

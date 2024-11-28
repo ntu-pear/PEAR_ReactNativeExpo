@@ -1,5 +1,5 @@
 // Libs
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {
   Alert,
   Keyboard,
@@ -109,7 +109,7 @@ function PatientPhotoAlbum(props) {
 
   // Problem log data related states
   const [originalData, setOriginalData] = useState([]);
-  const [data, setData] = useState([]);
+  const [photoData, setPhotoData] = useState([]);
   const [formData, setFormData] = useState({
     // for add/edit form
     problemLogID: null,
@@ -118,7 +118,10 @@ function PatientPhotoAlbum(props) {
     problemLogRemarks: '',
     photoDetails: '',
     albumCategoryName: '',
+    albumCategoryListID: 1,
+    patientPhotoID: null,
   });
+  const [patientAlbumIDs, setPatientAlbumIDs] = useState([]);
 
   // //MODIFIED
   // const [photoItems, setPhotoItems] = useState([]);
@@ -140,6 +143,11 @@ function PatientPhotoAlbum(props) {
     }, [isReloadList]),
   );
 
+
+  useEffect(() => {
+    console.log("Updated photoData:", photoData);
+  }, [photoData]);
+  
   // // Set isLoading to true when retrieving data
   // const refreshLogData = () => {
   //   setIsLoading(true);
@@ -217,14 +225,13 @@ function PatientPhotoAlbum(props) {
       // console.log(response.data.data);
       if (response.ok) {
         // setPatientPhoto(response.data.data); // Store photo data separately
-        console.log('API Response Data', response.data.data);
         // setOriginalData([...response.data.data]);
-        console.log('YC:', response);
-        setData(parsePhotoData([...response.data.data]));
-        console.log(
-          'Parsed Photo Data',
-          parsePhotoData([...response.data.data]),
+        setPhotoData(parsePhotoData([...response.data.data]));
+        // Extract existing album photo IDs
+        const albumIDs = response.data.data.map(
+          (album) => album.albumCategoryListID,
         );
+        setPatientAlbumIDs(albumIDs);
         setIsDataInitialized(true);
         setIsLoading(false);
         setIsError(false);
@@ -233,7 +240,7 @@ function PatientPhotoAlbum(props) {
       } else {
         console.log('Request failed with status code: ', response.status);
         setOriginalData([]);
-        setData([]);
+        setPhotoData([]);
         // setPatientPhoto(null); // Reset photo data in case of an error
         setIsLoading(false);
         setIsError(true);
@@ -265,6 +272,7 @@ function PatientPhotoAlbum(props) {
       patientPhotoID: item.patientPhotoID.toString(),
       photoPath: item.photoPath || null, // Handle null values
       albumCategoryName: item.albumCategoryName,
+      albumCategoryListID: item.albumCategoryListID,
       // startDate: item.holidayExperience
       //   ? item.holidayExperience.startDate
       //   : null,
@@ -281,6 +289,24 @@ function PatientPhotoAlbum(props) {
     };
     promiseFunction();
   };
+
+  // // Set isLoading to true when retrieving data
+  // const refreshPhotoData = async () => {
+  //   setIsLoading(true);
+  //   try {
+  //     await Promise.all([getPhotoData(), getPatientData()]);
+  //     // Successfully fetched data, so reset error states if needed
+  //     setIsError(false);
+  //     setIsRetry(false);
+  //   } catch (error) {
+  //     console.error('Data fetch failed:', error);
+  //     setIsError(true);
+  //     setIsRetry(true);
+  //     setPhotoData([]); // Clear photo data in case of an error
+  //   } finally {
+  //     setIsLoading(false); // Stop loading after async calls complete
+  //   }
+  // };
 
   //////////////////////////////////////////////////////////////
 
@@ -469,6 +495,13 @@ function PatientPhotoAlbum(props) {
       photoPath:
         'https://res.cloudinary.com/dbpearfyp/image/upload/v1730400494/Patient/Yan_Yi_Sxxxx148C/Family/tygjuwvopmrafe59rkfq.jpg',
     },
+    {
+      albumCategoryName: 'Family',
+      patientPhotoID: '16',
+      photoDetails: 'apple logo',
+      photoPath:
+        'https://res.cloudinary.com/dbpearfyp/image/upload/v1730400494/Patient/Yan_Yi_Sxxxx148C/Family/tygjuwvopmrafe59rkfq.jpg',
+    },
   ];
 
   // console.log('Photo Items:', photoItems);
@@ -498,7 +531,7 @@ function PatientPhotoAlbum(props) {
         <View>
           <SearchFilterBar
             originalList={originalData}
-            setList={setData}
+            setList={setPhotoData}
             SEARCH_OPTIONS={SEARCH_OPTIONS}
             FIELD_MAPPING={FIELD_MAPPING}
             SORT_OPTIONS={SORT_OPTIONS}
@@ -513,33 +546,19 @@ function PatientPhotoAlbum(props) {
             initializeData={isDataInitialized}
             onInitialize={() => setIsDataInitialized(false)}
             itemType="albums"
-            itemCount={data.length}
+            itemCount={photoData.length}
             displayMode={displayMode}
             setDisplayMode={setDisplayMode}
             DISPLAY_MODES={DISPLAY_MODES}
           />
         </View>
       </View>
-
-      {/* <FlatList
-        data={staticData}
-        renderItem={({ item }) => {
-          console.log('Rendering item:', item); // Log each item as it renders
-          return (
-            <PhotoGridItem
-              albumCategoryName={item.albumCategoryName}
-              patientPhotoID={item.patientPhotoID}
-              photoDetails={item.photoDetails}
-              photoPath={item.photoPath}
-            />
-          );
-        }}
-        keyExtractor={(item) => item.patientPhotoID.toString()}
-      /> */}
-
+      {/* data={photoData} */}
       {console.log('Current display mode:', displayMode)}
+      {console.log('Length of photoData:', photoData.length)}
       {displayMode == 'rows' ? (
         <FlatList
+          key={photoData.length}
           onTouchStart={() => Keyboard.dismiss()}
           onScrollBeginDrag={() => setIsScrolling(true)}
           onScrollEndDrag={() => setIsScrolling(false)}
@@ -555,13 +574,16 @@ function PatientPhotoAlbum(props) {
               true,
             )
           }
-          data={data}
-          // keyboardShouldPersistTaps="handled"
+          data={photoData}
+          keyboardShouldPersistTaps="handled"
           keyExtractor={(item) => item.patientPhotoID.toString()}
           renderItem={({ item }) => {
-            // Log the item to the console to inspect its properties
             console.log('Rendering item:', item);
-            console.log('Data for FlatList:', data);
+            console.log('Rendering item:', item.patientPhotoID.toString());
+            console.log('Rendering item:', item.photoPath);
+            console.log('Rendering item:', item.albumCategoryName);
+            console.log('Rendering item:', item.photoDetails);
+            console.log('Length of photoData INSIDE:', photoData.length)
             return (
               <Swipeable
                 setIsScrolling={setIsScrolling}
@@ -583,7 +605,7 @@ function PatientPhotoAlbum(props) {
                         onEdit={()=>handleEditLog(item.problemLogID)}
                         /> */}
                     <PhotoGridItem
-                      patientPhotoID={item.patientPhotoID}
+                      patientPhotoID={item.patientPhotoID.toString()}
                       photoPath={item.photoPath}
                       albumCategoryName={item.albumCategoryName}
                       photoDetails={item.photoDetails}
