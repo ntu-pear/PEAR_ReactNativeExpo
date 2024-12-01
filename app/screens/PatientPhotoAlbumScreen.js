@@ -49,38 +49,34 @@ function PatientPhotoAlbum(props) {
     patientID = patientId;
   }
 
-  const testID = `problem_log_screen_${patientID}`;
+  const testID = `photo_album_screen_${patientID}`;
 
   const navigation = useNavigation();
 
-  // User ID for edit/add operations
-  const { user } = useContext(AuthContext);
-  const userID = user ? user.userID : null;
+  // // User ID for edit/add operations
+  // const { user } = useContext(AuthContext);
+  // const userID = user ? user.userID : null;
 
   // Modal states
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // either 'add' or 'edit'
 
   // Options for user to search by
-  const SEARCH_OPTIONS = ['Album Name', 'Photo Details'];
+  const SEARCH_OPTIONS = ['Album Name'];
 
   // Display mode options
   const [displayMode, setDisplayMode] = useState('rows');
   const DISPLAY_MODES = ['rows', 'table'];
 
   // Sort options
-  const SORT_OPTIONS = ['Date', 'Album Name'];
+  const SORT_OPTIONS = ['Album Name'];
 
-  // Filter options
-  const FILTER_OPTIONS = ['Date'];
+  // // Filter options
+  // const FILTER_OPTIONS = ['Date'];
 
   // Mapping between sort/filter/search names and the respective field in the patient data retrieved from the backend
   const FIELD_MAPPING = {
-    // Description: 'problemLogListDesc',
-    // Date: 'createdDateTime',
-    // Author: 'authorName',
     'Album Name': 'albumCategoryName',
-    'Photo Details': 'photoDetails',
   };
 
   // Search, sort, and filter related states
@@ -99,13 +95,13 @@ function PatientPhotoAlbum(props) {
   // isFilter - whether the filter is actually to be used for filtering,
   //            since some filters like patient status may be used to make an API call instead of normal filtering
   // --------------------------
-  const [filterOptionDetails, setFilterOptionDetails] = useState({
-    Date: {
-      type: 'date',
-      options: { min: {}, max: {} },
-      isFilter: true,
-    },
-  });
+  // const [filterOptionDetails, setFilterOptionDetails] = useState({
+  //   Date: {
+  //     type: 'date',
+  //     options: { min: {}, max: {} },
+  //     isFilter: true,
+  //   },
+  // });
 
   // API call related states
   const [isLoading, setIsLoading] = useState(false);
@@ -119,14 +115,10 @@ function PatientPhotoAlbum(props) {
   const [photoData, setPhotoData] = useState([]);
   const [formData, setFormData] = useState({
     // for add/edit form
-    problemLogID: null,
-    problemLogListID: 1,
-    problemLogListDesc: '',
-    problemLogRemarks: '',
     photoDetails: '',
     albumCategoryName: '',
     albumCategoryListID: 1,
-    patientPhotoID: null,
+    patientPhotoID: 1,
   });
 
   // const [patientAlbumIDs, setPatientAlbumIDs] = useState([]);
@@ -158,27 +150,43 @@ function PatientPhotoAlbum(props) {
 
   //////////////////////////////////////////////////////////////
   //MODIFIED FOR PHOTO
-  // Get patient photo from backend
-  const [patientPhoto, setPatientPhoto] = useState(null);
 
-  // Set isLoading to true when retrieving data
-  const refreshPhotoData = () => {
-    setIsLoading(true);
-    const promiseFunction = async () => {
+  // // Set isLoading to true when retrieving data
+  // const refreshPhotoData = () => {
+  //   setIsLoading(true);
+  //   const promiseFunction = async () => {
+  //     await getPhotoData();
+  //     await getPatientData();
+  //   };
+  //   promiseFunction();
+  // };
+
+  // Memoized data refresh function
+  const refreshPhotoData = React.useCallback(async () => {
+    try {
+      setIsLoading(true);
       await getPhotoData();
       await getPatientData();
-    };
-    promiseFunction();
-  };
+    } catch (error) {
+      console.error('Error refreshing photo data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   // Get photo data from backend
   const getPhotoData = async () => {
     if (patientID) {
       const response = await patientApi.getPatientPhoto(patientID);
       if (response.ok) {
-        console.log(response.data.data);
+        console.log('response.data.data: ', response.data.data);
+        console.log('...response.data.data: ', [...response.data.data]);
+        console.log(
+          'parsed response.data.data: ',
+          parsePhotoData([...response.data.data]),
+        );
         // setPatientPhoto(response.data.data); // Store photo data separately
-        // setOriginalData([...response.data.data]);
+        setOriginalData(parsePhotoData([...response.data.data]));
         setPhotoData(parsePhotoData([...response.data.data]));
         // Extract existing photo IDs
         const photoIDs = response.data.data.map(
@@ -208,13 +216,13 @@ function PatientPhotoAlbum(props) {
   const parsePhotoData = (tempData) => {
     return tempData.map((item) => ({
       patientPhotoID: item.patientPhotoID.toString(),
-      photoPath: item.photoPath || null, // Handle null values
-      albumCategoryName: item.albumCategoryName,
-      albumCategoryListID: item.albumCategoryListID,
+      photoPath: item.photoPath.toString() || null, // Handle null values
+      albumCategoryName: item.albumCategoryName.toString(),
+      albumCategoryListID: item.albumCategoryListID.toString(),
       // startDate: item.holidayExperience
       //   ? item.holidayExperience.startDate
       //   : null,
-      photoDetails: item.photoDetails || null,
+      photoDetails: item.photoDetails.toString() || null,
     }));
   };
 
@@ -276,7 +284,7 @@ function PatientPhotoAlbum(props) {
   };
 
   // Edit photo
-  const handleEditLog = (photoID) => {
+  const handleEditPhoto = (photoID) => {
     setIsModalVisible(true);
     setModalMode('edit');
 
@@ -458,8 +466,8 @@ function PatientPhotoAlbum(props) {
             SEARCH_OPTIONS={SEARCH_OPTIONS}
             FIELD_MAPPING={FIELD_MAPPING}
             SORT_OPTIONS={SORT_OPTIONS}
-            FILTER_OPTIONS={FILTER_OPTIONS}
-            filterOptionDetails={filterOptionDetails}
+            // FILTER_OPTIONS={FILTER_OPTIONS}
+            // filterOptionDetails={filterOptionDetails}
             datetime={datetime}
             setDatetime={setDatetime}
             sort={sort}
@@ -476,12 +484,10 @@ function PatientPhotoAlbum(props) {
           />
         </View>
       </View>
-      {/* data={photoData} */}
       {console.log('Current display mode:', displayMode)}
       {console.log('Length of photoData:', photoData.length)}
       {displayMode == 'rows' ? (
         <FlatList
-          // key={photoData.length}
           onTouchStart={() => Keyboard.dismiss()}
           onScrollBeginDrag={() => setIsScrolling(true)}
           onScrollEndDrag={() => setIsScrolling(false)}
@@ -510,8 +516,8 @@ function PatientPhotoAlbum(props) {
             return (
               <Swipeable
                 setIsScrolling={setIsScrolling}
-                // onSwipeRight={()=>handleDeletePhoto(item.patientPhotoID)}
-                // onSwipeLeft={()=>handleEditPhoto(item.patientPhotoID)}
+                onSwipeRight={() => handleDeletePhoto(item.patientPhotoID)}
+                onSwipeLeft={() => handleEditPhoto(item.patientPhotoID)}
                 underlay={<EditDeleteUnderlay />}
                 item={
                   <TouchableOpacity
@@ -533,11 +539,6 @@ function PatientPhotoAlbum(props) {
                       albumCategoryName={item.albumCategoryName}
                       photoDetails={item.photoDetails}
                     />
-                    {/* <SimplePhotoItem
-                      photoPath={item.photoPath}
-                      albumCategoryName={item.albumCategoryName}
-                      photoDetails={item.photoDetails}
-                    /> */}
                   </TouchableOpacity>
                 }
               />
