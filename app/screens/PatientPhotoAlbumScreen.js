@@ -42,6 +42,7 @@ import DynamicTable from 'app/components/DynamicTable';
 import ProblemLogItem from 'app/components/ProblemLogItem';
 import AddPatientProblemLogModal from 'app/components/AddPatientProblemLogModal';
 import PhotoGridItem from 'app/components/PhotoGridItem';
+import AlbumItem from 'app/components/AlbumItem';
 
 function PatientPhotoAlbum(props) {
   let { patientID, patientId } = props.route.params;
@@ -123,6 +124,7 @@ function PatientPhotoAlbum(props) {
 
   // const [patientAlbumIDs, setPatientAlbumIDs] = useState([]);
   const [patientPhotoIDs, setPatientPhotoIDs] = useState([]);
+  const [latestPhoto, setLatestPhoto] = useState([]);
 
   // //MODIFIED
   // const [photoItems, setPhotoItems] = useState([]);
@@ -188,11 +190,7 @@ function PatientPhotoAlbum(props) {
         // setPatientPhoto(response.data.data); // Store photo data separately
         setOriginalData(parsePhotoData([...response.data.data]));
         setPhotoData(parsePhotoData([...response.data.data]));
-        // Extract existing photo IDs
-        const photoIDs = response.data.data.map(
-          (photo) => photo.patientPhotoID,
-        );
-        setPatientPhotoIDs(photoIDs); //testing
+
         setIsDataInitialized(true);
         setIsLoading(false);
         setIsError(false);
@@ -203,7 +201,7 @@ function PatientPhotoAlbum(props) {
         setOriginalData([]);
         setPhotoData([]);
         // setPatientPhoto(null); // Reset photo data in case of an error
-        setPatientPhotoIDs([]); // testing
+        // setPatientPhotoIDs([]); // testing
         setIsLoading(false);
         setIsError(true);
         setStatusCode(response.status);
@@ -212,21 +210,35 @@ function PatientPhotoAlbum(props) {
     }
   };
 
-  // Parse photo album data
+  // Parse photo album data and return the latest photo per album category
   const parsePhotoData = (tempData) => {
-    return tempData.map((item) => ({
+    const groupedPhotos = tempData.reduce((acc, item) => {
+      const albumName = item.albumCategoryName.toString();
+      if (!acc[albumName]) {
+        acc[albumName] = [];
+      }
+      acc[albumName].push(item);
+      return acc;
+    }, {});
+
+    // For each album category, select the most recent photo based on the patientPhotoID
+    const latestPhotos = Object.values(groupedPhotos).map((photos) => {
+      return photos.reduce((latest, current) => {
+        return current.patientPhotoID > latest.patientPhotoID
+          ? current
+          : latest;
+      });
+    });
+
+    // Return the parsed and filtered photo data with only the latest photos per album
+    return latestPhotos.map((item) => ({
       patientPhotoID: item.patientPhotoID.toString(),
       photoPath: item.photoPath.toString() || null, // Handle null values
       albumCategoryName: item.albumCategoryName.toString(),
       albumCategoryListID: item.albumCategoryListID.toString(),
-      // startDate: item.holidayExperience
-      //   ? item.holidayExperience.startDate
-      //   : null,
       photoDetails: item.photoDetails.toString() || null,
     }));
   };
-
-  //////////////////////////////////////////////////////////////
 
   // Get patient data from backend
   const getPatientData = async () => {
@@ -267,7 +279,7 @@ function PatientPhotoAlbum(props) {
       refreshPhotoData();
       setIsModalVisible(false);
 
-      alertTitle = 'Successfully added photo';
+      alertTitle = 'Successfully added album';
     } else {
       const errors = result.data?.message;
 
@@ -277,14 +289,14 @@ function PatientPhotoAlbum(props) {
         ? (alertDetails = `\n${errors}\n\nPlease try again.`)
         : (alertDetails = 'Please try again.');
 
-      alertTitle = 'Error adding photo';
+      alertTitle = 'Error adding album';
     }
 
     Alert.alert(alertTitle, alertDetails);
   };
 
-  // Edit photo
-  const handleEditPhoto = (photoID) => {
+  // Edit album
+  const handleEditAlbum = (photoID) => {
     setIsModalVisible(true);
     setModalMode('edit');
 
@@ -314,23 +326,23 @@ function PatientPhotoAlbum(props) {
       refreshPhotoData();
       setIsModalVisible(false);
 
-      alertTitle = 'Successfully edited photo';
+      alertTitle = 'Successfully edited album';
     } else {
       const errors = result.data?.message;
-      console.log('Error editing photo');
+      console.log('Error editing album');
 
       result.data
         ? (alertDetails = `\n${errors}\n\nPlease try again.`)
         : (alertDetails = 'Please try again.');
 
-      alertTitle = 'Error editing photo';
+      alertTitle = 'Error editing album';
     }
 
     Alert.alert(alertTitle, alertDetails);
   };
 
   // Ask user to confirm deletion of problem log
-  const handleDeletePhoto = (photoID) => {
+  const handleDeleteAlbum = (photoID) => {
     const tempData = photoData.filter((x) => x.patientPhotoID == photoID)[0];
 
     Alert.alert(
@@ -343,13 +355,13 @@ function PatientPhotoAlbum(props) {
           onPress: () => {},
           style: 'cancel',
         },
-        { text: 'OK', onPress: () => deletePhoto(photoID) },
+        { text: 'OK', onPress: () => deleteAlbum(photoID) },
       ],
     );
   };
 
-  // Delete photo
-  const deletePhoto = async (photoID) => {
+  // Delete album
+  const deleteAlbum = async (photoID) => {
     setIsLoading(true);
 
     let tempData = { patientPhotoID: photoID };
@@ -357,21 +369,21 @@ function PatientPhotoAlbum(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.deletePatientPhoto(tempData);
+    const result = await patientApi.deletePatientAlbum(tempData);
     if (result.ok) {
       refreshPhotoData();
       setIsModalVisible(false);
 
-      alertTitle = 'Successfully deleted photo';
+      alertTitle = 'Successfully deleted album';
     } else {
       const errors = result.data?.message;
-      console.log('Error deleting photo', result);
+      console.log('Error deleting album', result);
 
       result.data
         ? (alertDetails = `\n${errors}\n\nPlease try again.`)
         : (alertDetails = 'Please try again.');
 
-      alertTitle = 'Error deleting photo';
+      alertTitle = 'Error deleting album';
     }
 
     Alert.alert(alertTitle, alertDetails);
@@ -459,6 +471,7 @@ function PatientPhotoAlbum(props) {
             <LoadingWheel />
           )}
         </View>
+
         <View>
           <SearchFilterBar
             originalList={originalData}
@@ -476,7 +489,7 @@ function PatientPhotoAlbum(props) {
             setSearchQuery={setSearchQuery}
             initializeData={isDataInitialized}
             onInitialize={() => setIsDataInitialized(false)}
-            itemType="photo"
+            itemType="albums"
             itemCount={photoData.length}
             displayMode={displayMode}
             setDisplayMode={setDisplayMode}
@@ -516,8 +529,8 @@ function PatientPhotoAlbum(props) {
             return (
               <Swipeable
                 setIsScrolling={setIsScrolling}
-                onSwipeRight={() => handleDeletePhoto(item.patientPhotoID)}
-                onSwipeLeft={() => handleEditPhoto(item.patientPhotoID)}
+                onSwipeRight={() => handleDeleteAlbum(item.patientPhotoID)}
+                onSwipeLeft={() => handleEditAlbum(item.patientPhotoID)}
                 underlay={<EditDeleteUnderlay />}
                 item={
                   <TouchableOpacity
@@ -525,19 +538,12 @@ function PatientPhotoAlbum(props) {
                     activeOpacity={1}
                     disabled={!isScrolling}
                   >
-                    {/* <ProblemLogItem
-                        problemLogRemarks={item.problemLogRemarks}
-                        authorName={item.authorName}
-                        problemLogListDesc={item.problemLogListDesc}
-                        createdDateTime={item.createdDateTime}
-                        onDelete={()=>handleDeleteLog(item.problemLogID)}
-                        onEdit={()=>handleEditLog(item.problemLogID)}
-                        /> */}
-                    <PhotoGridItem
+                    <AlbumItem
                       patientPhotoID={item.patientPhotoID.toString()}
                       photoPath={item.photoPath}
                       albumCategoryName={item.albumCategoryName}
-                      photoDetails={item.photoDetails}
+                      onDelete={() => handleDeleteAlbum(item.patientPhotoID)}
+                      onEdit={() => handleEditAlbum(item.patientPhotoID)}
                     />
                   </TouchableOpacity>
                 }
