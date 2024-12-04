@@ -173,11 +173,15 @@
 
 //////////////////////////////////
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, Dimensions } from 'react-native';
 import { Card, Button } from 'react-native-paper';
 
 // Configurations
 import colors from 'app/config/colors';
+
+const { width, height } = Dimensions.get('window');
+
+const photoSize = (width - 215) / 3;
 
 const PhotoGridItem = ({
   photoPath,
@@ -189,34 +193,20 @@ const PhotoGridItem = ({
   return (
     <Card style={styles.card}>
       <Card.Content>
+        {/* Photo as a square */}
         <Image source={{ uri: photoPath }} style={styles.photo} />
-
         <View style={styles.contentContainer}>
-          <View style={styles.textContainer}>
-            {albumCategoryName ? (
-              <View
-                style={{ flexDirection: 'row', marginLeft: 5, marginTop: 5 }}
-              >
-                <Text>
-                  <Text style={[styles.text, styles.bold]}>Album: </Text>
-                  <Text style={[styles.text]}>{albumCategoryName}</Text>
-                </Text>
-              </View>
-            ) : null}
-            {photoDetails ? (
-              <View
-                style={{ flexDirection: 'row', marginLeft: 5, marginTop: 5 }}
-              >
-                <Text>
-                  <Text style={[styles.text, styles.bold]}>
-                    Photo Details:{' '}
-                  </Text>
-                  <Text style={[styles.text]}>{photoDetails}</Text>
-                </Text>
-              </View>
-            ) : null}
-          </View>
+          {/* Photo details */}
+          {photoDetails ? (
+            <View style={styles.detailsContainer}>
+              <Text style={styles.text} numberOfLines={1} ellipsizeMode="tail">
+                <Text style={[styles.text, styles.bold]}>Description: </Text>
+                <Text style={[styles.text]}>{photoDetails}</Text>
+              </Text>
+            </View>
+          ) : null}
 
+          {/* Edit and Delete buttons */}
           <View style={styles.buttonContainer}>
             <Button
               mode="outlined"
@@ -254,28 +244,37 @@ const PhotoGridItem = ({
 
 const styles = StyleSheet.create({
   card: {
-    margin: 10,
+    marginLeft: 10,
+    marginRight: -20,
     borderRadius: 8,
     elevation: 2, // Adds shadow for Android
     backgroundColor: colors.green_lightest,
   },
   photo: {
-    width: '100%',
-    height: 200,
+    width: photoSize,
+    height: photoSize,
     borderRadius: 8,
     marginBottom: 10,
+    borderColor: colors.green_lighter,
+    borderWidth: 3,
+    resizeMode: 'cover',
   },
   contentContainer: {
-    flexDirection: 'row', // Align title, description, and buttons in a row
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    padding: 2,
+  },
+  detailsContainer: {
+    marginTop: 2,
   },
   textContainer: {
-    flex: 1, // Allow the text section to take as much space as possible
+    marginTop: 10,
   },
   text: {
     marginTop: 4,
     fontSize: 16,
+    maxWidth: photoSize,
+    flexWrap: 'wrap',
+    textAlign: 'center',
+    alignSelf: 'center',
   },
   bold: {
     marginLeft: 20,
@@ -283,16 +282,16 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
-    alignItems: 'center', // Align buttons vertically in the center
-    marginLeft: 10,
+    alignItems: 'center',
     marginTop: 12,
+    marginLeft: 10,
   },
   button: {
     marginHorizontal: 5,
   },
   buttonContent: {
-    marginVertical: -5, // Reduce vertical padding to make the button more compact
-    marginHorizontal: -10, // Reduce horizontal padding if needed
+    marginVertical: -5,
+    marginHorizontal: -10,
   },
 });
 

@@ -530,6 +530,7 @@ function PatientPhotoGrid(props) {
           data={photoData}
           keyboardShouldPersistTaps="handled"
           keyExtractor={(item) => item.patientPhotoID.toString()}
+          numColumns={3}
           renderItem={({ item }) => {
             console.log('Rendering item:', item);
             console.log('Rendering item:', item.patientPhotoID.toString());
@@ -540,19 +541,20 @@ function PatientPhotoGrid(props) {
             return (
               <Swipeable
                 setIsScrolling={setIsScrolling}
-                onSwipeRight={() => handleDeletePhoto(item.patientPhotoID)}
-                onSwipeLeft={() => handleEditPhoto(item.patientPhotoID)}
-                underlay={<EditDeleteUnderlay />}
+                // onSwipeRight={() => handleDeletePhoto(item.patientPhotoID)}
+                // onSwipeLeft={() => handleEditPhoto(item.patientPhotoID)}
+                // underlay={<EditDeleteUnderlay />}
                 item={
                   <TouchableOpacity
                     style={styles.logContainer}
                     activeOpacity={1}
                     disabled={!isScrolling}
                   >
-                    <AlbumItem
+                    <PhotoGridItem
                       patientPhotoID={item.patientPhotoID.toString()}
                       photoPath={item.photoPath}
                       albumCategoryName={item.albumCategoryName}
+                      photoDetails={item.photoDetails}
                       onDelete={() => handleDeletePhoto(item.patientPhotoID)}
                       onEdit={() => handleEditPhoto(item.patientPhotoID)}
                     />
