@@ -224,7 +224,7 @@ function PatientPhotoAlbum(props) {
 
     // Return the parsed and filtered photo data with only the latest photos per album
     return latestPhotos.map((item) => ({
-      patientPhotoID: item.patientPhotoID.toString(),
+      patientID: item.patientID,
       photoPath: item.photoPath.toString() || null, // Handle null values
       albumCategoryName: item.albumCategoryName.toString(),
       albumCategoryListID: item.albumCategoryListID.toString(),
@@ -520,10 +520,10 @@ function PatientPhotoAlbum(props) {
           }
           data={photoData}
           keyboardShouldPersistTaps="handled"
-          keyExtractor={(item) => item.patientPhotoID.toString()}
+          keyExtractor={(item) => item.patientPhotoID}
           renderItem={({ item }) => {
             console.log('Rendering item:', item);
-            console.log('Rendering item:', item.patientPhotoID.toString());
+            console.log('Rendering item:', item.patientPhotoID);
             console.log('Rendering item:', item.photoPath);
             console.log('Rendering item:', item.albumCategoryName);
             console.log('Rendering item:', item.photoDetails);
@@ -541,11 +541,11 @@ function PatientPhotoAlbum(props) {
                     disabled={!isScrolling}
                   >
                     <AlbumItem
-                      patientPhotoID={item.patientPhotoID.toString()}
+                      patientPhotoID={item.patientPhotoID}
                       photoPath={item.photoPath}
                       albumCategoryName={item.albumCategoryName}
                       albumCategoryListID={item.albumCategoryListID}
-                      patientID={item.patientID.toString()}
+                      patientID={item.patientID}
                       onDelete={() => handleDeleteAlbum(item.patientPhotoID)}
                       onEdit={() => handleEditAlbum(item.patientPhotoID)}
                       handleOnPress={onClickAlbum}

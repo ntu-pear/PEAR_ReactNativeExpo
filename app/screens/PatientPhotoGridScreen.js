@@ -193,11 +193,17 @@ function PatientPhotoGrid(props) {
         console.log('...response.data.data: ', [...response.data.data]);
         console.log(
           'parsed response.data.data: ',
-          parsePhotoData([...response.data.data]),
+          parsePhotoData([...response.data.data], albumCategoryListID),
         );
         // setPatientPhoto(response.data.data); // Store photo data separately
-        setOriginalData(parsePhotoData([...response.data.data]));
-        setPhotoData(parsePhotoData([...response.data.data]));
+        // setOriginalData(parsePhotoData([...response.data.data]));
+        // setPhotoData(parsePhotoData([...response.data.data]));
+        setOriginalData(
+          parsePhotoData([...response.data.data], albumCategoryListID),
+        );
+        setPhotoData(
+          parsePhotoData([...response.data.data], albumCategoryListID),
+        );
 
         setIsDataInitialized(true);
         setIsLoading(false);
@@ -218,17 +224,30 @@ function PatientPhotoGrid(props) {
     }
   };
 
-  // Parse photo album data
-  const parsePhotoData = (tempData) => {
-    return tempData.map((item) => ({
+  // // Parse photo album data
+  // const parsePhotoData = (tempData) => {
+  //   return tempData.map((item) => ({
+  //     patientPhotoID: item.patientPhotoID.toString(),
+  //     photoPath: item.photoPath.toString() || null, // Handle null values
+  //     albumCategoryName: item.albumCategoryName.toString(),
+  //     albumCategoryListID: item.albumCategoryListID.toString(),
+  //     photoDetails: item.photoDetails.toString() || null,
+  //   }));
+  // };
+
+  // Parse photo album data and filter by albumCategoryListID
+  const parsePhotoData = (tempData, targetAlbumCategoryListID) => {
+    // Filter the data to include only items matching the target albumCategoryListID
+    const filteredData = tempData.filter((item) => {
+      return item.albumCategoryListID.toString() === targetAlbumCategoryListID;
+    });
+    // Map the filtered data to the desired format
+    return filteredData.map((item) => ({
       patientPhotoID: item.patientPhotoID.toString(),
-      photoPath: item.photoPath.toString() || null, // Handle null values
-      albumCategoryName: item.albumCategoryName.toString(),
+      photoPath: item.photoPath?.toString() || null, // Handle null values
+      albumCategoryName: item.albumCategoryName?.toString(),
       albumCategoryListID: item.albumCategoryListID.toString(),
-      // startDate: item.holidayExperience
-      //   ? item.holidayExperience.startDate
-      //   : null,
-      photoDetails: item.photoDetails.toString() || null,
+      photoDetails: item.photoDetails?.toString() || null,
     }));
   };
 
