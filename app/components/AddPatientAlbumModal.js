@@ -15,7 +15,7 @@ import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 import colors from 'app/config/colors';
 import AddEditModal from './AddEditModal';
 
-function AddPatientProblemLogModal({
+function AddPatientAlbumModal({
   showModal,
   modalMode,
   formData,
@@ -28,44 +28,46 @@ function AddPatientProblemLogModal({
   const [isInputErrors, setIsInputErrors] = useState(false);
 
   // Options for problem field
-  const { data: problemLogOptions } = useGetSelectionOptions('ProblemLog');
+  const { data: albumOptions } = useGetSelectionOptions('AlbumCategory');
 
   // Input error states (Child components)
   // This records the error states of each child component (ones that require tracking).
-  const [isAuthorNameError, setIsAuthorNameError] = useState(false);
-  const [isProblemDescriptionError, setIsProblemDescriptionError] =
+  const [isAlbumCategoryNameError, setIsAlbumCategoryNameError] =
     useState(false);
-  const [isProblemRemarksError, setIsProblemRemarksError] = useState(false);
-  const [isCreatedDateTimeError, setIsCreatedDateTimeError] = useState(false);
+  const [isPatientPhotoIdError, setIsPatientPhotoIdError] = useState(false);
+  const [isPhotoDetailsError, setIsPhotoDetailsError] = useState(false);
+  const [isAlbumCategoryListIdError, setIsAlbumCategoryListIdError] =
+    useState(false);
 
   // This useEffect enables the page to show correct error checking.
   // The main isInputErrors is responsible for the error state of the screen.
   // This state will be true whenever any child input components are in error state.
   useEffect(() => {
     setIsInputErrors(
-      isAuthorNameError ||
-        isProblemDescriptionError ||
-        isProblemRemarksError ||
-        isCreatedDateTimeError,
+      isAlbumCategoryNameError ||
+        isPatientPhotoIdError ||
+        isPhotoDetailsError ||
+        isAlbumCategoryListIdError,
     );
   }, [
-    isAuthorNameError,
-    isProblemDescriptionError,
-    isProblemRemarksError,
-    isCreatedDateTimeError,
+    isAlbumCategoryNameError,
+    isPatientPhotoIdError,
+    isPhotoDetailsError,
+    isAlbumCategoryListIdError,
   ]);
 
   // Reset form
   const resetForm = () => {
     setFormData({
-      problemLogID: null,
-      problemLogListID: 1,
-      problemLogRemarks: '',
+      patientPhotoID: 1,
+      albumCategoryListID: 1,
+      albumCategoryName: '',
+      photoDetails: '',
     });
-    setIsAuthorNameError(false);
-    setIsProblemDescriptionError(false);
-    setIsProblemRemarksError(false);
-    setIsCreatedDateTimeError(false);
+    setIsAlbumCategoryNameError(false);
+    setIsPatientPhotoIdError(false);
+    setIsPhotoDetailsError(false);
+    setIsAlbumCategoryListIdError(false);
   };
 
   // When modal is closed, reset form
@@ -76,10 +78,10 @@ function AddPatientProblemLogModal({
   }, [showModal]);
 
   // Function to update  data
-  const handleLogData = (field) => (e) => {
+  const handleAlbumData = (field) => (e) => {
     setFormData((prevState) => ({
       ...prevState,
-      [field]: field == 'problemLogListID' ? parseInt(e) : e,
+      [field]: field == 'albumCategoryListID' ? parseInt(e) : e,
     }));
   };
 
@@ -91,6 +93,37 @@ function AddPatientProblemLogModal({
     }
   };
 
+  //   return (
+  //     <AddEditModal
+  //       handleSubmit={handleSubmit}
+  //       isInputErrors={isInputErrors}
+  //       modalMode={modalMode}
+  //       onClose={onClose}
+  //       showModal={showModal}
+  //       modalTitle="Album"
+  //       modalContent={
+  //         <>
+  //           <SelectionInputField
+  //             isRequired
+  //             title="Album Title"
+  //             value={formData.albumCategoryListID}
+  //             dataArray={albumOptions}
+  //             onDataChange={handleAlbumData('albumCategoryListID')}
+  //           />
+  //           <InputField
+  //             isRequired
+  //             title={'Remarks'}
+  //             value={formData.problemLogRemarks}
+  //             onChangeText={handleAlbumData('problemLogRemarks')}
+  //             onEndEditing={setIsProblemRemarksError}
+  //             autoCapitalize="none"
+  //           />
+  //         </>
+  //       }
+  //     />
+  //   );
+  // }
+
   return (
     <AddEditModal
       handleSubmit={handleSubmit}
@@ -98,28 +131,32 @@ function AddPatientProblemLogModal({
       modalMode={modalMode}
       onClose={onClose}
       showModal={showModal}
-      modalTitle="Problem Log"
+      modalTitle="Album"
       modalContent={
         <>
           <SelectionInputField
             isRequired
-            title="Description"
-            value={formData.problemLogListID}
-            dataArray={problemLogOptions}
-            onDataChange={handleLogData('problemLogListID')}
+            title="Album Title"
+            value={formData.albumCategoryListID}
+            dataArray={albumOptions}
+            onDataChange={handleAlbumData('albumCategoryListID')}
           />
-          <InputField
-            isRequired
-            title={'Remarks'}
-            value={formData.problemLogRemarks}
-            onChangeText={handleLogData('problemLogRemarks')}
-            onEndEditing={setIsProblemRemarksError}
-            autoCapitalize="none"
-          />
+          {albumOptions.find(
+            (option) => option.id === formData.albumCategoryListID,
+          )?.title === 'Others' && (
+            <InputField
+              isRequired
+              title={'Remarks'}
+              value={formData.albumCategoryName}
+              onChangeText={handleAlbumData('albumCategoryName')}
+              onEndEditing={setIsAlbumCategoryNameError}
+              autoCapitalize="none"
+            />
+          )}
         </>
       }
     />
   );
 }
 
-export default AddPatientProblemLogModal;
+export default AddPatientAlbumModal;

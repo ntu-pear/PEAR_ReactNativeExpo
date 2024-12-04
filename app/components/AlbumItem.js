@@ -1,63 +1,81 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { Card, Button } from 'react-native-paper';
 
 // Configurations
 import colors from 'app/config/colors';
+import { useNavigation } from '@react-navigation/native';
 
-const AlbumItem = ({ photoPath, albumCategoryName, onEdit, onDelete }) => {
+const AlbumItem = ({
+  patientID,
+  patientPhotoID,
+  photoPath,
+  albumCategoryName,
+  albumCategoryListID,
+  onEdit,
+  onDelete,
+}) => {
+  const navigation = useNavigation();
+  const handlePress = () => {
+    navigation.navigate('PatientPhotoGrid', {
+      patientID,
+      albumCategoryListID,
+    });
+  };
   return (
-    <Card style={styles.card}>
-      <Card.Content>
-        <Image source={{ uri: photoPath }} style={styles.photo} />
+    <TouchableOpacity onPress={handlePress}>
+      <Card style={styles.card}>
+        <Card.Content>
+          <Image source={{ uri: photoPath }} style={styles.photo} />
 
-        <View style={styles.contentContainer}>
-          <View style={styles.textContainer}>
-            {albumCategoryName ? (
-              <View
-                style={{ flexDirection: 'row', marginLeft: 5, marginTop: 5 }}
-              >
-                <Text>
-                  <Text style={[styles.text, styles.bold]}>
-                    {albumCategoryName}
+          <View style={styles.contentContainer}>
+            <View style={styles.textContainer}>
+              {albumCategoryName ? (
+                <View
+                  style={{ flexDirection: 'row', marginLeft: 5, marginTop: 5 }}
+                >
+                  <Text>
+                    <Text style={[styles.text, styles.bold]}>
+                      {albumCategoryName}
+                    </Text>
                   </Text>
-                </Text>
-              </View>
-            ) : null}
-          </View>
+                </View>
+              ) : null}
+            </View>
 
-          <View style={styles.buttonContainer}>
-            <Button
-              mode="outlined"
-              onPress={onEdit}
-              style={[
-                styles.button,
-                {
-                  borderColor: colors.green,
-                  borderWidth: 2,
-                },
-              ]}
-              labelStyle={{ color: colors.green }}
-              contentStyle={styles.buttonContent}
-            >
-              Edit
-            </Button>
-            <Button
-              mode="outlined"
-              onPress={onDelete}
-              style={[
-                styles.button,
-                { borderColor: colors.pink, borderWidth: 2 },
-              ]}
-              labelStyle={{ color: colors.pink }}
-              contentStyle={styles.buttonContent}
-            >
-              Delete
-            </Button>
+            <View style={styles.buttonContainer}>
+              <Button
+                mode="outlined"
+                onPress={onEdit}
+                style={[
+                  styles.button,
+                  {
+                    borderColor: colors.green,
+                    borderWidth: 2,
+                  },
+                ]}
+                labelStyle={{ color: colors.green }}
+                contentStyle={styles.buttonContent}
+              >
+                Edit
+              </Button>
+              <Button
+                mode="outlined"
+                onPress={onDelete}
+                style={[
+                  styles.button,
+                  { borderColor: colors.pink, borderWidth: 2 },
+                ]}
+                labelStyle={{ color: colors.pink }}
+                contentStyle={styles.buttonContent}
+              >
+                Delete
+              </Button>
+            </View>
           </View>
-        </View>
-      </Card.Content>
-    </Card>
+        </Card.Content>
+      </Card>
+    </TouchableOpacity>
   );
 };
 

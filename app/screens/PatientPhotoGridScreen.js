@@ -50,6 +50,14 @@ function PatientPhotoGrid(props) {
     patientID = patientId;
   }
 
+  let { albumCategoryListID, photoDetails, albumCategoryName, patientPhotoID } =
+    props.route.params;
+
+  console.log('PatientID:', patientID);
+  console.log('AlbumCategoryListID:', albumCategoryListID);
+  console.log('AlbumCategoryName:', albumCategoryName);
+  console.log('PatientPhotoID:', patientPhotoID);
+
   const testID = `photo_album_screen_${patientID}`;
 
   const navigation = useNavigation();

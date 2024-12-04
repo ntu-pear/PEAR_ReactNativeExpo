@@ -41,6 +41,7 @@ import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUn
 import DynamicTable from 'app/components/DynamicTable';
 import ProblemLogItem from 'app/components/ProblemLogItem';
 import AddPatientProblemLogModal from 'app/components/AddPatientProblemLogModal';
+import AddPatientAlbumModal from 'app/components/AddPatientAlbumModal';
 import PhotoGridItem from 'app/components/PhotoGridItem';
 import AlbumItem from 'app/components/AlbumItem';
 
@@ -48,6 +49,17 @@ function PatientPhotoAlbum(props) {
   let { patientID, patientId } = props.route.params;
   if (patientId) {
     patientID = patientId;
+  }
+
+  let {
+    albumCategoryListID,
+    albumCategoryListId,
+    photoDetails,
+    albumCategoryName,
+    patientPhotoID,
+  } = props.route.params;
+  if (albumCategoryListId) {
+    albumCategoryListID = albumCategoryListId;
   }
 
   const testID = `photo_album_screen_${patientID}`;
@@ -126,9 +138,6 @@ function PatientPhotoAlbum(props) {
   const [patientPhotoIDs, setPatientPhotoIDs] = useState([]);
   const [latestPhoto, setLatestPhoto] = useState([]);
 
-  // //MODIFIED
-  // const [photoItems, setPhotoItems] = useState([]);
-
   // Patient data related states
   const [patientData, setPatientData] = useState({});
 
@@ -145,23 +154,6 @@ function PatientPhotoAlbum(props) {
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isReloadList]),
   );
-
-  // useEffect(() => {
-  //   console.log("Updated photoData:", photoData);
-  // }, [photoData]);
-
-  //////////////////////////////////////////////////////////////
-  //MODIFIED FOR PHOTO
-
-  // // Set isLoading to true when retrieving data
-  // const refreshPhotoData = () => {
-  //   setIsLoading(true);
-  //   const promiseFunction = async () => {
-  //     await getPhotoData();
-  //     await getPatientData();
-  //   };
-  //   promiseFunction();
-  // };
 
   // Memoized data refresh function
   const refreshPhotoData = React.useCallback(async () => {
@@ -260,13 +252,13 @@ function PatientPhotoAlbum(props) {
     }
   };
 
-  // Show form to add problem log when add button is clicked
+  // Show form to add album when add button is clicked
   const handleOnClickAddLog = () => {
     setIsModalVisible(true);
     setModalMode('add');
   };
 
-  // Submit data to add photo
+  // Submit data to add album
   const handleModalSubmitAdd = async (tempPhotoData) => {
     setIsLoading(true);
 
@@ -275,7 +267,7 @@ function PatientPhotoAlbum(props) {
 
     const result = await patientApi.addPatientPhoto(patientID, tempPhotoData);
     if (result.ok) {
-      console.log('submitting problem log data', tempPhotoData);
+      console.log('submitting album data', tempPhotoData);
       refreshPhotoData();
       setIsModalVisible(false);
 
@@ -341,14 +333,13 @@ function PatientPhotoAlbum(props) {
     Alert.alert(alertTitle, alertDetails);
   };
 
-  // Ask user to confirm deletion of problem log
+  // Ask user to confirm deletion of album
   const handleDeleteAlbum = (photoID) => {
     const tempData = photoData.filter((x) => x.patientPhotoID == photoID)[0];
 
     Alert.alert(
       'Are you sure you wish to delete this item?',
-      `Album Name: ${tempData.albumCategoryName}\n` +
-        `Description: ${tempData.photoDetails}\n`,
+      `Album Name: ${tempData.albumCategoryName}\n`,
       [
         {
           text: 'Cancel',
@@ -392,6 +383,17 @@ function PatientPhotoAlbum(props) {
   // Navigate to patient profile on click profile image
   const onClickProfile = () => {
     navigation.navigate(routes.PATIENT_PROFILE, { id: patientID });
+  };
+
+  // Navigate to photo grid page on click album
+  const onClickAlbum = () => {
+    navigation.navigate(routes.PATIENT_PHOTO_GRID, {
+      patientID,
+      albumCategoryListID,
+      photoDetails,
+      albumCategoryName,
+      patientPhotoID,
+    });
   };
 
   // NEED TO EDIT!!! (COME  BACK LTR)
@@ -542,8 +544,13 @@ function PatientPhotoAlbum(props) {
                       patientPhotoID={item.patientPhotoID.toString()}
                       photoPath={item.photoPath}
                       albumCategoryName={item.albumCategoryName}
+                      albumCategoryListID={item.albumCategoryListID}
+                      patientID={item.patientID.toString()}
                       onDelete={() => handleDeleteAlbum(item.patientPhotoID)}
                       onEdit={() => handleEditAlbum(item.patientPhotoID)}
+                      handleOnPress={onClickAlbum}
+                      // navigation={navigation}
+                      // routes={routes.PATIENT_PHOTO_GRID}
                     />
                   </TouchableOpacity>
                 }
@@ -576,7 +583,7 @@ function PatientPhotoAlbum(props) {
       <View style={styles.addBtn}>
         <AddButton title="Add Album" onPress={handleOnClickAddLog} />
       </View>
-      <AddPatientProblemLogModal
+      <AddPatientAlbumModal
         showModal={isModalVisible}
         modalMode={modalMode}
         formData={formData}
