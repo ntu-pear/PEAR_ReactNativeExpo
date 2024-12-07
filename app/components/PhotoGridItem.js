@@ -173,11 +173,19 @@
 
 //////////////////////////////////
 import React from 'react';
-import { View, Text, Image, StyleSheet, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  Dimensions,
+  TouchableOpacity,
+} from 'react-native';
 import { Card, Button } from 'react-native-paper';
 
 // Configurations
 import colors from 'app/config/colors';
+import { useNavigation } from '@react-navigation/native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -187,58 +195,83 @@ const PhotoGridItem = ({
   photoPath,
   albumCategoryName,
   photoDetails,
+  patientID,
+  albumCategoryListID,
+  patientPhotoID,
   onEdit,
   onDelete,
+  initialIndex,
+  numPhotos,
+  photoData,
 }) => {
+  const navigation = useNavigation();
+  const handlePress = () => {
+    navigation.navigate('PatientViewPhoto', {
+      patientID,
+      albumCategoryListID,
+      patientPhotoID,
+      photoDetails,
+      initialIndex,
+      numPhotos,
+      photoPath,
+      photoData,
+    });
+  };
   return (
-    <Card style={styles.card}>
-      <Card.Content>
-        {/* Photo as a square */}
-        <Image source={{ uri: photoPath }} style={styles.photo} />
-        <View style={styles.contentContainer}>
-          {/* Photo details */}
-          {photoDetails ? (
-            <View style={styles.detailsContainer}>
-              <Text style={styles.text} numberOfLines={1} ellipsizeMode="tail">
-                <Text style={[styles.text, styles.bold]}>Description: </Text>
-                <Text style={[styles.text]}>{photoDetails}</Text>
-              </Text>
-            </View>
-          ) : null}
+    <TouchableOpacity onPress={handlePress}>
+      <Card style={styles.card}>
+        <Card.Content>
+          {/* Photo as a square */}
+          <Image source={{ uri: photoPath }} style={styles.photo} />
+          <View style={styles.contentContainer}>
+            {/* Photo details */}
+            {photoDetails ? (
+              <View style={styles.detailsContainer}>
+                <Text
+                  style={styles.text}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  <Text style={[styles.text, styles.bold]}>Description: </Text>
+                  <Text style={[styles.text]}>{photoDetails}</Text>
+                </Text>
+              </View>
+            ) : null}
 
-          {/* Edit and Delete buttons */}
-          <View style={styles.buttonContainer}>
-            <Button
-              mode="outlined"
-              onPress={onEdit}
-              style={[
-                styles.button,
-                {
-                  borderColor: colors.green,
-                  borderWidth: 2,
-                },
-              ]}
-              labelStyle={{ color: colors.green }}
-              contentStyle={styles.buttonContent}
-            >
-              Edit
-            </Button>
-            <Button
-              mode="outlined"
-              onPress={onDelete}
-              style={[
-                styles.button,
-                { borderColor: colors.pink, borderWidth: 2 },
-              ]}
-              labelStyle={{ color: colors.pink }}
-              contentStyle={styles.buttonContent}
-            >
-              Delete
-            </Button>
+            {/* Edit and Delete buttons */}
+            <View style={styles.buttonContainer}>
+              <Button
+                mode="outlined"
+                onPress={onEdit}
+                style={[
+                  styles.button,
+                  {
+                    borderColor: colors.green,
+                    borderWidth: 2,
+                  },
+                ]}
+                labelStyle={{ color: colors.green }}
+                contentStyle={styles.buttonContent}
+              >
+                Edit
+              </Button>
+              <Button
+                mode="outlined"
+                onPress={onDelete}
+                style={[
+                  styles.button,
+                  { borderColor: colors.pink, borderWidth: 2 },
+                ]}
+                labelStyle={{ color: colors.pink }}
+                contentStyle={styles.buttonContent}
+              >
+                Delete
+              </Button>
+            </View>
           </View>
-        </View>
-      </Card.Content>
-    </Card>
+        </Card.Content>
+      </Card>
+    </TouchableOpacity>
   );
 };
 

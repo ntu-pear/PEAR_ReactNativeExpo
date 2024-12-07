@@ -39,24 +39,37 @@ import LoadingWheel from 'app/components/LoadingWheel';
 import Swipeable from 'app/components/swipeable-components/Swipeable';
 import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
 import DynamicTable from 'app/components/DynamicTable';
+import ProblemLogItem from 'app/components/ProblemLogItem';
 import AddPatientProblemLogModal from 'app/components/AddPatientProblemLogModal';
 import PhotoGridItem from 'app/components/PhotoGridItem';
+import AlbumItem from 'app/components/AlbumItem';
+import PhotoCarouselItem from 'app/components/PhotoCarouselItem';
 
-function PatientPhotoGrid(props) {
+function PatientViewPhoto(props) {
   let { patientID, patientId } = props.route.params;
   if (patientId) {
     patientID = patientId;
   }
 
-  let { albumCategoryListID, photoDetails, albumCategoryName, patientPhotoID } =
-    props.route.params;
+  let {
+    albumCategoryListID,
+    photoDetails,
+    albumCategoryName,
+    patientPhotoID,
+    initialIndex,
+    numPhotos,
+    photoPath,
+  } = props.route.params;
 
   console.log('PatientID:', patientID);
   console.log('AlbumCategoryListID:', albumCategoryListID);
   console.log('AlbumCategoryName:', albumCategoryName);
   console.log('PatientPhotoID:', patientPhotoID);
+  console.log('Photo Details:', photoDetails);
+  console.log('Index:', initialIndex);
+  console.log('Number of photos:', numPhotos);
 
-  const testID = `photo_grid_screen_${patientID}`;
+  const testID = `photo_album_screen_${patientID}`;
 
   const navigation = useNavigation();
 
@@ -69,21 +82,21 @@ function PatientPhotoGrid(props) {
   const [modalMode, setModalMode] = useState('add'); // either 'add' or 'edit'
 
   // Options for user to search by
-  const SEARCH_OPTIONS = ['Photo Details'];
+  const SEARCH_OPTIONS = ['Album Name'];
 
   // Display mode options
   const [displayMode, setDisplayMode] = useState('rows');
   const DISPLAY_MODES = ['rows', 'table'];
 
   // Sort options
-  const SORT_OPTIONS = ['Photo Details'];
+  const SORT_OPTIONS = ['Album Name'];
 
   // // Filter options
   // const FILTER_OPTIONS = ['Date'];
 
   // Mapping between sort/filter/search names and the respective field in the patient data retrieved from the backend
   const FIELD_MAPPING = {
-    'Photo Details': 'photoDetails',
+    'Album Name': 'albumCategoryName',
   };
 
   // Search, sort, and filter related states
@@ -152,23 +165,6 @@ function PatientPhotoGrid(props) {
     }, [isReloadList]),
   );
 
-  // useEffect(() => {
-  //   console.log("Updated photoData:", photoData);
-  // }, [photoData]);
-
-  //////////////////////////////////////////////////////////////
-  //MODIFIED FOR PHOTO
-
-  // // Set isLoading to true when retrieving data
-  // const refreshPhotoData = () => {
-  //   setIsLoading(true);
-  //   const promiseFunction = async () => {
-  //     await getPhotoData();
-  //     await getPatientData();
-  //   };
-  //   promiseFunction();
-  // };
-
   // Memoized data refresh function
   const refreshPhotoData = React.useCallback(async () => {
     try {
@@ -191,17 +187,15 @@ function PatientPhotoGrid(props) {
         console.log('...response.data.data: ', [...response.data.data]);
         console.log(
           'parsed response.data.data: ',
-          parsePhotoData([...response.data.data], albumCategoryListID),
+          parsePhotoData([...response.data.data], patientPhotoID),
         );
         // setPatientPhoto(response.data.data); // Store photo data separately
         // setOriginalData(parsePhotoData([...response.data.data]));
         // setPhotoData(parsePhotoData([...response.data.data]));
         setOriginalData(
-          parsePhotoData([...response.data.data], albumCategoryListID),
+          parsePhotoData([...response.data.data], patientPhotoID),
         );
-        setPhotoData(
-          parsePhotoData([...response.data.data], albumCategoryListID),
-        );
+        setPhotoData(parsePhotoData([...response.data.data], patientPhotoID));
 
         setIsDataInitialized(true);
         setIsLoading(false);
@@ -233,15 +227,29 @@ function PatientPhotoGrid(props) {
   //   }));
   // };
 
-  // Parse photo album data and filter by albumCategoryListID
-  const parsePhotoData = (tempData, targetAlbumCategoryListID) => {
-    // Filter the data to include only items matching the target albumCategoryListID
+  //   // Parse photo album data and filter by albumCategoryListID
+  //   const parsePhotoData = (tempData, targetAlbumCategoryListID) => {
+  //     // Filter the data to include only items matching the target albumCategoryListID
+  //     const filteredData = tempData.filter((item) => {
+  //       return item.albumCategoryListID.toString() === targetAlbumCategoryListID;
+  //     });
+  //     // Map the filtered data to the desired format
+  //     return filteredData.map((item) => ({
+  //       patientPhotoID: item.patientPhotoID.toString(),
+  //       photoPath: item.photoPath?.toString() || null, // Handle null values
+  //       albumCategoryName: item.albumCategoryName?.toString(),
+  //       albumCategoryListID: item.albumCategoryListID.toString(),
+  //       photoDetails: item.photoDetails?.toString() || null,
+  //     }));
+  //   };
+
+  const parsePhotoData = (tempData, targetPatientPhotoID) => {
+
     const filteredData = tempData.filter((item) => {
-      return item.albumCategoryListID.toString() === targetAlbumCategoryListID;
+      return item.patientPhotoID.toString() === targetPatientPhotoID;
     });
-    // Map the filtered data to the desired format
+
     return filteredData.map((item) => ({
-      patientID: item.patientID,
       patientPhotoID: item.patientPhotoID.toString(),
       photoPath: item.photoPath?.toString() || null, // Handle null values
       albumCategoryName: item.albumCategoryName?.toString(),
@@ -404,19 +412,6 @@ function PatientPhotoGrid(props) {
     navigation.navigate(routes.PATIENT_PROFILE, { id: patientID });
   };
 
-  // Navigate to photo grid page on click album
-  const onClickPhoto = () => {
-    navigation.navigate(routes.PATIENT_VIEW_PHOTO, {
-      patientID,
-      albumCategoryListID,
-      photoDetails,
-      albumCategoryName,
-      patientPhotoID,
-      photos: photoData,
-      initialIndex: index,
-    });
-  };
-
   // NEED TO EDIT!!! (COME  BACK LTR)
   // Return formatted row data for table display
   // Note: keys originally ordered like ['ID', 'Author', 'Description', 'Created Datetime', 'Remarks']
@@ -454,30 +449,13 @@ function PatientPhotoGrid(props) {
     return ['ID', 'Author', 'Description', 'Remarks', 'Created Datetime'];
   };
 
-  const staticData = [
-    {
-      albumCategoryName: 'Family',
-      patientPhotoID: '15',
-      photoDetails: 'apple logo',
-      photoPath:
-        'https://res.cloudinary.com/dbpearfyp/image/upload/v1730400494/Patient/Yan_Yi_Sxxxx148C/Family/tygjuwvopmrafe59rkfq.jpg',
-    },
-    {
-      albumCategoryName: 'Family',
-      patientPhotoID: '16',
-      photoDetails: 'apple logo',
-      photoPath:
-        'https://res.cloudinary.com/dbpearfyp/image/upload/v1730400494/Patient/Yan_Yi_Sxxxx148C/Family/tygjuwvopmrafe59rkfq.jpg',
-    },
-  ];
-
   return isLoading ? (
     <ActivityIndicator visible />
   ) : (
     <View style={styles.container}>
       <View style={{ justifyContent: 'space-between' }}>
         <View style={{ alignSelf: 'center', marginTop: 15, maxHeight: 120 }}>
-          {!isEmptyObject(patientData) ? (
+          {/* {!isEmptyObject(patientData) ? (
             <ProfileNameButton
               testID={`${testID}_profileNameButton`}
               profilePicture={patientData.profilePicture}
@@ -492,10 +470,10 @@ function PatientPhotoGrid(props) {
             />
           ) : (
             <LoadingWheel />
-          )}
+          )} */}
         </View>
 
-        <View>
+        {/* <View>
           <SearchFilterBar
             originalList={originalData}
             setList={setPhotoData}
@@ -518,10 +496,10 @@ function PatientPhotoGrid(props) {
             setDisplayMode={setDisplayMode}
             DISPLAY_MODES={DISPLAY_MODES}
           />
-        </View>
+        </View> */}
       </View>
-      {console.log('Current display mode:', displayMode)}
-      {console.log('Length of photoData:', photoData.length)}
+      {console.log('Current display mode VIEWPHOTO:', displayMode)}
+      {/* {console.log('Length of photoData VIEWPHOTO:', photoData.length)} */}
       {displayMode == 'rows' ? (
         <FlatList
           onTouchStart={() => Keyboard.dismiss()}
@@ -535,20 +513,22 @@ function PatientPhotoGrid(props) {
               statusCode,
               isLoading,
               isError,
-              'No photos found',
+              'No albums found',
               true,
             )
           }
           data={photoData}
           keyboardShouldPersistTaps="handled"
           keyExtractor={(item) => item.patientPhotoID.toString()}
-          numColumns={3}
-          renderItem={({ item, index }) => {
-            console.log('Rendering item:', item);
-            console.log('Rendering item:', item.patientPhotoID.toString());
-            console.log('Rendering item:', item.photoPath);
-            console.log('Rendering item:', item.albumCategoryName);
-            console.log('Rendering item:', item.photoDetails);
+          renderItem={({ item }) => {
+            console.log('Rendering item VIEWPHOTO:', item);
+            console.log(
+              'Rendering item VIEWPHOTO:',
+              item.patientPhotoID.toString(),
+            );
+            console.log('Rendering itemVIEWPHOTO:', item.photoPath);
+            console.log('Rendering item VIEWPHOTO:', item.albumCategoryName);
+            console.log('Rendering item VIEWPHOTO:', item.photoDetails);
             console.log('Length of photoData INSIDE:', photoData.length);
             return (
               <Swipeable
@@ -562,18 +542,12 @@ function PatientPhotoGrid(props) {
                     activeOpacity={1}
                     disabled={!isScrolling}
                   >
-                    <PhotoGridItem
+                    <PhotoCarouselItem
                       patientPhotoID={item.patientPhotoID.toString()}
                       photoPath={item.photoPath}
                       albumCategoryName={item.albumCategoryName}
-                      albumCategoryListID={item.albumCategoryListID}
                       photoDetails={item.photoDetails}
                       patientID={item.patientID}
-                      numPhotos={photoData.length}
-                      initialIndex={index}
-                      onDelete={() => handleDeletePhoto(item.patientPhotoID)}
-                      onEdit={() => handleEditPhoto(item.patientPhotoID)}
-                      handleOnPress={onClickPhoto}
                     />
                   </TouchableOpacity>
                 }
@@ -603,9 +577,9 @@ function PatientPhotoGrid(props) {
           <Text>Testing Row</Text>
         </View>
       )}
-      <View style={styles.addBtn}>
-        <AddButton title="Add Photo" onPress={handleOnClickAddLog} />
-      </View>
+      {/* <View style={styles.addBtn}>
+        <AddButton title="Add Album" onPress={handleOnClickAddLog} />
+      </View> */}
       <AddPatientProblemLogModal
         showModal={isModalVisible}
         modalMode={modalMode}
@@ -634,4 +608,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PatientPhotoGrid;
+export default PatientViewPhoto;

@@ -549,8 +549,6 @@ function PatientPhotoAlbum(props) {
                       onDelete={() => handleDeleteAlbum(item.patientPhotoID)}
                       onEdit={() => handleEditAlbum(item.patientPhotoID)}
                       handleOnPress={onClickAlbum}
-                      // navigation={navigation}
-                      // routes={routes.PATIENT_PHOTO_GRID}
                     />
                   </TouchableOpacity>
                 }
