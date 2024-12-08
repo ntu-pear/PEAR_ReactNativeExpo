@@ -123,7 +123,7 @@ function PatientPhotoAlbum(props) {
   const [statusCode, setStatusCode] = useState(200);
   const [isReloadList, setIsReloadList] = useState(true);
 
-  // Problem log data related states
+  // Album data related states
   const [originalData, setOriginalData] = useState([]);
   const [photoData, setPhotoData] = useState([]);
   const [formData, setFormData] = useState({
@@ -133,6 +133,7 @@ function PatientPhotoAlbum(props) {
     albumCategoryListID: 1,
     patientPhotoID: 1,
   });
+  const [photoCount, setPhotoCount] = useState([]);
 
   // const [patientAlbumIDs, setPatientAlbumIDs] = useState([]);
   const [patientPhotoIDs, setPatientPhotoIDs] = useState([]);
@@ -179,10 +180,31 @@ function PatientPhotoAlbum(props) {
           'parsed response.data.data: ',
           parsePhotoData([...response.data.data]),
         );
-        // setPatientPhoto(response.data.data); // Store photo data separately
-        setOriginalData(parsePhotoData([...response.data.data]));
-        setPhotoData(parsePhotoData([...response.data.data]));
+        console.log(
+          'combined merged data: ',
+          mergeSeededAlbumsWithPhotos(
+            parsePhotoData([...response.data.data]),
+            seededAlbums,
+          ),
+        );
 
+        const photoCount = countPhotosByAlbum([...response.data.data]);
+
+        setPhotoCount(photoCount);
+        setPhotoData(
+          mergeSeededAlbumsWithPhotos(
+            parsePhotoData([...response.data.data]),
+            seededAlbums,
+          ),
+        );
+        setOriginalData(
+          mergeSeededAlbumsWithPhotos(
+            parsePhotoData([...response.data.data]),
+            seededAlbums,
+          ),
+        );
+        // setOriginalData(parsePhotoData([...response.data.data]));
+        // setPhotoData(parsePhotoData([...response.data.data]));
         setIsDataInitialized(true);
         setIsLoading(false);
         setIsError(false);
@@ -192,8 +214,6 @@ function PatientPhotoAlbum(props) {
         console.log('Request failed with status code: ', response.status);
         setOriginalData([]);
         setPhotoData([]);
-        // setPatientPhoto(null); // Reset photo data in case of an error
-        // setPatientPhotoIDs([]); // testing
         setIsLoading(false);
         setIsError(true);
         setStatusCode(response.status);
@@ -230,6 +250,27 @@ function PatientPhotoAlbum(props) {
       albumCategoryListID: item.albumCategoryListID.toString(),
       photoDetails: item.photoDetails.toString() || null,
     }));
+  };
+
+  // Function to merge seeded albums with photo data
+  const mergeSeededAlbumsWithPhotos = (photoData, seededAlbums) => {
+    // Create a map of photoData by albumCategoryListID for quick lookup
+    const photoDataMap = photoData.reduce((acc, item) => {
+      acc[item.albumCategoryListID] = item;
+      return acc;
+    }, {});
+
+    // Combine seededAlbums with photoData
+    return seededAlbums.map((album) => {
+      const photo = photoDataMap[album.albumCategoryListID];
+      return {
+        albumCategoryListID: album.albumCategoryListID,
+        albumCategoryName: album.albumCategoryName,
+        patientID: patientID, // Use photo data if available
+        photoPath: photo ? photo.photoPath : null, // Use photo data if available
+        photoDetails: photo ? photo.photoDetails : null, // Use photo data if available
+      };
+    });
   };
 
   // Get patient data from backend
@@ -396,6 +437,26 @@ function PatientPhotoAlbum(props) {
     });
   };
 
+  const countPhotosByAlbum = (tempData) => {
+    // Group photos by albumCategoryListID
+    return tempData.reduce((acc, item) => {
+      const albumID = item.albumCategoryListID.toString();
+      if (!acc[albumID]) {
+        acc[albumID] = 0; // Initialize the count for this album
+      }
+      acc[albumID] += 1; // Increment the count for this album
+      return acc;
+    }, {});
+  };
+
+  const seededAlbums = [
+    { albumCategoryListID: '1', albumCategoryName: 'Family' },
+    { albumCategoryListID: '2', albumCategoryName: 'Friends' },
+    { albumCategoryListID: '4', albumCategoryName: 'Pet' },
+    { albumCategoryListID: '5', albumCategoryName: 'Food' },
+    { albumCategoryListID: '6', albumCategoryName: 'Activity' },
+  ];
+
   // NEED TO EDIT!!! (COME  BACK LTR)
   // Return formatted row data for table display
   // Note: keys originally ordered like ['ID', 'Author', 'Description', 'Created Datetime', 'Remarks']
@@ -546,6 +607,7 @@ function PatientPhotoAlbum(props) {
                       albumCategoryName={item.albumCategoryName}
                       albumCategoryListID={item.albumCategoryListID}
                       patientID={item.patientID}
+                      photoCount={photoCount[item.albumCategoryListID] || 0}
                       onDelete={() => handleDeleteAlbum(item.patientPhotoID)}
                       onEdit={() => handleEditAlbum(item.patientPhotoID)}
                       handleOnPress={onClickAlbum}
@@ -578,7 +640,7 @@ function PatientPhotoAlbum(props) {
           <Text>Testing Row</Text>
         </View>
       )}
-      <View style={styles.addBtn}>
+      {/* <View style={styles.addBtn}>
         <AddButton title="Add Album" onPress={handleOnClickAddLog} />
       </View>
       <AddPatientAlbumModal
@@ -590,7 +652,7 @@ function PatientPhotoAlbum(props) {
         onSubmit={
           modalMode == 'add' ? handleModalSubmitAdd : handleModalSubmitEdit
         }
-      />
+      /> */}
     </View>
   );
 }

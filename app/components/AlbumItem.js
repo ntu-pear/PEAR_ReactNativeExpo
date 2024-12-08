@@ -2,6 +2,9 @@ import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { Card, Button } from 'react-native-paper';
 
+// Assets
+import placeholderImage from 'app/assets/album_placeholder.png';
+
 // Configurations
 import colors from 'app/config/colors';
 import { useNavigation } from '@react-navigation/native';
@@ -12,6 +15,7 @@ const AlbumItem = ({
   photoPath,
   albumCategoryName,
   albumCategoryListID,
+  photoCount,
   onEdit,
   onDelete,
 }) => {
@@ -26,7 +30,10 @@ const AlbumItem = ({
     <TouchableOpacity onPress={handlePress}>
       <Card style={styles.card}>
         <Card.Content>
-          <Image source={{ uri: photoPath }} style={styles.photo} />
+          <Image
+            source={photoPath ? { uri: photoPath } : placeholderImage}
+            style={styles.photo}
+          />
 
           <View style={styles.contentContainer}>
             <View style={styles.textContainer}>
@@ -39,11 +46,20 @@ const AlbumItem = ({
                       {albumCategoryName}
                     </Text>
                   </Text>
+                  <Text style={{ marginTop: 6, marginLeft: 10 }}>
+                    (
+                    {photoCount < 1
+                      ? 'No photos'
+                      : `${photoCount} ${
+                          photoCount === 1 ? 'photo' : 'photos'
+                        }`}
+                    )
+                  </Text>
                 </View>
               ) : null}
             </View>
 
-            <View style={styles.buttonContainer}>
+            {/* <View style={styles.buttonContainer}>
               <Button
                 mode="outlined"
                 onPress={onEdit}
@@ -71,7 +87,7 @@ const AlbumItem = ({
               >
                 Delete
               </Button>
-            </View>
+            </View> */}
           </View>
         </Card.Content>
       </Card>
