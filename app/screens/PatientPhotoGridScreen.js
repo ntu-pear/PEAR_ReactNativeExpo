@@ -39,7 +39,7 @@ import LoadingWheel from 'app/components/LoadingWheel';
 import Swipeable from 'app/components/swipeable-components/Swipeable';
 import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
 import DynamicTable from 'app/components/DynamicTable';
-import AddPatientProblemLogModal from 'app/components/AddPatientProblemLogModal';
+import AddPatientPhotoModal from 'app/components/AddPatientPhotoModal';
 import PhotoGridItem from 'app/components/PhotoGridItem';
 
 function PatientPhotoGrid(props) {
@@ -606,7 +606,7 @@ function PatientPhotoGrid(props) {
       <View style={styles.addBtn}>
         <AddButton title="Add Photo" onPress={handleOnClickAddLog} />
       </View>
-      <AddPatientProblemLogModal
+      <AddPatientPhotoModal
         showModal={isModalVisible}
         modalMode={modalMode}
         formData={formData}
