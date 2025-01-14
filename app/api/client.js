@@ -4,6 +4,7 @@ import cache from 'app/utility/cache';
 
 // const baseURL = 'http://172.21.148.180:5678/api'; // old NTU server - changes to new api
 const baseURL = 'http://10.96.188.173:5678/api'; // old server for PEAR_CORE webapp
+// const baseURL = 'http://192.168.188.173:5678/api'; // changed on 13 jan
 // const baseURL = 'https://coremvc.fyp2017.com/api'; // old server
 
 const endpoint = '/User';

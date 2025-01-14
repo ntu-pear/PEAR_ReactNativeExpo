@@ -66,10 +66,6 @@ function PatientPhotoAlbum(props) {
 
   const navigation = useNavigation();
 
-  // // User ID for edit/add operations
-  // const { user } = useContext(AuthContext);
-  // const userID = user ? user.userID : null;
-
   // Modal states
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // either 'add' or 'edit'
