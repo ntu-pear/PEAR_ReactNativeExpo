@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Image, Text, StyleSheet, Dimensions } from 'react-native';
-import { Button } from 'react-native-paper'; // Assuming you're using react-native-paper for Button
-import colors from 'app/config/colors'; // Adjust this according to your color scheme
+import { Button } from 'react-native-paper';
+import colors from 'app/config/colors';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -9,6 +9,9 @@ const PhotoCarouselItem = ({
   photoPath,
   photoDetails,
   albumCategoryName,
+  startDate,
+  endDate,
+  country,
   onEdit,
   onDelete,
 }) => {
@@ -18,19 +21,14 @@ const PhotoCarouselItem = ({
   // Load image to get original dimensions
   useEffect(() => {
     Image.getSize(photoPath, (width, height) => {
-      // Set the original width and height of the image
       const aspectRatio = width / height;
+      let newWidth = screenWidth * 0.7;
+      let newHeight = newWidth / aspectRatio;
+      const availableHeight = screenHeight * 0.5;
 
-      // Start by setting the width of the image as a percentage of the screen width
-      let newWidth = screenWidth * 0.8; // 80% of the screen width
-      let newHeight = newWidth / aspectRatio; // Maintain the aspect ratio
-
-      // If the new image height exceeds the available screen height (minus space for text)
-      const availableHeight = screenHeight * 0.5; // Reserve 30% of the screen for other elements (like text)
       if (newHeight > availableHeight) {
-        // If the height is too big, adjust it based on the available space
         newHeight = availableHeight;
-        newWidth = newHeight * aspectRatio; // Recalculate the width to maintain aspect ratio
+        newWidth = newHeight * aspectRatio;
       }
 
       setImageWidth(newWidth);
@@ -40,25 +38,43 @@ const PhotoCarouselItem = ({
 
   return (
     <View style={styles.container}>
-      {/* Photo Display with original dimensions */}
       <Image
         source={{ uri: photoPath }}
         style={{ width: imageWidth, height: imageHeight }}
       />
-
-      {/* Photo Details - Now placed below the image */}
-      {photoDetails && (
-        <View style={styles.detailsContainer}>
+      <View style={styles.detailsContainer}>
+        {albumCategoryName && (
           <Text style={styles.boldText}>
             Album: <Text style={styles.normalText}>{albumCategoryName}</Text>
           </Text>
+        )}
+        {photoDetails && (
           <Text style={styles.boldText}>
             Details: <Text style={styles.normalText}>{photoDetails}</Text>
           </Text>
-        </View>
-      )}
-
-      {/* Button Container - Edit and Delete buttons */}
+        )}
+        {country && (
+          <Text style={styles.boldText}>
+            Country: <Text style={styles.normalText}>{country}</Text>
+          </Text>
+        )}
+        {startDate && (
+          <Text style={styles.boldText}>
+            Start Date:{' '}
+            <Text style={styles.normalText}>
+              {new Date(startDate).toLocaleDateString()}
+            </Text>
+          </Text>
+        )}
+        {endDate && (
+          <Text style={styles.boldText}>
+            End Date:{' '}
+            <Text style={styles.normalText}>
+              {new Date(endDate).toLocaleDateString()}
+            </Text>
+          </Text>
+        )}
+      </View>
       <View style={styles.buttonContainer}>
         <Button
           mode="outlined"
@@ -89,33 +105,34 @@ const PhotoCarouselItem = ({
   );
 };
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff', // Background color for container
+    backgroundColor: '#fff',
   },
   detailsContainer: {
-    marginTop: 10, // Adds space between the image and the details
+    marginTop: 10,
     paddingHorizontal: 20,
-    alignItems: 'center', // Center-align text
+    alignItems: 'center',
     justifyContent: 'center',
   },
   boldText: {
     fontSize: 16,
-    fontWeight: 'bold', // Bold text style for labels
-    textAlign: 'center', // Center-align the text in the bold section
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   normalText: {
     fontSize: 16,
-    fontWeight: 'normal', // Normal text style for values
-    color: '#000', // Change text color if needed for better contrast
-    textAlign: 'center', // Center-align the text in the normal section
+    fontWeight: 'normal',
+    color: '#000',
+    textAlign: 'center',
   },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'center', // Center buttons horizontally
+    justifyContent: 'center',
     marginTop: 12,
   },
   button: {

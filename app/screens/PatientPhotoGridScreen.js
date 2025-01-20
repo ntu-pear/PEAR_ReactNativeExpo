@@ -222,17 +222,6 @@ function PatientPhotoGrid(props) {
     }
   };
 
-  // // Parse photo album data
-  // const parsePhotoData = (tempData) => {
-  //   return tempData.map((item) => ({
-  //     patientPhotoID: item.patientPhotoID.toString(),
-  //     photoPath: item.photoPath.toString() || null, // Handle null values
-  //     albumCategoryName: item.albumCategoryName.toString(),
-  //     albumCategoryListID: item.albumCategoryListID.toString(),
-  //     photoDetails: item.photoDetails.toString() || null,
-  //   }));
-  // };
-
   // Parse photo album data and filter by albumCategoryListID
   const parsePhotoData = (tempData, targetAlbumCategoryListID) => {
     // Filter the data to include only items matching the target albumCategoryListID
@@ -453,23 +442,6 @@ function PatientPhotoGrid(props) {
   const getTableHeaderData = () => {
     return ['ID', 'Author', 'Description', 'Remarks', 'Created Datetime'];
   };
-
-  const staticData = [
-    {
-      albumCategoryName: 'Family',
-      patientPhotoID: '15',
-      photoDetails: 'apple logo',
-      photoPath:
-        'https://res.cloudinary.com/dbpearfyp/image/upload/v1730400494/Patient/Yan_Yi_Sxxxx148C/Family/tygjuwvopmrafe59rkfq.jpg',
-    },
-    {
-      albumCategoryName: 'Family',
-      patientPhotoID: '16',
-      photoDetails: 'apple logo',
-      photoPath:
-        'https://res.cloudinary.com/dbpearfyp/image/upload/v1730400494/Patient/Yan_Yi_Sxxxx148C/Family/tygjuwvopmrafe59rkfq.jpg',
-    },
-  ];
 
   return isLoading ? (
     <ActivityIndicator visible />

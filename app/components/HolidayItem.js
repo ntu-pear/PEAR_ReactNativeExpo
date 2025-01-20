@@ -10,6 +10,7 @@ const HolidayItem = ({
   patientPhotoID,
   photoPath,
   country,
+  countryListID,
   startDate,
   endDate,
   photoCount,
@@ -24,13 +25,15 @@ const HolidayItem = ({
     patientPhotoID,
     photoPath,
     country,
+    countryListID,
     startDate,
     endDate,
   });
 
   const handlePress = () => {
-    navigation.navigate('PatientPhotoGrid', {
+    navigation.navigate('PatientHolidayGrid', {
       patientID,
+      countryListID,
     });
   };
 

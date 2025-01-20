@@ -9,6 +9,7 @@ import routes from 'app/navigation/routes';
 import PatientMedicalHistoryScreen from 'app/screens/PatientMedicalHistoryScreen';
 import PatientAllergyScreen from 'app/screens/PatientAllergyScreen';
 import PatientHolidayScreen from 'app/screens/PatientHolidayScreen';
+import PatientHolidayGridScreen from 'app/screens/PatientHolidayGridScreen';
 import PatientPhotoAlbumScreen from 'app/screens/PatientPhotoAlbumScreen';
 import PatientPhotoGridScreen from 'app/screens/PatientPhotoGridScreen';
 import PatientViewPhotoScreen from 'app/screens/PatientViewPhotoScreen';
@@ -85,6 +86,15 @@ function PatientsNavigator() {
           headerShown: true,
           headerBackTitleVisible: false,
           title: 'Holiday',
+        }}
+      />
+      <Stack.Screen
+        name={routes.PATIENT_HOLIDAY_GRID}
+        component={PatientHolidayGridScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Holiday Photo Grid',
         }}
       />
       <Stack.Screen

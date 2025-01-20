@@ -39,64 +39,59 @@ import LoadingWheel from 'app/components/LoadingWheel';
 import Swipeable from 'app/components/swipeable-components/Swipeable';
 import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
 import DynamicTable from 'app/components/DynamicTable';
-import ProblemLogItem from 'app/components/ProblemLogItem';
-import AddPatientProblemLogModal from 'app/components/AddPatientProblemLogModal';
+import AddPatientPhotoModal from 'app/components/AddPatientPhotoModal';
 import PhotoGridItem from 'app/components/PhotoGridItem';
-import AlbumItem from 'app/components/AlbumItem';
-import PhotoCarouselItem from 'app/components/PhotoCarouselItem';
 
-function PatientViewPhoto(props) {
+function PatientHolidayGrid(props) {
   let { patientID, patientId } = props.route.params;
   if (patientId) {
     patientID = patientId;
   }
 
   let {
+    countryListID,
+    country,
+    startDate,
+    endDate,
     albumCategoryListID,
     photoDetails,
     albumCategoryName,
     patientPhotoID,
-    initialIndex,
-    numPhotos,
-    photoPath,
   } = props.route.params;
 
+  console.log('countryListID:', countryListID);
+  console.log('country:', country);
+  console.log('startDate:', startDate);
+  console.log('endDate:', endDate);
   console.log('PatientID:', patientID);
   console.log('AlbumCategoryListID:', albumCategoryListID);
   console.log('AlbumCategoryName:', albumCategoryName);
   console.log('PatientPhotoID:', patientPhotoID);
-  console.log('Photo Details:', photoDetails);
-  console.log('Index:', initialIndex);
-  console.log('Number of photos:', numPhotos);
 
-  const testID = `photo_album_screen_${patientID}`;
+  const testID = `holiday_grid_screen_${patientID}`;
 
   const navigation = useNavigation();
-
-  // // User ID for edit/add operations
-  // const { user } = useContext(AuthContext);
-  // const userID = user ? user.userID : null;
 
   // Modal states
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // either 'add' or 'edit'
 
   // Options for user to search by
-  const SEARCH_OPTIONS = ['Album Name'];
+  const SEARCH_OPTIONS = ['Photo Details'];
 
   // Display mode options
   const [displayMode, setDisplayMode] = useState('rows');
   const DISPLAY_MODES = ['rows', 'table'];
 
   // Sort options
-  const SORT_OPTIONS = ['Album Name'];
+  const SORT_OPTIONS = ['Photo Details'];
 
   // // Filter options
   // const FILTER_OPTIONS = ['Date'];
 
   // Mapping between sort/filter/search names and the respective field in the patient data retrieved from the backend
   const FIELD_MAPPING = {
-    'Album Name': 'albumCategoryName',
+    'Photo Details': 'photoDetails',
   };
 
   // Search, sort, and filter related states
@@ -145,9 +140,6 @@ function PatientViewPhoto(props) {
   const [patientPhotoIDs, setPatientPhotoIDs] = useState([]);
   const [latestPhoto, setLatestPhoto] = useState([]);
 
-  // //MODIFIED
-  // const [photoItems, setPhotoItems] = useState([]);
-
   // Patient data related states
   const [patientData, setPatientData] = useState({});
 
@@ -187,15 +179,10 @@ function PatientViewPhoto(props) {
         console.log('...response.data.data: ', [...response.data.data]);
         console.log(
           'parsed response.data.data: ',
-          parsePhotoData([...response.data.data], patientPhotoID),
+          parsePhotoData([...response.data.data], countryListID),
         );
-        // setPatientPhoto(response.data.data); // Store photo data separately
-        // setOriginalData(parsePhotoData([...response.data.data]));
-        // setPhotoData(parsePhotoData([...response.data.data]));
-        setOriginalData(
-          parsePhotoData([...response.data.data], patientPhotoID),
-        );
-        setPhotoData(parsePhotoData([...response.data.data], patientPhotoID));
+        setOriginalData(parsePhotoData([...response.data.data], countryListID));
+        setPhotoData(parsePhotoData([...response.data.data], countryListID));
 
         setIsDataInitialized(true);
         setIsLoading(false);
@@ -216,21 +203,33 @@ function PatientViewPhoto(props) {
     }
   };
 
-  const parsePhotoData = (tempData, targetPatientPhotoID) => {
+  const parsePhotoData = (tempData, targetCountryListID) => {
+    // Log the targetCountryListID
+    console.log('Target Country List ID:', targetCountryListID);
+
+    // Filter the data to include only items matching the target albumCategoryListID
     const filteredData = tempData.filter((item) => {
-      return item.patientPhotoID.toString() === targetPatientPhotoID;
+      const countryListIDValue =
+        item.holidayExperience?.countryListID?.toString() || null;
+      console.log('item.holidayExperience?.countryListID:', countryListIDValue);
+      return countryListIDValue === targetCountryListID.toString();
     });
 
+    // Log the filtered data
+    console.log('Filtered Data:', filteredData);
+
+    // Map the filtered data to the desired format, converting everything to a string
     return filteredData.map((item) => ({
-      patientPhotoID: item.patientPhotoID.toString(),
-      photoPath: item.photoPath?.toString() || null, // Handle null values
-      albumCategoryName: item.albumCategoryName?.toString(),
-      albumCategoryListID: item.albumCategoryListID.toString(),
+      patientID: item.patientID.toString() || null,
+      patientPhotoID: item.patientPhotoID.toString() || null,
+      photoPath: item.photoPath?.toString() || null,
+      albumCategoryName: item.albumCategoryName?.toString() || null,
+      albumCategoryListID: item.albumCategoryListID.toString() || null,
       photoDetails: item.photoDetails?.toString() || null,
-      countryListID: item.holidayExperience?.countryListID?.toString() || null,
-      country: item.holidayExperience?.country?.toString() || null,
-      startDate: item.holidayExperience?.startDate?.toString() || null,
-      endDate: item.holidayExperience?.endDate?.toString() || null,
+      country: item.country?.toString() || null,
+      countryListID: item.countryListID?.toString() || null,
+      startDate: item.startDate?.toString() || null,
+      endDate: item.endDate?.toString() || null,
     }));
   };
 
@@ -388,6 +387,19 @@ function PatientViewPhoto(props) {
     navigation.navigate(routes.PATIENT_PROFILE, { id: patientID });
   };
 
+  // Navigate to photo grid page on click album
+  const onClickPhoto = () => {
+    navigation.navigate(routes.PATIENT_VIEW_PHOTO, {
+      patientID,
+      albumCategoryListID,
+      photoDetails,
+      albumCategoryName,
+      patientPhotoID,
+      photos: photoData,
+      initialIndex: index,
+    });
+  };
+
   // NEED TO EDIT!!! (COME  BACK LTR)
   // Return formatted row data for table display
   // Note: keys originally ordered like ['ID', 'Author', 'Description', 'Created Datetime', 'Remarks']
@@ -429,6 +441,53 @@ function PatientViewPhoto(props) {
     <ActivityIndicator visible />
   ) : (
     <View style={styles.container}>
+      <View style={{ justifyContent: 'space-between' }}>
+        <View style={{ alignSelf: 'center', marginTop: 15, maxHeight: 120 }}>
+          {!isEmptyObject(patientData) ? (
+            <ProfileNameButton
+              testID={`${testID}_profileNameButton`}
+              profilePicture={patientData.profilePicture}
+              profileLineOne={patientData.preferredName}
+              profileLineTwo={
+                patientData.firstName + ' ' + patientData.lastName
+              }
+              handleOnPress={onClickProfile}
+              isPatient
+              isVertical={false}
+              size={90}
+            />
+          ) : (
+            <LoadingWheel />
+          )}
+        </View>
+
+        <View>
+          <SearchFilterBar
+            originalList={originalData}
+            setList={setPhotoData}
+            SEARCH_OPTIONS={SEARCH_OPTIONS}
+            FIELD_MAPPING={FIELD_MAPPING}
+            SORT_OPTIONS={SORT_OPTIONS}
+            // FILTER_OPTIONS={FILTER_OPTIONS}
+            // filterOptionDetails={filterOptionDetails}
+            datetime={datetime}
+            setDatetime={setDatetime}
+            sort={sort}
+            setSort={setSort}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            initializeData={isDataInitialized}
+            onInitialize={() => setIsDataInitialized(false)}
+            itemType="photo"
+            itemCount={photoData.length}
+            displayMode={displayMode}
+            setDisplayMode={setDisplayMode}
+            DISPLAY_MODES={DISPLAY_MODES}
+          />
+        </View>
+      </View>
+      {console.log('Current display mode:', displayMode)}
+      {console.log('Length of photoData:', photoData.length)}
       {displayMode == 'rows' ? (
         <FlatList
           onTouchStart={() => Keyboard.dismiss()}
@@ -442,25 +501,20 @@ function PatientViewPhoto(props) {
               statusCode,
               isLoading,
               isError,
-              'No albums found',
+              'No photos found',
               true,
             )
           }
           data={photoData}
           keyboardShouldPersistTaps="handled"
           keyExtractor={(item) => item.patientPhotoID.toString()}
-          renderItem={({ item }) => {
-            console.log('Rendering item VIEWPHOTO:', item);
-            console.log(
-              'Rendering item VIEWPHOTO:',
-              item.patientPhotoID.toString(),
-            );
-            console.log('Rendering item VIEWPHOTO:', item.photoPath);
-            console.log('Rendering item VIEWPHOTO:', item.albumCategoryName);
-            console.log('Rendering item VIEWPHOTO:', item.photoDetails);
-            console.log('Rendering item VIEWPHOTO:', item.startDate);
-            console.log('Rendering item VIEWPHOTO:', item.endDate);
-            console.log('Rendering item VIEWPHOTO:', item.country);
+          numColumns={3}
+          renderItem={({ item, index }) => {
+            console.log('Rendering item:', item);
+            console.log('Rendering item:', item.patientPhotoID.toString());
+            console.log('Rendering item:', item.photoPath);
+            console.log('Rendering item:', item.albumCategoryName);
+            console.log('Rendering item:', item.photoDetails);
             console.log('Length of photoData INSIDE:', photoData.length);
             return (
               <Swipeable
@@ -474,15 +528,33 @@ function PatientViewPhoto(props) {
                     activeOpacity={1}
                     disabled={!isScrolling}
                   >
-                    <PhotoCarouselItem
+                    {/* <PhotoGridItem
                       patientPhotoID={item.patientPhotoID.toString()}
                       photoPath={item.photoPath}
                       albumCategoryName={item.albumCategoryName}
+                      albumCategoryListID={item.albumCategoryListID}
                       photoDetails={item.photoDetails}
                       patientID={item.patientID}
-                      country={item.country}
-                      startDate={item.startDate}
-                      endDate={item.endDate}
+                      numPhotos={photoData.length}
+                      initialIndex={index}
+                      onDelete={() => handleDeletePhoto(item.patientPhotoID)}
+                      onEdit={() => handleEditPhoto(item.patientPhotoID)}
+                      handleOnPress={onClickPhoto}
+                    /> */}
+                    <PhotoGridItem
+                      patientPhotoID={item.patientPhotoID.toString()}
+                      photoPath={item.photoPath?.toString() || null}
+                      albumCategoryName={
+                        item.albumCategoryName?.toString() || null
+                      }
+                      albumCategoryListID={item.albumCategoryListID.toString()}
+                      photoDetails={item.photoDetails?.toString() || null}
+                      patientID={item.patientID.toString()}
+                      numPhotos={photoData.length.toString()}
+                      initialIndex={index.toString()}
+                      onDelete={() => handleDeletePhoto(item.patientPhotoID)}
+                      onEdit={() => handleEditPhoto(item.patientPhotoID)}
+                      handleOnPress={onClickPhoto}
                     />
                   </TouchableOpacity>
                 }
@@ -512,10 +584,10 @@ function PatientViewPhoto(props) {
           <Text>Testing Row</Text>
         </View>
       )}
-      {/* <View style={styles.addBtn}>
-        <AddButton title="Add Album" onPress={handleOnClickAddLog} />
-      </View> */}
-      <AddPatientProblemLogModal
+      <View style={styles.addBtn}>
+        <AddButton title="Add Photo" onPress={handleOnClickAddLog} />
+      </View>
+      <AddPatientPhotoModal
         showModal={isModalVisible}
         modalMode={modalMode}
         formData={formData}
@@ -543,4 +615,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PatientViewPhoto;
+export default PatientHolidayGrid;

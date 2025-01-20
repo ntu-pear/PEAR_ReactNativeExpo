@@ -434,7 +434,12 @@ function PatientHoliday(props) {
 
   // Navigate to photo grid page on click album
   const onClickAlbum = () => {
-    navigation.navigate(routes.PATIENT_PHOTO_GRID, {
+    console.log('Navigating to:', routes.PATIENT_HOLIDAY_GRID);
+    navigation.navigate(routes.PATIENT_HOLIDAY_GRID, {
+      countryListID,
+      country,
+      endDate,
+      startDate,
       patientID,
       albumCategoryListID,
       photoDetails,
@@ -550,7 +555,7 @@ function PatientHoliday(props) {
           }
           data={photoData}
           keyboardShouldPersistTaps="handled"
-          keyExtractor={(item) => item.patientPhotoID}
+          keyExtractor={(item) => item.countryListID}
           renderItem={({ item }) => {
             console.log('Rendering item:', item);
             console.log('Rendering item:', item.patientPhotoID);
@@ -576,11 +581,15 @@ function PatientHoliday(props) {
                       patientPhotoID={item.patientPhotoID}
                       photoPath={item.photoPath}
                       country={item.country || 'No Country Provided'}
+                      countryListID={
+                        item.countryListID || 'No Country Provided'
+                      }
                       startDate={item.startDate || 'Start date not available'}
                       endDate={item.endDate || 'End date not available'}
                       photoCount={photoCount[item.countryListID] || 0}
                       onEdit={() => handleEdit(item)}
                       onDelete={() => handleDelete(item)}
+                      handleOnPress={onClickAlbum}
                     />
                   </TouchableOpacity>
                 }

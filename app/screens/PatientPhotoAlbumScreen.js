@@ -39,10 +39,7 @@ import LoadingWheel from 'app/components/LoadingWheel';
 import Swipeable from 'app/components/swipeable-components/Swipeable';
 import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
 import DynamicTable from 'app/components/DynamicTable';
-import ProblemLogItem from 'app/components/ProblemLogItem';
-import AddPatientProblemLogModal from 'app/components/AddPatientProblemLogModal';
 import AddPatientAlbumModal from 'app/components/AddPatientAlbumModal';
-import PhotoGridItem from 'app/components/PhotoGridItem';
 import AlbumItem from 'app/components/AlbumItem';
 
 function PatientPhotoAlbum(props) {
@@ -131,10 +128,6 @@ function PatientPhotoAlbum(props) {
   });
   const [photoCount, setPhotoCount] = useState([]);
 
-  // const [patientAlbumIDs, setPatientAlbumIDs] = useState([]);
-  const [patientPhotoIDs, setPatientPhotoIDs] = useState([]);
-  const [latestPhoto, setLatestPhoto] = useState([]);
-
   // Patient data related states
   const [patientData, setPatientData] = useState({});
 
@@ -199,8 +192,6 @@ function PatientPhotoAlbum(props) {
             seededAlbums,
           ),
         );
-        // setOriginalData(parsePhotoData([...response.data.data]));
-        // setPhotoData(parsePhotoData([...response.data.data]));
         setIsDataInitialized(true);
         setIsLoading(false);
         setIsError(false);
@@ -433,14 +424,14 @@ function PatientPhotoAlbum(props) {
     });
   };
 
+  // Group photos by albumCategoryListID
   const countPhotosByAlbum = (tempData) => {
-    // Group photos by albumCategoryListID
     return tempData.reduce((acc, item) => {
       const albumID = item.albumCategoryListID.toString();
       if (!acc[albumID]) {
-        acc[albumID] = 0; // Initialize the count for this album
+        acc[albumID] = 0;
       }
-      acc[albumID] += 1; // Increment the count for this album
+      acc[albumID] += 1;
       return acc;
     }, {});
   };
@@ -490,23 +481,6 @@ function PatientPhotoAlbum(props) {
     return ['ID', 'Author', 'Description', 'Remarks', 'Created Datetime'];
   };
 
-  const staticData = [
-    {
-      albumCategoryName: 'Family',
-      patientPhotoID: '15',
-      photoDetails: 'apple logo',
-      photoPath:
-        'https://res.cloudinary.com/dbpearfyp/image/upload/v1730400494/Patient/Yan_Yi_Sxxxx148C/Family/tygjuwvopmrafe59rkfq.jpg',
-    },
-    {
-      albumCategoryName: 'Family',
-      patientPhotoID: '16',
-      photoDetails: 'apple logo',
-      photoPath:
-        'https://res.cloudinary.com/dbpearfyp/image/upload/v1730400494/Patient/Yan_Yi_Sxxxx148C/Family/tygjuwvopmrafe59rkfq.jpg',
-    },
-  ];
-
   return isLoading ? (
     <ActivityIndicator visible />
   ) : (
@@ -538,8 +512,6 @@ function PatientPhotoAlbum(props) {
             SEARCH_OPTIONS={SEARCH_OPTIONS}
             FIELD_MAPPING={FIELD_MAPPING}
             SORT_OPTIONS={SORT_OPTIONS}
-            // FILTER_OPTIONS={FILTER_OPTIONS}
-            // filterOptionDetails={filterOptionDetails}
             datetime={datetime}
             setDatetime={setDatetime}
             sort={sort}
@@ -550,105 +522,57 @@ function PatientPhotoAlbum(props) {
             onInitialize={() => setIsDataInitialized(false)}
             itemType="albums"
             itemCount={photoData.length}
-            displayMode={displayMode}
-            setDisplayMode={setDisplayMode}
-            DISPLAY_MODES={DISPLAY_MODES}
+            // Removed displayMode and setDisplayMode
           />
         </View>
       </View>
-      {console.log('Current display mode:', displayMode)}
-      {console.log('Length of photoData:', photoData.length)}
-      {displayMode == 'rows' ? (
-        <FlatList
-          onTouchStart={() => Keyboard.dismiss()}
-          onScrollBeginDrag={() => setIsScrolling(true)}
-          onScrollEndDrag={() => setIsScrolling(false)}
-          onRefresh={refreshPhotoData}
-          refreshing={isLoading}
-          height={'72%'}
-          ListEmptyComponent={() =>
-            noDataMessage(
-              statusCode,
-              isLoading,
-              isError,
-              'No albums found',
-              true,
-            )
-          }
-          data={photoData}
-          keyboardShouldPersistTaps="handled"
-          keyExtractor={(item) => item.patientPhotoID}
-          renderItem={({ item }) => {
-            console.log('Rendering item:', item);
-            console.log('Rendering item:', item.patientPhotoID);
-            console.log('Rendering item:', item.photoPath);
-            console.log('Rendering item:', item.albumCategoryName);
-            console.log('Rendering item:', item.photoDetails);
-            console.log('Length of photoData INSIDE:', photoData.length);
-            return (
-              <Swipeable
-                setIsScrolling={setIsScrolling}
-                onSwipeRight={() => handleDeleteAlbum(item.patientPhotoID)}
-                onSwipeLeft={() => handleEditAlbum(item.patientPhotoID)}
-                underlay={<EditDeleteUnderlay />}
-                item={
-                  <TouchableOpacity
-                    style={styles.logContainer}
-                    activeOpacity={1}
-                    disabled={!isScrolling}
-                  >
-                    <AlbumItem
-                      patientPhotoID={item.patientPhotoID}
-                      photoPath={item.photoPath}
-                      albumCategoryName={item.albumCategoryName}
-                      albumCategoryListID={item.albumCategoryListID}
-                      patientID={item.patientID}
-                      photoCount={photoCount[item.albumCategoryListID] || 0}
-                      onDelete={() => handleDeleteAlbum(item.patientPhotoID)}
-                      onEdit={() => handleEditAlbum(item.patientPhotoID)}
-                      handleOnPress={onClickAlbum}
-                    />
-                  </TouchableOpacity>
-                }
-              />
-            );
-          }}
-        />
-      ) : (
-        <View style={{ height: '72%', marginBottom: 20, marginHorizontal: 40 }}>
-          {/* <DynamicTable
-            headerData={getTableHeaderData()}
-            rowData={getTableRowData()}
-            widthData={[200, 200, 200, 200]}
-            screenName={'patient problem log'}
-            onClickDelete={handleDeleteLog}
-            onClickEdit={handleEditLog}
-            noDataMessage={noDataMessage(
-              statusCode,
-              isLoading,
-              isError,
-              'No problem log found',
-              false,
-            )}
-            del={true}
-            edit={true}
-          /> */}
-          <Text>Testing Row</Text>
-        </View>
-      )}
-      {/* <View style={styles.addBtn}>
-        <AddButton title="Add Album" onPress={handleOnClickAddLog} />
-      </View>
-      <AddPatientAlbumModal
-        showModal={isModalVisible}
-        modalMode={modalMode}
-        formData={formData}
-        setFormData={setFormData}
-        onClose={() => setIsModalVisible(false)}
-        onSubmit={
-          modalMode == 'add' ? handleModalSubmitAdd : handleModalSubmitEdit
+
+      {/* The layout now just shows the FlatList directly */}
+      <FlatList
+        onTouchStart={() => Keyboard.dismiss()}
+        onScrollBeginDrag={() => setIsScrolling(true)}
+        onScrollEndDrag={() => setIsScrolling(false)}
+        onRefresh={refreshPhotoData}
+        refreshing={isLoading}
+        height={'72%'}
+        ListEmptyComponent={() =>
+          noDataMessage(statusCode, isLoading, isError, 'No albums found', true)
         }
-      /> */}
+        data={photoData}
+        keyboardShouldPersistTaps="handled"
+        keyExtractor={(item) => item.albumCategoryListID}
+        renderItem={({ item }) => {
+          return (
+            <Swipeable
+              setIsScrolling={setIsScrolling}
+              onSwipeRight={() => handleDeleteAlbum(item.patientPhotoID)}
+              onSwipeLeft={() => handleEditAlbum(item.patientPhotoID)}
+              underlay={<EditDeleteUnderlay />}
+              item={
+                <TouchableOpacity
+                  style={styles.logContainer}
+                  activeOpacity={1}
+                  disabled={!isScrolling}
+                >
+                  <AlbumItem
+                    patientPhotoID={item.patientPhotoID}
+                    photoPath={item.photoPath}
+                    albumCategoryName={item.albumCategoryName}
+                    albumCategoryListID={item.albumCategoryListID}
+                    patientID={item.patientID}
+                    photoCount={photoCount[item.albumCategoryListID] || 0}
+                    onDelete={() => handleDeleteAlbum(item.patientPhotoID)}
+                    onEdit={() => handleEditAlbum(item.patientPhotoID)}
+                    handleOnPress={onClickAlbum}
+                  />
+                </TouchableOpacity>
+              }
+            />
+          );
+        }}
+      />
+
+      {/* Removed Add Button section */}
     </View>
   );
 }
