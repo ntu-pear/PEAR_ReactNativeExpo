@@ -464,21 +464,21 @@ function PatientPhotoGrid(props) {
         onScrollEndDrag={() => setIsScrolling(false)}
         onRefresh={refreshPhotoData}
         refreshing={isLoading}
-        height={'72%'}
+        height={'70%'}
         ListEmptyComponent={() =>
           noDataMessage(statusCode, isLoading, isError, 'No photos found', true)
         }
         data={photoData}
         keyboardShouldPersistTaps="handled"
         keyExtractor={(item) => item.patientPhotoID.toString()}
-        numColumns={3} // Only using one layout type here
+        numColumns={3}
         renderItem={({ item, index }) => {
           return (
             <Swipeable
               setIsScrolling={setIsScrolling}
               item={
                 <TouchableOpacity
-                  style={styles.logContainer}
+                  style={styles.photoContainer}
                   activeOpacity={1}
                   disabled={!isScrolling}
                 >
@@ -526,10 +526,10 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.white_var1,
   },
-  logContainer: {
+  photoContainer: {
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomColor: colors.white_var1,
   },
   addBtn: {
     marginTop: '0.01%',

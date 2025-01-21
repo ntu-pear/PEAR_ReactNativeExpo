@@ -531,13 +531,14 @@ function PatientPhotoAlbum(props) {
         onScrollEndDrag={() => setIsScrolling(false)}
         onRefresh={refreshPhotoData}
         refreshing={isLoading}
-        height={'72%'}
+        height={'77%'}
         ListEmptyComponent={() =>
           noDataMessage(statusCode, isLoading, isError, 'No albums found', true)
         }
         data={photoData}
         keyboardShouldPersistTaps="handled"
         keyExtractor={(item) => item.albumCategoryListID}
+        numColumns={2}
         renderItem={({ item }) => {
           return (
             <Swipeable
@@ -547,7 +548,7 @@ function PatientPhotoAlbum(props) {
               underlay={<EditDeleteUnderlay />}
               item={
                 <TouchableOpacity
-                  style={styles.logContainer}
+                  style={styles.albumContainer}
                   activeOpacity={1}
                   disabled={!isScrolling}
                 >
@@ -576,10 +577,10 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.white_var1,
   },
-  logContainer: {
+  albumContainer: {
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomColor: colors.white_var1,
   },
   addBtn: {
     marginTop: '0.01%',

@@ -1,9 +1,21 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Dimensions,
+} from 'react-native';
 import { Card, Button } from 'react-native-paper';
 import placeholderImage from 'app/assets/album_placeholder.png';
 import colors from 'app/config/colors';
 import { useNavigation } from '@react-navigation/native';
+
+const { width, height } = Dimensions.get('window');
+
+const photoHeight = (height - 750) / 3;
+const photoWidth = (width - 160) / 2;
 
 const HolidayItem = ({
   patientID,
@@ -55,7 +67,6 @@ const HolidayItem = ({
             <View style={styles.textContainer}>
               {country ? (
                 <View style={{ marginLeft: 5, marginTop: 5 }}>
-                  {/* Country and photo count side by side */}
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Text style={[styles.text, styles.bold]}>{country}</Text>
                     <Text style={{ marginTop: 6, marginLeft: 10 }}>
@@ -68,8 +79,6 @@ const HolidayItem = ({
                       )
                     </Text>
                   </View>
-
-                  {/* Start and end dates below */}
                   {startDate && endDate ? (
                     <Text style={styles.textBody}>
                       {formatDate(startDate)} - {formatDate(endDate)}
@@ -83,7 +92,7 @@ const HolidayItem = ({
               )}
             </View>
 
-            <View style={styles.buttonContainer}>
+            {/* <View style={styles.buttonContainer}>
               <Button
                 mode="outlined"
                 onPress={onEdit}
@@ -111,7 +120,7 @@ const HolidayItem = ({
               >
                 Delete
               </Button>
-            </View>
+            </View> */}
           </View>
         </Card.Content>
       </Card>
@@ -121,14 +130,15 @@ const HolidayItem = ({
 
 const styles = StyleSheet.create({
   card: {
-    margin: 10,
+    marginLeft: 10,
+    marginRight: -20,
     borderRadius: 8,
     elevation: 2,
     backgroundColor: colors.green_lightest,
   },
   photo: {
-    width: '100%',
-    height: 200,
+    width: photoWidth,
+    height: photoHeight,
     borderRadius: 8,
     marginBottom: 10,
     borderColor: colors.green_lighter,
@@ -153,19 +163,19 @@ const styles = StyleSheet.create({
   bold: {
     fontWeight: '600',
   },
-  buttonContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginLeft: 10,
-    marginTop: 5,
-  },
-  button: {
-    marginHorizontal: 5,
-  },
-  buttonContent: {
-    marginVertical: -5,
-    marginHorizontal: -10,
-  },
+  // buttonContainer: {
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   marginLeft: 10,
+  //   marginTop: 5,
+  // },
+  // button: {
+  //   marginHorizontal: 5,
+  // },
+  // buttonContent: {
+  //   marginVertical: -5,
+  //   marginHorizontal: -10,
+  // },
 });
 
 export default HolidayItem;

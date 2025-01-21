@@ -495,7 +495,7 @@ function PatientHolidayGrid(props) {
           onScrollEndDrag={() => setIsScrolling(false)}
           onRefresh={refreshPhotoData}
           refreshing={isLoading}
-          height={'72%'}
+          height={'70%'}
           ListEmptyComponent={() =>
             noDataMessage(
               statusCode,
@@ -524,23 +524,10 @@ function PatientHolidayGrid(props) {
                 // underlay={<EditDeleteUnderlay />}
                 item={
                   <TouchableOpacity
-                    style={styles.logContainer}
+                    style={styles.photoContainer}
                     activeOpacity={1}
                     disabled={!isScrolling}
                   >
-                    {/* <PhotoGridItem
-                      patientPhotoID={item.patientPhotoID.toString()}
-                      photoPath={item.photoPath}
-                      albumCategoryName={item.albumCategoryName}
-                      albumCategoryListID={item.albumCategoryListID}
-                      photoDetails={item.photoDetails}
-                      patientID={item.patientID}
-                      numPhotos={photoData.length}
-                      initialIndex={index}
-                      onDelete={() => handleDeletePhoto(item.patientPhotoID)}
-                      onEdit={() => handleEditPhoto(item.patientPhotoID)}
-                      handleOnPress={onClickPhoto}
-                    /> */}
                     <PhotoGridItem
                       patientPhotoID={item.patientPhotoID.toString()}
                       photoPath={item.photoPath?.toString() || null}
@@ -605,10 +592,10 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.white_var1,
   },
-  logContainer: {
+  photoContainer: {
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomColor: colors.white_var1,
   },
   addBtn: {
     marginTop: '0.01%',

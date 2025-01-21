@@ -516,8 +516,6 @@ function PatientHoliday(props) {
             SEARCH_OPTIONS={SEARCH_OPTIONS}
             FIELD_MAPPING={FIELD_MAPPING}
             SORT_OPTIONS={SORT_OPTIONS}
-            // FILTER_OPTIONS={FILTER_OPTIONS}
-            // filterOptionDetails={filterOptionDetails}
             datetime={datetime}
             setDatetime={setDatetime}
             sort={sort}
@@ -528,99 +526,65 @@ function PatientHoliday(props) {
             onInitialize={() => setIsDataInitialized(false)}
             itemType="albums"
             itemCount={photoData.length}
-            displayMode={displayMode}
-            setDisplayMode={setDisplayMode}
-            DISPLAY_MODES={DISPLAY_MODES}
           />
         </View>
       </View>
-      {console.log('Current display mode:', displayMode)}
       {console.log('Length of photoData:', photoData.length)}
-      {displayMode == 'rows' ? (
-        <FlatList
-          onTouchStart={() => Keyboard.dismiss()}
-          onScrollBeginDrag={() => setIsScrolling(true)}
-          onScrollEndDrag={() => setIsScrolling(false)}
-          onRefresh={refreshPhotoData}
-          refreshing={isLoading}
-          height={'72%'}
-          ListEmptyComponent={() =>
-            noDataMessage(
-              statusCode,
-              isLoading,
-              isError,
-              'No albums found',
-              true,
-            )
-          }
-          data={photoData}
-          keyboardShouldPersistTaps="handled"
-          keyExtractor={(item) => item.countryListID}
-          renderItem={({ item }) => {
-            console.log('Rendering item:', item);
-            console.log('Rendering item:', item.patientPhotoID);
-            console.log('Rendering item:', item.photoPath);
-            console.log('Rendering item:', item.albumCategoryName);
-            console.log('Rendering item:', item.photoDetails);
-            console.log('Rendering photocount:', item.photoCount);
-            console.log('Length of photoData INSIDE:', photoData.length);
-            return (
-              <Swipeable
-                setIsScrolling={setIsScrolling}
-                onSwipeRight={() => handleDeleteAlbum(item.patientPhotoID)}
-                onSwipeLeft={() => handleEditAlbum(item.patientPhotoID)}
-                underlay={<EditDeleteUnderlay />}
-                item={
-                  <TouchableOpacity
-                    style={styles.logContainer}
-                    activeOpacity={1}
-                    disabled={!isScrolling}
-                  >
-                    <HolidayItem
-                      patientID={item.patientID}
-                      patientPhotoID={item.patientPhotoID}
-                      photoPath={item.photoPath}
-                      country={item.country || 'No Country Provided'}
-                      countryListID={
-                        item.countryListID || 'No Country Provided'
-                      }
-                      startDate={item.startDate || 'Start date not available'}
-                      endDate={item.endDate || 'End date not available'}
-                      photoCount={photoCount[item.countryListID] || 0}
-                      onEdit={() => handleEdit(item)}
-                      onDelete={() => handleDelete(item)}
-                      handleOnPress={onClickAlbum}
-                    />
-                  </TouchableOpacity>
-                }
-              />
-            );
-          }}
-        />
-      ) : (
-        <View style={{ height: '72%', marginBottom: 20, marginHorizontal: 40 }}>
-          {/* <DynamicTable
-            headerData={getTableHeaderData()}
-            rowData={getTableRowData()}
-            widthData={[200, 200, 200, 200]}
-            screenName={'patient problem log'}
-            onClickDelete={handleDeleteLog}
-            onClickEdit={handleEditLog}
-            noDataMessage={noDataMessage(
-              statusCode,
-              isLoading,
-              isError,
-              'No problem log found',
-              false,
-            )}
-            del={true}
-            edit={true}
-          /> */}
-          <Text>Testing Row</Text>
-        </View>
-      )}
-      {/* <View style={styles.addBtn}>
-        <AddButton title="Add Album" onPress={handleOnClickAddLog} />
+      <FlatList
+        onTouchStart={() => Keyboard.dismiss()}
+        onScrollBeginDrag={() => setIsScrolling(true)}
+        onScrollEndDrag={() => setIsScrolling(false)}
+        onRefresh={refreshPhotoData}
+        refreshing={isLoading}
+        height={'70%'}
+        ListEmptyComponent={() =>
+          noDataMessage(statusCode, isLoading, isError, 'No albums found', true)
+        }
+        data={photoData}
+        keyboardShouldPersistTaps="handled"
+        keyExtractor={(item) => item.countryListID}
+        numColumns={2}
+        renderItem={({ item }) => {
+          console.log('Rendering item:', item);
+          console.log('Rendering item:', item.patientPhotoID);
+          console.log('Rendering item:', item.photoPath);
+          console.log('Rendering item:', item.albumCategoryName);
+          console.log('Rendering item:', item.photoDetails);
+          console.log('Rendering photocount:', item.photoCount);
+          console.log('Length of photoData INSIDE:', photoData.length);
+          return (
+            <Swipeable
+              setIsScrolling={setIsScrolling}
+              onSwipeRight={() => handleDeleteAlbum(item.patientPhotoID)}
+              onSwipeLeft={() => handleEditAlbum(item.patientPhotoID)}
+              underlay={<EditDeleteUnderlay />}
+              item={
+                <TouchableOpacity
+                  style={styles.holidayContainer}
+                  activeOpacity={1}
+                  disabled={!isScrolling}
+                >
+                  <HolidayItem
+                    patientID={item.patientID}
+                    patientPhotoID={item.patientPhotoID}
+                    photoPath={item.photoPath}
+                    country={item.country || 'No Country Provided'}
+                    countryListID={item.countryListID || 'No Country Provided'}
+                    startDate={item.startDate || 'Start date not available'}
+                    endDate={item.endDate || 'End date not available'}
+                    photoCount={photoCount[item.countryListID] || 0}
+                    // onEdit={() => handleEdit(item)}
+                    // onDelete={() => handleDelete(item)}
+                    handleOnPress={onClickAlbum}
+                  />
+                </TouchableOpacity>
+              }
+            />
+          );
+        }}
+      />
+      <View style={styles.addBtn}>
+        <AddButton title="Add Holiday" onPress={handleOnClickAddLog} />
       </View>
       <AddPatientAlbumModal
         showModal={isModalVisible}
@@ -631,7 +595,7 @@ function PatientHoliday(props) {
         onSubmit={
           modalMode == 'add' ? handleModalSubmitAdd : handleModalSubmitEdit
         }
-      /> */}
+      />
     </View>
   );
 }
@@ -640,10 +604,10 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.white_var1,
   },
-  logContainer: {
+  holidayContainer: {
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomColor: colors.white_var1,
   },
   addBtn: {
     marginTop: '0.01%',
