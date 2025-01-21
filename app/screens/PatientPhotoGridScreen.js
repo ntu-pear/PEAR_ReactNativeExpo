@@ -128,13 +128,6 @@ function PatientPhotoGrid(props) {
     patientPhotoID: 1,
   });
 
-  // const [patientAlbumIDs, setPatientAlbumIDs] = useState([]);
-  const [patientPhotoIDs, setPatientPhotoIDs] = useState([]);
-  const [latestPhoto, setLatestPhoto] = useState([]);
-
-  // //MODIFIED
-  // const [photoItems, setPhotoItems] = useState([]);
-
   // Patient data related states
   const [patientData, setPatientData] = useState({});
 
@@ -151,23 +144,6 @@ function PatientPhotoGrid(props) {
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isReloadList]),
   );
-
-  // useEffect(() => {
-  //   console.log("Updated photoData:", photoData);
-  // }, [photoData]);
-
-  //////////////////////////////////////////////////////////////
-  //MODIFIED FOR PHOTO
-
-  // // Set isLoading to true when retrieving data
-  // const refreshPhotoData = () => {
-  //   setIsLoading(true);
-  //   const promiseFunction = async () => {
-  //     await getPhotoData();
-  //     await getPatientData();
-  //   };
-  //   promiseFunction();
-  // };
 
   // Memoized data refresh function
   const refreshPhotoData = React.useCallback(async () => {
@@ -193,9 +169,6 @@ function PatientPhotoGrid(props) {
           'parsed response.data.data: ',
           parsePhotoData([...response.data.data], albumCategoryListID),
         );
-        // setPatientPhoto(response.data.data); // Store photo data separately
-        // setOriginalData(parsePhotoData([...response.data.data]));
-        // setPhotoData(parsePhotoData([...response.data.data]));
         setOriginalData(
           parsePhotoData([...response.data.data], albumCategoryListID),
         );
@@ -212,8 +185,6 @@ function PatientPhotoGrid(props) {
         console.log('Request failed with status code: ', response.status);
         setOriginalData([]);
         setPhotoData([]);
-        // setPatientPhoto(null); // Reset photo data in case of an error
-        // setPatientPhotoIDs([]); // testing
         setIsLoading(false);
         setIsError(true);
         setStatusCode(response.status);
@@ -474,8 +445,6 @@ function PatientPhotoGrid(props) {
             SEARCH_OPTIONS={SEARCH_OPTIONS}
             FIELD_MAPPING={FIELD_MAPPING}
             SORT_OPTIONS={SORT_OPTIONS}
-            // FILTER_OPTIONS={FILTER_OPTIONS}
-            // filterOptionDetails={filterOptionDetails}
             datetime={datetime}
             setDatetime={setDatetime}
             sort={sort}
@@ -486,98 +455,59 @@ function PatientPhotoGrid(props) {
             onInitialize={() => setIsDataInitialized(false)}
             itemType="photo"
             itemCount={photoData.length}
-            displayMode={displayMode}
-            setDisplayMode={setDisplayMode}
-            DISPLAY_MODES={DISPLAY_MODES}
           />
         </View>
       </View>
-      {console.log('Current display mode:', displayMode)}
-      {console.log('Length of photoData:', photoData.length)}
-      {displayMode == 'rows' ? (
-        <FlatList
-          onTouchStart={() => Keyboard.dismiss()}
-          onScrollBeginDrag={() => setIsScrolling(true)}
-          onScrollEndDrag={() => setIsScrolling(false)}
-          onRefresh={refreshPhotoData}
-          refreshing={isLoading}
-          height={'72%'}
-          ListEmptyComponent={() =>
-            noDataMessage(
-              statusCode,
-              isLoading,
-              isError,
-              'No photos found',
-              true,
-            )
-          }
-          data={photoData}
-          keyboardShouldPersistTaps="handled"
-          keyExtractor={(item) => item.patientPhotoID.toString()}
-          numColumns={3}
-          renderItem={({ item, index }) => {
-            console.log('Rendering item:', item);
-            console.log('Rendering item:', item.patientPhotoID.toString());
-            console.log('Rendering item:', item.photoPath);
-            console.log('Rendering item:', item.albumCategoryName);
-            console.log('Rendering item:', item.photoDetails);
-            console.log('Length of photoData INSIDE:', photoData.length);
-            return (
-              <Swipeable
-                setIsScrolling={setIsScrolling}
-                // onSwipeRight={() => handleDeletePhoto(item.patientPhotoID)}
-                // onSwipeLeft={() => handleEditPhoto(item.patientPhotoID)}
-                // underlay={<EditDeleteUnderlay />}
-                item={
-                  <TouchableOpacity
-                    style={styles.logContainer}
-                    activeOpacity={1}
-                    disabled={!isScrolling}
-                  >
-                    <PhotoGridItem
-                      patientPhotoID={item.patientPhotoID.toString()}
-                      photoPath={item.photoPath}
-                      albumCategoryName={item.albumCategoryName}
-                      albumCategoryListID={item.albumCategoryListID}
-                      photoDetails={item.photoDetails}
-                      patientID={item.patientID}
-                      numPhotos={photoData.length}
-                      initialIndex={index}
-                      onDelete={() => handleDeletePhoto(item.patientPhotoID)}
-                      onEdit={() => handleEditPhoto(item.patientPhotoID)}
-                      handleOnPress={onClickPhoto}
-                    />
-                  </TouchableOpacity>
-                }
-              />
-            );
-          }}
-        />
-      ) : (
-        <View style={{ height: '72%', marginBottom: 20, marginHorizontal: 40 }}>
-          {/* <DynamicTable
-            headerData={getTableHeaderData()}
-            rowData={getTableRowData()}
-            widthData={[200, 200, 200, 200]}
-            screenName={'patient problem log'}
-            onClickDelete={handleDeleteLog}
-            onClickEdit={handleEditLog}
-            noDataMessage={noDataMessage(
-              statusCode,
-              isLoading,
-              isError,
-              'No problem log found',
-              false,
-            )}
-            del={true}
-            edit={true}
-          /> */}
-          <Text>Testing Row</Text>
-        </View>
-      )}
+      <FlatList
+        onTouchStart={() => Keyboard.dismiss()}
+        onScrollBeginDrag={() => setIsScrolling(true)}
+        onScrollEndDrag={() => setIsScrolling(false)}
+        onRefresh={refreshPhotoData}
+        refreshing={isLoading}
+        height={'72%'}
+        ListEmptyComponent={() =>
+          noDataMessage(statusCode, isLoading, isError, 'No photos found', true)
+        }
+        data={photoData}
+        keyboardShouldPersistTaps="handled"
+        keyExtractor={(item) => item.patientPhotoID.toString()}
+        numColumns={3} // Only using one layout type here
+        renderItem={({ item, index }) => {
+          return (
+            <Swipeable
+              setIsScrolling={setIsScrolling}
+              item={
+                <TouchableOpacity
+                  style={styles.logContainer}
+                  activeOpacity={1}
+                  disabled={!isScrolling}
+                >
+                  <PhotoGridItem
+                    patientPhotoID={item.patientPhotoID.toString()}
+                    photoPath={item.photoPath}
+                    albumCategoryName={item.albumCategoryName}
+                    albumCategoryListID={item.albumCategoryListID}
+                    photoDetails={item.photoDetails}
+                    patientID={item.patientID}
+                    numPhotos={photoData.length}
+                    initialIndex={index}
+                    onDelete={() => handleDeletePhoto(item.patientPhotoID)}
+                    onEdit={() => handleEditPhoto(item.patientPhotoID)}
+                    handleOnPress={onClickPhoto}
+                  />
+                </TouchableOpacity>
+              }
+            />
+          );
+        }}
+      />
+
+      {/* Add Photo Button */}
       <View style={styles.addBtn}>
         <AddButton title="Add Photo" onPress={handleOnClickAddLog} />
       </View>
+
+      {/* Modal for adding/editing photo */}
       <AddPatientPhotoModal
         showModal={isModalVisible}
         modalMode={modalMode}

@@ -522,12 +522,9 @@ function PatientPhotoAlbum(props) {
             onInitialize={() => setIsDataInitialized(false)}
             itemType="albums"
             itemCount={photoData.length}
-            // Removed displayMode and setDisplayMode
           />
         </View>
       </View>
-
-      {/* The layout now just shows the FlatList directly */}
       <FlatList
         onTouchStart={() => Keyboard.dismiss()}
         onScrollBeginDrag={() => setIsScrolling(true)}
@@ -571,8 +568,6 @@ function PatientPhotoAlbum(props) {
           );
         }}
       />
-
-      {/* Removed Add Button section */}
     </View>
   );
 }

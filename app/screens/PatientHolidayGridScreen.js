@@ -268,7 +268,7 @@ function PatientHolidayGrid(props) {
 
     const result = await patientApi.addPatientPhoto(patientID, tempPhotoData);
     if (result.ok) {
-      console.log('submitting problem log data', tempPhotoData);
+      console.log('Submitting photo data', tempPhotoData);
       refreshPhotoData();
       setIsModalVisible(false);
 
