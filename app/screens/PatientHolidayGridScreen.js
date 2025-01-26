@@ -38,7 +38,6 @@ import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
 import LoadingWheel from 'app/components/LoadingWheel';
 import Swipeable from 'app/components/swipeable-components/Swipeable';
 import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
-import DynamicTable from 'app/components/DynamicTable';
 import AddPatientPhotoModal from 'app/components/AddPatientPhotoModal';
 import PhotoGridItem from 'app/components/PhotoGridItem';
 
@@ -59,15 +58,6 @@ function PatientHolidayGrid(props) {
     patientPhotoID,
   } = props.route.params;
 
-  console.log('countryListID:', countryListID);
-  console.log('country:', country);
-  console.log('startDate:', startDate);
-  console.log('endDate:', endDate);
-  console.log('PatientID:', patientID);
-  console.log('AlbumCategoryListID:', albumCategoryListID);
-  console.log('AlbumCategoryName:', albumCategoryName);
-  console.log('PatientPhotoID:', patientPhotoID);
-
   const testID = `holiday_grid_screen_${patientID}`;
 
   const navigation = useNavigation();
@@ -78,10 +68,6 @@ function PatientHolidayGrid(props) {
 
   // Options for user to search by
   const SEARCH_OPTIONS = ['Photo Details'];
-
-  // Display mode options
-  const [displayMode, setDisplayMode] = useState('rows');
-  const DISPLAY_MODES = ['rows', 'table'];
 
   // Sort options
   const SORT_OPTIONS = ['Photo Details'];
@@ -136,10 +122,6 @@ function PatientHolidayGrid(props) {
     patientPhotoID: 1,
   });
 
-  // const [patientAlbumIDs, setPatientAlbumIDs] = useState([]);
-  const [patientPhotoIDs, setPatientPhotoIDs] = useState([]);
-  const [latestPhoto, setLatestPhoto] = useState([]);
-
   // Patient data related states
   const [patientData, setPatientData] = useState({});
 
@@ -176,14 +158,31 @@ function PatientHolidayGrid(props) {
       const response = await patientApi.getPatientPhoto(patientID);
       if (response.ok) {
         console.log('response.data.data: ', response.data.data);
-        console.log('...response.data.data: ', [...response.data.data]);
         console.log(
           'parsed response.data.data: ',
-          parsePhotoData([...response.data.data], countryListID),
+          parsePhotoData(
+            [...response.data.data],
+            countryListID,
+            startDate,
+            endDate,
+          ),
         );
-        setOriginalData(parsePhotoData([...response.data.data], countryListID));
-        setPhotoData(parsePhotoData([...response.data.data], countryListID));
-
+        setOriginalData(
+          parsePhotoData(
+            [...response.data.data],
+            countryListID,
+            startDate,
+            endDate,
+          ),
+        );
+        setPhotoData(
+          parsePhotoData(
+            [...response.data.data],
+            countryListID,
+            startDate,
+            endDate,
+          ),
+        );
         setIsDataInitialized(true);
         setIsLoading(false);
         setIsError(false);
@@ -193,8 +192,6 @@ function PatientHolidayGrid(props) {
         console.log('Request failed with status code: ', response.status);
         setOriginalData([]);
         setPhotoData([]);
-        // setPatientPhoto(null); // Reset photo data in case of an error
-        // setPatientPhotoIDs([]); // testing
         setIsLoading(false);
         setIsError(true);
         setStatusCode(response.status);
@@ -203,20 +200,28 @@ function PatientHolidayGrid(props) {
     }
   };
 
-  const parsePhotoData = (tempData, targetCountryListID) => {
-    // Log the targetCountryListID
-    console.log('Target Country List ID:', targetCountryListID);
-
-    // Filter the data to include only items matching the target albumCategoryListID
+  const parsePhotoData = (
+    tempData,
+    targetCountryListID,
+    targetStartDate,
+    targetEndDate,
+  ) => {
+    // Filter the data to include only items matching the target countryListID, startDate, and endDate
     const filteredData = tempData.filter((item) => {
-      const countryListIDValue =
-        item.holidayExperience?.countryListID?.toString() || null;
-      console.log('item.holidayExperience?.countryListID:', countryListIDValue);
-      return countryListIDValue === targetCountryListID.toString();
-    });
+      // Ensure holidayExperience exists and is an object before trying to access its properties
+      const holidayExperience = item.holidayExperience || {}; // Default to an empty object if holidayExperience is null
 
-    // Log the filtered data
-    console.log('Filtered Data:', filteredData);
+      const countryListIDValue =
+        holidayExperience.countryListID?.toString() || null;
+      const startDateValue = holidayExperience.startDate?.toString() || null;
+      const endDateValue = holidayExperience.endDate?.toString() || null;
+
+      return (
+        countryListIDValue === targetCountryListID.toString() &&
+        startDateValue === targetStartDate.toString() &&
+        endDateValue === targetEndDate.toString()
+      );
+    });
 
     // Map the filtered data to the desired format, converting everything to a string
     return filteredData.map((item) => ({
@@ -226,10 +231,10 @@ function PatientHolidayGrid(props) {
       albumCategoryName: item.albumCategoryName?.toString() || null,
       albumCategoryListID: item.albumCategoryListID.toString() || null,
       photoDetails: item.photoDetails?.toString() || null,
-      country: item.country?.toString() || null,
-      countryListID: item.countryListID?.toString() || null,
-      startDate: item.startDate?.toString() || null,
-      endDate: item.endDate?.toString() || null,
+      country: item.holidayExperience?.country?.toString() || null,
+      countryListID: item.holidayExperience?.countryListID?.toString() || null,
+      startDate: item.holidayExperience?.startDate?.toString() || null,
+      endDate: item.holidayExperience?.endDate?.toString() || null,
     }));
   };
 
@@ -275,9 +280,6 @@ function PatientHolidayGrid(props) {
       alertTitle = 'Successfully added photo';
     } else {
       const errors = result.data?.message;
-
-      console.log(result);
-
       result.data
         ? (alertDetails = `\n${errors}\n\nPlease try again.`)
         : (alertDetails = 'Please try again.');
@@ -400,43 +402,6 @@ function PatientHolidayGrid(props) {
     });
   };
 
-  // NEED TO EDIT!!! (COME  BACK LTR)
-  // Return formatted row data for table display
-  // Note: keys originally ordered like ['ID', 'Author', 'Description', 'Created Datetime', 'Remarks']
-  const getTableRowData = () => {
-    const dataNoIDs = photoData.map(
-      ({ patientID, userID, problemLogListID, ...rest }) => rest,
-    );
-
-    let tempLogData = dataNoIDs.map((item) => {
-      return Object.entries(item).map(([key, value]) => {
-        if (key.toLowerCase().includes('date')) {
-          return formatDate(new Date(value), true);
-        } else {
-          return String(value); // Convert other values to strings
-        }
-      });
-    });
-
-    // Reordered items to have remarks before created datetime
-    tempLogData = tempLogData.map((item) => {
-      let temp = item[3];
-      item[3] = item[4];
-      item[4] = temp;
-
-      return item;
-    });
-
-    return tempLogData;
-  };
-
-  // NEED TO EDIT!!! (COME  BACK LTR)
-  // Return formatted header data for table display
-  // Note: keys originally ordered like ['ID', 'Author', 'Description', 'Created Datetime', 'Remarks']
-  const getTableHeaderData = () => {
-    return ['ID', 'Author', 'Description', 'Remarks', 'Created Datetime'];
-  };
-
   return isLoading ? (
     <ActivityIndicator visible />
   ) : (
@@ -468,8 +433,6 @@ function PatientHolidayGrid(props) {
             SEARCH_OPTIONS={SEARCH_OPTIONS}
             FIELD_MAPPING={FIELD_MAPPING}
             SORT_OPTIONS={SORT_OPTIONS}
-            // FILTER_OPTIONS={FILTER_OPTIONS}
-            // filterOptionDetails={filterOptionDetails}
             datetime={datetime}
             setDatetime={setDatetime}
             sort={sort}
@@ -480,97 +443,56 @@ function PatientHolidayGrid(props) {
             onInitialize={() => setIsDataInitialized(false)}
             itemType="photo"
             itemCount={photoData.length}
-            displayMode={displayMode}
-            setDisplayMode={setDisplayMode}
-            DISPLAY_MODES={DISPLAY_MODES}
           />
         </View>
       </View>
-      {console.log('Current display mode:', displayMode)}
-      {console.log('Length of photoData:', photoData.length)}
-      {displayMode == 'rows' ? (
-        <FlatList
-          onTouchStart={() => Keyboard.dismiss()}
-          onScrollBeginDrag={() => setIsScrolling(true)}
-          onScrollEndDrag={() => setIsScrolling(false)}
-          onRefresh={refreshPhotoData}
-          refreshing={isLoading}
-          height={'70%'}
-          ListEmptyComponent={() =>
-            noDataMessage(
-              statusCode,
-              isLoading,
-              isError,
-              'No photos found',
-              true,
-            )
-          }
-          data={photoData}
-          keyboardShouldPersistTaps="handled"
-          keyExtractor={(item) => item.patientPhotoID.toString()}
-          numColumns={3}
-          renderItem={({ item, index }) => {
-            console.log('Rendering item:', item);
-            console.log('Rendering item:', item.patientPhotoID.toString());
-            console.log('Rendering item:', item.photoPath);
-            console.log('Rendering item:', item.albumCategoryName);
-            console.log('Rendering item:', item.photoDetails);
-            console.log('Length of photoData INSIDE:', photoData.length);
-            return (
-              <Swipeable
-                setIsScrolling={setIsScrolling}
-                // onSwipeRight={() => handleDeletePhoto(item.patientPhotoID)}
-                // onSwipeLeft={() => handleEditPhoto(item.patientPhotoID)}
-                // underlay={<EditDeleteUnderlay />}
-                item={
-                  <TouchableOpacity
-                    style={styles.photoContainer}
-                    activeOpacity={1}
-                    disabled={!isScrolling}
-                  >
-                    <PhotoGridItem
-                      patientPhotoID={item.patientPhotoID.toString()}
-                      photoPath={item.photoPath?.toString() || null}
-                      albumCategoryName={
-                        item.albumCategoryName?.toString() || null
-                      }
-                      albumCategoryListID={item.albumCategoryListID.toString()}
-                      photoDetails={item.photoDetails?.toString() || null}
-                      patientID={item.patientID.toString()}
-                      numPhotos={photoData.length.toString()}
-                      initialIndex={index.toString()}
-                      onDelete={() => handleDeletePhoto(item.patientPhotoID)}
-                      onEdit={() => handleEditPhoto(item.patientPhotoID)}
-                      handleOnPress={onClickPhoto}
-                    />
-                  </TouchableOpacity>
-                }
-              />
-            );
-          }}
-        />
-      ) : (
-        <View style={{ height: '72%', marginBottom: 20, marginHorizontal: 40 }}>
-          {/* <DynamicTable
-            headerData={getTableHeaderData()}
-            rowData={getTableRowData()}
-            widthData={[200, 200, 200, 200]}
-            screenName={'patient problem log'}
-            onClickDelete={handleDeleteLog}
-            onClickEdit={handleEditLog}
-            noDataMessage={noDataMessage(
-              statusCode,
-              isLoading,
-              isError,
-              'No problem log found',
-              false,
-            )}
-            del={true}
-            edit={true}
-          /> */}
-          <Text>Testing Row</Text>
-        </View>
-      )}
+      <FlatList
+        onTouchStart={() => Keyboard.dismiss()}
+        onScrollBeginDrag={() => setIsScrolling(true)}
+        onScrollEndDrag={() => setIsScrolling(false)}
+        onRefresh={refreshPhotoData}
+        refreshing={isLoading}
+        height={'70%'}
+        ListEmptyComponent={() =>
+          noDataMessage(statusCode, isLoading, isError, 'No photos found', true)
+        }
+        data={photoData}
+        keyboardShouldPersistTaps="handled"
+        keyExtractor={(item) => item.patientPhotoID.toString()}
+        numColumns={3}
+        renderItem={({ item, index }) => {
+          console.log('Rendering item:', item);
+          return (
+            <Swipeable
+              setIsScrolling={setIsScrolling}
+              item={
+                <TouchableOpacity
+                  style={styles.photoContainer}
+                  activeOpacity={1}
+                  disabled={!isScrolling}
+                >
+                  <PhotoGridItem
+                    patientPhotoID={item.patientPhotoID.toString()}
+                    photoPath={item.photoPath?.toString() || null}
+                    albumCategoryName={
+                      item.albumCategoryName?.toString() || null
+                    }
+                    albumCategoryListID={item.albumCategoryListID.toString()}
+                    photoDetails={item.photoDetails?.toString() || null}
+                    patientID={item.patientID.toString()}
+                    numPhotos={photoData.length.toString()}
+                    initialIndex={index.toString()}
+                    onDelete={() => handleDeletePhoto(item.patientPhotoID)}
+                    onEdit={() => handleEditPhoto(item.patientPhotoID)}
+                    handleOnPress={onClickPhoto}
+                  />
+                </TouchableOpacity>
+              }
+            />
+          );
+        }}
+      />
+
       <View style={styles.addBtn}>
         <AddButton title="Add Photo" onPress={handleOnClickAddLog} />
       </View>

@@ -93,37 +93,6 @@ function AddPatientAlbumModal({
     }
   };
 
-  //   return (
-  //     <AddEditModal
-  //       handleSubmit={handleSubmit}
-  //       isInputErrors={isInputErrors}
-  //       modalMode={modalMode}
-  //       onClose={onClose}
-  //       showModal={showModal}
-  //       modalTitle="Album"
-  //       modalContent={
-  //         <>
-  //           <SelectionInputField
-  //             isRequired
-  //             title="Album Title"
-  //             value={formData.albumCategoryListID}
-  //             dataArray={albumOptions}
-  //             onDataChange={handleAlbumData('albumCategoryListID')}
-  //           />
-  //           <InputField
-  //             isRequired
-  //             title={'Remarks'}
-  //             value={formData.problemLogRemarks}
-  //             onChangeText={handleAlbumData('problemLogRemarks')}
-  //             onEndEditing={setIsProblemRemarksError}
-  //             autoCapitalize="none"
-  //           />
-  //         </>
-  //       }
-  //     />
-  //   );
-  // }
-
   return (
     <AddEditModal
       handleSubmit={handleSubmit}

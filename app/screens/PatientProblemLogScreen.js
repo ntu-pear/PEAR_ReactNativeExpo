@@ -135,7 +135,7 @@ function PatientProblemLog(props) {
       await getPatientData();
     };
     promiseFunction();
-  }    
+  }
 
   // Get problem log data from backend
   const getLogData = async () => {

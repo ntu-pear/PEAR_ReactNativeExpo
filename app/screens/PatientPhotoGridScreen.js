@@ -38,7 +38,6 @@ import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
 import LoadingWheel from 'app/components/LoadingWheel';
 import Swipeable from 'app/components/swipeable-components/Swipeable';
 import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
-import DynamicTable from 'app/components/DynamicTable';
 import AddPatientPhotoModal from 'app/components/AddPatientPhotoModal';
 import PhotoGridItem from 'app/components/PhotoGridItem';
 
@@ -51,18 +50,9 @@ function PatientPhotoGrid(props) {
   let { albumCategoryListID, photoDetails, albumCategoryName, patientPhotoID } =
     props.route.params;
 
-  console.log('PatientID:', patientID);
-  console.log('AlbumCategoryListID:', albumCategoryListID);
-  console.log('AlbumCategoryName:', albumCategoryName);
-  console.log('PatientPhotoID:', patientPhotoID);
-
   const testID = `photo_grid_screen_${patientID}`;
 
   const navigation = useNavigation();
-
-  // // User ID for edit/add operations
-  // const { user } = useContext(AuthContext);
-  // const userID = user ? user.userID : null;
 
   // Modal states
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -70,10 +60,6 @@ function PatientPhotoGrid(props) {
 
   // Options for user to search by
   const SEARCH_OPTIONS = ['Photo Details'];
-
-  // Display mode options
-  const [displayMode, setDisplayMode] = useState('rows');
-  const DISPLAY_MODES = ['rows', 'table'];
 
   // Sort options
   const SORT_OPTIONS = ['Photo Details'];
@@ -164,11 +150,6 @@ function PatientPhotoGrid(props) {
       const response = await patientApi.getPatientPhoto(patientID);
       if (response.ok) {
         console.log('response.data.data: ', response.data.data);
-        console.log('...response.data.data: ', [...response.data.data]);
-        console.log(
-          'parsed response.data.data: ',
-          parsePhotoData([...response.data.data], albumCategoryListID),
-        );
         setOriginalData(
           parsePhotoData([...response.data.data], albumCategoryListID),
         );
@@ -245,7 +226,7 @@ function PatientPhotoGrid(props) {
 
     const result = await patientApi.addPatientPhoto(patientID, tempPhotoData);
     if (result.ok) {
-      console.log('submitting problem log data', tempPhotoData);
+      console.log('submitting photo data', tempPhotoData);
       refreshPhotoData();
       setIsModalVisible(false);
 
@@ -375,43 +356,6 @@ function PatientPhotoGrid(props) {
       photos: photoData,
       initialIndex: index,
     });
-  };
-
-  // NEED TO EDIT!!! (COME  BACK LTR)
-  // Return formatted row data for table display
-  // Note: keys originally ordered like ['ID', 'Author', 'Description', 'Created Datetime', 'Remarks']
-  const getTableRowData = () => {
-    const dataNoIDs = photoData.map(
-      ({ patientID, userID, problemLogListID, ...rest }) => rest,
-    );
-
-    let tempLogData = dataNoIDs.map((item) => {
-      return Object.entries(item).map(([key, value]) => {
-        if (key.toLowerCase().includes('date')) {
-          return formatDate(new Date(value), true);
-        } else {
-          return String(value); // Convert other values to strings
-        }
-      });
-    });
-
-    // Reordered items to have remarks before created datetime
-    tempLogData = tempLogData.map((item) => {
-      let temp = item[3];
-      item[3] = item[4];
-      item[4] = temp;
-
-      return item;
-    });
-
-    return tempLogData;
-  };
-
-  // NEED TO EDIT!!! (COME  BACK LTR)
-  // Return formatted header data for table display
-  // Note: keys originally ordered like ['ID', 'Author', 'Description', 'Created Datetime', 'Remarks']
-  const getTableHeaderData = () => {
-    return ['ID', 'Author', 'Description', 'Remarks', 'Created Datetime'];
   };
 
   return isLoading ? (

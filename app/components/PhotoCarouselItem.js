@@ -36,6 +36,16 @@ const PhotoCarouselItem = ({
     });
   }, [photoPath]);
 
+  const formatDate = (date) => {
+    if (!date) return 'Unknown';
+    const parsedDate = new Date(date);
+    const day = String(parsedDate.getDate()).padStart(2, '0'); // Ensure 2 digits
+    const month = String(parsedDate.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const year = parsedDate.getFullYear();
+
+    return `${day}/${month}/${year}`; // Format as DD/MM/YYYY
+  };
+
   return (
     <View style={styles.container}>
       <Image
@@ -61,17 +71,13 @@ const PhotoCarouselItem = ({
         {startDate && (
           <Text style={styles.boldText}>
             Start Date:{' '}
-            <Text style={styles.normalText}>
-              {new Date(startDate).toLocaleDateString()}
-            </Text>
+            <Text style={styles.normalText}>{formatDate(startDate)}</Text>
           </Text>
         )}
         {endDate && (
           <Text style={styles.boldText}>
             End Date:{' '}
-            <Text style={styles.normalText}>
-              {new Date(endDate).toLocaleDateString()}
-            </Text>
+            <Text style={styles.normalText}>{formatDate(endDate)}</Text>
           </Text>
         )}
       </View>
@@ -104,7 +110,6 @@ const PhotoCarouselItem = ({
     </View>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {

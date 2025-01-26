@@ -1,19 +1,5 @@
-// // Libs
-// import React from 'react';
-// import { Text, View } from 'react-native';
-
-// function PatientHolidayScreen() {
-//   return (
-//     <View>
-//       <Text>This is PatientHolidayScreen</Text>
-//     </View>
-//   );
-// }
-
-// export default PatientHolidayScreen;
-
 // Libs
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Alert,
   Keyboard,
@@ -32,7 +18,6 @@ import {
   isEmptyObject,
   noDataMessage,
   sortFilterInitialState,
-  formatDate,
 } from 'app/utility/miscFunctions';
 
 // Navigation
@@ -40,9 +25,6 @@ import routes from 'app/navigation/routes';
 
 // Configurations
 import colors from 'app/config/colors';
-
-// Auth
-import AuthContext from 'app/auth/context';
 
 // Components
 import ActivityIndicator from 'app/components/ActivityIndicator';
@@ -52,11 +34,7 @@ import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
 import LoadingWheel from 'app/components/LoadingWheel';
 import Swipeable from 'app/components/swipeable-components/Swipeable';
 import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
-import DynamicTable from 'app/components/DynamicTable';
-import ProblemLogItem from 'app/components/ProblemLogItem';
-import AddPatientProblemLogModal from 'app/components/AddPatientProblemLogModal';
 import AddPatientAlbumModal from 'app/components/AddPatientAlbumModal';
-import PhotoGridItem from 'app/components/PhotoGridItem';
 import HolidayItem from 'app/components/HolidayItem';
 
 function PatientHoliday(props) {
@@ -71,8 +49,6 @@ function PatientHoliday(props) {
     photoDetails,
     albumCategoryName,
     patientPhotoID,
-    holidayExperience,
-    holidayExpID,
     countryListID,
     country,
     startDate,
@@ -92,10 +68,6 @@ function PatientHoliday(props) {
 
   // Options for user to search by
   const SEARCH_OPTIONS = ['Country'];
-
-  // Display mode options
-  const [displayMode, setDisplayMode] = useState('rows');
-  const DISPLAY_MODES = ['rows', 'table'];
 
   // Sort options
   const SORT_OPTIONS = ['Country'];
@@ -156,10 +128,6 @@ function PatientHoliday(props) {
   });
   const [photoCount, setPhotoCount] = useState([]);
 
-  // const [patientAlbumIDs, setPatientAlbumIDs] = useState([]);
-  const [patientPhotoIDs, setPatientPhotoIDs] = useState([]);
-  const [latestPhoto, setLatestPhoto] = useState([]);
-
   // Patient data related states
   const [patientData, setPatientData] = useState({});
 
@@ -190,7 +158,6 @@ function PatientHoliday(props) {
     }
   }, []);
 
-  // Parse photo data and group by countryListID dynamically
   const parsePhotoDataByCountryListID = (tempData) => {
     // Filter out items where holidayExperience or countryListID is missing
     const filteredData = tempData.filter(
@@ -199,17 +166,23 @@ function PatientHoliday(props) {
         item.holidayExperience.countryListID != null, // Ensure countryListID exists
     );
 
-    // Group photos by countryListID
+    // Group photos by countryListID, startDate, and endDate
     const groupedPhotos = filteredData.reduce((acc, item) => {
       const countryListID = item.holidayExperience.countryListID.toString();
-      if (!acc[countryListID]) {
-        acc[countryListID] = [];
+      const startDate = item.holidayExperience.startDate || 'N/A';
+      const endDate = item.holidayExperience.endDate || 'N/A';
+
+      // Generate a composite key of countryListID, startDate, and endDate
+      const groupKey = `${countryListID}_${startDate}_${endDate}`;
+
+      if (!acc[groupKey]) {
+        acc[groupKey] = [];
       }
-      acc[countryListID].push(item);
+      acc[groupKey].push(item);
       return acc;
     }, {});
 
-    // For each countryListID, select the most recent photo based on patientPhotoID
+    // For each group, select the most recent photo based on patientPhotoID
     const latestPhotos = Object.values(groupedPhotos).map((photos) => {
       return photos.reduce((latest, current) => {
         return current.patientPhotoID > latest.patientPhotoID
@@ -219,28 +192,92 @@ function PatientHoliday(props) {
     });
 
     // Map the latest photos to a standardized format
-    return latestPhotos.map((item) => ({
-      patientID: item.patientID,
-      photoPath: item.photoPath?.toString() || null,
-      albumCategoryName: item.albumCategoryName?.toString() || '',
-      albumCategoryListID: item.albumCategoryListID?.toString() || '',
-      photoDetails: item.photoDetails?.toString() || null,
-      country: item.holidayExperience.country?.toString() || '',
-      countryListID: item.holidayExperience.countryListID?.toString() || '',
-      startDate: item.holidayExperience.startDate || '',
-      endDate: item.holidayExperience.endDate || '',
-    }));
+    return latestPhotos.map((item) => {
+      const startDate = item.holidayExperience.startDate || 'N/A';
+      const endDate = item.holidayExperience.endDate || 'N/A';
+
+      return {
+        patientID: item.patientID,
+        photoPath: item.photoPath?.toString() || null,
+        albumCategoryName: item.albumCategoryName?.toString() || '',
+        albumCategoryListID: item.albumCategoryListID?.toString() || '',
+        photoDetails: item.photoDetails?.toString() || null,
+        country: item.holidayExperience.country?.toString() || '',
+        countryListID: item.holidayExperience.countryListID?.toString() || '',
+        startDate: startDate,
+        endDate: endDate,
+      };
+    });
+  };
+
+  const parsePhotoDataWithCounts = (tempData) => {
+    // Filter out items where holidayExperience or countryListID is missing
+    const filteredData = tempData.filter(
+      (item) =>
+        item.holidayExperience && item.holidayExperience.countryListID != null,
+    );
+
+    // Group photos by countryListID, startDate, and endDate
+    const groupedPhotos = filteredData.reduce((acc, item) => {
+      const countryListID = item.holidayExperience.countryListID.toString();
+      const startDate = item.holidayExperience.startDate || 'N/A';
+      const endDate = item.holidayExperience.endDate || 'N/A';
+
+      // Generate a composite key of countryListID, startDate, and endDate
+      const groupKey = `${countryListID}_${startDate}_${endDate}`;
+
+      if (!acc[groupKey]) {
+        acc[groupKey] = {
+          photos: [],
+          countryListID,
+          startDate,
+          endDate,
+        };
+      }
+
+      acc[groupKey].photos.push(item); // Add the current photo to the group
+      return acc;
+    }, {});
+
+    // Create the final output array
+    return Object.values(groupedPhotos).map((group) => {
+      return {
+        countryListID: group.countryListID,
+        startDate: group.startDate,
+        endDate: group.endDate,
+        numPhotos: group.photos.length, // Count of photos in the group
+        photos: group.photos.map((item) => ({
+          patientID: item.patientID,
+          photoPath: item.photoPath?.toString() || null,
+          albumCategoryName: item.albumCategoryName?.toString() || '',
+          albumCategoryListID: item.albumCategoryListID?.toString() || '',
+          photoDetails: item.photoDetails?.toString() || null,
+          country: item.holidayExperience.country?.toString() || '',
+          countryListID: item.holidayExperience.countryListID?.toString() || '',
+          startDate: item.holidayExperience.startDate || 'N/A',
+          endDate: item.holidayExperience.endDate || 'N/A',
+        })), // Include all photos in this group
+      };
+    });
   };
 
   const countPhotosByCountry = (parsedData) => {
-    // Count photos by countryListID
-    return parsedData.reduce((acc, item) => {
-      const countryListID = item.countryListID?.toString();
-      if (countryListID) {
-        acc[countryListID] = (acc[countryListID] || 0) + 1;
-      }
+    const counts = parsedData.reduce((acc, item) => {
+      // Use top-level fields directly
+      const countryListID =
+        item.countryListID?.toString() || 'No Country Provided';
+      const startDate = item.startDate || 'N/A';
+      const endDate = item.endDate || 'N/A';
+
+      // Create a composite key
+      const compositeKey = `${countryListID}_${startDate}_${endDate}`;
+
+      // Increment the count based on the numPhotos in each group
+      acc[compositeKey] = (acc[compositeKey] || 0) + item.numPhotos;
+
       return acc;
     }, {});
+    return counts;
   };
 
   // Updated getPhotoData function
@@ -255,9 +292,11 @@ function PatientHoliday(props) {
 
         // Parse photo data dynamically based on countryListID
         const parsedData = parsePhotoDataByCountryListID(responseData);
+        const parsedDataWithCounts = parsePhotoDataWithCounts(responseData);
 
         // Use the parsedData for counting photos by country
-        const photoCount = countPhotosByCountry(parsedData);
+        const photoCount = countPhotosByCountry(parsedDataWithCounts);
+        console.log('photoCount try: ', photoCount);
 
         setPhotoCount(photoCount);
         setPhotoData(parsedData);
@@ -432,9 +471,7 @@ function PatientHoliday(props) {
     navigation.navigate(routes.PATIENT_PROFILE, { id: patientID });
   };
 
-  // Navigate to photo grid page on click album
   const onClickAlbum = () => {
-    console.log('Navigating to:', routes.PATIENT_HOLIDAY_GRID);
     navigation.navigate(routes.PATIENT_HOLIDAY_GRID, {
       countryListID,
       country,
@@ -446,43 +483,6 @@ function PatientHoliday(props) {
       albumCategoryName,
       patientPhotoID,
     });
-  };
-
-  // NEED TO EDIT!!! (COME  BACK LTR)
-  // Return formatted row data for table display
-  // Note: keys originally ordered like ['ID', 'Author', 'Description', 'Created Datetime', 'Remarks']
-  const getTableRowData = () => {
-    const dataNoIDs = photoData.map(
-      ({ patientID, userID, problemLogListID, ...rest }) => rest,
-    );
-
-    let tempLogData = dataNoIDs.map((item) => {
-      return Object.entries(item).map(([key, value]) => {
-        if (key.toLowerCase().includes('date')) {
-          return formatDate(new Date(value), true);
-        } else {
-          return String(value); // Convert other values to strings
-        }
-      });
-    });
-
-    // Reordered items to have remarks before created datetime
-    tempLogData = tempLogData.map((item) => {
-      let temp = item[3];
-      item[3] = item[4];
-      item[4] = temp;
-
-      return item;
-    });
-
-    return tempLogData;
-  };
-
-  // NEED TO EDIT!!! (COME  BACK LTR)
-  // Return formatted header data for table display
-  // Note: keys originally ordered like ['ID', 'Author', 'Description', 'Created Datetime', 'Remarks']
-  const getTableHeaderData = () => {
-    return ['ID', 'Author', 'Description', 'Remarks', 'Created Datetime'];
   };
 
   return isLoading ? (
@@ -529,7 +529,6 @@ function PatientHoliday(props) {
           />
         </View>
       </View>
-      {console.log('Length of photoData:', photoData.length)}
       <FlatList
         onTouchStart={() => Keyboard.dismiss()}
         onScrollBeginDrag={() => setIsScrolling(true)}
@@ -545,13 +544,6 @@ function PatientHoliday(props) {
         keyExtractor={(item) => item.countryListID}
         numColumns={2}
         renderItem={({ item }) => {
-          console.log('Rendering item:', item);
-          console.log('Rendering item:', item.patientPhotoID);
-          console.log('Rendering item:', item.photoPath);
-          console.log('Rendering item:', item.albumCategoryName);
-          console.log('Rendering item:', item.photoDetails);
-          console.log('Rendering photocount:', item.photoCount);
-          console.log('Length of photoData INSIDE:', photoData.length);
           return (
             <Swipeable
               setIsScrolling={setIsScrolling}
@@ -572,7 +564,13 @@ function PatientHoliday(props) {
                     countryListID={item.countryListID || 'No Country Provided'}
                     startDate={item.startDate || 'Start date not available'}
                     endDate={item.endDate || 'End date not available'}
-                    photoCount={photoCount[item.countryListID] || 0}
+                    photoCount={
+                      photoCount[
+                        `${item.countryListID || 'No Country Provided'}_${
+                          item.startDate || 'N/A'
+                        }_${item.endDate || 'N/A'}`
+                      ] || 0
+                    }
                     // onEdit={() => handleEdit(item)}
                     // onDelete={() => handleDelete(item)}
                     handleOnPress={onClickAlbum}

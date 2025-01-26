@@ -31,27 +31,23 @@ const HolidayItem = ({
 }) => {
   const navigation = useNavigation();
 
-  // Debugging
-  console.log('HolidayItem Props:', {
-    patientID,
-    patientPhotoID,
-    photoPath,
-    country,
-    countryListID,
-    startDate,
-    endDate,
-  });
-
   const handlePress = () => {
     navigation.navigate('PatientHolidayGrid', {
       patientID,
       countryListID,
+      startDate,
+      endDate,
     });
   };
 
   const formatDate = (date) => {
     if (!date) return 'Unknown';
-    return new Date(date).toLocaleDateString(); // Formats the date to DD/MM/YYYY or locale format
+    const parsedDate = new Date(date);
+    const day = String(parsedDate.getDate()).padStart(2, '0'); // Ensure 2 digits
+    const month = String(parsedDate.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const year = parsedDate.getFullYear();
+
+    return `${day}/${month}/${year}`; // Format as DD/MM/YYYY
   };
 
   return (

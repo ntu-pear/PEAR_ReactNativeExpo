@@ -18,7 +18,6 @@ import {
   isEmptyObject,
   noDataMessage,
   sortFilterInitialState,
-  formatDate,
 } from 'app/utility/miscFunctions';
 
 // Navigation
@@ -38,7 +37,6 @@ import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
 import LoadingWheel from 'app/components/LoadingWheel';
 import Swipeable from 'app/components/swipeable-components/Swipeable';
 import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
-import DynamicTable from 'app/components/DynamicTable';
 import AddPatientAlbumModal from 'app/components/AddPatientAlbumModal';
 import AlbumItem from 'app/components/AlbumItem';
 
@@ -70,15 +68,8 @@ function PatientPhotoAlbum(props) {
   // Options for user to search by
   const SEARCH_OPTIONS = ['Album Name'];
 
-  // Display mode options
-  const [displayMode, setDisplayMode] = useState('rows');
-  const DISPLAY_MODES = ['rows', 'table'];
-
   // Sort options
   const SORT_OPTIONS = ['Album Name'];
-
-  // // Filter options
-  // const FILTER_OPTIONS = ['Date'];
 
   // Mapping between sort/filter/search names and the respective field in the patient data retrieved from the backend
   const FIELD_MAPPING = {
@@ -163,22 +154,7 @@ function PatientPhotoAlbum(props) {
     if (patientID) {
       const response = await patientApi.getPatientPhoto(patientID);
       if (response.ok) {
-        console.log('response.data.data: ', response.data.data);
-        console.log('...response.data.data: ', [...response.data.data]);
-        console.log(
-          'parsed response.data.data: ',
-          parsePhotoData([...response.data.data]),
-        );
-        console.log(
-          'combined merged data: ',
-          mergeSeededAlbumsWithPhotos(
-            parsePhotoData([...response.data.data]),
-            seededAlbums,
-          ),
-        );
-
         const photoCount = countPhotosByAlbum([...response.data.data]);
-
         setPhotoCount(photoCount);
         setPhotoData(
           mergeSeededAlbumsWithPhotos(
@@ -443,43 +419,6 @@ function PatientPhotoAlbum(props) {
     { albumCategoryListID: '5', albumCategoryName: 'Food' },
     { albumCategoryListID: '6', albumCategoryName: 'Activity' },
   ];
-
-  // NEED TO EDIT!!! (COME  BACK LTR)
-  // Return formatted row data for table display
-  // Note: keys originally ordered like ['ID', 'Author', 'Description', 'Created Datetime', 'Remarks']
-  const getTableRowData = () => {
-    const dataNoIDs = photoData.map(
-      ({ patientID, userID, problemLogListID, ...rest }) => rest,
-    );
-
-    let tempLogData = dataNoIDs.map((item) => {
-      return Object.entries(item).map(([key, value]) => {
-        if (key.toLowerCase().includes('date')) {
-          return formatDate(new Date(value), true);
-        } else {
-          return String(value); // Convert other values to strings
-        }
-      });
-    });
-
-    // Reordered items to have remarks before created datetime
-    tempLogData = tempLogData.map((item) => {
-      let temp = item[3];
-      item[3] = item[4];
-      item[4] = temp;
-
-      return item;
-    });
-
-    return tempLogData;
-  };
-
-  // NEED TO EDIT!!! (COME  BACK LTR)
-  // Return formatted header data for table display
-  // Note: keys originally ordered like ['ID', 'Author', 'Description', 'Created Datetime', 'Remarks']
-  const getTableHeaderData = () => {
-    return ['ID', 'Author', 'Description', 'Remarks', 'Created Datetime'];
-  };
 
   return isLoading ? (
     <ActivityIndicator visible />
