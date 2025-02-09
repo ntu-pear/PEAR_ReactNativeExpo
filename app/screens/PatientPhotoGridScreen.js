@@ -9,6 +9,8 @@ import {
 } from 'react-native';
 import { FlatList, View } from 'native-base';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import * as ImagePicker from 'expo-image-picker';
+import mime from 'mime';
 
 // API
 import patientApi from 'app/api/patient';
@@ -112,6 +114,8 @@ function PatientPhotoGrid(props) {
     albumCategoryName: '',
     albumCategoryListID: 1,
     patientPhotoID: 1,
+    photoPath: '',
+    patientInfo: {},
   });
 
   // Patient data related states
@@ -260,6 +264,7 @@ function PatientPhotoGrid(props) {
       albumCategoryName: tempPhotoData.albumCategoryName,
       albumCategoryListID: tempPhotoData.albumCategoryListID,
       patientPhotoID: tempPhotoData.patientPhotoID,
+      photoPath: tempPhotoData.photoPath,
     });
   };
 
@@ -445,12 +450,10 @@ function PatientPhotoGrid(props) {
           );
         }}
       />
-
       {/* Add Photo Button */}
       <View style={styles.addBtn}>
         <AddButton title="Add Photo" onPress={handleOnClickAddLog} />
       </View>
-
       {/* Modal for adding/editing photo */}
       <AddPatientPhotoModal
         showModal={isModalVisible}
@@ -461,6 +464,8 @@ function PatientPhotoGrid(props) {
         onSubmit={
           modalMode == 'add' ? handleModalSubmitAdd : handleModalSubmitEdit
         }
+        patientID={patientID}
+        albumCategoryListID={albumCategoryListID}
       />
     </View>
   );

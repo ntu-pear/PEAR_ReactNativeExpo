@@ -375,15 +375,111 @@ const addPatientMobility = async (patientID, mobilityData) => {
 };
 
 const addPatientPhoto = async (patientID, photoData) => {
-  const payload = {
-    patientID: patientID,
-    patientPhotoID: photoData.patientPhotoID,
-    photoPath: photoData.photoPath,
-    albumCategoryName: photoData.albumCategoryName,
-    albumCategoryListID: photoData.albumCategoryListID,
-  };
-  return client.post(patientPhotoAdd, payload);
+  const photoFormData = new FormData();
+
+  // Append the image file if it exists, using the key "Photo"
+  if (photoData.Photo) {
+    photoFormData.append('Photo', {
+      uri: photoData.Photo.uri,
+      name: photoData.Photo.name,
+      type: photoData.Photo.type,
+    });
+  }
+
+  // Append HolidayExperience fields as defined in Swagger.
+  // Convert Date objects to ISO strings if needed.
+  if (photoData.HolidayExperienceAddDTO) {
+    const he = photoData.HolidayExperienceAddDTO;
+    photoFormData.append(
+      'HolidayExperienceAddDTO.CountryListID',
+      he.CountryListID != null ? he.CountryListID : '',
+    );
+    let startDate = he.StartDate;
+    if (startDate instanceof Date) {
+      startDate = startDate.toISOString();
+    }
+    photoFormData.append('HolidayExperienceAddDTO.StartDate', startDate || '');
+
+    let endDate = he.EndDate;
+    if (endDate instanceof Date) {
+      endDate = endDate.toISOString();
+    }
+    photoFormData.append('HolidayExperienceAddDTO.EndDate', endDate || '');
+  } else {
+    // Alternatively, if the holiday experience fields are provided at the top level:
+    if (photoData.CountryListID != null) {
+      photoFormData.append(
+        'HolidayExperienceAddDTO.CountryListID',
+        photoData.CountryListID,
+      );
+    }
+    if (photoData.StartDate) {
+      let startDate = photoData.StartDate;
+      if (startDate instanceof Date) {
+        startDate = startDate.toISOString();
+      }
+      photoFormData.append('HolidayExperienceAddDTO.StartDate', startDate);
+    }
+    if (photoData.EndDate) {
+      let endDate = photoData.EndDate;
+      if (endDate instanceof Date) {
+        endDate = endDate.toISOString();
+      }
+      photoFormData.append('HolidayExperienceAddDTO.EndDate', endDate);
+    }
+  }
+
+  // Append the remaining fields.
+  // If a field is not provided, we send an empty string (per Swagger's "Send empty value" note).
+  photoFormData.append('PhotoDetails', photoData.PhotoDetails || '');
+  photoFormData.append('AlbumCategoryName', photoData.AlbumCategoryName || '');
+  photoFormData.append(
+    'AlbumCategoryListID',
+    photoData.AlbumCategoryListID != null ? photoData.AlbumCategoryListID : '',
+  );
+  photoFormData.append('PatientID', patientID);
+
+  // Do not manually set the Content-Type header; let the HTTP client handle the multipart boundary.
+  return client.post(patientPhotoAdd, photoFormData);
 };
+
+// const addPatientPhoto = async (patientID, photoData) => {
+//   const photoFormData = new FormData();
+
+//   // Append the image file if it exists, using the key "Photo"
+//   if (photoData.Photo) {
+//     photoFormData.append('Photo', {
+//       uri: photoData.Photo.uri,
+//       name: photoData.Photo.name,
+//       type: photoData.Photo.type,
+//     });
+//   }
+
+//   // Append the other required fields using matching key names
+//   photoFormData.append('PatientID', patientID);
+//   photoFormData.append('PhotoDetails', photoData.PhotoDetails);
+//   photoFormData.append('AlbumCategoryListID', photoData.AlbumCategoryListID);
+
+//   // Append HolidayExperience fields if they exist.
+//   // We send them as part of a nested object by using bracket notation.
+//   if (photoData.HolidayExperience) {
+//     photoFormData.append(
+//       'HolidayExperience[CountryListID]',
+//       photoData.HolidayExperience.CountryListID,
+//     );
+//     photoFormData.append(
+//       'HolidayExperience[StartDate]',
+//       photoData.HolidayExperience.StartDate,
+//     );
+//     photoFormData.append(
+//       'HolidayExperience[EndDate]',
+//       photoData.HolidayExperience.EndDate,
+//     );
+//   }
+
+//   // Do not manually set the Content-Type header; let the HTTP client handle the multipart boundary.
+//   return client.post(patientPhotoAdd, photoFormData);
+// };
 
 // ************************* UPDATE REQUESTS *************************
 const updatePatient = async (data) => {
