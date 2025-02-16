@@ -9,8 +9,6 @@ import {
 } from 'react-native';
 import { FlatList, View } from 'native-base';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import * as ImagePicker from 'expo-image-picker';
-import mime from 'mime';
 
 // API
 import patientApi from 'app/api/patient';
@@ -115,6 +113,13 @@ function PatientPhotoGrid(props) {
     albumCategoryListID: 1,
     patientPhotoID: 1,
     photoPath: '',
+    holidayExperience: {
+      holidayExpID: '',
+      countryListID: '',
+      country: '',
+      startDate: '',
+      endDate: '',
+    },
     patientInfo: {},
   });
 
@@ -153,7 +158,10 @@ function PatientPhotoGrid(props) {
     if (patientID) {
       const response = await patientApi.getPatientPhoto(patientID);
       if (response.ok) {
-        console.log('response.data.data: ', response.data.data);
+        console.log(
+          'parsed response.data.data: ',
+          parsePhotoData([...response.data.data], albumCategoryListID),
+        );
         setOriginalData(
           parsePhotoData([...response.data.data], albumCategoryListID),
         );
@@ -178,13 +186,12 @@ function PatientPhotoGrid(props) {
     }
   };
 
-  // Parse photo album data and filter by albumCategoryListID
   const parsePhotoData = (tempData, targetAlbumCategoryListID) => {
     // Filter the data to include only items matching the target albumCategoryListID
     const filteredData = tempData.filter((item) => {
       return item.albumCategoryListID.toString() === targetAlbumCategoryListID;
     });
-    // Map the filtered data to the desired format
+    // Map the filtered data to the desired format, including holidayExperience if present.
     return filteredData.map((item) => ({
       patientID: item.patientID,
       patientPhotoID: item.patientPhotoID.toString(),
@@ -192,6 +199,22 @@ function PatientPhotoGrid(props) {
       albumCategoryName: item.albumCategoryName?.toString(),
       albumCategoryListID: item.albumCategoryListID.toString(),
       photoDetails: item.photoDetails?.toString() || null,
+      // Include holidayExperience if it exists, otherwise null.
+      holidayExperience: item.holidayExperience
+        ? {
+            holidayExpID:
+              item.holidayExperience.holidayExpID != null
+                ? item.holidayExperience.holidayExpID.toString()
+                : '',
+            countryListID:
+              item.holidayExperience.countryListID != null
+                ? item.holidayExperience.countryListID.toString()
+                : '',
+            country: item.holidayExperience.country?.toString() || '',
+            startDate: item.holidayExperience.startDate?.toString() || '',
+            endDate: item.holidayExperience.endDate?.toString() || '',
+          }
+        : null,
     }));
   };
 
@@ -250,21 +273,36 @@ function PatientPhotoGrid(props) {
     Alert.alert(alertTitle, alertDetails);
   };
 
-  // Edit photo
   const handleEditPhoto = (photoID) => {
     setIsModalVisible(true);
     setModalMode('edit');
 
-    const tempPhotoData = photoData.filter(
-      (x) => x.patientPhotoID == photoID,
-    )[0];
+    // Find the photo data by photoID
+    const tempPhotoData = photoData.find((x) => x.patientPhotoID == photoID);
 
     setFormData({
-      photoDetails: tempPhotoData.photoDetails,
-      albumCategoryName: tempPhotoData.albumCategoryName,
-      albumCategoryListID: tempPhotoData.albumCategoryListID,
-      patientPhotoID: tempPhotoData.patientPhotoID,
-      photoPath: tempPhotoData.photoPath,
+      PhotoDetails: tempPhotoData.photoDetails,
+      AlbumCategoryListID: tempPhotoData.albumCategoryListID || '',
+      AlbumCategoryName: tempPhotoData.albumCategoryListID
+        ? ''
+        : tempPhotoData.albumCategoryName,
+      PatientPhotoID: tempPhotoData.patientPhotoID,
+      Photo: tempPhotoData.photoPath,
+      HolidayExperienceUpdateDTO: tempPhotoData.holidayExperience
+        ? {
+            HolidayExpID: tempPhotoData.holidayExperience.holidayExpID,
+            CountryListID: Number(
+              tempPhotoData.holidayExperience.countryListID,
+            ),
+            StartDate: tempPhotoData.holidayExperience.startDate,
+            EndDate: tempPhotoData.holidayExperience.endDate,
+          }
+        : {
+            HolidayExpID: '',
+            CountryListID: '',
+            StartDate: '',
+            EndDate: '',
+          },
     });
   };
 
@@ -273,11 +311,16 @@ function PatientPhotoGrid(props) {
     setIsLoading(true);
 
     let tempFormData = { ...formData };
+    // Log the form data before submitting it
+    console.log('Submitted form data:', tempFormData);
 
     let alertTitle = '';
     let alertDetails = '';
 
     const result = await patientApi.updatePatientPhoto(patientID, tempFormData);
+
+    console.log('Update result:', result);
+
     if (result.ok) {
       refreshPhotoData();
       setIsModalVisible(false);
@@ -297,14 +340,14 @@ function PatientPhotoGrid(props) {
     Alert.alert(alertTitle, alertDetails);
   };
 
-  // Ask user to confirm deletion of problem log
   const handleDeletePhoto = (photoID) => {
-    const tempData = photoData.filter((x) => x.patientPhotoID == photoID)[0];
+    // Find the photo data by photoID
+    const tempData = photoData.find((x) => x.patientPhotoID == photoID);
 
     Alert.alert(
-      'Are you sure you wish to delete this item?',
-      `Album Name: ${tempData.albumCategoryName}\n` +
-        `Description: ${tempData.photoDetails}\n`,
+      'Are you sure you wish to delete this photo?',
+      `Album: ${tempData.albumCategoryName || 'N/A'}\n` +
+        `Description: ${tempData.photoDetails || 'No details'}\n`,
       [
         {
           text: 'Cancel',

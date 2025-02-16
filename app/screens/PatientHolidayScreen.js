@@ -541,7 +541,10 @@ function PatientHoliday(props) {
         }
         data={photoData}
         keyboardShouldPersistTaps="handled"
-        keyExtractor={(item) => item.countryListID}
+        // Use a composite key to ensure uniqueness
+        keyExtractor={(item) =>
+          `${item.countryListID}_${item.startDate}_${item.endDate}`
+        }
         numColumns={2}
         renderItem={({ item }) => {
           return (
@@ -571,8 +574,6 @@ function PatientHoliday(props) {
                         }_${item.endDate || 'N/A'}`
                       ] || 0
                     }
-                    // onEdit={() => handleEdit(item)}
-                    // onDelete={() => handleDelete(item)}
                     handleOnPress={onClickAlbum}
                   />
                 </TouchableOpacity>
@@ -581,6 +582,7 @@ function PatientHoliday(props) {
           );
         }}
       />
+
       <View style={styles.addBtn}>
         <AddButton title="Add Holiday" onPress={handleOnClickAddLog} />
       </View>

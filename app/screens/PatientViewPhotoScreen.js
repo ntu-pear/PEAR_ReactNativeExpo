@@ -14,12 +14,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import patientApi from 'app/api/patient';
 
 // Utilities
-import {
-  isEmptyObject,
-  noDataMessage,
-  sortFilterInitialState,
-  formatDate,
-} from 'app/utility/miscFunctions';
+import { isEmptyObject, noDataMessage } from 'app/utility/miscFunctions';
 
 // Navigation
 import routes from 'app/navigation/routes';
@@ -43,17 +38,11 @@ function PatientViewPhoto(props) {
     patientID = patientId;
   }
 
-  let {
-    albumCategoryListID,
-    photoDetails,
-    albumCategoryName,
-    patientPhotoID,
-    initialIndex,
-    numPhotos,
-    photoPath,
-  } = props.route.params;
+  let { patientPhotoID, albumCategoryListID } = props.route.params;
 
   const testID = `view_photo_screen_${patientID}`;
+
+  const navigation = useNavigation();
 
   // Modal states
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -96,6 +85,15 @@ function PatientViewPhoto(props) {
     albumCategoryName: '',
     albumCategoryListID: 1,
     patientPhotoID: 1,
+    photoPath: '',
+    holidayExperience: {
+      holidayExpID: '',
+      countryListID: '',
+      country: '',
+      startDate: '',
+      endDate: '',
+    },
+    patientInfo: {},
   });
 
   // Patient data related states
@@ -157,20 +155,44 @@ function PatientViewPhoto(props) {
   };
 
   const parsePhotoData = (tempData, targetPatientPhotoID) => {
+    // Filter the data to include only items matching the target patientPhotoID.
     const filteredData = tempData.filter((item) => {
       return item.patientPhotoID.toString() === targetPatientPhotoID;
     });
 
+    // Map the filtered data to the desired format.
     return filteredData.map((item) => ({
+      patientID: item.patientID,
       patientPhotoID: item.patientPhotoID.toString(),
-      photoPath: item.photoPath?.toString() || null, // Handle null values
-      albumCategoryName: item.albumCategoryName?.toString(),
-      albumCategoryListID: item.albumCategoryListID.toString(),
-      photoDetails: item.photoDetails?.toString() || null,
-      countryListID: item.holidayExperience?.countryListID?.toString() || null,
-      country: item.holidayExperience?.country?.toString() || null,
-      startDate: item.holidayExperience?.startDate?.toString() || null,
-      endDate: item.holidayExperience?.endDate?.toString() || null,
+      photoPath: item.photoPath ? item.photoPath.toString() : '',
+      albumCategoryName: item.albumCategoryName
+        ? item.albumCategoryName.toString()
+        : '',
+      albumCategoryListID: item.albumCategoryListID
+        ? item.albumCategoryListID.toString()
+        : '',
+      photoDetails: item.photoDetails ? item.photoDetails.toString() : '',
+      holidayExperience: item.holidayExperience
+        ? {
+            holidayExpID:
+              item.holidayExperience.holidayExpID != null
+                ? item.holidayExperience.holidayExpID.toString()
+                : '',
+            countryListID:
+              item.holidayExperience.countryListID != null
+                ? item.holidayExperience.countryListID.toString()
+                : '',
+            country: item.holidayExperience.country
+              ? item.holidayExperience.country.toString()
+              : '',
+            startDate: item.holidayExperience.startDate
+              ? item.holidayExperience.startDate.toString()
+              : '',
+            endDate: item.holidayExperience.endDate
+              ? item.holidayExperience.endDate.toString()
+              : '',
+          }
+        : {}, // Return an empty object if holidayExperience is missing.
     }));
   };
 
@@ -192,12 +214,6 @@ function PatientViewPhoto(props) {
         setIsRetry(true);
       }
     }
-  };
-
-  // Show form to add problem log when add button is clicked
-  const handleOnClickAddLog = () => {
-    setIsModalVisible(true);
-    setModalMode('add');
   };
 
   // Submit data to add photo
@@ -226,20 +242,36 @@ function PatientViewPhoto(props) {
     Alert.alert(alertTitle, alertDetails);
   };
 
-  // Edit photo
   const handleEditPhoto = (photoID) => {
     setIsModalVisible(true);
     setModalMode('edit');
 
-    const tempPhotoData = photoData.filter(
-      (x) => x.patientPhotoID == photoID,
-    )[0];
+    // Find the photo data by photoID
+    const tempPhotoData = photoData.find((x) => x.patientPhotoID == photoID);
 
     setFormData({
-      photoDetails: tempPhotoData.photoDetails,
-      albumCategoryName: tempPhotoData.albumCategoryName,
-      albumCategoryListID: tempPhotoData.albumCategoryListID,
-      patientPhotoID: tempPhotoData.patientPhotoID,
+      PhotoDetails: tempPhotoData.photoDetails,
+      AlbumCategoryListID: tempPhotoData.albumCategoryListID || '',
+      AlbumCategoryName: tempPhotoData.albumCategoryListID
+        ? ''
+        : tempPhotoData.albumCategoryName,
+      PatientPhotoID: tempPhotoData.patientPhotoID,
+      Photo: tempPhotoData.photoPath,
+      HolidayExperienceUpdateDTO: tempPhotoData.holidayExperience
+        ? {
+            HolidayExpID: tempPhotoData.holidayExperience.holidayExpID,
+            CountryListID: Number(
+              tempPhotoData.holidayExperience.countryListID,
+            ),
+            StartDate: tempPhotoData.holidayExperience.startDate,
+            EndDate: tempPhotoData.holidayExperience.endDate,
+          }
+        : {
+            HolidayExpID: '',
+            CountryListID: '',
+            StartDate: '',
+            EndDate: '',
+          },
     });
   };
 
@@ -248,11 +280,16 @@ function PatientViewPhoto(props) {
     setIsLoading(true);
 
     let tempFormData = { ...formData };
+    // Log the form data before submitting it
+    console.log('Submitted form data:', tempFormData);
 
     let alertTitle = '';
     let alertDetails = '';
 
     const result = await patientApi.updatePatientPhoto(patientID, tempFormData);
+
+    console.log('Update result:', result);
+
     if (result.ok) {
       refreshPhotoData();
       setIsModalVisible(false);
@@ -272,14 +309,14 @@ function PatientViewPhoto(props) {
     Alert.alert(alertTitle, alertDetails);
   };
 
-  // Ask user to confirm deletion of problem log
   const handleDeletePhoto = (photoID) => {
-    const tempData = photoData.filter((x) => x.patientPhotoID == photoID)[0];
+    // Find the photo data by photoID
+    const tempData = photoData.find((x) => x.patientPhotoID == photoID);
 
     Alert.alert(
-      'Are you sure you wish to delete this item?',
-      `Album Name: ${tempData.albumCategoryName}\n` +
-        `Description: ${tempData.photoDetails}\n`,
+      'Are you sure you wish to delete this photo?',
+      `Album: ${tempData.albumCategoryName || 'N/A'}\n` +
+        `Description: ${tempData.photoDetails || 'No details'}\n`,
       [
         {
           text: 'Cancel',
@@ -291,7 +328,6 @@ function PatientViewPhoto(props) {
     );
   };
 
-  // Delete photo
   const deletePhoto = async (photoID) => {
     setIsLoading(true);
 
@@ -302,22 +338,25 @@ function PatientViewPhoto(props) {
 
     const result = await patientApi.deletePatientPhoto(tempData);
     if (result.ok) {
-      refreshPhotoData();
+      await refreshPhotoData();
       setIsModalVisible(false);
+      navigation.replace('PatientPhotoGrid', {
+        patientID,
+        albumCategoryListID,
+      });
 
       alertTitle = 'Successfully deleted photo';
     } else {
       const errors = result.data?.message;
       console.log('Error deleting photo', result);
-
-      result.data
-        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-        : (alertDetails = 'Please try again.');
-
+      alertDetails = result.data
+        ? `\n${errors}\n\nPlease try again.`
+        : 'Please try again.';
       alertTitle = 'Error deleting photo';
     }
 
     Alert.alert(alertTitle, alertDetails);
+    setIsLoading(false);
   };
 
   return isLoading ? (
@@ -353,9 +392,11 @@ function PatientViewPhoto(props) {
                     albumCategoryName={item.albumCategoryName}
                     photoDetails={item.photoDetails}
                     patientID={item.patientID}
-                    country={item.country}
-                    startDate={item.startDate}
-                    endDate={item.endDate}
+                    country={item.holidayExperience.country}
+                    startDate={item.holidayExperience.startDate}
+                    endDate={item.holidayExperience.endDate}
+                    onDelete={() => handleDeletePhoto(item.patientPhotoID)}
+                    onEdit={() => handleEditPhoto(item.patientPhotoID)}
                   />
                 </TouchableOpacity>
               }

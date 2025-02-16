@@ -125,15 +125,21 @@ function PatientPhotoAlbum(props) {
   // Scrollview state
   const [isScrolling, setIsScrolling] = useState(false);
 
-  // Refresh list when new medication is added or user requests refresh
+  // // Refresh list when new photo is added or user requests refresh
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     if (isReloadList) {
+  //       refreshPhotoData();
+  //       setIsReloadList(false);
+  //     }
+  //     // eslint-disable-next-line react-hooks/exhaustive-deps
+  //   }, [isReloadList]),
+  // );
+
   useFocusEffect(
     React.useCallback(() => {
-      if (isReloadList) {
-        refreshPhotoData();
-        setIsReloadList(false);
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isReloadList]),
+      refreshPhotoData();
+    }, [])
   );
 
   // Memoized data refresh function

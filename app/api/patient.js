@@ -443,44 +443,6 @@ const addPatientPhoto = async (patientID, photoData) => {
   return client.post(patientPhotoAdd, photoFormData);
 };
 
-// const addPatientPhoto = async (patientID, photoData) => {
-//   const photoFormData = new FormData();
-
-//   // Append the image file if it exists, using the key "Photo"
-//   if (photoData.Photo) {
-//     photoFormData.append('Photo', {
-//       uri: photoData.Photo.uri,
-//       name: photoData.Photo.name,
-//       type: photoData.Photo.type,
-//     });
-//   }
-
-//   // Append the other required fields using matching key names
-//   photoFormData.append('PatientID', patientID);
-//   photoFormData.append('PhotoDetails', photoData.PhotoDetails);
-//   photoFormData.append('AlbumCategoryListID', photoData.AlbumCategoryListID);
-
-//   // Append HolidayExperience fields if they exist.
-//   // We send them as part of a nested object by using bracket notation.
-//   if (photoData.HolidayExperience) {
-//     photoFormData.append(
-//       'HolidayExperience[CountryListID]',
-//       photoData.HolidayExperience.CountryListID,
-//     );
-//     photoFormData.append(
-//       'HolidayExperience[StartDate]',
-//       photoData.HolidayExperience.StartDate,
-//     );
-//     photoFormData.append(
-//       'HolidayExperience[EndDate]',
-//       photoData.HolidayExperience.EndDate,
-//     );
-//   }
-
-//   // Do not manually set the Content-Type header; let the HTTP client handle the multipart boundary.
-//   return client.post(patientPhotoAdd, photoFormData);
-// };
-
 // ************************* UPDATE REQUESTS *************************
 const updatePatient = async (data) => {
   const formData = new FormData();
@@ -589,14 +551,96 @@ const updateMobility = async (patientID, mobilityData) => {
 };
 
 const updatePatientPhoto = async (patientID, photoData) => {
-  const payload = {
-    patientID: patientID,
-    patientPhotoID: photoData.patientPhotoID,
-    photoPath: photoData.photoPath,
-    albumCategoryName: photoData.albumCategoryName,
-    albumCategoryListID: photoData.albumCategoryListID,
-  };
-  return client.put(patientPhotoUpdate, payload);
+  const photoFormData = new FormData();
+
+  // Append the image file if it exists.
+  if (photoData.Photo) {
+    if (typeof photoData.Photo === 'object' && photoData.Photo.uri) {
+      photoFormData.append('Photo', {
+        uri: photoData.Photo.uri,
+        name: photoData.Photo.name,
+        type: photoData.Photo.type,
+      });
+    } else if (typeof photoData.Photo === 'string') {
+      // No new photo; send empty so that the backend retains the existing image.
+      photoFormData.append('Photo', '');
+    }
+  } else {
+    photoFormData.append('Photo', '');
+  }
+
+  // Merge holiday experience data:
+  const holidayExpID =
+    (photoData.HolidayExperienceUpdateDTO &&
+      photoData.HolidayExperienceUpdateDTO.HolidayExpID) ||
+    '';
+  const countryListID =
+    photoData.CountryListID ||
+    (photoData.HolidayExperienceUpdateDTO &&
+      photoData.HolidayExperienceUpdateDTO.CountryListID) ||
+    '';
+
+  // For StartDate, use the top-level value if present; otherwise, fall back to the nested one.
+  let startDate = photoData.StartDate;
+  if (
+    !startDate &&
+    photoData.HolidayExperienceUpdateDTO &&
+    photoData.HolidayExperienceUpdateDTO.StartDate
+  ) {
+    startDate = photoData.HolidayExperienceUpdateDTO.StartDate;
+  }
+  if (startDate instanceof Date) {
+    startDate = startDate.toISOString();
+  }
+
+  // Similarly for EndDate.
+  let endDate = photoData.EndDate;
+  if (
+    !endDate &&
+    photoData.HolidayExperienceUpdateDTO &&
+    photoData.HolidayExperienceUpdateDTO.EndDate
+  ) {
+    endDate = photoData.HolidayExperienceUpdateDTO.EndDate;
+  }
+  if (endDate instanceof Date) {
+    endDate = endDate.toISOString();
+  }
+
+  photoFormData.append('HolidayExperienceUpdateDTO.HolidayExpID', holidayExpID);
+  photoFormData.append(
+    'HolidayExperienceUpdateDTO.CountryListID',
+    countryListID,
+  );
+  photoFormData.append('HolidayExperienceUpdateDTO.StartDate', startDate || '');
+  photoFormData.append('HolidayExperienceUpdateDTO.EndDate', endDate || '');
+
+  // Append the remaining fields.
+  photoFormData.append('PhotoDetails', photoData.PhotoDetails || '');
+  if (photoData.AlbumCategoryListID) {
+    photoFormData.append('AlbumCategoryListID', photoData.AlbumCategoryListID);
+  } else {
+    photoFormData.append(
+      'AlbumCategoryName',
+      photoData.AlbumCategoryName || '',
+    );
+  }
+  photoFormData.append('PatientID', patientID);
+  photoFormData.append('PatientPhotoID', photoData.PatientPhotoID);
+
+  // (Optional) Log the FormData entries for debugging.
+  if (photoFormData.entries) {
+    try {
+      for (let [key, value] of photoFormData.entries()) {
+        console.log(key, value);
+      }
+    } catch (error) {
+      console.warn('FormData.entries() not supported:', error);
+    }
+  }
+
+  return client.put(patientPhotoUpdate, photoFormData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
 };
 
 const deleteMedication = async (medicationData) => {
