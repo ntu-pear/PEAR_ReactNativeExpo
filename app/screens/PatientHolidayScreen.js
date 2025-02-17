@@ -34,7 +34,7 @@ import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
 import LoadingWheel from 'app/components/LoadingWheel';
 import Swipeable from 'app/components/swipeable-components/Swipeable';
 import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
-import AddPatientAlbumModal from 'app/components/AddPatientAlbumModal';
+import AddPatientPhotoModal from 'app/components/AddPatientPhotoModal';
 import HolidayItem from 'app/components/HolidayItem';
 
 function PatientHoliday(props) {
@@ -53,6 +53,7 @@ function PatientHoliday(props) {
     country,
     startDate,
     endDate,
+    holidayExperience,
   } = props.route.params;
   if (albumCategoryListId) {
     albumCategoryListID = albumCategoryListId;
@@ -120,11 +121,13 @@ function PatientHoliday(props) {
     albumCategoryName: '',
     albumCategoryListID: 1,
     patientPhotoID: 1,
-    holidayExpID: 1,
-    countryListID: 1,
-    country: '',
-    startDate: '',
-    endDate: '',
+    holidayExperience: {
+      holidayExpID: '',
+      countryListID: '',
+      country: '',
+      startDate: '',
+      endDate: '',
+    },
   });
   const [photoCount, setPhotoCount] = useState([]);
 
@@ -134,7 +137,7 @@ function PatientHoliday(props) {
   // Scrollview state
   const [isScrolling, setIsScrolling] = useState(false);
 
-  // Refresh list when new medication is added or user requests refresh
+  // Refresh list when new holiday is added or user requests refresh
   useFocusEffect(
     React.useCallback(() => {
       if (isReloadList) {
@@ -162,18 +165,24 @@ function PatientHoliday(props) {
     // Filter out items where holidayExperience or countryListID is missing
     const filteredData = tempData.filter(
       (item) =>
-        item.holidayExperience && // Ensure holidayExperience is not null/undefined
+        item.holidayExperience && // Ensure holidayExperience exists
         item.holidayExperience.countryListID != null, // Ensure countryListID exists
     );
 
-    // Group photos by countryListID, startDate, and endDate
+    // Group photos by countryListID, formatted startDate, and formatted endDate
     const groupedPhotos = filteredData.reduce((acc, item) => {
       const countryListID = item.holidayExperience.countryListID.toString();
-      const startDate = item.holidayExperience.startDate || 'N/A';
-      const endDate = item.holidayExperience.endDate || 'N/A';
 
-      // Generate a composite key of countryListID, startDate, and endDate
-      const groupKey = `${countryListID}_${startDate}_${endDate}`;
+      // For grouping, format the date to just the date portion (YYYY-MM-DD)
+      const rawStartDate = item.holidayExperience.startDate || 'N/A';
+      const rawEndDate = item.holidayExperience.endDate || 'N/A';
+      const formattedStartDate =
+        rawStartDate !== 'N/A' ? rawStartDate.split('T')[0] : 'N/A';
+      const formattedEndDate =
+        rawEndDate !== 'N/A' ? rawEndDate.split('T')[0] : 'N/A';
+
+      // Create a composite key using the formatted dates
+      const groupKey = `${countryListID}_${formattedStartDate}_${formattedEndDate}`;
 
       if (!acc[groupKey]) {
         acc[groupKey] = [];
@@ -183,98 +192,144 @@ function PatientHoliday(props) {
     }, {});
 
     // For each group, select the most recent photo based on patientPhotoID
-    const latestPhotos = Object.values(groupedPhotos).map((photos) => {
-      return photos.reduce((latest, current) => {
-        return current.patientPhotoID > latest.patientPhotoID
-          ? current
-          : latest;
-      });
-    });
+    const latestPhotos = Object.values(groupedPhotos).map((photos) =>
+      photos.reduce((latest, current) =>
+        current.patientPhotoID > latest.patientPhotoID ? current : latest,
+      ),
+    );
 
-    // Map the latest photos to a standardized format
-    return latestPhotos.map((item) => {
-      const startDate = item.holidayExperience.startDate || 'N/A';
-      const endDate = item.holidayExperience.endDate || 'N/A';
-
-      return {
-        patientID: item.patientID,
-        photoPath: item.photoPath?.toString() || null,
-        albumCategoryName: item.albumCategoryName?.toString() || '',
-        albumCategoryListID: item.albumCategoryListID?.toString() || '',
-        photoDetails: item.photoDetails?.toString() || null,
-        country: item.holidayExperience.country?.toString() || '',
-        countryListID: item.holidayExperience.countryListID?.toString() || '',
-        startDate: startDate,
-        endDate: endDate,
-      };
-    });
+    return latestPhotos.map((item) => ({
+      patientID: item.patientID,
+      patientPhotoID: item.patientPhotoID.toString(),
+      photoPath: item.photoPath?.toString() || null,
+      albumCategoryName: item.albumCategoryName?.toString() || '',
+      albumCategoryListID: item.albumCategoryListID?.toString() || '',
+      photoDetails: item.photoDetails?.toString() || null,
+      holidayExperience: item.holidayExperience
+        ? {
+            holidayExpID:
+              item.holidayExperience.holidayExpID != null
+                ? item.holidayExperience.holidayExpID.toString()
+                : '',
+            countryListID:
+              item.holidayExperience.countryListID != null
+                ? item.holidayExperience.countryListID.toString()
+                : '',
+            country: item.holidayExperience.country?.toString() || '',
+            // Keep the original full dates (with time) for submission
+            startDate: item.holidayExperience.startDate
+              ? item.holidayExperience.startDate.toString()
+              : 'N/A',
+            endDate: item.holidayExperience.endDate
+              ? item.holidayExperience.endDate.toString()
+              : 'N/A',
+          }
+        : null,
+      // Also add a top-level property for country if needed
+      country: item.holidayExperience
+        ? item.holidayExperience.country?.toString() || ''
+        : '',
+    }));
   };
 
   const parsePhotoDataWithCounts = (tempData) => {
-    // Filter out items where holidayExperience or countryListID is missing
+    // Filter out items where holidayExperience or countryListID is missing.
     const filteredData = tempData.filter(
       (item) =>
         item.holidayExperience && item.holidayExperience.countryListID != null,
     );
 
-    // Group photos by countryListID, startDate, and endDate
+    // Group photos by countryListID and by the formatted start and end dates (YYYY-MM-DD).
     const groupedPhotos = filteredData.reduce((acc, item) => {
-      const countryListID = item.holidayExperience.countryListID.toString();
-      const startDate = item.holidayExperience.startDate || 'N/A';
-      const endDate = item.holidayExperience.endDate || 'N/A';
+      const he = item.holidayExperience;
+      const countryKey = he.countryListID ? he.countryListID.toString() : 'N/A';
 
-      // Generate a composite key of countryListID, startDate, and endDate
-      const groupKey = `${countryListID}_${startDate}_${endDate}`;
+      // Format the start and end dates for grouping (use only the date portion).
+      const formattedStart = he.startDate ? he.startDate.split('T')[0] : 'N/A';
+      const formattedEnd = he.endDate ? he.endDate.split('T')[0] : 'N/A';
+
+      // Composite key for grouping.
+      const groupKey = `${countryKey}_${formattedStart}_${formattedEnd}`;
 
       if (!acc[groupKey]) {
         acc[groupKey] = {
+          // Retain the full original dates for submission.
+          holidayExperience: {
+            holidayExpID:
+              he.holidayExpID != null ? he.holidayExpID.toString() : '',
+            countryListID: countryKey,
+            country: he.country ? he.country.toString() : '',
+            startDate: he.startDate ? he.startDate.toString() : 'N/A',
+            endDate: he.endDate ? he.endDate.toString() : 'N/A',
+          },
           photos: [],
-          countryListID,
-          startDate,
-          endDate,
         };
       }
-
-      acc[groupKey].photos.push(item); // Add the current photo to the group
+      acc[groupKey].photos.push(item);
       return acc;
     }, {});
 
-    // Create the final output array
-    return Object.values(groupedPhotos).map((group) => {
-      return {
-        countryListID: group.countryListID,
-        startDate: group.startDate,
-        endDate: group.endDate,
-        numPhotos: group.photos.length, // Count of photos in the group
-        photos: group.photos.map((item) => ({
-          patientID: item.patientID,
-          photoPath: item.photoPath?.toString() || null,
-          albumCategoryName: item.albumCategoryName?.toString() || '',
-          albumCategoryListID: item.albumCategoryListID?.toString() || '',
-          photoDetails: item.photoDetails?.toString() || null,
-          country: item.holidayExperience.country?.toString() || '',
-          countryListID: item.holidayExperience.countryListID?.toString() || '',
-          startDate: item.holidayExperience.startDate || 'N/A',
-          endDate: item.holidayExperience.endDate || 'N/A',
-        })), // Include all photos in this group
-      };
-    });
+    // Map each group into an object with count and an array of parsed photo objects.
+    return Object.values(groupedPhotos).map((group) => ({
+      holidayExperience: group.holidayExperience,
+      numPhotos: group.photos.length,
+      photos: group.photos.map((item) => ({
+        patientID: item.patientID,
+        patientPhotoID: item.patientPhotoID.toString(),
+        photoPath: item.photoPath ? item.photoPath.toString() : null,
+        albumCategoryName: item.albumCategoryName
+          ? item.albumCategoryName.toString()
+          : '',
+        albumCategoryListID: item.albumCategoryListID
+          ? item.albumCategoryListID.toString()
+          : '',
+        photoDetails: item.photoDetails ? item.photoDetails.toString() : null,
+        // Retain full holidayExperience (with full dates)
+        holidayExperience: item.holidayExperience
+          ? {
+              holidayExpID:
+                item.holidayExperience.holidayExpID != null
+                  ? item.holidayExperience.holidayExpID.toString()
+                  : '',
+              countryListID:
+                item.holidayExperience.countryListID != null
+                  ? item.holidayExperience.countryListID.toString()
+                  : '',
+              country: item.holidayExperience.country
+                ? item.holidayExperience.country.toString()
+                : '',
+              startDate: item.holidayExperience.startDate
+                ? item.holidayExperience.startDate.toString()
+                : 'N/A',
+              endDate: item.holidayExperience.endDate
+                ? item.holidayExperience.endDate.toString()
+                : 'N/A',
+            }
+          : null,
+      })),
+    }));
   };
 
   const countPhotosByCountry = (parsedData) => {
     const counts = parsedData.reduce((acc, item) => {
-      // Use top-level fields directly
+      const he = item.holidayExperience;
       const countryListID =
-        item.countryListID?.toString() || 'No Country Provided';
-      const startDate = item.startDate || 'N/A';
-      const endDate = item.endDate || 'N/A';
+        he?.countryListID?.toString() || 'No Country Provided';
 
-      // Create a composite key
-      const compositeKey = `${countryListID}_${startDate}_${endDate}`;
+      // Format the stored full date strings to only the date part.
+      const formattedStart =
+        he && he.startDate && he.startDate.includes('T')
+          ? he.startDate.split('T')[0]
+          : he.startDate || 'N/A';
+      const formattedEnd =
+        he && he.endDate && he.endDate.includes('T')
+          ? he.endDate.split('T')[0]
+          : he.endDate || 'N/A';
 
-      // Increment the count based on the numPhotos in each group
+      // Composite key based on formatted dates.
+      const compositeKey = `${countryListID}_${formattedStart}_${formattedEnd}`;
+
       acc[compositeKey] = (acc[compositeKey] || 0) + item.numPhotos;
-
       return acc;
     }, {});
     return counts;
@@ -297,6 +352,8 @@ function PatientHoliday(props) {
         // Use the parsedData for counting photos by country
         const photoCount = countPhotosByCountry(parsedDataWithCounts);
         console.log('photoCount try: ', photoCount);
+        console.log('parsedData try: ', parsedData);
+        console.log('parsedDataWithCounts try: ', parsedDataWithCounts);
 
         setPhotoCount(photoCount);
         setPhotoData(parsedData);
@@ -342,6 +399,25 @@ function PatientHoliday(props) {
   const handleOnClickAddLog = () => {
     setIsModalVisible(true);
     setModalMode('add');
+
+    setFormData((prevState) => ({
+      ...prevState,
+      PatientID: patientID,
+      PhotoDetails: '',
+      AlbumCategoryName: '',
+      AlbumCategoryListID: prevState.AlbumCategoryListID || '1',
+      PatientPhotoID: '',
+      Photo: null,
+      IsHoliday: true,
+      HolidayExperienceAddDTO: {
+        HolidayExpID: holidayExperience?.holidayExpID || '',
+        CountryListID: holidayExperience?.countryListID
+          ? Number(holidayExperience.countryListID)
+          : 1,
+        StartDate: holidayExperience?.startDate || new Date(),
+        EndDate: holidayExperience?.endDate || new Date(),
+      },
+    }));
   };
 
   // Submit data to add album
@@ -353,11 +429,11 @@ function PatientHoliday(props) {
 
     const result = await patientApi.addPatientPhoto(patientID, tempPhotoData);
     if (result.ok) {
-      console.log('submitting album data', tempPhotoData);
+      console.log('submitting holiday data', tempPhotoData);
       refreshPhotoData();
       setIsModalVisible(false);
 
-      alertTitle = 'Successfully added album';
+      alertTitle = 'Successfully added holiday';
     } else {
       const errors = result.data?.message;
 
@@ -367,7 +443,7 @@ function PatientHoliday(props) {
         ? (alertDetails = `\n${errors}\n\nPlease try again.`)
         : (alertDetails = 'Please try again.');
 
-      alertTitle = 'Error adding album';
+      alertTitle = 'Error adding holiday';
     }
 
     Alert.alert(alertTitle, alertDetails);
@@ -482,6 +558,7 @@ function PatientHoliday(props) {
       photoDetails,
       albumCategoryName,
       patientPhotoID,
+      holidayExperience,
     });
   };
 
@@ -543,7 +620,7 @@ function PatientHoliday(props) {
         keyboardShouldPersistTaps="handled"
         // Use a composite key to ensure uniqueness
         keyExtractor={(item) =>
-          `${item.countryListID}_${item.startDate}_${item.endDate}`
+          `${item.holidayExperience.countryListID}_${item.holidayExperience.startDate}_${item.holidayExperience.endDate}`
         }
         numColumns={2}
         renderItem={({ item }) => {
@@ -552,7 +629,7 @@ function PatientHoliday(props) {
               setIsScrolling={setIsScrolling}
               onSwipeRight={() => handleDeleteAlbum(item.patientPhotoID)}
               onSwipeLeft={() => handleEditAlbum(item.patientPhotoID)}
-              underlay={<EditDeleteUnderlay />}
+              // underlay={<EditDeleteUnderlay />}
               item={
                 <TouchableOpacity
                   style={styles.holidayContainer}
@@ -563,17 +640,38 @@ function PatientHoliday(props) {
                     patientID={item.patientID}
                     patientPhotoID={item.patientPhotoID}
                     photoPath={item.photoPath}
-                    country={item.country || 'No Country Provided'}
-                    countryListID={item.countryListID || 'No Country Provided'}
-                    startDate={item.startDate || 'Start date not available'}
-                    endDate={item.endDate || 'End date not available'}
+                    country={
+                      item.holidayExperience?.country || 'No Country Provided'
+                    }
+                    countryListID={
+                      item.holidayExperience?.countryListID ||
+                      'No Country Provided'
+                    }
+                    startDate={
+                      item.holidayExperience?.startDate ||
+                      'Start date not available'
+                    }
+                    endDate={
+                      item.holidayExperience?.endDate ||
+                      'End date not available'
+                    }
                     photoCount={
                       photoCount[
-                        `${item.countryListID || 'No Country Provided'}_${
-                          item.startDate || 'N/A'
-                        }_${item.endDate || 'N/A'}`
+                        `${
+                          item.holidayExperience?.countryListID ||
+                          'No Country Provided'
+                        }_${
+                          item.holidayExperience?.startDate
+                            ? item.holidayExperience.startDate.split('T')[0]
+                            : 'N/A'
+                        }_${
+                          item.holidayExperience?.endDate
+                            ? item.holidayExperience.endDate.split('T')[0]
+                            : 'N/A'
+                        }`
                       ] || 0
                     }
+                    holidayExperience={item.holidayExperience}
                     handleOnPress={onClickAlbum}
                   />
                 </TouchableOpacity>
@@ -586,7 +684,7 @@ function PatientHoliday(props) {
       <View style={styles.addBtn}>
         <AddButton title="Add Holiday" onPress={handleOnClickAddLog} />
       </View>
-      <AddPatientAlbumModal
+      <AddPatientPhotoModal
         showModal={isModalVisible}
         modalMode={modalMode}
         formData={formData}
@@ -595,6 +693,8 @@ function PatientHoliday(props) {
         onSubmit={
           modalMode == 'add' ? handleModalSubmitAdd : handleModalSubmitEdit
         }
+        patientID={patientID}
+        albumCategoryListID={albumCategoryListID}
       />
     </View>
   );

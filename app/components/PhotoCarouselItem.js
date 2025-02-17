@@ -24,7 +24,7 @@ const PhotoCarouselItem = ({
       const aspectRatio = width / height;
       let newWidth = screenWidth * 0.7;
       let newHeight = newWidth / aspectRatio;
-      const availableHeight = screenHeight * 0.5;
+      const availableHeight = screenHeight * 0.45;
 
       if (newHeight > availableHeight) {
         newHeight = availableHeight;

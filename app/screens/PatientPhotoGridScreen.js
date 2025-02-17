@@ -129,7 +129,7 @@ function PatientPhotoGrid(props) {
   // Scrollview state
   const [isScrolling, setIsScrolling] = useState(false);
 
-  // Refresh list when new medication is added or user requests refresh
+  // Refresh list when new photo is added or user requests refresh
   useFocusEffect(
     React.useCallback(() => {
       if (isReloadList) {
@@ -288,6 +288,7 @@ function PatientPhotoGrid(props) {
         : tempPhotoData.albumCategoryName,
       PatientPhotoID: tempPhotoData.patientPhotoID,
       Photo: tempPhotoData.photoPath,
+      // Populate the nested holiday experience data.
       HolidayExperienceUpdateDTO: tempPhotoData.holidayExperience
         ? {
             HolidayExpID: tempPhotoData.holidayExperience.holidayExpID,
@@ -303,6 +304,8 @@ function PatientPhotoGrid(props) {
             StartDate: '',
             EndDate: '',
           },
+      // Set the IsHoliday flag based on whether holiday experience data exists
+      IsHoliday: !!tempPhotoData.holidayExperience,
     });
   };
 
@@ -493,11 +496,9 @@ function PatientPhotoGrid(props) {
           );
         }}
       />
-      {/* Add Photo Button */}
       <View style={styles.addBtn}>
         <AddButton title="Add Photo" onPress={handleOnClickAddLog} />
       </View>
-      {/* Modal for adding/editing photo */}
       <AddPatientPhotoModal
         showModal={isModalVisible}
         modalMode={modalMode}

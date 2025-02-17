@@ -26,28 +26,32 @@ const HolidayItem = ({
   startDate,
   endDate,
   photoCount,
+  holidayExperience,
   onEdit,
   onDelete,
 }) => {
   const navigation = useNavigation();
 
   const handlePress = () => {
+    console.log('Holiday Experience:', holidayExperience);
     navigation.navigate('PatientHolidayGrid', {
       patientID,
       countryListID,
       startDate,
       endDate,
+      holidayExperience,
+      previousScreen: 'PatientHolidayGrid',
     });
   };
 
   const formatDate = (date) => {
     if (!date) return 'Unknown';
     const parsedDate = new Date(date);
-    const day = String(parsedDate.getDate()).padStart(2, '0'); // Ensure 2 digits
-    const month = String(parsedDate.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const day = String(parsedDate.getDate()).padStart(2, '0');
+    const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
     const year = parsedDate.getFullYear();
 
-    return `${day}/${month}/${year}`; // Format as DD/MM/YYYY
+    return `${day}/${month}/${year}`; 
   };
 
   return (
@@ -87,36 +91,6 @@ const HolidayItem = ({
                 <Text style={styles.text}>Country not available</Text>
               )}
             </View>
-
-            {/* <View style={styles.buttonContainer}>
-              <Button
-                mode="outlined"
-                onPress={onEdit}
-                style={[
-                  styles.button,
-                  {
-                    borderColor: colors.green,
-                    borderWidth: 2,
-                  },
-                ]}
-                labelStyle={{ color: colors.green }}
-                contentStyle={styles.buttonContent}
-              >
-                Edit
-              </Button>
-              <Button
-                mode="outlined"
-                onPress={onDelete}
-                style={[
-                  styles.button,
-                  { borderColor: colors.pink, borderWidth: 2 },
-                ]}
-                labelStyle={{ color: colors.pink }}
-                contentStyle={styles.buttonContent}
-              >
-                Delete
-              </Button>
-            </View> */}
           </View>
         </Card.Content>
       </Card>
@@ -159,19 +133,6 @@ const styles = StyleSheet.create({
   bold: {
     fontWeight: '600',
   },
-  // buttonContainer: {
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   marginLeft: 10,
-  //   marginTop: 5,
-  // },
-  // button: {
-  //   marginHorizontal: 5,
-  // },
-  // buttonContent: {
-  //   marginVertical: -5,
-  //   marginHorizontal: -10,
-  // },
 });
 
 export default HolidayItem;

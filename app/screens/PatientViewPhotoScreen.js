@@ -38,7 +38,14 @@ function PatientViewPhoto(props) {
     patientID = patientId;
   }
 
-  let { patientPhotoID, albumCategoryListID } = props.route.params;
+  let {
+    patientPhotoID,
+    albumCategoryListID,
+    countryListID,
+    startDate,
+    endDate,
+    previousScreen,
+  } = props.route.params;
 
   const testID = `view_photo_screen_${patientID}`;
 
@@ -102,7 +109,7 @@ function PatientViewPhoto(props) {
   // Scrollview state
   const [isScrolling, setIsScrolling] = useState(false);
 
-  // Refresh list when new medication is added or user requests refresh
+  // Refresh list when new photo is added or user requests refresh
   useFocusEffect(
     React.useCallback(() => {
       if (isReloadList) {
@@ -257,6 +264,7 @@ function PatientViewPhoto(props) {
         : tempPhotoData.albumCategoryName,
       PatientPhotoID: tempPhotoData.patientPhotoID,
       Photo: tempPhotoData.photoPath,
+      // Populate the nested holiday experience data.
       HolidayExperienceUpdateDTO: tempPhotoData.holidayExperience
         ? {
             HolidayExpID: tempPhotoData.holidayExperience.holidayExpID,
@@ -272,6 +280,8 @@ function PatientViewPhoto(props) {
             StartDate: '',
             EndDate: '',
           },
+      // Set the IsHoliday flag based on whether holiday experience data exists
+      IsHoliday: !!tempPhotoData.holidayExperience,
     });
   };
 
@@ -340,10 +350,22 @@ function PatientViewPhoto(props) {
     if (result.ok) {
       await refreshPhotoData();
       setIsModalVisible(false);
-      navigation.replace('PatientPhotoGrid', {
-        patientID,
-        albumCategoryListID,
-      });
+
+      // if (previousScreen === 'PatientHolidayGrid') {
+      //   // For holiday grid, pass patientID, countryListID, startDate, and endDate
+      //   navigation.replace('PatientHolidayGrid', {
+      //     patientID,
+      //     countryListID,
+      //     startDate,
+      //     endDate,
+      //   });
+      // } else {
+      //   // Default to PatientPhotoGrid
+      //   navigation.replace('PatientPhotoGrid', {
+      //     patientID,
+      //     albumCategoryListID,
+      //   });
+      // }
 
       alertTitle = 'Successfully deleted photo';
     } else {
@@ -371,7 +393,7 @@ function PatientViewPhoto(props) {
         refreshing={isLoading}
         height={'72%'}
         ListEmptyComponent={() =>
-          noDataMessage(statusCode, isLoading, isError, 'No albums found', true)
+          noDataMessage(statusCode, isLoading, isError, 'No photo found', true)
         }
         data={photoData}
         keyboardShouldPersistTaps="handled"
@@ -424,8 +446,6 @@ const styles = StyleSheet.create({
   },
   logContainer: {
     padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
   },
   addBtn: {
     marginTop: '0.01%',

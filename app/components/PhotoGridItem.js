@@ -31,6 +31,8 @@ const PhotoGridItem = ({
   photoData,
   startDate,
   endDate,
+  countryListID,
+  previousScreen,
 }) => {
   const navigation = useNavigation();
   const handlePress = () => {
@@ -43,8 +45,10 @@ const PhotoGridItem = ({
       numPhotos,
       photoPath,
       photoData,
+      countryListID,
       startDate,
       endDate,
+      previousScreen,
     });
   };
   return (

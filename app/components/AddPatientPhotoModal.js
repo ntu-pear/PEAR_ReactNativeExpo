@@ -7,11 +7,12 @@ import mime from 'mime';
 import { format } from 'date-fns';
 
 // Components
-import AddEditModal from './AddEditModal';
-import SelectionInputField from './input-components/SelectionInputField';
-import InputField from './input-components/InputField';
-import AppButton from './AppButton';
-import DateInputField from './input-components/DateInputField';
+import AddEditModal from 'app/components/AddEditModal';
+import SelectionInputField from 'app/components/input-components/SelectionInputField';
+import InputField from 'app/components/input-components/InputField';
+import AppButton from 'app/components/AppButton';
+import DateInputField from 'app/components/input-components/DateInputField';
+import SingleOptionCheckBox from 'app/components/input-components/SingleOptionCheckBox';
 
 // Hooks
 import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
@@ -34,6 +35,20 @@ function AddPatientPhotoModal({
 
   // Options for country field
   const { data: countryOptions } = useGetSelectionOptions('Country');
+
+  // Options for album field
+  const seededAlbums = [
+    { AlbumCategoryListID: '1', AlbumCategoryName: 'Family' },
+    { AlbumCategoryListID: '2', AlbumCategoryName: 'Friends' },
+    { AlbumCategoryListID: '4', AlbumCategoryName: 'Pet' },
+    { AlbumCategoryListID: '5', AlbumCategoryName: 'Food' },
+    { AlbumCategoryListID: '6', AlbumCategoryName: 'Activity' },
+  ];
+
+  const albumOptions = seededAlbums.map((album) => ({
+    label: album.AlbumCategoryName,
+    value: album.AlbumCategoryListID, // now a string
+  }));
 
   // Input error states
   const [isPhotoPathError, setIsPhotoPathError] = useState(false);
@@ -62,7 +77,7 @@ function AddPatientPhotoModal({
   const pickImage = (field) => async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: false, // no editing, so no cropping restrictions
+      allowsEditing: false,
       quality: 1,
     });
 
@@ -97,7 +112,8 @@ function AddPatientPhotoModal({
       CountryListID: 1,
       StartDate: new Date(),
       EndDate: new Date(),
-      // albumCategoryListID: albumCategoryListID,
+      AlbumCategoryListID: '1',
+      AlbumCategoryName: '',
     });
     setIsPhotoPathError(false);
     setIsPhotoDetailsError(false);
@@ -113,40 +129,83 @@ function AddPatientPhotoModal({
     }
   }, [showModal]);
 
-  // Function to update data in formData
   const handlePhotoData = (field) => (value) => {
-    setFormData((prevState) => {
-      return {
+    if (field === 'AlbumCategoryListID') {
+      const selectedAlbum = seededAlbums.find(
+        (album) => album.AlbumCategoryListID === value,
+      );
+      setFormData((prevState) => ({
+        ...prevState,
+        AlbumCategoryListID: value,
+        AlbumCategoryName: selectedAlbum ? selectedAlbum.AlbumCategoryName : '',
+      }));
+    } else {
+      setFormData((prevState) => ({
         ...prevState,
         [field]: value,
-      };
-    });
+      }));
+    }
   };
 
   const handleSubmit = () => {
     if (!isInputErrors && formData.Photo) {
       // Choose the correct holiday experience key based on modalMode.
       // For update/edit mode, use "HolidayExperienceUpdateDTO"; for add mode, use "HolidayExperienceAddDTO".
+      // const holidayKey =
+      //   modalMode === 'update' || modalMode === 'edit'
+      //     ? 'HolidayExperienceUpdateDTO'
+      //     : 'HolidayExperienceAddDTO';
+
+      // // If the holiday checkbox is checked, prepare holiday data; otherwise, use an empty object.
+      // const holidayPayload = formData.IsHoliday
+      //   ? {
+      //       CountryListID: formData.CountryListID || '',
+      //       StartDate:
+      //         formData.StartDate instanceof Date
+      //           ? format(formData.StartDate, "yyyy-MM-dd'T'HH:mm:ss")
+      //           : formData.StartDate || '',
+      //       EndDate:
+      //         formData.EndDate instanceof Date
+      //           ? format(formData.EndDate, "yyyy-MM-dd'T'HH:mm:ss")
+      //           : formData.EndDate || '',
+      //     }
+      //   : {};
+
       const holidayKey =
         modalMode === 'update' || modalMode === 'edit'
           ? 'HolidayExperienceUpdateDTO'
           : 'HolidayExperienceAddDTO';
 
+      const holidayPayload = formData.IsHoliday
+        ? {
+            CountryListID:
+              formData[holidayKey]?.CountryListID ||
+              formData.CountryListID ||
+              '',
+            StartDate:
+              formData[holidayKey]?.StartDate instanceof Date
+                ? format(
+                    formData[holidayKey].StartDate,
+                    "yyyy-MM-dd'T'HH:mm:ss",
+                  )
+                : formData[holidayKey]?.StartDate || '',
+            EndDate:
+              formData[holidayKey]?.EndDate instanceof Date
+                ? format(formData[holidayKey].EndDate, "yyyy-MM-dd'T'HH:mm:ss")
+                : formData[holidayKey]?.EndDate || '',
+          }
+        : {};
+
+      // Decide which AlbumCategoryListID to submit.
+      const albumIdToSubmit =
+        albumCategoryListID != null
+          ? albumCategoryListID
+          : formData.AlbumCategoryListID;
+
       const payload = {
-        [holidayKey]: {
-          CountryListID: formData.CountryListID || '',
-          StartDate:
-            formData.StartDate instanceof Date
-              ? format(formData.StartDate, "yyyy-MM-dd'T'HH:mm:ss")
-              : formData.StartDate || '',
-          EndDate:
-            formData.EndDate instanceof Date
-              ? format(formData.EndDate, "yyyy-MM-dd'T'HH:mm:ss")
-              : formData.EndDate || '',
-        },
+        [holidayKey]: holidayPayload,
         PhotoDetails: formData.PhotoDetails || '',
-        AlbumCategoryName: formData.AlbumCategoryName || '',
-        AlbumCategoryListID: albumCategoryListID,
+        AlbumCategoryListID: albumIdToSubmit,
         PatientID: patientID,
         Photo: formData.Photo,
       };
@@ -160,20 +219,17 @@ function AddPatientPhotoModal({
   };
 
   const handleHolidayPhotoData = (field) => (value) => {
-    if (modalMode === 'edit') {
-      setFormData((prevState) => ({
-        ...prevState,
-        HolidayExperienceUpdateDTO: {
-          ...prevState.HolidayExperienceUpdateDTO,
-          [field]: value,
-        },
-      }));
-    } else {
-      setFormData((prevState) => ({
-        ...prevState,
+    setFormData((prevState) => ({
+      ...prevState,
+      HolidayExperienceUpdateDTO: {
+        ...prevState.HolidayExperienceUpdateDTO,
         [field]: value,
-      }));
-    }
+      },
+      HolidayExperienceAddDTO: {
+        ...prevState.HolidayExperienceAddDTO,
+        [field]: value,
+      },
+    }));
   };
 
   return (
@@ -186,14 +242,12 @@ function AddPatientPhotoModal({
       modalTitle="Photo"
       modalContent={
         <>
-          {/* Upload Button */}
           <AppButton
             title="Upload Photo"
             onPress={pickImage('Photo')}
             color="gray"
             isDisabled={false}
           />
-
           {/* Show image only if photoPath exists */}
           {formData.Photo && (
             <TouchableOpacity onPress={pickImage('Photo')}>
@@ -207,6 +261,16 @@ function AddPatientPhotoModal({
             </TouchableOpacity>
           )}
 
+          {albumCategoryListID == null && (
+            <SelectionInputField
+              isRequired
+              title="Album"
+              value={formData.AlbumCategoryListID}
+              dataArray={albumOptions}
+              onDataChange={handlePhotoData('AlbumCategoryListID')}
+            />
+          )}
+
           <InputField
             isRequired
             title="Description"
@@ -215,72 +279,98 @@ function AddPatientPhotoModal({
             onEndEditing={setIsPhotoDetailsError}
             autoCapitalize="none"
           />
-
-          <SelectionInputField
-            title="Country"
+          <View style={{ marginVertical: 8 }} />
+          <SingleOptionCheckBox
+            testID="holiday_check_box"
+            title="Is this photo part of a holiday?"
             value={
-              modalMode === 'edit'
-                ? formData.HolidayExperienceUpdateDTO?.CountryListID
-                : formData.CountryListID
+              formData.IsHoliday ||
+              (!!formData.HolidayExperienceUpdateDTO &&
+                Object.keys(formData.HolidayExperienceUpdateDTO).length > 0) ||
+              (!!formData.HolidayExperienceAddDTO &&
+                Object.keys(formData.HolidayExperienceAddDTO).length > 0)
             }
-            dataArray={countryOptions}
-            onDataChange={handleHolidayPhotoData('CountryListID')}
+            onChangeData={(value) =>
+              setFormData((prevState) => ({
+                ...prevState,
+                IsHoliday: value,
+                HolidayExperienceUpdateDTO: value
+                  ? prevState.HolidayExperienceUpdateDTO
+                  : null,
+                HolidayExperienceAddDTO: value
+                  ? prevState.HolidayExperienceAddDTO
+                  : null,
+                CountryListID: value
+                  ? prevState.CountryListID ||
+                    prevState.HolidayExperienceAddDTO?.CountryListID ||
+                    ''
+                  : null,
+                StartDate: value
+                  ? prevState.StartDate ||
+                    prevState.HolidayExperienceAddDTO?.StartDate ||
+                    ''
+                  : null,
+                EndDate: value
+                  ? prevState.EndDate ||
+                    prevState.HolidayExperienceAddDTO?.EndDate ||
+                    ''
+                  : null,
+              }))
+            }
           />
 
-          <View style={styles.dateSelectionContainer}>
-            <DateInputField
-              title="Start Date"
-              value={
-                modalMode === 'edit'
-                  ? formData.HolidayExperienceUpdateDTO?.StartDate
-                    ? new Date(formData.HolidayExperienceUpdateDTO.StartDate)
-                    : new Date()
-                  : formData.StartDate instanceof Date
-                  ? formData.StartDate
-                  : new Date(formData.StartDate)
-              }
-              hideDayOfWeek={true}
-              handleFormData={handleHolidayPhotoData('StartDate')}
-              onEndEditing={setIsStartDateError}
-              // Remove minimumInputDate if not needed
-              maximumInputDate={
-                modalMode === 'edit'
-                  ? formData.HolidayExperienceUpdateDTO?.EndDate
-                    ? new Date(formData.HolidayExperienceUpdateDTO.EndDate)
-                    : new Date()
-                  : formData.EndDate instanceof Date
-                  ? formData.EndDate
-                  : new Date(formData.EndDate)
-              }
-            />
-          </View>
+          {formData.IsHoliday ? (
+            <>
+              <SelectionInputField
+                title="Country"
+                value={
+                  formData.HolidayExperienceUpdateDTO?.CountryListID ||
+                  formData.HolidayExperienceAddDTO?.CountryListID
+                }
+                dataArray={countryOptions}
+                onDataChange={handleHolidayPhotoData('CountryListID')}
+              />
 
-          <View style={styles.dateSelectionContainer}>
-            <DateInputField
-              title="End Date"
-              value={
-                modalMode === 'edit'
-                  ? formData.HolidayExperienceUpdateDTO?.EndDate
-                    ? new Date(formData.HolidayExperienceUpdateDTO.EndDate)
-                    : new Date()
-                  : formData.EndDate instanceof Date
-                  ? formData.EndDate
-                  : new Date(formData.EndDate)
-              }
-              hideDayOfWeek={true}
-              handleFormData={handleHolidayPhotoData('EndDate')}
-              onEndEditing={setIsEndDateError}
-              minimumInputDate={
-                modalMode === 'edit'
-                  ? formData.HolidayExperienceUpdateDTO?.StartDate
-                    ? new Date(formData.HolidayExperienceUpdateDTO.StartDate)
-                    : new Date()
-                  : formData.StartDate instanceof Date
-                  ? formData.StartDate
-                  : new Date(formData.StartDate)
-              }
-            />
-          </View>
+              <View style={styles.dateSelectionContainer}>
+                <DateInputField
+                  title="Start Date"
+                  value={
+                    formData.HolidayExperienceUpdateDTO?.StartDate
+                      ? new Date(formData.HolidayExperienceUpdateDTO.StartDate)
+                      : formData.HolidayExperienceAddDTO?.StartDate
+                      ? new Date(formData.HolidayExperienceAddDTO.StartDate)
+                      : new Date()
+                  }
+                  hideDayOfWeek={true}
+                  handleFormData={handleHolidayPhotoData('StartDate')}
+                  onEndEditing={setIsStartDateError}
+                />
+              </View>
+
+              <View style={styles.dateSelectionContainer}>
+                <DateInputField
+                  title="End Date"
+                  value={
+                    formData.HolidayExperienceUpdateDTO?.EndDate
+                      ? new Date(formData.HolidayExperienceUpdateDTO.EndDate)
+                      : formData.HolidayExperienceAddDTO?.EndDate
+                      ? new Date(formData.HolidayExperienceAddDTO.EndDate)
+                      : new Date()
+                  }
+                  hideDayOfWeek={true}
+                  handleFormData={handleHolidayPhotoData('EndDate')}
+                  onEndEditing={setIsEndDateError}
+                  minimumInputDate={
+                    formData.HolidayExperienceUpdateDTO?.StartDate
+                      ? new Date(formData.HolidayExperienceUpdateDTO.StartDate)
+                      : formData.HolidayExperienceAddDTO?.StartDate
+                      ? new Date(formData.HolidayExperienceAddDTO.StartDate)
+                      : new Date()
+                  }
+                />
+              </View>
+            </>
+          ) : null}
         </>
       }
     />
@@ -290,7 +380,7 @@ function AddPatientPhotoModal({
 const styles = StyleSheet.create({
   imagePreview: {
     width: '100%',
-    height: 200, // Adjust the height as needed
+    height: 200,
     borderRadius: 10,
     marginTop: 10,
   },
