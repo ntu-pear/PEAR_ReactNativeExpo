@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 12,
-    marginLeft: 10,
+    marginLeft: 18,
   },
   button: {
     marginHorizontal: 5,
