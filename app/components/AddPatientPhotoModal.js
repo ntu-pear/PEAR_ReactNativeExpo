@@ -102,7 +102,26 @@ function AddPatientPhotoModal({
     }
   };
 
-  // Reset form
+  // // Reset form
+  // const resetForm = () => {
+  //   setFormData({
+  //     PatientPhotoID: null,
+  //     HolidayExpID: null,
+  //     Photo: null,
+  //     PhotoDetails: '',
+  //     CountryListID: 1,
+  //     StartDate: new Date(),
+  //     EndDate: new Date(),
+  //     AlbumCategoryListID: '1',
+  //     AlbumCategoryName: '',
+  //   });
+  //   setIsPhotoPathError(false);
+  //   setIsPhotoDetailsError(false);
+  //   setIsCountryListIDError(false);
+  //   setIsStartDateError(false);
+  //   setIsEndDateError(false);
+  // };
+
   const resetForm = () => {
     setFormData({
       PatientPhotoID: null,
@@ -114,6 +133,13 @@ function AddPatientPhotoModal({
       EndDate: new Date(),
       AlbumCategoryListID: '1',
       AlbumCategoryName: '',
+      HolidayExperience: {
+        HolidayExpID: '',
+        CountryListID: 1,
+        StartDate: new Date(),
+        EndDate: new Date(),
+      },
+      HolidayExperienceUpdateDTO: null,
     });
     setIsPhotoPathError(false);
     setIsPhotoDetailsError(false);
@@ -283,13 +309,7 @@ function AddPatientPhotoModal({
           <SingleOptionCheckBox
             testID="holiday_check_box"
             title="Is this photo part of a holiday?"
-            value={
-              formData.IsHoliday ||
-              (!!formData.HolidayExperienceUpdateDTO &&
-                Object.keys(formData.HolidayExperienceUpdateDTO).length > 0) ||
-              (!!formData.HolidayExperienceAddDTO &&
-                Object.keys(formData.HolidayExperienceAddDTO).length > 0)
-            }
+            value={formData.IsHoliday}
             onChangeData={(value) =>
               setFormData((prevState) => ({
                 ...prevState,

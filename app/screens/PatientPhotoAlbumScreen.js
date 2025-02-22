@@ -31,13 +31,11 @@ import AuthContext from 'app/auth/context';
 
 // Components
 import ActivityIndicator from 'app/components/ActivityIndicator';
-import AddButton from 'app/components/AddButton';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
 import LoadingWheel from 'app/components/LoadingWheel';
 import Swipeable from 'app/components/swipeable-components/Swipeable';
 import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
-import AddPatientAlbumModal from 'app/components/AddPatientAlbumModal';
 import AlbumItem from 'app/components/AlbumItem';
 
 function PatientPhotoAlbum(props) {
@@ -60,10 +58,6 @@ function PatientPhotoAlbum(props) {
   const testID = `photo_album_screen_${patientID}`;
 
   const navigation = useNavigation();
-
-  // Modal states
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [modalMode, setModalMode] = useState('add'); // either 'add' or 'edit'
 
   // Options for user to search by
   const SEARCH_OPTIONS = ['Album Name'];
@@ -125,21 +119,10 @@ function PatientPhotoAlbum(props) {
   // Scrollview state
   const [isScrolling, setIsScrolling] = useState(false);
 
-  // // Refresh list when new photo is added or user requests refresh
-  // useFocusEffect(
-  //   React.useCallback(() => {
-  //     if (isReloadList) {
-  //       refreshPhotoData();
-  //       setIsReloadList(false);
-  //     }
-  //     // eslint-disable-next-line react-hooks/exhaustive-deps
-  //   }, [isReloadList]),
-  // );
-
   useFocusEffect(
     React.useCallback(() => {
       refreshPhotoData();
-    }, [])
+    }, []),
   );
 
   // Memoized data refresh function
@@ -262,134 +245,6 @@ function PatientPhotoAlbum(props) {
     }
   };
 
-  // Show form to add album when add button is clicked
-  const handleOnClickAddLog = () => {
-    setIsModalVisible(true);
-    setModalMode('add');
-  };
-
-  // Submit data to add album
-  const handleModalSubmitAdd = async (tempPhotoData) => {
-    setIsLoading(true);
-
-    let alertTitle = '';
-    let alertDetails = '';
-
-    const result = await patientApi.addPatientPhoto(patientID, tempPhotoData);
-    if (result.ok) {
-      console.log('submitting album data', tempPhotoData);
-      refreshPhotoData();
-      setIsModalVisible(false);
-
-      alertTitle = 'Successfully added album';
-    } else {
-      const errors = result.data?.message;
-
-      console.log(result);
-
-      result.data
-        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-        : (alertDetails = 'Please try again.');
-
-      alertTitle = 'Error adding album';
-    }
-
-    Alert.alert(alertTitle, alertDetails);
-  };
-
-  // Edit album
-  const handleEditAlbum = (photoID) => {
-    setIsModalVisible(true);
-    setModalMode('edit');
-
-    const tempPhotoData = photoData.filter(
-      (x) => x.patientPhotoID == photoID,
-    )[0];
-
-    setFormData({
-      photoDetails: tempPhotoData.photoDetails,
-      albumCategoryName: tempPhotoData.albumCategoryName,
-      albumCategoryListID: tempPhotoData.albumCategoryListID,
-      patientPhotoID: tempPhotoData.patientPhotoID,
-    });
-  };
-
-  // Submit data to edit photo
-  const handleModalSubmitEdit = async () => {
-    setIsLoading(true);
-
-    let tempFormData = { ...formData };
-
-    let alertTitle = '';
-    let alertDetails = '';
-
-    const result = await patientApi.updatePatientPhoto(patientID, tempFormData);
-    if (result.ok) {
-      refreshPhotoData();
-      setIsModalVisible(false);
-
-      alertTitle = 'Successfully edited album';
-    } else {
-      const errors = result.data?.message;
-      console.log('Error editing album');
-
-      result.data
-        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-        : (alertDetails = 'Please try again.');
-
-      alertTitle = 'Error editing album';
-    }
-
-    Alert.alert(alertTitle, alertDetails);
-  };
-
-  // Ask user to confirm deletion of album
-  const handleDeleteAlbum = (photoID) => {
-    const tempData = photoData.filter((x) => x.patientPhotoID == photoID)[0];
-
-    Alert.alert(
-      'Are you sure you wish to delete this item?',
-      `Album Name: ${tempData.albumCategoryName}\n`,
-      [
-        {
-          text: 'Cancel',
-          onPress: () => {},
-          style: 'cancel',
-        },
-        { text: 'OK', onPress: () => deleteAlbum(photoID) },
-      ],
-    );
-  };
-
-  // Delete album
-  const deleteAlbum = async (photoID) => {
-    setIsLoading(true);
-
-    let tempData = { patientPhotoID: photoID };
-
-    let alertTitle = '';
-    let alertDetails = '';
-
-    const result = await patientApi.deletePatientAlbum(tempData);
-    if (result.ok) {
-      refreshPhotoData();
-      setIsModalVisible(false);
-
-      alertTitle = 'Successfully deleted album';
-    } else {
-      const errors = result.data?.message;
-      console.log('Error deleting album', result);
-
-      result.data
-        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-        : (alertDetails = 'Please try again.');
-
-      alertTitle = 'Error deleting album';
-    }
-
-    Alert.alert(alertTitle, alertDetails);
-  };
-
   // Navigate to patient profile on click profile image
   const onClickProfile = () => {
     navigation.navigate(routes.PATIENT_PROFILE, { id: patientID });
@@ -488,9 +343,6 @@ function PatientPhotoAlbum(props) {
           return (
             <Swipeable
               setIsScrolling={setIsScrolling}
-              onSwipeRight={() => handleDeleteAlbum(item.patientPhotoID)}
-              onSwipeLeft={() => handleEditAlbum(item.patientPhotoID)}
-              underlay={<EditDeleteUnderlay />}
               item={
                 <TouchableOpacity
                   style={styles.albumContainer}
@@ -504,8 +356,6 @@ function PatientPhotoAlbum(props) {
                     albumCategoryListID={item.albumCategoryListID}
                     patientID={item.patientID}
                     photoCount={photoCount[item.albumCategoryListID] || 0}
-                    onDelete={() => handleDeleteAlbum(item.patientPhotoID)}
-                    onEdit={() => handleEditAlbum(item.patientPhotoID)}
                     handleOnPress={onClickAlbum}
                   />
                 </TouchableOpacity>

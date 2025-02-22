@@ -47,8 +47,13 @@ function PatientPhotoGrid(props) {
     patientID = patientId;
   }
 
-  let { albumCategoryListID, photoDetails, albumCategoryName, patientPhotoID } =
-    props.route.params;
+  let {
+    albumCategoryListID,
+    photoDetails,
+    albumCategoryName,
+    patientPhotoID,
+    holidayExperience,
+  } = props.route.params;
 
   const testID = `photo_grid_screen_${patientID}`;
 
@@ -242,6 +247,25 @@ function PatientPhotoGrid(props) {
   const handleOnClickAddLog = () => {
     setIsModalVisible(true);
     setModalMode('add');
+
+    setFormData((prevState) => ({
+      ...prevState,
+      PatientID: patientID,
+      PhotoDetails: '',
+      AlbumCategoryName: '',
+      AlbumCategoryListID: prevState.AlbumCategoryListID || '1',
+      PatientPhotoID: '',
+      Photo: null,
+      IsHoliday: false,
+      HolidayExperienceAddDTO: {
+        HolidayExpID: holidayExperience?.holidayExpID || '',
+        CountryListID: holidayExperience?.countryListID
+          ? Number(holidayExperience.countryListID)
+          : 1,
+        StartDate: holidayExperience?.startDate || new Date(),
+        EndDate: holidayExperience?.endDate || new Date(),
+      },
+    }));
   };
 
   // Submit data to add photo
