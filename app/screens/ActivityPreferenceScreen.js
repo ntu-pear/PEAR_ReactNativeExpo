@@ -434,6 +434,7 @@ function ActivityPreferenceScreen(props) {
             <AddButton
               title="Edit Activity Preference"
               onPress={handleAddActivity}
+              iconName="pencil"
             />
             <AddActivityPreferenceModal
               showModal={showModal}

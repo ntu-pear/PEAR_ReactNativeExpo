@@ -5,10 +5,16 @@ import colors from 'app/config/colors';
 import { FontAwesome } from '@expo/vector-icons';
 
 function AddButton(props) {
-  // Destructure props
-  const { title, onPress, color = 'green', isDisabled = false , testID } = props;
+  // Destructure props including an optional iconName with a default value of "plus"
+  const {
+    title,
+    onPress,
+    color = 'green',
+    isDisabled = false,
+    testID,
+    iconName = 'plus', // default icon name is "plus"
+  } = props;
 
-  // replacement of TouchableOpacity with Button to enable isDisabled property - Russell
   return (
     <View style={styles.buttonContainer}>
       <Button
@@ -19,7 +25,7 @@ function AddButton(props) {
       >
         <View style={styles.buttonContent}>
           <FontAwesome
-            name="plus"
+            name={iconName}
             size={20}
             color={colors.secondary}
             style={styles.icon}
@@ -57,7 +63,7 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   icon: {
-    marginHorizontal: 8, // Adjust the spacing between text and icon
+    marginHorizontal: 8, // Adjust spacing between text and icon
   },
 });
 
