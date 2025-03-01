@@ -1,26 +1,31 @@
-// Libs
-import React, { useEffect, useState, useCallback } from 'react';
-import { Dimensions, StyleSheet, SectionList, View, Text, Alert, TouchableOpacity } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+// Libs;
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { StyleSheet, SectionList, View, Text, Alert } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 // Utilities
-import { formatTimeHM24, convertTimeMilitary, isEmptyObject, noDataMessage, sortFilterInitialState, formatMilitaryToAMPM, formatDate, formatTimeAMPM } from 'app/utility/miscFunctions';
+import {
+  isEmptyObject,
+  sortFilterInitialState,
+} from 'app/utility/miscFunctions';
 
 // Navigation
 import routes from 'app/navigation/routes';
 
-//API
+// API
 import activity from 'app/api/activity';
 import patientApi from 'app/api/patient';
 
-//Components
-import DynamicTable from 'app/components/DynamicTable';
+// Configurations
+import colors from 'app/config/colors';
+
+// Components
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import AddButton from 'app/components/AddButton';
 import AddActivityPreferenceModal from 'app/components/AddActivityPreferenceModal';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import LoadingWheel from 'app/components/LoadingWheel';
+import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
 
 function ActivityPreferenceScreen(props) {
   let { patientID, patientId } = props.route.params;
@@ -29,29 +34,53 @@ function ActivityPreferenceScreen(props) {
   }
 
   const testID = `activity_preference_screen_${patientID}`;
-
   const navigation = useNavigation();
 
-  // Modal states
+  // Modal and API state
   const [showModal, setShowModal] = useState(false);
   const [patientActivityIDs, setPatientActivityIDs] = useState([]);
+  const [patientActivityPreferences, setPatientActivityPreferences] = useState(
+    [],
+  );
+  const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
 
+  // Search, sort, and filter options
+  const SEARCH_OPTIONS = ['Activity Name'];
+  const SORT_OPTIONS = ['Preference'];
+  // const FILTER_OPTIONS = ['Preference'];
+  const FIELD_MAPPING = {
+    'Activity Name': 'activityTitle',
+    Preference: 'isLike',
+  };
+
+  const [sort, setSort] = useState(sortFilterInitialState);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isDataInitialized, setIsDataInitialized] = useState(false);
+  const [datetime, setDatetime] = useState(sortFilterInitialState);
+
+  // Loading and error states
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const [isRetry, setIsRetry] = useState(false);
   const [statusCode, setStatusCode] = useState(200);
 
-  // Patient data related states
+  // Patient data state
   const [patientData, setPatientData] = useState({});
   const [isReloadPatientList, setIsReloadPatientList] = useState(true);
+
+  // Grouped activity preference arrays (for SectionList)
   const [likedItems, setLikedItems] = useState([]);
   const [dislikedItems, setDislikedItems] = useState([]);
+  const [neutralItems, setNeutralItems] = useState([]);
+  const [emptyData, setEmptyData] = useState([{ activityTitle: 'None' }]);
 
-  const [emptyData, setEmptyData] = useState([{ "activityTitle": "None" }]);
+  // Data for filtering (flat list)
+  const [originalData, setOriginalData] = useState([]);
+  const [activityData, setActivityData] = useState([]);
 
-  // Refresh list when new activity is added or user requests refresh
+  // Fetch patient activity preferences when reloading
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       if (isReloadPatientList) {
         refreshActivityPreference();
         setIsReloadPatientList(false);
@@ -59,45 +88,67 @@ function ActivityPreferenceScreen(props) {
     }, [isReloadPatientList]),
   );
 
+  // Fetch activity preference data for filtering
   useEffect(() => {
     const getData = async () => {
-      setDislikedItems([]);
-      setLikedItems([]);
       const response = await activity.getActivityPreference(patientID);
-
       if (response.data.data !== null) {
-        const { likedItems, notLikedItems } = splitData(response.data.data);
-        setLikedItems(likedItems.length > 0 ? likedItems : emptyData);
-        setDislikedItems(notLikedItems.length > 0 ? notLikedItems : emptyData);
+        const data = response.data.data;
+        setOriginalData(data);
+        setActivityData(data);
+        setIsDataInitialized(true);
       } else {
-        setLikedItems(emptyData);
-        setDislikedItems(emptyData);
+        setOriginalData([]);
+        setActivityData([]);
+        setIsDataInitialized(true);
       }
     };
-
     getData();
   }, [isReloadPatientList]);
 
+  // Update grouped sections when activityData changes
+  useEffect(() => {
+    if (activityData && activityData.length) {
+      const { likedItems, neutralItems, dislikedItems } =
+        splitData(activityData);
+      setLikedItems(likedItems.length > 0 ? likedItems : emptyData);
+      setNeutralItems(neutralItems.length > 0 ? neutralItems : emptyData);
+      setDislikedItems(dislikedItems.length > 0 ? dislikedItems : emptyData);
+    } else {
+      setLikedItems(emptyData);
+      setNeutralItems(emptyData);
+      setDislikedItems(emptyData);
+    }
+  }, [activityData]);
+
+  // Get patient data (for profile info)
+  useEffect(() => {
+    if (patientID) {
+      getPatientData();
+    }
+  }, []);
+
+  // Also get patient activity preferences mapping when reloading
   useEffect(() => {
     if (props.route.params.patientId) {
       getPatientActivity(patientID);
-      console.log('patient ID Log: ', patientID);
     }
   }, [isReloadPatientList]);
 
-  // Navigate to patient profile on click profile image
-  const onClickProfile = () => {  
+  // Navigate to profile
+  const onClickProfile = () => {
     navigation.navigate(routes.PATIENT_PROFILE, { id: patientID });
-  }
+  };
 
   // Set isLoading to true when retrieving data
   const refreshActivityPreference = () => {
     setIsLoading(true);
     const promiseFunction = async () => {
       await getPatientData();
+      await getPatientActivity();
     };
     promiseFunction();
-  }
+  };
 
   // Get patient data from backend
   const getPatientData = async () => {
@@ -119,7 +170,7 @@ function ActivityPreferenceScreen(props) {
     }
   };
 
-  // Get patient activity data
+  // Get patient activity preferences and mapping
   const getPatientActivity = async (id) => {
     const response = await activity.getActivityPreference(id);
     if (!response.ok) {
@@ -127,11 +178,17 @@ function ActivityPreferenceScreen(props) {
       setIsLoading(false);
       return;
     }
-
-    const activityIDs = response.data.data?.map(
-      (activity) => activity.centreActivityID,
-    );
+    const data = response.data.data || [];
+    // Extract array of CentreActivityIDs
+    const activityIDs = data.map((activity) => activity.centreActivityID);
     setPatientActivityIDs(activityIDs);
+    // Build mapping array with both CentreActivityID and CentreActivityPreferenceID
+    const preferencesMapping = data.map((activity) => ({
+      CentreActivityID: activity.centreActivityID,
+      isLike: activity.isLike,
+      CentreActivityPreferenceID: activity.centreActivityPreferenceID,
+    }));
+    setPatientActivityPreferences(preferencesMapping);
     setIsLoading(false);
   };
 
@@ -139,124 +196,255 @@ function ActivityPreferenceScreen(props) {
     setShowModal(true);
   };
 
-  const handleModalSubmit = async (activityData) => {
+  const handleModalSubmit = async (activityArray) => {
     let alertTitle = '';
     let alertDetails = '';
+    let successCount = 0;
+    let failCount = 0;
 
-    const result = await activity.addActivityPreference(patientID, activityData);
-    if (result.ok) {
-      await getPatientActivity(patientID);
-      setShowModal(false);
-      setIsReloadPatientList(true);
-      
-      alertTitle = 'Successfully added activity';
+    for (const item of activityArray) {
+      try {
+        // Build payload consistently
+        const payload = {
+          patientID: patientID,
+          centreActivityID: item.centreActivityID,
+          isLike: item.isLike,
+        };
+
+        const existingPref = patientActivityPreferences.find(
+          (pref) => pref.CentreActivityID === item.centreActivityID,
+        );
+
+        if (existingPref) {
+          // Preference exists: update with PUT
+          const updatePayload = {
+            PatientID: patientID,
+            CentreActivityID: item.centreActivityID,
+            IsLike: item.isLike,
+            CentreActivityPreferenceID: existingPref.CentreActivityPreferenceID,
+          };
+          const result = await activity.updateActivityPreference(updatePayload);
+          if (result.ok) {
+            successCount++;
+          } else {
+            failCount++;
+          }
+        } else {
+          const result = await activity.addActivityPreference(
+            patientID,
+            payload,
+          );
+          if (result.ok) {
+            successCount++;
+          } else {
+            failCount++;
+          }
+        }
+      } catch (error) {
+        console.error(
+          'Error processing preference for activity',
+          item.centreActivityID,
+          error,
+        );
+        failCount++;
+      }
+    }
+
+    await getPatientActivity(patientID);
+    setShowModal(false);
+    setIsReloadPatientList(true);
+
+    if (failCount === 0) {
+      alertTitle = 'Success';
+      alertDetails = `Successfully processed ${successCount} preferences.`;
     } else {
-      const errors = result.data?.message;
-
-      result.data
-      ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-      : (alertDetails = 'Please try again.');
-      
-      alertTitle = 'Error adding activity';
+      alertTitle = 'Some errors occurred';
+      alertDetails = `Processed ${successCount} preferences, but ${failCount} failed. Please try again.`;
     }
 
     Alert.alert(alertTitle, alertDetails);
   };
 
-  const handleDeleteActivity = async (activityID) => {
-    Alert.alert(
-      'Are you sure you wish to delete this item?',
-      '',
-      [
+  // const handleDeleteActivity = async (activityID) => {
+  //   Alert.alert('Are you sure you wish to delete this item?', '', [
+  //     {
+  //       text: 'Cancel',
+  //       onPress: () => {},
+  //       style: 'cancel',
+  //     },
+  //     {
+  //       text: 'OK',
+  //       onPress: async () => {
+  //         const result = await activity.deleteActivityPreference(activityID);
+  //         if (result.ok) {
+  //           Alert.alert('Success', 'Activity preference deleted successfully');
+  //           setIsReloadPatientList(true);
+  //         } else {
+  //           Alert.alert('Error', 'Failed to delete activity preference');
+  //         }
+  //       },
+  //     },
+  //   ]);
+  // };
+
+  const splitData = (data) => {
+    const likedItems = data.filter((item) => item.isLike === 1);
+    const neutralItems = data.filter((item) => item.isLike === 0);
+    const dislikedItems = data.filter((item) => item.isLike === -1);
+    return { likedItems, neutralItems, dislikedItems };
+  };
+
+  const ascending = sort?.sel?.asc ?? true;
+
+  const sections = useMemo(() => {
+    // If ascending, liked → neutral → disliked
+    if (ascending) {
+      return [
         {
-          text: 'Cancel',
-          onPress: () => {},
-          style: 'cancel',
+          title: 'Liked Activities',
+          data: likedItems.length ? [likedItems] : [],
         },
         {
-          text: 'OK',
-          onPress: async () => {
-            const result = await activity.deleteActivityPreference(activityID);
-            if (result.ok) {
-              Alert.alert('Success', 'Activity preference deleted successfully');
-              setIsReloadPatientList(true);
-            } else {
-              Alert.alert('Error', 'Failed to delete activity preference');
-            }
-          },
+          title: 'Neutral Activities',
+          data: neutralItems.length ? [neutralItems] : [],
         },
-      ],
+        {
+          title: 'Disliked Activities',
+          data: dislikedItems.length ? [dislikedItems] : [],
+        },
+      ];
+    }
+    // If descending, disliked → neutral → liked
+    else {
+      return [
+        {
+          title: 'Disliked Activities',
+          data: dislikedItems.length ? [dislikedItems] : [],
+        },
+        {
+          title: 'Neutral Activities',
+          data: neutralItems.length ? [neutralItems] : [],
+        },
+        {
+          title: 'Liked Activities',
+          data: likedItems.length ? [likedItems] : [],
+        },
+      ];
+    }
+  }, [ascending, likedItems, neutralItems, dislikedItems]);
+
+  const renderItem = ({ item }) => {
+    // `item` is an array of activities (e.g., all neutral activities)
+    return (
+      <View style={styles.wrapContainer}>
+        {item.map((activity) => (
+          <View key={activity.centreActivityID} style={styles.gridItem}>
+            <Text
+              style={[
+                styles.activityText,
+                activity.activityTitle === 'None'
+                  ? styles.noItem
+                  : activity.isLike === 1
+                  ? styles.likedItems
+                  : activity.isLike === 0
+                  ? styles.neutralItems
+                  : styles.dislikedItems,
+              ]}
+            >
+              {activity.activityTitle}
+            </Text>
+          </View>
+        ))}
+      </View>
     );
   };
 
-  // Split the array into different sections for SectionList
-  const splitData = (data) => {
-    const likedItems = data.filter(item => item.isLike);
-    const notLikedItems = data.filter(item => !item.isLike);
-    return { likedItems, notLikedItems };
+  const renderSectionHeader = ({ section }) => {
+    // section.data is an array with one element: the array of items
+    let total = section.data.length ? section.data[0].length : 0;
+    // If the only item is the default placeholder ("None"), count as 0
+    if (total === 1 && section.data[0][0]?.activityTitle === 'None') {
+      total = 0;
+    }
+
+    return (
+      <Text style={styles.header}>
+        {section.title} ({total})
+      </Text>
+    );
   };
 
-  const renderItem = ({ item }) => (
-    <View style={styles.itemContainer}>
-      <Text style={item.activityTitle === "None" ? styles.noItem : item.isLike ? styles.likedItems : styles.dislikedItems}>
-        {item.activityTitle}
-      </Text>
-      {item.activityTitle !== "None" && (
-        <TouchableOpacity onPress={() => handleDeleteActivity(item)}>
-          <MaterialCommunityIcons name="delete" size={35} color="red" />
-        </TouchableOpacity>
-      )}
-    </View>
-  );
-
   return (
-    <>{isLoading ? (
-      <ActivityIndicator visible />
-    ) : (
-      <View style={styles.container}>
-        <View style={{ justifyContent: 'space-between' }}>
-          <View style={{ alignSelf: 'center', marginTop: 15, maxHeight: 120 }} >
-            {!isEmptyObject(patientData) ? (
-              <ProfileNameButton
-                testID={`${testID}_profileNameButton`}  
-                profilePicture={patientData.profilePicture}
-                profileLineOne={patientData.preferredName}
-                profileLineTwo={`${patientData.firstName} ${patientData.lastName}`}
-                handleOnPress={onClickProfile}
-                isPatient
-                isVertical={false}
-                size={90}
+    <>
+      {isLoading ? (
+        <ActivityIndicator visible />
+      ) : (
+        <View style={styles.container}>
+          <View style={{ justifyContent: 'space-between' }}>
+            <View
+              style={{ alignSelf: 'center', marginTop: 15, maxHeight: 120 }}
+            >
+              {!isEmptyObject(patientData) ? (
+                <ProfileNameButton
+                  profilePicture={patientData.profilePicture}
+                  profileLineOne={patientData.preferredName}
+                  profileLineTwo={`${patientData.firstName} ${patientData.lastName}`}
+                  handleOnPress={onClickProfile}
+                  isPatient
+                  isVertical={false}
+                  size={90}
+                />
+              ) : (
+                <LoadingWheel />
+              )}
+            </View>
+            <View>
+              <SearchFilterBar
+                originalList={originalData}
+                setList={setActivityData}
+                SEARCH_OPTIONS={SEARCH_OPTIONS}
+                FIELD_MAPPING={FIELD_MAPPING}
+                SORT_OPTIONS={SORT_OPTIONS}
+                datetime={datetime}
+                setDatetime={setDatetime}
+                sort={sort}
+                setSort={setSort}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                initializeData={isDataInitialized}
+                onInitialize={() => setIsDataInitialized(false)}
+                itemType="activity"
+                itemCount={activityData.length}
               />
-            ) : (
-              <LoadingWheel />
-            )}
+            </View>
+          </View>
+          {(likedItems.length > 0 ||
+            neutralItems.length > 0 ||
+            dislikedItems.length > 0) && (
+            <SectionList
+              onRefresh={refreshActivityPreference}
+              refreshing={isLoading}
+              sections={sections}
+              renderItem={renderItem}
+              renderSectionHeader={renderSectionHeader}
+              keyExtractor={(item, index) => `${index}`}
+            />
+          )}
+          <View style={styles.button}>
+            <AddButton
+              title="Edit Activity Preference"
+              onPress={handleAddActivity}
+            />
+            <AddActivityPreferenceModal
+              showModal={showModal}
+              onClose={() => setShowModal(false)}
+              onSubmit={handleModalSubmit}
+              existingActivityIDs={patientActivityIDs}
+              existingActivityPreferences={patientActivityPreferences}
+            />
           </View>
         </View>
-        {(likedItems.length > 0 || dislikedItems.length > 0) && (
-          <SectionList
-            sections={[
-              { title: 'Activities liked', data: likedItems },
-              { title: 'Activities disliked', data: dislikedItems }
-            ]}
-            renderItem={renderItem}
-            renderSectionHeader={({ section }) => (
-              <Text style={styles.header}>{section.title}</Text>
-            )}
-            keyExtractor={(item, index) => index.toString()}
-          />
-        )}
-
-        <View style={styles.button}>
-          <AddButton title="Add Activity Preference" onPress={handleAddActivity} />
-          <AddActivityPreferenceModal
-            showModal={showModal}
-            onClose={() => setShowModal(false)}
-            onSubmit={handleModalSubmit}
-            existingActivityIDs={patientActivityIDs}
-          />
-        </View>
-      </View>
-    )}
+      )}
     </>
   );
 }
@@ -266,41 +454,49 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginVertical: 1,
   },
-  itemContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  likedItems: {
-    backgroundColor: '#C6EBC5',
-    fontSize: 15,
-    padding: 20,
-    marginVertical: 3,
-    borderRadius: 30,
-    flex: 1,
-  },
-  dislikedItems: {
-    backgroundColor: '#FF8F8F',
-    fontSize: 15,
-    padding: 20,
-    marginVertical: 3,
-    borderRadius: 30,
-    flex: 1,
-  },
-  noItem: {
-    fontSize: 15,
-    padding: 20,
-    marginVertical: 3,
-    flex: 1,
-  },
   header: {
+    paddingLeft: 10,
     paddingTop: 15,
-    fontSize: 30,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: '500',
+    marginBottom: 6,
   },
   button: {
     paddingTop: 30,
-  }
+  },
+
+  // Container for each row of activities in a section
+  wrapContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+    marginBottom: 10,
+  },
+  gridItem: {
+    alignSelf: 'flex-start',
+    marginHorizontal: 5,
+    marginVertical: 5,
+  },
+  activityText: {
+    fontSize: 15,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    borderRadius: 10,
+    textAlign: 'center',
+  },
+  likedItems: {
+    backgroundColor: colors.green_lightest,
+  },
+  neutralItems: {
+    backgroundColor: colors.lighter_grey,
+  },
+  dislikedItems: {
+    backgroundColor: colors.pink_lightest,
+  },
+  noItem: {
+    backgroundColor: colors.grey,
+    color: colors.white,
+  },
 });
 
 export default ActivityPreferenceScreen;

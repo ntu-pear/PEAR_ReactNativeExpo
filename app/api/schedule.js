@@ -18,7 +18,7 @@ const generate = `${endpoint}/generate`; //test
 
 // **********************  GET REQUESTS *************************
 
-const getPatientWeeklySchedule = async (patientIDs=[]) => {
+const getPatientWeeklySchedule = async (patientIDs = []) => {
   let params;
   if (patientIDs.length > 0) {
     params = {
@@ -35,7 +35,7 @@ const getPatientWeeklySchedule = async (patientIDs=[]) => {
 
 const getPatientAllTest = async () => {
   return await client.get(patientAllTest, {});
-}
+};
 
 const getPatientTest = async (patientID) => {
   let params;
@@ -44,7 +44,7 @@ const getPatientTest = async (patientID) => {
       patientID,
     };
   }
-  
+
   // if patientId is not specified
   else {
     params = {};
@@ -54,12 +54,12 @@ const getPatientTest = async (patientID) => {
 
 const getSystemTest = async () => {
   return await client.get(systemTest, {});
-}
+};
 
 // **********************  POST REQUESTS *************************
 const generateThisWeek = async () => {
   return await client.post(generate);
-}
+};
 
 // ************************* UPDATE REQUESTS *************************
 

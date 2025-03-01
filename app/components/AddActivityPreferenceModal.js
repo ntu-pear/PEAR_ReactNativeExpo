@@ -1,174 +1,135 @@
 // Libs
-import React, { useEffect, useState, useRef } from 'react';
-import { Modal, Button, VStack, Text } from 'native-base';
-import { StyleSheet, View, Alert } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { ScrollView } from 'native-base';
 
 // Components
-import SelectionInputField from './input-components/SelectionInputField';
-import InputField from './input-components/InputField';
-import AppButton from './AppButton';
-
-// Hooks
-import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
-import colors from 'app/config/colors';
+import AddEditModal from 'app/components/AddEditModal';
+import RadioButtonInput from 'app/components/input-components/RadioButtonsInput';
 
 // API
-import activity from 'app/api/activity'; //need to create a list of array for dataArray
-
-// Configurations
+import activity from 'app/api/activity';
 
 function AddActivityPreferenceModal({
+  testID,
   showModal,
+  modalMode, // e.g. 'add' or 'edit'
   onClose,
   onSubmit,
-  existingActivityIDs,
+  existingActivityIDs, // No longer used to disable options
+  existingActivityPreferences,
 }) {
-
-  const [activityData, setActivityData] = useState({
-    centreActivityID: null,
-    isLike: null,
-  });
-
-  const [isError, setIsError] = useState(false);
-  const [isActivityError, setIsActivityError] = useState(true);
-  const [isActivityIsLikeError, setIsActivityIsLikeError] = useState(true);
-  const [disabledActivityOptions, setDisabledActivityOptions] = useState({});
-
+  // List of all centre activities from the backend
   const [activityList, setActivityList] = useState([]);
-  const [isLikeList] = useState([
+
+  // Object to store preferences: key = centreActivityID, value = preference (0 for Neutral, 1 for Like, -1 for Dislike)
+  const [preferences, setPreferences] = useState({});
+  const [isError, setIsError] = useState(false);
+
+  // Define radio button options for each activity preference
+  const preferenceOptions = [
+    { label: 'Neutral', value: 0 },
     { label: 'Like', value: 1 },
-    { label: 'Dislike', value: 0 },
-  ]);
+    { label: 'Dislike', value: -1 },
+  ];
 
-  let extractedObjects = [];
-
+  // Fetch the full list of activities and initialize preferences to neutral
   const getListData = async () => {
     try {
       const response = await activity.getCentreActivities();
       const responseData = response.data.data;
-
-      responseData.map((object) => {
-      const valuesArray = Object.values(object);
-      const id = valuesArray[0];
-      const value = object.activityTitle;
-      const extractedObject = { label: value, value: id };
-      extractedObjects.push(extractedObject);
-      });
+      const extractedObjects = responseData.map((object) => ({
+        label: object.activityTitle,
+        value: object.centreActivityID, // adjust if your API uses a different key
+      }));
       setActivityList(extractedObjects);
+      const initialPrefs = {};
+      extractedObjects.forEach((item) => {
+        const existing = existingActivityPreferences?.find(
+          (pref) => pref.CentreActivityID === item.value,
+        );
+        initialPrefs[item.value] = existing ? existing.isLike : 0;
+      });
+      setPreferences(initialPrefs);
     } catch (error) {
       setIsError(true);
       console.error(error);
     }
   };
 
-  const handleActivityChange = (value) => {
-    setActivityData({ ...activityData, centreActivityID: value });
-    setIsActivityError(false);
-  };
-
-  const handleIsLikeChange = (value) => {
-    setActivityData({ ...activityData, isLike: value });
-    setIsActivityIsLikeError(false);
-  };
-
-  const resetForm = () => {
-    setActivityData({
-      centreActivityID: null,
-      isLike: null,
-    });
-    setIsActivityError(true);
-    setIsActivityIsLikeError(true);
-  };
-
+  // Load activity list when the modal is shown
   useEffect(() => {
-    if (!showModal) {
-      resetForm();
+    if (showModal) {
+      getListData();
+    } else {
+      // Optionally reset when modal is closed
+      setActivityList([]);
+      setPreferences({});
     }
-  }, [showModal]);
+  }, [showModal, existingActivityIDs]);
 
-  useEffect(() => {
-    const newDisabledOptions = {};
-
-    if(existingActivityIDs){
-      existingActivityIDs.forEach((id) => {
-        newDisabledOptions[id] = true;
-      });
-    }
-
-    setDisabledActivityOptions(newDisabledOptions);
-  }, [existingActivityIDs]);
-
-  useEffect(() => {
-    getListData();
-  }, []);
+  // Handler to update the preference for a given activity
+  const handlePreferenceChange = (activityId, newValue) => {
+    setPreferences((prev) => ({ ...prev, [activityId]: newValue }));
+  };
 
   // Handle form submission
   const handleSubmit = () => {
-    let alertTitle = 'Please Try Again';
-    let alertDetails = 'Field(s) cannot be left empty';
-
-    if (!isActivityError && !isActivityIsLikeError) {
-      onSubmit(activityData);
-      onClose();
-    }else{
-      Alert.alert(alertTitle, alertDetails);
-    }
+    const submission = Object.entries(preferences).map(
+      ([activityId, pref]) => ({
+        centreActivityID: parseInt(activityId, 10),
+        isLike: pref,
+      }),
+    );
+    onSubmit(submission);
+    onClose();
   };
 
+  // Build the modal content: list all activities with a radio group for each
+  const modalContent = (
+    <ScrollView>
+      {activityList.map((activityItem) => (
+        <View key={activityItem.value} style={styles.activityRow}>
+          <RadioButtonInput
+            testID={`${testID}_activity_radio_${activityItem.value}`}
+            isRequired={true}
+            title={activityItem.label}
+            value={preferences[activityItem.value]}
+            dataArray={preferenceOptions}
+            onChangeData={(newValue) =>
+              handlePreferenceChange(activityItem.value, newValue)
+            }
+            isDisabled={false}
+          />
+        </View>
+      ))}
+    </ScrollView>
+  );
+
   return (
-    <Modal isOpen={showModal} onClose={onClose}>
-      <Modal.Content maxWidth="400px">
-        <Modal.CloseButton />
-        <Modal.Header style={styles.modalHeader}>
-          <Text style={styles.modalHeaderText}>Add Activity Preference</Text>
-        </Modal.Header>
-        <Modal.Body>
-          <VStack space={3}>
-            <SelectionInputField
-              isRequired
-              title={'Activity'}
-              placeholder={'Select Activity'}
-              onDataChange={handleActivityChange}
-              value={activityData.centreActivityID}
-              dataArray={activityList}
-              isDisabledItems={disabledActivityOptions}
-            />
-            <SelectionInputField
-              isRequired
-              title={'Like/Dislike'}
-              placeholder={'Select Preference'}
-              onDataChange={handleIsLikeChange}
-              value={activityData.isLike}
-              dataArray={isLikeList}
-            />
-          </VStack>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button.Group space={2}>
-            <AppButton color="red" title="Cancel" onPress={onClose}></AppButton>
-            <AppButton
-              onPress={handleSubmit}
-              title="Submit"
-              color="green"
-            ></AppButton>
-          </Button.Group>
-        </Modal.Footer>
-      </Modal.Content>
-    </Modal>
+    <AddEditModal
+      testID={testID}
+      handleSubmit={handleSubmit}
+      isInputErrors={false}
+      modalMode={modalMode}
+      onClose={onClose}
+      showModal={showModal}
+      modalTitle="Edit Activity Preferences"
+      modalContent={modalContent}
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  modalHeader: {
-    backgroundColor: colors.green, // Change to your preferred green color
+  activityRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    marginVertical: 5,
+    justifyContent: 'space-between',
   },
-  modalHeaderText: {
-    color: 'white', // Text color
-    fontSize: 18, // Adjust font size as needed
-    fontWeight: 'bold', // Optional: if you want the text to be bold
-    textTransform: 'uppercase',
+  activityLabel: {
+    flex: 1,
+    fontSize: 16,
   },
 });
 

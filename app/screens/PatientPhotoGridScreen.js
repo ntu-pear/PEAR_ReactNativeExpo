@@ -108,7 +108,7 @@ function PatientPhotoGrid(props) {
   const [statusCode, setStatusCode] = useState(200);
   const [isReloadList, setIsReloadList] = useState(true);
 
-  // Problem log data related states
+  // Photo data related states
   const [originalData, setOriginalData] = useState([]);
   const [photoData, setPhotoData] = useState([]);
   const [formData, setFormData] = useState({

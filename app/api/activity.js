@@ -23,7 +23,7 @@ const getActivityPreference = async (patientID) => {
   const payload = {
     patientID: patientID,
   };
-  
+
   return client.get(patientActivityPreference, payload);
 };
 
@@ -34,21 +34,21 @@ const getCentreActivities = async () => {
 // **********************  POST REQUESTS *************************
 
 const addActivityPreference = async (patientID, data) => {
-    const payload = {
-        patientID: patientID,
-        centreActivityID: data.centreActivityID,
-        isLike: data.isLike,
-      };
+  const payload = {
+    patientID: patientID,
+    centreActivityID: data.centreActivityID,
+    isLike: data.isLike,
+  };
 
-    return await client.post(addPatientActivityPreference, payload);
+  return await client.post(addPatientActivityPreference, payload);
 };
 
 // ************************* UPDATE REQUESTS *************************
 
 const updateActivityPreference = async (data) => {
-    const headers = { 'Content-Type': 'application/json-patch+json' };
-  
-    return client.put(updatePatientActivityPreference, data, { headers });
+  const headers = { 'Content-Type': 'application/json-patch+json' };
+
+  return client.put(updatePatientActivityPreference, data, { headers });
 };
 
 const deleteActivityPreference = async (data) => {

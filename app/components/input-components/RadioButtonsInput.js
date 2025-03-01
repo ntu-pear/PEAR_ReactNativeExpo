@@ -13,7 +13,7 @@ import ErrorMessage from 'app/components/ErrorMessage';
 import RequiredIndicator from '../RequiredIndicator';
 
 function RadioButtonInput({
-  testID='',
+  testID = '',
   isRequired,
   title,
   value,
@@ -21,7 +21,6 @@ function RadioButtonInput({
   onChangeData,
   onChildData,
 }) {
-
   // This state is used to track if the component is in its first render
   const [isFirstRender, setIsFirstRender] = useState(true);
 
@@ -54,12 +53,22 @@ function RadioButtonInput({
   // ensure that the submission blocking in the parent component is active (as it is first rendered, user will not
   // likely have filled anything). This also ensures that since there is no input yet, the component error message
   // does not show until the user focuses and violates the validation with their input.
+  // useEffect(() => {
+  //   onChildData ? onChildData(isFirstRender || isError.error) : null;
+  //   setIsFirstRender(false);
+  //   setIsError({
+  //     ...isError,
+  //     error: isRequired && value.length === 0,
+  //   });
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
   useEffect(() => {
+    console.log('RadioButtonInput value:', value);
     onChildData ? onChildData(isFirstRender || isError.error) : null;
     setIsFirstRender(false);
     setIsError({
       ...isError,
-      error: isRequired && value.length === 0,
+      error: isRequired && (value === null || value === undefined),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -75,7 +84,7 @@ function RadioButtonInput({
     <View testID={testID} style={styles.componentContainer}>
       <VStack>
         <Text style={styles.titleMsg}>
-        {title}:{isRequired ? <RequiredIndicator/> : ''}
+          {title}:{isRequired ? <RequiredIndicator /> : ''}
         </Text>
         <RadioButton.Group value={value} onValueChange={onChangeSelection}>
           <HStack space={1} flexWrap="wrap">

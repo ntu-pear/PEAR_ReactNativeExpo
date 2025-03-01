@@ -38,4 +38,8 @@ export default {
   primary_overlay_color: '#00000080', // ligher black color
   white: '#f3f6f4',
   white_var1: '#FFFFFF',
+  //ADDED 22feb by nicole
+  grey: '#7F7F7F',
+  light_grey: '#D9D9D9',
+  lighter_grey: '#F0F0F0',
 };
