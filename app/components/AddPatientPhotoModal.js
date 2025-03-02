@@ -1,7 +1,6 @@
 // Libs
 import React, { useEffect, useState } from 'react';
 import { Image, TouchableOpacity, StyleSheet, View } from 'react-native';
-import { VStack, Text } from 'native-base';
 import * as ImagePicker from 'expo-image-picker';
 import mime from 'mime';
 import { format } from 'date-fns';
@@ -102,26 +101,6 @@ function AddPatientPhotoModal({
     }
   };
 
-  // // Reset form
-  // const resetForm = () => {
-  //   setFormData({
-  //     PatientPhotoID: null,
-  //     HolidayExpID: null,
-  //     Photo: null,
-  //     PhotoDetails: '',
-  //     CountryListID: 1,
-  //     StartDate: new Date(),
-  //     EndDate: new Date(),
-  //     AlbumCategoryListID: '1',
-  //     AlbumCategoryName: '',
-  //   });
-  //   setIsPhotoPathError(false);
-  //   setIsPhotoDetailsError(false);
-  //   setIsCountryListIDError(false);
-  //   setIsStartDateError(false);
-  //   setIsEndDateError(false);
-  // };
-
   const resetForm = () => {
     setFormData({
       PatientPhotoID: null,
@@ -175,28 +154,6 @@ function AddPatientPhotoModal({
 
   const handleSubmit = () => {
     if (!isInputErrors && formData.Photo) {
-      // Choose the correct holiday experience key based on modalMode.
-      // For update/edit mode, use "HolidayExperienceUpdateDTO"; for add mode, use "HolidayExperienceAddDTO".
-      // const holidayKey =
-      //   modalMode === 'update' || modalMode === 'edit'
-      //     ? 'HolidayExperienceUpdateDTO'
-      //     : 'HolidayExperienceAddDTO';
-
-      // // If the holiday checkbox is checked, prepare holiday data; otherwise, use an empty object.
-      // const holidayPayload = formData.IsHoliday
-      //   ? {
-      //       CountryListID: formData.CountryListID || '',
-      //       StartDate:
-      //         formData.StartDate instanceof Date
-      //           ? format(formData.StartDate, "yyyy-MM-dd'T'HH:mm:ss")
-      //           : formData.StartDate || '',
-      //       EndDate:
-      //         formData.EndDate instanceof Date
-      //           ? format(formData.EndDate, "yyyy-MM-dd'T'HH:mm:ss")
-      //           : formData.EndDate || '',
-      //     }
-      //   : {};
-
       const holidayKey =
         modalMode === 'update' || modalMode === 'edit'
           ? 'HolidayExperienceUpdateDTO'
@@ -271,7 +228,7 @@ function AddPatientPhotoModal({
           <AppButton
             title="Upload Photo"
             onPress={pickImage('Photo')}
-            color="gray"
+            color={colors.grey}
             isDisabled={false}
           />
           {/* Show image only if photoPath exists */}

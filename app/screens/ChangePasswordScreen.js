@@ -40,7 +40,7 @@ function ChangePasswordScreen(props) {
       setIsPasswordError(state);
     },
     [isPasswordError],
-  ); 
+  );
 
   // const schema = Yup.object().shape({
   //   oldPassword: Yup.string().required('Old Password is a required field.'),
@@ -71,32 +71,38 @@ function ChangePasswordScreen(props) {
   //   }
   // };
 
-   const passwordFormat = (value) => {
-    if(!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,16}$/.test(value)) {
+  const passwordFormat = (value) => {
+    if (
+      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,16}$/.test(
+        value,
+      )
+    ) {
       return false;
     }
     return true;
   };
 
   const handleOnPress = async () => {
-    const isPasswordFormatValid = passwordFormat(currentPassword) === true && passwordFormat(newPassword) === true;
+    const isPasswordFormatValid =
+      passwordFormat(currentPassword) === true &&
+      passwordFormat(newPassword) === true;
     let alertTitle = 'Please try again';
     let alertDetails = '';
 
-    Keyboard.dismiss()
+    Keyboard.dismiss();
 
     // const validation = await validate();
     // if (!validation) {
     //   return;
     // }
 
-    if(currentPassword === '' || newPassword === ''){
+    if (currentPassword === '' || newPassword === '') {
       alertDetails = 'Fields cannot be left empty!';
       Alert.alert(alertTitle, alertDetails);
       return;
     }
 
-    if(!isPasswordFormatValid){
+    if (!isPasswordFormatValid) {
       alertDetails = 'Password does not follow the specified format!';
       Alert.alert(alertTitle, alertDetails);
       return;
@@ -122,7 +128,7 @@ function ChangePasswordScreen(props) {
     // let alertTxt = 'Password changed successfully. Please login again.';
     // Platform.OS === 'web' ? alert(alertTxt) : Alert.alert(alertTxt);
     // Redirects the user to Welcome screen by logging out after successful password change.
-    
+
     alertTitle = 'Password changed successful';
     alertDetails = 'Please login again';
     Alert.alert(alertTitle, alertDetails);
@@ -160,23 +166,23 @@ function ChangePasswordScreen(props) {
           /> */}
 
           <SensitiveInputField
-              isRequired
-              title={'Current Password'}
-              value={currentPassword}
-              onChangeText={setCurrentPassword}
-              onEndEditing={handlePasswordError}
-              dataType='password'
-              maxLength={16}
+            isRequired
+            title={'Current Password'}
+            value={currentPassword}
+            onChangeText={setCurrentPassword}
+            onEndEditing={handlePasswordError}
+            dataType="password"
+            maxLength={16}
           />
 
           <SensitiveInputField
-              isRequired
-              title={'New Password'}
-              value={newPassword}
-              onChangeText={setNewPassword}
-              onEndEditing={handlePasswordError}
-              dataType='password'
-              maxLength={16}
+            isRequired
+            title={'New Password'}
+            value={newPassword}
+            onChangeText={setNewPassword}
+            onEndEditing={handlePasswordError}
+            dataType="password"
+            maxLength={16}
           />
 
           {/* <CustomFormControl
@@ -210,7 +216,7 @@ function ChangePasswordScreen(props) {
 
           <View style={styles.buttonsContainer}>
             {isLoading ? (
-              <ActivityIndicator color={colors.primary_overlay_color} />
+              <ActivityIndicator visible />
             ) : (
               <AppButton
                 title="Confirm"

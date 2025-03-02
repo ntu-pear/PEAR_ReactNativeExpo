@@ -1,7 +1,7 @@
 // Libs
 import React from 'react';
 import { Text, Icon, View } from 'native-base';
-import {  StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 // Configurations
@@ -16,71 +16,69 @@ const MedicalHistoryItem = ({
   medicalDetails,
   medicalEstimatedDate,
   medicalRemarks,
-  onDelete
-}) => {  
+  onDelete,
+}) => {
   return (
-    <View 
-      style={[styles.medContainer]}>
+    <View style={[styles.medContainer]}>
       <Icon
-        as={
-          <MaterialIcons 
-          name="info" 
-          />
-        } 
+        as={<MaterialIcons name="info" />}
         size={12}
         color={colors.green}
-      >
-      </Icon>
+      ></Icon>
       <View style={styles.medTextContainer}>
         {informationSource ? (
-          <View style={{flexDirection: 'row',  marginLeft: 20}}>
+          <View style={{ flexDirection: 'row', marginLeft: 20 }}>
             <Text>
               <Text style={[styles.medText, styles.bold]}>Source: </Text>
               <Text style={[styles.medText]}>{informationSource}</Text>
             </Text>
           </View>
-          ): null}
+        ) : null}
         {medicalDetails ? (
-          <View style={{flexDirection: 'row',  marginLeft: 20}}>
+          <View style={{ flexDirection: 'row', marginLeft: 20 }}>
             <Text>
               <Text style={[styles.medText, styles.bold]}>Details: </Text>
               <Text style={[styles.medText]}>{medicalDetails}</Text>
             </Text>
           </View>
-          ): null}
-        
+        ) : null}
+
         {medicalRemarks ? (
-          <View style={{flexDirection: 'row',  marginLeft: 20}}>
+          <View style={{ flexDirection: 'row', marginLeft: 20 }}>
             <Text>
               <Text style={[styles.medText, styles.bold]}>Remarks: </Text>
               <Text style={[styles.medText]}>{medicalRemarks}</Text>
             </Text>
           </View>
-          ): null}
+        ) : null}
         {medicalEstimatedDate ? (
-          <View style={{flexDirection: 'row',  marginLeft: 20}}>
+          <View style={{ flexDirection: 'row', marginLeft: 20 }}>
             <Text>
-              <Text style={[styles.medText, styles.bold]}>Estimated Date: </Text>
-              <Text style={[styles.medText]}>{formatDateTime(new Date(medicalEstimatedDate), true)}</Text>
+              <Text style={[styles.medText, styles.bold]}>
+                Estimated Date:{' '}
+              </Text>
+              <Text style={[styles.medText]}>
+                {formatDateTime(new Date(medicalEstimatedDate), true)}
+              </Text>
             </Text>
           </View>
-          ): null}
+        ) : null}
       </View>
-      <EditDeleteBtn onDelete={onDelete}/>
+      <EditDeleteBtn onDelete={onDelete} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   medContainer: {
-    flexDirection: 'row', 
+    flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.green_lightest,
-    padding: 20, 
-    borderRadius: 8
+    padding: 20,
+    borderRadius: 8,
   },
   medTextContainer: {
-    flex: 1
+    flex: 1,
   },
   heading: {
     marginLeft: 20,
@@ -96,9 +94,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginLeft: 17,
     marginRight: 15,
-  },
-  red: {
-    color: colors.dark_red
   },
   bold: {
     marginLeft: 20,

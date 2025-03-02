@@ -8,7 +8,12 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import patientApi from 'app/api/patient';
 
 // Utilities
-import { isEmptyObject, noDataMessage, sortFilterInitialState, formatDate } from 'app/utility/miscFunctions';
+import {
+  isEmptyObject,
+  noDataMessage,
+  sortFilterInitialState,
+  formatDate,
+} from 'app/utility/miscFunctions';
 
 // Navigation
 import routes from 'app/navigation/routes';
@@ -32,7 +37,7 @@ import PrescriptionItem from 'app/components/PrescriptionItem';
 import AddPatientPrescriptionModal from 'app/components/AddPatientPrescriptionModal';
 
 function PatientPrescriptionScreen(props) {
-  let {patientID, patientId} = props.route.params;
+  let { patientID, patientId } = props.route.params;
   if (patientId) {
     patientID = patientId;
   }
@@ -55,18 +60,19 @@ function PatientPrescriptionScreen(props) {
   //Prescription data related states
   const [originalPrescriptionData, setOriginalPrescriptionData] = useState([]);
   const [prescriptionData, setPrescriptionData] = useState([]);
-  const [formData, setFormData] = useState({ // for add/edit form
-    "prescriptionID": null,
-    "prescriptionListID": 1,
-    "dosage": "",
-    "frequencyPerDay": 1,
-    "isChronic": true,
-    "instruction": "",
-    "startDate": new Date(),
-    "endDate": new Date(),
-    "afterMeal": true,
-    "prescriptionRemarks": "",
-    "prescriptionListDesc": "",
+  const [formData, setFormData] = useState({
+    // for add/edit form
+    prescriptionID: null,
+    prescriptionListID: 1,
+    dosage: '',
+    frequencyPerDay: 1,
+    isChronic: true,
+    instruction: '',
+    startDate: new Date(),
+    endDate: new Date(),
+    afterMeal: true,
+    prescriptionRemarks: '',
+    prescriptionListDesc: '',
   });
 
   // Patient data related states
@@ -78,11 +84,11 @@ function PatientPrescriptionScreen(props) {
   // Options for user to search by
   const SEARCH_OPTIONS = ['Drug Name'];
 
-  // Display mode options  
+  // Display mode options
   const [displayMode, setDisplayMode] = useState('rows');
   const DISPLAY_MODES = ['rows', 'table'];
 
-  // Sort options 
+  // Sort options
   const SORT_OPTIONS = ['Date'];
 
   // Filter options
@@ -91,7 +97,7 @@ function PatientPrescriptionScreen(props) {
   // Mapping between sort/filter/search names and the respective field in the patient data retrieved from the backend
   const FIELD_MAPPING = {
     'Drug Name': 'prescriptionListDesc',
-    'Date': 'date',
+    Date: 'date',
   };
 
   // Search, sort, and filter related states
@@ -101,10 +107,10 @@ function PatientPrescriptionScreen(props) {
   const [datetime, setDatetime] = useState(sortFilterInitialState);
 
   const [filterOptionDetails, setFilterOptionDetails] = useState({
-    'Date': {
-      'type': 'date',
-      'options': {'min': {}, 'max': {},},
-      'isFilter': true,
+    Date: {
+      type: 'date',
+      options: { min: {}, max: {} },
+      isFilter: true,
     },
   });
 
@@ -127,18 +133,18 @@ function PatientPrescriptionScreen(props) {
       await getPrescriptionData();
     };
     promiseFunction();
-  }
-  
+  };
+
   // Get prescription data from backend
   const getPrescriptionData = async () => {
     if (patientID) {
       const response = await patientApi.getPatientPrescriptionList(patientID);
       if (response.ok) {
-        console.log(response.data.data)
-        setOriginalPrescriptionData([...response.data.data]);    
-        setPrescriptionData(parsePrescriptionData([...response.data.data]));    
+        console.log(response.data.data);
+        setOriginalPrescriptionData([...response.data.data]);
+        setPrescriptionData(parsePrescriptionData([...response.data.data]));
         setIsDataInitialized(true);
-        setIsLoading(false);  
+        setIsLoading(false);
         setIsError(false);
         setIsRetry(false);
         setStatusCode(response.status);
@@ -156,21 +162,22 @@ function PatientPrescriptionScreen(props) {
 
   // Parse data
   const parsePrescriptionData = (tempData) => {
-    return tempData.map(item=>({ // for add/edit form
-      "prescriptionID": item.prescriptionID,
-      "prescriptionListID": item.prescriptionListID,
-      "dosage": item.dosage,
-      "frequencyPerDay": item.frequencyPerDay,
-      "isChronic": item.isChronic,
-      "instruction": item.instruction,
-      "startDate": item.startDate,
-      "endDate": item.endDate,
-      "afterMeal": item.afterMeal,
-      "prescriptionRemarks": item.prescriptionRemarks,
-      "prescriptionListDesc": item.prescriptionListDesc,
-      "date" : item.date,
-    }))
-  }
+    return tempData.map((item) => ({
+      // for add/edit form
+      prescriptionID: item.prescriptionID,
+      prescriptionListID: item.prescriptionListID,
+      dosage: item.dosage,
+      frequencyPerDay: item.frequencyPerDay,
+      isChronic: item.isChronic,
+      instruction: item.instruction,
+      startDate: item.startDate,
+      endDate: item.endDate,
+      afterMeal: item.afterMeal,
+      prescriptionRemarks: item.prescriptionRemarks,
+      prescriptionListDesc: item.prescriptionListDesc,
+      date: item.date,
+    }));
+  };
 
   // Get patient data from backend
   const getPatientData = async () => {
@@ -205,12 +212,15 @@ function PatientPrescriptionScreen(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.addPatientPrescription(patientID, tempPrescriptionFormData);
+    const result = await patientApi.addPatientPrescription(
+      patientID,
+      tempPrescriptionFormData,
+    );
     if (result.ok) {
       console.log('submitting prescription data', tempPrescriptionFormData);
       refreshPrescriptionData();
       setIsModalVisible(false);
-      
+
       alertTitle = 'Successfully added prescription';
     } else {
       const errors = result.data?.message;
@@ -218,12 +228,12 @@ function PatientPrescriptionScreen(props) {
       console.log(result);
 
       result.data
-      ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-      : (alertDetails = 'Please try again.');
-      
+        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
+        : (alertDetails = 'Please try again.');
+
       alertTitle = 'Error adding prescription';
     }
-    
+
     Alert.alert(alertTitle, alertDetails);
   };
 
@@ -231,29 +241,31 @@ function PatientPrescriptionScreen(props) {
   const handleEditPrescription = (prescriptionID) => {
     setIsModalVisible(true);
     setModalMode('edit');
-    
-    const tempPrescriptionFormData = prescriptionData.filter(x=>x.prescriptionID == prescriptionID)[0];
+
+    const tempPrescriptionFormData = prescriptionData.filter(
+      (x) => x.prescriptionID == prescriptionID,
+    )[0];
 
     setFormData({
-      "prescriptionID": tempPrescriptionFormData.prescriptionID,
-      "prescriptionListID": tempPrescriptionFormData.prescriptionListID,
-      "dosage": tempPrescriptionFormData.dosage,
-      "frequencyPerDay": tempPrescriptionFormData.frequencyPerDay.toString(),
-      "isChronic": tempPrescriptionFormData.isChronic,
-      "instruction": tempPrescriptionFormData.instruction,
-      "startDate": new Date(tempPrescriptionFormData.startDate),
-      "endDate": new Date(tempPrescriptionFormData.endDate),
-      "afterMeal": tempPrescriptionFormData.afterMeal,
-      "prescriptionRemarks": tempPrescriptionFormData.prescriptionRemarks,
-      "prescriptionListDesc": tempPrescriptionFormData.prescriptionListDesc,
-    })
-  }
+      prescriptionID: tempPrescriptionFormData.prescriptionID,
+      prescriptionListID: tempPrescriptionFormData.prescriptionListID,
+      dosage: tempPrescriptionFormData.dosage,
+      frequencyPerDay: tempPrescriptionFormData.frequencyPerDay.toString(),
+      isChronic: tempPrescriptionFormData.isChronic,
+      instruction: tempPrescriptionFormData.instruction,
+      startDate: new Date(tempPrescriptionFormData.startDate),
+      endDate: new Date(tempPrescriptionFormData.endDate),
+      afterMeal: tempPrescriptionFormData.afterMeal,
+      prescriptionRemarks: tempPrescriptionFormData.prescriptionRemarks,
+      prescriptionListDesc: tempPrescriptionFormData.prescriptionListDesc,
+    });
+  };
 
   // Submit data to edit prescription
   const handleModalSubmitEdit = async () => {
     setIsLoading(true);
 
-    let tempFormData = {...formData};
+    let tempFormData = { ...formData };
 
     let alertTitle = '';
     let alertDetails = '';
@@ -262,53 +274,57 @@ function PatientPrescriptionScreen(props) {
     if (result.ok) {
       refreshPrescriptionData();
       setIsModalVisible(false);
-      
+
       alertTitle = 'Successfully edited prescription';
     } else {
       const errors = result.data?.message;
-      console.log("Error editing prescription")
+      console.log('Error editing prescription');
 
       result.data
-      ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-      : (alertDetails = 'Please try again.');
-      
+        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
+        : (alertDetails = 'Please try again.');
+
       alertTitle = 'Error editing prescription';
     }
-    
+
     Alert.alert(alertTitle, alertDetails);
   };
 
   // Ask user to confirm deletion of prescription
   const handleDeletePrescription = (prescriptionID) => {
-    const tempData = prescriptionData.filter(x=>x.prescriptionID == prescriptionID)[0];
+    const tempData = prescriptionData.filter(
+      (x) => x.prescriptionID == prescriptionID,
+    )[0];
 
-    Alert.alert('Are you sure you wish to delete this item?', 
-    `Date: ${formatDateTime(new Date(tempData.date), true)}\n` +
-    `Time: ${formatDateTime(new Date(tempData.date), false)}\n` +
-    `Drug Name: ${tempData.prescriptionListDesc}\n` +
-    `Dosage: ${tempData.dosage}\n` +
-    `Frequency Per Day: ${tempData.frequencyPerDay}\n` +   
-    `Instruction: ${tempData.instruction}\n` +
-    `Start Date: ${formatDate(new Date(tempData.startDate), true)}\n` +
-    `End Date: ${formatDate(new Date(tempData.endDate), true)}\n` +
-    `After Meal: ${tempData.afterMeal ? "After Meal" : "Before Meal"} \n` +
-    `Remarks: ${tempData.prescriptionRemarks}\n` +  
-    `Chronic: ${tempData.isChronic ? "Long Term" : "Short Term"} \n`, 
-    [
-      {
-        text: 'Cancel',
-        onPress: ()=>{},
-        style: 'cancel',
-      },
-      {text: 'OK', onPress: ()=>deletePrescription(prescriptionID)},
-    ]);
-  }
+    Alert.alert(
+      'Are you sure you wish to delete this item?',
+      `Date: ${formatDateTime(new Date(tempData.date), true)}\n` +
+        `Time: ${formatDateTime(new Date(tempData.date), false)}\n` +
+        `Drug Name: ${tempData.prescriptionListDesc}\n` +
+        `Dosage: ${tempData.dosage}\n` +
+        `Frequency Per Day: ${tempData.frequencyPerDay}\n` +
+        `Instruction: ${tempData.instruction}\n` +
+        `Start Date: ${formatDate(new Date(tempData.startDate), true)}\n` +
+        `End Date: ${formatDate(new Date(tempData.endDate), true)}\n` +
+        `After Meal: ${tempData.afterMeal ? 'After Meal' : 'Before Meal'} \n` +
+        `Remarks: ${tempData.prescriptionRemarks}\n` +
+        `Chronic: ${tempData.isChronic ? 'Long Term' : 'Short Term'} \n`,
+      [
+        {
+          text: 'Cancel',
+          onPress: () => {},
+          style: 'cancel',
+        },
+        { text: 'OK', onPress: () => deletePrescription(prescriptionID) },
+      ],
+    );
+  };
 
   // Delete Prescription
   const deletePrescription = async (prescriptionID) => {
     setIsLoading(true);
 
-    let tempData = {prescriptionID: prescriptionID};
+    let tempData = { prescriptionID: prescriptionID };
 
     let alertTitle = '';
     let alertDetails = '';
@@ -317,26 +333,26 @@ function PatientPrescriptionScreen(props) {
     if (result.ok) {
       refreshPrescriptionData();
       setIsModalVisible(false);
-      
+
       alertTitle = 'Successfully deleted prescription';
     } else {
       const errors = result.data?.message;
-      console.log("Error deleting prescription", result)
+      console.log('Error deleting prescription', result);
 
       result.data
-      ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-      : (alertDetails = 'Please try again.');
-      
+        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
+        : (alertDetails = 'Please try again.');
+
       alertTitle = 'Error deleting prescription';
     }
-    
+
     Alert.alert(alertTitle, alertDetails);
-  }
+  };
 
   // Navigate to patient profile on click profile image
-  const onClickProfile = () => {  
+  const onClickProfile = () => {
     navigation.navigate(routes.PATIENT_PROFILE, { id: patientID });
-  }
+  };
 
   //Prescription data related states
   const getTableRowData = () => {
@@ -384,133 +400,154 @@ function PatientPrescriptionScreen(props) {
     <ActivityIndicator visible />
   ) : (
     <View testID={testID} style={styles.container}>
-      <View style={{justifyContent: 'space-between'}}>            
-            <View style={{alignSelf: 'center', marginTop: 15, maxHeight: 120}} >
-              {!isEmptyObject(patientData) ? (
-                  <ProfileNameButton
-                    testID={`${testID}_profileNameButton`}    
-                    profilePicture={patientData.profilePicture}
-                    profileLineOne={patientData.preferredName}
-                    profileLineTwo={(patientData.firstName + ' ' + patientData.lastName)}
-                    handleOnPress={onClickProfile}
-                    isPatient
-                    isVertical={false}
-                    size={90}
-                    />
-              ) : (
-                <LoadingWheel/>
-                )}
-            </View>
-          <View>
-              <SearchFilterBar
-                originalList={originalPrescriptionData}
-                setList={setPrescriptionData}
-                SEARCH_OPTIONS={SEARCH_OPTIONS}
-                FIELD_MAPPING={FIELD_MAPPING}
-                SORT_OPTIONS={SORT_OPTIONS}
-                FILTER_OPTIONS={FILTER_OPTIONS}
-                filterOptionDetails={filterOptionDetails}
-                datetime={datetime}
-                setDatetime={setDatetime}
-                sort={sort}
-                setSort={setSort}
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                initializeData={isDataInitialized}
-                onInitialize={()=>setIsDataInitialized(false)}
-                itemType='prescription'
-                itemCount={prescriptionData.length}
-                displayMode={displayMode}
-                setDisplayMode={setDisplayMode}
-                DISPLAY_MODES={DISPLAY_MODES}
-                /> 
-            </View>
-          </View>
-          {displayMode == 'rows' ? (
-            <FlatList
-            testID={`${testID}_flatlist`}
-            onTouchStart={()=>Keyboard.dismiss()}
-            onScrollBeginDrag={() => setIsScrolling(true)}
-            onScrollEndDrag={() => setIsScrolling(false)}
-            onRefresh={refreshPrescriptionData}
-            refreshing={isLoading}
-            height={'72%'}
-            ListEmptyComponent={()=>noDataMessage(statusCode, isLoading, isError, 'No prescriptions found', true)}
-            data={prescriptionData}
-            keyboardShouldPersistTaps='handled'
-            keyExtractor={item => (item.prescriptionID)}
-            renderItem={({ item }) => { 
-              return(
-                <Swipeable
-                  setIsScrolling={setIsScrolling}
-                  onSwipeRight={()=>handleDeletePrescription(item.prescriptionID)}
-                  onSwipeLeft={()=>handleEditPrescription(item.prescriptionID)}
-                  underlay={<EditDeleteUnderlay/>}
-                  item={
-                    <TouchableOpacity
-                      testID={`${testID}_${item.prescriptionID}_touchable`} 
-                      style={styles.logContainer} 
-                      activeOpacity={1} 
-                      disabled={!isScrolling}
-                    >
-                      <PrescriptionItem
-                        testID={`${testID}_${item.prescriptionID}`}
-                        date={item.date}
-                        prescriptionListDesc={item.prescriptionListDesc}
-                        dosage={item.dosage}
-                        frequencyPerDay={item.frequencyPerDay}
-                        instruction={item.instruction}
-                        startDate={item.startDate}
-                        endDate={item.endDate}
-                        afterMeal={item.afterMeal}
-                        prescriptionRemarks={item.prescriptionRemarks}
-                        isChronic={item.isChronic}
-                        onDelete={()=>handleDeletePrescription(item.prescriptionID)}
-                        onEdit={()=>handleEditPrescription(item.prescriptionID)}
-                        />
-                    </TouchableOpacity>
-                  }
-                />
-              )           
-            }}
+      <View style={{ justifyContent: 'space-between' }}>
+        <View style={{ alignSelf: 'center', marginTop: 15, maxHeight: 120 }}>
+          {!isEmptyObject(patientData) ? (
+            <ProfileNameButton
+              testID={`${testID}_profileNameButton`}
+              profilePicture={patientData.profilePicture}
+              profileLineOne={patientData.preferredName}
+              profileLineTwo={
+                patientData.firstName + ' ' + patientData.lastName
+              }
+              handleOnPress={onClickProfile}
+              isPatient
+              isVertical={false}
+              size={90}
             />
           ) : (
-      <View style={{height: '72%', marginBottom: 20, marginHorizontal: 40}}>  
-      <DynamicTable
-        headerData={getTableHeaderData()}
-        rowData={getTableRowData()}
-        widthData={[120, 100, 130, 100, 200, 300, 120, 120, 120, 300, 100]}
-        screenName={'patient prescription'}
-        noDataMessage={noDataMessage(statusCode, isLoading, isError, 'No prescriptions found', false)}
-        del={true}
-        edit={true}
-      />
-      </View>
-    )}  
-    <View style={styles.addBtn}>
-      <AddButton 
-        testID={`${testID}_addPrescription`} 
-        title="Add Prescription" 
-        onPress={handleOnClickAddPrescription}
-      />
-      </View>
-        <AddPatientPrescriptionModal
-          testID={`${testID}_modal_${modalMode === 'add' ? 'add' : 'edit'}`}
-          showModal={isModalVisible}
-          modalMode={modalMode}
-          formData={formData}
-          setFormData={setFormData}
-          onClose={()=>setIsModalVisible(false)}
-          onSubmit={modalMode == 'add' ? handleModalSubmitAdd : handleModalSubmitEdit}
+            <LoadingWheel />
+          )}
+        </View>
+        <View>
+          <SearchFilterBar
+            originalList={originalPrescriptionData}
+            setList={setPrescriptionData}
+            SEARCH_OPTIONS={SEARCH_OPTIONS}
+            FIELD_MAPPING={FIELD_MAPPING}
+            SORT_OPTIONS={SORT_OPTIONS}
+            FILTER_OPTIONS={FILTER_OPTIONS}
+            filterOptionDetails={filterOptionDetails}
+            datetime={datetime}
+            setDatetime={setDatetime}
+            sort={sort}
+            setSort={setSort}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            initializeData={isDataInitialized}
+            onInitialize={() => setIsDataInitialized(false)}
+            itemType="prescription"
+            itemCount={prescriptionData.length}
+            displayMode={displayMode}
+            setDisplayMode={setDisplayMode}
+            DISPLAY_MODES={DISPLAY_MODES}
           />
+        </View>
+      </View>
+      {displayMode == 'rows' ? (
+        <FlatList
+          testID={`${testID}_flatlist`}
+          onTouchStart={() => Keyboard.dismiss()}
+          onScrollBeginDrag={() => setIsScrolling(true)}
+          onScrollEndDrag={() => setIsScrolling(false)}
+          onRefresh={refreshPrescriptionData}
+          refreshing={isLoading}
+          height={'72%'}
+          ListEmptyComponent={() =>
+            noDataMessage(
+              statusCode,
+              isLoading,
+              isError,
+              'No prescriptions found',
+              true,
+            )
+          }
+          data={prescriptionData}
+          keyboardShouldPersistTaps="handled"
+          keyExtractor={(item) => item.prescriptionID}
+          renderItem={({ item }) => {
+            return (
+              <Swipeable
+                setIsScrolling={setIsScrolling}
+                onSwipeRight={() =>
+                  handleDeletePrescription(item.prescriptionID)
+                }
+                onSwipeLeft={() => handleEditPrescription(item.prescriptionID)}
+                underlay={<EditDeleteUnderlay />}
+                item={
+                  <TouchableOpacity
+                    testID={`${testID}_${item.prescriptionID}_touchable`}
+                    style={styles.logContainer}
+                    activeOpacity={1}
+                    disabled={!isScrolling}
+                  >
+                    <PrescriptionItem
+                      testID={`${testID}_${item.prescriptionID}`}
+                      date={item.date}
+                      prescriptionListDesc={item.prescriptionListDesc}
+                      dosage={item.dosage}
+                      frequencyPerDay={item.frequencyPerDay}
+                      instruction={item.instruction}
+                      startDate={item.startDate}
+                      endDate={item.endDate}
+                      afterMeal={item.afterMeal}
+                      prescriptionRemarks={item.prescriptionRemarks}
+                      isChronic={item.isChronic}
+                      onDelete={() =>
+                        handleDeletePrescription(item.prescriptionID)
+                      }
+                      onEdit={() => handleEditPrescription(item.prescriptionID)}
+                    />
+                  </TouchableOpacity>
+                }
+              />
+            );
+          }}
+        />
+      ) : (
+        <View style={{ height: '72%', marginBottom: 20, marginHorizontal: 40 }}>
+          <DynamicTable
+            headerData={getTableHeaderData()}
+            rowData={getTableRowData()}
+            widthData={[120, 100, 130, 100, 200, 300, 120, 120, 120, 300, 100]}
+            screenName={'patient prescription'}
+            noDataMessage={noDataMessage(
+              statusCode,
+              isLoading,
+              isError,
+              'No prescriptions found',
+              false,
+            )}
+            del={true}
+            edit={true}
+          />
+        </View>
+      )}
+      <View style={styles.addBtn}>
+        <AddButton
+          testID={`${testID}_addPrescription`}
+          title="Add Prescription"
+          onPress={handleOnClickAddPrescription}
+        />
+      </View>
+      <AddPatientPrescriptionModal
+        testID={`${testID}_modal_${modalMode === 'add' ? 'add' : 'edit'}`}
+        showModal={isModalVisible}
+        modalMode={modalMode}
+        formData={formData}
+        setFormData={setFormData}
+        onClose={() => setIsModalVisible(false)}
+        onSubmit={
+          modalMode == 'add' ? handleModalSubmitAdd : handleModalSubmitEdit
+        }
+      />
     </View>
-    
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.white_var1,
+    backgroundColor: colors.white,
   },
   logContainer: {
     padding: 20,

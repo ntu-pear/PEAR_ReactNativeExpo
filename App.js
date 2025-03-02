@@ -22,10 +22,13 @@ import DebugNavigator from 'app/navigation/DebugNavigator';
 // import authStorage from './app/auth/authStorage';
 const AppStack = createNativeStackNavigator();
 
-const AppStackScreen = ({user}) => (
+const AppStackScreen = ({ user }) => (
   <AppStack.Navigator screenOptions={{ headerShown: false }}>
-    {user ? <AppStack.Screen name = "App" component={AppNavigator} /> : 
-            <AppStack.Screen name = "Auth" component={AuthNavigator} />}
+    {user ? (
+      <AppStack.Screen name="App" component={AppNavigator} />
+    ) : (
+      <AppStack.Screen name="Auth" component={AuthNavigator} />
+    )}
   </AppStack.Navigator>
 );
 
@@ -39,7 +42,7 @@ export default function App() {
     ...DefaultTheme,
     colors: {
       ...DefaultTheme.colors,
-      background: colors.white_var1,
+      background: colors.white,
     },
   };
   LogBox.ignoreLogs(['Invalid prop textStyle of type array supplied to Cell']);

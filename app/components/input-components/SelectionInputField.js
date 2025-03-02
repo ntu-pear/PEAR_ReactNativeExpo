@@ -12,7 +12,7 @@ import ErrorMessage from 'app/components/ErrorMessage';
 import RequiredIndicator from '../RequiredIndicator';
 
 function SelectionInputField({
-  testID='',
+  testID = '',
   isRequired = false,
   hideError = true,
   showTitle = true,
@@ -25,20 +25,20 @@ function SelectionInputField({
   inputLeftElement = null,
   inputRightElement = null,
   isDisabledItems = {},
-  otherProps={},
+  otherProps = {},
 }) {
   /*
   This state and subsequent useEffect are used to track if the component is in its first render. This is mainly used to
   ensure that the submission blocking in the parent component is active (as it is first rendered, user will not
   likely have filled anything). This also ensures that since there will be no input, the component error message
   does not show until the user focuses and violates the validation with their input.
-  */   
+  */
   const [isFirstRender, setIsFirstRender] = useState(true);
 
   /* 
   This state is used to track the error state of this component via validation
   */
-  const [error, setError] = useState({isError: false, errorMsg: ''});
+  const [error, setError] = useState({ isError: false, errorMsg: '' });
 
   /*
   This state is used to track the value of the selected item
@@ -46,9 +46,8 @@ function SelectionInputField({
   const [selectedValue, setSelectedValue] = useState(
     //value ? value : Object.keys(isDisabledItems).length > 0 ? null : dataArray[0].value,
     // uncomment ^ if want value to show in selectioninputfield
-    value ? value : null
+    value ? value : null,
   );
-
 
   useEffect(() => {
     onEndEditing ? onEndEditing(isFirstRender || error.isError) : null;
@@ -60,15 +59,18 @@ function SelectionInputField({
   }, []);
 
   useEffect(() => {
-    if(isDisabledItems.length > 0) {
-      if(isDisabledItems[value] == true) {
-        setSelectedValue(Object.keys(isDisabledItems).find((key) => isDisabledItems[key] === true) || null)
+    if (isDisabledItems.length > 0) {
+      if (isDisabledItems[value] == true) {
+        setSelectedValue(
+          Object.keys(isDisabledItems).find(
+            (key) => isDisabledItems[key] === true,
+          ) || null,
+        );
       }
     }
+  }, [isDisabledItems]);
 
-  }, [isDisabledItems])
-
-   /* 
+  /* 
   This is used to update the parent component that there is a validation error
   Validation is passed via the onEndEditing prop.
   */
@@ -85,14 +87,14 @@ function SelectionInputField({
   const handleValueChanged = (selected) => {
     setSelectedValue(selected);
     onDataChange(selected);
-  };  
+  };
 
   return (
     <View testID={testID} style={styles.componentContainer}>
       <VStack>
         {showTitle ? (
           <Text style={styles.titleMsg}>
-            {title}:{isRequired ? <RequiredIndicator/> : ''}
+            {title}:{isRequired ? <RequiredIndicator /> : ''}
           </Text>
         ) : (
           <></>
@@ -108,7 +110,7 @@ function SelectionInputField({
           minWidth="full"
           minHeight="3%"
           placeholder={placeholder}
-          placeholderTextColor={colors.medium}
+          placeholderTextColor={colors.grey}
           fontSize="16"
           selectedValue={selectedValue}
           onValueChange={handleValueChanged}
@@ -117,14 +119,19 @@ function SelectionInputField({
           {...otherProps}
         >
           {dataArray.map((item) => (
-            <Select.Item testID={`${testID}_${item.label}`} key={item} label={item.label} value={item.value} isDisabled={isDisabledItems ? isDisabledItems[item.value] : false}/>
+            <Select.Item
+              testID={`${testID}_${item.label}`}
+              key={item}
+              label={item.label}
+              value={item.value}
+              isDisabled={isDisabledItems ? isDisabledItems[item.value] : false}
+            />
           ))}
         </Select>
-        {hideError && !error.errorMsg ? 
-        null : (
-        <ErrorMessage testID={testID} message={error.errorMsg}/>
-        )}   
-        </VStack>
+        {hideError && !error.errorMsg ? null : (
+          <ErrorMessage testID={testID} message={error.errorMsg} />
+        )}
+      </VStack>
     </View>
   );
 }
@@ -145,7 +152,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 5,
     marginTop: 10,
-    color: colors.light_gray2,
+    color: colors.grey,
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
   },
 });

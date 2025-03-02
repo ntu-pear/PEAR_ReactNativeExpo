@@ -450,7 +450,7 @@ function PatientAllergyScreen(props) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.white_var1,
+    backgroundColor: colors.white,
   },
   logContainer: {
     padding: 20,

@@ -758,7 +758,7 @@ function DashboardScreen({ navigation }) {
                   size={6}
                   marginRight={3}
                   color={
-                    isMonday(selectedDate) ? colors.light_gray3 : colors.green
+                    isMonday(selectedDate) ? colors.grey_lighter : colors.green
                   }
                 />
               </TouchableOpacity>
@@ -777,7 +777,7 @@ function DashboardScreen({ navigation }) {
                   size={6}
                   marginLeft={3}
                   color={
-                    isSunday(selectedDate) ? colors.light_gray3 : colors.green
+                    isSunday(selectedDate) ? colors.grey_lighter : colors.green
                   }
                 />
               </TouchableOpacity>
@@ -912,7 +912,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
     fontSize: 12,
-    color: colors.black_var1,
+    color: colors.black,
     width: 90,
   },
   patientContainer: {
@@ -932,7 +932,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     height: '100%',
     width: 2,
-    backgroundColor: 'red',
+    backgroundColor: colors.red,
   },
   hStack: {
     flexDirection: 'row',

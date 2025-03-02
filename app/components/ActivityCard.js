@@ -19,45 +19,68 @@ const ActivityCard = ({
   currentTime,
   medications,
   patientName,
-  patientID, 
+  patientID,
   date,
   navigation,
 }) => {
-
   // State to toggle modal visibility
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   // Check if current time falls during an activity
   const isCurrentActivity = () => {
-    return activityStartTime > currentTime || currentTime < activityEndTime
+    return activityStartTime > currentTime || currentTime < activityEndTime;
   };
 
   return (
     <>
-      <TouchableOpacity 
-        onPress={medications.length > 0 ? ()=>setIsModalVisible(true) : () => {}}
-        style={[styles.activityContainer,
+      <TouchableOpacity
+        onPress={
+          medications.length > 0 ? () => setIsModalVisible(true) : () => {}
+        }
+        style={[
+          styles.activityContainer,
           isCurrentActivity()
-          ? styles.activityContainerGreen
-          : styles.activityContainerGray
+            ? styles.activityContainerGreen
+            : styles.activityContainerGray,
         ]}
         activeOpacity={medications.length > 0 ? null : 1}
+      >
+        <View style={{ marginTop: 4 }}>
+          <Text
+            style={[
+              styles.activityTitle,
+              isCurrentActivity() ? styles.darkText : styles.lightText,
+            ]}
+          >
+            {activityTitle}
+          </Text>
+          <Text
+            style={[
+              styles.activityTime,
+              isCurrentActivity() ? styles.darkText : styles.lightText,
+            ]}
+          >
+            {formatTimeHM24(activityStartTime)}-{' '}
+            {formatTimeHM24(activityEndTime)}
+          </Text>
+        </View>
+        <View
+          style={[
+            styles.medication,
+            {
+              backgroundColor:
+                medications.length > 0
+                  ? isCurrentActivity()
+                    ? colors.green
+                    : colors.grey
+                  : null,
+            },
+          ]}
         >
-          <View style={{marginTop: 4}}>
-            <Text style={[styles.activityTitle, isCurrentActivity() ? styles.darkText : styles.lightText]}>{activityTitle}</Text>
-            <Text style={[styles.activityTime, isCurrentActivity() ? styles.darkText : styles.lightText]}>
-              {formatTimeHM24(activityStartTime)}
-              -{' '}
-              {formatTimeHM24(activityEndTime)}
-            </Text>
-          </View>
-          <View style={[styles.medication, {backgroundColor: medications.length > 0 
-            ? isCurrentActivity()
-              ? colors.green
-              : colors.light_gray 
-            : null}]}>
-            <Text style={{color: colors.white_var1, paddingVertical: 2}}>{medications.length > 0 ? 'See medication ➝' : ''}</Text>
-          </View>
+          <Text style={{ color: colors.white, paddingVertical: 2 }}>
+            {medications.length > 0 ? 'See medication ➝' : ''}
+          </Text>
+        </View>
       </TouchableOpacity>
       <MedicationModal
         isModalVisible={isModalVisible}
@@ -67,7 +90,7 @@ const ActivityCard = ({
         patientID={patientID}
         date={date}
         navigation={navigation}
-        />
+      />
     </>
   );
 };
@@ -83,21 +106,21 @@ const styles = StyleSheet.create({
     margin: 1,
     // padding: 3,
   },
-  medication: { 
-    width: '100%', 
+  medication: {
+    width: '100%',
     backgroundColor: colors.green,
-    alignItems: 'center', 
+    alignItems: 'center',
     justifyContent: 'center',
-    borderBottomLeftRadius: 8, 
-    borderBottomRightRadius: 8, 
-    paddingVertical: 4
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+    paddingVertical: 4,
   },
   activityContainerGreen: {
     backgroundColor: colors.green_lightest,
-    color: colors.black
+    color: colors.black,
   },
   activityContainerGray: {
-    backgroundColor: colors.gray
+    backgroundColor: colors.grey_lighter,
   },
   activityTitle: {
     textAlign: 'center',
@@ -114,10 +137,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   lightText: {
-    color: colors.white_var1
+    color: colors.white,
   },
   darkText: {
-    color: colors.light_gray
+    color: colors.grey,
   },
 });
 

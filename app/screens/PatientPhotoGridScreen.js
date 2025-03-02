@@ -541,12 +541,12 @@ function PatientPhotoGrid(props) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.white_var1,
+    backgroundColor: colors.white,
   },
   photoContainer: {
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: colors.white_var1,
+    borderBottomColor: colors.white,
   },
   addBtn: {
     marginTop: '0.01%',

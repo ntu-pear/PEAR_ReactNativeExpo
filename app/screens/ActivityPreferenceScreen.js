@@ -489,7 +489,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.green_lightest,
   },
   neutralItems: {
-    backgroundColor: colors.lighter_grey,
+    backgroundColor: colors.grey_lightest,
   },
   dislikedItems: {
     backgroundColor: colors.pink_lightest,

@@ -1,6 +1,14 @@
 // Base
 import React, { useState, useEffect } from 'react';
-import { Modal, StyleSheet, Text, Pressable, View, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
+import {
+  Modal,
+  StyleSheet,
+  Text,
+  Pressable,
+  View,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+} from 'react-native';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { FlatList, Icon } from 'native-base';
@@ -201,21 +209,20 @@ function PatientDailyHighlights() {
       <TouchableOpacity
         onPress={() => setModalVisible(!modalVisible)}
         testID={'highlightsButton'}
-        style={{flexDirection: 'row'}}
+        style={{ flexDirection: 'row' }}
       >
-        <Icon 
-          as={
-            <MaterialIcons 
-            name="announcement" 
-            />
-          } 
+        <Icon
+          as={<MaterialIcons name="announcement" />}
           size={10}
-          color={colors.light_gray}
-        >
-        </Icon>
-        {highlightsData.length > 0 ? (          
+          color={colors.black}
+        ></Icon>
+        {highlightsData.length > 0 ? (
           <View style={styles.iconNumber}>
-            <Text style={{color: colors.white_var1, fontSize: 11, fontWeight: '700'}}>{highlightsData.length}</Text>
+            <Text
+              style={{ color: colors.white, fontSize: 11, fontWeight: '700' }}
+            >
+              {highlightsData.length}
+            </Text>
           </View>
         ) : null}
       </TouchableOpacity>
@@ -228,19 +235,27 @@ function PatientDailyHighlights() {
         }}
         testID="highlightsModal"
       >
-        <TouchableOpacity style={styles.centeredView} activeOpacity={1} onPressOut={() => {setModalVisible(!modalVisible)}} >
+        <TouchableOpacity
+          style={styles.centeredView}
+          activeOpacity={1}
+          onPressOut={() => {
+            setModalVisible(!modalVisible);
+          }}
+        >
           <TouchableWithoutFeedback>
             <View style={styles.modalView}>
-              <Text style={styles.modalHeaderText}>Patients Daily Highlights</Text>
+              <Text style={styles.modalHeaderText}>
+                Patients Daily Highlights
+              </Text>
               <Pressable
                 style={styles.buttonClose}
                 onPress={() => setModalVisible(!modalVisible)}
                 testID="highlightsCloseButton"
-                >
+              >
                 <MaterialCommunityIcons
                   name="close"
                   size={Platform.OS === 'web' ? 42 : 20}
-                  />
+                />
               </Pressable>
               <View style={styles.searchBarDropDownView}>
                 <View style={styles.flex}>
@@ -273,9 +288,9 @@ function PatientDailyHighlights() {
                     navigation={navigation}
                     setModalVisible={setModalVisible}
                   />
-                  )}
-                  testID="flatList"
-                  />
+                )}
+                testID="flatList"
+              />
             </View>
           </TouchableWithoutFeedback>
         </TouchableOpacity>
@@ -293,7 +308,7 @@ const styles = StyleSheet.create({
   },
   modalView: {
     margin: 20,
-    backgroundColor: 'white',
+    backgroundColor: colors.white,
     borderRadius: 20,
     padding: 15,
     alignItems: 'center',
@@ -327,7 +342,7 @@ const styles = StyleSheet.create({
     textAlign: Platform.OS === 'web' ? 'center' : null,
   },
   modalErrorText: {
-    color: 'red',
+    color: colors.red,
   },
   searchBarDropDownView: {
     flexDirection: 'row',
@@ -337,20 +352,20 @@ const styles = StyleSheet.create({
   },
   flex: {
     flex: 0.49,
-  }, 
+  },
   iconNumber: {
-    borderRadius: 27, 
-    height: 27, 
-    width: 27, 
-    backgroundColor: colors.red, 
-    borderColor: colors.white_var1, 
-    borderWidth: 3, 
+    borderRadius: 27,
+    height: 27,
+    width: 27,
+    backgroundColor: colors.red,
+    borderColor: colors.white,
+    borderWidth: 3,
     position: 'absolute',
     top: -11,
     right: -12,
     alignItems: 'center',
     justifyContent: 'center',
-  }
+  },
 });
 
 export default PatientDailyHighlights;

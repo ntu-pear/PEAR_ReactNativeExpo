@@ -15,26 +15,35 @@ import colors from 'app/config/colors';
 import AppButton from 'app/components/AppButton';
 import { configureProps } from 'react-native-reanimated/lib/reanimated2/core';
 
-function InformationCard({ displayData, title, subtitle, handleOnPress=null, unMaskedNRIC=null }) {
+function InformationCard({
+  displayData,
+  title,
+  subtitle,
+  handleOnPress = null,
+  unMaskedNRIC = null,
+}) {
   const [itemizedData, setItemizedData] = useState(displayData);
   const [masked, setMasked] = useState(true);
 
   // Handling of unmasking of NRIC
   const handleUnmaskNRIC = () => {
     if (masked) {
-      const newData = itemizedData.map(item => {
+      const newData = itemizedData.map((item) => {
         if (item.label === 'NRIC') {
           return { ...item, value: unMaskedNRIC };
         }
         return item;
       });
-  
+
       setItemizedData(newData);
       setMasked(false);
     } else {
-      const newData = itemizedData.map(item => {
+      const newData = itemizedData.map((item) => {
         if (item.label === 'NRIC') {
-          return { ...item, value: unMaskedNRIC.replace(/\d{4}(\d{3})/, 'xxxx$1') };
+          return {
+            ...item,
+            value: unMaskedNRIC.replace(/\d{4}(\d{3})/, 'xxxx$1'),
+          };
         }
         return item;
       });
@@ -45,7 +54,7 @@ function InformationCard({ displayData, title, subtitle, handleOnPress=null, unM
   };
 
   useEffect(() => {
-    if (itemizedData.length === 0){
+    if (itemizedData.length === 0) {
       setItemizedData(displayData);
     }
   }, [itemizedData, displayData]);
@@ -61,73 +70,83 @@ function InformationCard({ displayData, title, subtitle, handleOnPress=null, unM
               </Text>
             ) : null}
             {subtitle ? (
-              <View style={{marginLeft: 10}}>
-                <AppButton
-                  title='EDIT'
-                  onPress={handleOnPress}
-                  color='green'
-                />
+              <View style={{ marginLeft: 10 }}>
+                <AppButton title="EDIT" onPress={handleOnPress} color="green" />
               </View>
             ) : null}
           </HStack>
-          {itemizedData.length !== 0 ? 
+          {itemizedData.length !== 0 ? (
             itemizedData.map((data, index) => (
-            <View style={styles.fieldContainer} key={index}>
-              <Text style={[styles.TextContent, styles.fieldLabel]}>
-                {data === undefined ? 'undefined' : `${data.label}:  `}
-              </Text>
-              <Text style={[styles.TextContent, styles.fieldValue]} key={index+"text"}>
-                {data === undefined ? 'undefined' :                             // formatting of data
-                  data.value === 1 ? 'Yes' :
-                  data.value === true ? 'Yes' :
-                  data.value === 0 ? 'No' :
-                  data.value === null ? '-' :
-                  data.value === 'null' ? '-' :
-                  data.value === '-' ? '-' :
-                  data.label === 'DOB' ? `${formatDateTime(data.value, true)}` : 
-                  data.label === 'Start Date' ? `${formatDateTime(data.value, true)}` : 
-                  data.label === 'End Date' ? `${formatDateTime(data.value, true)}` : 
-                  data.label === 'Date' ? `${formatDateTime(data.value, true)}` : 
-                  `${data.value}`}
-              </Text>
-              {(data.label !== null && data.label === 'NRIC' && masked === true) ? (
-                <IconButton
-                  _icon={{
-                    as: MaterialCommunityIcons,
-                    name: 'eye-outline',
-                  }}
-                  padding={0}
-                  onPress={() => handleUnmaskNRIC()}
-                />
-              ) : (data.label !== null && data.label === 'NRIC' && masked === false) ? (
-                <IconButton
-                  _icon={{
-                    as: MaterialCommunityIcons,
-                    name: 'eye',
-                  }}
-                  padding={0}
-                  onPress={() => handleUnmaskNRIC()}
-                />
-              ) : null}
-            </View>
-          )) :
+              <View style={styles.fieldContainer} key={index}>
+                <Text style={[styles.TextContent, styles.fieldLabel]}>
+                  {data === undefined ? 'undefined' : `${data.label}:  `}
+                </Text>
+                <Text
+                  style={[styles.TextContent, styles.fieldValue]}
+                  key={index + 'text'}
+                >
+                  {data === undefined
+                    ? 'undefined' // formatting of data
+                    : data.value === 1
+                    ? 'Yes'
+                    : data.value === true
+                    ? 'Yes'
+                    : data.value === 0
+                    ? 'No'
+                    : data.value === null
+                    ? '-'
+                    : data.value === 'null'
+                    ? '-'
+                    : data.value === '-'
+                    ? '-'
+                    : data.label === 'DOB'
+                    ? `${formatDateTime(data.value, true)}`
+                    : data.label === 'Start Date'
+                    ? `${formatDateTime(data.value, true)}`
+                    : data.label === 'End Date'
+                    ? `${formatDateTime(data.value, true)}`
+                    : data.label === 'Date'
+                    ? `${formatDateTime(data.value, true)}`
+                    : `${data.value}`}
+                </Text>
+                {data.label !== null &&
+                data.label === 'NRIC' &&
+                masked === true ? (
+                  <IconButton
+                    _icon={{
+                      as: MaterialCommunityIcons,
+                      name: 'eye-outline',
+                    }}
+                    padding={0}
+                    onPress={() => handleUnmaskNRIC()}
+                  />
+                ) : data.label !== null &&
+                  data.label === 'NRIC' &&
+                  masked === false ? (
+                  <IconButton
+                    _icon={{
+                      as: MaterialCommunityIcons,
+                      name: 'eye',
+                    }}
+                    padding={0}
+                    onPress={() => handleUnmaskNRIC()}
+                  />
+                ) : null}
+              </View>
+            ))
+          ) : (
             <View style={styles.fieldContainer}>
               <Text style={[styles.TextContent, styles.fieldLabel]}>
                 Not available
               </Text>
             </View>
-          }
+          )}
         </VStack>
-        {(handleOnPress != null && title != null && subtitle == null) ? (
+        {handleOnPress != null && title != null && subtitle == null ? (
           <View style={styles.editButton}>
-            <AppButton
-              title='EDIT'
-              onPress={handleOnPress}
-              color='green'
-            />
+            <AppButton title="EDIT" onPress={handleOnPress} color="green" />
           </View>
         ) : null}
-          
       </HStack>
     </View>
   );
@@ -151,17 +170,17 @@ const styles = StyleSheet.create({
   titleText: {
     fontSize: 25,
     fontWeight: 'bold',
-    color: colors.black_var1,
+    color: colors.black,
     marginRight: 0,
   },
   subtitleText: {
     fontSize: 25,
-    color: colors.black_var1,
+    color: colors.black,
     fontWeight: 'bold',
   },
   fieldLabel: {
     fontSize: 18,
-    color: colors.light_gray2,
+    color: colors.grey,
     textTransform: 'uppercase',
   },
   fieldValue: {
@@ -172,8 +191,8 @@ const styles = StyleSheet.create({
   fieldContainer: {
     flexDirection: 'row',
   },
-  buttonContainer:{
-    w: "100%",
+  buttonContainer: {
+    w: '100%',
   },
   editButton: {
     flexDirection: 'column',

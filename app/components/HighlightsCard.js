@@ -58,28 +58,26 @@ function HighlightsCard({ item, setModalVisible }) {
 
     switch (element.highlightTypeID) {
       case 1:
-        icon = (
-          <FontAwesome5 name="pills" size={16} color={colors.black_var1} />
-        );
+        icon = <FontAwesome5 name="pills" size={16} color={colors.black} />;
         break;
       case 2:
         icon = (
           <MaterialCommunityIcons
             name="allergy"
             size={18}
-            color={colors.black_var1}
+            color={colors.black}
           />
         );
         break;
       case 3:
-        icon = <FontAwesome5 name="ban" size={18} color={colors.black_var1} />;
+        icon = <FontAwesome5 name="ban" size={18} color={colors.black} />;
         break;
       case 4:
         icon = (
           <MaterialCommunityIcons
             name="heart-pulse"
             size={18}
-            color={colors.black_var1}
+            color={colors.black}
           />
         );
         break;
@@ -88,7 +86,7 @@ function HighlightsCard({ item, setModalVisible }) {
           <FontAwesome5
             name="exclamation-triangle"
             size={18}
-            color={colors.black_var1}
+            color={colors.black}
           />
         );
         break;
@@ -97,7 +95,7 @@ function HighlightsCard({ item, setModalVisible }) {
           <MaterialCommunityIcons
             name="clipboard-text"
             size={18}
-            color={colors.black_var1}
+            color={colors.black}
           />
         );
         break;
@@ -200,7 +198,7 @@ function HighlightsCard({ item, setModalVisible }) {
       <Box
         w="100%"
         borderWidth="1"
-        borderColor={colors.primary_gray}
+        borderColor={colors.grey_lighter}
         rounded="lg"
         p="2"
         mt="3"
@@ -226,7 +224,7 @@ function HighlightsCard({ item, setModalVisible }) {
 const styles = StyleSheet.create({
   highlightsList: {
     borderBottomWidth: 1,
-    borderBottomColor: colors.gray,
+    borderBottomColor: colors.grey_lighter,
   },
 });
 

@@ -89,7 +89,7 @@ const styles = {
     borderTopColor: 'transparent',
   },
   inputContainerStyle: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.grey_lightest,
     borderRadius: 10,
   },
   inputStyle: { 

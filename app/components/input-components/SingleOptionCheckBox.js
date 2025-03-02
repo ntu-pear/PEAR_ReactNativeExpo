@@ -5,12 +5,7 @@ import typography from 'app/config/typography';
 import colors from 'app/config/colors';
 import Checkbox from 'expo-checkbox';
 
-function SingleOptionCheckBox({ 
-  testID='', 
-  title, 
-  value, 
-  onChangeData 
-}) {
+function SingleOptionCheckBox({ testID = '', title, value, onChangeData }) {
   return (
     <View style={styles.ComponentContainer}>
       <HStack justifyContent="space-between" alignItems="center">
@@ -38,7 +33,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 5,
     marginTop: 10,
-    color: colors.light_gray2,
+    color: colors.grey,
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
   },
 });

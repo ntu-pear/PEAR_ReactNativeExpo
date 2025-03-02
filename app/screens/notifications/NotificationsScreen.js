@@ -167,7 +167,7 @@ function NotificationsScreen(props) {
                   isFetchingMoreNotifications && (
                     <HStack mx="auto" space={2} justifyContent="center">
                       <Spinner accessibilityLabel="Loading posts" size="lg" />
-                      <Heading color="red" fontSize="md">
+                      <Heading color={colors.red} fontSize="md">
                         Loading
                       </Heading>
                     </HStack>

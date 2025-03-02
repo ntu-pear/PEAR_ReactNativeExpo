@@ -26,7 +26,7 @@ import RequiredIndicator from '../RequiredIndicator';
 import { formatDate, formatTimeAMPM } from 'app/utility/miscFunctions';
 
 function DateInputField({
-  testID='',
+  testID = '',
   isRequired,
   selectionMode,
   title,
@@ -36,11 +36,11 @@ function DateInputField({
   maximumInputDate,
   onChildData,
   hideDayOfWeek,
-  mode='date',
-  placeholder=mode == 'date' ? 'Select date' : 'Select time',
-  allowNull=false,
+  mode = 'date',
+  placeholder = mode == 'date' ? 'Select date' : 'Select time',
+  allowNull = false,
   dateForTime,
-  centerDate=false
+  centerDate = false,
 }) {
   const [show, setShow] = useState(false);
 
@@ -80,7 +80,7 @@ function DateInputField({
 
   const onChangeData = (event, selected) => {
     setShow(false);
-    if(event == null || event.type != 'dismissed') {
+    if (event == null || event.type != 'dismissed') {
       handleFormData(selected);
       validation();
     }
@@ -115,72 +115,76 @@ function DateInputField({
   }, [isError, onChildData]);
 
   const setFieldText = () => {
-    if(value != null) {
-      return mode == 'date' ? formatDateTime(value, true) : formatTimeAMPM(value);
-    }  else {
+    if (value != null) {
+      return mode == 'date'
+        ? formatDateTime(value, true)
+        : formatTimeAMPM(value);
+    } else {
       return placeholder;
     }
-  }
+  };
 
   const clearDate = () => {
     value = null;
-    onChangeData(null, null)
-  }
+    onChangeData(null, null);
+  };
 
   return (
     <View testID={testID} style={styles.componentContainer}>
-        {title ? (
-          <Text style={styles.titleMsg}>
-            {title}:{isRequired ? <RequiredIndicator/> : ''}
-          </Text>
-        ) : (
-          <></>
-        )}
-        <View style={styles.dateWrapper}>
-            <TouchableOpacity style={[styles.dateContainer, {alignItems: allowNull && !centerDate ? 'flex-start' : 'center'}]} onPress={showPicker}>
-              <Text style={[styles.textField]}>{setFieldText()}</Text>
-            </TouchableOpacity>
-            {allowNull && value != null? (
-              <TouchableOpacity 
-                testID={`${testID}_input`}
-                onPress={clearDate} 
-                disabled={value==null}
-                activeOpacity={value==null ? 1 : 0.5}
-                style={styles.resetIcon}
-                >
-                <Icon 
-                  as={
-                    <MaterialIcons 
-                    name="close" 
-                    />
-                  } 
-                  size={6}    
-                  style={{alignSelf: 'flex-end', marginRight: 5}} 
-                />
-              </TouchableOpacity>
-            ) : null}
-        </View>
-        {show && (
-          <DateTimePicker
-            testID={`${testID}_picker`}
-            value={value || dateForTime || new Date()}
-            display="default"
-            mode={mode}
-            onChange={(onChangeData)}
-            // if the selection mode is set to Date of Birth (DOB), fixed max and min years will be specified
-            // else, the minimumInputDate and maximumInputDate will be used.
-            // if there is no minimumInputDate or maximumInputDate specified in the prop, default DateTimePicker min and max dates will be used.
-            minimumDate={
-              selectionMode === 'DOB' ? minimumDOB : minimumInputDate
-            }
-            maximumDate={
-              selectionMode === 'DOB' ? maximumDOB : maximumInputDate
-            }
-          />
-        )}
-        {isError.errorMsg ? (
-          <ErrorMessage testID={`${testID}_error`} message={isError.errorMsg} visible={true} />
+      {title ? (
+        <Text style={styles.titleMsg}>
+          {title}:{isRequired ? <RequiredIndicator /> : ''}
+        </Text>
+      ) : (
+        <></>
+      )}
+      <View style={styles.dateWrapper}>
+        <TouchableOpacity
+          style={[
+            styles.dateContainer,
+            { alignItems: allowNull && !centerDate ? 'flex-start' : 'center' },
+          ]}
+          onPress={showPicker}
+        >
+          <Text style={[styles.textField]}>{setFieldText()}</Text>
+        </TouchableOpacity>
+        {allowNull && value != null ? (
+          <TouchableOpacity
+            testID={`${testID}_input`}
+            onPress={clearDate}
+            disabled={value == null}
+            activeOpacity={value == null ? 1 : 0.5}
+            style={styles.resetIcon}
+          >
+            <Icon
+              as={<MaterialIcons name="close" />}
+              size={6}
+              style={{ alignSelf: 'flex-end', marginRight: 5 }}
+            />
+          </TouchableOpacity>
         ) : null}
+      </View>
+      {show && (
+        <DateTimePicker
+          testID={`${testID}_picker`}
+          value={value || dateForTime || new Date()}
+          display="default"
+          mode={mode}
+          onChange={onChangeData}
+          // if the selection mode is set to Date of Birth (DOB), fixed max and min years will be specified
+          // else, the minimumInputDate and maximumInputDate will be used.
+          // if there is no minimumInputDate or maximumInputDate specified in the prop, default DateTimePicker min and max dates will be used.
+          minimumDate={selectionMode === 'DOB' ? minimumDOB : minimumInputDate}
+          maximumDate={selectionMode === 'DOB' ? maximumDOB : maximumInputDate}
+        />
+      )}
+      {isError.errorMsg ? (
+        <ErrorMessage
+          testID={`${testID}_error`}
+          message={isError.errorMsg}
+          visible={true}
+        />
+      ) : null}
     </View>
   );
 }
@@ -202,39 +206,39 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 5,
     marginTop: 10,
-    color: colors.light_gray2,
+    color: colors.grey,
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
   },
   textField: {
     fontSize: 16,
     textAlign: 'left',
-    color: colors.black_var1,
+    color: colors.black,
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
     paddingHorizontal: 10,
   },
   dateWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',    
+    justifyContent: 'space-between',
     width: '100%',
     height: 50,
     borderWidth: 1,
     borderRadius: 25,
-    borderColor: colors.light_gray3,
+    borderColor: colors.grey_lighter,
   },
   dateContainer: {
-    width: '90%',    
-    borderTopLeftRadius: 25, 
+    width: '90%',
+    borderTopLeftRadius: 25,
     borderBottomLeftRadius: 25,
-    height: 50, 
-    justifyContent: 'center'
+    height: 50,
+    justifyContent: 'center',
   },
   resetIcon: {
-    width: '10%', 
+    width: '10%',
     justifyContent: 'flex-end',
     borderTopRightRadius: 25,
-    borderBottomRightRadius: 25
-  }
+    borderBottomRightRadius: 25,
+  },
 });
 
 export default DateInputField;

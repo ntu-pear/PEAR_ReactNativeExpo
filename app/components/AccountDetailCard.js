@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     padding: Platform.OS === 'web' ? 8 : 10,
     overflow: 'visible',
     borderRadius: 10,
-    borderColor: colors.primary_gray,
+    borderColor: colors.grey_lighter,
     borderWidth: 3,
   },
   ProfileImage: {

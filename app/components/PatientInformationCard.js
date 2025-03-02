@@ -60,7 +60,12 @@ function PatientInformationCard(props) {
     return (
       <HStack space={'10%'} justifyContent="flex-end">
         <VStack>
-          <Text testID="nric_label" thin fontSize={SCREEN_HEIGHT * 0.014} color={colors.light}>
+          <Text
+            testID="nric_label"
+            thin
+            fontSize={SCREEN_HEIGHT * 0.014}
+            color={colors.grey_lightest}
+          >
             NRIC NO.
           </Text>
           <Text
@@ -68,7 +73,7 @@ function PatientInformationCard(props) {
             bold
             fontSize={SCREEN_HEIGHT * 0.024}
             lineHeight="xs"
-            color={colors.light}
+            color={colors.grey_lightest}
           >
             {`${patientProfile?.nric}`}
           </Text>
@@ -77,7 +82,7 @@ function PatientInformationCard(props) {
             thin
             fontSize={SCREEN_HEIGHT * 0.014}
             mt="2"
-            color={colors.light}
+            color={colors.grey_lightest}
           >
             DATE OF BIRTH
           </Text>
@@ -86,14 +91,19 @@ function PatientInformationCard(props) {
             bold
             fontSize={SCREEN_HEIGHT * 0.024}
             lineHeight="xs"
-            color={colors.light}
+            color={colors.grey_lightest}
           >
-            {`${formatDateTime(patientProfile?.dob,true)}`}
+            {`${formatDateTime(patientProfile?.dob, true)}`}
           </Text>
         </VStack>
 
         <VStack>
-          <Text testID="age_label" thin fontSize={SCREEN_HEIGHT * 0.014} color={colors.light}>
+          <Text
+            testID="age_label"
+            thin
+            fontSize={SCREEN_HEIGHT * 0.014}
+            color={colors.grey_lightest}
+          >
             AGE
           </Text>
           <Text
@@ -101,7 +111,7 @@ function PatientInformationCard(props) {
             bold
             fontSize={SCREEN_HEIGHT * 0.024}
             lineHeight="xs"
-            color={colors.light}
+            color={colors.grey_lightest}
           >
             {`${calcAge(patientProfile?.dob)}`}
           </Text>
@@ -109,7 +119,7 @@ function PatientInformationCard(props) {
             thin
             fontSize={SCREEN_HEIGHT * 0.014}
             mt="2"
-            color={colors.light}
+            color={colors.grey_lightest}
           >
             LANGUAGE
           </Text>
@@ -117,7 +127,7 @@ function PatientInformationCard(props) {
             bold
             fontSize={SCREEN_HEIGHT * 0.024}
             lineHeight="xs"
-            color={colors.light}
+            color={colors.grey_lightest}
           >
             {`${patientProfile?.preferredLanguage}`}
           </Text> */}
@@ -126,7 +136,7 @@ function PatientInformationCard(props) {
             thin
             fontSize={SCREEN_HEIGHT * 0.014}
             mt="2"
-            color={colors.light}
+            color={colors.grey_lightest}
           >
             Mobile Number
           </Text>
@@ -135,9 +145,12 @@ function PatientInformationCard(props) {
             bold
             fontSize={SCREEN_HEIGHT * 0.024}
             lineHeight="xs"
-            color={colors.light}
+            color={colors.grey_lightest}
           >
-            {patientProfile.handphoneNo !== null && patientProfile.handphoneNo !== '' ? patientProfile.handphoneNo : '-'}
+            {patientProfile.handphoneNo !== null &&
+            patientProfile.handphoneNo !== ''
+              ? patientProfile.handphoneNo
+              : '-'}
           </Text>
         </VStack>
       </HStack>
@@ -148,71 +161,71 @@ function PatientInformationCard(props) {
     <Box
       overflow="visible"
       backgroundColor={colors.green}
-      borderColor={colors.primary_gray}
+      borderColor={colors.grey_lighter}
       borderBottomWidth="3"
       style={styles.container}
     >
-        <HStack space={'4%'} justifyContent="center">
-          <Avatar
-            testID="patient_profile_picture"
-            size={Platform.OS === 'web' ? '28vh' : SCREEN_HEIGHT * 0.11}
-            bg={colors.pink}
-            marginY="auto"
-            source={
-              patientProfile?.profilePicture
-                ? {
-                    uri: `${patientProfile.profilePicture}`,
-                  }
-                : null
-            }
-            borderColor={colors.light}
-            borderWidth="2"
-          >
-            {' '}
-            {patientProfile &&
-            patientProfile.firstName &&
-            patientProfile.firstName.substring(0, 1)
-              ? patientProfile.firstName.substring(0, 1)
-              : '--'}{' '}
-          </Avatar>
-          <VStack space={'8%'}>
-            <VStack>
-              {/* <Text
+      <HStack space={'4%'} justifyContent="center">
+        <Avatar
+          testID="patient_profile_picture"
+          size={Platform.OS === 'web' ? '28vh' : SCREEN_HEIGHT * 0.11}
+          bg={colors.pink}
+          marginY="auto"
+          source={
+            patientProfile?.profilePicture
+              ? {
+                  uri: `${patientProfile.profilePicture}`,
+                }
+              : null
+          }
+          borderColor={colors.grey_lightest}
+          borderWidth="2"
+        >
+          {' '}
+          {patientProfile &&
+          patientProfile.firstName &&
+          patientProfile.firstName.substring(0, 1)
+            ? patientProfile.firstName.substring(0, 1)
+            : '--'}{' '}
+        </Avatar>
+        <VStack space={'8%'}>
+          <VStack>
+            {/* <Text
                 bold
                 fontSize={SCREEN_HEIGHT * 0.034}
-                color={colors.light}
+                color={colors.grey_lightest}
               >
                 {`${patientProfile?.firstName} ${patientProfile?.lastName}`}
               </Text> */}
-              <Text
-                testID="patient_preferred_name"
-                bold
-                fontSize={SCREEN_HEIGHT * 0.024}
-                color={colors.light}
-              >
-                {`${patientProfile?.preferredName}`}
-              </Text>
-              <Text
-                testID="patient_gender"
-                italic
-                fontSize={SCREEN_HEIGHT * 0.024}
-                color={colors.light}
-              >
-                {patientProfile?.gender === 'F' ? 'FEMALE' : 'MALE'}
-              </Text>
-              <Text
-                testID="patient_preferred_language"
-                thin
-                fontSize={SCREEN_HEIGHT * 0.024}
-                color={colors.light}
-              >
-                {`${patientProfile?.preferredLanguage}`}
-              </Text>
-            </VStack>
-            {Platform.OS === 'web' ? MyComponent() : null}
+            <Text
+              testID="patient_preferred_name"
+              bold
+              fontSize={SCREEN_HEIGHT * 0.024}
+              color={colors.grey_lightest}
+            >
+              {`${patientProfile?.preferredName}`}
+            </Text>
+            <Text
+              testID="patient_gender"
+              italic
+              fontSize={SCREEN_HEIGHT * 0.024}
+              color={colors.grey_lightest}
+            >
+              {patientProfile?.gender === 'F' ? 'FEMALE' : 'MALE'}
+            </Text>
+            <Text
+              testID="patient_preferred_language"
+              thin
+              fontSize={SCREEN_HEIGHT * 0.024}
+              color={colors.grey_lightest}
+            >
+              {`${patientProfile?.preferredLanguage}`}
+            </Text>
           </VStack>
-        </HStack>
-        {Platform.OS === 'web' ? null : MyComponent()}
+          {Platform.OS === 'web' ? MyComponent() : null}
+        </VStack>
+      </HStack>
+      {Platform.OS === 'web' ? null : MyComponent()}
     </Box>
   );
 }

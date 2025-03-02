@@ -57,7 +57,7 @@ function PatientProfileScreen(props) {
       getPatient(patientID);
       retrieveGuardian(route.params.id);
       retrieveSocialHistory(route.params.id);
-    }, [])
+    }, []),
   );
 
   // Retrieval of Patient Info, Doctor's Notes, Guardian Info and Social History
@@ -120,13 +120,16 @@ function PatientProfileScreen(props) {
 
   // Check if all the data has been loaded before loading page
   useEffect(() => {
-    if(patientProfile !== undefined && Object.keys(patientProfile).length>0){
+    if (
+      patientProfile !== undefined &&
+      Object.keys(patientProfile).length > 0
+    ) {
       setIsPatientLoading(false);
     }
-    if(socialHistoryData !== undefined){
+    if (socialHistoryData !== undefined) {
       setIsSocialHistoryLoading(false);
     }
-    if(guardianData !== undefined && guardianData.length !== 0){
+    if (guardianData !== undefined && guardianData.length !== 0) {
       setIsGuardianLoading(false);
     }
     // if(doctorsNoteData !== undefined){
@@ -136,15 +139,24 @@ function PatientProfileScreen(props) {
     //   setIsLoading(false);
     // }
 
-    if(isPatientLoading === false && isSocialHistoryLoading === false && isGuardianLoading === false){
+    if (
+      isPatientLoading === false &&
+      isSocialHistoryLoading === false &&
+      isGuardianLoading === false
+    ) {
       setIsLoading(false);
     }
 
-  // }, [patientProfile, isPatientLoading, socialHistoryData, isSocialHistoryLoading, 
-  //   guardianData, isGuardianLoading, doctorsNoteData, isDoctorsNoteLoading]);
-
-  }, [patientProfile, isPatientLoading, socialHistoryData, isSocialHistoryLoading, 
-    guardianData, isGuardianLoading]);
+    // }, [patientProfile, isPatientLoading, socialHistoryData, isSocialHistoryLoading,
+    //   guardianData, isGuardianLoading, doctorsNoteData, isDoctorsNoteLoading]);
+  }, [
+    patientProfile,
+    isPatientLoading,
+    socialHistoryData,
+    isSocialHistoryLoading,
+    guardianData,
+    isGuardianLoading,
+  ]);
 
   const SCREEN_HEIGHT = Dimensions.get('window').height;
 
@@ -153,7 +165,7 @@ function PatientProfileScreen(props) {
       {isLoading ? (
         <ActivityIndicator visible />
       ) : (
-        <Center backgroundColor={colors.white_var1} style={{ flex: 1 }}>
+        <Center backgroundColor={colors.white} style={{ flex: 1 }}>
           <ScrollView
             testID={`${patientID}_scroll_view`}
             w="100%"
@@ -171,226 +183,226 @@ function PatientProfileScreen(props) {
               />
             </View>
 
-            <ScrollView
-              style={{ flex: 1, padding: '3%' }}
-            >
-              <View flexDirection='row' width='100%'>
-                  <PatientProfileCard
-                    vectorIconComponent={
-                      <MaterialCommunityIcons
-                        name="allergy"
-                        size={SCREEN_HEIGHT * 0.04}
-                        color={colors.pink}
-                      />
-                    }
-                    testID={`allergy_${patientID}`}
-                    text="Allergy"
-                    navigation={navigation}
-                    routes={routes.PATIENT_ALLERGY}
-                    patientProfile={patientProfile}
-                    patientId={patientID}
+            <ScrollView style={{ flex: 1, padding: '3%' }}>
+              <View flexDirection="row" width="100%">
+                <PatientProfileCard
+                  vectorIconComponent={
+                    <MaterialCommunityIcons
+                      name="allergy"
+                      size={SCREEN_HEIGHT * 0.04}
+                      color={colors.pink}
                     />
-                  <PatientProfileCard
-                    vectorIconComponent={
-                      <MaterialCommunityIcons
-                        name="heart-pulse"
-                        size={SCREEN_HEIGHT * 0.04}
-                        color={colors.pink}
-                        />
-                    }
-                    testID={`vital_${patientID}`}
-                    text="Vital"
-                    navigation={navigation}
-                    routes={routes.PATIENT_VITAL}
-                    patientProfile={patientProfile}
-                    patientId={patientID}
+                  }
+                  testID={`allergy_${patientID}`}
+                  text="Allergy"
+                  navigation={navigation}
+                  routes={routes.PATIENT_ALLERGY}
+                  patientProfile={patientProfile}
+                  patientId={patientID}
+                />
+                <PatientProfileCard
+                  vectorIconComponent={
+                    <MaterialCommunityIcons
+                      name="heart-pulse"
+                      size={SCREEN_HEIGHT * 0.04}
+                      color={colors.pink}
                     />
-                  <PatientProfileCard
-                    vectorIconComponent={
-                      <FontAwesome5
-                        name="pills"
-                        size={SCREEN_HEIGHT * 0.04}
-                        color={colors.pink}
-                      />
-                    }
-                    testID={`medication_${patientID}`}
-                    text="Medication"
-                    navigation={navigation}
-                    routes={routes.PATIENT_MEDICATION}
-                    patientId={patientID}
-                    // patientProfile={patientProfile}
+                  }
+                  testID={`vital_${patientID}`}
+                  text="Vital"
+                  navigation={navigation}
+                  routes={routes.PATIENT_VITAL}
+                  patientProfile={patientProfile}
+                  patientId={patientID}
+                />
+                <PatientProfileCard
+                  vectorIconComponent={
+                    <FontAwesome5
+                      name="pills"
+                      size={SCREEN_HEIGHT * 0.04}
+                      color={colors.pink}
                     />
-                  <PatientProfileCard
-                    vectorIconComponent={
-                      <FontAwesome5
+                  }
+                  testID={`medication_${patientID}`}
+                  text="Medication"
+                  navigation={navigation}
+                  routes={routes.PATIENT_MEDICATION}
+                  patientId={patientID}
+                  // patientProfile={patientProfile}
+                />
+                <PatientProfileCard
+                  vectorIconComponent={
+                    <FontAwesome5
                       name="prescription-bottle"
                       size={SCREEN_HEIGHT * 0.04}
                       color={colors.pink}
-                      />
-                    }
-                    testID={`prescription_${patientID}`}
-                    text="Prescriptions"
-                    navigation={navigation}
-                    routes={routes.PATIENT_PRESCRIPTION}
-                    patientId={patientID}
-                    // patientProfile={patientProfile}
                     />
+                  }
+                  testID={`prescription_${patientID}`}
+                  text="Prescriptions"
+                  navigation={navigation}
+                  routes={routes.PATIENT_PRESCRIPTION}
+                  patientId={patientID}
+                  // patientProfile={patientProfile}
+                />
               </View>
-              <View flexDirection='row' width='100%'>
-                  <PatientProfileCard
-                    vectorIconComponent={
-                      <FontAwesome5
+              <View flexDirection="row" width="100%">
+                <PatientProfileCard
+                  vectorIconComponent={
+                    <FontAwesome5
                       name="exclamation-triangle"
-                        size={SCREEN_HEIGHT * 0.035}
-                        color={colors.pink}
-                      />
-                    }
-                    testID={`problemLog_${patientID}`}
-                    text="Problem Log"
-                    navigation={navigation}
-                    routes={routes.PATIENT_PROBLEM_LOG}
-                    patientProfile={patientProfile}
-                  />
-                  <PatientProfileCard
-                    vectorIconComponent={
-                      <MaterialCommunityIcons
+                      size={SCREEN_HEIGHT * 0.035}
+                      color={colors.pink}
+                    />
+                  }
+                  testID={`problemLog_${patientID}`}
+                  text="Problem Log"
+                  navigation={navigation}
+                  routes={routes.PATIENT_PROBLEM_LOG}
+                  patientProfile={patientProfile}
+                />
+                <PatientProfileCard
+                  vectorIconComponent={
+                    <MaterialCommunityIcons
                       name="clipboard-text"
-                        size={SCREEN_HEIGHT * 0.04}
-                        color={colors.pink}
-                      />
-                    }
-                    testID={`medicalHistory_${patientID}`}
-                    text="Medical History"
-                    navigation={navigation}
-                    routes={routes.PATIENT_MEDICAL_HISTORY}
-                    patientProfile={patientProfile}
+                      size={SCREEN_HEIGHT * 0.04}
+                      color={colors.pink}
                     />
-                  <PatientProfileCard
-                    vectorIconComponent={
-                      <MaterialCommunityIcons
+                  }
+                  testID={`medicalHistory_${patientID}`}
+                  text="Medical History"
+                  navigation={navigation}
+                  routes={routes.PATIENT_MEDICAL_HISTORY}
+                  patientProfile={patientProfile}
+                />
+                <PatientProfileCard
+                  vectorIconComponent={
+                    <MaterialCommunityIcons
                       name="clock"
-                        size={SCREEN_HEIGHT * 0.04}
-                        color={colors.pink}
-                        />
-                    }
-                    testID={`activityRoutine_${patientID}`}
-                    text="Activity Routine"
-                    navigation={navigation}
-                    routes={routes.PATIENT_ROUTINE}
-                    patientProfile={patientProfile}
+                      size={SCREEN_HEIGHT * 0.04}
+                      color={colors.pink}
                     />
-                  <PatientProfileCard
-                    vectorIconComponent={
-                      <FontAwesome5
+                  }
+                  testID={`activityRoutine_${patientID}`}
+                  text="Activity Routine"
+                  navigation={navigation}
+                  routes={routes.PATIENT_ROUTINE}
+                  patientProfile={patientProfile}
+                />
+                <PatientProfileCard
+                  vectorIconComponent={
+                    <FontAwesome5
                       name="calendar-week"
                       size={SCREEN_HEIGHT * 0.04}
                       color={colors.pink}
-                      />
-                    }
-                    testID={`schedule_${patientID}`}
-                    text="Schedule"
-                    navigation={navigation}
-                    routes={routes.PATIENT_SCHEDULE}
-                    patientId={patientID}
                     />
+                  }
+                  testID={`schedule_${patientID}`}
+                  text="Schedule"
+                  navigation={navigation}
+                  routes={routes.PATIENT_SCHEDULE}
+                  patientId={patientID}
+                />
               </View>
-              <View flexDirection='row' width='100%'>
-                  <PatientProfileCard
-                    vectorIconComponent={
-                      <MaterialCommunityIcons
+              <View flexDirection="row" width="100%">
+                <PatientProfileCard
+                  vectorIconComponent={
+                    <MaterialCommunityIcons
                       name="dumbbell"
-                        size={SCREEN_HEIGHT * 0.04}
-                        color={colors.pink}
-                        />
-                    }
-                    testID={`activityPreference_${patientID}`}
-                    text="Activity Preference"
-                    navigation={navigation}
-                    routes={routes.ACTIVITY_PREFERENCE}
-                    patientProfile={patientProfile}
-                    patientId={patientID}
+                      size={SCREEN_HEIGHT * 0.04}
+                      color={colors.pink}
                     />
-                  <PatientProfileCard
-                    vectorIconComponent={
-                      <MaterialIcons
+                  }
+                  testID={`activityPreference_${patientID}`}
+                  text="Activity Preference"
+                  navigation={navigation}
+                  routes={routes.ACTIVITY_PREFERENCE}
+                  patientProfile={patientProfile}
+                  patientId={patientID}
+                />
+                <PatientProfileCard
+                  vectorIconComponent={
+                    <MaterialIcons
                       name="insert-photo"
-                        size={SCREEN_HEIGHT * 0.04}
-                        color={colors.pink}
-                        />
-                    }
-                    testID={`photoAlbum_${patientID}`}
-                    text="Photo Album"
-                    navigation={navigation}
-                    routes={routes.PATIENT_PHOTO_ALBUM}
-                    patientProfile={patientProfile}
-                  />
-                  <PatientProfileCard
-                    vectorIconComponent={
-                      <MaterialCommunityIcons
-                        name="umbrella-beach"
-                        size={SCREEN_HEIGHT * 0.04}
-                        color={colors.pink}
-                      />
-                    }
-                    testID={`holiday_${patientID}`}
-                    text="Holiday"
-                    navigation={navigation}
-                    routes={routes.PATIENT_HOLIDAY}
-                    patientProfile={patientProfile}
+                      size={SCREEN_HEIGHT * 0.04}
+                      color={colors.pink}
                     />
-                  <PatientProfileCard
-                    vectorIconComponent={
-                      <MaterialCommunityIcons
+                  }
+                  testID={`photoAlbum_${patientID}`}
+                  text="Photo Album"
+                  navigation={navigation}
+                  routes={routes.PATIENT_PHOTO_ALBUM}
+                  patientProfile={patientProfile}
+                />
+                <PatientProfileCard
+                  vectorIconComponent={
+                    <MaterialCommunityIcons
+                      name="umbrella-beach"
+                      size={SCREEN_HEIGHT * 0.04}
+                      color={colors.pink}
+                    />
+                  }
+                  testID={`holiday_${patientID}`}
+                  text="Holiday"
+                  navigation={navigation}
+                  routes={routes.PATIENT_HOLIDAY}
+                  patientProfile={patientProfile}
+                />
+                <PatientProfileCard
+                  vectorIconComponent={
+                    <MaterialCommunityIcons
                       name="wheelchair-accessibility"
                       size={SCREEN_HEIGHT * 0.04}
-                        color={colors.pink}
-                        />
-                      }
-                      testID={`mobilityAid_${patientID}`}
-                      text="Mobility Aids"
-                      navigation={navigation}
-                    routes={routes.PATIENT_MOBILITY_AIDS}
-                    patientProfile={patientProfile}
-                  />
-                </View>
-                {/* //temporary values for doctor icon, change later */}
-                <View flexDirection='row' width='100%'> 
-                  <PatientProfileCard
-                    vectorIconComponent={
-                      <MaterialCommunityIcons
-                        name="doctor"
-                        size={SCREEN_HEIGHT * 0.04}
-                        color={colors.pink}
-                      />
-                    }
-                    testID={`doctorNote_${patientID}`}
-                    text="Doctor's Note"
-                    navigation={navigation}
-                    routes={routes.DOCTORNOTE_SCREEN}
-                    patientProfile={patientProfile}
-                  />
+                      color={colors.pink}
+                    />
+                  }
+                  testID={`mobilityAid_${patientID}`}
+                  text="Mobility Aids"
+                  navigation={navigation}
+                  routes={routes.PATIENT_MOBILITY_AIDS}
+                  patientProfile={patientProfile}
+                />
+              </View>
+              {/* //temporary values for doctor icon, change later */}
+              <View flexDirection="row" width="100%">
+                <PatientProfileCard
+                  vectorIconComponent={
+                    <MaterialCommunityIcons
+                      name="doctor"
+                      size={SCREEN_HEIGHT * 0.04}
+                      color={colors.pink}
+                    />
+                  }
+                  testID={`doctorNote_${patientID}`}
+                  text="Doctor's Note"
+                  navigation={navigation}
+                  routes={routes.DOCTORNOTE_SCREEN}
+                  patientProfile={patientProfile}
+                />
 
-                  {/* Below are empty placeholder icons to fix doctor note position, only edit if you know what you're doing */}
-                  <PatientProfileCard
-                    routes={routes.DOCTORNOTE_SCREEN}
-                    navigation={navigation}
-                    style={styles.container}
-                    patientProfile={patientProfile}/>
-                  <PatientProfileCard
-                    routes={routes.DOCTORNOTE_SCREEN}
-                    navigation={navigation}
-                    style={styles.container}
-                    patientProfile={patientProfile}/>
-                  <PatientProfileCard
-                    routes={routes.DOCTORNOTE_SCREEN}
-                    navigation={navigation}
-                    style={styles.container}
-                    patientProfile={patientProfile}/>
-
-                </View>
+                {/* Below are empty placeholder icons to fix doctor note position, only edit if you know what you're doing */}
+                <PatientProfileCard
+                  routes={routes.DOCTORNOTE_SCREEN}
+                  navigation={navigation}
+                  style={styles.container}
+                  patientProfile={patientProfile}
+                />
+                <PatientProfileCard
+                  routes={routes.DOCTORNOTE_SCREEN}
+                  navigation={navigation}
+                  style={styles.container}
+                  patientProfile={patientProfile}
+                />
+                <PatientProfileCard
+                  routes={routes.DOCTORNOTE_SCREEN}
+                  navigation={navigation}
+                  style={styles.container}
+                  patientProfile={patientProfile}
+                />
+              </View>
             </ScrollView>
-            <View w="100%" style={{flex: 1}}>
-              <PatientInformationAccordion 
+            <View w="100%" style={{ flex: 1 }}>
+              <PatientInformationAccordion
                 patientID={patientID}
                 patientProfile={patientProfile}
                 guardianData={guardianData}
@@ -398,7 +410,7 @@ function PatientProfileScreen(props) {
                 socialHistoryData={socialHistoryData}
                 scrollViewRef={scrollViewRef}
               />
-            </View>              
+            </View>
           </ScrollView>
         </Center>
       )}
@@ -412,7 +424,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderColor: '#FFFFFF',
     flex: 1,
-    margin:'3%',
+    margin: '3%',
     aspectRatio: 1.1,
   },
 });

@@ -150,7 +150,7 @@ function PersonalSocialHistory({ socialHistory }) {
   return (
     <Stack space={2}>
       <Text
-        color={colors.black_var1}
+        color={colors.black}
         fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
         fontSize="2xl"
         fontWeight="semibold"
@@ -158,7 +158,7 @@ function PersonalSocialHistory({ socialHistory }) {
         Social History
       </Text>
       <Text
-        color={colors.primary_overlay_color}
+        color={colors.black}
         fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
         fontSize="md"
         fontWeight="hairline"
@@ -218,7 +218,7 @@ function PersonalSocialHistory({ socialHistory }) {
             </Select>
           ) : (
             <Input
-              color={colors.black_var1}
+              color={colors.black}
               fontFamily={
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
@@ -288,7 +288,7 @@ function PersonalSocialHistory({ socialHistory }) {
             </Select>
           ) : (
             <Input
-              color={colors.black_var1}
+              color={colors.black}
               fontFamily={
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
@@ -358,7 +358,7 @@ function PersonalSocialHistory({ socialHistory }) {
             </Select>
           ) : (
             <Input
-              color={colors.black_var1}
+              color={colors.black}
               fontFamily={
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
@@ -428,7 +428,7 @@ function PersonalSocialHistory({ socialHistory }) {
             </Select>
           ) : (
             <Input
-              color={colors.black_var1}
+              color={colors.black}
               fontFamily={
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
@@ -496,7 +496,7 @@ function PersonalSocialHistory({ socialHistory }) {
             </Select>
           ) : (
             <Input
-              color={colors.black_var1}
+              color={colors.black}
               fontFamily={
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
@@ -562,7 +562,7 @@ function PersonalSocialHistory({ socialHistory }) {
             </Select>
           ) : (
             <Input
-              color={colors.black_var1}
+              color={colors.black}
               fontFamily={
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
@@ -578,7 +578,7 @@ function PersonalSocialHistory({ socialHistory }) {
         </HStack>
       </FormControl>
       <Text
-        color={colors.primary_overlay_color}
+        color={colors.black}
         fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
         fontSize="md"
         fontWeight="hairline"
@@ -630,7 +630,7 @@ function PersonalSocialHistory({ socialHistory }) {
             </Select>
           ) : (
             <Input
-              color={colors.black_var1}
+              color={colors.black}
               fontFamily={
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
@@ -694,7 +694,7 @@ function PersonalSocialHistory({ socialHistory }) {
             </Select>
           ) : (
             <Input
-              color={colors.black_var1}
+              color={colors.black}
               fontFamily={
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
@@ -757,7 +757,7 @@ function PersonalSocialHistory({ socialHistory }) {
             </Select>
           ) : (
             <Input
-              color={colors.black_var1}
+              color={colors.black}
               fontFamily={
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
@@ -816,7 +816,7 @@ function PersonalSocialHistory({ socialHistory }) {
             </Select>
           ) : (
             <Input
-              color={colors.black_var1}
+              color={colors.black}
               fontFamily={
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
@@ -875,7 +875,7 @@ function PersonalSocialHistory({ socialHistory }) {
             </Select>
           ) : (
             <Input
-              color={colors.black_var1}
+              color={colors.black}
               fontFamily={
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
@@ -934,7 +934,7 @@ function PersonalSocialHistory({ socialHistory }) {
             </Select>
           ) : (
             <Input
-              color={colors.black_var1}
+              color={colors.black}
               fontFamily={
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }
@@ -995,7 +995,7 @@ function PersonalSocialHistory({ socialHistory }) {
             </Select>
           ) : (
             <Input
-              color={colors.black_var1}
+              color={colors.black}
               fontFamily={
                 Platform.OS === 'ios' ? 'Helvetica' : typography.android
               }

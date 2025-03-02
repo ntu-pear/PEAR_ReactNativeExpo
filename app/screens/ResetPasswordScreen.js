@@ -19,7 +19,7 @@ function ResetPasswordScreen(props) {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  const testID = "reset_password_screen";
+  const testID = 'reset_password_screen';
 
   const handleEmail = (e) => {
     setEmail(e);
@@ -81,7 +81,7 @@ function ResetPasswordScreen(props) {
     <View testID={testID}>
       <VStack>
         <Center>
-          <Center w={Platform.OS === 'web' ? '62.5%' : '100%' }>
+          <Center w={Platform.OS === 'web' ? '62.5%' : '100%'}>
             <CustomFormControl
               isRequired
               isInvalid={'email' in errors}
@@ -120,7 +120,7 @@ function ResetPasswordScreen(props) {
                 minWidth="full"
                 minHeight="3%"
                 placeholder="Select role"
-                placeholderTextColor={colors.medium}
+                placeholderTextColor={colors.grey}
                 onValueChange={(itemValue) => setRole(itemValue)}
                 selectedValue={role}
                 size="18"
@@ -139,7 +139,7 @@ function ResetPasswordScreen(props) {
           </Box>
           <View style={styles.buttonsContainer}>
             {isLoading ? (
-              <ActivityIndicator color={colors.primary_overlay_color} />
+              <ActivityIndicator visible />
             ) : (
               <AppButton title="Reset" color="green" onPress={onPressReset} />
             )}

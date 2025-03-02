@@ -101,12 +101,13 @@ function PatientMedicalHistory(props) {
   // Medical history related states
   const [originalData, setOriginalList] = useState([]);
   const [data, setData] = useState([]);
-  const [formData, setFormData] = useState({ // for add/edit form
-    "medicalHistoryId": null,
-    "informationSource": "",
-    "medicalDetails": "",
-    "medicalRemarks": "",
-    "medicalEstimatedDate": new Date(),
+  const [formData, setFormData] = useState({
+    // for add/edit form
+    medicalHistoryId: null,
+    informationSource: '',
+    medicalDetails: '',
+    medicalRemarks: '',
+    medicalEstimatedDate: new Date(),
   });
 
   // Patient data related states
@@ -141,8 +142,8 @@ function PatientMedicalHistory(props) {
     if (patientID) {
       const response = await patientApi.getPatientMedicalHistory(patientID);
       if (response.ok) {
-        setOriginalList([...response.data.data]);    
-        setData(parseHxData([...response.data.data]));    
+        setOriginalList([...response.data.data]);
+        setData(parseHxData([...response.data.data]));
         setIsDataInitialized(true);
         setIsLoading(false);
         setIsError(false);
@@ -162,14 +163,14 @@ function PatientMedicalHistory(props) {
 
   // Parse data
   const parseHxData = (tempData) => {
-    return tempData.map(item=>({
-      "medicalHistoryId": item.medicalHistoryId, 
-      "informationSource": item.informationSource, 
-      "medicalDetails": item.medicalDetails, 
-      "medicalRemarks": item.medicalRemarks, 
-      "medicalEstimatedDate": item.medicalEstimatedDate,
-    }))
-  }
+    return tempData.map((item) => ({
+      medicalHistoryId: item.medicalHistoryId,
+      informationSource: item.informationSource,
+      medicalDetails: item.medicalDetails,
+      medicalRemarks: item.medicalRemarks,
+      medicalEstimatedDate: item.medicalEstimatedDate,
+    }));
+  };
 
   // Get patient data from backend
   const getPatientData = async () => {
@@ -203,13 +204,13 @@ function PatientMedicalHistory(props) {
 
     let alertTitle = '';
     let alertDetails = '';
-    
+
     const result = await patientApi.addPatientMedicalHistory(
       patientID,
       medData,
-      );
-      if (result.ok) {
-        console.log('submitting medical history data', medData);
+    );
+    if (result.ok) {
+      console.log('submitting medical history data', medData);
       alertTitle = 'Sucessfully added medical history';
       refreshData();
       setIsModalVisible(false);
@@ -225,31 +226,36 @@ function PatientMedicalHistory(props) {
 
     Alert.alert(alertTitle, alertDetails);
   };
-  
+
   // Ask user to confirm deletion of medical history
   const handleDeleteHx = (hxID) => {
-    const tempData = data.filter(x=>x.medicalHistoryId == hxID)[0];
-    console.log(tempData, hxID)
+    const tempData = data.filter((x) => x.medicalHistoryId == hxID)[0];
+    console.log(tempData, hxID);
 
-    Alert.alert('Are you sure you wish to delete this item?', 
-    `Source: ${tempData.informationSource}\n`+
-    `Details: ${tempData.medicalDetails}\n`+
-    `Remarks: ${tempData.medicalRemarks}\n`+
-    `Estimated Date: ${formatDate(new Date(tempData.medicalEstimatedDate))}`, [
-      {
-        text: 'Cancel',
-        onPress: ()=>{},
-        style: 'cancel',
-      },
-      {text: 'OK', onPress: ()=>deleteHx(hxID)},
-    ]);
-  }
+    Alert.alert(
+      'Are you sure you wish to delete this item?',
+      `Source: ${tempData.informationSource}\n` +
+        `Details: ${tempData.medicalDetails}\n` +
+        `Remarks: ${tempData.medicalRemarks}\n` +
+        `Estimated Date: ${formatDate(
+          new Date(tempData.medicalEstimatedDate),
+        )}`,
+      [
+        {
+          text: 'Cancel',
+          onPress: () => {},
+          style: 'cancel',
+        },
+        { text: 'OK', onPress: () => deleteHx(hxID) },
+      ],
+    );
+  };
 
   // Delete medical history item
   const deleteHx = async (hxID) => {
     setIsLoading(true);
 
-    let tempData = {medicalHistoryID: hxID};
+    let tempData = { medicalHistoryID: hxID };
 
     let alertTitle = '';
     let alertDetails = '';
@@ -283,8 +289,8 @@ function PatientMedicalHistory(props) {
   // Note: keys originally ordered like ['ID', 'Details', 'Source', 'Remarks', 'Estimated Date']
   const getTableRowData = () => {
     const dataNoPatientID = data.map(({ patientId, ...rest }) => rest);
-    
-    let tempHxData =  dataNoPatientID.map(item=> {
+
+    let tempHxData = dataNoPatientID.map((item) => {
       return Object.entries(item).map(([key, value]) => {
         if (key.toLowerCase().includes('date')) {
           return formatDate(new Date(value), true);
@@ -310,128 +316,139 @@ function PatientMedicalHistory(props) {
   // Note: keys originally ordered like ['ID', 'Details', 'Source', 'Remarks', 'Estimated Date']
   const getTableHeaderData = () => {
     return ['ID', 'Source', 'Details', 'Remarks', 'Estimated Date'];
-  }
+  };
 
-  return (
-      isLoading ? (
-        <ActivityIndicator visible />
-      ) : (
-        <View style={styles.container}>  
-          <View style={{justifyContent: 'space-between'}}>            
-            <View style={{alignSelf: 'center', marginTop: 15, maxHeight: 120}} >
-              {!isEmptyObject(patientData) ? (
-                  <ProfileNameButton
-                    testID={`${testID}_profileNameButton`}    
-                    profilePicture={patientData.profilePicture}
-                    profileLineOne={patientData.preferredName}
-                    profileLineTwo={(patientData.firstName + ' ' + patientData.lastName)}
-                    handleOnPress={onClickProfile}
-                    isPatient
-                    isVertical={false}
-                    size={90}
-                    />
-              ) : (
-                <LoadingWheel/>
-                )}
-            </View>  
-            <View>
-              <SearchFilterBar
-                originalList={originalData}
-                setList={setData}
-                SEARCH_OPTIONS={SEARCH_OPTIONS}
-                FIELD_MAPPING={FIELD_MAPPING}
-                SORT_OPTIONS={SORT_OPTIONS}
-                FILTER_OPTIONS={FILTER_OPTIONS}
-                filterOptionDetails={filterOptionDetails}
-                datetime={datetime}
-                setDatetime={setDatetime}
-                sort={sort}
-                setSort={setSort}
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                initializeData={isDataInitialized}
-                onInitialize={()=>setIsDataInitialized(false)}
-                itemType='medical history'
-                itemCount={data.length}
-                displayMode={displayMode}
-                setDisplayMode={setDisplayMode}
-                DISPLAY_MODES={DISPLAY_MODES}
-                /> 
-            </View>
-          </View>
-          {displayMode == 'rows' ? (
-            <FlatList
-            onTouchStart={()=>Keyboard.dismiss()}
-            onScrollBeginDrag={() => setIsScrolling(true)}
-            onScrollEndDrag={() => setIsScrolling(false)}
-            onRefresh={refreshData}
-            refreshing={isLoading}
-            height={'72%'}
-            ListEmptyComponent={()=>noDataMessage(statusCode, isLoading, isError, 'No medical history found', true)}
-            data={data}
-            keyboardShouldPersistTaps='handled'
-            keyExtractor={item => (item.medicalHistoryId)}
-            renderItem={({ item }) => { 
-              return(
-                <Swipeable
-                  setIsScrolling={setIsScrolling}
-                  onSwipeRight={()=>handleDeleteHx(item.medicalHistoryId)}
-                  underlay={<EditDeleteUnderlay/>}
-                  item={
-                    <TouchableOpacity 
-                      style={styles.medContainer} 
-                      activeOpacity={1} 
-                      disabled={!isScrolling}
-                    >
-                      <MedicalHistoryItem
-                        medicalHistoryId={item.medicalHistoryId}
-                        informationSource={item.informationSource}
-                        medicalDetails={item.medicalDetails}
-                        medicalEstimatedDate={item.medicalEstimatedDate}
-                        medicalRemarks={item.medicalRemarks}
-                        onDelete={()=>handleDeleteHx(item.medicalHistoryId)}
-                        />
-                    </TouchableOpacity>
-                  }
-                />
-              )           
-            }}
-          />
+  return isLoading ? (
+    <ActivityIndicator visible />
+  ) : (
+    <View style={styles.container}>
+      <View style={{ justifyContent: 'space-between' }}>
+        <View style={{ alignSelf: 'center', marginTop: 15, maxHeight: 120 }}>
+          {!isEmptyObject(patientData) ? (
+            <ProfileNameButton
+              testID={`${testID}_profileNameButton`}
+              profilePicture={patientData.profilePicture}
+              profileLineOne={patientData.preferredName}
+              profileLineTwo={
+                patientData.firstName + ' ' + patientData.lastName
+              }
+              handleOnPress={onClickProfile}
+              isPatient
+              isVertical={false}
+              size={90}
+            />
           ) : (
-            <View style={{height: '72%', marginBottom: 20, marginHorizontal: 40}}>
-              <DynamicTable
-                headerData={getTableHeaderData()}
-                rowData={getTableRowData()}
-                widthData={[200, 200, 200, 200]}
-                screenName={'patient medical history'}
-                onClickDelete={handleDeleteHx}
-                noDataMessage={noDataMessage(statusCode, isLoading, isError, 'No medical history found', false)}
-                del={true}
-                />
-            </View>
+            <LoadingWheel />
           )}
-          <View style={styles.addBtn}>
-            <AddButton 
-              title="Add Medical History"
-              onPress={handleOnClickAddHx}
-              />
-          </View>
-          <AddPatientMedicalHistoryModal
-            showModal={isModalVisible}
-            modalMode={modalMode}
-            formData={formData}
-            setFormData={setFormData}
-            onClose={()=>setIsModalVisible(false)}
-            onSubmit={modalMode == 'add' ? handleModalSubmitAdd : () => {}}
+        </View>
+        <View>
+          <SearchFilterBar
+            originalList={originalData}
+            setList={setData}
+            SEARCH_OPTIONS={SEARCH_OPTIONS}
+            FIELD_MAPPING={FIELD_MAPPING}
+            SORT_OPTIONS={SORT_OPTIONS}
+            FILTER_OPTIONS={FILTER_OPTIONS}
+            filterOptionDetails={filterOptionDetails}
+            datetime={datetime}
+            setDatetime={setDatetime}
+            sort={sort}
+            setSort={setSort}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            initializeData={isDataInitialized}
+            onInitialize={() => setIsDataInitialized(false)}
+            itemType="medical history"
+            itemCount={data.length}
+            displayMode={displayMode}
+            setDisplayMode={setDisplayMode}
+            DISPLAY_MODES={DISPLAY_MODES}
           />
         </View>
-      )
+      </View>
+      {displayMode == 'rows' ? (
+        <FlatList
+          onTouchStart={() => Keyboard.dismiss()}
+          onScrollBeginDrag={() => setIsScrolling(true)}
+          onScrollEndDrag={() => setIsScrolling(false)}
+          onRefresh={refreshData}
+          refreshing={isLoading}
+          height={'72%'}
+          ListEmptyComponent={() =>
+            noDataMessage(
+              statusCode,
+              isLoading,
+              isError,
+              'No medical history found',
+              true,
+            )
+          }
+          data={data}
+          keyboardShouldPersistTaps="handled"
+          keyExtractor={(item) => item.medicalHistoryId}
+          renderItem={({ item }) => {
+            return (
+              <Swipeable
+                setIsScrolling={setIsScrolling}
+                onSwipeRight={() => handleDeleteHx(item.medicalHistoryId)}
+                underlay={<EditDeleteUnderlay />}
+                item={
+                  <TouchableOpacity
+                    style={styles.medContainer}
+                    activeOpacity={1}
+                    disabled={!isScrolling}
+                  >
+                    <MedicalHistoryItem
+                      medicalHistoryId={item.medicalHistoryId}
+                      informationSource={item.informationSource}
+                      medicalDetails={item.medicalDetails}
+                      medicalEstimatedDate={item.medicalEstimatedDate}
+                      medicalRemarks={item.medicalRemarks}
+                      onDelete={() => handleDeleteHx(item.medicalHistoryId)}
+                    />
+                  </TouchableOpacity>
+                }
+              />
+            );
+          }}
+        />
+      ) : (
+        <View style={{ height: '72%', marginBottom: 20, marginHorizontal: 40 }}>
+          <DynamicTable
+            headerData={getTableHeaderData()}
+            rowData={getTableRowData()}
+            widthData={[200, 200, 200, 200]}
+            screenName={'patient medical history'}
+            onClickDelete={handleDeleteHx}
+            noDataMessage={noDataMessage(
+              statusCode,
+              isLoading,
+              isError,
+              'No medical history found',
+              false,
+            )}
+            del={true}
+          />
+        </View>
+      )}
+      <View style={styles.addBtn}>
+        <AddButton title="Add Medical History" onPress={handleOnClickAddHx} />
+      </View>
+      <AddPatientMedicalHistoryModal
+        showModal={isModalVisible}
+        modalMode={modalMode}
+        formData={formData}
+        setFormData={setFormData}
+        onClose={() => setIsModalVisible(false)}
+        onSubmit={modalMode == 'add' ? handleModalSubmitAdd : () => {}}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.white_var1,
+    backgroundColor: colors.white,
   },
   medContainer: {
     padding: 20,

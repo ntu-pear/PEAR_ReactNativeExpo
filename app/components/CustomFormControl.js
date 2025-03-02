@@ -45,8 +45,8 @@ function CustomFormControl(props) {
           </Text>
         </View>
         <Input
-          color={colors.black_var1}
-          borderColor={ErrorMessage == null ? colors.light_gray3 : colors.red}
+          color={colors.black}
+          borderColor={ErrorMessage == null ? colors.grey_lighter : colors.red}
           borderRadius="25"
           height="50"
           fontFamily={
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     fontSize: 13.5,
     fontWeight: 'bold',
     marginBottom: 5,
-    color: colors.light_gray2,
+    color: colors.grey,
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
   },
   errorMsg: {

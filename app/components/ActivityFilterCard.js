@@ -140,7 +140,7 @@ const ActivityFilterCard = ({
             ? '45%'
             : '30%'
         }
-        backgroundColor={colors.white_var1}
+        backgroundColor={colors.white}
       >
         <Modal.Body>
           <View style={styles.activityNameViewStyle} zIndex={6}>
@@ -176,7 +176,7 @@ const ActivityFilterCard = ({
                 suggestionsListContainerStyle={
                   Platform.OS === 'web'
                     ? {
-                        backgroundColor: colors.light,
+                        backgroundColor: colors.grey_lightest,
                         width: 400,
                         marginLeft: 25,
                         fontSize: 18,
@@ -219,8 +219,8 @@ const ActivityFilterCard = ({
                 )}
                 {!startTimePicker && Platform.OS === 'android' && (
                   <Button
-                    backgroundColor={colors.white_var1}
-                    borderColor={colors.light_gray}
+                    backgroundColor={colors.white}
+                    borderColor={colors.grey_lighter}
                     flex={1}
                     onPress={showStartTimePicker}
                   >
@@ -271,8 +271,8 @@ const ActivityFilterCard = ({
                 )}
                 {!endTimePicker && Platform.OS === 'android' && (
                   <Button
-                    backgroundColor={colors.white_var1}
-                    borderColor={colors.light_gray}
+                    backgroundColor={colors.white}
+                    borderColor={colors.grey_lighter}
                     flex={1}
                     onPress={showEndTimePicker}
                   >

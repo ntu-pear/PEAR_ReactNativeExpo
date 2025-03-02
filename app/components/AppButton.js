@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import { Button, Text } from 'native-base';
 import colors from 'app/config/colors';
 
-function AppButton({ title, onPress, color, isDisabled = false, testID}) {
+function AppButton({ title, onPress, color, isDisabled = false, testID }) {
   // replacement of TouchableOpacity with Button to enable isDisabled property - Russell
   return (
     <Button
@@ -19,11 +19,11 @@ function AppButton({ title, onPress, color, isDisabled = false, testID}) {
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: colors.light_gray,
+    backgroundColor: colors.grey,
     borderRadius: 25,
   },
   text: {
-    color: colors.secondary,
+    color: colors.white,
     textTransform: 'uppercase',
     fontWeight: 'bold',
     fontSize: 18,

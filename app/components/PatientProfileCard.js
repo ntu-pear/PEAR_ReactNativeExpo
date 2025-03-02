@@ -11,8 +11,15 @@ import colors from 'app/config/colors';
 import { useNavigation } from '@react-navigation/native';
 
 function PatientProfileCard(props) {
-  const { vectorIconComponent, text, routes, patientProfile, patientId, style, testID } =
-    props;
+  const {
+    vectorIconComponent,
+    text,
+    routes,
+    patientProfile,
+    patientId,
+    style,
+    testID,
+  } = props;
 
   const navigation = useNavigation();
 
@@ -30,19 +37,17 @@ function PatientProfileCard(props) {
       onPress={handleOnPressToNextScreen}
       testID={testID}
       style={[styles.container, style]}
-      
     >
-        
-        {vectorIconComponent}
-        <Text
-          fontSize={SCREEN_HEIGHT * 0.013}
-          mt={SCREEN_HEIGHT * 0.01}
-          color={colors.black_var1}
-          textAlign="center"
-          flexWrap="wrap"
-        >
-          {text}
-        </Text>
+      {vectorIconComponent}
+      <Text
+        fontSize={SCREEN_HEIGHT * 0.013}
+        mt={SCREEN_HEIGHT * 0.01}
+        color={colors.black}
+        textAlign="center"
+        flexWrap="wrap"
+      >
+        {text}
+      </Text>
     </TouchableOpacity>
   );
 }
@@ -55,7 +60,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 12,
     flex: 1,
-    margin:'3%',
+    margin: '3%',
     aspectRatio: 1.1,
   },
 });

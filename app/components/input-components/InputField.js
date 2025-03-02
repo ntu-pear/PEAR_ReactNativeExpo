@@ -17,7 +17,7 @@ import { TextInput } from 'react-native';
 import RequiredIndicator from '../RequiredIndicator';
 
 function InputField({
-  testID='',
+  testID = '',
   isRequired = false,
   hideError = true,
   showTitle = true,
@@ -61,7 +61,7 @@ function InputField({
 
   // Update error state if isRequired value changes
   useEffect(() => {
-    if(value.length > 0) {
+    if (value.length > 0) {
       validateInput(value.length == 0);
     }
   }, [isRequired]);
@@ -90,7 +90,7 @@ function InputField({
       if (autoCapitalize == 'characters') {
         value = value.toUpperCase();
       }
-        value = value.trim().replace(/\s{2,}/g, ' ');
+      value = value.trim().replace(/\s{2,}/g, ' ');
     } else {
       value = '';
     }
@@ -101,7 +101,7 @@ function InputField({
 
   // Function used for input validation depending on the type of input data (given by the type prop)
   // When checking for forms that are prefilled, ignore isRequired so msg is not displayed
-  const validateInput = (ignoreIsRequired=false) => {
+  const validateInput = (ignoreIsRequired = false) => {
     msg = '';
     if (!ignoreIsRequired && isRequired) {
       msg = validation.notEmpty(value);
@@ -120,7 +120,7 @@ function InputField({
   };
 
   return (
-    <View style={styles.componentContainer} >
+    <View style={styles.componentContainer}>
       <VStack>
         {showTitle ? (
           <Text style={styles.titleMsg}>
@@ -129,7 +129,7 @@ function InputField({
         ) : null}
         <Input
           testID={`${testID}_input`}
-          borderColor={!error.errorMsg ? colors.light_gray3 : colors.red}
+          borderColor={!error.errorMsg ? colors.grey_lighter : colors.red}
           textAlignVertical={variant === 'multiLine' ? 'top' : 'center'}
           autoCapitalize="none"
           borderRadius="25"
@@ -148,7 +148,10 @@ function InputField({
           {...otherProps}
         />
         {hideError && !error.errorMsg ? null : (
-          <ErrorMessage testID={`${testID}_input_error`} message={error.errorMsg} />
+          <ErrorMessage
+            testID={`${testID}_input_error`}
+            message={error.errorMsg}
+          />
         )}
       </VStack>
     </View>
@@ -174,7 +177,7 @@ InputField.propTypes = {
     'heartRate',
     'weight',
     'height',
-    'frequencyPerDay'
+    'frequencyPerDay',
   ]),
   keyboardType: TextInput.propTypes.keyboardType,
   variant: PropTypes.oneOf(['singleLine', 'multiLine']),
@@ -192,7 +195,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 5,
     marginTop: 10,
-    color: colors.light_gray2,
+    color: colors.grey,
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
   },
   errorMsg: {
@@ -203,7 +206,7 @@ const styles = StyleSheet.create({
   inputField: {
     fontSize: 16,
     width: '100%',
-    color: colors.black_var1,
+    color: colors.black,
     fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
   },
 });

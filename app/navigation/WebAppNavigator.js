@@ -136,7 +136,7 @@ function WebAppNavigator() {
       <Box style={{ borderBottomWidth: 3 }}>
         <StatusBar />
         <HStack
-          bg="white"
+          bg={colors.white}
           justifyContent="space-between"
           alignItems="center"
           w="100%"
@@ -232,7 +232,7 @@ function WebAppNavigator() {
                   <Box
                     rounded="lg"
                     borderWidth={Platform.OS === 'web' ? '1' : ''}
-                    borderColor={colors.primary_gray}
+                    borderColor={colors.grey_lighter}
                     style={{ flex: 1 }}
                   >
                     <AccountCard
@@ -251,7 +251,7 @@ function WebAppNavigator() {
                   <Box
                     rounded="lg"
                     borderWidth={Platform.OS === 'web' ? '1' : ''}
-                    borderColor={colors.primary_gray}
+                    borderColor={colors.grey_lighter}
                     style={{ flex: 1 }}
                   >
                     <AccountCard

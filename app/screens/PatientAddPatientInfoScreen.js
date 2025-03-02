@@ -37,7 +37,7 @@ import patientApi from 'app/api/patient';
 import AuthContext from 'app/auth/context';
 
 function PatientAddPatientInfoScreen({
-  testID='',
+  testID = '',
   nextQuestionHandler,
   handleFormData,
   formData,
@@ -67,7 +67,7 @@ function PatientAddPatientInfoScreen({
       'Korean',
     ]),
   );
-  
+
   // Used for the RadioButtonInput dataArray prop -> follow format of "label" and "value"
   const [listOfGenders, setListOfGenders] = useState([
     { label: 'Male', value: 'M' },
@@ -118,20 +118,20 @@ function PatientAddPatientInfoScreen({
   useEffect(() => {
     setIsInputErrors(
       isFirstNameError ||
-      isLastNameError ||
-      isNRICError ||
-      isDOBError ||
-      isGenderError ||
-      isAddrError ||
-      isPostalCodeError ||
-      isTempAddrError ||
-      isTempPostalCodeError ||
-      isHomeNoError ||
-      isMobileNoError ||
-      isPrefNameError ||
-      isRespiteError ||
-      isJoiningError ||
-      isLeavingError,
+        isLastNameError ||
+        isNRICError ||
+        isDOBError ||
+        isGenderError ||
+        isAddrError ||
+        isPostalCodeError ||
+        isTempAddrError ||
+        isTempPostalCodeError ||
+        isHomeNoError ||
+        isMobileNoError ||
+        isPrefNameError ||
+        isRespiteError ||
+        isJoiningError ||
+        isLeavingError,
     );
   }, [
     isFirstNameError,
@@ -195,7 +195,7 @@ function PatientAddPatientInfoScreen({
     },
     [isLastNameError],
   );
-    
+
   const handleNRICError = useCallback(
     (state) => {
       setIsNRICError(state);
@@ -203,7 +203,7 @@ function PatientAddPatientInfoScreen({
     },
     [isNRICError],
   );
-  
+
   const handleDOBError = useCallback(
     (state) => {
       setIsDOBError(state);
@@ -219,7 +219,7 @@ function PatientAddPatientInfoScreen({
     },
     [isGenderError],
   );
-  
+
   const handleAddrError = useCallback(
     (state) => {
       setIsAddrError(state);
@@ -235,7 +235,7 @@ function PatientAddPatientInfoScreen({
     },
     [isPostalCodeError],
   );
-  
+
   const handleTempAddrError = useCallback(
     (state) => {
       setIsTempAddrError(state);
@@ -251,7 +251,7 @@ function PatientAddPatientInfoScreen({
     },
     [isTempPostalCodeError],
   );
-  
+
   const handleHomeNoError = useCallback(
     (state) => {
       setIsHomeNoError(state);
@@ -267,7 +267,7 @@ function PatientAddPatientInfoScreen({
     },
     [isMobileNoError],
   );
-  
+
   const handlePrefNameError = useCallback(
     (state) => {
       setIsPrefNameError(state);
@@ -275,7 +275,7 @@ function PatientAddPatientInfoScreen({
     },
     [isPrefNameError],
   );
-  
+
   const handlePrefLanguageError = useCallback(
     (state) => {
       setIsPrefLanguageError(state);
@@ -308,7 +308,7 @@ function PatientAddPatientInfoScreen({
     [isLeavingError],
   );
 
-  return isError ? (    
+  return isError ? (
     noDataMessage(null, false, isError, null)
   ) : isLoading || isPrefNamesLoading ? (
     <ActivityIndicator visible />
@@ -359,11 +359,7 @@ function PatientAddPatientInfoScreen({
                         {patient.UploadProfilePicture.uri ? (
                           <></>
                         ) : (
-                          <Text
-                            style={styles.text}
-                            color={colors.black_var1}
-                            mt="2"
-                          >
+                          <Text style={styles.text} color={colors.black} mt="2">
                             Upload a Profile Picture
                           </Text>
                         )}
@@ -397,11 +393,11 @@ function PatientAddPatientInfoScreen({
                     title={'Preferred Name'}
                     value={patient.PreferredName}
                     onChangeText={handleFormData('PreferredName')}
-                    onEndEditing={handlePrefNameError}                    
+                    onEndEditing={handlePrefNameError}
                     dataType="name"
-                    otherProps={{prefNameList: prefNames}}
+                    otherProps={{ prefNameList: prefNames }}
                   />
-                  
+
                   <SelectionInputField
                     testID={`${testID}_PreferredLanguageListID`}
                     isRequired
@@ -411,7 +407,7 @@ function PatientAddPatientInfoScreen({
                     value={patient.PreferredLanguageListID}
                     dataArray={listOfLanguages}
                     onEndEditing={handlePrefLanguageError}
-                  /> 
+                  />
 
                   <SensitiveInputField
                     testID={`${testID}_NRIC`}
@@ -436,7 +432,7 @@ function PatientAddPatientInfoScreen({
                       handleFormData={handleFormData('DOB')}
                       onEndEditing={handleDOBError}
                     />
-                  </View>             
+                  </View>
 
                   <RadioButtonInput
                     testID={`${testID}_Gender`}
@@ -457,7 +453,7 @@ function PatientAddPatientInfoScreen({
                     onChangeText={handleFormData('Address')}
                     onEndEditing={handleAddrError}
                   />
-                  
+
                   <InputField
                     testID={`${testID}_PostalCode`}
                     isRequired
@@ -465,8 +461,8 @@ function PatientAddPatientInfoScreen({
                     value={patient.PostalCode}
                     onChangeText={handleFormData('PostalCode')}
                     onEndEditing={handlePostalCodeError}
-                    dataType='postal code'
-                    keyboardType='numeric'
+                    dataType="postal code"
+                    keyboardType="numeric"
                     maxLength={6}
                   />
 
@@ -486,8 +482,8 @@ function PatientAddPatientInfoScreen({
                     value={patient.TempPostalCode}
                     onChangeText={handleFormData('TempPostalCode')}
                     onEndEditing={handleTempPostalCodeError}
-                    dataType='postal code'
-                    keyboardType='numeric'
+                    dataType="postal code"
+                    keyboardType="numeric"
                     maxLength={6}
                   />
                   <InputField
@@ -497,7 +493,7 @@ function PatientAddPatientInfoScreen({
                     onChangeText={handleFormData('HomeNo')}
                     onEndEditing={handleHomeNoError}
                     dataType={'home phone'}
-                    keyboardType='numeric'
+                    keyboardType="numeric"
                     maxLength={8}
                   />
 
@@ -508,9 +504,9 @@ function PatientAddPatientInfoScreen({
                     onChangeText={handleFormData('HandphoneNo')}
                     onEndEditing={handleMobileNoError}
                     dataType={'mobile phone'}
-                    keyboardType='numeric'                      
+                    keyboardType="numeric"
                     maxLength={8}
-                  />                
+                  />
 
                   <RadioButtonInput
                     testID={`${testID}_IsRespiteCare`}
@@ -600,7 +596,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 20,
-    color: 'red',
+    color: colors.red,
     paddingBottom: 20,
     paddingTop: 20,
   },

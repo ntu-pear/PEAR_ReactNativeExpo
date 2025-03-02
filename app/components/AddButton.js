@@ -27,7 +27,7 @@ function AddButton(props) {
           <FontAwesome
             name={iconName}
             size={20}
-            color={colors.secondary}
+            color={colors.white}
             style={styles.icon}
           />
           <Text style={styles.text}>{title}</Text>
@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   text: {
-    color: colors.secondary,
+    color: colors.white,
     textTransform: 'uppercase',
     fontWeight: 'bold',
     fontSize: 18,

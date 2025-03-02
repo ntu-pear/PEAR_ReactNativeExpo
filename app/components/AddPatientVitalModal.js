@@ -6,6 +6,9 @@ import AppButton from './AppButton';
 import InputField from './input-components/InputField';
 import RadioButtonInput from './input-components/RadioButtonsInput';
 
+// Configurations
+import colors from 'app/config/colors';
+
 function AddPatientVitalModal({ showModal, onClose, onSubmit }) {
   // State to hold form data
   const initialVitalData = {
@@ -180,7 +183,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   modalHeaderText: {
-    color: 'white', // Text color
+    color: colors.white, // Text color
     fontSize: 18, // Adjust font size as needed
     fontweight: 'bold', // Optional: if you want the text to be bold
     textTransform: 'uppercase',

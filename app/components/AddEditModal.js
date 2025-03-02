@@ -10,26 +10,32 @@ import AppButton from './AppButton';
 import colors from 'app/config/colors';
 
 function AddEditModal({
-  testID='',
+  testID = '',
   showModal,
   modalMode,
   modalContent,
-  modalTitle='',
+  modalTitle = '',
   onClose,
   handleSubmit,
-  isInputErrors=false,
+  isInputErrors = false,
 }) {
   const [keyboardOffset, setKeyboardOffset] = useState(0);
 
   useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (event) => {
-      const { height } = event.endCoordinates;
-      setKeyboardOffset(height);
-    });
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      (event) => {
+        const { height } = event.endCoordinates;
+        setKeyboardOffset(height);
+      },
+    );
 
-    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
-      setKeyboardOffset(0);
-    });
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setKeyboardOffset(0);
+      },
+    );
 
     return () => {
       keyboardDidShowListener.remove();
@@ -40,35 +46,40 @@ function AddEditModal({
   return (
     <Modal isOpen={showModal} onClose={onClose}>
       <View
-        testID={testID} 
+        testID={testID}
         style={[
           styles.centeredView,
           { marginBottom: keyboardOffset }, // Adjust margin based on keyboardOffset
         ]}
       >
-      <Modal.Content maxWidth="65%">
-        <Modal.CloseButton />
-        <Modal.Header style={styles.modalHeader}>
-          <Text style={styles.modalHeaderText}>{modalMode} {modalTitle}</Text>
-        </Modal.Header>
-        <Modal.Body>
-          <View> 
-            {modalContent}         
-          </View>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button.Group space={2}>
-            <AppButton testID={`${testID}_cancel_button`} color="red" title="Cancel" onPress={onClose}></AppButton>
-            <AppButton
-              testID={`${testID}_submit_button`}
-              onPress={handleSubmit}
-              title="Submit"
-              color="green"
-              isDisabled={isInputErrors}
-            ></AppButton>
-          </Button.Group>
-        </Modal.Footer>
-      </Modal.Content>
+        <Modal.Content maxWidth="65%">
+          <Modal.CloseButton />
+          <Modal.Header style={styles.modalHeader}>
+            <Text style={styles.modalHeaderText}>
+              {modalMode} {modalTitle}
+            </Text>
+          </Modal.Header>
+          <Modal.Body>
+            <View>{modalContent}</View>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button.Group space={2}>
+              <AppButton
+                testID={`${testID}_cancel_button`}
+                color="red"
+                title="Cancel"
+                onPress={onClose}
+              ></AppButton>
+              <AppButton
+                testID={`${testID}_submit_button`}
+                onPress={handleSubmit}
+                title="Submit"
+                color="green"
+                isDisabled={isInputErrors}
+              ></AppButton>
+            </Button.Group>
+          </Modal.Footer>
+        </Modal.Content>
       </View>
     </Modal>
   );
@@ -81,11 +92,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   modalHeaderText: {
-    color: 'white', // Text color
+    color: colors.white, // Text color
     fontSize: 18, // Adjust font size as needed
     fontWeight: 'bold', // Optional: if you want the text to be bold
     textTransform: 'uppercase',
-  }, 
+  },
 });
 
 export default AddEditModal;

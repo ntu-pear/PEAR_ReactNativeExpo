@@ -10,10 +10,10 @@ import patientApi from 'app/api/patient';
 
 // Utilities
 import {
-    isEmptyObject,
-    noDataMessage,
-    sortFilterInitialState,
-    formatDate,
+  isEmptyObject,
+  noDataMessage,
+  sortFilterInitialState,
+  formatDate,
 } from 'app/utility/miscFunctions';
 
 // Navigation
@@ -62,12 +62,12 @@ function DoctorNoteScreen(props) {
   // Sort and Filter options
   const SORT_OPTIONS = ['Created Datetime'];
   const FILTER_OPTIONS = ['Created Datetime'];
-  
+
   // Mapping for fields
   const FIELD_MAPPING = {
     'Created Datetime': 'date',
   };
-  
+
   // Filter details state
   const [filterOptionDetails, setFilterOptionDetails] = useState({
     'Created Datetime': {
@@ -93,34 +93,30 @@ function DoctorNoteScreen(props) {
       }
     }, [isReloadList]),
   );
-    
+
   const refreshPageData = () => {
-      setIsLoading(true);
-      const promiseFunction = async () => {
-        await getDoctorNote();
-        await getPatientData();
-      };
-      promiseFunction();
+    setIsLoading(true);
+    const promiseFunction = async () => {
+      await getDoctorNote();
+      await getPatientData();
+    };
+    promiseFunction();
   };
 
   const onClickProfile = () => {
     navigation.navigate(routes.PATIENT_PROFILE, { id: patientID });
   };
-    
+
   const getTableHeaderData = () => {
-    return [
-      'Doctor',
-      'Remarks',
-      'Created',
-    ];
+    return ['Doctor', 'Remarks', 'Created'];
   };
 
   const getTableRowData = () => {
-    return noteData.map(({...item }) => {
+    return noteData.map(({ ...item }) => {
       let rowData = [
-      item.doctorName,
-      item.doctorRemarks,
-      formatDate(new Date(item.date), true),
+        item.doctorName,
+        item.doctorRemarks,
+        formatDate(new Date(item.date), true),
       ];
       return rowData;
     });
@@ -169,125 +165,129 @@ function DoctorNoteScreen(props) {
   };
 
   return isLoading ? (
-  <ActivityIndicator visible />
+    <ActivityIndicator visible />
   ) : (
-      <View style={styles.container}>
-        <View style={{ justifyContent: 'space-between' }}>
-          <View style={{ alignSelf: 'center', marginTop: 15, maxHeight: 120 }}>
-            {!isEmptyObject(patientData) ? (
+    <View style={styles.container}>
+      <View style={{ justifyContent: 'space-between' }}>
+        <View style={{ alignSelf: 'center', marginTop: 15, maxHeight: 120 }}>
+          {!isEmptyObject(patientData) ? (
             <ProfileNameButton
-              testID={`${testID}_profileNameButton`}  
+              testID={`${testID}_profileNameButton`}
               profilePicture={patientData.profilePicture}
               profileLineOne={patientData.preferredName}
               profileLineTwo={
-              patientData.firstName + ' ' + patientData.lastName
+                patientData.firstName + ' ' + patientData.lastName
               }
               handleOnPress={onClickProfile}
               isPatient
               isVertical={false}
               size={90}
             />
-            ) : (
+          ) : (
             <LoadingWheel />
-            )}
-          </View>
-          <View>
-            <SearchFilterBar
-              originalList={originalNoteData}
-              setList={setNoteData}
-              SEARCH_OPTIONS={SEARCH_OPTIONS}
-              FIELD_MAPPING={FIELD_MAPPING}
-              SORT_OPTIONS={SORT_OPTIONS}
-              FILTER_OPTIONS={FILTER_OPTIONS}
-              filterOptionDetails={filterOptionDetails}
-              datetime={datetime}
-              setDatetime={setDatetime}
-              sort={sort}
-              setSort={setSort}
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              initializeData={isDataInitialized}
-              onInitialize={() => setIsDataInitialized(false)}
-              itemType="Note"
-              itemCount={noteData.length}
-              displayMode={displayMode}
-              setDisplayMode={setDisplayMode}
-              DISPLAY_MODES={DISPLAY_MODES}
-            />
-            </View>
-            {displayMode == 'rows' ? (
-              <FlatList
-                onTouchStart={() => Keyboard.dismiss()}
-                onScrollBeginDrag={() => setIsScrolling(true)}
-                onScrollEndDrag={() => setIsScrolling(false)}
-                onRefresh={refreshPageData}
-                refreshing={isLoading}
-                height={'72%'}
-                ListEmptyComponent={() =>
-                  noDataMessage(
-                  statusCode,
-                  isLoading,
-                  isError,
-                  'No Notes Found',
-                  true,
-                  )
-                }
-                data={noteData}
-                keyboardShouldPersistTaps="handled"
-                keyExtractor={(item) => item.doctorNoteId}
-                renderItem={({ item }) => {
-                  return (
-                    <Swipeable
-                      key={item.doctorNoteId}
-                      setIsScrolling={setIsScrolling}
-                      item={
-                        <TouchableOpacity
-                          style={styles.logContainer}
-                          activeOpacity={1}
-                          disabled={!isScrolling}
-                        >
-                        <DoctorNoteItem
-                          date={item.date}
-                          doctorName={item.doctorName}
-                          doctorRemarks={item.doctorRemarks}
-                        />
-                        </TouchableOpacity>
-                      }
-                    />
-                  );
-                }}
-              />
-            ) : (
-                <View style={{ height: '72%', marginBottom: 20, marginHorizontal: 40 }}>
-                  <DynamicTable
-                    headerData={getTableHeaderData()}
-                    rowData={getTableRowData()}
-                    widthData={[180, 200, 200, 180, 100, 200, 120, 120, 200, 150, 150]}
-                    screenName={'Doctor Note'}
-                    noDataMessage={noDataMessage(
-                    statusCode,
-                    isLoading,
-                    isError,
-                    'No notes found',
-                    false,
-                    )}
-                  />
-                </View>
-                )}
+          )}
         </View>
+        <View>
+          <SearchFilterBar
+            originalList={originalNoteData}
+            setList={setNoteData}
+            SEARCH_OPTIONS={SEARCH_OPTIONS}
+            FIELD_MAPPING={FIELD_MAPPING}
+            SORT_OPTIONS={SORT_OPTIONS}
+            FILTER_OPTIONS={FILTER_OPTIONS}
+            filterOptionDetails={filterOptionDetails}
+            datetime={datetime}
+            setDatetime={setDatetime}
+            sort={sort}
+            setSort={setSort}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            initializeData={isDataInitialized}
+            onInitialize={() => setIsDataInitialized(false)}
+            itemType="Note"
+            itemCount={noteData.length}
+            displayMode={displayMode}
+            setDisplayMode={setDisplayMode}
+            DISPLAY_MODES={DISPLAY_MODES}
+          />
+        </View>
+        {displayMode == 'rows' ? (
+          <FlatList
+            onTouchStart={() => Keyboard.dismiss()}
+            onScrollBeginDrag={() => setIsScrolling(true)}
+            onScrollEndDrag={() => setIsScrolling(false)}
+            onRefresh={refreshPageData}
+            refreshing={isLoading}
+            height={'72%'}
+            ListEmptyComponent={() =>
+              noDataMessage(
+                statusCode,
+                isLoading,
+                isError,
+                'No Notes Found',
+                true,
+              )
+            }
+            data={noteData}
+            keyboardShouldPersistTaps="handled"
+            keyExtractor={(item) => item.doctorNoteId}
+            renderItem={({ item }) => {
+              return (
+                <Swipeable
+                  key={item.doctorNoteId}
+                  setIsScrolling={setIsScrolling}
+                  item={
+                    <TouchableOpacity
+                      style={styles.logContainer}
+                      activeOpacity={1}
+                      disabled={!isScrolling}
+                    >
+                      <DoctorNoteItem
+                        date={item.date}
+                        doctorName={item.doctorName}
+                        doctorRemarks={item.doctorRemarks}
+                      />
+                    </TouchableOpacity>
+                  }
+                />
+              );
+            }}
+          />
+        ) : (
+          <View
+            style={{ height: '72%', marginBottom: 20, marginHorizontal: 40 }}
+          >
+            <DynamicTable
+              headerData={getTableHeaderData()}
+              rowData={getTableRowData()}
+              widthData={[
+                180, 200, 200, 180, 100, 200, 120, 120, 200, 150, 150,
+              ]}
+              screenName={'Doctor Note'}
+              noDataMessage={noDataMessage(
+                statusCode,
+                isLoading,
+                isError,
+                'No notes found',
+                false,
+              )}
+            />
+          </View>
+        )}
       </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-    container: {
-      backgroundColor: colors.white_var1,
-    },
-    logContainer: {
-      padding: 20,
-      borderBottomWidth: 1,
-      borderBottomColor: '#ccc',
-    },
-  });
+  container: {
+    backgroundColor: colors.white,
+  },
+  logContainer: {
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+});
 
 export default DoctorNoteScreen;

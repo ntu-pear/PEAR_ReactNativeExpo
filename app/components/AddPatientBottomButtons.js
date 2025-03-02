@@ -11,7 +11,7 @@ import colors from 'app/config/colors';
 import AppButton from 'app/components/AppButton';
 
 function AddPatientBottomButtons({
-  testID='',
+  testID = '',
   list = null,
   nextQuestionHandler = null,
   prevQuestionHandler = null,
@@ -25,27 +25,35 @@ function AddPatientBottomButtons({
   isNextDisabled,
   onSubmit,
 }) {
-  
   return (
     <Box testID={testID} mt={8} mb={8}>
-      <Flex testID={testID} w={Platform.OS === 'web' ? 40 : '80%'} direction="row">
+      <Flex
+        testID={testID}
+        w={Platform.OS === 'web' ? 40 : '80%'}
+        direction="row"
+      >
         {prevQuestionHandler != null && (
-        <Button
-          testID={`${testID}_prev`}
-          width={12}
-          height={12}
-          bg={colors.green}
-          leftIcon={
-            <Icon as={<MaterialIcons name="chevron-left" />} color="white" />
-          }
-          isDisabled={prevQuestionHandler == null ? true : false}
-          accessibilityTraits={prevQuestionHandler == null ? ['button', 'disabled'] : ['button']}
-          onPress={
-            prevQuestionHandler == null ? true : () => prevQuestionHandler()
-          }
-          borderRadius="full"
-        />
-      )}
+          <Button
+            testID={`${testID}_prev`}
+            width={12}
+            height={12}
+            bg={colors.green}
+            leftIcon={
+              <Icon
+                as={<MaterialIcons name="chevron-left" />}
+                color={colors.white}
+              />
+            }
+            isDisabled={prevQuestionHandler == null ? true : false}
+            accessibilityTraits={
+              prevQuestionHandler == null ? ['button', 'disabled'] : ['button']
+            }
+            onPress={
+              prevQuestionHandler == null ? true : () => prevQuestionHandler()
+            }
+            borderRadius="full"
+          />
+        )}
         <Spacer />
         {list ? (
           list.length === 1 ? (
@@ -58,7 +66,9 @@ function AddPatientBottomButtons({
               borderRadius="full"
               onPress={addComponent}
               isDisabled={isAddDisabled}
-              accessibilityTraits={isAddDisabled ? ['button', 'disabled'] : ['button']}
+              accessibilityTraits={
+                isAddDisabled ? ['button', 'disabled'] : ['button']
+              }
             >
               +
             </Button>
@@ -70,7 +80,7 @@ function AddPatientBottomButtons({
                   width={12}
                   height={12}
                   variant="outline"
-                  colorScheme="secondary"
+                  colorScheme={colors.white}
                   borderRadius="full"
                   onPress={removeComponent}
                 >
@@ -97,7 +107,7 @@ function AddPatientBottomButtons({
                   width={12}
                   height={12}
                   variant="outline"
-                  colorScheme="secondary"
+                  colorScheme={colors.white}
                   borderRadius="full"
                   onPress={removeComponent}
                 >
@@ -109,38 +119,47 @@ function AddPatientBottomButtons({
         ) : null}
         <Spacer />
         {nextQuestionHandler != null && (
-        <Button
-          testID={`${testID}_next`}
-          width={12}
-          height={12}
-          bg={colors.green}
-          leftIcon={
-            <Icon as={<MaterialIcons name="chevron-right" />} color="white" />
-          }
-          // Disable the buttons when there is no next page or when page has errors -- Justin
-          isDisabled={
-            nextQuestionHandler == null || isNextDisabled ? true : false
-          }
-          accessibilityTraits={nextQuestionHandler == null || isNextDisabled ? ['button', 'disabled'] : ['button']}
-          onPress={
-            nextQuestionHandler == null
-              ? true
-              : () => nextQuestionHandler(formData)
-          }
-          borderRadius="full"
-          list={list}
-        />
-      )}   
+          <Button
+            testID={`${testID}_next`}
+            width={12}
+            height={12}
+            bg={colors.green}
+            leftIcon={
+              <Icon
+                as={<MaterialIcons name="chevron-right" />}
+                color={colors.white}
+              />
+            }
+            // Disable the buttons when there is no next page or when page has errors -- Justin
+            isDisabled={
+              nextQuestionHandler == null || isNextDisabled ? true : false
+            }
+            accessibilityTraits={
+              nextQuestionHandler == null || isNextDisabled
+                ? ['button', 'disabled']
+                : ['button']
+            }
+            onPress={
+              nextQuestionHandler == null
+                ? true
+                : () => nextQuestionHandler(formData)
+            }
+            borderRadius="full"
+            list={list}
+          />
+        )}
       </Flex>
       {submit ? (
         <Box mt={8}>
           <AppButton
-            testID={`${testID}_submit`} 
-            title="Submit" 
-            color="green" 
-            onPress={onSubmit} 
+            testID={`${testID}_submit`}
+            title="Submit"
+            color="green"
+            onPress={onSubmit}
             isDisabled={isSubmitDisabled}
-            accessibilityTraits={isSubmitDisabled ? ['button', 'disabled'] : ['button']}
+            accessibilityTraits={
+              isSubmitDisabled ? ['button', 'disabled'] : ['button']
+            }
           />
         </Box>
       ) : null}

@@ -59,7 +59,7 @@ function PatientVitalScreen(props) {
 
   // Mapping for fields
   const FIELD_MAPPING = {
-    'Date': 'createdDateTime',
+    Date: 'createdDateTime',
   };
 
   // Search, sort, and filter related states
@@ -70,7 +70,7 @@ function PatientVitalScreen(props) {
 
   // Filter details state
   const [filterOptionDetails, setFilterOptionDetails] = useState({
-    'Date': {
+    Date: {
       type: 'date',
       options: { min: {}, max: {} },
       isFilter: true,
@@ -202,8 +202,8 @@ function PatientVitalScreen(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-  // Create and store the original FormData
-  const originalVitalFormData = {... tempVitalFormData};
+    // Create and store the original FormData
+    const originalVitalFormData = { ...tempVitalFormData };
 
     const result = await patientApi.AddPatientVital(
       patientID,
@@ -288,28 +288,33 @@ function PatientVitalScreen(props) {
 
   // Ask user to confirm deletion of vital
   const handleDeleteVital = (vitalID, patientID) => {
-    const tempData = vitalData.filter(x=>x.vitalID == vitalID && x.patientID == patientID)[0];
+    const tempData = vitalData.filter(
+      (x) => x.vitalID == vitalID && x.patientID == patientID,
+    )[0];
 
-    Alert.alert('Are you sure you wish to delete this item?', 
-    `Temperature: ${tempData.temperature} °C \n` +
-    `Weight: ${tempData.weight} kg \n` +
-    `Height: ${tempData.height} cm \n` +
-    `systolicBP: ${tempData.systolicBP} mmHg \n` +
-    `diastolicBP: ${tempData.diastolicBP} mmHg\n` +
-    `heartRate: ${tempData.heartRate} bpm \n` +
-    `spO2: ${tempData.spO2}% \n` +
-    `bloodSugarLevel: ${tempData.bloodSugarlevel} mg/dL \n` +
-    `vitalRemarks: ${tempData.vitalRemarks}\n` +
-    `afterMeal: ${tempData.afterMeal}\n` +
-    `Created: ${formatDate(new Date(tempData.createdDateTime), true)}`, [
-      {
-        text: 'Cancel',
-        onPress: ()=>{},
-        style: 'cancel',
-      },
-      {text: 'OK', onPress: ()=>deleteVital(vitalID)},
-    ]);
-  }
+    Alert.alert(
+      'Are you sure you wish to delete this item?',
+      `Temperature: ${tempData.temperature} °C \n` +
+        `Weight: ${tempData.weight} kg \n` +
+        `Height: ${tempData.height} cm \n` +
+        `systolicBP: ${tempData.systolicBP} mmHg \n` +
+        `diastolicBP: ${tempData.diastolicBP} mmHg\n` +
+        `heartRate: ${tempData.heartRate} bpm \n` +
+        `spO2: ${tempData.spO2}% \n` +
+        `bloodSugarLevel: ${tempData.bloodSugarlevel} mg/dL \n` +
+        `vitalRemarks: ${tempData.vitalRemarks}\n` +
+        `afterMeal: ${tempData.afterMeal}\n` +
+        `Created: ${formatDate(new Date(tempData.createdDateTime), true)}`,
+      [
+        {
+          text: 'Cancel',
+          onPress: () => {},
+          style: 'cancel',
+        },
+        { text: 'OK', onPress: () => deleteVital(vitalID) },
+      ],
+    );
+  };
 
   // Delete vital
   const deleteVital = async (vitalID) => {
@@ -322,21 +327,21 @@ function PatientVitalScreen(props) {
     if (result.ok) {
       refreshVitalData();
       setIsModalVisible(false);
-      
+
       alertTitle = 'Successfully deleted vital';
     } else {
       const errors = result.data?.message;
-      console.log("Error deleting vital", result)
+      console.log('Error deleting vital', result);
 
       result.data
-      ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-      : (alertDetails = 'Please try again.');
-      
+        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
+        : (alertDetails = 'Please try again.');
+
       alertTitle = 'Error deleting vital';
     }
-    
+
     Alert.alert(alertTitle, alertDetails);
-  }
+  };
 
   // Navigate to patient profile on click profile image
   const onClickProfile = () => {
@@ -391,7 +396,7 @@ function PatientVitalScreen(props) {
         <View style={{ alignSelf: 'center', marginTop: 15, maxHeight: 120 }}>
           {!isEmptyObject(patientData) ? (
             <ProfileNameButton
-              testID={`${testID}_profileNameButton`} 
+              testID={`${testID}_profileNameButton`}
               profilePicture={patientData.profilePicture}
               profileLineOne={patientData.preferredName}
               profileLineTwo={
@@ -456,7 +461,9 @@ function PatientVitalScreen(props) {
               <Swipeable
                 key={item.vitalID}
                 setIsScrolling={setIsScrolling}
-                onSwipeRight={() => handleDeleteVital(item.vitalID, item.patientID)}
+                onSwipeRight={() =>
+                  handleDeleteVital(item.vitalID, item.patientID)
+                }
                 onSwipeLeft={() => handleEditVital(item.vitalID)}
                 underlay={<EditDeleteUnderlay />}
                 item={
@@ -477,7 +484,9 @@ function PatientVitalScreen(props) {
                       vitalRemarks={item.vitalRemarks}
                       afterMeal={item.afterMeal}
                       createdDateTime={item.createdDateTime}
-                      onDelete={() => handleDeleteVital(item.vitalID, item.patientID)}
+                      onDelete={() =>
+                        handleDeleteVital(item.vitalID, item.patientID)
+                      }
                     />
                   </TouchableOpacity>
                 }
@@ -525,7 +534,7 @@ function PatientVitalScreen(props) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.white_var1,
+    backgroundColor: colors.white,
   },
   logContainer: {
     padding: 20,

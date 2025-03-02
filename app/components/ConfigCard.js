@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
 import { Box, Icon, Text, HStack, VStack } from 'native-base';
 import colors from 'app/config/colors';
-import { Platform, Alert, TouchableOpacity, StyleSheet, View } from 'react-native';
+import {
+  Platform,
+  Alert,
+  TouchableOpacity,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useGetWeekDates } from 'app/hooks/useGetWeekDate';
 
@@ -18,7 +24,7 @@ function ConfigCard(props) {
   useFocusEffect(
     React.useCallback(() => {
       checkSchedule();
-    }, [])
+    }, []),
   );
 
   const checkSchedule = async () => {
@@ -80,22 +86,27 @@ function ConfigCard(props) {
 
     if (result && result.ok) {
       console.log('Schedule for this week generated');
-      const alertTitle = 'Schedule for this week generated' + '\n(' + checkWeek + ')';
+      const alertTitle =
+        'Schedule for this week generated' + '\n(' + checkWeek + ')';
 
       Alert.alert(alertTitle, '', [
         {
           text: 'OK',
           onPress: () => {
-            Alert.alert('Do you want to view the schedule?\n(redirected to dashboard)', '', [
-              {
-                text: 'No',
-                style: 'cancel',
-              },
-              {
-                text: 'Yes',
-                onPress: () => navigation.navigate(routes.DASHBOARD_SCREEN),
-              },
-            ]);
+            Alert.alert(
+              'Do you want to view the schedule?\n(redirected to dashboard)',
+              '',
+              [
+                {
+                  text: 'No',
+                  style: 'cancel',
+                },
+                {
+                  text: 'Yes',
+                  onPress: () => navigation.navigate(routes.DASHBOARD_SCREEN),
+                },
+              ],
+            );
           },
         },
       ]);
@@ -116,7 +127,7 @@ function ConfigCard(props) {
                 as={{ ...vectorIconComponent }}
                 top="3"
                 left="2"
-                color={colors.black_var1}
+                color={colors.black}
                 size="50"
               />
               <Text style={styles.TextContent}>{text}</Text>
@@ -132,7 +143,7 @@ const styles = StyleSheet.create({
   CardBoxContainer: {
     borderRadius: 10,
     borderWidth: Platform.OS === 'web' ? null : 1,
-    borderColor: colors.primary_gray,
+    borderColor: colors.grey_lighter,
     minWidth: '100%',
     minHeight: Platform.OS === 'web' ? null : 20,
   },
@@ -152,7 +163,7 @@ const styles = StyleSheet.create({
     fontSize: 19,
     marginTop: Platform.OS === 'web' ? 2 : 28,
     marginLeft: 19,
-    color: colors.black_var1,
+    color: colors.black,
   },
   HStackWrapper: {
     space: 5,

@@ -17,6 +17,9 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 // API
 import userApi from 'app/api/user';
 
+// Configurations
+import colors from 'app/config/colors';
+
 function AccountScreen(props) {
   const [isReloadPage, setIsReloadPage] = useState(true);
   const [isLoading, setIsLoading] = useState(false);

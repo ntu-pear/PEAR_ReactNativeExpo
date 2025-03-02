@@ -10,7 +10,18 @@ import colors from 'app/config/colors';
 // Components
 import AppButton from './AppButton';
 
-function DynamicTable({ headerData, rowData, widthData, screenName, onClickEdit, edit=false, onClickDelete, del=false, customColumns=[], noDataMessage=()=>{} }){  
+function DynamicTable({
+  headerData,
+  rowData,
+  widthData,
+  screenName,
+  onClickEdit,
+  edit = false,
+  onClickDelete,
+  del = false,
+  customColumns = [],
+  noDataMessage = () => {},
+}) {
   // Button to edit item
   const editButton = (id) => {
     return (
@@ -28,105 +39,107 @@ function DynamicTable({ headerData, rowData, widthData, screenName, onClickEdit,
           title="Delete"
           onPress={() => onClickDelete(id)}
           color="red"
-          />
+        />
       </View>
     );
   };
 
   // Get header data
   const getHeaderData = () => {
-    let tempHeaderData = [...headerData.filter(x=>x!='ID')]
-    if(edit) {
+    let tempHeaderData = [...headerData.filter((x) => x != 'ID')];
+    if (edit) {
       tempHeaderData.push('Edit');
     }
-    if(del) {
+    if (del) {
       tempHeaderData.push('Delete');
     }
-    customColumns.forEach(item=>(
-      tempHeaderData.push(item.colTitle)
-    ));
+    customColumns.forEach((item) => tempHeaderData.push(item.colTitle));
     return tempHeaderData;
   };
 
   // Get row data by removing ID values if any and adding edit/delete/custom buttons
   const getRowData = () => {
     let tempRowData = [...rowData];
-    if(edit) {
-      tempRowData = tempRowData.map(item=>(
-        [...item, editButton(item[headerData.indexOf('ID')])]
-      ))
+    if (edit) {
+      tempRowData = tempRowData.map((item) => [
+        ...item,
+        editButton(item[headerData.indexOf('ID')]),
+      ]);
     }
-    if(del) {
-      tempRowData = tempRowData.map(item=>(
-        [...item, deleteButton(item[headerData.indexOf('ID')])]
-      ))
+    if (del) {
+      tempRowData = tempRowData.map((item) => [
+        ...item,
+        deleteButton(item[headerData.indexOf('ID')]),
+      ]);
     }
-    if(headerData.includes('ID')) {
-      tempRowData = tempRowData.map(item=>(
-        item.slice(headerData.indexOf('ID')+1)
-      ))
+    if (headerData.includes('ID')) {
+      tempRowData = tempRowData.map((item) =>
+        item.slice(headerData.indexOf('ID') + 1),
+      );
     }
     return tempRowData;
   };
 
   // Get width data
   const getWidthData = () => {
-    let tempWidthData = [...widthData]
-    if(edit) {
+    let tempWidthData = [...widthData];
+    if (edit) {
       tempWidthData.push(140);
-    } 
-    if(del) {
+    }
+    if (del) {
       tempWidthData.push(140);
-    } 
-    customColumns.forEach(item=>(
-      tempWidthData.push(item.width)
-    ))
+    }
+    customColumns.forEach((item) => tempWidthData.push(item.width));
     return tempWidthData;
   };
 
-  return (
-    rowData.length > 0 ? (
-      <ScrollView style={styles.scrollViewVertical}>
-        <ScrollView horizontal>
+  return rowData.length > 0 ? (
+    <ScrollView style={styles.scrollViewVertical}>
+      <ScrollView horizontal>
+        <View>
           <View>
-              <View>
-                <Table borderStyle={{ borderWidth: 1, borderColor: colors.primary_gray }}>
-                  <Row 
-                    style={styles.head} 
-                    textStyle={styles.titleText}
-                    widthArr={getWidthData()} 
-                    data={getHeaderData()} 
-                    />
-                    {getRowData().map((row, index) => (
-                      <Row
-                        textStyle={styles.rowText} 
-                        widthArr={getWidthData()}
-                        key={index}
-                        data={row.concat(
-                          customColumns.map((column) => (
-                            <View key={column.btnTitle} style={{marginVertical: '7%', marginHorizontal: '7%'}}>
-                              <AppButton 
-                                title={column.btnTitle} 
-                                onPress={() => column.onPress(index)} 
-                                color={column.color}
-                              />
-                            </View>
-                          ))
-                        )}
-                      />
-                    ))} 
-                </Table>
-                <Divider/>
-              </View>
+            <Table
+              borderStyle={{ borderWidth: 1, borderColor: colors.grey_lighter }}
+            >
+              <Row
+                style={styles.head}
+                textStyle={styles.titleText}
+                widthArr={getWidthData()}
+                data={getHeaderData()}
+              />
+              {getRowData().map((row, index) => (
+                <Row
+                  textStyle={styles.rowText}
+                  widthArr={getWidthData()}
+                  key={index}
+                  data={row.concat(
+                    customColumns.map((column) => (
+                      <View
+                        key={column.btnTitle}
+                        style={{ marginVertical: '7%', marginHorizontal: '7%' }}
+                      >
+                        <AppButton
+                          title={column.btnTitle}
+                          onPress={() => column.onPress(index)}
+                          color={column.color}
+                        />
+                      </View>
+                    )),
+                  )}
+                />
+              ))}
+            </Table>
+            <Divider />
           </View>
-        </ScrollView>
-        <Text style={styles.redText}>
-          Note: To include extra {screenName} information, please contact system administrator.
-        </Text>
+        </View>
       </ScrollView>
-    ) : (
-      noDataMessage
-    )
+      <Text style={styles.redText}>
+        Note: To include extra {screenName} information, please contact system
+        administrator.
+      </Text>
+    </ScrollView>
+  ) : (
+    noDataMessage
   );
 }
 
@@ -141,14 +154,14 @@ const styles = StyleSheet.create({
   titleText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: colors.light,
+    color: colors.grey_lightest,
     flex: 1,
     textAlign: 'center',
     padding: 10,
   },
   rowText: {
     fontSize: 18,
-    color: colors.light_gray2,
+    color: colors.black,
     flex: 1,
     //textAlign: 'center',
     padding: 10,

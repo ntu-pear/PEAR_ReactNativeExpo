@@ -31,7 +31,13 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 import InformationCard from 'app/components/InformationCard';
 
 // function PatientInformationAccordion({patientID, patientProfile, guardianData, doctorsNoteData, socialHistoryData}) {
-function PatientInformationAccordion({patientID, patientProfile, guardianData, socialHistoryData, scrollViewRef}) {
+function PatientInformationAccordion({
+  patientID,
+  patientProfile,
+  guardianData,
+  socialHistoryData,
+  scrollViewRef,
+}) {
   // const { displayPicUrl, firstName, lastName, patientID } = props.route.params;
   const navigation = useNavigation();
   // const [isLoading, setIsLoading] = useState(true);
@@ -55,8 +61,8 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, s
   const [unMaskedGuardianNRIC, setUnMaskedGuardianNRIC] = useState('');
   const [unMasked2ndGuardianNRIC, setUnMasked2ndGuardianNRIC] = useState('');
 
-  const [ activeSections, setActiveSections ] = useState([]);
-  const [ sections, setSections ] = useState([]);
+  const [activeSections, setActiveSections] = useState([]);
+  const [sections, setSections] = useState([]);
 
   // Used to retrieve the patient since after an editing of the patients particulars it will need to be refreshed - Russell
   const retrievePatientNRIC = async (id) => {
@@ -88,12 +94,17 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, s
 
   useEffect(() => {
     const delayUpdate = setTimeout(() => {
-      if (patientProfile !== undefined && Object.keys(patientProfile).length>0) {
+      if (
+        patientProfile !== undefined &&
+        Object.keys(patientProfile).length > 0
+      ) {
         setPatientData([
           { label: 'First Name', value: patientProfile.firstName },
           { label: 'Last Name', value: patientProfile.lastName },
-          { label: 'NRIC', 
-            value: patientProfile.nric.replace(/\d{4}(\d{3})/, 'xxxx$1')},
+          {
+            label: 'NRIC',
+            value: patientProfile.nric.replace(/\d{4}(\d{3})/, 'xxxx$1'),
+          },
           {
             label: 'DOB',
             value: patientProfile.dob || '-',
@@ -124,12 +135,16 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, s
           },
           {
             label: 'End Date',
-            value: patientProfile.endDate != null && patientProfile.endDate !="1970-01-01T00:00:00" ? patientProfile.endDate : null,
+            value:
+              patientProfile.endDate != null &&
+              patientProfile.endDate != '1970-01-01T00:00:00'
+                ? patientProfile.endDate
+                : null,
           },
           {
             label: 'Respite Care',
             value: patientProfile.isRespiteCare ? 'YES' : 'NO',
-          }
+          },
         ]);
       }
     }, 1000); //was 1500
@@ -164,7 +179,7 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, s
 
   useEffect(() => {
     const delayUpdate = setTimeout(() => {
-      if (Object.keys(guardianData).length>0) {
+      if (Object.keys(guardianData).length > 0) {
         // get data of first guardian
         setUnMaskedGuardianNRIC(guardianData.guardian.nric);
         setGuardianInfoData([
@@ -186,7 +201,9 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, s
           },
           {
             label: 'NRIC',
-            value: guardianData.guardian.nric.replace(/\d{4}(\d{3})/, 'xxxx$1') || '-',
+            value:
+              guardianData.guardian.nric.replace(/\d{4}(\d{3})/, 'xxxx$1') ||
+              '-',
           },
           {
             label: 'DOB',
@@ -194,7 +211,7 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, s
           },
           {
             label: 'Gender',
-            value: guardianData.guardian.gender === 'F' ? 'FEMALE' : 'MALE'
+            value: guardianData.guardian.gender === 'F' ? 'FEMALE' : 'MALE',
           },
           {
             label: 'Address',
@@ -219,8 +236,7 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, s
         guardianData &&
         guardianData.additionalGuardian &&
         guardianData.additionalGuardian.nric !== null &&
-        guardianData.additionalGuardian.nric !==
-          guardianData.guardian.nric
+        guardianData.additionalGuardian.nric !== guardianData.guardian.nric
       ) {
         setIsSecondGuardian(true);
         setUnMasked2ndGuardianNRIC(guardianData.additionalGuardian.nric);
@@ -235,7 +251,11 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, s
           },
           {
             label: 'NRIC',
-            value: guardianData.additionalGuardian.nric.replace(/\d{4}(\d{3})/, 'xxxx$1') || '-',
+            value:
+              guardianData.additionalGuardian.nric.replace(
+                /\d{4}(\d{3})/,
+                'xxxx$1',
+              ) || '-',
           },
           {
             label: 'DOB',
@@ -243,7 +263,10 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, s
           },
           {
             label: 'Gender',
-            value: guardianData.additionalGuardian.gender === 'F' ? 'FEMALE' : 'MALE',
+            value:
+              guardianData.additionalGuardian.gender === 'F'
+                ? 'FEMALE'
+                : 'MALE',
           },
           {
             label: 'Address',
@@ -254,7 +277,7 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, s
             value: guardianData.additionalGuardian.email || '-',
           },
           {
-            label: "Relationship",
+            label: 'Relationship',
             value: guardianData.additionalGuardian.relationship || '-',
           },
           {
@@ -278,7 +301,10 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, s
 
   useEffect(() => {
     const delayUpdate = setTimeout(() => {
-      if (socialHistoryData !== null && Object.keys(socialHistoryData).length>0) {
+      if (
+        socialHistoryData !== null &&
+        Object.keys(socialHistoryData).length > 0
+      ) {
         setSocialHistoryInfo([
           {
             label: 'Live with',
@@ -342,7 +368,7 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, s
   useFocusEffect(
     React.useCallback(() => {
       retrievePatientNRIC(patientID);
-    }, [])
+    }, []),
   );
 
   // This callback function will be executed when the screen comes into focus - Russell
@@ -372,43 +398,43 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, s
 
   // Handling of InformationCard editing button onPress
   const handlePatientInfoOnPress = () => {
-    navigation.push(routes.EDIT_PATIENT_INFO, { 
+    navigation.push(routes.EDIT_PATIENT_INFO, {
       patientProfile: patientProfile,
       // navigation: navigation,
-    })
+    });
   };
-  
+
   const handlePatientPrefOnPress = () => {
     navigation.push(routes.EDIT_PATIENT_PREFERENCES, {
       patientProfile: patientProfile,
       // navigation: navigation,
-    })
+    });
   };
-  
+
   const handlePatientGuardianOnPress = () => {
-    navigation.push(routes.EDIT_PATIENT_GUARDIAN, { 
+    navigation.push(routes.EDIT_PATIENT_GUARDIAN, {
       guardianProfile: guardianData.guardian,
       // navigation: navigation,
-    })
+    });
   };
-  
+
   const handlePatientSecondGuardianOnPress = () => {
-    navigation.push(routes.EDIT_PATIENT_GUARDIAN, { 
+    navigation.push(routes.EDIT_PATIENT_GUARDIAN, {
       guardianProfile: guardianData.additionalGuardian,
       // navigation: navigation,
-    })
+    });
   };
-  
+
   const handlePatientSocialHistOnPress = () => {
-    navigation.push(routes.EDIT_PATIENT_SOCIALHIST, { 
+    navigation.push(routes.EDIT_PATIENT_SOCIALHIST, {
       socialHistory: socialHistoryData,
       patientID: patientID,
       // navigation: navigation,
-    })
+    });
   };
 
   const handleOnPress = (title) => {
-    switch(title) {
+    switch (title) {
       case 'Patient Information':
         return handlePatientInfoOnPress;
       case 'Patient Preferences':
@@ -426,14 +452,14 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, s
 
   const handleOnChange = (sections) => {
     setActiveSections(sections);
-    
+
     if (scrollViewRef && scrollViewRef.current) {
       scrollViewRef.current.scrollTo({ y: 2000, animated: true });
     }
   };
 
   const unmaskedNRIC = (title) => {
-    switch(title) {
+    switch (title) {
       case 'Patient Information':
         return unMaskedPatientNRIC;
       case 'Guardian(s) Information':
@@ -450,11 +476,11 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, s
     setSections([
       {
         title: 'Patient Information',
-        content: patientData
+        content: patientData,
       },
       {
         title: 'Patient Preferences',
-        content: preferenceData
+        content: preferenceData,
       },
       // {
       //   title: "Doctor's Notes",
@@ -462,51 +488,71 @@ function PatientInformationAccordion({patientID, patientProfile, guardianData, s
       // },
       {
         title: 'Guardian(s) Information',
-        content: guardianInfoData
+        content: guardianInfoData,
       },
       {
         title: 'Social History',
-        content: socialHistoryInfo
-      }
+        content: socialHistoryInfo,
+      },
     ]);
     // }, [patientData, doctorsNoteInfo, guardianInfoData, secondGuardianInfoData, socialHistoryInfo]);
-  }, [patientData, preferenceData, guardianInfoData, secondGuardianInfoData, socialHistoryInfo]);
+  }, [
+    patientData,
+    preferenceData,
+    guardianInfoData,
+    secondGuardianInfoData,
+    socialHistoryInfo,
+  ]);
 
   function renderHeader(section, _, isActive) {
     return (
-      <View testID={`accordion_${section.title.replace(/\\s+/g, '_')}_header`} style={styles.accordHeader}>
+      <View
+        testID={`accordion_${section.title.replace(/\\s+/g, '_')}_header`}
+        style={styles.accordHeader}
+      >
         <Text style={styles.accordTitle}>{section.title}</Text>
-        <Icon name={ isActive ? 'chevron-up' : 'chevron-down' } size={30} color={colors.white_var1} />
+        <Icon
+          name={isActive ? 'chevron-up' : 'chevron-down'}
+          size={30}
+          color={colors.white}
+        />
       </View>
     );
-  };
+  }
 
   function renderContent(section, _, isActive) {
     return (
-      <View testID={`accordion_${section.title.replace(/\\s+/g, '_')}_content`} style={styles.accordBody}>
+      <View
+        testID={`accordion_${section.title.replace(/\\s+/g, '_')}_content`}
+        style={styles.accordBody}
+      >
         <InformationCard
           title={section.title}
-          subtitle={(section.title === 'Guardian(s) Information' && isSecondGuardian) ? 'Guardian 1' : null}
+          subtitle={
+            section.title === 'Guardian(s) Information' && isSecondGuardian
+              ? 'Guardian 1'
+              : null
+          }
           displayData={section.content}
           handleOnPress={handleOnPress(section.title)}
           unMaskedNRIC={unmaskedNRIC(section.title)}
         />
-        {(section.title === "Guardian(s) Information" && isSecondGuardian) ? (
-          <InformationCard 
+        {section.title === 'Guardian(s) Information' && isSecondGuardian ? (
+          <InformationCard
             title={section.title}
             subtitle={'Guardian 2'}
             displayData={secondGuardianInfoData}
             handleOnPress={handlePatientSecondGuardianOnPress}
             unMaskedNRIC={unmaskedNRIC('Guardian 2')}
           />
-        ) : null }
+        ) : null}
       </View>
     );
-  };
-  
+  }
+
   return (
     <Accordion
-      align="bottom" 
+      align="bottom"
       sections={sections}
       activeSections={activeSections}
       renderHeader={renderHeader}
@@ -534,13 +580,13 @@ const styles = StyleSheet.create({
     fontSize: 30,
     paddingTop: 15,
     fontWeight: 'bold',
-    color: colors.white_var1,
-    marginHorizontal: '2%'
+    color: colors.white,
+    marginHorizontal: '2%',
   },
   accordBody: {
     padding: 12,
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android
-  }
+    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+  },
 });
 
 export default PatientInformationAccordion;

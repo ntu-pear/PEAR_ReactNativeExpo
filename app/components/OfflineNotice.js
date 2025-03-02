@@ -34,7 +34,7 @@ function OfflineNotice(props) {
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    backgroundColor: colors.primary,
+    backgroundColor: colors.grey_lighter,
     height: 50,
     justifyContent: 'center',
     position: 'absolute',

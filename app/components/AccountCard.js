@@ -25,7 +25,7 @@ function AccountCard(props) {
                 as={{ ...vectorIconComponent }}
                 top="3"
                 left="2"
-                color={colors.black_var1}
+                color={colors.black}
                 size="50"
               />
               <Text style={styles.TextContent}>{text}</Text>
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
   CardBoxContainer: {
     borderRadius: 10,
     borderWidth: Platform.OS === 'web' ? null : 1,
-    borderColor: colors.primary_gray,
+    borderColor: colors.grey_lighter,
     minWidth: '100%',
     minHeight: Platform.OS === 'web' ? null : 20,
   },
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     fontSize: 19,
     marginTop: Platform.OS === 'web' ? 2 : 28,
     marginLeft: 19,
-    color: colors.black_var1,
+    color: colors.black,
   },
   HStackWrapper: {
     space: 5,

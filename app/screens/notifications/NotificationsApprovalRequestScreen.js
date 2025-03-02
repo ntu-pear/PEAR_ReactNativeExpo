@@ -134,7 +134,7 @@ function NotificationsApprovalRequestScreen(props) {
                 <VStack space={5}>
                   <HStack justifyContent="space-between" alignItems="center">
                     <Text
-                      color={colors.black_var1}
+                      color={colors.black}
                       fontFamily={
                         Platform.OS === 'ios' ? 'Helvetica' : typography.android
                       }
@@ -158,7 +158,7 @@ function NotificationsApprovalRequestScreen(props) {
                   <ScrollView h="100%" w="100%">
                     <Box>
                       <Text
-                        color={colors.black_var1}
+                        color={colors.black}
                         fontFamily={
                           Platform.OS === 'ios'
                             ? 'Helvetica'
@@ -212,7 +212,7 @@ function NotificationsApprovalRequestScreen(props) {
                   size="md"
                   w="30%"
                   _text={{
-                    color: `${colors.white_var1}`,
+                    color: `${colors.white}`,
                     fontFamily:
                       Platform.OS === 'ios' ? 'Helvetica' : typography.android,
                     fontSize: 'sm',
