@@ -15,6 +15,7 @@ import placeholderImage from 'app/assets/album_placeholder.png';
 // Configurations
 import colors from 'app/config/colors';
 import { useNavigation } from '@react-navigation/native';
+import typography from 'app/config/typography';
 
 const { width, height } = Dimensions.get('window');
 
@@ -104,11 +105,8 @@ const styles = StyleSheet.create({
   },
   text: {
     marginTop: 4,
-    fontSize: 20,
-  },
-  bold: {
     marginLeft: 20,
-    fontWeight: '600',
+    ...typography.heading2,
   },
   buttonContainer: {
     flexDirection: 'row',

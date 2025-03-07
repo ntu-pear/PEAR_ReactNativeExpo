@@ -30,10 +30,7 @@ function CustomFormControl(props) {
       <VStack>
         {/* <FormControl.Label
           _text={{
-            fontFamily: `${
-              Platform.OS === 'ios' ? typography.ios : typography.android
-            }`,
-            fontWeight: 'bold',
+            ...typography.body1SemiBold,
           }}
         >
           {title}
@@ -49,13 +46,10 @@ function CustomFormControl(props) {
           borderColor={ErrorMessage == null ? colors.grey_lighter : colors.red}
           borderRadius="25"
           height="50"
-          fontFamily={
-            Platform.OS === 'ios' ? typography.ios : typography.android
-          }
+          {...typography.subheading1}
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          size="18"
           w="100%"
           InputRightElement={InputRightElement}
           type={type}
@@ -79,16 +73,13 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   titleMsg: {
-    fontSize: 13.5,
-    fontWeight: 'bold',
     marginBottom: 5,
     color: colors.grey,
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+    ...typography.body1SemiBold,
   },
   errorMsg: {
     color: colors.red,
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
-    fontSize: 12,
+    ...typography.subheading1,
   },
   requiredIndicator: {
     color: colors.red,

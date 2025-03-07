@@ -101,10 +101,7 @@ function ResetPasswordScreen(props) {
             <VStack>
               <FormControl.Label
                 _text={{
-                  fontFamily: `${
-                    Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                  }`,
-                  fontWeight: 'bold',
+                  ...typography.body1SemiBold,
                 }}
               >
                 Role
@@ -113,9 +110,7 @@ function ResetPasswordScreen(props) {
               <Select
                 accessibilityLabel="Select Role"
                 borderRadius="25"
-                fontFamily={
-                  Platform.OS === 'ios' ? typography.ios : typography.android
-                }
+                {...typography.subheading1}
                 height="50"
                 minWidth="full"
                 minHeight="3%"
@@ -123,7 +118,6 @@ function ResetPasswordScreen(props) {
                 placeholderTextColor={colors.grey}
                 onValueChange={(itemValue) => setRole(itemValue)}
                 selectedValue={role}
-                size="18"
               >
                 <Select.Item label="Supervisor" value="Supervisor" />
                 <Select.Item label="Guardian" value="Guardian" />

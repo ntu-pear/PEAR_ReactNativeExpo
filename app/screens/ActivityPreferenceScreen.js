@@ -18,6 +18,7 @@ import patientApi from 'app/api/patient';
 
 // Configurations
 import colors from 'app/config/colors';
+import typography from 'app/config/typography';
 
 // Components
 import ActivityIndicator from 'app/components/ActivityIndicator';
@@ -334,11 +335,18 @@ function ActivityPreferenceScreen(props) {
   }, [ascending, likedItems, neutralItems, dislikedItems]);
 
   const renderItem = ({ item }) => {
-    // `item` is an array of activities (e.g., all neutral activities)
+    // `item` is an array of activities
     return (
       <View style={styles.wrapContainer}>
-        {item.map((activity) => (
-          <View key={activity.centreActivityID} style={styles.gridItem}>
+        {item.map((activity, index) => (
+          <View
+            key={
+              activity.centreActivityID
+                ? activity.centreActivityID
+                : `placeholder-${index}`
+            }
+            style={styles.gridItem}
+          >
             <Text
               style={[
                 styles.activityText,
@@ -358,6 +366,32 @@ function ActivityPreferenceScreen(props) {
       </View>
     );
   };
+
+  // const renderItem = ({ item }) => {
+  //   // `item` is an array of activities (e.g., all neutral activities)
+  //   return (
+  //     <View style={styles.wrapContainer}>
+  //       {item.map((activity) => (
+  //         <View key={activity.centreActivityID} style={styles.gridItem}>
+  //           <Text
+  //             style={[
+  //               styles.activityText,
+  //               activity.activityTitle === 'None'
+  //                 ? styles.noItem
+  //                 : activity.isLike === 1
+  //                 ? styles.likedItems
+  //                 : activity.isLike === 0
+  //                 ? styles.neutralItems
+  //                 : styles.dislikedItems,
+  //             ]}
+  //           >
+  //             {activity.activityTitle}
+  //           </Text>
+  //         </View>
+  //       ))}
+  //     </View>
+  //   );
+  // };
 
   const renderSectionHeader = ({ section }) => {
     // section.data is an array with one element: the array of items
@@ -479,7 +513,7 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   activityText: {
-    fontSize: 15,
+    ...typography.subheading1,
     paddingHorizontal: 15,
     paddingVertical: 12,
     borderRadius: 10,

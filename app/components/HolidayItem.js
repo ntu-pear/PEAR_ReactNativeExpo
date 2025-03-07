@@ -9,8 +9,11 @@ import {
 } from 'react-native';
 import { Card, Button } from 'react-native-paper';
 import placeholderImage from 'app/assets/album_placeholder.png';
-import colors from 'app/config/colors';
 import { useNavigation } from '@react-navigation/native';
+
+// Configurations
+import colors from 'app/config/colors';
+import typography from 'app/config/typography';
 
 const { width, height } = Dimensions.get('window');
 
@@ -68,7 +71,7 @@ const HolidayItem = ({
               {country ? (
                 <View style={{ marginLeft: 5, marginTop: 5 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Text style={[styles.text, styles.bold]}>{country}</Text>
+                    <Text style={[styles.text]}>{country}</Text>
                     <Text style={{ marginTop: 6, marginLeft: 10 }}>
                       (
                       {photoCount < 1
@@ -124,14 +127,11 @@ const styles = StyleSheet.create({
   },
   text: {
     marginTop: 4,
-    fontSize: 20,
+    ...typography.heading2,
   },
   textBody: {
     marginTop: 4,
-    fontSize: 17,
-  },
-  bold: {
-    fontWeight: '600',
+    ...typography.subheading1,
   },
 });
 

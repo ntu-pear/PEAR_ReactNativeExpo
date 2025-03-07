@@ -79,10 +79,9 @@ const styles = StyleSheet.create({
     marginTop: '3%',
   },
   headerStyle: {
-    fontSize: 25,
     alignSelf: 'center',
     padding: 10,
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+    ...typography.heading1,
   },
   subheaderStyle: {
     fontSize: 20,
@@ -94,7 +93,7 @@ const styles = StyleSheet.create({
   },
   viewAllText: {
     color: colors.green,
-    fontSize: 15,
+    ...typography.body1,
   },
 });
 

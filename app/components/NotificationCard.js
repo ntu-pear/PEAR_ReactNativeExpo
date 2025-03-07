@@ -64,9 +64,7 @@ function NotificationCard(
             <Text
               bold
               color={colors.black}
-              fontFamily={
-                Platform.OS === 'ios' ? typography.ios : typography.android
-              }
+              fontFamily={typography.baseFontFamily}
             >
               {item?.requiresAction ? 'Action Required' : ''}
             </Text>
@@ -75,9 +73,7 @@ function NotificationCard(
             <Text
               alignSelf="flex-start"
               color={colors.black}
-              fontFamily={
-                Platform.OS === 'ios' ? typography.ios : typography.android
-              }
+              fontFamily={typography.baseFontFamily}
             >
               {item?.shortMessage
                 ? handleString(item.shortMessage)
@@ -89,7 +85,7 @@ function NotificationCard(
               alignSelf="flex-start"
               color={colors.black}
               fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
+                typography.baseFontFamily
               }
             >
               {' '}

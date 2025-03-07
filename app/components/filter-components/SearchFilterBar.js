@@ -630,11 +630,10 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   itemCount: {
-    fontSize: 13.5,
     marginLeft: '2%',
     paddingVertical: '1.5%',
     alignSelf: 'flex-start',
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+    ...typography.body1,
   },
 });
 

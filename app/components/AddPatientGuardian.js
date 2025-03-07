@@ -253,8 +253,6 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError, testI
             <Text
               testID={`${testID}_title`}
               marginTop={6}
-              bold
-              fontSize="2xl"
               color={colors.green}
               style={styles.text}
             >
@@ -427,10 +425,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   text: {
-    fontWeight: 'bold',
-    fontFamily: `${
-      Platform.OS === 'ios' ? typography.ios : typography.android
-    }`,
+    ...typography.heading1,
   },
   dateSelectionContainer: {
     width: '100%',

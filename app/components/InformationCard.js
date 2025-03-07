@@ -162,31 +162,28 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   TextContent: {
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+    fontFamily: typography.baseFontFamily,
     marginTop: 10,
     marginBottom: 10,
     marginRight: 10,
   },
   titleText: {
-    fontSize: 25,
-    fontWeight: 'bold',
+    ...typography.heading1,
     color: colors.black,
     marginRight: 0,
   },
   subtitleText: {
-    fontSize: 25,
-    color: colors.black,
+    ...typography.heading1,
     fontWeight: 'bold',
   },
   fieldLabel: {
-    fontSize: 18,
+    ...typography.subheading1,
     color: colors.grey,
     textTransform: 'uppercase',
   },
   fieldValue: {
-    fontSize: 18,
+    ...typography.subheading1SemiBoldheading1,
     maxWidth: '65%',
-    fontWeight: 'bold',
   },
   fieldContainer: {
     flexDirection: 'row',

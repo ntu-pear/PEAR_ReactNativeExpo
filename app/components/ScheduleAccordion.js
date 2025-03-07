@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     marginHorizontal: '2%',
   },
   accordBody: {
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+    fontFamily: typography.baseFontFamily,
   },
 });
 

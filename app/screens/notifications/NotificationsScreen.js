@@ -87,10 +87,7 @@ function NotificationsScreen(props) {
           <DeleteIcon color={colors.white} size="2xl" alignSelf="center" />
           <Text
             alignSelf="center"
-            bold
-            fontFamily={
-              Platform.OS === 'ios' ? 'Helvetica' : typography.android
-            }
+            {...typography.body1SemiBold}
             color={colors.white}
           >
             Clear

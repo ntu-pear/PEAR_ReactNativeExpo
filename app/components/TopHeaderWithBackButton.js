@@ -25,14 +25,7 @@ function TopHeaderWithBackButton({ navigation, title }) {
           }}
         />
         <Center w="30%">
-          <Text
-            color={colors.black}
-            fontFamily={
-              Platform.OS === 'ios' ? 'Helvetica' : typography.android
-            }
-            fontSize="lg"
-            fontWeight="semibold"
-          >
+          <Text color={colors.black} {...typography.subheading1SemiBold}>
             {title ? title : ''}
           </Text>
         </Center>

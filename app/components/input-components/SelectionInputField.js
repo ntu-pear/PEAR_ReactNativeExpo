@@ -103,15 +103,12 @@ function SelectionInputField({
           testID={`${testID}_input`}
           accessibilityLabel={title}
           borderRadius="25"
-          fontFamily={
-            Platform.OS === 'ios' ? typography.ios : typography.android
-          }
           height="50"
           minWidth="full"
           minHeight="3%"
           placeholder={placeholder}
           placeholderTextColor={colors.grey}
-          fontSize="16"
+          {...typography.subheading1}
           selectedValue={selectedValue}
           onValueChange={handleValueChanged}
           InputLeftElement={inputLeftElement}
@@ -148,12 +145,10 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   titleMsg: {
-    fontSize: 13.5,
-    fontWeight: 'bold',
     marginBottom: 5,
     marginTop: 10,
     color: colors.grey,
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+    ...typography.body1SemiBold,
   },
 });
 

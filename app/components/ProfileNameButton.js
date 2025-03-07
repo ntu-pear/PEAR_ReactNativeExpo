@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   DefaultText: {
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+    fontFamily: typography.baseFontFamily,
   },
   NameText: {
     fontWeight: 'bold',

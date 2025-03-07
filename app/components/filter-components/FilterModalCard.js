@@ -892,16 +892,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerStyle: {
-    fontSize: 20,
     alignSelf: 'center',
     padding: 5,
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+    ...typography.heading2,
   },
   textStyle: {
-    fontSize: 13.5,
     padding: 5,
-    fontWeight: '400',
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+    ...typography.body1,
   },
   dateTitle: {
     paddingHorizontal: 5,
@@ -913,9 +910,6 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     paddingBottom: 10,
-  },
-  dateText: {
-    fontSize: 17,
   },
   errorMsg: {
     color: colors.red,

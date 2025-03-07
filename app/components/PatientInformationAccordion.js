@@ -585,7 +585,7 @@ const styles = StyleSheet.create({
   },
   accordBody: {
     padding: 12,
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+    fontFamily: typography.baseFontFamily,
   },
 });
 

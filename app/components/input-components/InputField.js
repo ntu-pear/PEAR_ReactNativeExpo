@@ -191,23 +191,19 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   titleMsg: {
-    fontSize: 13.5,
-    fontWeight: 'bold',
     marginBottom: 5,
     marginTop: 10,
     color: colors.grey,
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+    ...typography.body1SemiBold,
   },
   errorMsg: {
     color: colors.red,
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
-    fontSize: 15,
+    ...typography.subheading1,
   },
   inputField: {
-    fontSize: 16,
     width: '100%',
     color: colors.black,
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+    ...typography.subheading1,
   },
 });
 

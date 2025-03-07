@@ -149,41 +149,24 @@ function PersonalSocialHistory({ socialHistory }) {
 
   return (
     <Stack space={2}>
-      <Text
-        color={colors.black}
-        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
-        fontSize="2xl"
-        fontWeight="semibold"
-      >
+      <Text color={colors.black} {...typography.heading1}>
         Social History
       </Text>
-      <Text
-        color={colors.black}
-        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
-        fontSize="md"
-        fontWeight="hairline"
-      >
+      <Text color={colors.black} {...typography.body1}>
         About
       </Text>
       <FormControl maxW="50%">
         <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: `${
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }`,
-              fontSize: 'lg',
-              fontWeight: 'thin',
+              ...typography.subheading1,
             }}
           >
             Live with
           </FormControl.Label>
           {isEditMode ? (
             <Select
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
@@ -198,10 +181,7 @@ function PersonalSocialHistory({ socialHistory }) {
                 endIcon: (
                   <CheckIcon
                     size="5"
-                    fontFamily={
-                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                    }
-                    fontSize="lg"
+                    {...typography.subheading1}
                     color={colors.pink}
                   />
                 ),
@@ -219,10 +199,7 @@ function PersonalSocialHistory({ socialHistory }) {
           ) : (
             <Input
               color={colors.black}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               isReadOnly
               variant="unstyled"
               value={
@@ -239,21 +216,14 @@ function PersonalSocialHistory({ socialHistory }) {
         <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: `${
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }`,
-              fontSize: 'lg',
-              fontWeight: 'thin',
+              ...typography.subheading1,
             }}
           >
             Education
           </FormControl.Label>
           {isEditMode ? (
             <Select
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
@@ -268,10 +238,7 @@ function PersonalSocialHistory({ socialHistory }) {
                 endIcon: (
                   <CheckIcon
                     size="5"
-                    fontFamily={
-                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                    }
-                    fontSize="lg"
+                    {...typography.subheading1}
                     color={colors.pink}
                   />
                 ),
@@ -289,10 +256,7 @@ function PersonalSocialHistory({ socialHistory }) {
           ) : (
             <Input
               color={colors.black}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               isReadOnly
               variant="unstyled"
               value={
@@ -309,21 +273,14 @@ function PersonalSocialHistory({ socialHistory }) {
         <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: `${
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }`,
-              fontSize: 'lg',
-              fontWeight: 'thin',
+              ...typography.subheading1,
             }}
           >
             Occupation
           </FormControl.Label>
           {isEditMode ? (
             <Select
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
@@ -338,10 +295,7 @@ function PersonalSocialHistory({ socialHistory }) {
                 endIcon: (
                   <CheckIcon
                     size="5"
-                    fontFamily={
-                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                    }
-                    fontSize="lg"
+                    {...typography.subheading1}
                     color={colors.pink}
                   />
                 ),
@@ -359,10 +313,7 @@ function PersonalSocialHistory({ socialHistory }) {
           ) : (
             <Input
               color={colors.black}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               isReadOnly
               variant="unstyled"
               value={
@@ -379,21 +330,14 @@ function PersonalSocialHistory({ socialHistory }) {
         <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: `${
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }`,
-              fontSize: 'lg',
-              fontWeight: 'thin',
+              ...typography.subheading1,
             }}
           >
             Religion
           </FormControl.Label>
           {isEditMode ? (
             <Select
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
@@ -408,10 +352,7 @@ function PersonalSocialHistory({ socialHistory }) {
                 endIcon: (
                   <CheckIcon
                     size="5"
-                    fontFamily={
-                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                    }
-                    fontSize="lg"
+                    {...typography.subheading1}
                     color={colors.pink}
                   />
                 ),
@@ -429,10 +370,7 @@ function PersonalSocialHistory({ socialHistory }) {
           ) : (
             <Input
               color={colors.black}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               isReadOnly
               variant="unstyled"
               value={
@@ -449,21 +387,14 @@ function PersonalSocialHistory({ socialHistory }) {
         <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: `${
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }`,
-              fontSize: 'lg',
-              fontWeight: 'thin',
+              ...typography.subheading1,
             }}
           >
             Pet
           </FormControl.Label>
           {isEditMode ? (
             <Select
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
@@ -476,10 +407,7 @@ function PersonalSocialHistory({ socialHistory }) {
                 endIcon: (
                   <CheckIcon
                     size="5"
-                    fontFamily={
-                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                    }
-                    fontSize="lg"
+                    {...typography.subheading1}
                     color={colors.pink}
                   />
                 ),
@@ -497,10 +425,7 @@ function PersonalSocialHistory({ socialHistory }) {
           ) : (
             <Input
               color={colors.black}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               isReadOnly
               variant="unstyled"
               value={
@@ -515,21 +440,14 @@ function PersonalSocialHistory({ socialHistory }) {
         <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: `${
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }`,
-              fontSize: 'lg',
-              fontWeight: 'thin',
+              ...typography.subheading1,
             }}
           >
             Diet
           </FormControl.Label>
           {isEditMode ? (
             <Select
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
@@ -542,10 +460,7 @@ function PersonalSocialHistory({ socialHistory }) {
                 endIcon: (
                   <CheckIcon
                     size="5"
-                    fontFamily={
-                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                    }
-                    fontSize="lg"
+                    {...typography.subheading1}
                     color={colors.pink}
                   />
                 ),
@@ -563,10 +478,7 @@ function PersonalSocialHistory({ socialHistory }) {
           ) : (
             <Input
               color={colors.black}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               isReadOnly
               variant="unstyled"
               value={
@@ -577,34 +489,21 @@ function PersonalSocialHistory({ socialHistory }) {
           )}
         </HStack>
       </FormControl>
-      <Text
-        color={colors.black}
-        fontFamily={Platform.OS === 'ios' ? 'Helvetica' : typography.android}
-        fontSize="md"
-        fontWeight="hairline"
-        mt="5"
-      >
+      <Text color={colors.black} {...typography.body1} mt="5">
         Lifestyle
       </Text>
       <FormControl maxW="50%">
         <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: `${
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }`,
-              fontSize: 'lg',
-              fontWeight: 'thin',
+              ...typography.subheading1,
             }}
           >
             Exercise
           </FormControl.Label>
           {isEditMode ? (
             <Select
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
@@ -616,10 +515,7 @@ function PersonalSocialHistory({ socialHistory }) {
                 endIcon: (
                   <CheckIcon
                     size="5"
-                    fontFamily={
-                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                    }
-                    fontSize="lg"
+                    {...typography.subheading1}
                     color={colors.pink}
                   />
                 ),
@@ -631,10 +527,7 @@ function PersonalSocialHistory({ socialHistory }) {
           ) : (
             <Input
               color={colors.black}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               isReadOnly
               variant="unstyled"
               value={
@@ -652,21 +545,14 @@ function PersonalSocialHistory({ socialHistory }) {
         <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: `${
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }`,
-              fontSize: 'lg',
-              fontWeight: 'thin',
+              ...typography.subheading1,
             }}
           >
             Sexually Active
           </FormControl.Label>
           {isEditMode ? (
             <Select
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
@@ -680,10 +566,7 @@ function PersonalSocialHistory({ socialHistory }) {
                 endIcon: (
                   <CheckIcon
                     size="5"
-                    fontFamily={
-                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                    }
-                    fontSize="lg"
+                    {...typography.subheading1}
                     color={colors.pink}
                   />
                 ),
@@ -695,10 +578,7 @@ function PersonalSocialHistory({ socialHistory }) {
           ) : (
             <Input
               color={colors.black}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               isReadOnly
               variant="unstyled"
               value={
@@ -717,21 +597,14 @@ function PersonalSocialHistory({ socialHistory }) {
         <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: `${
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }`,
-              fontSize: 'lg',
-              fontWeight: 'thin',
+              ...typography.subheading1,
             }}
           >
             Drug use
           </FormControl.Label>
           {isEditMode ? (
             <Select
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
@@ -743,10 +616,7 @@ function PersonalSocialHistory({ socialHistory }) {
                 endIcon: (
                   <CheckIcon
                     size="5"
-                    fontFamily={
-                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                    }
-                    fontSize="lg"
+                    {...typography.subheading1}
                     color={colors.pink}
                   />
                 ),
@@ -758,10 +628,7 @@ function PersonalSocialHistory({ socialHistory }) {
           ) : (
             <Input
               color={colors.black}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               isReadOnly
               variant="unstyled"
               value={drugeUse === 0 || drugeUse === '0' ? 'No' : 'Yes'}
@@ -774,21 +641,14 @@ function PersonalSocialHistory({ socialHistory }) {
         <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: `${
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }`,
-              fontSize: 'lg',
-              fontWeight: 'thin',
+              ...typography.subheading1,
             }}
           >
             Caffeine use
           </FormControl.Label>
           {isEditMode ? (
             <Select
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
@@ -802,10 +662,7 @@ function PersonalSocialHistory({ socialHistory }) {
                 endIcon: (
                   <CheckIcon
                     size="5"
-                    fontFamily={
-                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                    }
-                    fontSize="lg"
+                    {...typography.subheading1}
                     color={colors.pink}
                   />
                 ),
@@ -817,10 +674,7 @@ function PersonalSocialHistory({ socialHistory }) {
           ) : (
             <Input
               color={colors.black}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               isReadOnly
               variant="unstyled"
               value={caffeineUse === 0 || caffeineUse === '0' ? 'No' : 'Yes'}
@@ -833,21 +687,14 @@ function PersonalSocialHistory({ socialHistory }) {
         <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: `${
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }`,
-              fontSize: 'lg',
-              fontWeight: 'thin',
+              ...typography.subheading1,
             }}
           >
             Alcohol use
           </FormControl.Label>
           {isEditMode ? (
             <Select
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
@@ -861,10 +708,7 @@ function PersonalSocialHistory({ socialHistory }) {
                 endIcon: (
                   <CheckIcon
                     size="5"
-                    fontFamily={
-                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                    }
-                    fontSize="lg"
+                    {...typography.subheading1}
                     color={colors.pink}
                   />
                 ),
@@ -876,10 +720,7 @@ function PersonalSocialHistory({ socialHistory }) {
           ) : (
             <Input
               color={colors.black}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               isReadOnly
               variant="unstyled"
               value={alocholUse === 0 || alocholUse === '0' ? 'No' : 'Yes'}
@@ -892,21 +733,14 @@ function PersonalSocialHistory({ socialHistory }) {
         <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: `${
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }`,
-              fontSize: 'lg',
-              fontWeight: 'thin',
+              ...typography.subheading1,
             }}
           >
             Tobacco use
           </FormControl.Label>
           {isEditMode ? (
             <Select
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
@@ -920,10 +754,7 @@ function PersonalSocialHistory({ socialHistory }) {
                 endIcon: (
                   <CheckIcon
                     size="5"
-                    fontFamily={
-                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                    }
-                    fontSize="lg"
+                    {...typography.subheading1}
                     color={colors.pink}
                   />
                 ),
@@ -935,10 +766,7 @@ function PersonalSocialHistory({ socialHistory }) {
           ) : (
             <Input
               color={colors.black}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               isReadOnly
               variant="unstyled"
               value={tobaccoUse === 0 || tobaccoUse === '0' ? 'No' : 'Yes'}
@@ -951,21 +779,14 @@ function PersonalSocialHistory({ socialHistory }) {
         <HStack space={2} alignItems="center">
           <FormControl.Label
             _text={{
-              fontFamily: `${
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }`,
-              fontSize: 'lg',
-              fontWeight: 'thin',
+              ...typography.subheading1,
             }}
           >
             Secondhand smoker
           </FormControl.Label>
           {isEditMode ? (
             <Select
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               minW="100%"
               // Peforms setDescription and setId
               onValueChange={(itemValue) => {
@@ -981,10 +802,7 @@ function PersonalSocialHistory({ socialHistory }) {
                 endIcon: (
                   <CheckIcon
                     size="5"
-                    fontFamily={
-                      Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                    }
-                    fontSize="lg"
+                    {...typography.subheading1}
                     color={colors.pink}
                   />
                 ),
@@ -996,10 +814,7 @@ function PersonalSocialHistory({ socialHistory }) {
           ) : (
             <Input
               color={colors.black}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
-              fontSize="lg"
+              {...typography.subheading1}
               isReadOnly
               variant="unstyled"
               value={

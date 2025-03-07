@@ -29,12 +29,10 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   TitleMsg: {
-    fontSize: 13.5,
-    fontWeight: 'bold',
     marginBottom: 5,
     marginTop: 10,
     color: colors.grey,
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+    ...typography.body1SemiBold,
   },
 });
 

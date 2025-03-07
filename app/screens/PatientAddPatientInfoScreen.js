@@ -330,9 +330,8 @@ function PatientAddPatientInfoScreen({
                     <Text
                       testID={`${testID}_title`}
                       marginTop={6}
-                      fontSize="2xl"
                       color={colors.green}
-                      style={styles.text}
+                      style={styles.titleText}
                     >
                       Patient Information
                     </Text>
@@ -359,7 +358,11 @@ function PatientAddPatientInfoScreen({
                         {patient.UploadProfilePicture.uri ? (
                           <></>
                         ) : (
-                          <Text style={styles.text} color={colors.black} mt="2">
+                          <Text
+                            style={styles.bodyText}
+                            color={colors.black}
+                            mt="2"
+                          >
                             Upload a Profile Picture
                           </Text>
                         )}
@@ -590,9 +593,11 @@ const styles = StyleSheet.create({
   dateSelectionContainer: {
     width: '100%',
   },
-  text: {
-    fontWeight: 'bold',
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+  bodyText: {
+    ...typography.body1SemiBold,
+  },
+  titleText: {
+    ...typography.heading1,
   },
   errorText: {
     fontSize: 20,

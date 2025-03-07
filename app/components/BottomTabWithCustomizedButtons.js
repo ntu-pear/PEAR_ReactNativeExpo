@@ -33,9 +33,7 @@ function BottomTabWithCustomizedButtons({
             bg={colors.green}
             _text={{
               color: `${colors.white}`,
-              fontFamily:
-                Platform.OS === 'ios' ? typography.ios : typography.android,
-              fontSize: 'sm',
+              ...typography.body1,
             }}
           >
             {leftButtonText ? leftButtonText : null}
@@ -49,9 +47,7 @@ function BottomTabWithCustomizedButtons({
             bg={colors.pink}
             _text={{
               color: `${colors.white}`,
-              fontFamily:
-                Platform.OS === 'ios' ? typography.ios : typography.android,
-              fontSize: 'sm',
+              ...typography.body1,
             }}
           >
             {rightButtonText ? rightButtonText : null}

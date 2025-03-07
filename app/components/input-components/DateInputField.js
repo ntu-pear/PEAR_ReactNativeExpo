@@ -202,18 +202,15 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   titleMsg: {
-    fontSize: 13.5,
-    fontWeight: 'bold',
     marginBottom: 5,
     marginTop: 10,
     color: colors.grey,
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+    ...typography.body1SemiBold,
   },
   textField: {
-    fontSize: 16,
     textAlign: 'left',
     color: colors.black,
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+    ...typography.subheading1,
     paddingHorizontal: 10,
   },
   dateWrapper: {

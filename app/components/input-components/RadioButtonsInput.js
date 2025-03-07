@@ -63,7 +63,6 @@ function RadioButtonInput({
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, []);
   useEffect(() => {
-    console.log('RadioButtonInput value:', value);
     onChildData ? onChildData(isFirstRender || isError.error) : null;
     setIsFirstRender(false);
     setIsError({
@@ -118,12 +117,10 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   titleMsg: {
-    fontSize: 13.5,
-    fontWeight: 'bold',
     marginBottom: 5,
     marginTop: 10,
     color: colors.grey,
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+    ...typography.body1SemiBold,
   },
   radioButtonContainer: {
     flexShrink: 1,

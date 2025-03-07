@@ -27,10 +27,8 @@ const styles = StyleSheet.create({
     tintColor: colors.black,
   },
   errorText: {
-    fontSize: 20,
-    fontWeight: 'bold',
     marginTop: 15,
-    fontFamily: Platform.OS === 'ios' ? typography.ios : typography.android,
+    ...typography.heading2,
   },
 });
 

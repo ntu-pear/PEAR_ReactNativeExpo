@@ -627,17 +627,6 @@ const updatePatientPhoto = async (patientID, photoData) => {
   photoFormData.append('PatientID', patientID);
   photoFormData.append('PatientPhotoID', photoData.PatientPhotoID);
 
-  // (Optional) Log the FormData entries for debugging.
-  if (photoFormData.entries) {
-    try {
-      for (let [key, value] of photoFormData.entries()) {
-        console.log(key, value);
-      }
-    } catch (error) {
-      console.warn('FormData.entries() not supported:', error);
-    }
-  }
-
   return client.put(patientPhotoUpdate, photoFormData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
