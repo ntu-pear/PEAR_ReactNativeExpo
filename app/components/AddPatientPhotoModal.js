@@ -108,8 +108,10 @@ function AddPatientPhotoModal({
       Photo: null,
       PhotoDetails: '',
       CountryListID: 1,
-      StartDate: new Date(),
-      EndDate: new Date(),
+      // StartDate: new Date(),
+      // EndDate: new Date(),
+      StartDate: null,
+      EndDate: null,
       AlbumCategoryListID: '1',
       AlbumCategoryName: '',
       HolidayExperience: {
@@ -177,7 +179,12 @@ function AddPatientPhotoModal({
                 ? format(formData[holidayKey].EndDate, "yyyy-MM-dd'T'HH:mm:ss")
                 : formData[holidayKey]?.EndDate || '',
           }
-        : {};
+        : {
+            // Explicitly set each field to null or empty when IsHoliday is false
+            CountryListID: null,
+            StartDate: null,
+            EndDate: null,
+          };
 
       // Decide which AlbumCategoryListID to submit.
       const albumIdToSubmit =
@@ -228,7 +235,7 @@ function AddPatientPhotoModal({
           <AppButton
             title="Upload Photo"
             onPress={pickImage('Photo')}
-            color={colors.grey}
+            color="grey"
             isDisabled={false}
           />
           {/* Show image only if photoPath exists */}
@@ -267,6 +274,7 @@ function AddPatientPhotoModal({
             testID="holiday_check_box"
             title="Is this photo part of a holiday?"
             value={formData.IsHoliday}
+            rightLabel="Yes"
             onChangeData={(value) =>
               setFormData((prevState) => ({
                 ...prevState,
@@ -280,17 +288,17 @@ function AddPatientPhotoModal({
                 CountryListID: value
                   ? prevState.CountryListID ||
                     prevState.HolidayExperienceAddDTO?.CountryListID ||
-                    ''
+                    1
                   : null,
                 StartDate: value
                   ? prevState.StartDate ||
                     prevState.HolidayExperienceAddDTO?.StartDate ||
-                    ''
+                    new Date()
                   : null,
                 EndDate: value
                   ? prevState.EndDate ||
                     prevState.HolidayExperienceAddDTO?.EndDate ||
-                    ''
+                    new Date()
                   : null,
               }))
             }
@@ -302,7 +310,8 @@ function AddPatientPhotoModal({
                 title="Country"
                 value={
                   formData.HolidayExperienceUpdateDTO?.CountryListID ||
-                  formData.HolidayExperienceAddDTO?.CountryListID
+                  formData.HolidayExperienceAddDTO?.CountryListID ||
+                  1
                 }
                 dataArray={countryOptions}
                 onDataChange={handleHolidayPhotoData('CountryListID')}

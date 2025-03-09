@@ -1,8 +1,3 @@
-// export default {
-//   ios: 'Avenir',
-//   android: 'Roboto',
-// };
-
 // typography.js
 import { Platform } from 'react-native';
 

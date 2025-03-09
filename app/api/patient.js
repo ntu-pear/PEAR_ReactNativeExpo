@@ -569,50 +569,69 @@ const updatePatientPhoto = async (patientID, photoData) => {
     photoFormData.append('Photo', '');
   }
 
-  // Merge holiday experience data:
-  const holidayExpID =
-    (photoData.HolidayExperienceUpdateDTO &&
-      photoData.HolidayExperienceUpdateDTO.HolidayExpID) ||
-    '';
-  const countryListID =
-    photoData.CountryListID ||
-    (photoData.HolidayExperienceUpdateDTO &&
-      photoData.HolidayExperienceUpdateDTO.CountryListID) ||
-    '';
+  // Append holiday experience fields conditionally.
+  if (photoData.IsHoliday) {
+    // Merge holiday experience data:
+    const holidayExpID =
+      (photoData.HolidayExperienceUpdateDTO &&
+        photoData.HolidayExperienceUpdateDTO.HolidayExpID) ||
+      '';
+    const countryListID =
+      photoData.CountryListID ||
+      (photoData.HolidayExperienceUpdateDTO &&
+        photoData.HolidayExperienceUpdateDTO.CountryListID) ||
+      '';
 
-  // For StartDate, use the top-level value if present; otherwise, fall back to the nested one.
-  let startDate = photoData.StartDate;
-  if (
-    !startDate &&
-    photoData.HolidayExperienceUpdateDTO &&
-    photoData.HolidayExperienceUpdateDTO.StartDate
-  ) {
-    startDate = photoData.HolidayExperienceUpdateDTO.StartDate;
-  }
-  if (startDate instanceof Date) {
-    startDate = startDate.toISOString();
-  }
+    // For StartDate, use the top-level value if present; otherwise, fall back to the nested one.
+    let startDate = photoData.StartDate;
+    if (
+      !startDate &&
+      photoData.HolidayExperienceUpdateDTO &&
+      photoData.HolidayExperienceUpdateDTO.StartDate
+    ) {
+      startDate = photoData.HolidayExperienceUpdateDTO.StartDate;
+    }
+    if (startDate instanceof Date) {
+      startDate = startDate.toISOString();
+    }
 
-  // Similarly for EndDate.
-  let endDate = photoData.EndDate;
-  if (
-    !endDate &&
-    photoData.HolidayExperienceUpdateDTO &&
-    photoData.HolidayExperienceUpdateDTO.EndDate
-  ) {
-    endDate = photoData.HolidayExperienceUpdateDTO.EndDate;
-  }
-  if (endDate instanceof Date) {
-    endDate = endDate.toISOString();
-  }
+    // Similarly for EndDate.
+    let endDate = photoData.EndDate;
+    if (
+      !endDate &&
+      photoData.HolidayExperienceUpdateDTO &&
+      photoData.HolidayExperienceUpdateDTO.EndDate
+    ) {
+      endDate = photoData.HolidayExperienceUpdateDTO.EndDate;
+    }
+    if (endDate instanceof Date) {
+      endDate = endDate.toISOString();
+    }
 
-  photoFormData.append('HolidayExperienceUpdateDTO.HolidayExpID', holidayExpID);
-  photoFormData.append(
-    'HolidayExperienceUpdateDTO.CountryListID',
-    countryListID,
-  );
-  photoFormData.append('HolidayExperienceUpdateDTO.StartDate', startDate || '');
-  photoFormData.append('HolidayExperienceUpdateDTO.EndDate', endDate || '');
+    photoFormData.append(
+      'HolidayExperienceUpdateDTO.HolidayExpID',
+      holidayExpID,
+    );
+    photoFormData.append(
+      'HolidayExperienceUpdateDTO.CountryListID',
+      countryListID,
+    );
+    photoFormData.append(
+      'HolidayExperienceUpdateDTO.StartDate',
+      startDate || '',
+    );
+    photoFormData.append('HolidayExperienceUpdateDTO.EndDate', endDate || '');
+  } else {
+    photoFormData.append(
+      'HolidayExperienceUpdateDTO',
+      JSON.stringify({
+        HolidayExpID: null,
+        CountryListID: null,
+        StartDate: null,
+        EndDate: null,
+      }),
+    );
+  }
 
   // Append the remaining fields.
   photoFormData.append('PhotoDetails', photoData.PhotoDetails || '');
@@ -626,6 +645,8 @@ const updatePatientPhoto = async (patientID, photoData) => {
   }
   photoFormData.append('PatientID', patientID);
   photoFormData.append('PatientPhotoID', photoData.PatientPhotoID);
+
+  console.log('Final FormData:', photoFormData);
 
   return client.put(patientPhotoUpdate, photoFormData, {
     headers: { 'Content-Type': 'multipart/form-data' },

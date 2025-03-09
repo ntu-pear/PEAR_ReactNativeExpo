@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import PatientsScreen from 'app/screens/PatientsScreen';
 import PatientProfile from 'app/screens/PatientProfileScreen';
 import PatientInformationAccordion from 'app/components/PatientInformationAccordion';
+import { format } from 'date-fns';
 
 // Import Constants from routes
 import routes from 'app/navigation/routes';
@@ -91,10 +92,24 @@ function PatientsNavigator() {
       <Stack.Screen
         name={routes.PATIENT_HOLIDAY_GRID}
         component={PatientHolidayGridScreen}
-        options={{
-          headerShown: true,
-          headerBackTitleVisible: false,
-          title: 'Holiday Photo Grid',
+        options={({ route }) => {
+          const { holidayExperience } = route.params || {};
+          let title = 'Holiday Photo Grid';
+          if (holidayExperience) {
+            const { country, startDate, endDate } = holidayExperience;
+            const formattedStartDate = startDate
+              ? format(new Date(startDate), 'dd/MM/yyyy')
+              : '';
+            const formattedEndDate = endDate
+              ? format(new Date(endDate), 'dd/MM/yyyy')
+              : '';
+            title = `${country} (${formattedStartDate} - ${formattedEndDate})`;
+          }
+          return {
+            headerShown: true,
+            headerBackTitleVisible: false,
+            title,
+          };
         }}
       />
       <Stack.Screen
@@ -109,12 +124,13 @@ function PatientsNavigator() {
       <Stack.Screen
         name={routes.PATIENT_PHOTO_GRID}
         component={PatientPhotoGridScreen}
-        options={{
+        options={({ route }) => ({
           headerShown: true,
           headerBackTitleVisible: false,
-          title: 'Photo Grid',
-        }}
+          title: route.params?.albumCategoryName || 'Photo Grid',
+        })}
       />
+
       <Stack.Screen
         name={routes.PATIENT_VIEW_PHOTO}
         component={PatientViewPhotoScreen}
@@ -186,7 +202,7 @@ function PatientsNavigator() {
           headerBackTitleVisible: false,
           title: 'Schedule',
         }}
-      />      
+      />
       <Stack.Screen
         name={routes.PATIENT_MOBILITY_AIDS}
         component={PatientMobilityAidScreen}

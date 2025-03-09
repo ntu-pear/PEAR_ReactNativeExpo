@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { FlatList, View } from 'native-base';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { Button } from 'react-native-paper';
 
 // API
 import patientApi from 'app/api/patient';
@@ -199,7 +200,7 @@ function PatientViewPhoto(props) {
               ? item.holidayExperience.endDate.toString()
               : '',
           }
-        : {}, // Return an empty object if holidayExperience is missing.
+        : {},
     }));
   };
 
@@ -281,7 +282,9 @@ function PatientViewPhoto(props) {
             EndDate: '',
           },
       // Set the IsHoliday flag based on whether holiday experience data exists
-      IsHoliday: !!tempPhotoData.holidayExperience,
+      IsHoliday:
+        tempPhotoData.holidayExperience &&
+        Object.keys(tempPhotoData.holidayExperience).length > 0,
     });
   };
 
@@ -290,15 +293,12 @@ function PatientViewPhoto(props) {
     setIsLoading(true);
 
     let tempFormData = { ...formData };
-    // Log the form data before submitting it
-    console.log('Submitted form data:', tempFormData);
+    console.log('FormData before submission:', tempFormData);
 
     let alertTitle = '';
     let alertDetails = '';
 
     const result = await patientApi.updatePatientPhoto(patientID, tempFormData);
-
-    console.log('Update result:', result);
 
     if (result.ok) {
       refreshPhotoData();
@@ -351,22 +351,6 @@ function PatientViewPhoto(props) {
       await refreshPhotoData();
       setIsModalVisible(false);
 
-      // if (previousScreen === 'PatientHolidayGrid') {
-      //   // For holiday grid, pass patientID, countryListID, startDate, and endDate
-      //   navigation.replace('PatientHolidayGrid', {
-      //     patientID,
-      //     countryListID,
-      //     startDate,
-      //     endDate,
-      //   });
-      // } else {
-      //   // Default to PatientPhotoGrid
-      //   navigation.replace('PatientPhotoGrid', {
-      //     patientID,
-      //     albumCategoryListID,
-      //   });
-      // }
-
       alertTitle = 'Successfully deleted photo';
     } else {
       const errors = result.data?.message;
@@ -380,52 +364,93 @@ function PatientViewPhoto(props) {
     Alert.alert(alertTitle, alertDetails);
     setIsLoading(false);
   };
+  const formatDate = (date) => {
+    if (!date) return 'Unknown';
+    const parsedDate = new Date(date);
+    const day = String(parsedDate.getDate()).padStart(2, '0');
+    const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+    const year = parsedDate.getFullYear();
+
+    return `${day}/${month}/${year}`;
+  };
 
   return isLoading ? (
     <ActivityIndicator visible />
   ) : (
     <View style={styles.container}>
-      <FlatList
-        onTouchStart={() => Keyboard.dismiss()}
-        onScrollBeginDrag={() => setIsScrolling(true)}
-        onScrollEndDrag={() => setIsScrolling(false)}
-        onRefresh={refreshPhotoData}
-        refreshing={isLoading}
-        height={'72%'}
-        ListEmptyComponent={() =>
-          noDataMessage(statusCode, isLoading, isError, 'No photo found', true)
-        }
-        data={photoData}
-        keyboardShouldPersistTaps="handled"
-        keyExtractor={(item) => item.patientPhotoID.toString()}
-        renderItem={({ item }) => {
-          return (
-            <Swipeable
-              setIsScrolling={setIsScrolling}
-              item={
-                <TouchableOpacity
-                  style={styles.logContainer}
-                  activeOpacity={1}
-                  disabled={!isScrolling}
-                >
-                  <PhotoCarouselItem
-                    patientPhotoID={item.patientPhotoID.toString()}
-                    photoPath={item.photoPath}
-                    albumCategoryName={item.albumCategoryName}
-                    photoDetails={item.photoDetails}
-                    patientID={item.patientID}
-                    country={item.holidayExperience.country}
-                    startDate={item.holidayExperience.startDate}
-                    endDate={item.holidayExperience.endDate}
-                    onDelete={() => handleDeletePhoto(item.patientPhotoID)}
-                    onEdit={() => handleEditPhoto(item.patientPhotoID)}
-                  />
-                </TouchableOpacity>
-              }
-            />
-          );
-        }}
-      />
+      {photoData.length > 0 && (
+        <>
+          <PhotoCarouselItem photoPath={photoData[0].photoPath} />
+          <View style={styles.detailsContainer}>
+            {photoData[0].albumCategoryName && (
+              <Text style={styles.boldText}>
+                Album:{' '}
+                <Text style={styles.normalText}>
+                  {photoData[0].albumCategoryName}
+                </Text>
+              </Text>
+            )}
+            {photoData[0].photoDetails && (
+              <Text style={styles.boldText}>
+                Details:{' '}
+                <Text style={styles.normalText}>
+                  {photoData[0].photoDetails}
+                </Text>
+              </Text>
+            )}
+            {photoData[0].holidayExperience.country && (
+              <Text style={styles.boldText}>
+                Country:{' '}
+                <Text style={styles.normalText}>
+                  {photoData[0].holidayExperience.country}
+                </Text>
+              </Text>
+            )}
+            {photoData[0].holidayExperience.startDate && (
+              <Text style={styles.boldText}>
+                Start Date:{' '}
+                <Text style={styles.normalText}>
+                  {formatDate(photoData[0].holidayExperience.startDate)}
+                </Text>
+              </Text>
+            )}
+            {photoData[0].holidayExperience.endDate && (
+              <Text style={styles.boldText}>
+                End Date:{' '}
+                <Text style={styles.normalText}>
+                  {formatDate(photoData[0].holidayExperience.endDate)}
+                </Text>
+              </Text>
+            )}
+          </View>
+          <View style={styles.buttonContainer}>
+            <Button
+              mode="outlined"
+              onPress={() => handleEditPhoto(photoData[0].patientPhotoID)}
+              style={[
+                styles.button,
+                { borderColor: colors.green, borderWidth: 2 },
+              ]}
+              labelStyle={{ color: colors.green }}
+              contentStyle={styles.buttonContent}
+            >
+              Edit
+            </Button>
+            <Button
+              mode="outlined"
+              onPress={() => handleDeletePhoto(photoData[0].patientPhotoID)}
+              style={[
+                styles.button,
+                { borderColor: colors.pink, borderWidth: 2 },
+              ]}
+              labelStyle={{ color: colors.pink }}
+              contentStyle={styles.buttonContent}
+            >
+              Delete
+            </Button>
+          </View>
+        </>
+      )}
       <AddPatientPhotoModal
         showModal={isModalVisible}
         modalMode={modalMode}
@@ -442,13 +467,38 @@ function PatientViewPhoto(props) {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     backgroundColor: colors.white,
   },
-  logContainer: {
-    padding: 20,
+  detailsContainer: {
+    marginTop: 10,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  addBtn: {
-    marginTop: '0.01%',
+  boldText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  normalText: {
+    fontSize: 16,
+    fontWeight: 'normal',
+    color: '#000',
+    textAlign: 'center',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 12,
+    marginBottom: 20, // Add some bottom margin for spacing
+  },
+  button: {
+    marginHorizontal: 5,
+  },
+  buttonContent: {
+    marginVertical: -5,
+    marginHorizontal: -10,
   },
 });
 

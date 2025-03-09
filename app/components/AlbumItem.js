@@ -38,6 +38,7 @@ const AlbumItem = ({
     navigation.navigate('PatientPhotoGrid', {
       patientID,
       albumCategoryListID,
+      albumCategoryName,
       previousScreen: 'PatientPhotoGrid',
     });
   };

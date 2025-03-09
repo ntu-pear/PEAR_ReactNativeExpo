@@ -66,7 +66,6 @@ const PhotoGridItem = ({
                   numberOfLines={1}
                   ellipsizeMode="tail"
                 >
-                  <Text style={[styles.text, styles.bold]}>Description: </Text>
                   <Text style={[styles.text]}>{photoDetails}</Text>
                 </Text>
               </View>

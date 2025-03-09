@@ -1,21 +1,70 @@
+// import React from 'react';
+// import { Platform, StyleSheet, View, Text } from 'react-native';
+// import { HStack } from 'native-base';
+// import typography from 'app/config/typography';
+// import colors from 'app/config/colors';
+// import Checkbox from 'expo-checkbox';
+
+// function SingleOptionCheckBox({ testID = '', title, value, onChangeData }) {
+//   return (
+//     <View style={styles.ComponentContainer}>
+//       <HStack justifyContent="space-between" alignItems="center">
+//         <Text style={styles.TitleMsg}>{title}</Text>
+//         <Checkbox
+//           testID={`${testID}`}
+//           disabled={false}
+//           value={value}
+//           onValueChange={(newValue) => onChangeData(newValue)}
+//         />
+//       </HStack>
+//     </View>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   ComponentContainer: {
+//     display: 'flex',
+//     width: '100%',
+//     marginTop: 5,
+//     justifyContent: 'flex-start',
+//   },
+//   TitleMsg: {
+//     marginBottom: 5,
+//     marginTop: 10,
+//     color: colors.grey,
+//     ...typography.body1SemiBold,
+//   },
+// });
+
+// export default SingleOptionCheckBox;
+
 import React from 'react';
-import { Platform, StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text } from 'react-native';
 import { HStack } from 'native-base';
 import typography from 'app/config/typography';
 import colors from 'app/config/colors';
 import Checkbox from 'expo-checkbox';
 
-function SingleOptionCheckBox({ testID = '', title, value, onChangeData }) {
+function SingleOptionCheckBox({
+  testID = '',
+  title,
+  value,
+  onChangeData,
+  rightLabel,
+}) {
   return (
     <View style={styles.ComponentContainer}>
       <HStack justifyContent="space-between" alignItems="center">
         <Text style={styles.TitleMsg}>{title}</Text>
-        <Checkbox
-          testID={`${testID}`}
-          disabled={false}
-          value={value}
-          onValueChange={(newValue) => onChangeData(newValue)}
-        />
+        <HStack alignItems="center">
+          <Checkbox
+            testID={testID}
+            disabled={false}
+            value={value}
+            onValueChange={(newValue) => onChangeData(newValue)}
+          />
+          {rightLabel && <Text style={styles.RightLabel}>{rightLabel}</Text>}
+        </HStack>
       </HStack>
     </View>
   );
@@ -23,7 +72,6 @@ function SingleOptionCheckBox({ testID = '', title, value, onChangeData }) {
 
 const styles = StyleSheet.create({
   ComponentContainer: {
-    display: 'flex',
     width: '100%',
     marginTop: 5,
     justifyContent: 'flex-start',
@@ -33,6 +81,11 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: colors.grey,
     ...typography.body1SemiBold,
+  },
+  RightLabel: {
+    marginLeft: 8,
+    color: colors.grey,
+    ...typography.body1Regular,
   },
 });
 
