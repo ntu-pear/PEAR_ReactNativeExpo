@@ -137,11 +137,11 @@ const styles = StyleSheet.create({
   text: {
     marginTop: 4,
     fontSize: 16,
-    maxWidth: photoSize,
-    flexWrap: 'wrap',
+    maxWidth: photoSize * 0.95,
     textAlign: 'center',
-    alignSelf: 'center',
+    alignSelf: 'stretch',
   },
+
   bold: {
     marginLeft: 20,
     fontWeight: '600',

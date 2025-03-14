@@ -1,7 +1,15 @@
 // Libs
 import React, { useState, useEffect } from 'react';
-import { Platform, StyleSheet, View, Text } from 'react-native';
-import { VStack, Select } from 'native-base';
+import {
+  View,
+  Text,
+  TextInput,
+  FlatList,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+} from 'react-native';
+import { VStack, Actionsheet, useDisclose } from 'native-base';
+import { MaterialIcons } from '@expo/vector-icons';
 
 // Configurations
 import typography from 'app/config/typography';
@@ -22,32 +30,18 @@ function SelectionInputField({
   value = '',
   dataArray = [],
   onEndEditing = () => {},
-  inputLeftElement = null,
-  inputRightElement = null,
   isDisabledItems = {},
-  otherProps = {},
+  selectBoxStyle = {},
+  displayTextStyle = {},
+  arrowIconColor = colors.grey,
 }) {
-  /*
-  This state and subsequent useEffect are used to track if the component is in its first render. This is mainly used to
-  ensure that the submission blocking in the parent component is active (as it is first rendered, user will not
-  likely have filled anything). This also ensures that since there will be no input, the component error message
-  does not show until the user focuses and violates the validation with their input.
-  */
   const [isFirstRender, setIsFirstRender] = useState(true);
-
-  /* 
-  This state is used to track the error state of this component via validation
-  */
   const [error, setError] = useState({ isError: false, errorMsg: '' });
+  const [selectedValue, setSelectedValue] = useState(value ? value : null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredData, setFilteredData] = useState(dataArray);
 
-  /*
-  This state is used to track the value of the selected item
-  */
-  const [selectedValue, setSelectedValue] = useState(
-    //value ? value : Object.keys(isDisabledItems).length > 0 ? null : dataArray[0].value,
-    // uncomment ^ if want value to show in selectioninputfield
-    value ? value : null,
-  );
+  const { isOpen, onOpen, onClose } = useDisclose(); // Controls dropdown visibility
 
   useEffect(() => {
     onEndEditing ? onEndEditing(isFirstRender || error.isError) : null;
@@ -60,7 +54,7 @@ function SelectionInputField({
 
   useEffect(() => {
     if (isDisabledItems.length > 0) {
-      if (isDisabledItems[value] == true) {
+      if (isDisabledItems[value] === true) {
         setSelectedValue(
           Object.keys(isDisabledItems).find(
             (key) => isDisabledItems[key] === true,
@@ -70,61 +64,112 @@ function SelectionInputField({
     }
   }, [isDisabledItems]);
 
-  /* 
-  This is used to update the parent component that there is a validation error
-  Validation is passed via the onEndEditing prop.
-  */
   useEffect(() => {
     if (!isFirstRender) {
       onEndEditing ? onEndEditing(error.isError) : null;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error, onEndEditing]);
 
-  /*
-  This is used to update the selected item
-  */
+  // Filter data based on search input
+  useEffect(() => {
+    setFilteredData(
+      dataArray.filter((item) =>
+        item.label.toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
+    );
+  }, [searchQuery, dataArray]);
+
+  // Clear search query every time the selection input is opened
+  const handleOpen = () => {
+    setSearchQuery('');
+    onOpen();
+  };
+
   const handleValueChanged = (selected) => {
     setSelectedValue(selected);
     onDataChange(selected);
+    onClose(); // Close dropdown after selection
   };
 
   return (
     <View testID={testID} style={styles.componentContainer}>
       <VStack>
-        {showTitle ? (
+        {showTitle && (
           <Text style={styles.titleMsg}>
             {title}:{isRequired ? <RequiredIndicator /> : ''}
           </Text>
-        ) : (
-          <></>
         )}
-        <Select
-          testID={`${testID}_input`}
-          accessibilityLabel={title}
-          borderRadius="25"
-          height="50"
-          minWidth="full"
-          minHeight="3%"
-          placeholder={placeholder}
-          placeholderTextColor={colors.grey}
-          {...typography.subheading1}
-          selectedValue={selectedValue}
-          onValueChange={handleValueChanged}
-          InputLeftElement={inputLeftElement}
-          inputRightElement={inputRightElement}
-          {...otherProps}
+
+        {/* Selection Box (Triggers the dropdown) */}
+        <TouchableOpacity
+          onPress={handleOpen}
+          style={[styles.selectBox, selectBoxStyle]}
         >
-          {dataArray.map((item) => (
-            <Select.Item
-              testID={`${testID}_${item.label}`}
-              key={item}
-              label={item.label}
-              value={item.value}
-              isDisabled={isDisabledItems ? isDisabledItems[item.value] : false}
-            />
-          ))}
-        </Select>
+          <Text
+            style={[
+              selectedValue ? styles.selectedText : styles.placeholderText,
+              displayTextStyle,
+            ]}
+          >
+            {selectedValue
+              ? dataArray.find((item) => item.value === selectedValue)?.label
+              : placeholder}
+          </Text>
+          <MaterialIcons
+            name="arrow-drop-down"
+            size={24}
+            color={arrowIconColor}
+          />
+        </TouchableOpacity>
+
+        {/* Actionsheet (Dropdown) */}
+        <Actionsheet isOpen={isOpen} onClose={onClose}>
+          <Actionsheet.Content>
+            <KeyboardAvoidingView
+              behavior="padding"
+              keyboardVerticalOffset={70} // Adjust as needed
+              style={{ width: '100%' }}
+            >
+              {dataArray.length > 15 && (
+                <TextInput
+                  testID={`${testID}_search`}
+                  style={styles.searchBar}
+                  placeholder="Search..."
+                  placeholderTextColor={colors.grey}
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                />
+              )}
+
+              <FlatList
+                data={filteredData}
+                keyExtractor={(item) => item.value}
+                style={{ width: '100%' }}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={[
+                      styles.item,
+                      selectedValue === item.value && styles.selectedItem,
+                    ]}
+                    onPress={() => handleValueChanged(item.value)}
+                    disabled={isDisabledItems[item.value]}
+                  >
+                    <Text
+                      style={[
+                        styles.itemText,
+                        selectedValue === item.value && styles.selectedText,
+                        // No override here—list items use default styles
+                      ]}
+                    >
+                      {item.label}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              />
+            </KeyboardAvoidingView>
+          </Actionsheet.Content>
+        </Actionsheet>
+
         {hideError && !error.errorMsg ? null : (
           <ErrorMessage testID={testID} message={error.errorMsg} />
         )}
@@ -137,7 +182,7 @@ SelectionInputField.defaultProps = {
   isRequired: false,
 };
 
-const styles = StyleSheet.create({
+const styles = {
   componentContainer: {
     display: 'flex',
     width: '100%',
@@ -150,6 +195,54 @@ const styles = StyleSheet.create({
     color: colors.grey,
     ...typography.body1SemiBold,
   },
-});
+  selectBox: {
+    height: 50,
+    borderRadius: 25,
+    paddingHorizontal: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: colors.grey_lighter,
+  },
+  placeholderText: {
+    color: colors.grey,
+    fontSize: 16,
+  },
+  selectedText: {
+    color: colors.black,
+    ...typography.subheading1,
+  },
+  searchBar: {
+    height: 45,
+    width: '95%',
+    backgroundColor: colors.grey_lightest,
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    marginBottom: 20,
+    marginLeft: 20,
+    ...typography.subheading1,
+    color: colors.black,
+    borderWidth: 1,
+    borderColor: colors.grey_lighter,
+  },
+  item: {
+    width: '100%',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.grey_lighter,
+    alignItems: 'center',
+  },
+  itemText: {
+    ...typography.subheading1,
+    color: colors.black,
+    textAlign: 'center',
+    width: '100%',
+  },
+  selectedItem: {
+    backgroundColor: colors.grey_lightest,
+  },
+};
 
 export default SelectionInputField;

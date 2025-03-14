@@ -74,6 +74,7 @@
     "react-native-dropdown-picker": "^5.4.3",
     "react-native-elements": "^3.4.2",
     "react-native-gesture-handler": "~2.9.0",
+    "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-modal": "^13.0.1",
     "react-native-pager-view": "6.1.2",
     "react-native-paper": "^5.8.0",

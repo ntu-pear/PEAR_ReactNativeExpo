@@ -53,7 +53,7 @@ function AddEditModal({
         ]}
       >
         <Modal.Content maxWidth="65%">
-          <Modal.CloseButton />
+          <Modal.CloseButton _icon={{ color: colors.white }} />
           <Modal.Header style={styles.modalHeader}>
             <Text style={styles.modalHeaderText}>
               {modalMode} {modalTitle}
