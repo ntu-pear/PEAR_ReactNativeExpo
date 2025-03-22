@@ -127,7 +127,7 @@ function SelectionInputField({
           <Actionsheet.Content>
             <KeyboardAvoidingView
               behavior="padding"
-              keyboardVerticalOffset={70} // Adjust as needed
+              keyboardVerticalOffset={70}
               style={{ width: '100%' }}
             >
               {dataArray.length > 15 && (

@@ -30,7 +30,7 @@ function AboutScreen(props) {
             {'\n\n\n'}
             Version: 1.0.0
             {'\n\n'}
-            Build Date: 9 March 2025
+            Build Date: 22 March 2025
           </Text>
         </View>
       </Center>
