@@ -22,7 +22,16 @@ const v1 = {
   requestReset: '/user/request_reset_password/',
   resetPassword: (token) => `/user/reset_user_password/${encodeURIComponent(token)}`,
   logout: '/logout/',
+  updateUser: '/user/update_user/',                 // NEW
+  uploadProfilePic: '/user/upload_profile_pic/',    // NEW
+  getProfilePic: '/user/profile_pic/',              // NEW
+  deleteProfilePic: '/user/delete_profile_pic/',    // NEW
+  rolesName: '/roles_name/',                        // NEW
+  resendRegistrationEmail: '/user/request/resend_registration_email', // NEW
+  requestOtp: '/request-otp/',                      // NEW
+  verifyOtp: '/verify-otp/',                        // NEW
   };
+  
 
 // **********************  GET REQUESTS *************************
 
@@ -136,10 +145,70 @@ const changePassword = (Email /*unused*/, OldPassword, NewPassword) =>
   );
 
 // ************************* UPDATE REQUESTS *************************
-const updateUser = async (data) => {
+const updateUserLegacy = async (data) => {
   const headers = { 'Content-Type': 'application/json-patch+json' };
   return client.put(userUpdate, data, { headers });
 };
+
+// New API for updateUser
+const updateUserV1 = async (data) =>
+  client.put(v1.updateUser, data, { baseURL: V1_BASE });
+
+// updateUser: tries new v1 API first; if it fails, auto-fallback to legacy, to ensure safe migration
+const updateUser = async (data) => {
+  const res = await updateUserV1(data);
+  if (res?.ok) return res;
+
+  console.log('[updateUser] v1 failed, falling back to legacy:', res?.status);
+  return updateUserLegacy(data);
+};
+
+// Adding in Profile Picture functions
+// Upload profile picture 
+const uploadProfilePicV1 = (file) => {
+  const form = new FormData();
+  form.append('file', file);
+  return client.post(v1.uploadProfilePic, form, {
+    baseURL: V1_BASE,
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+
+// Get profile picture 
+const getProfilePicV1 = () =>
+  client.get(v1.getProfilePic, {}, { baseURL: V1_BASE });
+
+// Delete profile picture
+const deleteProfilePicV1 = () =>
+  client.delete(v1.deleteProfilePic, {}, { baseURL: V1_BASE });
+
+// Adding in Role List functions
+const v1GetRoleNames = (page = 0, page_size = 50) =>
+  client.get(v1.rolesName, { page, page_size }, { baseURL: V1_BASE });
+
+// Adding in Resending of Verfication Email functions
+const resendRegistrationEmailV1 = ({ nric, email, roleName, nric_DateOfBirth }) =>
+  client.post(
+    v1.resendRegistrationEmail,
+    { nric, email, roleName, nric_DateOfBirth },
+    { baseURL: V1_BASE }
+  );
+
+// Adding in OTP functions 
+const requestOtpV1 = (user_email) =>
+  client.post(
+    v1.requestOtp,
+    null,
+    { baseURL: V1_BASE, params: { user_email } }
+  );
+
+const verifyOtpV1 = (user_email, code) =>
+  client.get(
+    v1.verifyOtp,
+    { user_email, code },
+    { baseURL: V1_BASE }
+  );
+
 
 const logoutUser = async () => {
   // New service uses DELETE /logout/
@@ -164,7 +233,16 @@ export default {
   requestResetPassword,
   resetPassword,
   getUser,
-  updateUser,
   changePassword,
   logoutUser,
+  updateUser,          // v1-first, legacy fallback
+  updateUserV1,        // explicit v1
+  updateUserLegacy,    // explicit legacy
+  uploadProfilePicV1,
+  getProfilePicV1,
+  deleteProfilePicV1,
+  v1GetRoleNames,
+  resendRegistrationEmailV1,
+  requestOtpV1,
+  verifyOtpV1,
 };
