@@ -1,35 +1,31 @@
 // All colors to be defined here for re-usability
-// across components and screens
 
 /*
  * Having trouble selecting shades of colors?
  * Refer to this: https://www.color-hex.com/
  */
+
+//Note: colors with no descriptions has no use case yet, but can be used as needed.
+
 export default {
-  primary: '#E8DCCC',
-  secondary: '#F3ECE4', // off-white
-  black: '#373234',
-  gray: '#ABABAB',
-  black_var2: '#3C4043',
-  red: '#FD4734',
-  light_gray: '#595959',
-  medium: '#6e6969', // place-holder text color
-  light: '#f8f4f4',
-  light_var1: '#E8DCCC',
-  lighter: '#f2eee9',
-  lighter_var2: '#f5f0e9',
-  /*
-   ***** Note: Bottom Colors are the
-   ***** Primary Colors used in this app
-   **** Inspired by Airbnb's design
-   */
-  black_var1: '#484848', // ** Frequently used colors throughout app **
-  green: '#019192',
+  //neutral colours
+  black_darker: '#373234',
+  black: '#484848', //for icons and main text
+  grey: '#7f7f7f', //for dark button backgrounds & input component title messages
+  grey_lighter: '#d3d3d3', //for border colors
+  grey_lightest: '#f0f0f0', //for input backgrounds eg. searchbar
+  white: '#ffffff', //for backgrounds and text on dark backgrounds
+
+  //green primary colors
+  green: '#019192', //for button backgrounds and icons
   green_lighter: '#66bdbd',
-  pink: '#FF585D', // ** Frequently used colors throughout app **
+  green_lightest: '#cce8e8', //for card/item backgrounds
+
+  //pink primary colors
+  pink: '#ff585d', //for icons & other contrasts
   pink_lighter: '#ff9396',
-  primary_gray: '#D4D4D4',
-  primary_overlay_color: '#00000080', // ligher black color
-  white: '#f3f6f4',
-  white_var1: '#FFFFFF',
+  pink_lightest: '#ffe6ee', //for card/item backgrounds
+
+  //error management
+  red: '#fd4734', //for error texts
 };

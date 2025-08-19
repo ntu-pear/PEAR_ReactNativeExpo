@@ -30,15 +30,12 @@ export default function useNotifications(
       sortBy,
     );
 
-    // console.log(
-    //   response.data.results.map(({ notificationID }) => notificationID),
-    // );
     if (!response.ok) {
       // return error block
       setIsError(true);
       return;
     }
-    let results = response?.data?.results ?? [];
+    let results = response?.data?.data?.results ?? [];
     results = (() => {
       switch (notificationType) {
         case NotificationType.Accept:

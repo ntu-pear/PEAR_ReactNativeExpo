@@ -134,12 +134,8 @@ function NotificationsApprovalRequestScreen(props) {
                 <VStack space={5}>
                   <HStack justifyContent="space-between" alignItems="center">
                     <Text
-                      color={colors.black_var1}
-                      fontFamily={
-                        Platform.OS === 'ios' ? 'Helvetica' : typography.android
-                      }
-                      fontWeight="bold"
-                      fontSize="md"
+                      color={colors.black}
+                      {...typography.subheading1SemiBold}
                     >
                       {senderName} has requested for an update
                     </Text>
@@ -157,16 +153,7 @@ function NotificationsApprovalRequestScreen(props) {
                   </HStack>
                   <ScrollView h="100%" w="100%">
                     <Box>
-                      <Text
-                        color={colors.black_var1}
-                        fontFamily={
-                          Platform.OS === 'ios'
-                            ? 'Helvetica'
-                            : typography.android
-                        }
-                        fontWeight="hairline"
-                        fontSize="md"
-                      >
+                      <Text color={colors.black} {...typography.subheading1}>
                         {message}
                       </Text>
                     </Box>
@@ -212,10 +199,8 @@ function NotificationsApprovalRequestScreen(props) {
                   size="md"
                   w="30%"
                   _text={{
-                    color: `${colors.white_var1}`,
-                    fontFamily:
-                      Platform.OS === 'ios' ? 'Helvetica' : typography.android,
-                    fontSize: 'sm',
+                    color: `${colors.white}`,
+                    ...typography.body1,
                   }}
                 >
                   Confirm

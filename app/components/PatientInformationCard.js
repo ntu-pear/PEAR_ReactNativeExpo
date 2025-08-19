@@ -12,6 +12,9 @@ import colors from 'app/config/colors';
 import routes from 'app/navigation/routes';
 import { useNavigate } from 'react-router-dom';
 
+// Hook
+import formatDateTime from 'app/hooks/useFormatDateTime.js';
+
 function PatientInformationCard(props) {
   const { patientProfile, navigation } = props;
   const [displayPicUrl, setDisplayPicUrl] = //eslint-disable-line no-unused-vars
@@ -22,18 +25,19 @@ function PatientInformationCard(props) {
   // useNavigate() hook cannot work on mobile
   const navigate = Platform.OS === 'web' ? useNavigate() : null;
 
-  const handleOnPress = () => {
-    if (Platform.OS === 'web') {
-      navigate('/' + routes.PATIENT_INFORMATION, {
-        state: { displayPicUrl: `${displayPicUrl}`, ...patientProfile },
-      });
-    } else {
-      navigation.push(routes.PATIENT_INFORMATION, {
-        displayPicUrl: `${displayPicUrl}`,
-        ...patientProfile,
-      });
-    }
-  };
+  // const handleOnPress = () => {
+  //   if (Platform.OS === 'web') {
+  //     navigate('/' + routes.PATIENT_INFORMATION, {
+  //       state: { displayPicUrl: `${displayPicUrl}`, ...patientProfile },
+  //     });
+  //   } else {
+  //     navigation.push(routes.PATIENT_INFORMATION, {
+  //       displayPicUrl: `${displayPicUrl}`,
+  //       navigation: navigation,
+  //       ...patientProfile,
+  //     });
+  //   }
+  // };
 
   const calcAge = (dob) => {
     const today = new Date().getFullYear();
@@ -41,63 +45,81 @@ function PatientInformationCard(props) {
     return today - _dob;
   };
 
-  const extractFullYear = (dob) => {
-    const _date = new Date(dob);
-    return `${_date.getDate()}-${_date.getMonth()}-${_date.getFullYear()}`;
-  };
+  // const extractFullYear = (dob) => {
+  //   const _date = new Date(dob);
+
+  //   const day = String(_date.getDate()).padStart(2, '0');
+  //   const month = String(_date.getMonth() + 1).padStart(2, '0');
+  //   const year = _date.getFullYear();
+  //   return `${day}-${month}-${year}`;
+  // };
 
   const SCREEN_HEIGHT = Dimensions.get('window').height;
 
   const MyComponent = () => {
     return (
-      <HStack space={'12%'} justifyContent="center">
+      <HStack space={'10%'} justifyContent="flex-end">
         <VStack>
-          <Text thin fontSize={SCREEN_HEIGHT * 0.014} color={colors.light}>
+          <Text
+            testID="nric_label"
+            thin
+            fontSize={SCREEN_HEIGHT * 0.014}
+            color={colors.grey_lightest}
+          >
             NRIC NO.
           </Text>
           <Text
+            testID="nric_value"
             bold
             fontSize={SCREEN_HEIGHT * 0.024}
             lineHeight="xs"
-            color={colors.light}
+            color={colors.grey_lightest}
           >
             {`${patientProfile?.nric}`}
           </Text>
           <Text
+            testID="dob_label"
             thin
             fontSize={SCREEN_HEIGHT * 0.014}
             mt="2"
-            color={colors.light}
+            color={colors.grey_lightest}
           >
             DATE OF BIRTH
           </Text>
           <Text
+            testID="dob_value"
             bold
             fontSize={SCREEN_HEIGHT * 0.024}
             lineHeight="xs"
-            color={colors.light}
+            color={colors.grey_lightest}
           >
-            {`${extractFullYear(patientProfile?.dob)}`}
+            {`${formatDateTime(patientProfile?.dob, true)}`}
           </Text>
         </VStack>
 
         <VStack>
-          <Text thin fontSize={SCREEN_HEIGHT * 0.014} color={colors.light}>
+          <Text
+            testID="age_label"
+            thin
+            fontSize={SCREEN_HEIGHT * 0.014}
+            color={colors.grey_lightest}
+          >
             AGE
           </Text>
           <Text
+            testID="age_value"
             bold
             fontSize={SCREEN_HEIGHT * 0.024}
             lineHeight="xs"
-            color={colors.light}
+            color={colors.grey_lightest}
           >
             {`${calcAge(patientProfile?.dob)}`}
           </Text>
-          <Text
+          {/* <Text
             thin
             fontSize={SCREEN_HEIGHT * 0.014}
             mt="2"
-            color={colors.light}
+            color={colors.grey_lightest}
           >
             LANGUAGE
           </Text>
@@ -105,9 +127,30 @@ function PatientInformationCard(props) {
             bold
             fontSize={SCREEN_HEIGHT * 0.024}
             lineHeight="xs"
-            color={colors.light}
+            color={colors.grey_lightest}
           >
             {`${patientProfile?.preferredLanguage}`}
+          </Text> */}
+          <Text
+            testID="mobile_number_label"
+            thin
+            fontSize={SCREEN_HEIGHT * 0.014}
+            mt="2"
+            color={colors.grey_lightest}
+          >
+            Mobile Number
+          </Text>
+          <Text
+            testID="mobile_number_value"
+            bold
+            fontSize={SCREEN_HEIGHT * 0.024}
+            lineHeight="xs"
+            color={colors.grey_lightest}
+          >
+            {patientProfile.handphoneNo !== null &&
+            patientProfile.handphoneNo !== ''
+              ? patientProfile.handphoneNo
+              : '-'}
           </Text>
         </VStack>
       </HStack>
@@ -115,84 +158,81 @@ function PatientInformationCard(props) {
   };
 
   return (
-    <TouchableOpacity
-      onPress={handleOnPress}
-      style={{ flex: 1 }}
-      testID="patientInformationCard"
+    <Box
+      overflow="visible"
+      backgroundColor={colors.green}
+      borderColor={colors.grey_lighter}
+      borderBottomWidth="3"
+      style={styles.container}
     >
-      <Box
-        overflow="visible"
-        backgroundColor={colors.green}
-        borderColor={colors.primary_gray}
-        borderBottomWidth="3"
-        style={styles.container}
-      >
-        <VStack space={'8%'} justifyContent="center" mb="5" mt="5" flex="1">
-          <HStack space={'12%'} justifyContent="center">
-            <Avatar
-              size={Platform.OS === 'web' ? '28vh' : SCREEN_HEIGHT * 0.15}
-              bg={colors.pink}
-              marginY="auto"
-              source={
-                patientProfile?.profilePicture
-                  ? {
-                      uri: `${patientProfile.profilePicture}`,
-                    }
-                  : null
-              }
-              borderColor={colors.light}
-              borderWidth="2"
+      <HStack space={'4%'} justifyContent="center">
+        <Avatar
+          testID="patient_profile_picture"
+          size={Platform.OS === 'web' ? '28vh' : SCREEN_HEIGHT * 0.11}
+          bg={colors.pink}
+          marginY="auto"
+          source={
+            patientProfile?.profilePicture
+              ? {
+                  uri: `${patientProfile.profilePicture}`,
+                }
+              : null
+          }
+          borderColor={colors.grey_lightest}
+          borderWidth="2"
+        >
+          {' '}
+          {patientProfile &&
+          patientProfile.firstName &&
+          patientProfile.firstName.substring(0, 1)
+            ? patientProfile.firstName.substring(0, 1)
+            : '--'}{' '}
+        </Avatar>
+        <VStack space={'8%'}>
+          <VStack>
+            {/* <Text
+                bold
+                fontSize={SCREEN_HEIGHT * 0.034}
+                color={colors.grey_lightest}
+              >
+                {`${patientProfile?.firstName} ${patientProfile?.lastName}`}
+              </Text> */}
+            <Text
+              testID="patient_preferred_name"
+              bold
+              fontSize={SCREEN_HEIGHT * 0.024}
+              color={colors.grey_lightest}
             >
-              {' '}
-              {patientProfile &&
-              patientProfile.firstName &&
-              patientProfile.firstName.substring(0, 1)
-                ? patientProfile.firstName.substring(0, 1)
-                : '--'}{' '}
-            </Avatar>
-            <VStack space={'8%'}>
-              <VStack>
-                <Text
-                  bold
-                  fontSize={SCREEN_HEIGHT * 0.034}
-                  color={colors.light}
-                >
-                  {`${patientProfile?.firstName} ${patientProfile?.lastName}`}
-                </Text>
-                <Text
-                  italic
-                  fontSize={SCREEN_HEIGHT * 0.024}
-                  color={colors.light}
-                >
-                  {`${patientProfile?.preferredName}`}
-                </Text>
-                <Text
-                  italic
-                  fontSize={SCREEN_HEIGHT * 0.024}
-                  color={colors.light}
-                >
-                  {patientProfile?.gender === 'F' ? 'Female' : 'Male'}
-                </Text>
-              </VStack>
-              {Platform.OS === 'web' ? MyComponent() : null}
-            </VStack>
-          </HStack>
-
-          {Platform.OS === 'web' ? null : MyComponent()}
+              {`${patientProfile?.preferredName}`}
+            </Text>
+            <Text
+              testID="patient_gender"
+              italic
+              fontSize={SCREEN_HEIGHT * 0.024}
+              color={colors.grey_lightest}
+            >
+              {patientProfile?.gender === 'F' ? 'FEMALE' : 'MALE'}
+            </Text>
+            <Text
+              testID="patient_preferred_language"
+              thin
+              fontSize={SCREEN_HEIGHT * 0.024}
+              color={colors.grey_lightest}
+            >
+              {`${patientProfile?.preferredLanguage}`}
+            </Text>
+          </VStack>
+          {Platform.OS === 'web' ? MyComponent() : null}
         </VStack>
-        <Icon
-          as={MaterialIcons}
-          color={colors.light}
-          name="chevron-right"
-          size={SCREEN_HEIGHT * 0.04}
-        />
-      </Box>
-    </TouchableOpacity>
+      </HStack>
+      {Platform.OS === 'web' ? null : MyComponent()}
+    </Box>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    height: 190,
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',

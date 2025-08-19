@@ -36,13 +36,13 @@ import AccountViewScreen from 'app/screens/AccountViewScreen';
 import AccountEditScreen from 'app/screens/AccountEditScreen';
 import ChangePasswordScreen from 'app/screens/ChangePasswordScreen';
 import PatientAddScreen from 'app/screens/PatientAddScreen';
-import PatientActivityPreferenceScreen from 'app/screens/PatientActivityPreferenceScreen';
+import PatientMedicalHistoryScreen from 'app/screens/PatientMedicalHistoryScreen';
 import PatientAllergyScreen from 'app/screens/PatientAllergyScreen';
 import PatientHolidayScreen from 'app/screens/PatientHolidayScreen';
 import PatientPhotoAlbumScreen from 'app/screens/PatientPhotoAlbumScreen';
-import PatientPreferenceScreen from 'app/screens/PatientPreferenceScreen';
+import ActivityPreferenceScreen from 'app/screens/ActivityPreferenceScreen';
 import PatientPrescriptionScreen from 'app/screens/PatientPrescriptionScreen';
-import PatientProblemLog from 'app/screens/PatientProblemLog';
+import PatientProblemLog from 'app/screens/PatientProblemLogScreen';
 import PatientVitalScreen from 'app/screens/PatientVitalScreen';
 import PatientRoutineScreen from 'app/screens/PatientRoutineScreen';
 
@@ -136,7 +136,7 @@ function WebAppNavigator() {
       <Box style={{ borderBottomWidth: 3 }}>
         <StatusBar />
         <HStack
-          bg="white"
+          bg={colors.white}
           justifyContent="space-between"
           alignItems="center"
           w="100%"
@@ -232,7 +232,7 @@ function WebAppNavigator() {
                   <Box
                     rounded="lg"
                     borderWidth={Platform.OS === 'web' ? '1' : ''}
-                    borderColor={colors.primary_gray}
+                    borderColor={colors.grey_lighter}
                     style={{ flex: 1 }}
                   >
                     <AccountCard
@@ -251,7 +251,7 @@ function WebAppNavigator() {
                   <Box
                     rounded="lg"
                     borderWidth={Platform.OS === 'web' ? '1' : ''}
-                    borderColor={colors.primary_gray}
+                    borderColor={colors.grey_lighter}
                     style={{ flex: 1 }}
                   >
                     <AccountCard
@@ -435,16 +435,16 @@ function WebAppNavigator() {
             element={<PatientProblemLog />}
           />
           <Route
-            path={routes.PATIENT_ACTIVITY_PREFERENCE}
-            element={<PatientActivityPreferenceScreen />}
+            path={routes.PATIENT_MEDICAL_HISTORY}
+            element={<PatientMedicalHistoryScreen />}
           />
           <Route
             path={routes.PATIENT_ROUTINE}
             element={<PatientRoutineScreen />}
           />
           <Route
-            path={routes.PATIENT_PREFERENCE}
-            element={<PatientPreferenceScreen />}
+            path={routes.ACTIVITY_PREFERENCE}
+            element={<ActivityPreferenceScreen />}
           />
           <Route
             path={routes.PATIENT_PHOTO_ALBUM}

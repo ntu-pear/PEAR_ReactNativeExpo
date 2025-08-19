@@ -49,24 +49,22 @@ function NotificationCard(
     >
       <Box
         borderBottomWidth="1"
-        borderColor={colors.primary_gray}
+        borderColor={colors.grey_lighter}
         py="2"
         mt="1"
       >
         <VStack w="100%" space={4} flexWrap="wrap" mb="1">
           <HStack space={5} alignItems="center">
             <Avatar size="sm" bg={colors.pink} marginY="auto">
-              {' '}
+              {/* Extract the 1st char of the users name for display in the avatar*/}{' '}
               {user && user.sub && user.sub.substring(0, 1)
                 ? user.sub.substring(0, 1)
                 : '--'}{' '}
             </Avatar>
             <Text
               bold
-              color={colors.black_var1}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
+              color={colors.black}
+              fontFamily={typography.baseFontFamily}
             >
               {item?.requiresAction ? 'Action Required' : ''}
             </Text>
@@ -74,10 +72,8 @@ function NotificationCard(
           <HStack>
             <Text
               alignSelf="flex-start"
-              color={colors.black_var1}
-              fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
-              }
+              color={colors.black}
+              fontFamily={typography.baseFontFamily}
             >
               {item?.shortMessage
                 ? handleString(item.shortMessage)
@@ -87,9 +83,9 @@ function NotificationCard(
           {/* <HStack justifyContent="flex-start">
             <Text
               alignSelf="flex-start"
-              color={colors.primary_overlay_color}
+              color={colors.black}
               fontFamily={
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android
+                typography.baseFontFamily
               }
             >
               {' '}

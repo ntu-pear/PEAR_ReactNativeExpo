@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
   dayDateYear: {
     textAlign: 'center',
     fontSize: Platform.OS === 'web' ? 26 : 22,
-    color: colors.black_var1,
+    color: colors.black,
   },
   calendarPickerText: {
     fontSize: Platform.OS === 'web' ? 22 : 15,

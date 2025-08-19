@@ -12,7 +12,7 @@ function BottomTabWithCustomizedButtons({
 }) {
   return (
     <Center
-      bg={colors.white_var1}
+      bg={colors.white}
       position="absolute"
       bottom="0"
       w="100%"
@@ -32,10 +32,8 @@ function BottomTabWithCustomizedButtons({
             size="md"
             bg={colors.green}
             _text={{
-              color: `${colors.white_var1}`,
-              fontFamily:
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android,
-              fontSize: 'sm',
+              color: `${colors.white}`,
+              ...typography.body1,
             }}
           >
             {leftButtonText ? leftButtonText : null}
@@ -48,10 +46,8 @@ function BottomTabWithCustomizedButtons({
             size="md"
             bg={colors.pink}
             _text={{
-              color: `${colors.white_var1}`,
-              fontFamily:
-                Platform.OS === 'ios' ? 'Helvetica' : typography.android,
-              fontSize: 'sm',
+              color: `${colors.white}`,
+              ...typography.body1,
             }}
           >
             {rightButtonText ? rightButtonText : null}

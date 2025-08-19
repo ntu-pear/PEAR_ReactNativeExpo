@@ -1,77 +1,159 @@
 /*eslint eslint-comments/no-unlimited-disable: error */
-import client from 'app/api/client';
-
+import client, { V1_BASE } from 'app/api/client';
+import authStorage from 'app/auth/authStorage';
 /*
  * List all end points here
  */
 const endpoint = '/User';
-const userLogin = `${endpoint}/Login`;
 const userUpdate = `${endpoint}/Update`;
 const userDelete = `${endpoint}/delete`; //eslint-disable-line no-unused-vars
-const userRefreshToken = `${endpoint}/RefereshToken`; //eslint-disable-line no-unused-vars
-const userLogout = `${endpoint}/Logout`; //eslint-disable-line no-unused-vars
-const userResetPassword = `${endpoint}/ResetPassword`;
-const userChangePassword = `${endpoint}/ChangePassword`;
+// const userRefreshToken = `${endpoint}/RefereshToken`; //eslint-disable-line no-unused-vars
+//const userRefreshToken = `${endpoint}/RefreshToken`; //eslint-disable-line no-unused-vars
+//const userLogout = `${endpoint}/Logout`; //eslint-disable-line no-unused-vars
+//const userResetPassword = `${endpoint}/ResetPassword`;
+//const userChangePassword = `${endpoint}/ChangePassword`;
 
-/*
- * List all functions here
- * Refer to this api doc: https://github.com/infinitered/apisauce
- */
+// New user-service endpoints (FastAPI @ http://10.96.188.185/api/v1)
+const v1 = {
+  login: '/login/',
+  currentUser: '/current_user/',
+  getUser: '/user/get_user/',
+  changePassword: '/user/change_password/',
+  requestReset: '/user/request_reset_password/',
+  resetPassword: (token) => `/user/reset_user_password/${encodeURIComponent(token)}`,
+  logout: '/logout/',
+  };
 
 // **********************  GET REQUESTS *************************
 
-const getUser = async (userID) => {
-  const params = {
-    userID: userID,
-  };
-  return client.get(endpoint, params);
+// New service returns the current user's profile; userID is ignored now.
+const getUser = async (userID, maskNRIC = true) => {
+  const token =
+    (await authStorage.getToken('userAuthTokenV1')) ||
+    (await authStorage.getToken('userAuthToken')); // fallback
+  const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
+  return client.get(v1.getUser, {}, { baseURL: V1_BASE, headers });
 };
 
 // **********************  POST REQUESTS *************************
-const loginUser = (Email, Role, Password) => {
-  const body = JSON.stringify({ Email, Role, Password });
 
-  // Note: client.post accepts 3 parameters. (1) endpoint (2) data and (3) onUploadProgress -- this is optional
-  return client.post(userLogin, body);
-};
+export const loginUser = async ({ email, role, password }) => {
+  // 1) New user-service login (form-encoded)
+  const form = new URLSearchParams();
+  form.append('username', email);
+  form.append('password', password);
+  form.append('grant_type', 'password');
 
-const resetPassword = (Email, Role) => {
-  const body = JSON.stringify({ Email, Role });
+  const resp = await client.post(v1.login, form, {
+    baseURL: V1_BASE,
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  });
+  if (!resp.ok) return resp;
 
-  // Note: client.post accepts 3 parameters. (1) endpoint (2) data and (3) onUploadProgress -- this is optional
-  return client.post(userResetPassword, body);
-};
+  const data = resp.data || {};
+  // accept multiple token shapes
+  const v1Access =
+    data.accessToken ||
+    data.token ||
+    data.access_token ||
+    (data.data && (data.data.accessToken || data.data.token || data.data.access_token));
+  const v1Refresh =
+    data.refreshToken ||
+    data.refresh_token ||
+    (data.data && (data.data.refreshToken || data.data.refresh_token));
 
-const changePassword = (Email, OldPassword, NewPassword) => {
-  const body = JSON.stringify({ Email, OldPassword, NewPassword });
-
-  // Note: client.post accepts 3 parameters. (1) endpoint (2) data and (3) onUploadProgress -- this is optional
-  return client.post(userChangePassword, body);
-};
-
-// ************************* UPDATE REQUESTS *************************
-const updateUser = async (data, profilePicture) => {
-  const formData = new FormData();
-
-  for (const key in data) {
-    var value = data[key];
-    formData.append(key, value);
+  if (!v1Access) {
+    console.log('loginUser(v1): NO ACCESS TOKEN — keys:', Object.keys(data || {}));
+    return { ...resp, ok: false, problem: 'NO_ACCESS_TOKEN' };
   }
 
-  const fileName = profilePicture.split('/').pop();
-  const fileType = fileName.split('.').pop();
+  // store under v1-specific keys (don’t overwrite legacy)
+  await authStorage.storeToken('userAuthTokenV1', v1Access);
+  if (v1Refresh) await authStorage.storeToken('userRefreshTokenV1', v1Refresh);
 
-  formData.append('uploadProfilePicture', {
-    uri: profilePicture,
-    name: fileName,
-    type: `image/${fileType}`,
+  // optional: keep generic key as v1 for older code paths
+  await authStorage.storeToken('userAuthToken', v1Access);
+  if (v1Refresh) await authStorage.storeToken('userRefreshToken', v1Refresh);
+
+  // 2) Legacy login (JSON payload) → needed for old endpoints (e.g., /Patient/patientList)
+  const legacyBody = { email, role, password };
+  const legacyResp = await client.post('/User/Login', legacyBody, {
+    headers: { 'Content-Type': 'application/json-patch+json' },
+    // baseURL defaults to legacy; no need to override
   });
 
-  const headers = { 'Content-Type': 'multipart/form-data' };
+  if (legacyResp?.ok) {
+    const l = legacyResp.data || {};
+    const legacyAccess =
+      l.accessToken ||
+      l.token ||
+      (l.data && (l.data.accessToken || l.data.token || l.data.BearerToken));
+    const legacyRefresh =
+      l.refreshToken ||
+      l.RefreshToken ||
+      (l.data && (l.data.refreshToken || l.data.RefreshToken));
 
-  // console.log('formData', formData);
+    if (legacyAccess) {
+      await authStorage.storeToken('userAuthTokenLegacy', legacyAccess);
+      if (legacyRefresh) await authStorage.storeToken('userRefreshTokenLegacy', legacyRefresh);
+    } else {
+      console.log('loginUser(legacy): no token in response — keys:', Object.keys(l || {}));
+    }
+  } else {
+    console.log('loginUser(legacy): failed', legacyResp?.status, legacyResp?.data);
+  }
 
-  return client.put(userUpdate, formData, { headers });
+  // set a default header for immediate v1 calls (legacy will be set per-request via client.js transform)
+  client.setHeaders({ Authorization: `Bearer ${v1Access}` });
+  console.log('AUTH HEADER NOW:', client.axiosInstance?.defaults?.headers?.common?.Authorization);
+
+  return resp;
+};
+
+/* Forgot password (request email with reset link) */
+const requestResetPassword = ({ nric, email, roleName, nric_DateOfBirth }) =>
+  client.post(
+    v1.requestReset,
+    { nric, email, roleName, nric_DateOfBirth },
+    { baseURL: V1_BASE }
+  );
+
+// Set new password using token from email link
+const resetPassword = (token, { newPassword, confirmPassword }) =>
+  client.put(
+    v1.resetPassword(token),
+    { newPassword, confirmPassword },
+    { baseURL: V1_BASE }
+  );
+
+/* ======================= PUT / UPDATE ======================= */
+
+const changePassword = (Email /*unused*/, OldPassword, NewPassword) =>
+  client.put(
+    v1.changePassword,
+    { currentPassword: OldPassword, newPassword: NewPassword, confirmPassword: NewPassword },
+    { baseURL: V1_BASE }
+  );
+
+// ************************* UPDATE REQUESTS *************************
+const updateUser = async (data) => {
+  const headers = { 'Content-Type': 'application/json-patch+json' };
+  return client.put(userUpdate, data, { headers });
+};
+
+const logoutUser = async () => {
+  // New service uses DELETE /logout/
+  try {
+    await client.delete(v1.logout, {}, { baseURL: V1_BASE });
+  } catch {}
+  // clear both token sets
+  await authStorage.deleteToken?.('userAuthTokenV1');
+  await authStorage.deleteToken?.('userRefreshTokenV1');
+  await authStorage.deleteToken?.('userAuthTokenLegacy');
+  await authStorage.deleteToken?.('userRefreshTokenLegacy');
+  // generic fallbacks
+  await authStorage.deleteToken?.('userAuthToken');
+  await authStorage.deleteToken?.('userRefreshToken');
 };
 
 /*
@@ -79,8 +161,10 @@ const updateUser = async (data, profilePicture) => {
  */
 export default {
   loginUser,
+  requestResetPassword,
   resetPassword,
   getUser,
   updateUser,
   changePassword,
+  logoutUser,
 };

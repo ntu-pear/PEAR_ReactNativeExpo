@@ -42,8 +42,7 @@ function NotificationTabNavigator() {
             backgroundColor: colors.pink,
           },
           tabBarLabelStyle: {
-            fontFamily:
-              Platform.OS === 'ios' ? 'Helvetica' : typography.android,
+            fontFamily: typography.baseFontFamily,
           },
           swipeEnabled: false,
         }}

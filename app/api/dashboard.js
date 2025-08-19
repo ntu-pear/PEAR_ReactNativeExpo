@@ -14,7 +14,7 @@ const endpoint = '/Dashboard';
 // **********************  GET REQUESTS *************************
 
 const getDashboard = async () => {
-  return client.get(endpoint, {});
+  return await client.get(endpoint, {});
 };
 
 // **********************  POST REQUESTS *************************

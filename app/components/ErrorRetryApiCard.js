@@ -10,6 +10,9 @@ import {
 } from 'native-base';
 import React from 'react';
 
+// Configurations
+import colors from 'app/config/colors';
+
 /* Note the immediate bunch of code will only be rendered
  * when one of the APIs has an error. Purpose: Error handling of API
  * Note: Make sure to pass in handleError() from parent component to use this code

@@ -16,6 +16,8 @@ export default function useCheckExpiredThenLogOut() {
       errorMessage.headers &&
       errorMessage.headers['www-authenticate']
     ) {
+      console.log('Expired logout error message: ');
+      console.log(JSON.stringify(errorMessage), '\n');
       const responseHeader = errorMessage.headers;
       const errors = responseHeader['www-authenticate'].split(',');
       if (errors[0] === 'Bearer error="invalid_token"') {

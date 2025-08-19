@@ -30,7 +30,7 @@ function AboutScreen(props) {
             {'\n\n\n'}
             Version: 1.0.0
             {'\n\n'}
-            Build Date: 18 August 2018
+            Build Date: 22 March 2025
           </Text>
         </View>
       </Center>
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     maxWidth: 300,
     textAlign: 'center',
-    whiteSpace: 'pre-line',
+    //whiteSpace: 'pre-line',
   },
 });
 

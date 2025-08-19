@@ -2,20 +2,32 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import PatientsScreen from 'app/screens/PatientsScreen';
 import PatientProfile from 'app/screens/PatientProfileScreen';
-import PatientInformationScreen from 'app/screens/PatientInformationScreen';
+import PatientInformationAccordion from 'app/components/PatientInformationAccordion';
+import { format } from 'date-fns';
 
 // Import Constants from routes
 import routes from 'app/navigation/routes';
-import PatientActivityPreferenceScreen from 'app/screens/PatientActivityPreferenceScreen';
+import PatientMedicalHistoryScreen from 'app/screens/PatientMedicalHistoryScreen';
 import PatientAllergyScreen from 'app/screens/PatientAllergyScreen';
 import PatientHolidayScreen from 'app/screens/PatientHolidayScreen';
+import PatientHolidayGridScreen from 'app/screens/PatientHolidayGridScreen';
 import PatientPhotoAlbumScreen from 'app/screens/PatientPhotoAlbumScreen';
-import PatientPreferenceScreen from 'app/screens/PatientPreferenceScreen';
+import PatientPhotoGridScreen from 'app/screens/PatientPhotoGridScreen';
+import PatientViewPhotoScreen from 'app/screens/PatientViewPhotoScreen';
+import ActivityPreferenceScreen from 'app/screens/ActivityPreferenceScreen';
 import PatientPrescriptionScreen from 'app/screens/PatientPrescriptionScreen';
-import PatientProblemLog from 'app/screens/PatientProblemLog';
+import PatientProblemLog from 'app/screens/PatientProblemLogScreen';
 import PatientVitalScreen from 'app/screens/PatientVitalScreen';
 import PatientRoutineScreen from 'app/screens/PatientRoutineScreen';
 import PatientAddScreen from 'app/screens/PatientAddScreen';
+import EditPatientInfoScreen from 'app/screens/EditPatientInfoScreen';
+import EditPatientPreferencesScreen from 'app/screens/EditPatientPreferencesScreen';
+import EditPatientGuardianScreen from 'app/screens/EditPatientGuardianScreen';
+import EditPatientSocialHistScreen from 'app/screens/EditPatientSocialHistScreen';
+import PatientMedicationScreen from 'app/screens/PatientMedicationScreen';
+import PatientScheduleScreen from 'app/screens/PatientScheduleScreen';
+import PatientMobilityAidScreen from 'app/screens/PatientMobilityAidsScreen';
+import DoctorNoteScreen from 'app/screens/DoctorNoteScreen';
 
 // Refer to this: https://reactnavigation.org/docs/hello-react-navigation
 const Stack = createNativeStackNavigator();
@@ -43,20 +55,20 @@ function PatientsNavigator() {
       />
       <Stack.Screen
         name={routes.PATIENT_INFORMATION}
-        component={PatientInformationScreen}
+        component={PatientInformationAccordion}
         options={{
           headerShown: true,
           headerBackTitleVisible: false,
-          title: 'Patient Information',
+          title: 'Patient Particulars',
         }}
       />
       <Stack.Screen
-        name={routes.PATIENT_ACTIVITY_PREFERENCE}
-        component={PatientActivityPreferenceScreen}
+        name={routes.PATIENT_MEDICAL_HISTORY}
+        component={PatientMedicalHistoryScreen}
         options={{
           headerShown: true,
           headerBackTitleVisible: false,
-          title: 'Activity Preference',
+          title: 'Medical History',
         }}
       />
       <Stack.Screen
@@ -78,6 +90,29 @@ function PatientsNavigator() {
         }}
       />
       <Stack.Screen
+        name={routes.PATIENT_HOLIDAY_GRID}
+        component={PatientHolidayGridScreen}
+        options={({ route }) => {
+          const { holidayExperience } = route.params || {};
+          let title = 'Holiday Photo Grid';
+          if (holidayExperience) {
+            const { country, startDate, endDate } = holidayExperience;
+            const formattedStartDate = startDate
+              ? format(new Date(startDate), 'dd/MM/yyyy')
+              : '';
+            const formattedEndDate = endDate
+              ? format(new Date(endDate), 'dd/MM/yyyy')
+              : '';
+            title = `${country} (${formattedStartDate} - ${formattedEndDate})`;
+          }
+          return {
+            headerShown: true,
+            headerBackTitleVisible: false,
+            title,
+          };
+        }}
+      />
+      <Stack.Screen
         name={routes.PATIENT_PHOTO_ALBUM}
         component={PatientPhotoAlbumScreen}
         options={{
@@ -87,8 +122,27 @@ function PatientsNavigator() {
         }}
       />
       <Stack.Screen
-        name={routes.PATIENT_PREFERENCE}
-        component={PatientPreferenceScreen}
+        name={routes.PATIENT_PHOTO_GRID}
+        component={PatientPhotoGridScreen}
+        options={({ route }) => ({
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: route.params?.albumCategoryName || 'Photo Grid',
+        })}
+      />
+
+      <Stack.Screen
+        name={routes.PATIENT_VIEW_PHOTO}
+        component={PatientViewPhotoScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'View Photo',
+        }}
+      />
+      <Stack.Screen
+        name={routes.ACTIVITY_PREFERENCE}
+        component={ActivityPreferenceScreen}
         options={{
           headerShown: true,
           headerBackTitleVisible: false,
@@ -132,12 +186,84 @@ function PatientsNavigator() {
         }}
       />
       <Stack.Screen
+        name={routes.PATIENT_MEDICATION}
+        component={PatientMedicationScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Medication',
+        }}
+      />
+      <Stack.Screen
+        name={routes.PATIENT_SCHEDULE}
+        component={PatientScheduleScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Schedule',
+        }}
+      />
+      <Stack.Screen
+        name={routes.PATIENT_MOBILITY_AIDS}
+        component={PatientMobilityAidScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Mobility Aid',
+        }}
+      />
+      <Stack.Screen
         name={routes.PATIENT_ADD_PATIENT}
         component={PatientAddScreen}
         options={{
           headerShown: true,
           headerBackTitleVisible: false,
           title: 'Add Patient',
+        }}
+      />
+      <Stack.Screen
+        name={routes.EDIT_PATIENT_INFO}
+        component={EditPatientInfoScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Edit Patient Info',
+        }}
+      />
+      <Stack.Screen
+        name={routes.EDIT_PATIENT_PREFERENCES}
+        component={EditPatientPreferencesScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Edit Patient Preferences',
+        }}
+      />
+      <Stack.Screen
+        name={routes.EDIT_PATIENT_GUARDIAN}
+        component={EditPatientGuardianScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Edit Patient Guardian',
+        }}
+      />
+      <Stack.Screen
+        name={routes.EDIT_PATIENT_SOCIALHIST}
+        component={EditPatientSocialHistScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Edit Patient Social History',
+        }}
+      />
+      <Stack.Screen
+        name={routes.DOCTORNOTE_SCREEN}
+        component={DoctorNoteScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Doctor Note',
         }}
       />
     </Stack.Navigator>

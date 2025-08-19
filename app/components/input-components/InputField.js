@@ -1,0 +1,210 @@
+// Libs
+import React, { useState, useEffect } from 'react';
+import { Platform, StyleSheet, View, Text } from 'react-native';
+import { VStack, Input } from 'native-base';
+import PropTypes from 'prop-types';
+
+// Configurations
+import typography from 'app/config/typography';
+import colors from 'app/config/colors';
+
+// Utils
+import * as validation from 'app/utility/inputValidation';
+
+// Components
+import ErrorMessage from 'app/components/ErrorMessage';
+import { TextInput } from 'react-native';
+import RequiredIndicator from '../RequiredIndicator';
+
+function InputField({
+  testID = '',
+  isRequired = false,
+  hideError = true,
+  showTitle = true,
+  autoCapitalize = 'characters',
+  title = '',
+  value = '',
+  onChangeText = () => {},
+  InputRightElement = () => {},
+  InputLeftElement = () => {},
+  dataType = 'general',
+  type = 'text',
+  keyboardType = 'default',
+  maxLength = null,
+  onEndEditing = () => {},
+  variant = 'singeLine',
+  style = null,
+  otherProps = {},
+}) {
+  // Track error state via input validation
+  const [error, setError] = useState({ isError: false, errorMsg: '' });
+
+  // Track whether component is in its first render
+  const [isFirstRender, setIsFirstRender] = useState(true);
+
+  // State for value in input component
+  const [inputText, setInputText] = useState(value);
+
+  // In first render of component, set isError to true to ensure submission blocking in the parent component
+  // is active (as it is first rendered, user will not likely have filled anything).
+  // This also ensures that since there will be no input, the component error message does not show until
+  // the user focuses and violates the validation with their input.
+  useEffect(() => {
+    onEndEditing ? onEndEditing(isFirstRender || error.isError) : null;
+    setIsFirstRender(false);
+    setError({
+      ...error,
+      isError: isRequired && value.length === 0,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Update error state if isRequired value changes
+  useEffect(() => {
+    if (value.length > 0) {
+      validateInput(value.length == 0);
+    }
+  }, [isRequired]);
+
+  // Update the parent component that there is a validation error.
+  // Validation is passed via the onEndEditing prop.
+  useEffect(() => {
+    if (!isFirstRender) {
+      onEndEditing ? onEndEditing(error.isError) : null;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error, onEndEditing]);
+
+  // Function to convert input to string and update value
+  const handleOnChangeText = (value) => {
+    value = value.toString();
+    setInputText(value);
+    onChangeText(value);
+  };
+
+  // Function to handle what to do after user leaves the input component
+  // Capitalize input if autocap specificied
+  // Validate input
+  const handleOnEndEditing = () => {
+    if (value) {
+      if (autoCapitalize == 'characters') {
+        value = value.toUpperCase();
+      }
+      value = value.trim().replace(/\s{2,}/g, ' ');
+    } else {
+      value = '';
+    }
+    setInputText(value);
+    validateInput();
+    onChangeText(value);
+  };
+
+  // Function used for input validation depending on the type of input data (given by the type prop)
+  // When checking for forms that are prefilled, ignore isRequired so msg is not displayed
+  const validateInput = (ignoreIsRequired = false) => {
+    msg = '';
+    if (!ignoreIsRequired && isRequired) {
+      msg = validation.notEmpty(value);
+    }
+    if ('prefNameList' in otherProps) {
+      msg = msg || validation.uniquePrefName(value, otherProps['prefNameList']);
+    }
+    const selValidationFunctions = validation.validationFunctions[dataType];
+    if (selValidationFunctions) {
+      for (const validationFunction of selValidationFunctions) {
+        msg = msg || validationFunction(value);
+      }
+    }
+    setError({ isError: msg ? true : false, errorMsg: msg });
+    return msg ? true : false;
+  };
+
+  return (
+    <View style={styles.componentContainer}>
+      <VStack>
+        {showTitle ? (
+          <Text style={styles.titleMsg}>
+            {title}:{isRequired ? <RequiredIndicator /> : ''}
+          </Text>
+        ) : null}
+        <Input
+          testID={`${testID}_input`}
+          borderColor={!error.errorMsg ? colors.grey_lighter : colors.red}
+          textAlignVertical={variant === 'multiLine' ? 'top' : 'center'}
+          autoCapitalize="none"
+          borderRadius="25"
+          minWidth="full"
+          height={variant === 'multiLine' ? '150' : '50'}
+          value={inputText}
+          onChangeText={handleOnChangeText}
+          onEndEditing={handleOnEndEditing}
+          placeholder={title}
+          InputRightElement={InputRightElement}
+          InputLeftElement={InputLeftElement}
+          type={type}
+          keyboardType={keyboardType}
+          maxLength={maxLength}
+          style={[styles.inputField, style]}
+          {...otherProps}
+        />
+        {hideError && !error.errorMsg ? null : (
+          <ErrorMessage
+            testID={`${testID}_input_error`}
+            message={error.errorMsg}
+          />
+        )}
+      </VStack>
+    </View>
+  );
+}
+
+InputField.propTypes = {
+  dataType: PropTypes.oneOf([
+    'general',
+    'password',
+    'name',
+    'nric',
+    'address',
+    'home phone',
+    'mobile phone',
+    'email',
+    'postal code',
+    'temperature',
+    'systolicBP',
+    'diastolicBP',
+    'spO2',
+    'bloodSugarLevel',
+    'heartRate',
+    'weight',
+    'height',
+    'frequencyPerDay',
+  ]),
+  keyboardType: TextInput.propTypes.keyboardType,
+  variant: PropTypes.oneOf(['singleLine', 'multiLine']),
+};
+
+const styles = StyleSheet.create({
+  componentContainer: {
+    display: 'flex',
+    width: '100%',
+    marginTop: 5,
+    justifyContent: 'flex-start',
+  },
+  titleMsg: {
+    marginBottom: 5,
+    marginTop: 10,
+    color: colors.grey,
+    ...typography.body1SemiBold,
+  },
+  errorMsg: {
+    color: colors.red,
+    ...typography.subheading1,
+  },
+  inputField: {
+    width: '100%',
+    color: colors.black,
+    ...typography.subheading1,
+  },
+});
+
+export default InputField;

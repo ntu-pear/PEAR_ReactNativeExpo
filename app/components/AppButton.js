@@ -1,34 +1,33 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet } from 'react-native';
+import { Button, Text } from 'native-base';
 import colors from 'app/config/colors';
 
-function AppButton(props) {
-  // Destructure props
-  const { title, onPress, color } = props;
+function AppButton({ title, onPress, color, isDisabled = false, testID }) {
+  // replacement of TouchableOpacity with Button to enable isDisabled property - Russell
   return (
-    <TouchableOpacity
+    <Button
       style={[styles.button, { backgroundColor: colors[color] }]}
+      isDisabled={isDisabled}
       onPress={onPress}
+      testID={testID}
     >
       <Text style={styles.text}>{title}</Text>
-    </TouchableOpacity>
+    </Button>
   );
 }
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: colors.light_gray,
+    backgroundColor: colors.grey,
     borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 15,
-    width: '100%',
   },
   text: {
-    color: colors.secondary,
+    color: colors.white,
     textTransform: 'uppercase',
     fontWeight: 'bold',
     fontSize: 18,
+    padding: 7,
   },
 });
 

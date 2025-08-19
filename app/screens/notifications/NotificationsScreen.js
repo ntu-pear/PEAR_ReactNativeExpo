@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import { Platform, View } from 'react-native';
+import { Platform, View, StyleSheet } from 'react-native';
 import {
   Text,
   FlatList,
@@ -21,6 +21,7 @@ import ErrorRetryApiCard from 'app/components/ErrorRetryApiCard';
 import routes from 'app/navigation/routes';
 import useNotifications from 'app/screens/notifications/useNotifications';
 import NotificationSortSelector from 'app/screens/notifications/NotificationsSortSelector';
+import globalStyles from 'app/utility/styles.js';
 
 function NotificationsScreen(props) {
   const { notificationType } = props.route.params;
@@ -86,10 +87,7 @@ function NotificationsScreen(props) {
           <DeleteIcon color={colors.white} size="2xl" alignSelf="center" />
           <Text
             alignSelf="center"
-            bold
-            fontFamily={
-              Platform.OS === 'ios' ? 'Helvetica' : typography.android
-            }
+            {...typography.body1SemiBold}
             color={colors.white}
           >
             Clear
@@ -136,7 +134,7 @@ function NotificationsScreen(props) {
   };
   // console.log(notificationData);
   return (
-    <>
+    <View style={globalStyles.mainContentContainer}>
       {isLoading ? (
         <ActivityIndicator visible={true} />
       ) : (
@@ -166,7 +164,7 @@ function NotificationsScreen(props) {
                   isFetchingMoreNotifications && (
                     <HStack mx="auto" space={2} justifyContent="center">
                       <Spinner accessibilityLabel="Loading posts" size="lg" />
-                      <Heading color="red" fontSize="md">
+                      <Heading color={colors.red} fontSize="md">
                         Loading
                       </Heading>
                     </HStack>
@@ -209,7 +207,7 @@ function NotificationsScreen(props) {
           </VStack>
         </VStack>
       )}
-    </>
+    </View>
   );
 }
 

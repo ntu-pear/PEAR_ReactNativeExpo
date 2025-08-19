@@ -5,8 +5,8 @@ import jwt_decode from 'jwt-decode';
 /*
  * All constants to be defined here
  */
-const authKey = 'userAuthToken';
-const refreshKey = 'userRefreshToken';
+// const authKey = 'userAuthToken';
+// const refreshKey = 'userRefreshToken';
 
 /*
  * Stores (key, authToken) into a global secure storage
@@ -28,6 +28,7 @@ const getToken = async (key) => {
     // const authToken = await AsyncStorage.getItem(key);
     // return JSON.parse(authToken) ? JSON.parse(authToken) : null;
     const authToken = await AsyncStorage.getItem(key);
+    // console.log(authToken);
     return authToken;
   } catch (error) {
     console.log('Error retrieving the auth token', error);
@@ -54,7 +55,10 @@ const removeToken = async () => {
   try {
     // await AsyncStorage.removeItem(authKey);
     // await AsyncStorage.removeItem(refreshKey);
-    await Promise.all([AsyncStorage.removeItem(authKey), AsyncStorage.removeItem(refreshKey)])
+    await Promise.all([
+      AsyncStorage.removeItem('userAuthToken'),
+      AsyncStorage.removeItem('userRefreshToken'),
+    ]);
   } catch (error) {
     console.log('Error removing the auth token', error);
   }

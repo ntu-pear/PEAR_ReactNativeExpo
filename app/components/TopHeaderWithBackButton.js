@@ -15,24 +15,17 @@ function TopHeaderWithBackButton({ navigation, title }) {
           right="2"
           _icon={{
             as: MaterialIcons,
-            color: `${colors.black_var1}`,
+            color: `${colors.black}`,
             name: 'arrow-back-ios',
             pl: '1',
             size: 'lg',
           }}
           _pressed={{
-            bg: `${colors.white_var1}`,
+            bg: `${colors.white}`,
           }}
         />
         <Center w="30%">
-          <Text
-            color={colors.black}
-            fontFamily={
-              Platform.OS === 'ios' ? 'Helvetica' : typography.android
-            }
-            fontSize="lg"
-            fontWeight="semibold"
-          >
+          <Text color={colors.black} {...typography.subheading1SemiBold}>
             {title ? title : ''}
           </Text>
         </Center>

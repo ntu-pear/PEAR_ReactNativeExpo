@@ -6,12 +6,64 @@ import { Image } from 'react-native';
  * List all end points here
  */
 const endpoint = '/Patient';
+const allergyEndpoint = '/Allergy';
+const vitalEndpoint = '/Vital';
+const prescriptionEndpoint = '/Prescription';
+const problemLogEndpoint = '/ProblemLog';
+const medicalHistoryEndpoint = '/MedicalHistory';
+const medicationEndpoint = '/Medication';
+const activityEndpoint = '/Activity';
+const routineEndpoint = '/Routine';
+const mobilityEndpoint = '/Mobility';
+const photoEndpoint = '/PatientPhoto';
 const patientList = `${endpoint}/patientList`;
-const patientListByUserId = `${endpoint}/patientListByUserId`;
+// `${endpoint}/patientListByUserId` changed to ${endpoint}/patientListByLoggedInCaregiver
+// to enable fetching caregiver specific patients
+const patientListByUserId = `${endpoint}/patientListByLoggedInCaregiver`;
+const patientStatusCountList = `${endpoint}/patientStatusCountList`;
 const patientAdd = `${endpoint}/add`;
 const patientUpdate = `${endpoint}/update`; //eslint-disable-line no-unused-vars
 const privacyLevelUpdate = `${endpoint}/UpdatePatient`; //eslint-disable-line no-unused-vars
 const patientDelete = `${endpoint}/delete`; //eslint-disable-line no-unused-vars
+const patientPrescriptionList = `${prescriptionEndpoint}/PatientPrescription`; //eslint-disable-line no-unused-vars
+const patientRoutine = `${activityEndpoint}${routineEndpoint}/PatientRoutine`; //eslint-disable-line no-unused-vars
+// Medical History
+const patientMedicalHistory = `${medicalHistoryEndpoint}/list`; //eslint-disable-line no-unused-vars
+const patientMedicalHistoryAdd = `${medicalHistoryEndpoint}/add`; //eslint-disable-line no-unused-vars
+const patientMedicalHistoryDelete = `${medicalHistoryEndpoint}/delete`; //eslint-disable-line no-unused-vars
+// Allergy
+const patientAllergy = `${allergyEndpoint}/PatientAllergy`; //eslint-disable-line no-unused-vars
+const patientAllergyAdd = `${allergyEndpoint}/add`; //eslint-disable-line no-unused-vars
+// const patientAllergyUpdate = `${allergyEndpoint}/update`; //eslint-disable-line no-unused-vars
+const patientAllergyDelete = `${allergyEndpoint}/delete`; //eslint-disable-line no-unused-vars
+// Vitals
+const patientVitalList = `${vitalEndpoint}/list`; //eslint-disable-line no-unused-vars
+const patientVitalAdd = `${vitalEndpoint}/add`; //eslint-disable-line no-unused-vars
+//const patientVitalUpdate = `${vitalEndpoint}/update`; //eslint-disable-line no-unused-vars
+const patientVitalDelete = `${vitalEndpoint}/delete`; //eslint-disable-line no-unused-vars
+// Problem Log
+const patientProblemLog = `${problemLogEndpoint}/PatientProblemLog`; //eslint-disable-line no-unused-vars
+const patientProblemLogAdd = `${problemLogEndpoint}/add`; //eslint-disable-line no-unused-vars
+const patientProblemLogUpdate = `${problemLogEndpoint}/update`; //eslint-disable-line no-unused-vars
+const patientProblemLogDelete = `${problemLogEndpoint}/delete`; //eslint-disable-line no-unused-vars
+// Medication
+const patientMedicationAdd = `${medicationEndpoint}/add`; //eslint-disable-line no-unused-vars
+const patientMedicationUpdate = `${medicationEndpoint}/update`; //eslint-disable-line no-unused-vars
+const patientMedicationDelete = `${medicationEndpoint}/delete`; //eslint-disable-line no-unused-vars
+// Prescription
+const patientPrescriptionAdd = `${prescriptionEndpoint}/add`; //eslint-disable-line no-unused-vars
+const patientPrescriptionUpdate = `${prescriptionEndpoint}/update`; //eslint-disable-line no-unused-vars
+const patientPrescriptionDelete = `${prescriptionEndpoint}/delete`; //eslint-disable-line no-unused-vars
+// Mobility
+const patientMobility = `${mobilityEndpoint}/PatientMobility`; //eslint-disable-line no-unused-vars
+const patientMobilityAdd = `${mobilityEndpoint}/add`; //eslint-disable-line no-unused-vars
+const patientMobilityUpdate = `${mobilityEndpoint}/update`; //eslint-disable-line no-unused-vars
+const patientMobilityDelete = `${mobilityEndpoint}/delete`; //eslint-disable-line no-unused-vars
+// Photo Album
+const patientPhoto = `${photoEndpoint}/GetAlbumByCategory`; //eslint-disable-line no-unused-vars
+const patientPhotoAdd = `${photoEndpoint}/add`; //eslint-disable-line no-unused-vars
+const patientPhotoUpdate = `${photoEndpoint}/update`; //eslint-disable-line no-unused-vars
+const patientPhotoDelete = `${photoEndpoint}/delete`; //eslint-disable-line no-unused-vars
 
 /*
  * List all functions here
@@ -33,6 +85,9 @@ const addPatientForm = (arr, str, patientData) => {
       if (key == 'IsChecked') {
         continue;
       }
+      if (val instanceof Date) {
+        val = val.toISOString().split('T')[0];
+      }
       // if AllergyListID is 'None', do not append allergy info to patientData
       if (key == 'AllergyListID' && val == 2) {
         break;
@@ -46,10 +101,7 @@ const addPatientForm = (arr, str, patientData) => {
 };
 // **********************  GET REQUESTS *************************
 
-const getPatient = async (patientID, maskNRIC) => {
-  // Error Handling
-  maskNRIC ? (maskNRIC = true) : (maskNRIC = false);
-
+const getPatient = async (patientID, maskNRIC = true) => {
   /*
    *   Build Params
    */
@@ -71,15 +123,110 @@ const getPatient = async (patientID, maskNRIC) => {
   return client.get(endpoint, params);
 };
 
-const getPatientList = async (maskNRIC = true) => {
-  // Error Handling
-  // maskNRIC ? (maskNRIC = true) : (maskNRIC = false);
-
-  return client.get(patientList, maskNRIC);
+const getPatientList = async (maskNRIC = true, patientStatus = null) => {
+  return client.get(patientList, { maskNRIC, patientStatus });
 };
 
-const getPatientListByUserId = async (maskNRIC = true) => {
-  return client.get(patientListByUserId, maskNRIC);
+const getPatientListByLoggedInCaregiver = async (
+  maskNRIC = true,
+  patientStatus = null,
+) => {
+  return client.get(patientListByUserId, { maskNRIC, patientStatus });
+};
+
+const getPatientStatusCountList = async () => {
+  return client.get(patientStatusCountList, {});
+};
+
+const getPatientAllergy = async (patientID) => {
+  let params;
+  params = {
+    patientID,
+  };
+
+  return client.get(patientAllergy, params);
+};
+
+const getPatientVitalList = async (patientID) => {
+  let params;
+  params = {
+    patientID,
+  };
+
+  return client.get(patientVitalList, params);
+};
+
+const getPatientPrescriptionList = async (patientID) => {
+  let params;
+  params = {
+    patientID,
+  };
+
+  return client.get(patientPrescriptionList, params);
+};
+
+const getPatientProblemLog = async (patientID) => {
+  let params;
+  params = {
+    patientID,
+  };
+
+  return client.get(patientProblemLog, params);
+};
+
+const getPatientMedicalHistory = async (patientID) => {
+  let params;
+  params = {
+    patientID,
+  };
+
+  return client.get(patientMedicalHistory, params);
+};
+
+const getPatientMedication = async (medicationID) => {
+  let params;
+  params = {
+    medicationID,
+  };
+
+  return client.get(medicationEndpoint, params);
+};
+
+const getPatientRoutine = async (patientID) => {
+  let params;
+  params = {
+    patientID,
+  };
+
+  return client.get(patientRoutine, params);
+};
+
+const getPatientMobility = async (patientID) => {
+  let params;
+  params = {
+    patientID,
+  };
+
+  return client.get(patientMobility, params);
+};
+
+const getPatientPhoto = async (patientID) => {
+  let params;
+  params = {
+    patientID,
+  };
+
+  return client.get(photoEndpoint, params);
+};
+
+const getPatientPhotoByCategory = async (patientID, albumCategoryListID) => {
+  let params;
+  params = {
+    patientID,
+    albumCategoryListID,
+  };
+
+  return client.get(patientPhoto, params);
 };
 
 // **********************  POST REQUESTS *************************
@@ -97,21 +244,15 @@ const addPatient = (patientFormData) => {
       value = '';
     }
 
-    // if no profile image is uploaded, upload a placeholder profile image
+    // if no profile image is uploaded, don't use profile pic as a parameter
     if (
       key === 'UploadProfilePicture' &&
       Object.values(value).every((val) => val === '')
     ) {
-      const placeholderImage = Image.resolveAssetSource(
-        require('../assets/placeholder.png'),
-      );
-
-      value = {
-        uri: placeholderImage.uri,
-        name: 'placeholder.png',
-        type: 'image/png',
-      };
+      continue;
     }
+
+    // console.log("PLACEHOLDER",placeholderImage);
     if (key === 'NRIC') {
       value = value.toUpperCase();
     }
@@ -130,7 +271,429 @@ const addPatient = (patientFormData) => {
   return client.post(patientAdd, patientData, { headers });
 };
 
+// AddPatientAllergy is used in AddPatientAllergyModal.js - Joel
+const AddPatientAllergy = async (patientID, allergyData) => {
+  const payload = {
+    patientID: patientID,
+    allergyListID: allergyData.AllergyListID,
+    allergyReactionListID: allergyData.AllergyReactionListID,
+    allergyRemarks: allergyData.AllergyRemarks,
+  };
+  return client.post(patientAllergyAdd, payload);
+};
+
+const AddPatientVital = async (patientID, vitalData) => {
+  const payload = {
+    PatientID: patientID,
+    Temperature: vitalData.temperature,
+    SystolicBP: vitalData.systolicBP,
+    DiastolicBP: vitalData.diastolicBP,
+    HeartRate: vitalData.heartRate,
+    SpO2: vitalData.spO2,
+    BloodSugarLevel: vitalData.bloodSugarLevel,
+    Height: vitalData.height,
+    Weight: vitalData.weight,
+    VitalRemarks: vitalData.vitalRemarks,
+    AfterMeal: vitalData.afterMeal,
+  };
+  console.log('payload', payload);
+  return client.post(patientVitalAdd, payload);
+};
+
+const addPatientProblemLog = async (patientID, userID, problemLogData) => {
+  const payload = {
+    userID: userID,
+    patientID: patientID,
+    problemLogRemarks: problemLogData.problemLogRemarks,
+    problemLogListID: problemLogData.problemLogListID,
+  };
+
+  return client.post(patientProblemLogAdd, payload);
+};
+
+const AddPatientMedicalHistory = async (patientID, medicalData) => {
+  const payload = {
+    PatientID: patientID,
+    medicalDetails: medicalData.medicalDetails,
+    informationSource: medicalData.informationSource,
+    medicalRemarks: medicalData.medicalRemarks,
+    medicalEstimatedDate: medicalData.medicalEstimatedDate,
+  };
+  return client.post(patientMedicalHistoryAdd, payload);
+};
+
+const addPatientMedication = async (patientID, medicationData) => {
+  const payload = {
+    patientID: patientID,
+    prescriptionName: medicationData.prescriptionName,
+    dosage: medicationData.dosage,
+    administerTime: medicationData.administerTime,
+    instruction: medicationData.instruction,
+    startDateTime: medicationData.startDateTime,
+    endDateTime: medicationData.endDateTime,
+    prescriptionRemarks: medicationData.prescriptionRemarks,
+  };
+  return client.post(patientMedicationAdd, payload);
+};
+
+const addPatientMedicalHistory = async (patientID, hxData) => {
+  const payload = {
+    patientID: patientID,
+    informationSource: hxData.informationSource,
+    medicalDetails: hxData.medicalDetails,
+    medicalRemarks: hxData.medicalRemarks,
+    medicalEstimatedDate: hxData.medicalEstimatedDate,
+  };
+  return client.post(patientMedicalHistoryAdd, payload);
+};
+
+const addPatientPrescription = async (patientID, prescriptionData) => {
+  const payload = {
+    patientID: patientID,
+    prescriptionListID: prescriptionData.prescriptionListID,
+    dosage: prescriptionData.dosage,
+    frequencyPerDay: prescriptionData.frequencyPerDay,
+    instruction: prescriptionData.instruction,
+    startDate: prescriptionData.startDate,
+    endDate: prescriptionData.endDate,
+    afterMeal: prescriptionData.afterMeal,
+    prescriptionRemarks: prescriptionData.prescriptionRemarks,
+    isChronic: prescriptionData.isChronic,
+  };
+  return client.post(patientPrescriptionAdd, payload);
+};
+
+const addPatientMobility = async (patientID, mobilityData) => {
+  const payload = {
+    patientID: patientID,
+    mobilityListId: mobilityData.mobilityListId,
+    mobilityListDesc: mobilityData.mobilityListDesc,
+    mobilityRemark: mobilityData.mobilityRemark,
+    isRecovered: mobilityData.isRecovered,
+  };
+  return client.post(patientMobilityAdd, payload);
+};
+
+const addPatientPhoto = async (patientID, photoData) => {
+  const photoFormData = new FormData();
+
+  // Append the image file if it exists, using the key "Photo"
+  if (photoData.Photo) {
+    photoFormData.append('Photo', {
+      uri: photoData.Photo.uri,
+      name: photoData.Photo.name,
+      type: photoData.Photo.type,
+    });
+  }
+
+  // Append HolidayExperience fields as defined in Swagger.
+  // Convert Date objects to ISO strings if needed.
+  if (photoData.HolidayExperienceAddDTO) {
+    const he = photoData.HolidayExperienceAddDTO;
+    photoFormData.append(
+      'HolidayExperienceAddDTO.CountryListID',
+      he.CountryListID != null ? he.CountryListID : '',
+    );
+    let startDate = he.StartDate;
+    if (startDate instanceof Date) {
+      startDate = startDate.toISOString();
+    }
+    photoFormData.append('HolidayExperienceAddDTO.StartDate', startDate || '');
+
+    let endDate = he.EndDate;
+    if (endDate instanceof Date) {
+      endDate = endDate.toISOString();
+    }
+    photoFormData.append('HolidayExperienceAddDTO.EndDate', endDate || '');
+  } else {
+    // Alternatively, if the holiday experience fields are provided at the top level:
+    if (photoData.CountryListID != null) {
+      photoFormData.append(
+        'HolidayExperienceAddDTO.CountryListID',
+        photoData.CountryListID,
+      );
+    }
+    if (photoData.StartDate) {
+      let startDate = photoData.StartDate;
+      if (startDate instanceof Date) {
+        startDate = startDate.toISOString();
+      }
+      photoFormData.append('HolidayExperienceAddDTO.StartDate', startDate);
+    }
+    if (photoData.EndDate) {
+      let endDate = photoData.EndDate;
+      if (endDate instanceof Date) {
+        endDate = endDate.toISOString();
+      }
+      photoFormData.append('HolidayExperienceAddDTO.EndDate', endDate);
+    }
+  }
+
+  // Append the remaining fields.
+  // If a field is not provided, we send an empty string (per Swagger's "Send empty value" note).
+  photoFormData.append('PhotoDetails', photoData.PhotoDetails || '');
+  photoFormData.append('AlbumCategoryName', photoData.AlbumCategoryName || '');
+  photoFormData.append(
+    'AlbumCategoryListID',
+    photoData.AlbumCategoryListID != null ? photoData.AlbumCategoryListID : '',
+  );
+  photoFormData.append('PatientID', patientID);
+
+  // Do not manually set the Content-Type header; let the HTTP client handle the multipart boundary.
+  return client.post(patientPhotoAdd, photoFormData);
+};
+
 // ************************* UPDATE REQUESTS *************************
+const updatePatient = async (data) => {
+  const formData = new FormData();
+
+  for (const key in data) {
+    var value = data[key];
+    formData.append(key, value);
+  }
+
+  const headers = { 'Content-Type': 'multipart/form-data' };
+
+  return client.put(patientUpdate, formData, { headers });
+};
+
+const updatePatientAllergy = async (patientID, allergyData) => {
+  const payload = {
+    patientID: patientID,
+    allergyListID: allergyData.AllergyListID,
+    allergyReactionListID: allergyData.AllergyReactionListID,
+    allergyRemarks: allergyData.AllergyRemarks,
+  };
+  return client.put(patientAllergyUpdate, payload);
+};
+
+const deletePatientAllergy = async (allergyData) => {
+  const payload = {
+    allergyID: allergyData.allergyID,
+  };
+  return client.put(patientAllergyDelete, payload);
+};
+
+const updatePatientVital = async (patientID, vitalData) => {
+  const payload = {
+    PatientID: patientID,
+    Temperature: vitalData.temperature,
+    SystolicBP: vitalData.systolicBP,
+    DiastolicBP: vitalData.diastolicBP,
+    HeartRate: vitalData.heartRate,
+    SpO2: vitalData.spO2,
+    BloodSugarLevel: vitalData.bloodSugarLevel,
+    Height: vitalData.height,
+    Weight: vitalData.weight,
+    VitalRemarks: vitalData.vitalRemarks,
+    AfterMeal: vitalData.afterMeal,
+  };
+  return client.put(patientVitalUpdate, payload);
+};
+
+const deletePatientVital = async (vitalID) => {
+  return client.put(patientVitalDelete, { vitalID });
+};
+
+const updateMedication = async (patientID, medicationData) => {
+  const payload = {
+    patientID: patientID,
+    medicationID: medicationData.medicationID,
+    prescriptionName: medicationData.prescriptionName,
+    dosage: medicationData.dosage,
+    administerTime: medicationData.administerTime,
+    instruction: medicationData.instruction,
+    startDateTime: medicationData.startDateTime,
+    endDateTime: medicationData.endDateTime,
+    prescriptionRemarks: medicationData.prescriptionRemarks,
+  };
+  return client.put(patientMedicationUpdate, payload);
+};
+
+const updateProblemLog = async (patientID, userID, logData) => {
+  const payload = {
+    userID: userID,
+    patientID: patientID,
+    problemLogID: logData.problemLogID,
+    problemLogListID: logData.problemLogListID,
+    problemLogRemarks: logData.problemLogRemarks,
+  };
+  return client.put(patientProblemLogUpdate, payload);
+};
+
+const updatePrescription = async (patientID, prescriptionData) => {
+  const payload = {
+    patientID: patientID,
+    prescriptionID: prescriptionData.prescriptionID,
+    prescriptionListID: prescriptionData.prescriptionListID,
+    dosage: prescriptionData.dosage,
+    frequencyPerDay: prescriptionData.frequencyPerDay,
+    instruction: prescriptionData.instruction,
+    startDate: prescriptionData.startDate,
+    endDate: prescriptionData.endDate,
+    afterMeal: prescriptionData.afterMeal,
+    prescriptionRemarks: prescriptionData.prescriptionRemarks,
+    isChronic: prescriptionData.isChronic,
+  };
+  return client.put(patientPrescriptionUpdate, payload);
+};
+
+const updateMobility = async (patientID, mobilityData) => {
+  const payload = {
+    patientID: patientID,
+    mobilityId: mobilityData.mobilityId,
+    mobilityListId: mobilityData.mobilityListId,
+    mobilityListDesc: mobilityData.mobilityListDesc,
+    mobilityRemark: mobilityData.mobilityRemark,
+    isRecovered: mobilityData.isRecovered,
+  };
+  return client.put(patientMobilityUpdate, payload);
+};
+
+const updatePatientPhoto = async (patientID, photoData) => {
+  const photoFormData = new FormData();
+
+  // Append the image file if it exists.
+  if (photoData.Photo) {
+    if (typeof photoData.Photo === 'object' && photoData.Photo.uri) {
+      photoFormData.append('Photo', {
+        uri: photoData.Photo.uri,
+        name: photoData.Photo.name,
+        type: photoData.Photo.type,
+      });
+    } else if (typeof photoData.Photo === 'string') {
+      // No new photo; send empty so that the backend retains the existing image.
+      photoFormData.append('Photo', '');
+    }
+  } else {
+    photoFormData.append('Photo', '');
+  }
+
+  // Append holiday experience fields conditionally.
+  if (photoData.IsHoliday) {
+    // Merge holiday experience data:
+    const holidayExpID =
+      (photoData.HolidayExperienceUpdateDTO &&
+        photoData.HolidayExperienceUpdateDTO.HolidayExpID) ||
+      '';
+    const countryListID =
+      photoData.CountryListID ||
+      (photoData.HolidayExperienceUpdateDTO &&
+        photoData.HolidayExperienceUpdateDTO.CountryListID) ||
+      '';
+
+    // For StartDate, use the top-level value if present; otherwise, fall back to the nested one.
+    let startDate = photoData.StartDate;
+    if (
+      !startDate &&
+      photoData.HolidayExperienceUpdateDTO &&
+      photoData.HolidayExperienceUpdateDTO.StartDate
+    ) {
+      startDate = photoData.HolidayExperienceUpdateDTO.StartDate;
+    }
+    if (startDate instanceof Date) {
+      startDate = startDate.toISOString();
+    }
+
+    // Similarly for EndDate.
+    let endDate = photoData.EndDate;
+    if (
+      !endDate &&
+      photoData.HolidayExperienceUpdateDTO &&
+      photoData.HolidayExperienceUpdateDTO.EndDate
+    ) {
+      endDate = photoData.HolidayExperienceUpdateDTO.EndDate;
+    }
+    if (endDate instanceof Date) {
+      endDate = endDate.toISOString();
+    }
+
+    photoFormData.append(
+      'HolidayExperienceUpdateDTO.HolidayExpID',
+      holidayExpID,
+    );
+    photoFormData.append(
+      'HolidayExperienceUpdateDTO.CountryListID',
+      countryListID,
+    );
+    photoFormData.append(
+      'HolidayExperienceUpdateDTO.StartDate',
+      startDate || '',
+    );
+    photoFormData.append('HolidayExperienceUpdateDTO.EndDate', endDate || '');
+  } else {
+    photoFormData.append(
+      'HolidayExperienceUpdateDTO',
+      JSON.stringify({
+        HolidayExpID: null,
+        CountryListID: null,
+        StartDate: null,
+        EndDate: null,
+      }),
+    );
+  }
+
+  // Append the remaining fields.
+  photoFormData.append('PhotoDetails', photoData.PhotoDetails || '');
+  if (photoData.AlbumCategoryListID) {
+    photoFormData.append('AlbumCategoryListID', photoData.AlbumCategoryListID);
+  } else {
+    photoFormData.append(
+      'AlbumCategoryName',
+      photoData.AlbumCategoryName || '',
+    );
+  }
+  photoFormData.append('PatientID', patientID);
+  photoFormData.append('PatientPhotoID', photoData.PatientPhotoID);
+
+  console.log('Final FormData:', photoFormData);
+
+  return client.put(patientPhotoUpdate, photoFormData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+
+const deleteMedication = async (medicationData) => {
+  const payload = {
+    medicationID: medicationData.medicationID,
+  };
+  return client.put(patientMedicationDelete, payload);
+};
+
+const deleteMedicalHistory = async (medHistoryData) => {
+  const payload = {
+    medicalHistoryID: medHistoryData.medicalHistoryID,
+  };
+  return client.put(patientMedicalHistoryDelete, payload);
+};
+
+const deleteProblemLog = async (logData) => {
+  const payload = {
+    problemLogID: logData.problemLogID,
+  };
+  return client.put(patientProblemLogDelete, payload);
+};
+
+const deletePrescription = async (prescriptionData) => {
+  const payload = {
+    prescriptionID: prescriptionData.prescriptionID,
+  };
+  return client.put(patientPrescriptionDelete, payload);
+};
+
+const deleteMobility = async (mobilityData) => {
+  const payload = {
+    mobilityId: mobilityData.mobilityId,
+  };
+  return client.put(patientMobilityDelete, payload);
+};
+
+const deletePatientPhoto = async (photoData) => {
+  const payload = {
+    patientPhotoID: photoData.patientPhotoID,
+  };
+  return client.put(patientPhotoDelete, payload);
+};
 
 /*
  * Expose your end points here
@@ -138,6 +701,42 @@ const addPatient = (patientFormData) => {
 export default {
   getPatient,
   getPatientList,
-  getPatientListByUserId,
+  getPatientListByLoggedInCaregiver,
+  getPatientStatusCountList,
+  getPatientAllergy,
+  getPatientVitalList,
+  getPatientPrescriptionList,
+  getPatientProblemLog,
+  getPatientMedicalHistory,
+  getPatientMedication,
+  getPatientRoutine,
+  getPatientMobility,
+  getPatientPhoto,
+  getPatientPhotoByCategory,
   addPatient,
+  AddPatientAllergy,
+  AddPatientVital,
+  addPatientProblemLog,
+  AddPatientMedicalHistory,
+  addPatientMedication,
+  addPatientMedicalHistory,
+  addPatientPrescription,
+  addPatientMobility,
+  addPatientPhoto,
+  updatePatient,
+  updatePatientAllergy,
+  deletePatientAllergy,
+  updatePatientVital,
+  deletePatientVital,
+  updateMedication,
+  deleteMedication,
+  deleteMedicalHistory,
+  deleteProblemLog,
+  updateProblemLog,
+  updatePrescription,
+  deletePrescription,
+  updateMobility,
+  deleteMobility,
+  updatePatientPhoto,
+  deletePatientPhoto,
 };

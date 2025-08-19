@@ -2,6 +2,7 @@ module.exports = {
     bracketSpacing: true,
     singleQuote: true,
     trailingComma: 'all',
+    endOfLine: 'auto',
 };
 
 // Note: Sample configuration if needed
