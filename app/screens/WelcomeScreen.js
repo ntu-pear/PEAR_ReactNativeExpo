@@ -96,26 +96,32 @@ function WelcomeScreen(props) {
 
     if(result && result.ok) {
       console.log('User authenticated - storing tokens...');
-
-      // Store token refresh and access tokens returned by backend
-      const user = jwt_decode(result.data.data.accessToken);
-      await authStorage.storeToken('userAuthToken', result.data.data.accessToken);
-      await authStorage.storeToken(
-        'userRefreshToken',
-        result.data.data.refreshToken,
-      );
-  
       // set api header if empty
       console.log('Setting header...');
       apiHandlerHook.setHeader();
       console.log('Header updated...');
+      // Fetch profile and put it into AuthContext → this switches you out of the Auth stack
+      console.log('Fetching profile...');
+      const me = await userApi.getUser(); // GET /api/v1/user/get_user/
+      if (me?.ok) {
+        authContext.setUser(me.data);     // main way your app knows you’re logged in
+        console.log('Profile loaded, user set in context'); // NEW
+      } else {
+    // NEW: show a clean error if profile fails (don’t silently proceed)
+    console.log('Profile fetch failed after login:', me?.status, me?.data);
+    setIsLoading(false);
+    setIsError(true);
+    setStatusCode(me?.status ?? 500);
+    setErrorMsg(me?.data?.message || 'Could not load profile');
+    return;
+  }
       setIsLoading(false);
       setIsError(false);
       setIsError(false);
       setStatusCode(result.status);
       setErrorMsg('');
       console.log('Logging in!');
-      authContext.setUser(user);
+      
     } else if(result && !result.ok){
       console.log('Error:', result);
       setIsLoading(false);
@@ -126,7 +132,7 @@ function WelcomeScreen(props) {
         setErrorMsg(errors.emptyParameters);
       }
       else{
-        setErrorMsg(errors.loginError);
+        setErrorMsg(result?.data?.message || errors.loginError);
       }
       return;
     }
@@ -141,7 +147,11 @@ function WelcomeScreen(props) {
       }, 5000);
     });
 
-    const apiPromise = userApi.loginUser(username, userRole, password);
+    const apiPromise = userApi.loginUser({
+      email: (username || '').trim().toLowerCase(),
+      role: userRole,
+      password,
+    });
     
     try {
       const result = await Promise.race([apiPromise, timeoutPromise]);

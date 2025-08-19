@@ -16,44 +16,39 @@ function ResetPasswordScreen(props) {
   const { navigation } = props;
   const [role, setRole] = useState('Supervisor');
   const [email, setEmail] = useState('');
+  const [nric, setNric] = useState('');
+  const [dob, setDob] = useState(''); // optional: 'YYYY-MM-DD'
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
   const testID = 'reset_password_screen';
 
-  const handleEmail = (e) => {
-    setEmail(e);
-  };
 
   const schema = Yup.object().shape({
-    email: Yup.string()
-      .email('Invalid email address.')
-      .required('Email is a required field.'),
+    nric: Yup.string().required('NRIC is a required field.'),
+    email: Yup.string().email('Invalid email address.').required('Email is a required field.'),
     role: Yup.string().required('Role is a required field.'),
-  });
+    // dob optional – add rules if your backend strictly validates format:
+    // nric_DateOfBirth: Yup.string().matches(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD'),
+    });
 
-  const validate = async () => {
-    let formData = {
-      email: email,
-      role: role,
-    };
-
-    try {
-      // Validate the form data against the schema and set errors when needed
-      await schema.validate(formData, { abortEarly: false });
-      return true;
-    } catch (error) {
-      if (error.inner) {
-        const errorList = {};
-        error.inner.forEach((e) => {
-          errorList[e.path] = e.message;
-        });
-        // console.log(errorList);
-        setErrors(errorList);
+    const validate = async () => {
+      const formData = { nric, email, role };
+      try {
+        await schema.validate(formData, { abortEarly: false });
+        setErrors({});
+        return true;
+      } catch (error) {
+        if (error.inner) {
+          const errorList = {};
+          error.inner.forEach((e) => {
+            errorList[e.path] = e.message;
+          });
+          setErrors(errorList);
+        }
         return false;
       }
-    }
-  };
+    };
 
   const onPressReset = async () => {
     const validation = await validate();
@@ -62,11 +57,20 @@ function ResetPasswordScreen(props) {
     }
 
     setIsLoading(true);
-    const result = await userApi.resetPassword(email, role);
-    if (!result.ok) {
-      setErrors({
-        api: result.data.message,
+    const result = await userApi.requestResetPassword({
+      nric,
+      email,
+      roleName: role,
+      nric_DateOfBirth: dob || undefined,
       });
+
+    if (!result.ok) {
+        const apiMsg =
+        result?.data?.message ||
+        (Array.isArray(result?.data?.detail)
+          ? result.data.detail.map(d => d.msg).join('\n')
+          : 'Unable to request password reset.');
+      setErrors({ api: apiMsg });
       setIsLoading(false);
       return;
     }
@@ -80,33 +84,47 @@ function ResetPasswordScreen(props) {
   return (
     <View testID={testID}>
       <VStack>
-        <Center>
-          <Center w={Platform.OS === 'web' ? '62.5%' : '100%'}>
-            <CustomFormControl
-              isRequired
-              isInvalid={'email' in errors}
-              title="Email"
-              onChangeText={handleEmail}
-              placeholder="jess@gmail.com"
-              ErrorMessage={errors.email}
-              value={email}
-            />
-          </Center>
+        <Center w={Platform.OS === 'web' ? '62.5%' : '100%'}>
+          {/* NRIC */}
+          <CustomFormControl
+            label="NRIC"
+            placeholder="S1234567A"
+            onChangeText={(v) => setNric(v.trim().toUpperCase())} 
+            value={nric}
+            error={errors.nric}
+          />
 
+          {/* Email */}
+          <CustomFormControl
+            label="Email"
+            placeholder="jess@gmail.com"
+            onChangeText={setEmail}
+            value={email}
+            error={errors.email}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+
+          {/* (Optional) Date of Birth */}
+          <CustomFormControl
+            label="Date of Birth (optional)"
+            placeholder="YYYY-MM-DD"
+            onChangeText={setDob}
+            value={dob}
+            error={errors.nric_DateOfBirth}
+          />
+
+          {/* Role */}
           <FormControl
             maxW={Platform.OS === 'web' ? '50%' : '80%'}
             mt="5"
             isRequired
+            isInvalid={'role' in errors}
           >
+            <FormControl.Label _text={{ ...typography.body1SemiBold }}>
+              Role
+            </FormControl.Label>
             <VStack>
-              <FormControl.Label
-                _text={{
-                  ...typography.body1SemiBold,
-                }}
-              >
-                Role
-              </FormControl.Label>
-
               <Select
                 accessibilityLabel="Select Role"
                 borderRadius="25"
@@ -131,11 +149,12 @@ function ResetPasswordScreen(props) {
           <Box>
             <ErrorMessage visible={'api' in errors} message={errors.api} />
           </Box>
+
           <View style={styles.buttonsContainer}>
             {isLoading ? (
-              <ActivityIndicator visible />
+              <ActivityIndicator />
             ) : (
-              <AppButton title="Reset" color="green" onPress={onPressReset} />
+              <AppButton title="Reset" color="green" onPress={onPressReset} disabled={isLoading} />
             )}
           </View>
         </Center>
