@@ -39,13 +39,13 @@ function AccountScreen(props) {
   };
 
   const retrieveCurrentUser = async () => {
-    // fetch full user profile information by calling api using user ID
-    const response = await userApi.getUser(user.userID, false);
+    // v1 self endpoint: /api/v1/user/get_user/
+    const response = await userApi.getUser();
     if (!response.ok) {
       console.log('Request failed with status code: ', response.status);
       return;
     }
-    setUser(response.data.data);
+    setUser(response.data);
   };
 
   // used to confirm that data has returned from apis before loading the page - Russell
@@ -81,23 +81,22 @@ function AccountScreen(props) {
   );
 
   const getCurrentUser = async () => {
-    // get current user from authStorage
-    const currentUser = await authStorage.getUser();
-    console.log(currentUser);
-    // fetch full user profile information by calling api using user ID
-    const response = await userApi.getUser(currentUser.userID, false);
+    // v1 self endpoint: /api/v1/user/get_user/
+    const response = await userApi.getUser();
     if (!response.ok) {
-      // Proceed to log out if account screen does not load due to api failure
-      // Note: should use useCheckExpiredThenLogOut hook but it isnt working and had no time to fix
-
-      // reset the navigation stack when logging out
-      // resetNavigation.dispatch(resetAction);
-      onPressLogOut();
-      return;
+      // only force logout if the token is invalid/expired
+      if (response.status === 401) {
+        onPressLogOut();
+      } else {
+        console.log('Account fetch failed:', response.status, response?.data);
+      }
+      return { data: null };
     }
+      
     setIsLoading(false);
-    return response.data;
-  };
+    // keep return shape so callers using `response.data` still work
+    return { data: response.data };
+    };
 
   const handleOnPress = () => {
     navigation.push(routes.ACCOUNT_VIEW, { ...user });
@@ -108,9 +107,9 @@ function AccountScreen(props) {
   ) : (
     <VStack w="100%" h="100%" alignItems="center">
       <ProfileNameButton
-        profilePicture={user.profilePicture}
-        profileLineOne={user.preferredName}
-        profileLineTwo={user.role}
+        profilePicture={typeof user.profilePicture === 'string' ? user.profilePicture : ''}
+        profileLineOne={(user.preferredName || user.firstName || user.email || 'User') + ''}
+        profileLineTwo={(user.role || '') + ''}
         size={SCREEN_WIDTH / 5.5}
         isPatient={false}
         // isVertical={false}

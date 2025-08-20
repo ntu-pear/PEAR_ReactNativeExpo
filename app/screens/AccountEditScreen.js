@@ -40,8 +40,10 @@ function AccountEditScreen(props) {
 
   // Account data to be submitted
   const [formData, setFormData] = useState({
-    PreferredName: props.route.params.preferredName,
-    ContactNo: props.route.params.contactNo,
+    PreferredName: props.route.params?.preferredName ?? '',
+    ContactNo: props.route.params?.contactNo ?? '',
+    Email: props.route.params?.email ?? '',          // if you show email
+    TwoFactorEnabled: !!props.route.params?.twoFactorEnabled,
   });
 
   // This useEffect enables the page to show correct error checking.
@@ -85,7 +87,14 @@ function AccountEditScreen(props) {
   // form submission when save button is pressed
   const submitForm = async () => {
     setIsLoading(true);
-    const result = await userApi.updateUser(formData);
+    const payload = {
+      preferredName: (formData?.PreferredName || '').trim() || undefined, // map YOUR state → v1 keys
+      contactNo: formData?.ContactNo || undefined,
+      email: (formData?.Email || '').trim() || undefined,
+      twoFactorEnabled: !!formData?.TwoFactorEnabled,
+    };
+    const result = await userApi.updateUser(payload); // uses your v1-first wrapper, auto-fallback to legacy
+    
     let alertTitle = '';
     let alertDetails = '';
 
@@ -176,7 +185,7 @@ function AccountEditScreen(props) {
                 <InputField
                   isRequired
                   title={'Preferred Name'}
-                  value={formData.PreferredName}
+                  value={formData.PreferredName ?? ''}
                   onChangeText={handleFormData('PreferredName')}
                   onEndEditing={handlePrefNameError}
                   dataType="name"
@@ -185,7 +194,7 @@ function AccountEditScreen(props) {
                 <InputField
                   isRequired
                   title={'Contact No.'}
-                  value={formData.ContactNo}
+                  value={formData.ContactNo ?? ''}
                   onChangeText={handleFormData('ContactNo')}
                   onEndEditing={handleMobileNoError}
                   dataType={'mobile phone'}
