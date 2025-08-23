@@ -1,9 +1,8 @@
 // Libs
-import React, { useContext, useEffect, useState } from 'react';
-import { Platform, Alert, Button } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import { Image, VStack, AspectRatio, Center, ScrollView } from 'native-base';
-import AuthContext from 'app/auth/context';
+import React, { useEffect, useState } from 'react';
+import { Platform, Alert } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import { Image, VStack, AspectRatio, Center, ScrollView, Box, Pressable, Icon, Badge } from 'native-base';
 
 // API
 import userApi from 'app/api/user';
@@ -14,7 +13,6 @@ import routes from 'app/navigation/routes';
 // Components
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import InformationCard from 'app/components/InformationCard';
-import authStorage from 'app/auth/authStorage';
 
 function AccountViewScreen(props) {
   const { navigation } = props;
@@ -22,6 +20,10 @@ function AccountViewScreen(props) {
   const [userProfile, setUserProfile] = useState({});
   const [unMaskedUserNRIC, setUnMaskedUserNRIC] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [profileImageUri, setProfileImageUri] = useState(null);
+  const [isPicLoading, setIsPicLoading] = useState(false);
+  const [isDeletingPic, setIsDeletingPic] = useState(false);
+
 
 const onPickAndUploadPhoto = async () => {
   // Ask permission
@@ -61,6 +63,14 @@ const onPickAndUploadPhoto = async () => {
     // Refresh so the new image shows
     const refetch = await userApi.getUser();       // GET /api/v1/user/get_user/
     if (refetch.ok) setUserProfile(refetch.data);
+    const refreshed = await userApi.getProfilePicV1();
+    const newUrl =
+    refreshed?.data?.url ||
+    refreshed?.data?.image_url ||
+    refreshed?.data?.profile_pic_url ||
+    null;
+  setProfileImageUri(newUrl);
+
   } finally {
     setUploading(false);
   }
@@ -103,6 +113,53 @@ const onPickAndUploadPhoto = async () => {
     setUnMaskedUserNRIC(response.data.nric);
   };
 
+  const loadProfilePic = async () => {
+    try {
+      setIsPicLoading(true);
+      const res = await userApi.getProfilePicV1(); // GET /api/v1/user/profile_pic/
+      const raw =
+        res?.data?.url ||
+        res?.data?.image_url ||
+        res?.data?.profile_pic_url ||
+        null;
+      const clean = (typeof raw === 'string' && raw.trim().length && /^https?:\/\//.test(raw))
+        ? raw
+        : null;
+      setProfileImageUri(clean);
+    } catch (e) {
+      // ok if user has no photo yet
+    } finally {
+      setIsPicLoading(false);
+    }
+  };
+
+  const handleRemovePhoto = async () => {
+    if (!profileImageUri) return;
+    try {
+      setIsDeletingPic(true);
+      const del = await userApi.deleteProfilePicV1(); // DELETE /api/v1/user/delete_profile_pic/
+      if (!del?.ok) {
+        Alert.alert('Profile Photo', del?.data?.detail || 'Failed to remove photo.');
+        return;
+      }
+      setProfileImageUri(null);
+      Alert.alert('Profile Photo', 'Removed successfully.');
+    } catch (err) {
+      const msg = err?.response?.data?.detail || err?.message || 'Failed to remove photo.';
+      Alert.alert('Profile Photo', msg);
+    } finally {
+      setIsDeletingPic(false);
+    }
+  };
+  
+  const confirmRemove = () =>
+    Alert.alert('Remove Photo', 'Are you sure you want to remove your profile picture?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Remove', style: 'destructive', onPress: handleRemovePhoto },
+    ]);
+  
+  
+
   // used to confirm that data has returned from apis before loading the page - Russell
   useEffect(() => {
     if(userProfile !== undefined && Object.keys(userProfile).length>0){
@@ -116,23 +173,20 @@ const onPickAndUploadPhoto = async () => {
       setUserProfile({});
       setIsLoading(true);
       retrieveCurrentUser();
+      loadProfilePic();
     });
     return navListener;
   }, [navigation]);
 
   const handleOnPress = () => {
     navigation.push(routes.ACCOUNT_EDIT, { 
-      userData: userData,
-      navigation: navigation,
-      unMaskedUserNRIC: unMaskedUserNRIC,
-       ...userProfile 
+      userData,
+      unMaskedUserNRIC,
       });
   };
   const FALLBACK =
   'https://res.cloudinary.com/dbpearfyp/image/upload/v1634523641/User/Adeline_Tan_Sxxxx515G/ProfilePicture/ffo5oc4jhurmtjjhqcib.jpg';
-  const hasPic =
-  typeof userProfile?.profilePicture === 'string' &&
-  userProfile.profilePicture.trim().length > 0;
+
 
   return isLoading ? (
     <ActivityIndicator visible />
@@ -141,21 +195,27 @@ const onPickAndUploadPhoto = async () => {
       <VStack mt="4" ml="4" px={Platform.OS === 'web' ? '10%' : null}>
         <Center>
           <Center>
-            <AspectRatio w="80%" ratio={1} mb="2" alignSelf="center">
-              <Image
-                borderRadius="full"
-                fallbackSource={{ uri: FALLBACK }}
-                source={{ uri: hasPic ? userProfile.profilePicture : FALLBACK }}
-                alt="user_image"
+          <AspectRatio w="80%" ratio={1} mb="2" alignSelf="center">
+            <Box w="100%" h="100%" position="relative">
+              <Pressable
+                onPress={() => navigation.navigate(routes.ACCOUNT_PHOTO)}
+                disabled={uploading || isDeletingPic}
+                style={{ width: '100%', height: '100%' }}
+              >
+                <Image
+                  w="100%"
+                  h="100%"
+                  borderRadius="full"
+                  source={{ uri: profileImageUri || FALLBACK }}
+                  alt="user_image"
                 />
+              </Pressable>
 
-            </AspectRatio>
-
-            <Button
-              title={uploading ? 'Uploading…' : 'Change Photo'}
-              onPress={onPickAndUploadPhoto}
-              disabled={uploading}
-            />
+              <Badge position="absolute" right="3" bottom="3" rounded="full" bg="primary.600" p="2">
+                <Icon as={MaterialIcons} name="photo-camera" color="white" size="sm" />
+              </Badge>
+            </Box>
+          </AspectRatio>
 
           </Center>
         </Center>

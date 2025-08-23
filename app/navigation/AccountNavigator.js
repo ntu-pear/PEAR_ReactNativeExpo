@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AccountScreen from 'app/screens/AccountScreen';
 import AccountViewScreen from 'app/screens/AccountViewScreen';
 import AboutScreen from 'app/screens/AboutScreen';
+import AccountPhotoScreen from 'app/screens/AccountPhotoScreen';
 // Import Constants from routes
 import routes from 'app/navigation/routes';
 import SettingsScreen from 'app/screens/SettingsScreen';
@@ -59,6 +60,11 @@ function AccountNavigator() {
           headerBackTitleVisible: false,
           title: 'Settings',
         }}
+      />
+      <Stack.Screen
+        name={routes.ACCOUNT_PHOTO}
+        component={AccountPhotoScreen}
+        options={{ title: 'Edit Profile Photo' }}
       />
       <Stack.Screen
         name={routes.CHANGE_PASSWORD}

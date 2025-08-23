@@ -155,33 +155,6 @@ function AccountEditScreen(props) {
           <Box w="100%">
             <VStack>
               <View style={styles.formContainer}>
-                <Center alignSelf="center">
-                  <TouchableOpacity
-                    onPress={pickImage}
-                  >
-                    <AspectRatio
-                      w='70%'
-                      ratio={1}
-                      mb="2"
-                    >
-                      <Image
-                        borderRadius="full"
-                        fallbackSource={{
-                          uri: 'https://res.cloudinary.com/dbpearfyp/image/upload/v1634523641/User/Adeline_Tan_Sxxxx515G/ProfilePicture/ffo5oc4jhurmtjjhqcib.jpg',
-                        }}
-                        resizeMode="cover"
-                        source={{
-                          uri: profilePicture
-                            ? `${profilePicture}`
-                            : 'https://res.cloudinary.com/dbpearfyp/image/upload/v1634523641/User/Adeline_Tan_Sxxxx515G/ProfilePicture/ffo5oc4jhurmtjjhqcib.jpg',
-                        }}
-                        alt="user_image"
-                      />
-                    </AspectRatio>
-                    <Text style={styles.redText}> Click to edit profile picture</Text>
-                  </TouchableOpacity>
-                </Center>
-
                 <InputField
                   isRequired
                   title={'Preferred Name'}
