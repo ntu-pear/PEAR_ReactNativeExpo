@@ -38,7 +38,8 @@ function PatientProfileScreen(props) {
   const [isGuardianLoading, setIsGuardianLoading] = useState(true);
   // const [isDoctorsNoteLoading, setIsDoctorsNoteLoading] = useState(true);
   const [patientID, setPatientID] = useState(route.params.id);
-
+  const ICON = 28;      // good on most phones
+  const ICON_SM = 24;  
   const scrollViewRef = useRef(null);
 
   // useEffect(() => {
@@ -189,7 +190,7 @@ function PatientProfileScreen(props) {
                   vectorIconComponent={
                     <MaterialCommunityIcons
                       name="allergy"
-                      size={SCREEN_HEIGHT * 0.04}
+                      size={ICON}
                       color={colors.pink}
                     />
                   }
@@ -204,7 +205,7 @@ function PatientProfileScreen(props) {
                   vectorIconComponent={
                     <MaterialCommunityIcons
                       name="heart-pulse"
-                      size={SCREEN_HEIGHT * 0.04}
+                      size={ICON}
                       color={colors.pink}
                     />
                   }
@@ -219,7 +220,7 @@ function PatientProfileScreen(props) {
                   vectorIconComponent={
                     <FontAwesome5
                       name="pills"
-                      size={SCREEN_HEIGHT * 0.04}
+                      size={ICON}
                       color={colors.pink}
                     />
                   }
@@ -234,7 +235,7 @@ function PatientProfileScreen(props) {
                   vectorIconComponent={
                     <FontAwesome5
                       name="prescription-bottle"
-                      size={SCREEN_HEIGHT * 0.04}
+                      size={ICON}
                       color={colors.pink}
                     />
                   }
@@ -251,7 +252,7 @@ function PatientProfileScreen(props) {
                   vectorIconComponent={
                     <FontAwesome5
                       name="exclamation-triangle"
-                      size={SCREEN_HEIGHT * 0.035}
+                      size={ICON}
                       color={colors.pink}
                     />
                   }
@@ -265,7 +266,7 @@ function PatientProfileScreen(props) {
                   vectorIconComponent={
                     <MaterialCommunityIcons
                       name="clipboard-text"
-                      size={SCREEN_HEIGHT * 0.04}
+                      size={ICON}
                       color={colors.pink}
                     />
                   }

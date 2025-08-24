@@ -120,13 +120,16 @@ export const loginUser = async ({ email, role, password }) => {
 };
 
 /* Forgot password (request email with reset link) */
-const requestResetPassword = ({ nric, email, roleName, nric_DateOfBirth }) =>
-  client.post(
-    v1.requestReset,
-    { nric, email, roleName, nric_DateOfBirth },
-    { baseURL: V1_BASE }
-  );
+const requestResetPassword = ({ nric, email, roleName, nric_DateOfBirth }) => {
+  const body = {
+    nric: (nric || '').trim().toUpperCase(),
+    email: (email || '').trim().toLowerCase(),
+    roleName: (roleName || '').trim().toUpperCase(),
+  };
+  if (nric_DateOfBirth) body.nric_DateOfBirth = nric_DateOfBirth; // "YYYY-MM-DD"
 
+  return client.post(v1.requestReset, body, { baseURL: V1_BASE });
+};
 // Set new password using token from email link
 const resetPassword = (token, { newPassword, confirmPassword }) =>
   client.put(

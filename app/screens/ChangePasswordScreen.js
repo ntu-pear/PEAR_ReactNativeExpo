@@ -23,25 +23,14 @@ function ChangePasswordScreen(props) {
   const [showNew, setShowNew] = useState(false);
   const { sidebar } = props;
 
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
+  const [currentPassword, setCurrentPassword] = useState(''); // NEW
+  const [newPassword, setNewPassword] = useState('');         // NEW
   const [isPasswordError, setIsPasswordError] = useState(false);
 
-  // const handleOldPassword = (e) => {
-  //   setOldPassword(e);
-  // };
-
-  // const handleNewPassword = (e) => {
-  //   setNewPassword(e);
-  // };
-
   const handlePasswordError = useCallback(
-    (state) => {
-      setIsPasswordError(state);
-    },
-    [isPasswordError],
+    (state) => setIsPasswordError(state),
+    []
   );
-
   // const schema = Yup.object().shape({
   //   oldPassword: Yup.string().required('Old Password is a required field.'),
   //   newPassword: Yup.string()
@@ -71,16 +60,10 @@ function ChangePasswordScreen(props) {
   //   }
   // };
 
-  const passwordFormat = (value) => {
-    if (
-      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,16}$/.test(
-        value,
-      )
-    ) {
-      return false;
-    }
-    return true;
-  };
+   // Server policy: ≥12 chars, ≥1 uppercase, ≥1 lowercase, ≥1 special char
+const normalize = (s) => (s || '').trim();
+const passwordFormat = (value) =>
+   /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{12,}$/.test(normalize(value));
 
   const handleOnPress = async () => {
     const isPasswordFormatValid =
@@ -96,11 +79,10 @@ function ChangePasswordScreen(props) {
     //   return;
     // }
 
-    if (currentPassword === '' || newPassword === '') {
-      alertDetails = 'Fields cannot be left empty!';
-      Alert.alert(alertTitle, alertDetails);
+    if (normalize(currentPassword) === normalize(newPassword)) {
+      Alert.alert('Please try again', 'New password must be different from current password.');
       return;
-    }
+   }
 
     if (!isPasswordFormatValid) {
       alertDetails = 'Password does not follow the specified format!';
@@ -109,32 +91,36 @@ function ChangePasswordScreen(props) {
     }
 
     setIsLoading(true);
-    const currentUser = await authStorage.getUser();
-    const result = await userApi.changePassword(
-      currentUser.email,
-      currentPassword,
-      newPassword,
-    );
+    const resp = await userApi.changePassword('', currentPassword, newPassword); // NEW
 
-    // console.log(result.data);
-    if (!result.ok) {
-      alertDetails = 'Current password is incorrect!';
-      Alert.alert(alertTitle, alertDetails);
+    if (!resp?.ok) {
+      // NEW: friendlier error surfacing for FastAPI responses
+      const data = resp?.data || {};
+      const apiMsg =
+        data?.message ||
+        (Array.isArray(data?.detail) ? data.detail.map((d) => d.msg).join('\n') : null) ||
+        (typeof data?.detail === 'string' ? data.detail : null) ||
+        'Unable to change password.';
+      Alert.alert('Please try again', apiMsg);
       setIsLoading(false);
       return;
     }
-
     setIsLoading(false);
     // let alertTxt = 'Password changed successfully. Please login again.';
     // Platform.OS === 'web' ? alert(alertTxt) : Alert.alert(alertTxt);
     // Redirects the user to Welcome screen by logging out after successful password change.
 
-    alertTitle = 'Password changed successful';
-    alertDetails = 'Please login again';
-    Alert.alert(alertTitle, alertDetails);
-
+    Alert.alert('Password changed successfully', 'Please login again.');
     authContext.setUser(null);
-    await authStorage.removeToken();
+
+    await Promise.all([
+      authStorage.deleteToken?.('userAuthTokenV1'),
+      authStorage.deleteToken?.('userRefreshTokenV1'),
+      authStorage.deleteToken?.('userAuthToken'),
+      authStorage.deleteToken?.('userRefreshToken'),
+      authStorage.deleteToken?.('userAuthTokenLegacy'),
+      authStorage.deleteToken?.('userRefreshTokenLegacy'),
+    ]);
   };
 
   return (

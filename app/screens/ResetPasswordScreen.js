@@ -1,7 +1,7 @@
 import React from 'react';
 import { useState } from 'react';
 import { Platform, Alert, StyleSheet, ActivityIndicator } from 'react-native';
-import { VStack, FormControl, View, Select, Box, Center } from 'native-base';
+import { VStack, FormControl, View, Select, Box, Center, Input} from 'native-base';
 import userApi from 'app/api/user';
 import typography from 'app/config/typography';
 import colors from 'app/config/colors';
@@ -28,12 +28,15 @@ function ResetPasswordScreen(props) {
     nric: Yup.string().required('NRIC is a required field.'),
     email: Yup.string().email('Invalid email address.').required('Email is a required field.'),
     role: Yup.string().required('Role is a required field.'),
+    nric_DateOfBirth: Yup.string()
+     .required('Date of Birth is required.')
+     .matches(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD'),
     // dob optional – add rules if your backend strictly validates format:
     // nric_DateOfBirth: Yup.string().matches(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD'),
     });
 
     const validate = async () => {
-      const formData = { nric, email, role };
+      const formData = { nric, email, role, nric_DateOfBirth: dob };
       try {
         await schema.validate(formData, { abortEarly: false });
         setErrors({});
@@ -57,6 +60,12 @@ function ResetPasswordScreen(props) {
     }
 
     setIsLoading(true);
+    const payload = {
+      nric: (nric || '').trim().toUpperCase(),
+      email: (email || '').trim().toLowerCase(),
+      roleName: (role || '').trim().toUpperCase(),
+      nric_DateOfBirth: dob,
+    };
     const result = await userApi.requestResetPassword({
       nric,
       email,
@@ -64,102 +73,139 @@ function ResetPasswordScreen(props) {
       nric_DateOfBirth: dob || undefined,
       });
 
-    if (!result.ok) {
-        const apiMsg =
-        result?.data?.message ||
-        (Array.isArray(result?.data?.detail)
-          ? result.data.detail.map(d => d.msg).join('\n')
-          : 'Unable to request password reset.');
-      setErrors({ api: apiMsg });
+      if (!result?.ok) {
+        // Map FastAPI-style errors into a friendly message
+        const data = result?.data || {};
+        let apiMsg =
+          data?.message ||
+          (Array.isArray(data?.detail) ? data.detail.map((d) => d.msg).join('\n') : null) ||
+          (typeof data?.detail === 'string' ? data.detail : null) ||
+          'Unable to request password reset.';
+  
+        // Special-case the common backend response
+        if (apiMsg === 'Invalid Details') {
+          apiMsg =
+            'We could not find a user with that NRIC, email, and role. Please double-check all three fields (role must match your account).';
+        }
+  
+        setErrors({ api: apiMsg });
+        setIsLoading(false);
+        return;
+      }
+  
       setIsLoading(false);
-      return;
-    }
+      const alertTxt = 'Instructions to reset password have been sent to email.';
+      Platform.OS === 'web' ? alert(alertTxt) : Alert.alert(alertTxt);
+      navigation.navigate(routes.WELCOME);
+    };
 
-    setIsLoading(false);
-    let alertTxt = 'Instructions to reset password have been sent to email.';
-    Platform.OS === 'web' ? alert(alertTxt) : Alert.alert(alertTxt);
-    navigation.navigate(routes.WELCOME);
-  };
 
   return (
     <View testID={testID}>
+  <VStack
+    w={Platform.OS === 'web' ? '50%' : '80%'}
+    alignSelf="center"
+    mt="5"
+    space={5}   // consistent vertical rhythm
+  >
+
+    {/* NRIC */}
+    <FormControl isRequired isInvalid={'nric' in errors}>
+      <FormControl.Label _text={{ fontWeight: 'bold', fontSize: 16 }} pl="4">
+        NRIC
+      </FormControl.Label>
+      <Input
+        value={nric}
+        onChangeText={(v) => setNric(v.trim().toUpperCase())}
+        placeholder="S1234567A"
+        borderRadius="25"
+        height="50"
+        px="4"                 // matches label padding
+      />
+      {'nric' in errors && (
+        <FormControl.ErrorMessage>{errors.nric}</FormControl.ErrorMessage>
+      )}
+    </FormControl>
+
+    {/* Email */}
+    <FormControl isRequired isInvalid={'email' in errors}>
+      <FormControl.Label _text={{ fontWeight: 'bold', fontSize: 16 }} pl="4">
+        Email
+      </FormControl.Label>
+      <Input
+        value={email}
+        onChangeText={setEmail}
+        placeholder="jess@gmail.com"
+        keyboardType="email-address"
+        autoCapitalize="none"
+        borderRadius="25"
+        height="50"
+        px="4"
+      />
+      {'email' in errors && (
+        <FormControl.ErrorMessage>{errors.email}</FormControl.ErrorMessage>
+      )}
+    </FormControl>
+
+    {/* Date of Birth (optional) */}
+    <FormControl isRequired isInvalid={'nric_DateOfBirth' in errors}>
+      <FormControl.Label _text={{ fontWeight: 'bold', fontSize: 16 }} pl="4">
+        Date of Birth
+      </FormControl.Label>
+      <Input
+        value={dob}
+        onChangeText={setDob}
+        placeholder="YYYY-MM-DD"
+        borderRadius="25"
+        height="50"
+        px="4"
+      />
+    </FormControl>
+
+    {/* Role — keep your existing block, just match width/padding */}
+    <FormControl
+      w="100%"
+      isRequired
+      isInvalid={'role' in errors}
+    >
+      <FormControl.Label _text={{ ...typography.body1SemiBold, fontWeight: 'bold' }} pl="4">
+        Role
+      </FormControl.Label>
       <VStack>
-        <Center w={Platform.OS === 'web' ? '62.5%' : '100%'}>
-          {/* NRIC */}
-          <CustomFormControl
-            label="NRIC"
-            placeholder="S1234567A"
-            onChangeText={(v) => setNric(v.trim().toUpperCase())} 
-            value={nric}
-            error={errors.nric}
-          />
-
-          {/* Email */}
-          <CustomFormControl
-            label="Email"
-            placeholder="jess@gmail.com"
-            onChangeText={setEmail}
-            value={email}
-            error={errors.email}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-
-          {/* (Optional) Date of Birth */}
-          <CustomFormControl
-            label="Date of Birth (optional)"
-            placeholder="YYYY-MM-DD"
-            onChangeText={setDob}
-            value={dob}
-            error={errors.nric_DateOfBirth}
-          />
-
-          {/* Role */}
-          <FormControl
-            maxW={Platform.OS === 'web' ? '50%' : '80%'}
-            mt="5"
-            isRequired
-            isInvalid={'role' in errors}
-          >
-            <FormControl.Label _text={{ ...typography.body1SemiBold }}>
-              Role
-            </FormControl.Label>
-            <VStack>
-              <Select
-                accessibilityLabel="Select Role"
-                borderRadius="25"
-                {...typography.subheading1}
-                height="50"
-                minWidth="full"
-                minHeight="3%"
-                placeholder="Select role"
-                placeholderTextColor={colors.grey}
-                onValueChange={(itemValue) => setRole(itemValue)}
-                selectedValue={role}
-              >
-                <Select.Item label="Supervisor" value="Supervisor" />
-                <Select.Item label="Guardian" value="Guardian" />
-                <Select.Item label="Doctor" value="Doctor" />
-                <Select.Item label="Caregiver" value="Caregiver" />
-                <Select.Item label="Nurse" value="Nurse" />
-              </Select>
-            </VStack>
-          </FormControl>
-
-          <Box>
-            <ErrorMessage visible={'api' in errors} message={errors.api} />
-          </Box>
-
-          <View style={styles.buttonsContainer}>
-            {isLoading ? (
-              <ActivityIndicator />
-            ) : (
-              <AppButton title="Reset" color="green" onPress={onPressReset} disabled={isLoading} />
-            )}
-          </View>
-        </Center>
+        <Select
+          accessibilityLabel="Select Role"
+          borderRadius="25"
+          {...typography.subheading1}
+          height="50"
+          minWidth="full"
+          placeholder="Select role"
+          placeholderTextColor={colors.grey}
+          onValueChange={(itemValue) => setRole(itemValue)}
+          selectedValue={role}
+        >
+          <Select.Item label="Supervisor" value="Supervisor" />
+          <Select.Item label="Guardian" value="Guardian" />
+          <Select.Item label="Doctor" value="Doctor" />
+          <Select.Item label="Caregiver" value="Caregiver" />
+          <Select.Item label="Nurse" value="Nurse" />
+        </Select>
       </VStack>
+    </FormControl>
+
+    <Box>
+      <ErrorMessage visible={'api' in errors} message={errors.api} />
+    </Box>
+
+    <View style={styles.buttonsContainer}>
+      {isLoading ? (
+        <ActivityIndicator />
+      ) : (
+        <AppButton title="Reset" color="green" onPress={onPressReset} disabled={isLoading} />
+      )}
     </View>
+  </VStack>
+</View>
+
   );
 }
 

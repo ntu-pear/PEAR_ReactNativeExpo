@@ -5,6 +5,14 @@ import { Image } from 'react-native';
 /*
  * List all end points here
  */
+// --- Patient Service v1 base (new server) ---
+const PATIENT_V1_BASE = 'http://10.96.188.180';
+const withPatientV1Base = (cfg = {}) => ({ baseURL: PATIENT_V1_BASE, timeout: 15000, ...cfg });
+// --- Patient Service v1 endpoints ---
+const v1PatientsListEndpoint = '/api/v1/patients/';
+const v1PatientReadEndpoint  = (patient_id) => `/api/v1/patients/${patient_id}`;
+
+
 const endpoint = '/Patient';
 const allergyEndpoint = '/Allergy';
 const vitalEndpoint = '/Vital';
@@ -69,6 +77,38 @@ const patientPhotoDelete = `${photoEndpoint}/delete`; //eslint-disable-line no-u
  * List all functions here
  * Refer to this api doc: https://github.com/infinitered/apisauce
  */
+const listPatientsV1 = (params = {}) => {
+  return client.get(
+    '/api/v1/patients/',
+    {
+      // TEMP: no-auth to verify connectivity/shape
+      require_auth: false,       // NEW
+      mask: true,
+      pageNo: params.pageNo ?? 0,
+      pageSize: params.pageSize ?? 20,
+      ...(params.name ? { name: params.name } : {}),
+      ...(params.isActive !== undefined ? { isActive: params.isActive } : {}),
+    },
+    {
+      // hit Patient Service base
+      ...withPatientV1Base(),
+      // NEW: strip Authorization header for this call only
+      headers: { Authorization: undefined },
+      // (apisauce lets us pass axios config here)
+    }
+  );
+};
+
+const readPatientV1 = async (
+  patient_id,
+  { require_auth = true, mask = true } = {}
+) => {
+  return client.get(
+    v1PatientReadEndpoint(patient_id),
+    { require_auth, mask },
+    withPatientV1Base()
+  );
+};
 
 const addPatientForm = (arr, str, patientData) => {
   for (const item in arr) {
@@ -739,4 +779,8 @@ export default {
   deleteMobility,
   updatePatientPhoto,
   deletePatientPhoto,
+    // --- v1 Patient Service (new) ---
+    listPatientsV1,
+    readPatientV1,
+  
 };

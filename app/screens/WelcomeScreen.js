@@ -201,7 +201,7 @@ function WelcomeScreen(props) {
                   source={require('../assets/pear_v2.png')}
                   style={styles.logo}
                 />
-                <Text style={styles.tagLine}>PEAR</Text>
+                <Text style={styles.tagLine} >PEAR</Text>
               </View>
               <View style={styles.inputContainer}>
                 <InputField
@@ -209,7 +209,7 @@ function WelcomeScreen(props) {
                   autoCapitalize='none'
                   isRequired
                   showTitle={false}
-                  title="Username/Email"
+                  title="Email"
                   value={username}
                   onChangeText={setUsername}
                   onEndEditing={handleUsernameError}

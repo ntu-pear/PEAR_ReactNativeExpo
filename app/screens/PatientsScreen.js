@@ -49,6 +49,48 @@ function PatientsScreen({ navigation }) {
     'All Patients': 'allPatients',
   };
 
+  // NEW: debug info to display & log
+const [debug, setDebug] = useState({ server: '', status: null, pageNo: 0, totalPages: 0, showing: 0 });
+
+  const normalizePatientV1 = (p = {}) => {
+    const id =
+      p.patient_id ??
+      p.id ??
+      p.patientID ??
+      p.PatientId ??
+      p.PatientID ??
+      null;
+  
+    // Prefer split(name) only if first/last not present
+    const hasFirst = typeof p.first_name === 'string' || typeof p.firstName === 'string';
+    const hasLast  = typeof p.last_name === 'string'  || typeof p.lastName === 'string';
+    const nameStr  = typeof p.name === 'string' ? p.name.trim() : '';
+  
+    const firstName =
+      (p.first_name ?? p.firstName ?? (hasFirst ? '' : nameStr.split(' ')[0] ?? '')).toString().trim();
+  
+    const lastName =
+      (p.last_name ?? p.lastName ?? (hasLast ? '' : nameStr.split(' ').slice(1).join(' ') ?? '')).toString().trim();
+  
+    return {
+      ...p,
+  
+      // legacy fields this screen already uses:
+      patientID: id,
+      firstName,
+      lastName,
+      fullName: `${firstName} ${lastName}`.trim(),
+  
+      // do our best for avatar/photo
+      profilePicture:
+        p.profilePicture ??
+        p.profile_picture ??
+        p.profile_photo ??
+        p.photoUrl ??
+        p.avatar ??
+        null,
+    };
+  };
   // Options for user to search by
   const SEARCH_OPTIONS = ['Full Name', 'Preferred Name'];
 
@@ -141,6 +183,7 @@ function PatientsScreen({ navigation }) {
     All: '',
   };
 
+  
   // Refresh list when new patient is added or user requests refresh
   // Reference https://stackoverflow.com/questions/21518381/proper-way-to-wait-for-one-function-to-finish-before-continuing
   useFocusEffect(
@@ -199,30 +242,48 @@ function PatientsScreen({ navigation }) {
 
   // Retrieve patient list from backend
   const getListOfPatients = async (status = 'active') => {
-    // console.log('PATIENTS -', 6, 'getListOfPatients');
-
-    const response =
-      viewMode === 'myPatients'
-        ? await patientApi.getPatientListByLoggedInCaregiver(undefined, status)
-        : await patientApi.getPatientList(undefined, status);
-
-    if (response.ok) {
-      const listWithFullName = response.data.data.map((item) => ({
-        ...item,
-        fullName: item.firstName.trim() + ' ' + item.lastName.trim(),
-      })); //change type of sort here
-
-      setOriginalListOfPatients([...listWithFullName]);
-      setListOfPatients([...listWithFullName]);
-      setIsError(false);
-      setIsRetry(false);
-      setStatusCode(response.status);
-    } else {
-      setIsLoading(false);
-      setIsError(true);
-      setStatusCode(response.status);
-      setIsRetry(true);
+    // Map your old status to the new API’s query
+    let isActive;
+    if (status === 'active') isActive = true;
+    else if (status === 'inactive') isActive = false;
+    else isActive = undefined;
+  
+    // We’ll fetch all pages once (keeps your existing UI/filters working)
+    const pageSize = 100; // tweak if needed
+    let pageNo = 0;
+    let totalPages = 1;
+    let all = [];
+  
+    while (pageNo < totalPages) {
+      const res = await patientApi.listPatientsV1({
+        
+        require_auth: true,
+        mask: true,
+        pageNo,
+        pageSize,
+        ...(isActive !== undefined ? { isActive } : {}),
+        // if you have a search text bound to API-side search, include it here:
+        // name: searchText
+      });
+  
+      if (!res.ok) {
+        return { status: res.status, ok: false }; // keep your error flow consistent
+      }
+  
+      const body = res.data || {};
+      const page = Array.isArray(body.data) ? body.data : Array.isArray(body) ? body : [];
+      totalPages = Number.isFinite(body.totalPages) ? body.totalPages : 1;
+  
+      all = all.concat(page.map(normalizePatientV1));
+      pageNo += 1;
     }
+  
+    // Your screen expects first/last/fullName etc., so we already normalized above
+    setOriginalListOfPatients([...all]);
+    setListOfPatients([...all]); // your existing search/sort/filter will still run
+    setIsError(false);
+  
+    return { status: 200, ok: true };
   };
 
   // Retrieve cargivers patient count list from backend
