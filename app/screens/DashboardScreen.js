@@ -20,9 +20,11 @@ import {
   Center,
   Fab,
   Icon,
+  Button,
 } from 'native-base';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
+import * as fav from 'app/utility/favorites';
 
 // API
 import scheduleApi from 'app/api/schedule';
@@ -128,6 +130,8 @@ function DashboardScreen({ navigation }) {
   const [currentTimePosition, setCurrentTimePosition] = useState(null);
   const [scheduleXOffset, setScheduleXOffset] = useState(0);
   const [tempOffset, setTempOffset] = useState(0);
+  const [favoriteIds, setFavoriteIds] = useState(new Set());
+  const [showFavOnly, setShowFavOnly] = useState(false);
 
   const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -176,6 +180,17 @@ function DashboardScreen({ navigation }) {
     }, [isReloadSchedule]),
   );
 
+  useFocusEffect(
+    React.useCallback(() => {
+      let mounted = true;
+      (async () => {
+        const list = await fav.getAll();
+        if (mounted) setFavoriteIds(new Set(list.map(String)));
+      })();
+      return () => { mounted = false; };
+    }, [])
+  );
+
   // // Refresh schedule when screen comes into focus
   // useFocusEffect(
   //   React.useCallback(() => {
@@ -195,6 +210,13 @@ function DashboardScreen({ navigation }) {
     updateSchedule({ tempSelectedDate: selectedDate });
     setIsDataInitialized(true);
   }, [selectedDate]);
+
+  useEffect(() => {
+      (async () => {
+        const list = await fav.getAll();
+        setFavoriteIds(new Set(list.map(String)));
+      })();
+    }, []);
 
   // Refresh schedule if isRetry is set to true
   useEffect(() => {
@@ -664,15 +686,19 @@ function DashboardScreen({ navigation }) {
     }));
   };
 
-  // Check if all schedules are empty
-  const checkAllEmptySchedules = (tempSchedule) => {
-    for (var i = 0; i < tempSchedule.length; i++) {
-      if (schedule[i]['activities'].length > 0) {
-        return false;
-      }
+  const checkAllEmptySchedules = (tempSchedule = []) => {
+    for (let i = 0; i < tempSchedule.length; i++) {
+      if (tempSchedule[i]?.activities?.length > 0) return false;
     }
     return true;
   };
+  
+  const visibleSchedules = React.useMemo(() => {
+      if (!showFavOnly) return schedule || [];
+      return (schedule || []).filter(s =>
+        favoriteIds.has(String(s.patientID ?? s.PatientId ?? s.patientId))
+      );
+    }, [schedule, showFavOnly, favoriteIds]);
 
   // const handlePullToRefresh = () => {
   //   refreshSchedule();
@@ -783,6 +809,16 @@ function DashboardScreen({ navigation }) {
               </TouchableOpacity>
             </View>
           </Stack>
+          <Button
+            onPress={() => setShowFavOnly(v => !v)}
+            variant={showFavOnly ? 'solid' : 'outline'}
+            leftIcon={<Icon as={MaterialIcons} name="star" />}
+            mx="5"
+            mt="2"
+            mb="1"
+         >
+           {showFavOnly ? 'Showing favourites' : '⭐ Favourites only'}
+          </Button>
           <FlatList
             ref={scheduleRef}
             onRefresh={refreshSchedule}
@@ -796,41 +832,46 @@ function DashboardScreen({ navigation }) {
                 true,
               )
             }
-            data={checkAllEmptySchedules(schedule) ? [] : schedule}
+            data={checkAllEmptySchedules(visibleSchedules) ? [] : visibleSchedules}
             renderItem={({ item, i }) => {
               return (
                 <Box style={styles.rowBox} key={item.patientID}>
                   <HStack justifyContent="space-between">
-                    <Container style={styles.patientContainer}>
+                    <Container style={[styles.patientContainer, { position: 'relative' }]}>
                       <ProfileNameButton
-                        handleOnPress={() =>
-                          onClickPatientProfile(item.patientID)
-                        }
+                        handleOnPress={() => onClickPatientProfile(item.patientID)}
                         profileLineOne={item.patientPreferredName}
                         profilePicture={item.patientImage}
                         isPatient={true}
                       />
+
+                      {favoriteIds.has(String(item.patientID)) && (
+                        <Icon
+                          as={MaterialIcons}
+                          name="star"
+                          size="xs"
+                          color="amber.500"
+                          style={{ position: 'absolute', top: 6, right: 6 }}
+                        />
+                      )}
+
                       {viewMode == 'allPatients' ? (
                         <>
-                          <Text style={{ textAlign: 'center' }}>
-                            Caregiver:
-                          </Text>
-                          <Text style={{ textAlign: 'center' }}>
-                            {item.patientCaregiverName}
-                          </Text>
+                          <Text style={{ textAlign: 'center' }}>Caregiver:</Text>
+                          <Text style={{ textAlign: 'center' }}>{item.patientCaregiverName}</Text>
                         </>
                       ) : null}
+
                       {showStartDate() ? (
                         <>
-                          <Text style={{ textAlign: 'center' }}>
-                            Patient Start Date:
-                          </Text>
+                          <Text style={{ textAlign: 'center' }}>Patient Start Date:</Text>
                           <Text style={{ textAlign: 'center' }}>
                             {formatDate(new Date(item.patientStartDate), true)}
                           </Text>
                         </>
                       ) : null}
                     </Container>
+
                     <ScrollView
                       contentOffset={{ x: scheduleXOffset }}
                       horizontal={true}

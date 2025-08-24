@@ -1,6 +1,5 @@
-// Libs
 import React, { useState, useEffect, useRef } from 'react';
-import { Center, VStack, ScrollView, Fab, Icon, FlatList } from 'native-base';
+import { Center, VStack, ScrollView, Fab, Icon, FlatList, IconButton, Button } from 'native-base';
 import {
   StyleSheet,
   View,
@@ -32,6 +31,7 @@ import {
   noDataMessage,
   sortFilterInitialState,
 } from 'app/utility/miscFunctions';
+import * as fav from 'app/utility/favorites'; // ⭐ favourites helper
 
 function PatientsScreen({ navigation }) {
   // Quick guide to adding sort/filter options
@@ -91,6 +91,10 @@ function PatientsScreen({ navigation }) {
   const [viewMode, setViewMode] = useState('myPatients'); // myPatients, allPatients
   const [isReloadPatientList, setIsReloadPatientList] = useState(false);
   const [applySortFilter, setApplySortFilter] = useState(true);
+
+  // ⭐ favourites state
+  const [favoriteIds, setFavoriteIds] = useState(new Set());
+  const [showFavOnly, setShowFavOnly] = useState(false);
 
   // Search related states
   const [searchQuery, setSearchQuery] = useState('');
@@ -157,6 +161,14 @@ function PatientsScreen({ navigation }) {
     refreshPatientData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewMode]);
+
+  // Load favourites from local storage when screen mounts
+  useEffect(() => {
+    (async () => {
+      const list = await fav.getAll();
+      setFavoriteIds(new Set(list));
+    })();
+  }, []);
 
   // When user toggles patient status filter, update caregiver filter options
   useEffect(() => {
@@ -344,6 +356,13 @@ function PatientsScreen({ navigation }) {
     navigation.push(routes.PATIENT_PROFILE, { id: patientID });
   };
 
+  // ⭐ toggle favourite for a patient
+  const toggleFavourite = async (patient) => {
+    const id = String(patient.patientID ?? fav.getPatientId(patient));
+    const updated = await fav.toggle(id);
+    setFavoriteIds(new Set(updated));
+  };
+
   // Whether to show start date for each patient - depends on whether sort/filter using start date applied
   const showStartDate = () => {
     return (
@@ -358,6 +377,25 @@ function PatientsScreen({ navigation }) {
         : false)
     );
   };
+
+  // ⭐ derived list: favourites first, then keep existing order from SearchFilterBar
+  const listWithFavPinned = React.useMemo(() => {
+    const arr = [...(listOfPatients || [])];
+    arr.sort((a, b) => {
+      const fa = favoriteIds.has(String(a.patientID ?? fav.getPatientId(a))) ? 0 : 1;
+      const fb = favoriteIds.has(String(b.patientID ?? fav.getPatientId(b))) ? 0 : 1;
+      if (fa !== fb) return fa - fb; // ⭐ first
+      return 0; // preserve current order
+    });
+    return arr;
+  }, [listOfPatients, favoriteIds]);
+
+  const visiblePatients = React.useMemo(() => {
+    if (!showFavOnly) return listWithFavPinned;
+    return listWithFavPinned.filter(p =>
+      favoriteIds.has(String(p.patientID ?? fav.getPatientId(p)))
+    );
+  }, [listWithFavPinned, showFavOnly, favoriteIds]);
 
   return (
     <>
@@ -397,6 +435,19 @@ function PatientsScreen({ navigation }) {
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
           />
+
+          {/* ⭐ Optional: show favourites-only toggle */}
+          <Button
+            onPress={() => setShowFavOnly(v => !v)}
+            variant={showFavOnly ? 'solid' : 'outline'}
+            leftIcon={<Icon as={MaterialIcons} name="star" />}
+            mx="5"
+            mt="2"
+            mb="1"
+          >
+            {showFavOnly ? 'Showing favourites' : '⭐ Favourites only'}
+          </Button>
+
           <View style={{ height: '85%' }}>
             <FlatList
               testID="patients_flatlist"
@@ -413,7 +464,8 @@ function PatientsScreen({ navigation }) {
                   true,
                 )
               }
-              data={listOfPatients}
+              data={visiblePatients} // ⭐ use favourites-aware list
+              keyExtractor={(item) => String(item.patientID ?? fav.getPatientId(item))}
               style={styles.patientListContainer}
               renderItem={({ item, index }) => {
                 return (
@@ -446,6 +498,28 @@ function PatientsScreen({ navigation }) {
                           : null}
                       </Text>
                     </View>
+                    {/* ⭐ star toggle */}
+                    <IconButton
+                      onPress={() => toggleFavourite(item)}
+                      icon={
+                        <Icon
+                          as={MaterialIcons}
+                          name={
+                            favoriteIds.has(String(item.patientID ?? fav.getPatientId(item)))
+                              ? 'star'
+                              : 'star-border'
+                          }
+                          size="sm"
+                          color={
+                            favoriteIds.has(String(item.patientID ?? fav.getPatientId(item)))
+                              ? 'amber.500'
+                              : 'coolGray.500'
+                          }
+                        />
+                      }
+                      accessibilityLabel="Toggle favourite"
+                      alignSelf="center"
+                    />
                   </TouchableOpacity>
                 );
               }}
