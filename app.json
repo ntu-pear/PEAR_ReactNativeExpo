@@ -6,6 +6,10 @@
     "orientation": "portrait",
     "icon": "./app/assets/icon.png",
     "userInterfaceStyle": "light",
+
+    "plugins": [
+      ["expo-build-properties", { "android": { "usesCleartextTraffic": true } }],"expo-image-picker"
+    ],
     "splash": {
       "image": "./app/assets/splash.png",
       "resizeMode": "contain",
@@ -33,9 +37,7 @@
     "web": {
       "favicon": "app/assets/favicon.png"
     },
-    "plugins": [
-      "expo-image-picker"
-    ],
+
     "extra": {
       "eas": {
         "projectId": "f8459a94-134a-4c92-ab57-4712f82df9b1"

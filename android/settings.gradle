@@ -1,4 +1,4 @@
-rootProject.name = 'PEAR_ReactNativeExpo'
+rootProject.name = 'PEARReactNativeExpo'
 
 apply from: new File(["node", "--print", "require.resolve('expo/package.json')"].execute(null, rootDir).text.trim(), "../scripts/autolinking.gradle");
 useExpoModules()
@@ -8,4 +8,3 @@ applyNativeModulesSettingsGradle(settings)
 
 include ':app'
 includeBuild(new File(["node", "--print", "require.resolve('react-native-gradle-plugin/package.json')"].execute(null, rootDir).text.trim()).getParentFile())
-

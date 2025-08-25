@@ -459,7 +459,7 @@ function PatientVitalScreen(props) {
           }
           data={vitalData}
           keyboardShouldPersistTaps="handled"
-          keyExtractor={(item) => String(item.vitalID)} {/* FIX: key as string */}
+          keyExtractor={(item) => String(item.vitalID)} 
           renderItem={({ item }) => {
             return (
               <Swipeable
