@@ -33,6 +33,25 @@ import DynamicTable from 'app/components/DynamicTable';
 import PatientVitalItem from 'app/components/PatientVitalItem';
 import AddPatientVitalModalNEW from 'app/components/AddPatientVitalModalNEW';
 
+// --- helper: normalize FastAPI patient to legacy fields this screen expects ---
+const normalizePatientV1 = (p = {}) => {
+  const name = typeof p.name === 'string' ? p.name.trim() : '';
+  const first = p.first_name ?? p.firstName ?? (name ? name.split(' ')[0] : '');
+  const last  = p.last_name ?? p.lastName ?? (name ? name.split(' ').slice(1).join(' ') : '');
+  return {
+    patientID: p.patient_id ?? p.id ?? p.PatientID ?? p.PatientId ?? null,
+    firstName: String(first || '').trim(),
+    lastName: String(last || '').trim(),
+    preferredName: p.preferred_name ?? p.preferredName ?? '',
+    fullName: `${first || ''} ${last || ''}`.trim(),
+    profilePicture: p.profile_picture ?? p.profilePhoto ?? p.avatar ?? p.photoUrl ?? null,
+    isActive: typeof p.is_active === 'boolean' ? p.is_active : p.isActive,
+    startDate: p.start_date ?? p.startDate ?? null,
+    caregiverName: p.caregiver_name ?? p.caregiverName ?? null,
+    ...p,
+  };
+};
+
 function PatientVitalScreen(props) {
   let { patientID, patientId } = props.route.params;
   if (patientId) {
@@ -166,15 +185,18 @@ function PatientVitalScreen(props) {
       bloodSugarlevel: item.bloodSugarlevel,
       vitalRemarks: item.vitalRemarks,
       afterMeal: item.afterMeal,
-      createdDateTime: item.createdDateTime,
+      // ensure we map any server casing to the UI key
+      createdDateTime: item.createdDateTime ?? item.CreatedDateTime,
     }));
   };
 
   const getPatientData = async () => {
     if (patientID) {
-      const response = await patientApi.getPatient(patientID);
+      // ONLY CHANGE: use new Patient Service for header + normalize
+      const response = await patientApi.readPatientV1(patientID, { require_auth: true, mask: true });
       if (response.ok) {
-        setPatientData(response.data.data);
+        const raw = response.data?.data ?? response.data ?? {};
+        setPatientData(normalizePatientV1(raw));
         setIsError(false);
         setIsRetry(false);
         setStatusCode(response.status);
@@ -207,7 +229,11 @@ function PatientVitalScreen(props) {
 
     const result = await patientApi.AddPatientVital(
       patientID,
-      tempVitalFormData,
+      {
+        ...tempVitalFormData,
+        // map UI key to API's expected camelCase
+        bloodSugarLevel: tempVitalFormData.bloodSugarlevel,
+      },
     );
     if (result.ok) {
       console.log('submitted vital data', tempVitalFormData);
@@ -232,7 +258,8 @@ function PatientVitalScreen(props) {
     setIsModalVisible(true);
     setModalMode('edit');
 
-    const tempVitalData = vitalData.find((v) => v.id === vitalID); // Assuming each vital entry has a unique `id`
+    // FIX: find by vitalID (not id)
+    const tempVitalData = vitalData.find((v) => v.vitalID === vitalID);
     if (tempVitalData) {
       setVitalFormData(tempVitalData);
     }
@@ -241,11 +268,14 @@ function PatientVitalScreen(props) {
   const handleModalSubmitEdit = async () => {
     setIsLoading(true);
 
+    // FIX: drop undefined userID param; map bloodSugarlevel -> bloodSugarLevel
     const result = await patientApi.updatePatientVital(
       patientID,
-      userID,
-      vitalFormData,
-    ); // Assuming this API call exists
+      {
+        ...vitalFormData,
+        bloodSugarLevel: vitalFormData.bloodSugarlevel,
+      },
+    );
     if (result.ok) {
       refreshVitalData();
       setIsModalVisible(false);
@@ -257,40 +287,14 @@ function PatientVitalScreen(props) {
     setIsLoading(false);
   };
 
-  // const handleDeleteVital = async (vitalID) => {
-  //   Alert.alert(
-  //     'Confirm Delete',
-  //     'Are you sure you want to delete this vital?',
-  //     [
-  //       { text: 'Cancel', style: 'cancel' },
-  //       {
-  //         text: 'OK',
-  //         onPress: async () => {
-  //           setIsLoading(true);
-
-  //           const result = await patientApi.deletePatientVital(
-  //             patientID,
-  //             vitalID,
-  //           ); // Assuming this API call exists
-  //           if (result.ok) {
-  //             refreshVitalData();
-  //             Alert.alert('Deleted', 'Vital deleted successfully');
-  //           } else {
-  //             Alert.alert('Error', 'Failed to delete vital');
-  //           }
-
-  //           setIsLoading(false);
-  //         },
-  //       },
-  //     ],
-  //   );
-  // };
-
   // Ask user to confirm deletion of vital
   const handleDeleteVital = (vitalID, patientID) => {
-    const tempData = vitalData.filter(
-      (x) => x.vitalID == vitalID && x.patientID == patientID,
-    )[0];
+    // FIX: safe lookup by vitalID only (rows don't store patientID)
+    const tempData = vitalData.find((x) => x.vitalID == vitalID);
+    if (!tempData) {
+      Alert.alert('Error', 'Could not load this vital entry.');
+      return;
+    }
 
     Alert.alert(
       'Are you sure you wish to delete this item?',
@@ -455,7 +459,7 @@ function PatientVitalScreen(props) {
           }
           data={vitalData}
           keyboardShouldPersistTaps="handled"
-          keyExtractor={(item) => item.vitalID}
+          keyExtractor={(item) => String(item.vitalID)} {/* FIX: key as string */}
           renderItem={({ item }) => {
             return (
               <Swipeable

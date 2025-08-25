@@ -1,16 +1,14 @@
 /*eslint eslint-comments/no-unlimited-disable: error */
-import client from 'app/api/client';
+import client, { PATIENT_V1_BASE } from 'app/api/client';
 import { Image } from 'react-native';
 
 /*
  * List all end points here
  */
 // --- Patient Service v1 base (new server) ---
-const PATIENT_V1_BASE = 'http://10.96.188.180';
 const withPatientV1Base = (cfg = {}) => ({ baseURL: PATIENT_V1_BASE, timeout: 15000, ...cfg });
-// --- Patient Service v1 endpoints ---
-const v1PatientsListEndpoint = '/api/v1/patients/';
-const v1PatientReadEndpoint  = (patient_id) => `/api/v1/patients/${patient_id}`;
+const v1PatientsListEndpoint = '/patients/';
+const v1PatientReadEndpoint  = (patient_id) => `/patients/${patient_id}`;
 
 
 const endpoint = '/Patient';
@@ -78,24 +76,11 @@ const patientPhotoDelete = `${photoEndpoint}/delete`; //eslint-disable-line no-u
  * Refer to this api doc: https://github.com/infinitered/apisauce
  */
 const listPatientsV1 = (params = {}) => {
+const { q, page, page_size } = params; // neutral; backend can ignore if unsupported
   return client.get(
-    '/api/v1/patients/',
-    {
-      // TEMP: no-auth to verify connectivity/shape
-      require_auth: false,       // NEW
-      mask: true,
-      pageNo: params.pageNo ?? 0,
-      pageSize: params.pageSize ?? 20,
-      ...(params.name ? { name: params.name } : {}),
-      ...(params.isActive !== undefined ? { isActive: params.isActive } : {}),
-    },
-    {
-      // hit Patient Service base
-      ...withPatientV1Base(),
-      // NEW: strip Authorization header for this call only
-      headers: { Authorization: undefined },
-      // (apisauce lets us pass axios config here)
-    }
+    v1PatientsListEndpoint,
+    { ...(q ? { q } : {}), ...(page ? { page } : {}), ...(page_size ? { page_size } : {}) },
+    withPatientV1Base()
   );
 };
 

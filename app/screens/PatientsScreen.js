@@ -34,24 +34,13 @@ import {
 import * as fav from 'app/utility/favorites'; // ⭐ favourites helper
 
 function PatientsScreen({ navigation }) {
-  // Quick guide to adding sort/filter options
-  // 1. Sort options:
-  // - Add name of sort option to SORT_OPTIONS under the respective viewmode (allPatients/myPatients)
-  // - Update SORT_FILTER_MAPPING with mapping between the sort name and the corresponding data field (if required)
-  // 2. Filter options:
-  // - Add name of filter option to FILTER_OPTIONS under the respective viewmode (allPatients/myPatients)
-  // - Update SORT_FILTER_MAPPING with mapping between the filter name and the corresponding data field (if required)
-  // - Update FILTER_OPTION_DETAILS with the type, options if any, and isFilter
-
   // View modes user can switch between (displayed as tab on top)
   const VIEW_MODES = {
     'My Patients': 'myPatients',
     'All Patients': 'allPatients',
   };
 
-  // NEW: debug info to display & log
-const [debug, setDebug] = useState({ server: '', status: null, pageNo: 0, totalPages: 0, showing: 0 });
-
+  // --- normalize FastAPI v1 patient → legacy fields used by this screen
   const normalizePatientV1 = (p = {}) => {
     const id =
       p.patient_id ??
@@ -60,28 +49,29 @@ const [debug, setDebug] = useState({ server: '', status: null, pageNo: 0, totalP
       p.PatientId ??
       p.PatientID ??
       null;
-  
-    // Prefer split(name) only if first/last not present
-    const hasFirst = typeof p.first_name === 'string' || typeof p.firstName === 'string';
-    const hasLast  = typeof p.last_name === 'string'  || typeof p.lastName === 'string';
-    const nameStr  = typeof p.name === 'string' ? p.name.trim() : '';
-  
-    const firstName =
-      (p.first_name ?? p.firstName ?? (hasFirst ? '' : nameStr.split(' ')[0] ?? '')).toString().trim();
-  
-    const lastName =
-      (p.last_name ?? p.lastName ?? (hasLast ? '' : nameStr.split(' ').slice(1).join(' ') ?? '')).toString().trim();
-  
+
+    // Prefer existing first/last if given; otherwise split name
+    const hasFirst =
+      typeof p.first_name === 'string' || typeof p.firstName === 'string';
+    const hasLast =
+      typeof p.last_name === 'string' || typeof p.lastName === 'string';
+    const nameStr = typeof p.name === 'string' ? p.name.trim() : '';
+
+    const firstName = String(
+      p.first_name ?? p.firstName ?? (hasFirst ? '' : (nameStr.split(' ')[0] ?? ''))
+    ).trim();
+
+    const lastName = String(
+      p.last_name ?? p.lastName ?? (hasLast ? '' : (nameStr.split(' ').slice(1).join(' ') ?? ''))
+    ).trim();
+
     return {
       ...p,
-  
       // legacy fields this screen already uses:
       patientID: id,
       firstName,
       lastName,
       fullName: `${firstName} ${lastName}`.trim(),
-  
-      // do our best for avatar/photo
       profilePicture:
         p.profilePicture ??
         p.profile_picture ??
@@ -89,8 +79,14 @@ const [debug, setDebug] = useState({ server: '', status: null, pageNo: 0, totalP
         p.photoUrl ??
         p.avatar ??
         null,
+      // additional fields referenced by UI/filters
+      preferredName: p.preferred_name ?? p.preferredName ?? '',
+      caregiverName: p.caregiver_name ?? p.caregiverName ?? null,
+      startDate: p.start_date ?? p.startDate ?? null,
+      isActive: typeof p.is_active === 'boolean' ? p.is_active : p.isActive,
     };
   };
+
   // Options for user to search by
   const SEARCH_OPTIONS = ['Full Name', 'Preferred Name'];
 
@@ -149,15 +145,6 @@ const [debug, setDebug] = useState({ server: '', status: null, pageNo: 0, totalP
   const [datetime, setDatetime] = useState(sortFilterInitialState);
 
   // Filter details related state
-  // Details of filter options
-  // --------------------------
-  // type - chip | dropdown | autocomplete (what kind of UI/component to use to display the filter)
-  // options - {} | custom dict that maps options for filtering to corresponding values in the patient data
-  //                e.g.: {'Active': true, 'Inactive': false, 'All': undefined} for filter corresponding to isActive
-  //                      where 'Active' filter option corresponds to isActive=true etc.
-  // isFilter - whether the filter is actually to be used for filtering,
-  //            since some filters like patient status may be used to make an API call instead of normal filtering
-  // --------------------------
   const [filterOptionDetails, setFilterOptionDetails] = useState({
     Caregiver: {
       type: 'dropdown',
@@ -176,21 +163,17 @@ const [debug, setDebug] = useState({ server: '', status: null, pageNo: 0, totalP
     },
   });
 
-  // Patient status names (what is displayed to the user) mapped to the actual values in the patient data
+  // Patient status names mapped to actual values
   const PATIENT_STATUSES = {
     Active: 'active',
     Inactive: 'inactive',
     All: '',
   };
 
-  
   // Refresh list when new patient is added or user requests refresh
-  // Reference https://stackoverflow.com/questions/21518381/proper-way-to-wait-for-one-function-to-finish-before-continuing
   useFocusEffect(
     React.useCallback(() => {
-      // console.log('PATIENTS -', 1, 'useFocusEffect [isReloadPatientList]', isReloadPatientList);
       if (isReloadPatientList) {
-        // console.log('PATIENTS -', 2, 'useFocusEffect if [isReloadPatientList]', isReloadPatientList);
         refreshPatientData();
         setIsReloadPatientList(false);
       }
@@ -200,7 +183,6 @@ const [debug, setDebug] = useState({ server: '', status: null, pageNo: 0, totalP
 
   // Refresh patient data from backend when user switches between 'My Patients' and 'All Patients'
   useEffect(() => {
-    // console.log('PATIENTS -', 3, 'useEffect [viemode]', viewMode);
     refreshPatientData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewMode]);
@@ -215,14 +197,11 @@ const [debug, setDebug] = useState({ server: '', status: null, pageNo: 0, totalP
 
   // When user toggles patient status filter, update caregiver filter options
   useEffect(() => {
-    // console.log('PATIENTS -', 4, 'useEffect [tempSelectedChipFilters]');
-
     if (
       chip['tempSel']['Patient Status'] != undefined &&
       viewMode == 'allPatients' &&
       !justUpdated
     ) {
-      console.log('PATIENTS -', 4.5, 'useEffect [tempSelectedChipFilters]');
       let tempPatientStatus =
         PATIENT_STATUSES[
           !isEmptyObject(chip['tempSel'])
@@ -240,56 +219,59 @@ const [debug, setDebug] = useState({ server: '', status: null, pageNo: 0, totalP
     }
   }, [chip['tempSel']['Patient Status']]);
 
-  // Retrieve patient list from backend
+  // --- list patients from the new Patient Service (V1)
   const getListOfPatients = async (status = 'active') => {
-    // Map your old status to the new API’s query
-    let isActive;
-    if (status === 'active') isActive = true;
-    else if (status === 'inactive') isActive = false;
-    else isActive = undefined;
-  
-    // We’ll fetch all pages once (keeps your existing UI/filters working)
-    const pageSize = 100; // tweak if needed
-    let pageNo = 0;
-    let totalPages = 1;
+    // simple pagination; aggregate to keep current UI behavior
+    const page_size = 100; // adjust if needed
+    let page = 1;
     let all = [];
-  
-    while (pageNo < totalPages) {
+    let keepGoing = true;
+
+    while (keepGoing) {
+      // NOTE: we only pass q/page/page_size because patient.js forwards only those (no teammate code touched)
       const res = await patientApi.listPatientsV1({
-        
-        require_auth: true,
-        mask: true,
-        pageNo,
-        pageSize,
-        ...(isActive !== undefined ? { isActive } : {}),
-        // if you have a search text bound to API-side search, include it here:
-        // name: searchText
+        page,
+        page_size,
+        // q: searchQuery  // (optional: wire to backend later)
       });
-  
+
       if (!res.ok) {
-        return { status: res.status, ok: false }; // keep your error flow consistent
+        setStatusCode(res.status);
+        setIsError(true);
+        return { status: res.status, ok: false };
       }
-  
+
       const body = res.data || {};
-      const page = Array.isArray(body.data) ? body.data : Array.isArray(body) ? body : [];
-      totalPages = Number.isFinite(body.totalPages) ? body.totalPages : 1;
-  
-      all = all.concat(page.map(normalizePatientV1));
-      pageNo += 1;
+      // support several common shapes: {results: []}, {items: []}, {data: []}, or an array
+      const pageArray =
+        (Array.isArray(body.results) && body.results) ||
+        (Array.isArray(body.items) && body.items) ||
+        (Array.isArray(body.data) && body.data) ||
+        (Array.isArray(body) && body) ||
+        [];
+
+      all = all.concat(pageArray.map(normalizePatientV1));
+
+      // stop when fewer than page_size came back, or backend says no next page
+      const nextUrl = body.next || body.nextPageUrl || null;
+      if (pageArray.length < page_size || !nextUrl) keepGoing = false;
+      page += 1;
     }
-  
-    // Your screen expects first/last/fullName etc., so we already normalized above
-    setOriginalListOfPatients([...all]);
-    setListOfPatients([...all]); // your existing search/sort/filter will still run
+
+    // --- apply patient status filter LOCALLY (no API change needed)
+    const want = status === 'active' ? true : status === 'inactive' ? false : undefined;
+    const filtered =
+      want === undefined ? all : all.filter(p => p.isActive === want);
+
+    setOriginalListOfPatients([...filtered]);
+    setListOfPatients([...filtered]);
     setIsError(false);
-  
+    setStatusCode(200);
     return { status: 200, ok: true };
   };
 
-  // Retrieve cargivers patient count list from backend
+  // Retrieve caregivers patient count list from backend (legacy for now)
   const getPatientCountInfo = async (tempPatientStatus = patientStatus) => {
-    // console.log('PATIENTS -', 7, 'getPatientCountInfo');
-
     const response = await patientApi.getPatientStatusCountList();
 
     if (response.ok) {
@@ -310,21 +292,18 @@ const [debug, setDebug] = useState({ server: '', status: null, pageNo: 0, totalP
   };
 
   // Set screen to loading wheel when retrieving patient list from backend
-  // Note: Once the data is retrieved from backend, setIsLoading is set to false momentarily so SearchFilterBar can render and initialize data
   const refreshPatientData = (tempPatientStatus = patientStatus) => {
-    console.log('PATIENTS -', 8, 'refreshPatientData');
-
     setIsLoading(true);
-    const promiseFunction = async () => {
+    const run = async () => {
       await getListOfPatients(tempPatientStatus);
       if (viewMode === 'allPatients') {
         await getPatientCountInfo(tempPatientStatus);
       }
       setIsLoading(false);
       setIsDataInitialized(true);
-      setIsLoading(true);
+      // ⚠️ do NOT setIsLoading(true) again here – that caused the spinner to persist
     };
-    promiseFunction();
+    run();
   };
 
   // Update filter options for Caregiver filter based on patient count data from backend
@@ -347,8 +326,6 @@ const [debug, setDebug] = useState({ server: '', status: null, pageNo: 0, totalP
         caregiverName;
     }
 
-    // console.log('PATIENTS -', 9, 'updateCaregiverFilterOptions', caregiverPatientCount);
-
     setFilterOptionDetails((prevState) => ({
       ...prevState,
       Caregiver: {
@@ -361,8 +338,6 @@ const [debug, setDebug] = useState({ server: '', status: null, pageNo: 0, totalP
   };
 
   // Handle searching, sorting, and filtering of patient data based on patient status
-  // If patient status has been updated, get patient list from api
-  // Otherwise filter the list of patients
   const handleSearchSortFilter = async ({
     text,
     tempSelSort,
@@ -372,8 +347,6 @@ const [debug, setDebug] = useState({ server: '', status: null, pageNo: 0, totalP
     tempSearchMode,
     setFilteredList,
   }) => {
-    // console.log('PATIENTS -', 10, 'handleSearchSortFilter', tempSelChipFilters);
-
     setIsLoading(true);
     setApplySortFilter(true);
 
@@ -404,16 +377,12 @@ const [debug, setDebug] = useState({ server: '', status: null, pageNo: 0, totalP
 
   // On click button to add patient
   const handleOnClickAddPatient = () => {
-    // console.log('PATIENTS -', 11, 'handleOnClickAddPatient');
-
     navigation.navigate(routes.PATIENT_ADD_PATIENT);
     setIsReloadPatientList(true);
   };
 
   // Navigate to patient profile when patient item is clicked
   const handleOnClickPatientItem = (patientID) => {
-    // console.log('PATIENTS -', 12, 'handleOnClickPatientItem');
-
     navigation.push(routes.PATIENT_PROFILE, { id: patientID });
   };
 
@@ -525,7 +494,7 @@ const [debug, setDebug] = useState({ server: '', status: null, pageNo: 0, totalP
                   true,
                 )
               }
-              data={visiblePatients} // ⭐ use favourites-aware list
+              data={visiblePatients}
               keyExtractor={(item) => String(item.patientID ?? fav.getPatientId(item))}
               style={styles.patientListContainer}
               renderItem={({ item, index }) => {

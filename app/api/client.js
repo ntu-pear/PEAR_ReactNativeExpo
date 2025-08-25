@@ -10,6 +10,9 @@ const baseURL = 'http://10.96.188.173:5678/api'; // old server for PEAR_CORE web
 // === User-service lives on a different server ===
 export const V1_BASE = 'http://10.96.188.185/api/v1';
 
+// === Patient-service (FastAPI) ===
+export const PATIENT_V1_BASE = 'http://10.96.188.180/api/v1';
+
 const endpoint = '/User';
 const userRefreshToken = `${endpoint}/RefreshToken`;
 /*
@@ -32,7 +35,8 @@ apiClient.addAsyncRequestTransform(async (request) => {
   // Skip attaching auth to login endpoints
   if (full.endsWith('/api/v1/login/') || full.endsWith('/api/User/Login')) return;
 
-  const key = full.startsWith(V1_BASE) ? 'userAuthTokenV1' : 'userAuthTokenLegacy';
+  let key = full.startsWith(V1_BASE) ? 'userAuthTokenV1' : 'userAuthTokenLegacy';
+  if (full.startsWith(PATIENT_V1_BASE)) key = 'userAuthTokenV1';
   let token = await authStorage.getToken(key);
   if (!token) token = await authStorage.getToken('userAuthToken'); // fallback
 
@@ -117,7 +121,7 @@ apiClient.addAsyncResponseTransform(async (response) => {
 
   // Which server did this request intend to hit?
   const reqBase = cfg.baseURL || baseURL;
-  const isV1 = reqBase?.startsWith(V1_BASE);
+  const isV1 = reqBase?.startsWith(V1_BASE) || reqBase?.startsWith(PATIENT_V1_BASE);
 
   // Read tokens from storage
   const rawAccess = await authStorage.getToken('userAuthToken');
