@@ -214,33 +214,39 @@ const STRINGY_KEYS = [
 
   const retrieveGuardian = async (id) => {
     setIsGuardianLoading(true);
-    const response = await guardianApi.getPatientGuardian(id, false);
-    if (!response.ok) {
-      console.log('Request failed with status code: ', response.status);
-      // setIsGuardianLoading(false);
-      return;
-    }else{
-      setGuardianData(response.data.data);
-    }
-    // setIsGuardianLoading(false);
-    setIsGuardianLoading(false);
-  };
-
+   try {
+     const response = await guardianApi.getPatientGuardian(id, false);
+     if (response.ok) {
+       setGuardianData(response.data?.data ?? []);
+     } else {
+       console.log('Request failed with status code: ', response.status);
+       setGuardianData([]); // NEW: keep data defined
+     }
+   } catch (e) {
+     console.log('Guardian load error:', e?.message || e);
+     setGuardianData([]);
+   } finally {
+     setIsGuardianLoading(false); // NEW: never block UI
+   }
+ };
   const retrieveSocialHistory = async (id) => {
     setIsSocialHistoryLoading(true);
-    const response = await socialHistoryApi.getSocialHistory(id);
-    if (!response.ok) {
-      console.log('Request failed with status code: ', response.status);
-      // setIsSocialHistoryLoading(false);
-      return;
-    }
-    if (response.data.data === null) {
-      setSocialHistoryData([]);
-    } else {
-      setSocialHistoryData(response.data.data);
-    }
-    setIsSocialHistoryLoading(false);
-  };
+    try {
+     const response = await socialHistoryApi.getSocialHistory(id);
+      if (response.ok) {
+       const data = response.data?.data ?? [];
+       setSocialHistoryData(data || []);
+     } else {
+       console.log('Request failed with status code: ', response.status);
+       setSocialHistoryData([]);
+     }
+   } catch (e) {
+     console.log('Social history load error:', e?.message || e);
+     setSocialHistoryData([]);
+   } finally {
+     setIsSocialHistoryLoading(false); // NEW
+   }
+ };
 
   // NEW: react if navigation params change later
   useEffect(() => {
@@ -251,17 +257,23 @@ const STRINGY_KEYS = [
   // CHANGED: include patientID in deps and always call with the resolved id
   useFocusEffect(
     React.useCallback(() => {
-      if (!patientID) {
-        console.log('No patientID found in route params');
+       if (!patientID) {
+       console.log('No patientID found in route params');
         setIsLoading(false);
-        return;
-      }
-      setIsLoading(true);
-      getPatient(patientID);
-      retrieveGuardian(patientID);       // CHANGED
-      retrieveSocialHistory(patientID);  // CHANGED
-    }, [patientID]), // CHANGED
-  );
+       return;
+       }
+       let mounted = true;
+       (async () => {
+       setIsLoading(true);
+       await getPatient(patientID);      // wait for v1 patient only
+       if (mounted) setIsLoading(false); // NEW: render now
+      // fire-and-forget legacy calls; they won't block UI
+       retrieveGuardian(patientID);
+        retrieveSocialHistory(patientID);
+       })();
+       return () => { mounted = false; };
+       }, [patientID])
+       );
 
   // Check if all the data has been loaded before loading page
   useEffect(() => {
