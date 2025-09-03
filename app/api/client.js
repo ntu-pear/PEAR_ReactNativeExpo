@@ -32,6 +32,14 @@ apiClient.addAsyncRequestTransform(async (request) => {
   const reqBase = request.baseURL || baseURL;
   const full = `${reqBase}${request.url || ''}`;
 
+  if (request.params?.require_auth === false || request.headers?.['X-No-Auth'] === '1') {
+    if (request.headers) delete request.headers.Authorization;
+    return; // don't attach token
+
+      // NEW (TEMP): don't attach auth to the legacy count endpoint (avoid noisy 403/refresh loops)
+  if (full.includes('/api/Patient/patientStatusCountList')) return;
+  }
+
   // Skip attaching auth to login endpoints
   if (full.endsWith('/api/v1/login/') || full.endsWith('/api/User/Login')) return;
 

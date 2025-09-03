@@ -8,7 +8,7 @@ import { Image } from 'react-native';
 // --- Patient Service v1 base (new server) ---
 const withPatientV1Base = (cfg = {}) => ({ baseURL: PATIENT_V1_BASE, timeout: 15000, ...cfg });
 const v1PatientsListEndpoint = '/patients/';
-const v1PatientReadEndpoint  = (patient_id) => `/patients/${patient_id}`;
+const v1PatientReadEndpoint  = (patient_id) => `/patients/${patient_id}/`;
 
 
 const endpoint = '/Patient';

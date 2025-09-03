@@ -33,6 +33,9 @@ import {
 } from 'app/utility/miscFunctions';
 import * as fav from 'app/utility/favorites'; // ⭐ favourites helper
 
+ // NEW (TEMP): disable legacy Core counts during Patient Service migration
+const ENABLE_OLD_COUNTS = false;
+
 function PatientsScreen({ navigation }) {
   // View modes user can switch between (displayed as tab on top)
   const VIEW_MODES = {
@@ -40,52 +43,49 @@ function PatientsScreen({ navigation }) {
     'All Patients': 'allPatients',
   };
 
-  // --- normalize FastAPI v1 patient → legacy fields used by this screen
-  const normalizePatientV1 = (p = {}) => {
-    const id =
-      p.patient_id ??
-      p.id ??
-      p.patientID ??
-      p.PatientId ??
-      p.PatientID ??
-      null;
+  // NEW: more robust active/inactive derivation
+const normalizePatientV1 = (p = {}) => {
+  const id =
+    p.patient_id ?? p.id ?? p.patientID ?? p.PatientId ?? p.PatientID ?? null;
 
-    // Prefer existing first/last if given; otherwise split name
-    const hasFirst =
-      typeof p.first_name === 'string' || typeof p.firstName === 'string';
-    const hasLast =
-      typeof p.last_name === 'string' || typeof p.lastName === 'string';
-    const nameStr = typeof p.name === 'string' ? p.name.trim() : '';
+  const hasFirst = typeof p.first_name === 'string' || typeof p.firstName === 'string';
+  const hasLast  = typeof p.last_name  === 'string' || typeof p.lastName  === 'string';
+  const nameStr  = typeof p.name === 'string' ? p.name.trim() : '';
 
-    const firstName = String(
-      p.first_name ?? p.firstName ?? (hasFirst ? '' : (nameStr.split(' ')[0] ?? ''))
-    ).trim();
+  const firstName = String(
+    p.first_name ?? p.firstName ?? (hasFirst ? '' : (nameStr.split(' ')[0] ?? ''))
+  ).trim();
 
-    const lastName = String(
-      p.last_name ?? p.lastName ?? (hasLast ? '' : (nameStr.split(' ').slice(1).join(' ') ?? ''))
-    ).trim();
+  const lastName = String(
+    p.last_name ?? p.lastName ?? (hasLast ? '' : (nameStr.split(' ').slice(1).join(' ') ?? ''))
+  ).trim();
 
-    return {
-      ...p,
-      // legacy fields this screen already uses:
-      patientID: id,
-      firstName,
-      lastName,
-      fullName: `${firstName} ${lastName}`.trim(),
-      profilePicture:
-        p.profilePicture ??
-        p.profile_picture ??
-        p.profile_photo ??
-        p.photoUrl ??
-        p.avatar ??
-        null,
-      // additional fields referenced by UI/filters
-      preferredName: p.preferred_name ?? p.preferredName ?? '',
-      caregiverName: p.caregiver_name ?? p.caregiverName ?? null,
-      startDate: p.start_date ?? p.startDate ?? null,
-      isActive: typeof p.is_active === 'boolean' ? p.is_active : p.isActive,
-    };
+  // NEW: derive isActive from multiple common shapes
+  const statusStr = typeof p.status === 'string' ? p.status.trim().toLowerCase() : null;
+  const statusAny = p.status ?? p.active ?? p.is_active ?? p.isActive ?? null;
+
+  const derivedIsActive =
+    typeof p.is_active === 'boolean' ? p.is_active :
+    typeof p.isActive === 'boolean' ? p.isActive :
+    (typeof statusAny === 'number' ? statusAny === 1 :
+     typeof statusAny === 'string'
+       ? ['1','true','active','yes'].includes(statusAny.trim().toLowerCase())
+       : (statusStr ? statusStr.startsWith('act') : undefined));
+
+  return {
+    ...p,
+    patientID: id,
+    firstName,
+    lastName,
+    fullName: `${firstName} ${lastName}`.trim(),
+    profilePicture:
+      p.profilePicture ?? p.profile_picture ?? p.profile_photo ?? p.photoUrl ?? p.avatar ?? null,
+    preferredName: p.preferred_name ?? p.preferredName ?? '',
+    caregiverName: p.caregiver_name ?? p.caregiverName ?? null,
+    startDate: p.start_date ?? p.startDate ?? null,
+    isActive: derivedIsActive, // NEW
   };
+};
 
   // Options for user to search by
   const SEARCH_OPTIONS = ['Full Name', 'Preferred Name'];
@@ -259,10 +259,11 @@ function PatientsScreen({ navigation }) {
     }
 
     // --- apply patient status filter LOCALLY (no API change needed)
+    // AFTER (NEW)
     const want = status === 'active' ? true : status === 'inactive' ? false : undefined;
+// Treat missing isActive as "active" during migration so nothing disappears
     const filtered =
-      want === undefined ? all : all.filter(p => p.isActive === want);
-
+      want === undefined ? all : all.filter(p => (p.isActive ?? true) === want);
     setOriginalListOfPatients([...filtered]);
     setListOfPatients([...filtered]);
     setIsError(false);
@@ -284,10 +285,14 @@ function PatientsScreen({ navigation }) {
       setIsRetry(false);
       setStatusCode(response.status);
     } else {
-      setIsLoading(false);
-      setIsError(true);
+      setPatientCountInfo({});
+      updateCaregiverFilterOptions({
+      tempPatientCountInfo: {},
+      tempPatientStatus: tempPatientStatus,
+    });
+      setIsError(false); // don't block the list UI
       setStatusCode(response.status);
-      setIsRetry(true);
+      return { status: response.status, ok: false };
     }
   };
 
@@ -296,9 +301,11 @@ function PatientsScreen({ navigation }) {
     setIsLoading(true);
     const run = async () => {
       await getListOfPatients(tempPatientStatus);
-      if (viewMode === 'allPatients') {
-        await getPatientCountInfo(tempPatientStatus);
-      }
+      // NEW (TEMP)
+    if (ENABLE_OLD_COUNTS && viewMode === 'allPatients') {
+      await getPatientCountInfo(tempPatientStatus);
+    }
+
       setIsLoading(false);
       setIsDataInitialized(true);
       // ⚠️ do NOT setIsLoading(true) again here – that caused the spinner to persist

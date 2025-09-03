@@ -77,9 +77,16 @@ function ProfileNameButton({
           <View style={customTextContainerStyle}>
             {profileLineOne ? (
               <Text
-                style={[styles.DefaultText, styles.NameText, ...isVertical ? [{textAlign: 'center'}] : []]}
-                fontSize={size / 4}
-              >
+              style={[
+                styles.DefaultText,
+                styles.NameText,
+                ...(isVertical ? [{ textAlign: 'center' }] : []),
+                { flexShrink: 1, flexWrap: 'wrap' },
+              ]}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+              fontSize={size / 4}
+            >
                 {profileLineOne.trim()}
               </Text>
             ) 
@@ -117,19 +124,21 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingBottom: '4%',
+    paddingBottom: '5%',
     paddingTop: '6%',
   },
   ContentWrapperHorizontal: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
     paddingBottom: '4%',
     paddingTop: '6%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    //flex: 1,
+    width: '100%',
+
   },
   ProfilePicture: {
-    height: 100,
-    width: 100,
+    height: 300,
+    width: 300,
     borderRadius: 100,
   },
   DefaultText: {
@@ -137,10 +146,14 @@ const styles = StyleSheet.create({
   },
   NameText: {
     fontWeight: 'bold',
+    fontSize: 18,
   },
   TextContainer: {
     justifyContent: 'flex-start',
-    marginLeft: 30,
+    marginLeft: 16,
+    flexShrink: 1,
+    flexGrow:1,
+    minWidth:0,
   },
 });
 
