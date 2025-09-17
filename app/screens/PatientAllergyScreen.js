@@ -11,7 +11,7 @@ import {
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 // API
-import patientApi from 'app/api/patient';
+import patientApi, { normalizePatientAllergyV1 } from 'app/api/patient';
 
 // Utilities
 import {
@@ -161,21 +161,23 @@ function PatientAllergyScreen(props) {
   // Get allergy data from backend
   const getAllergyData = async () => {
     if (patientID) {
-      const response = await patientApi.getPatientAllergy(patientID);
+      const response = await patientApi.listPatientAllergiesV1(patientID);
       if (response.ok) {
-        console.log(response.data.data);
-        setOriginalAllergyData([...response.data.data]);
-        setAllergyData(parseAllergyData([...response.data.data]));
-        // Extract existing allergy IDs
-        const allergyIDs = response.data.data.map(
-          (allergy) => allergy.allergyListID,
-        );
-        setPatientAllergyIDs(allergyIDs);
+        const raw = Array.isArray(response.data)
+          ? response.data
+          : response.data?.results ?? [];
+      
+        const normalized = raw.map(normalizePatientAllergyV1);
+      
+        setOriginalAllergyData(normalized);
+        setAllergyData(parseAllergyData(normalized));
+        setPatientAllergyIDs(normalized.map((a) => a.allergyID));
         setIsDataInitialized(true);
         setIsLoading(false);
         setIsError(false);
         setIsRetry(false);
         setStatusCode(response.status);
+      
       } else {
         console.log('Request failed with status code: ', response.status);
         setOriginalAllergyData([]);
@@ -213,7 +215,7 @@ function PatientAllergyScreen(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.AddPatientAllergy(patientID, allergyData);
+    const result = await patientApi.addPatientAllergyV1(patientID, allergyData);
     if (result.ok) {
       console.log('submitting allergy data', allergyData);
       refreshAllergyData();
@@ -264,7 +266,7 @@ function PatientAllergyScreen(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.deletePatientAllergy(tempData);
+    const result = await patientApi.deletePatientAllergyV1(allergyID);
     if (result.ok) {
       refreshAllergyData();
       setIsModalVisible(false);

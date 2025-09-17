@@ -103,7 +103,8 @@ function PatientInformationAccordion({
           { label: 'Last Name', value: patientProfile.lastName },
           {
             label: 'NRIC',
-            value: patientProfile.nric.replace(/\d{4}(\d{3})/, 'xxxx$1'),
+            value: patientProfile?.nric?.replace(/(\d{4})(\d{3})/, 'xxxx$1') ?? 'N/A',
+
           },
           {
             label: 'DOB',
