@@ -28,20 +28,26 @@ const apiClient = create({
   },
 });
 
-apiClient.addAsyncRequestTransform(async (request) => {
-  const reqBase = request.baseURL || baseURL;
-  const full = `${reqBase}${request.url || ''}`;
+  apiClient.addAsyncRequestTransform(async (request) => {
+    const reqBase = request.baseURL || baseURL;
+    const full = `${reqBase}${request.url || ''}`;
+  
+    // don't attach auth to the legacy count endpoint (avoid noisy 403/refresh loops)
+    if (full.includes('/api/Patient/patientStatusCountList')) return;
+  
+    if (request.params?.require_auth === false || request.headers?.['X-No-Auth'] === '1') {
+      if (request.headers) delete request.headers.Authorization;
+      return; // don't attach token
+    }
+  
+  // Skip attaching auth to login/refresh endpoints
+  if (
+    full.endsWith('/api/v1/login/')  ||
+    full.endsWith('/api/v1/refresh/')||
+    full.endsWith('/api/User/Login') ||
+    full.endsWith('/User/RefreshToken')
+  ) return;
 
-  if (request.params?.require_auth === false || request.headers?.['X-No-Auth'] === '1') {
-    if (request.headers) delete request.headers.Authorization;
-    return; // don't attach token
-
-      // NEW (TEMP): don't attach auth to the legacy count endpoint (avoid noisy 403/refresh loops)
-  if (full.includes('/api/Patient/patientStatusCountList')) return;
-  }
-
-  // Skip attaching auth to login endpoints
-  if (full.endsWith('/api/v1/login/') || full.endsWith('/api/User/Login')) return;
 
   let key = full.startsWith(V1_BASE) ? 'userAuthTokenV1' : 'userAuthTokenLegacy';
   if (full.startsWith(PATIENT_V1_BASE)) key = 'userAuthTokenV1';
@@ -143,7 +149,7 @@ apiClient.addAsyncResponseTransform(async (response) => {
   let refreshRes;
   if (isV1) {
     // FastAPI user-service refresh
-    refreshRes = await apiClient.post('/refresh/', { refreshToken: refresh }, { baseURL: V1_BASE });
+    refreshRes = await apiClient.post('/refresh/', { refresh }, { baseURL: V1_BASE });
   } else {
     // Legacy refresh expects BOTH accessToken and refreshToken
     refreshRes = await apiClient.post('/User/RefreshToken', {
@@ -153,18 +159,29 @@ apiClient.addAsyncResponseTransform(async (response) => {
   }
 
   // Extract new tokens (support multiple response shapes)
-  const body = refreshRes?.data || {};
+  let body = refreshRes?.data;
+  if (typeof body === 'string') {
+    // backend returned the token as a raw string
+    body = { token: body };
+  } else if (!body) {
+    body = {};
+  }
   const deep = body.data || {};
+
   const newAccess =
-    body.accessToken ||
-    body.token ||
-    deep.accessToken ||
-    deep.token ||
-    refreshRes?.headers?.authorization?.replace(/Bearer\s+/i, '');
+    body.accessToken || body.access || body.token ||
+    deep.accessToken || deep.access || deep.token ||
+    (refreshRes?.headers?.authorization
+      ? refreshRes.headers.authorization.replace(/Bearer\s+/i, '')
+      : undefined);
+
   const newRefresh =
-    body.refreshToken || deep.refreshToken || body.RefreshToken || deep.RefreshToken;
+    body.refreshToken || body.refresh ||
+    deep.refreshToken || deep.refresh ||
+    body.RefreshToken || deep.RefreshToken;
 
   if (!refreshRes?.ok || !newAccess) return; // bubble the 401/403
+
 
   // Save/apply new tokens
   await authStorage.storeToken('userAuthToken', newAccess);

@@ -14,6 +14,19 @@ const v1PatientMedicationsEndpoint = (patient_id) => `/patients/${patient_id}/me
 const v1PatientMedicationDetailEndpoint = (patient_id, med_id) => `/patients/${patient_id}/medications/${med_id}/`;
 const USE_COLLECTION_STYLE_MED_ENDPOINT = false;
 
+// ---------- Patient Mobility (v1) ----------
+const v1MobilityMapListByPatientEndpoint = (patient_id) => `/MobilityMapping/List/Patient/${patient_id}`;
+const v1MobilityMapAddEndpoint = () => `/MobilityMapping/List/add`;
+const v1MobilityMapUpdateEndpoint = (mobility_id) => `/MobilityMapping/List/update/${mobility_id}`;
+const v1MobilityMapDeleteEndpoint = (mobility_id) => `/MobilityMapping/List/delete/${mobility_id}`;
+
+// ---------- Vitals (v1) ----------
+const v1VitalListEndpoint = `/Vital/list`;                      // GET ?patient_id=#
+const v1VitalAddEndpoint = `/Vital/add`;                        // POST
+const v1VitalUpdateEndpoint = (vital_id) => `/Vital/update/${vital_id}`; // PUT
+const v1VitalDeleteEndpoint = `/Vital/delete`;                  // DELETE (expects vital_id)
+
+
 // ---- Legacy service endpoints (existing server) ----
 const endpoint = '/Patient';
 const allergyEndpoint = '/Allergy';
@@ -198,7 +211,137 @@ const deletePatientAllergyV1 = async (patient_allergy_id) => {
   if (!res.ok) console.log('[ALLERGY v1][DELETE]', url, res.status, res.data);
   return res;
 };
+// ---------- Mobility (v1) ----------
+const listPatientMobilityAidsV1 = async (patient_id) => {
+  const url = v1MobilityMapListByPatientEndpoint(patient_id);
+  const res = await client.get(url, {}, withPatientV1Base());
+  if (!res.ok) console.log('[MOBILITY v1][GET]', url, res.status, res.data);
 
+  // normalize to UI shape
+  const raw = Array.isArray(res.data) ? res.data : res.data?.data ?? [];
+  return raw.map((x) => ({
+    mobilityId: x.mobility_id ?? x.id,
+    mobilityListId: x.mobility_list_id,
+    mobilityListDesc: x.mobility_list_desc ?? '', // description if backend joins the master table
+    mobilityRemark: x.remark ?? '',
+    isRecovered: x.is_recovered,
+    date: x.date ?? x.created_at ?? '',
+  }));
+};
+
+const addPatientMobilityV1 = async (patient_id, data) => {
+  const payload = {
+    patient_id,
+    mobility_list_id: data.mobilityListId,
+    remark: data.mobilityRemark,
+    is_recovered: data.isRecovered,
+    date: data.date,
+  };
+  const url = v1MobilityMapAddEndpoint();
+  const res = await client.post(url, payload, withPatientV1Base());
+  if (!res.ok) console.log('[MOBILITY v1][POST]', url, res.status, payload, res.data);
+  return res;
+};
+
+const updatePatientMobilityV1 = async (patient_id, data) => {
+  const mobility_id = data.mobilityId;
+  const payload = {
+    patient_id,
+    mobility_list_id: data.mobilityListId,
+    remark: data.mobilityRemark,
+    is_recovered: data.isRecovered,
+    date: data.date,
+  };
+  const url = v1MobilityMapUpdateEndpoint(mobility_id);
+  const res = await client.put(url, payload, withPatientV1Base());
+  if (!res.ok) console.log('[MOBILITY v1][PUT]', url, res.status, payload, res.data);
+  return res;
+};
+
+const deletePatientMobilityV1 = async (patient_id, mobility_id) => {
+  const url = v1MobilityMapDeleteEndpoint(mobility_id);
+  const res = await client.delete(url, {}, withPatientV1Base());
+  if (!res.ok) console.log('[MOBILITY v1][DELETE]', url, res.status, res.data);
+  return res;
+};
+
+// ---------- Vitals (v1) ----------
+const listPatientVitalsV1 = async (patient_id, params = {}) => {
+  const res = await client.get(
+    v1VitalListEndpoint,
+    { patient_id, ...params },
+    withPatientV1Base()
+  );
+  if (!res.ok) {
+    console.log('[VITAL v1][GET LIST]', res.status, res.data);
+    throw res;
+  }
+
+  // normalize: FastAPI -> UI shape already used on the screen
+  const raw = Array.isArray(res.data) ? res.data : res.data?.data ?? [];
+  return raw.map((x) => ({
+    vitalID:           x.vital_id ?? x.id,
+    temperature:       x.temperature ?? null,
+    weight:            x.weight ?? null,
+    height:            x.height ?? null,
+    systolicBP:        x.systolic_bp ?? x.systolicBP ?? null,
+    diastolicBP:       x.diastolic_bp ?? x.diastolicBP ?? null,
+    heartRate:         x.heart_rate ?? x.heartRate ?? null,
+    spO2:              x.spo2 ?? x.SpO2 ?? null,
+    bloodSugarlevel:   x.blood_sugar_level ?? x.bloodSugarlevel ?? null, // keep UI’s key
+    vitalRemarks:      x.vital_remarks ?? x.vitalRemarks ?? '',
+    afterMeal:         x.after_meal ?? x.afterMeal ?? false,
+    createdDateTime:   x.created_at ?? x.createdDateTime ?? x.date ?? null,
+  }));
+};
+
+const addPatientVitalV1 = (patient_id, data) => {
+  const payload = {
+    patient_id,
+    temperature:        data.temperature,
+    weight:             data.weight,
+    height:             data.height,
+    systolic_bp:        data.systolicBP,
+    diastolic_bp:       data.diastolicBP,
+    heart_rate:         data.heartRate,
+    spo2:               data.spO2,
+    blood_sugar_level:  data.bloodSugarLevel ?? data.bloodSugarlevel,
+    vital_remarks:      data.vitalRemarks,
+    after_meal:         data.afterMeal,
+  };
+  return client.post(v1VitalAddEndpoint, payload, withPatientV1Base());
+};
+
+const updatePatientVitalV1 = (patient_id, data) => {
+  const payload = {
+    patient_id,
+    temperature:        data.temperature,
+    weight:             data.weight,
+    height:             data.height,
+    systolic_bp:        data.systolicBP,
+    diastolic_bp:       data.diastolicBP,
+    heart_rate:         data.heartRate,
+    spo2:               data.spO2,
+    blood_sugar_level:  data.bloodSugarLevel ?? data.bloodSugarlevel,
+    vital_remarks:      data.vitalRemarks,
+    after_meal:         data.afterMeal,
+  };
+  return client.put(v1VitalUpdateEndpoint(data.vitalID), payload, withPatientV1Base());
+};
+
+const deletePatientVitalV1 = async (vital_id) => {
+  // Try query param first (most common). If backend needs JSON body for DELETE, try again with `data`.
+  let res = await client.delete(v1VitalDeleteEndpoint, { vital_id }, withPatientV1Base());
+  if (!res.ok) {
+    res = await client.delete(
+      v1VitalDeleteEndpoint,
+      {},
+      { baseURL: PATIENT_V1_BASE, timeout: 15000, data: { vital_id } }
+    );
+  }
+  if (!res.ok) console.log('[VITAL v1][DELETE]', res.status, res.data);
+  return res;
+};
 
 // Normalize v1 -> legacy shape your UI already expects
 export const normalizePatientAllergyV1 = (a = {}) => ({
@@ -753,5 +896,18 @@ export default {
    deletePatientAllergyV1,
    getAllergyTypesV1,
    getAllergyReactionTypesV1,
+  
+   // --- v1 Mobility ---
+  listPatientMobilityAidsV1,
+  addPatientMobilityV1,
+  updatePatientMobilityV1,
+  deletePatientMobilityV1,
+
+   // --- v1 Vitals ---
+  listPatientVitalsV1,
+  addPatientVitalV1,
+  updatePatientVitalV1,
+  deletePatientVitalV1,
+  
 
 };

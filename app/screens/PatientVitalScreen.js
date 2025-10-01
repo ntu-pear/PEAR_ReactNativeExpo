@@ -1,11 +1,19 @@
 // Libs
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { Alert, Keyboard, StyleSheet, TouchableOpacity } from 'react-native';
 import { FlatList, View } from 'native-base';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 // API
 import patientApi from 'app/api/patient';
+const {
+  listPatientVitalsV1,
+  addPatientVitalV1,
+  updatePatientVitalV1,
+  deletePatientVitalV1,
+  readPatientV1,
+} = patientApi;
+
 
 // Utilities
 import {
@@ -146,54 +154,68 @@ function PatientVitalScreen(props) {
   };
 
   const getVitalData = async () => {
-    // Your API call to get vitals, parsing, and setting state logic here
-    if (patientID) {
-      const response = await patientApi.getPatientVitalList(patientID);
-      if (response.ok) {
-        console.log(response.data.data);
-        setOriginalVitalData([...response.data.data]);
-        setVitalData(parseVitalData([...response.data.data]));
-        setIsDataInitialized(true);
-        setIsLoading(false);
-        setIsError(false);
-        setIsRetry(false);
-        setStatusCode(response.status);
+    if (!patientID) return;
+  
+    try {
+      const resOrRows = await listPatientVitalsV1(patientID);
+  
+      // Handle both shapes: array or { ok, data, status }
+      let rows;
+      if (Array.isArray(resOrRows)) {
+        rows = resOrRows;
+        setStatusCode(200);
+      } else if (resOrRows?.ok) {
+        const payload = resOrRows.data?.data ?? resOrRows.data ?? [];
+        rows = Array.isArray(payload) ? payload : [];
+        setStatusCode(resOrRows.status ?? 200);
       } else {
-        console.log('Request failed with status code: ', response.status);
-        setOriginalVitalData([]);
-        setVitalData([]);
-        setIsLoading(false);
-        setIsError(true);
-        setStatusCode(response.status);
-        setIsRetry(true);
+        throw resOrRows || { status: 500, data: { detail: 'Unknown vitals response' } };
       }
+  
+      // Normalize + make Date a guaranteed string (prevents .toLowerCase() crash)
+      const normalized = rows.map((x) => ({
+        vitalID: x.vitalID ?? x.id ?? x.vital_id ?? null,
+        temperature: x.temperature ?? x.Temperature ?? '',
+        weight: x.weight ?? x.Weight ?? '',
+        height: x.height ?? x.Height ?? '',
+        systolicBP: x.systolicBP ?? x.SystolicBP ?? x.systolic_bp ?? '',
+        diastolicBP: x.diastolicBP ?? x.DiastolicBP ?? x.diastolic_bp ?? '',
+        heartRate: x.heartRate ?? x.HeartRate ?? x.heart_rate ?? '',
+        spO2: x.spO2 ?? x.SpO2 ?? '',
+        bloodSugarlevel: x.bloodSugarlevel ?? x.bloodSugarLevel ?? x.blood_sugar_level ?? '',
+        vitalRemarks: x.vitalRemarks ?? x.VitalRemarks ?? '',
+        afterMeal: x.afterMeal ?? x.AfterMeal ?? false,
+        createdDateTime: String(
+          x.createdDateTime ??
+          x.CreatedDateTime ??
+          x.created_at ??
+          x.date ??
+          ''
+        ),
+      }));
+  
+      setOriginalVitalData(normalized);
+      setVitalData(normalized);
+      setIsDataInitialized(true);
+      setIsLoading(false);
+      setIsError(false);
+      setIsRetry(false);
+    } catch (e) {
+      console.log('Vitals v1 list failed', e?.status, e?.data || e?.message);
+      setOriginalVitalData([]);
+      setVitalData([]);
+      setIsLoading(false);
+      setIsError(true);
+      setStatusCode(e?.status ?? 500);
+      setIsRetry(true);
     }
   };
-
-  // Parse data
-  const parseVitalData = (data) => {
-    return data.map((item) => ({
-      // for add/edit form
-      vitalID: item.vitalID,
-      temperature: item.temperature,
-      weight: item.weight,
-      height: item.height,
-      systolicBP: item.systolicBP,
-      diastolicBP: item.diastolicBP,
-      heartRate: item.heartRate,
-      spO2: item.spO2,
-      bloodSugarlevel: item.bloodSugarlevel,
-      vitalRemarks: item.vitalRemarks,
-      afterMeal: item.afterMeal,
-      // ensure we map any server casing to the UI key
-      createdDateTime: item.createdDateTime ?? item.CreatedDateTime,
-    }));
-  };
-
+  
+  
   const getPatientData = async () => {
     if (patientID) {
       // ONLY CHANGE: use new Patient Service for header + normalize
-      const response = await patientApi.readPatientV1(patientID, { require_auth: true, mask: true });
+      const response = await readPatientV1(patientID, { require_auth: true, mask: true });
       if (response.ok) {
         const raw = response.data?.data ?? response.data ?? {};
         setPatientData(normalizePatientV1(raw));
@@ -227,14 +249,11 @@ function PatientVitalScreen(props) {
     // Create and store the original FormData
     const originalVitalFormData = { ...tempVitalFormData };
 
-    const result = await patientApi.AddPatientVital(
-      patientID,
-      {
-        ...tempVitalFormData,
-        // map UI key to API's expected camelCase
-        bloodSugarLevel: tempVitalFormData.bloodSugarlevel,
-      },
-    );
+    const result = await addPatientVitalV1(patientID, {
+      ...tempVitalFormData,
+      bloodSugarLevel: tempVitalFormData.bloodSugarlevel,
+    });
+    
     if (result.ok) {
       console.log('submitted vital data', tempVitalFormData);
       refreshVitalData();
@@ -269,13 +288,11 @@ function PatientVitalScreen(props) {
     setIsLoading(true);
 
     // FIX: drop undefined userID param; map bloodSugarlevel -> bloodSugarLevel
-    const result = await patientApi.updatePatientVital(
-      patientID,
-      {
-        ...vitalFormData,
-        bloodSugarLevel: vitalFormData.bloodSugarlevel,
-      },
-    );
+    const result = await updatePatientVitalV1(patientID, {
+      ...vitalFormData,
+      bloodSugarLevel: vitalFormData.bloodSugarlevel,
+    });
+    
     if (result.ok) {
       refreshVitalData();
       setIsModalVisible(false);
@@ -288,7 +305,7 @@ function PatientVitalScreen(props) {
   };
 
   // Ask user to confirm deletion of vital
-  const handleDeleteVital = (vitalID, patientID) => {
+  const handleDeleteVital = (vitalID) => {
     // FIX: safe lookup by vitalID only (rows don't store patientID)
     const tempData = vitalData.find((x) => x.vitalID == vitalID);
     if (!tempData) {
@@ -327,7 +344,7 @@ function PatientVitalScreen(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.deletePatientVital(vitalID);
+    const result = await deletePatientVitalV1(vitalID);
     if (result.ok) {
       refreshVitalData();
       setIsModalVisible(false);
@@ -463,10 +480,9 @@ function PatientVitalScreen(props) {
           renderItem={({ item }) => {
             return (
               <Swipeable
-                key={item.vitalID}
                 setIsScrolling={setIsScrolling}
                 onSwipeRight={() =>
-                  handleDeleteVital(item.vitalID, item.patientID)
+                  handleDeleteVital(item.vitalID)
                 }
                 onSwipeLeft={() => handleEditVital(item.vitalID)}
                 underlay={<EditDeleteUnderlay />}
@@ -489,7 +505,7 @@ function PatientVitalScreen(props) {
                       afterMeal={item.afterMeal}
                       createdDateTime={item.createdDateTime}
                       onDelete={() =>
-                        handleDeleteVital(item.vitalID, item.patientID)
+                        handleDeleteVital(item.vitalID)
                       }
                     />
                   </TouchableOpacity>

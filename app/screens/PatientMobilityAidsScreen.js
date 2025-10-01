@@ -7,6 +7,15 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 // API
 import patientApi from 'app/api/patient';
 
+// Pull the new v1 helpers directly from patientApi
+const {
+  listPatientMobilityAidsV1,
+  addPatientMobilityV1,
+  updatePatientMobilityV1,
+  deletePatientMobilityV1,
+  readPatientV1,
+} = patientApi;
+
 // Utilities
 import {
   isEmptyObject,
@@ -75,15 +84,6 @@ function PatientMobilityAidScreen(props) {
   const [datetime, setDatetime] = useState(sortFilterInitialState);
 
   // Filter details related state
-  // Details of filter options
-  // --------------------------
-  // type - chip | dropdown | autocomplete (what kind of UI/component to use to display the filter)
-  // options - {} | custom dict that maps options for filtering to corresponding values in the patient data
-  //                e.g.: {'Active': true, 'Inactive': false, 'All': undefined} for filter corresponding to isActive
-  //                      where 'Active' filter option corresponds to isActive=true etc.
-  // isFilter - whether the filter is actually to be used for filtering,
-  //            since some filters like patient status may be used to make an API call instead of normal filtering
-  // --------------------------
   const [filterOptionDetails, setFilterOptionDetails] = useState({
     Date: {
       type: 'date',
@@ -92,7 +92,7 @@ function PatientMobilityAidScreen(props) {
     },
     Condition: {
       type: 'dropdown',
-      options: { 'Fully Recovered': true, 'Not Recovered': false }, // define custom options and map to corresponding values
+      options: { 'Fully Recovered': true, 'Not Recovered': false },
       isFilter: true,
     },
   });
@@ -141,35 +141,32 @@ function PatientMobilityAidScreen(props) {
     promiseFunction();
   };
 
-  // Get mobility data from backend
+  // Get mobility data from backend (v1)
   const getMobilityData = async () => {
-    if (patientID) {
-      const response = await patientApi.getPatientMobility(patientID);
-      if (response.ok) {
-        console.log(response.data.data);
-        setOriginalMobilityData([...response.data.data]);
-        setMobilityData(parseMobilityData([...response.data.data]));
-        setIsDataInitialized(true);
-        setIsLoading(false);
-        setIsError(false);
-        setIsRetry(false);
-        setStatusCode(response.status);
-      } else {
-        console.log('Request failed with status code: ', response.status);
-        setOriginalMobilityData([]);
-        setMobilityData([]);
-        setIsLoading(false);
-        setIsError(true);
-        setStatusCode(response.status);
-        setIsRetry(true);
-      }
+    if (!patientID) return;
+    try {
+      const rows = await listPatientMobilityAidsV1(patientID);
+      setOriginalMobilityData([...rows]);
+      setMobilityData([...rows]); // already normalized to UI shape
+      setIsDataInitialized(true);
+      setIsLoading(false);
+      setIsError(false);
+      setIsRetry(false);
+      setStatusCode(200);
+    } catch (e) {
+      console.log('Mobility list failed', e?.response?.status, e?.message);
+      setOriginalMobilityData([]);
+      setMobilityData([]);
+      setIsLoading(false);
+      setIsError(true);
+      setStatusCode(e?.response?.status ?? 500);
+      setIsRetry(true);
     }
   };
 
-  // Parse data
+  // (kept for reference; no longer needed since rows are mapped in API layer)
   const parseMobilityData = (tempData) => {
     return tempData.map((item) => ({
-      // for add/edit form
       mobilityId: item.mobilityId,
       mobilityListId: item.mobilityListId,
       mobilityRemark: item.mobilityRemark,
@@ -179,22 +176,22 @@ function PatientMobilityAidScreen(props) {
     }));
   };
 
+  // Read patient header (v1)
   const getPatientData = async () => {
-    if (patientID) {
-      const response = await patientApi.getPatient(patientID);
-      if (response.ok) {
-        setPatientData(response.data.data);
-        setIsError(false);
-        setIsRetry(false);
-        setStatusCode(response.status);
-      } else {
-        console.log('Request failed with status code: ', response.status);
-        setPatientData({});
-        setIsLoading(false);
-        setIsError(true);
-        setStatusCode(response.status);
-        setIsRetry(true);
-      }
+    if (!patientID) return;
+    try {
+      const data = await readPatientV1(patientID);
+      setPatientData(data);
+      setIsError(false);
+      setIsRetry(false);
+      setStatusCode(200);
+    } catch (e) {
+      console.log('Patient read failed', e?.response?.status, e?.message);
+      setPatientData({});
+      setIsLoading(false);
+      setIsError(true);
+      setStatusCode(e?.response?.status ?? 500);
+      setIsRetry(true);
     }
   };
 
@@ -204,39 +201,32 @@ function PatientMobilityAidScreen(props) {
     setModalMode('add');
   };
 
-  // Submit data to add mobility aid
+  // Submit data to add mobility aid (v1)
   const handleModalSubmitAdd = async (tempMobilityFormData) => {
     setIsLoading(true);
 
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.addPatientMobility(
-      patientID,
-      tempMobilityFormData,
-    );
+    const result = await addPatientMobilityV1(patientID, tempMobilityFormData);
     if (result.ok) {
       console.log('submitting mobility aid data', tempMobilityFormData);
       refreshMobilityData();
       setIsModalVisible(false);
-
       alertTitle = 'Successfully added mobility aid';
     } else {
       const errors = result.data?.message;
-
       console.log(result);
-
       result.data
         ? (alertDetails = `\n${errors}\n\nPlease try again.`)
         : (alertDetails = 'Please try again.');
-
       alertTitle = 'Error adding mobility aid';
     }
 
     Alert.alert(alertTitle, alertDetails);
   };
 
-  // Edit mobility aid
+  // Edit mobility aid (open modal with selected data)
   const handleEditMobilityAid = (mobilityID) => {
     setIsModalVisible(true);
     setModalMode('edit');
@@ -254,7 +244,7 @@ function PatientMobilityAidScreen(props) {
     });
   };
 
-  // Submit data to edit mobility aid
+  // Submit data to edit mobility aid (v1)
   const handleModalSubmitEdit = async () => {
     setIsLoading(true);
 
@@ -263,20 +253,17 @@ function PatientMobilityAidScreen(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.updateMobility(patientID, tempFormData);
+    const result = await updatePatientMobilityV1(patientID, tempFormData);
     if (result.ok) {
       refreshMobilityData();
       setIsModalVisible(false);
-
       alertTitle = 'Successfully edited mobility aid';
     } else {
       const errors = result.data?.message;
       console.log('Error editing mobility aid');
-
       result.data
         ? (alertDetails = `\n${errors}\n\nPlease try again.`)
         : (alertDetails = 'Please try again.');
-
       alertTitle = 'Error editing mobility aid';
     }
 
@@ -296,42 +283,30 @@ function PatientMobilityAidScreen(props) {
         } \n` +
         `Date: ${formatDate(new Date(tempData.date), true)}`,
       [
-        {
-          text: 'Cancel',
-          onPress: () => {},
-          style: 'cancel',
-        },
-        {
-          text: 'OK',
-          onPress: () => deleteMobilityAid(mobilityID),
-        },
+        { text: 'Cancel', onPress: () => {}, style: 'cancel' },
+        { text: 'OK', onPress: () => deleteMobilityAid(mobilityID) },
       ],
     );
   };
 
-  // Delete mobility aid
+  // Delete mobility aid (v1)
   const deleteMobilityAid = async (mobilityID) => {
     setIsLoading(true);
-
-    let tempData = { mobilityId: mobilityID };
 
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.deleteMobility(tempData);
+    const result = await deletePatientMobilityV1(patientID, mobilityID);
     if (result.ok) {
       refreshMobilityData();
       setIsModalVisible(false);
-
       alertTitle = 'Successfully deleted mobility aid';
     } else {
       const errors = result.data?.message;
       console.log('Error deleting mobility aid', result);
-
       result.data
         ? (alertDetails = `\n${errors}\n\nPlease try again.`)
         : (alertDetails = 'Please try again.');
-
       alertTitle = 'Error deleting mobility aid';
     }
 
@@ -345,17 +320,15 @@ function PatientMobilityAidScreen(props) {
 
   const getTableRowData = () => {
     return mobilityData.map(({ patientID, mobilityID, ...item }) => {
-      // Directly map the 2 conditions accordingly
       const isRecoveredDisplay = item.isRecovered
         ? 'Fully Recovered'
         : 'Not Recovered';
 
-      // Convert the rest of the item properties and handle the date separately
       let rowData = [
         item.mobilityListDesc,
         item.mobilityRemark,
         isRecoveredDisplay,
-        formatDate(new Date(item.date), true), // Assuming formatDate() formats the date as needed
+        formatDate(new Date(item.date), true),
       ];
 
       return rowData;
