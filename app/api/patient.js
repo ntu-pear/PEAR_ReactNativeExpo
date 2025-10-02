@@ -40,61 +40,18 @@ const routineEndpoint = '/Routine';
 const mobilityEndpoint = '/Mobility';
 const photoEndpoint = '/PatientPhoto';
 
-const patientList = `${endpoint}/patientList`;
-// `${endpoint}/patientListByUserId` changed to ${endpoint}/patientListByLoggedInCaregiver
-const patientListByUserId = `${endpoint}/patientListByLoggedInCaregiver`;
-const patientStatusCountList = `${endpoint}/patientStatusCountList`;
-const patientAdd = `${endpoint}/add`;
-const patientUpdate = `${endpoint}/update`; //eslint-disable-line no-unused-vars
-const privacyLevelUpdate = `${endpoint}/UpdatePatient`; //eslint-disable-line no-unused-vars
 
-const patientPrescriptionList = `${prescriptionEndpoint}/PatientPrescription`; //eslint-disable-line no-unused-vars
 const patientRoutine = `${activityEndpoint}${routineEndpoint}/PatientRoutine`; //eslint-disable-line no-unused-vars
 
 // Medical History
 const patientMedicalHistory = `${medicalHistoryEndpoint}/list`; //eslint-disable-line no-unused-vars
-const patientMedicalHistoryAdd = `${medicalHistoryEndpoint}/add`; //eslint-disable-line no-unused-vars
-const patientMedicalHistoryDelete = `${medicalHistoryEndpoint}/delete`; //eslint-disable-line no-unused-vars
 
-// Allergy
-const patientAllergy = `${allergyEndpoint}/PatientAllergy`; //eslint-disable-line no-unused-vars
-const patientAllergyAdd = `${allergyEndpoint}/add`; //eslint-disable-line no-unused-vars
-const patientAllergyUpdate = `${allergyEndpoint}/update`; // <-- was commented out; required by updatePatientAllergy
-const patientAllergyDelete = `${allergyEndpoint}/delete`; //eslint-disable-line no-unused-vars
 
 // Vitals
 const patientVitalList = `${vitalEndpoint}/list`; //eslint-disable-line no-unused-vars
-const patientVitalAdd = `${vitalEndpoint}/add`; //eslint-disable-line no-unused-vars
-const patientVitalUpdate = `${vitalEndpoint}/update`; // <-- was commented out; required by updatePatientVital
-const patientVitalDelete = `${vitalEndpoint}/delete`; //eslint-disable-line no-unused-vars
-
-// Problem Log
-const patientProblemLog = `${problemLogEndpoint}/PatientProblemLog`; //eslint-disable-line no-unused-vars
-const patientProblemLogAdd = `${problemLogEndpoint}/add`; //eslint-disable-line no-unused-vars
-const patientProblemLogUpdate = `${problemLogEndpoint}/update`; //eslint-disable-line no-unused-vars
-const patientProblemLogDelete = `${problemLogEndpoint}/delete`; //eslint-disable-line no-unused-vars
-
-// Medication
-const patientMedicationAdd = `${medicationEndpoint}/add`; //eslint-disable-line no-unused-vars
-const patientMedicationUpdate = `${medicationEndpoint}/update`; //eslint-disable-line no-unused-vars
-const patientMedicationDelete = `${medicationEndpoint}/delete`; //eslint-disable-line no-unused-vars
-
-// Prescription
-const patientPrescriptionAdd = `${prescriptionEndpoint}/add`; //eslint-disable-line no-unused-vars
-const patientPrescriptionUpdate = `${prescriptionEndpoint}/update`; //eslint-disable-line no-unused-vars
-const patientPrescriptionDelete = `${prescriptionEndpoint}/delete`; //eslint-disable-line no-unused-vars
-
-// Mobility
-const patientMobility = `${mobilityEndpoint}/PatientMobility`; //eslint-disable-line no-unused-vars
-const patientMobilityAdd = `${mobilityEndpoint}/add`; //eslint-disable-line no-unused-vars
-const patientMobilityUpdate = `${mobilityEndpoint}/update`; //eslint-disable-line no-unused-vars
-const patientMobilityDelete = `${mobilityEndpoint}/delete`; //eslint-disable-line no-unused-vars
 
 // Photo Album
 const patientPhoto = `${photoEndpoint}/GetAlbumByCategory`; //eslint-disable-line no-unused-vars
-const patientPhotoAdd = `${photoEndpoint}/add`; //eslint-disable-line no-unused-vars
-const patientPhotoUpdate = `${photoEndpoint}/update`; //eslint-disable-line no-unused-vars
-const patientPhotoDelete = `${photoEndpoint}/delete`; //eslint-disable-line no-unused-vars
 
 /*
  * List all functions here

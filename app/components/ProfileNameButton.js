@@ -81,7 +81,7 @@ function ProfileNameButton({
                 styles.DefaultText,
                 styles.NameText,
                 ...(isVertical ? [{ textAlign: 'center' }] : []),
-                { flexShrink: 1, flexWrap: 'wrap' },
+                //{ flexShrink: 1, flexWrap: 'wrap' },
               ]}
               numberOfLines={2}
               ellipsizeMode="tail"
@@ -151,8 +151,8 @@ const styles = StyleSheet.create({
   TextContainer: {
     justifyContent: 'flex-start',
     marginLeft: 16,
-    flexShrink: 1,
-    flexGrow:1,
+    //flexShrink: 1,
+    //flexGrow:1,
     minWidth:0,
   },
 });

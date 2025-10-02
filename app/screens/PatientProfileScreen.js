@@ -29,6 +29,67 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 function PatientProfileScreen(props) {
   const { navigation , route } = props;
   const toStr = (v) => (v == null ? '' : String(v));
+  const isHtmlError = (resp) =>
+    typeof resp?.data === 'string' &&
+    resp.data.trim().startsWith('<!DOCTYPE'); // legacy server HTML error page
+  
+  const logResp = (tag, resp) => {
+    const ct = resp?.headers?.['content-type'] || resp?.headers?.get?.('content-type');
+    console.log(`[${tag}] status=${resp?.status} ok=${resp?.ok} ct=${ct}`);
+  };
+  
+  const sanitizeProfileForLegacy = (p = {}) => {
+    const out = { ...p };
+  
+    // Ensure both legacy and new keys exist as strings
+    out.NRIC = toStr(p.NRIC ?? p.nric);
+    out.nric = out.NRIC;
+  
+    out.firstName = toStr(p.firstName ?? p.FirstName);
+    out.lastName  = toStr(p.lastName  ?? p.LastName);
+  
+    const fullName =
+      toStr(p.fullName ?? p.FullName) ||
+      `${out.firstName} ${out.lastName}`.trim();
+    out.fullName = fullName;
+  
+    out.preferredName =
+      toStr(p.preferredName ?? p.PreferredName) || fullName || out.firstName;
+  
+    // Gender/lang as strings
+    out.gender = toStr(p.gender ?? p.Gender);
+    out.preferredLanguage = toStr(p.preferredLanguage ?? p.language ?? '');
+    out.language = out.preferredLanguage;
+  
+    // DOB mirrored across shapes (keep null if invalid)
+    const d = p.DateOfBirth ?? p.dob ?? p.date_of_birth ?? null;
+    out.DateOfBirth = d ?? null;
+    out.dob = out.DateOfBirth;
+  
+    // Picture key normalization
+    out.profilePicture =
+      p.profilePicture ?? p.profile_picture ?? p.profile_photo ?? p.photoUrl ?? p.avatar ?? null;
+  
+    return out;
+  };
+  
+  const sanitizeGuardianData = (gd) => {
+    if (!gd) return gd;
+    // handle both { guardian: {...} } and flat shapes gracefully
+    const out = { ...gd };
+    if (out.guardian) {
+      const g = { ...out.guardian };
+      const n = toStr(g.NRIC ?? g.nric);
+      g.NRIC = n;
+      g.nric = n;
+      out.guardian = g;
+    } else {
+      const n = toStr(out.NRIC ?? out.nric);
+      out.NRIC = n; out.nric = n;
+    }
+    return out;
+  };
+
   const toISODateOrNull = (v) => {
      if (!v) return null;
      const d = new Date(v);
@@ -52,6 +113,16 @@ const STRINGY_KEYS = [
   'EndDate',
   'DateOfBirth',
 ];
+const ensurePatientId = React.useCallback(() => {
+  const pid = getPatientIdFromParams(route?.params || {});
+  if (!pid) {
+    console.warn('[Profile] No patientID in route params; going back.');
+    navigation.goBack();      // or navigate to Patients list
+    return null;
+  }
+  if (pid !== patientID) setPatientID(pid);
+  return pid;
+}, [route?.params, patientID, navigation]);
 
   const getPatientIdFromParams = (p = {}) =>  // NEW
     p.patientId ?? p.patientID ?? p.PatientID ?? p.PatientId ?? p.id ?? null;
@@ -94,6 +165,8 @@ const STRINGY_KEYS = [
       patientID: p.patient_id ?? p.id ?? p.patientID ?? null,
       firstName,
       lastName,
+      fullName,
+      preferredName,
       fullName: `${firstName} ${lastName}`.trim() || (typeof nameRaw === 'string' ? nameRaw : ''),
       profilePicture: p.profile_picture ?? p.profile_photo ?? p.photoUrl ?? p.avatar ?? null,
       preferredName: p.preferred_name ?? p.preferredName ?? '',
@@ -125,80 +198,202 @@ const STRINGY_KEYS = [
   // Retrieval of Patient Info, Doctor's Notes, Guardian Info and Social History
   const getPatient = async (id) => {
     setIsPatientLoading(true);
-  try {
-    // helpers
-    const toStr = (v) => (v == null ? '' : String(v));
-    const toISODateOrNull = (v) => {
-      if (!v) return null;
-      const d = new Date(v);
-      return isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10); // YYYY-MM-DD
-    };
-
-    // 1) New Patient Service (detail)
-    const v1 = await patientApi.readPatientV1(id, { require_auth: true, mask: true });
-    if (v1?.ok && v1.data) {
-      const p = v1.data || {};
-
-      // map names
-      const nameRaw = p.name ?? p.full_name ?? p.fullName ?? '';
-      const first = toStr(p.first_name ?? p.firstName).trim();
-      const last  = toStr(p.last_name  ?? p.lastName).trim();
-      const parts = (!first || !last) && typeof nameRaw === 'string' ? nameRaw.trim().split(/\s+/) : [];
-      const firstName = first || (parts[0] || '');
-      const lastName  = last  || (parts.length > 1 ? parts.slice(1).join(' ') : '');
-      const fullName  = `${firstName} ${lastName}`.trim() || (typeof nameRaw === 'string' ? nameRaw : '');
-
-      // map legacy keys your UI expects
-      const preferredName = toStr(((p.preferred_name ?? p.preferredName ?? firstName) || fullName));
-      const nric   = toStr(p.NRIC ?? p.nric ?? p.nric_no ?? p.national_id);
-      const gender = toStr(p.Gender ?? p.gender).toUpperCase();
-      const dobISO = toISODateOrNull(p.dob ?? p.date_of_birth ?? p.birth_date ?? p.DateOfBirth);
-
-      const normalized = {
-        ...p,
-        patientID: p.patient_id ?? p.id ?? p.patientID ?? id,
-        firstName,
-        lastName,
-        fullName,
-        preferredName,
-        FirstName: firstName,
-        LastName: lastName,
-        FullName: fullName,
-        PreferredName: preferredName,
-        NRIC: nric,
-        Gender: gender,
-        DateOfBirth: dobISO, // keep null when unknown
-        profilePicture: p.profile_picture ?? p.profile_photo ?? p.photoUrl ?? p.avatar ?? null,
-        isActive: typeof p.is_active === 'boolean' ? p.is_active : p.isActive,
-        startDate: p.start_date ?? p.startDate ?? null,
+    try {
+      // helpers
+      const toStr = (v) => (v === undefined || v === null ? '' : String(v));
+      const nonEmpty = (v) => {
+        const s = toStr(v).trim();
+        return s.length ? s : '';
       };
-
-      setPatientProfile(normalized);
-      return;
-    } else {
-      console.log('[PROFILE v1] status:', v1?.status, 'id:', id);
+      const getPath = (obj, path) =>
+        path.split('.').reduce((acc, k) => (acc == null ? undefined : acc[k]), obj);
+      const pickFirstFrom = (obj, paths) => {
+        for (const p of paths) {
+          const v = p.includes('.') ? getPath(obj, p) : obj[p];
+          const s = nonEmpty(v);
+          if (s) return s;
+        }
+        return '';
+      };
+      const toISODateOrNull = (v) => {
+        if (!v) return null;
+        const d = new Date(v);
+        return isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10); // YYYY-MM-DD
+      };
+      const toGenderLetter = (g) => {
+        const s = toStr(g).trim().toUpperCase();
+        if (s.startsWith('F')) return 'F';
+        if (s.startsWith('M')) return 'M';
+        return '';
+      };
+  
+      let ui = null;
+  
+      // --- 1) New Patient Service (detail)
+      const v1 = await patientApi.readPatientV1(id, { require_auth: true, mask: true });
+      if (v1?.ok && v1.data) {
+        const p = v1.data || {};
+  
+        const first = pickFirstFrom(p, ['first_name', 'firstName', 'given_name', 'givenName']);
+        const last  = pickFirstFrom(p, ['last_name', 'lastName', 'family_name', 'familyName', 'surname']);
+        const fullRaw = pickFirstFrom(p, ['name', 'full_name', 'fullName', 'display_name', 'displayName']);
+        const full = (nonEmpty(first) && nonEmpty(last)) ? `${first} ${last}`.trim() : fullRaw;
+  
+        const preferred = nonEmpty(
+          pickFirstFrom(p, ['preferred_name','preferredName','nickname','nick_name','short_name'])
+        ) || nonEmpty(first) || full;
+  
+        const nric = pickFirstFrom(p, [
+          'NRIC','nric','nric_no','national_id','nationalId','id_no',
+          'identifiers.national_id','identification.nric'
+        ]);
+  
+        const phone = pickFirstFrom(p, [
+          'PhoneNumber','handphoneNo','phone','mobile','mobile_number','phone_number',
+          'contact.mobile','contact.phone'
+        ]);
+  
+        const picture = pickFirstFrom(p, [
+          'profile_picture','profile_photo','photoUrl','avatar','profilePhoto','avatar_url'
+        ]);
+  
+        const genderLetter = toGenderLetter(p.Gender || p.gender || p.sex);
+  
+        const dobISO = toISODateOrNull(
+          p.DateOfBirth || p.dob || p.date_of_birth || p.birth_date || p.birthDate
+        );
+  
+        ui = {
+          patientID: p.patient_id || p.id || p.patientID || id,
+  
+          // names
+          firstName: first,  FirstName: first,
+          lastName:  last,   LastName:  last,
+          fullName:  nonEmpty(full),   FullName:  nonEmpty(full),
+          preferredName: preferred,    PreferredName: preferred,
+  
+          // identifiers & contact
+          nric: toStr(nric), NRIC: toStr(nric),
+          handphoneNo: toStr(phone), PhoneNumber: toStr(phone),
+  
+          // other
+          gender: genderLetter, Gender: genderLetter,
+          preferredLanguage: pickFirstFrom(p, ['preferred_language','preferredLanguage','language']),
+          PreferredLanguage: pickFirstFrom(p, ['preferred_language','preferredLanguage','language']),
+          dob: dobISO, DateOfBirth: dobISO,
+          profilePicture: nonEmpty(picture) ? picture : null,
+          isActive: (typeof p.is_active === 'boolean') ? p.is_active : p.isActive,
+          startDate: p.start_date || p.startDate || null,
+        };
+  
+        const missingKey =
+          !nonEmpty(ui.PreferredName) ||
+          !nonEmpty(ui.NRIC) ||
+          !nonEmpty(ui.Gender) ||
+          !ui.DateOfBirth;
+  
+        if (!missingKey) {
+          console.log('[PROFILE V1 SET]', ui);
+          setPatientProfile(ui);
+          return;
+        } else {
+          console.log('[PROFILE V1 PARTIAL — will merge with legacy]', ui);
+        }
+      } else {
+        console.log('[PROFILE V1] not ok, status=', v1?.status, 'id=', id);
+      }
+  
+      // --- 2) Legacy fallback/merge
+      const legacy = await patientApi.getPatient(id, true);
+      if (legacy?.ok) {
+        const d = (legacy.data && legacy.data.data) || legacy.data || {};
+  
+        const merged = {
+          ...(ui || {}),
+  
+          // prefer V1 non-empty; else legacy
+          PreferredName: nonEmpty(ui?.PreferredName) ? ui.PreferredName :
+                         nonEmpty(d.PreferredName || d.preferredName || d.FirstName || d.FullName),
+          preferredName: nonEmpty(ui?.preferredName) ? ui.preferredName :
+                         nonEmpty(d.preferredName || d.PreferredName || d.FirstName || d.FullName),
+  
+          NRIC: nonEmpty(ui?.NRIC) ? ui.NRIC : toStr(d.NRIC || d.nric),
+          nric: nonEmpty(ui?.nric) ? ui.nric : toStr(d.nric || d.NRIC),
+  
+          Gender: nonEmpty(ui?.Gender) ? ui.Gender : toGenderLetter(d.Gender || d.gender),
+          gender: nonEmpty(ui?.gender) ? ui.gender : toGenderLetter(d.gender || d.Gender),
+  
+          DateOfBirth: ui?.DateOfBirth ? ui.DateOfBirth : toISODateOrNull(d.DateOfBirth || d.dob),
+          dob: ui?.dob ? ui.dob : toISODateOrNull(d.dob || d.DateOfBirth),
+  
+          PhoneNumber: nonEmpty(ui?.PhoneNumber) ? ui.PhoneNumber : toStr(d.PhoneNumber || d.handphoneNo || d.phone),
+          handphoneNo: nonEmpty(ui?.handphoneNo) ? ui.handphoneNo : toStr(d.handphoneNo || d.PhoneNumber || d.phone),
+  
+          firstName: nonEmpty(ui?.firstName) ? ui.firstName : toStr(d.FirstName || d.firstName),
+          FirstName: nonEmpty(ui?.FirstName) ? ui.FirstName : toStr(d.FirstName || d.firstName),
+  
+          lastName: nonEmpty(ui?.lastName) ? ui.lastName : toStr(d.LastName || d.lastName),
+          LastName: nonEmpty(ui?.LastName) ? ui.LastName : toStr(d.LastName || d.lastName),
+  
+          fullName: nonEmpty(ui?.fullName) ? ui.fullName :
+                    nonEmpty(d.FullName || d.fullName || ((d.FirstName && d.LastName) ? `${d.FirstName} ${d.LastName}` : '')),
+          FullName: nonEmpty(ui?.FullName) ? ui.FullName :
+                    nonEmpty(d.FullName || d.fullName || ((d.FirstName && d.LastName) ? `${d.FirstName} ${d.LastName}` : '')),
+  
+          preferredLanguage: nonEmpty(ui?.preferredLanguage) ? ui.preferredLanguage :
+                             toStr(d.preferredLanguage || d.PreferredLanguage || d.language || ''),
+          PreferredLanguage: nonEmpty(ui?.PreferredLanguage) ? ui.PreferredLanguage :
+                             toStr(d.PreferredLanguage || d.preferredLanguage || d.language || ''),
+  
+          profilePicture: ui?.profilePicture ?? d.profilePicture ?? null,
+          isActive: (ui?.isActive !== undefined) ? ui.isActive :
+                    ((typeof d.isActive === 'boolean') ? d.isActive : undefined),
+          startDate: ui?.startDate ?? d.startDate ?? null,
+  
+          patientID: (ui?.patientID) || d.patientID || d.PatientID || id,
+        };
+  
+        // final safety: ensure strings for .replace callers
+        merged.NRIC = toStr(merged.NRIC);
+        merged.nric = toStr(merged.nric);
+        merged.PreferredName = toStr(merged.PreferredName);
+        merged.preferredName = toStr(merged.preferredName);
+  
+        console.log('[PROFILE MERGED]', merged);
+        setPatientProfile(merged);
+        return;
+      } else {
+        console.log('[PROFILE legacy] not ok, status=', legacy?.status, 'id=', id);
+      }
+  
+      // --- 3) Nothing worked: still set a minimal object so UI renders
+      const fallback = {
+        patientID: id,
+        PreferredName: '',
+        preferredName: '',
+        NRIC: '',
+        nric: '',
+        Gender: '',
+        gender: '',
+        DateOfBirth: null,
+        dob: null,
+        PhoneNumber: '',
+        handphoneNo: '',
+        firstName: '',
+        lastName: '',
+        fullName: '',
+        profilePicture: null,
+        isActive: undefined,
+        startDate: null,
+      };
+      console.log('[PROFILE FALLBACK]', fallback);
+      setPatientProfile(fallback);
+    } catch (e) {
+      console.log('Patient load error:', e?.message || e);
+    } finally {
+      setIsPatientLoading(false);
     }
-
-    // 2) Fallback: legacy Core API
-    const legacy = await patientApi.getPatient(id, true);
-    if (legacy?.ok) {
-      const data = legacy.data?.data ?? legacy.data ?? {};
-      setPatientProfile({
-        ...data,
-        PreferredName: toStr(data.PreferredName ?? data.preferredName ?? data.FirstName ?? ''),
-        NRIC: toStr(data.NRIC ?? data.nric),
-        Gender: toStr(data.Gender ?? data.gender).toUpperCase(),
-        DateOfBirth: toISODateOrNull(data.DateOfBirth ?? data.dob),
-      });
-    } else {
-      console.log('[PROFILE legacy] status:', legacy?.status, 'id:', id);
-    }
-  } catch (e) {
-    console.log('Patient load error:', e?.message || e);
-  } finally {
-    setIsPatientLoading(false);
-  }
-};
+  };
 
   // const retrieveDoctorsNote = async (id) => {
   //   setIsDoctorsNoteLoading(true);
@@ -213,40 +408,43 @@ const STRINGY_KEYS = [
   // };
 
   const retrieveGuardian = async (id) => {
-    setIsGuardianLoading(true);
-   try {
-     const response = await guardianApi.getPatientGuardian(id, false);
-     if (response.ok) {
-       setGuardianData(response.data?.data ?? []);
-     } else {
-       console.log('Request failed with status code: ', response.status);
-       setGuardianData([]); // NEW: keep data defined
-     }
-   } catch (e) {
-     console.log('Guardian load error:', e?.message || e);
-     setGuardianData([]);
-   } finally {
-     setIsGuardianLoading(false); // NEW: never block UI
-   }
- };
+  setIsGuardianLoading(true);
+  try {
+    const resp = await guardianApi.getPatientGuardian(id, false);
+    logResp('Guardian', resp);
+
+    if (resp?.ok && !isHtmlError(resp) && Array.isArray(resp?.data?.data)) {
+      setGuardianData(resp.data.data);
+    } else {
+      // 401/500/HTML => skip silently, do not break the screen
+      setGuardianData([]);
+    }
+  } catch (e) {
+    console.log('[Guardian] error:', e?.message || e);
+    setGuardianData([]);
+  } finally {
+    setIsGuardianLoading(false);
+  }
+};
   const retrieveSocialHistory = async (id) => {
     setIsSocialHistoryLoading(true);
-    try {
-     const response = await socialHistoryApi.getSocialHistory(id);
-      if (response.ok) {
-       const data = response.data?.data ?? [];
-       setSocialHistoryData(data || []);
-     } else {
-       console.log('Request failed with status code: ', response.status);
-       setSocialHistoryData([]);
-     }
-   } catch (e) {
-     console.log('Social history load error:', e?.message || e);
-     setSocialHistoryData([]);
-   } finally {
-     setIsSocialHistoryLoading(false); // NEW
-   }
- };
+  try {
+    const resp = await socialHistoryApi.getSocialHistory(id);
+    logResp('SocialHistory', resp);
+
+    if (resp?.ok && !isHtmlError(resp)) {
+      const payload = resp?.data?.data;
+      setSocialHistoryData(payload ?? []);
+    } else {
+      setSocialHistoryData([]);
+    }
+  } catch (e) {
+    console.log('[SocialHistory] error:', e?.message || e);
+    setSocialHistoryData([]);
+  } finally {
+    setIsSocialHistoryLoading(false);
+  }
+};
 
   // NEW: react if navigation params change later
   useEffect(() => {
@@ -257,23 +455,14 @@ const STRINGY_KEYS = [
   // CHANGED: include patientID in deps and always call with the resolved id
   useFocusEffect(
     React.useCallback(() => {
-       if (!patientID) {
-       console.log('No patientID found in route params');
-        setIsLoading(false);
-       return;
-       }
-       let mounted = true;
-       (async () => {
-       setIsLoading(true);
-       await getPatient(patientID);      // wait for v1 patient only
-       if (mounted) setIsLoading(false); // NEW: render now
-      // fire-and-forget legacy calls; they won't block UI
-       retrieveGuardian(patientID);
-        retrieveSocialHistory(patientID);
-       })();
-       return () => { mounted = false; };
-       }, [patientID])
-       );
+      const pid = ensurePatientId();
+      if (!pid) return;     // don’t try to load without an id
+      setIsLoading(true);
+      getPatient(pid);
+      retrieveGuardian(pid);
+      retrieveSocialHistory(pid);
+    }, [ensurePatientId])
+  );
 
   // Check if all the data has been loaded before loading page
   useEffect(() => {

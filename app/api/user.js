@@ -4,9 +4,9 @@ import authStorage from 'app/auth/authStorage';
 /*
  * List all end points here
  */
-const endpoint = '/User';
-const userUpdate = `${endpoint}/Update`;
-const userDelete = `${endpoint}/delete`; //eslint-disable-line no-unused-vars
+//const endpoint = '/User';
+//const userUpdate = `${endpoint}/Update`;
+//const userDelete = `${endpoint}/delete`; //eslint-disable-line no-unused-vars
 // const userRefreshToken = `${endpoint}/RefereshToken`; //eslint-disable-line no-unused-vars
 //const userRefreshToken = `${endpoint}/RefreshToken`; //eslint-disable-line no-unused-vars
 //const userLogout = `${endpoint}/Logout`; //eslint-disable-line no-unused-vars
@@ -38,8 +38,8 @@ const v1 = {
 // New service returns the current user's profile; userID is ignored now.
 const getUser = async (userID, maskNRIC = true) => {
   const token =
-    (await authStorage.getToken('userAuthTokenV1')) ||
-    (await authStorage.getToken('userAuthToken')); // fallback
+    (await authStorage.getToken('userAuthTokenV1'))
+    //(await authStorage.getToken('userAuthToken')); // fallback
   const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
   return client.get(v1.getUser, {}, { baseURL: V1_BASE, headers });
 };
@@ -81,15 +81,15 @@ export const loginUser = async ({ email, role, password }) => {
   if (v1Refresh) await authStorage.storeToken('userRefreshTokenV1', v1Refresh);
 
   // optional: keep generic key as v1 for older code paths
-  await authStorage.storeToken('userAuthToken', v1Access);
-  if (v1Refresh) await authStorage.storeToken('userRefreshToken', v1Refresh);
+  //await authStorage.storeToken('userAuthToken', v1Access);
+  //if (v1Refresh) await authStorage.storeToken('userRefreshToken', v1Refresh);
 
   // 2) Legacy login (JSON payload) → needed for old endpoints (e.g., /Patient/patientList)
-  const legacyBody = { email, role, password };
-  const legacyResp = await client.post('/User/Login', legacyBody, {
-    headers: { 'Content-Type': 'application/json-patch+json' },
+  //const legacyBody = { email, role, password };
+ // const legacyResp = await client.post('/User/Login', legacyBody, {
+    //headers: { 'Content-Type': 'application/json-patch+json' },
     // baseURL defaults to legacy; no need to override
-  });
+  //});
 
   if (legacyResp?.ok) {
     const l = legacyResp.data || {};
@@ -147,24 +147,21 @@ const changePassword = (Email /*unused*/, OldPassword, NewPassword) =>
     { baseURL: V1_BASE }
   );
 
-// ************************* UPDATE REQUESTS *************************
-const updateUserLegacy = async (data) => {
-  const headers = { 'Content-Type': 'application/json-patch+json' };
-  return client.put(userUpdate, data, { headers });
-};
 
 // New API for updateUser
 const updateUserV1 = async (data) =>
   client.put(v1.updateUser, data, { baseURL: V1_BASE });
 
 // updateUser: tries new v1 API first; if it fails, auto-fallback to legacy, to ensure safe migration
-const updateUser = async (data) => {
-  const res = await updateUserV1(data);
-  if (res?.ok) return res;
+//const updateUser = async (data) => {
+  //const res = await updateUserV1(data);
+  //if (res?.ok) return res;
 
-  console.log('[updateUser] v1 failed, falling back to legacy:', res?.status);
-  return updateUserLegacy(data);
-};
+  //console.log('[updateUser] v1 failed, falling back to legacy:', res?.status);
+  //return updateUserLegacy(data);
+//
+//};
+const updateUser = async (data) => updateUserV1(data);
 
 // Adding in Profile Picture functions
 // Upload profile picture 
@@ -238,7 +235,7 @@ export default {
   getUser,
   changePassword,
   logoutUser,
-  updateUser,          // v1-first, legacy fallback
+  updateUser,          // v1-only
   updateUserV1,        // explicit v1
   updateUserLegacy,    // explicit legacy
   uploadProfilePicV1,

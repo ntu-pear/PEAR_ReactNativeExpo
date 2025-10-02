@@ -232,12 +232,17 @@ function PatientInformationCard(props) {
 
 const styles = StyleSheet.create({
   container: {
-    height: 190,
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
+    width: '100%',
+    //flex: 1,
+    alignItems: 'flex-start',
+    //justifyContent: 'space-between',
+    flexDirection: 'column',
+    paddingBottom: 1,
+    paddingHorizontal: 25,
+    paddingTop: 12,
+    rowGap: 8,
   },
+
 });
 
 export default PatientInformationCard;
