@@ -141,9 +141,10 @@ function PatientAllergyScreen(props) {
 
   const getPatientData = async () => {
     if (patientID) {
-      const response = await patientApi.getPatient(patientID);
+      const response = await patientApi.readPatientV1(patientID);
       if (response.ok) {
-        setPatientData(response.data.data);
+        // v1 returns data directly, not inside response.data.data
+        setPatientData(response.data);
         setIsError(false);
         setIsRetry(false);
         setStatusCode(response.status);
@@ -157,6 +158,7 @@ function PatientAllergyScreen(props) {
       }
     }
   };
+
 
   // Get allergy data from backend
   const getAllergyData = async () => {

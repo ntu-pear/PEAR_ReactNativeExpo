@@ -29,49 +29,12 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 function PatientProfileScreen(props) {
   const { navigation , route } = props;
   const toStr = (v) => (v == null ? '' : String(v));
-  const isHtmlError = (resp) =>
-    typeof resp?.data === 'string' &&
-    resp.data.trim().startsWith('<!DOCTYPE'); // legacy server HTML error page
-  
+
   const logResp = (tag, resp) => {
     const ct = resp?.headers?.['content-type'] || resp?.headers?.get?.('content-type');
     console.log(`[${tag}] status=${resp?.status} ok=${resp?.ok} ct=${ct}`);
   };
   
-  const sanitizeProfileForLegacy = (p = {}) => {
-    const out = { ...p };
-  
-    // Ensure both legacy and new keys exist as strings
-    out.NRIC = toStr(p.NRIC ?? p.nric);
-    out.nric = out.NRIC;
-  
-    out.firstName = toStr(p.firstName ?? p.FirstName);
-    out.lastName  = toStr(p.lastName  ?? p.LastName);
-  
-    const fullName =
-      toStr(p.fullName ?? p.FullName) ||
-      `${out.firstName} ${out.lastName}`.trim();
-    out.fullName = fullName;
-  
-    out.preferredName =
-      toStr(p.preferredName ?? p.PreferredName) || fullName || out.firstName;
-  
-    // Gender/lang as strings
-    out.gender = toStr(p.gender ?? p.Gender);
-    out.preferredLanguage = toStr(p.preferredLanguage ?? p.language ?? '');
-    out.language = out.preferredLanguage;
-  
-    // DOB mirrored across shapes (keep null if invalid)
-    const d = p.DateOfBirth ?? p.dob ?? p.date_of_birth ?? null;
-    out.DateOfBirth = d ?? null;
-    out.dob = out.DateOfBirth;
-  
-    // Picture key normalization
-    out.profilePicture =
-      p.profilePicture ?? p.profile_picture ?? p.profile_photo ?? p.photoUrl ?? p.avatar ?? null;
-  
-    return out;
-  };
   
   const sanitizeGuardianData = (gd) => {
     if (!gd) return gd;
@@ -297,74 +260,13 @@ const ensurePatientId = React.useCallback(() => {
           setPatientProfile(ui);
           return;
         } else {
-          console.log('[PROFILE V1 PARTIAL — will merge with legacy]', ui);
+          console.log('[PROFILE V1 PARTIAL]', ui);
         }
       } else {
         console.log('[PROFILE V1] not ok, status=', v1?.status, 'id=', id);
       }
   
-      // --- 2) Legacy fallback/merge
-      const legacy = await patientApi.getPatient(id, true);
-      if (legacy?.ok) {
-        const d = (legacy.data && legacy.data.data) || legacy.data || {};
-  
-        const merged = {
-          ...(ui || {}),
-  
-          // prefer V1 non-empty; else legacy
-          PreferredName: nonEmpty(ui?.PreferredName) ? ui.PreferredName :
-                         nonEmpty(d.PreferredName || d.preferredName || d.FirstName || d.FullName),
-          preferredName: nonEmpty(ui?.preferredName) ? ui.preferredName :
-                         nonEmpty(d.preferredName || d.PreferredName || d.FirstName || d.FullName),
-  
-          NRIC: nonEmpty(ui?.NRIC) ? ui.NRIC : toStr(d.NRIC || d.nric),
-          nric: nonEmpty(ui?.nric) ? ui.nric : toStr(d.nric || d.NRIC),
-  
-          Gender: nonEmpty(ui?.Gender) ? ui.Gender : toGenderLetter(d.Gender || d.gender),
-          gender: nonEmpty(ui?.gender) ? ui.gender : toGenderLetter(d.gender || d.Gender),
-  
-          DateOfBirth: ui?.DateOfBirth ? ui.DateOfBirth : toISODateOrNull(d.DateOfBirth || d.dob),
-          dob: ui?.dob ? ui.dob : toISODateOrNull(d.dob || d.DateOfBirth),
-  
-          PhoneNumber: nonEmpty(ui?.PhoneNumber) ? ui.PhoneNumber : toStr(d.PhoneNumber || d.handphoneNo || d.phone),
-          handphoneNo: nonEmpty(ui?.handphoneNo) ? ui.handphoneNo : toStr(d.handphoneNo || d.PhoneNumber || d.phone),
-  
-          firstName: nonEmpty(ui?.firstName) ? ui.firstName : toStr(d.FirstName || d.firstName),
-          FirstName: nonEmpty(ui?.FirstName) ? ui.FirstName : toStr(d.FirstName || d.firstName),
-  
-          lastName: nonEmpty(ui?.lastName) ? ui.lastName : toStr(d.LastName || d.lastName),
-          LastName: nonEmpty(ui?.LastName) ? ui.LastName : toStr(d.LastName || d.lastName),
-  
-          fullName: nonEmpty(ui?.fullName) ? ui.fullName :
-                    nonEmpty(d.FullName || d.fullName || ((d.FirstName && d.LastName) ? `${d.FirstName} ${d.LastName}` : '')),
-          FullName: nonEmpty(ui?.FullName) ? ui.FullName :
-                    nonEmpty(d.FullName || d.fullName || ((d.FirstName && d.LastName) ? `${d.FirstName} ${d.LastName}` : '')),
-  
-          preferredLanguage: nonEmpty(ui?.preferredLanguage) ? ui.preferredLanguage :
-                             toStr(d.preferredLanguage || d.PreferredLanguage || d.language || ''),
-          PreferredLanguage: nonEmpty(ui?.PreferredLanguage) ? ui.PreferredLanguage :
-                             toStr(d.PreferredLanguage || d.preferredLanguage || d.language || ''),
-  
-          profilePicture: ui?.profilePicture ?? d.profilePicture ?? null,
-          isActive: (ui?.isActive !== undefined) ? ui.isActive :
-                    ((typeof d.isActive === 'boolean') ? d.isActive : undefined),
-          startDate: ui?.startDate ?? d.startDate ?? null,
-  
-          patientID: (ui?.patientID) || d.patientID || d.PatientID || id,
-        };
-  
-        // final safety: ensure strings for .replace callers
-        merged.NRIC = toStr(merged.NRIC);
-        merged.nric = toStr(merged.nric);
-        merged.PreferredName = toStr(merged.PreferredName);
-        merged.preferredName = toStr(merged.preferredName);
-  
-        console.log('[PROFILE MERGED]', merged);
-        setPatientProfile(merged);
-        return;
-      } else {
-        console.log('[PROFILE legacy] not ok, status=', legacy?.status, 'id=', id);
-      }
+    
   
       // --- 3) Nothing worked: still set a minimal object so UI renders
       const fallback = {
@@ -413,7 +315,7 @@ const ensurePatientId = React.useCallback(() => {
     const resp = await guardianApi.getPatientGuardian(id, false);
     logResp('Guardian', resp);
 
-    if (resp?.ok && !isHtmlError(resp) && Array.isArray(resp?.data?.data)) {
+    if (resp?.ok && Array.isArray(resp?.data?.data)) {
       setGuardianData(resp.data.data);
     } else {
       // 401/500/HTML => skip silently, do not break the screen
@@ -432,7 +334,7 @@ const ensurePatientId = React.useCallback(() => {
     const resp = await socialHistoryApi.getSocialHistory(id);
     logResp('SocialHistory', resp);
 
-    if (resp?.ok && !isHtmlError(resp)) {
+    if (resp?.ok) {
       const payload = resp?.data?.data;
       setSocialHistoryData(payload ?? []);
     } else {

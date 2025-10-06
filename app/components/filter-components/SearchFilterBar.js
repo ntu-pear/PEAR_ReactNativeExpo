@@ -134,9 +134,11 @@ function SearchFilterBar({
     // Search
     if (SEARCH_OPTIONS.length > 0) {
       filteredList = filteredList.filter((item) => {
-        return item[FIELD_MAPPING[tempSearchMode]]
+        const val = item?.[FIELD_MAPPING[tempSearchMode]];
+        return String(val ?? '')
           .toLowerCase()
-          .includes(text.toLowerCase());
+          .includes(String(text ?? '').toLowerCase());
+        
       });
     }
 

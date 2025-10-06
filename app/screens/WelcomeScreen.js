@@ -96,10 +96,6 @@ function WelcomeScreen(props) {
 
     if(result && result.ok) {
       console.log('User authenticated - storing tokens...');
-      // set api header if empty
-      console.log('Setting header...');
-      apiHandlerHook.setHeader();
-      console.log('Header updated...');
       // Fetch profile and put it into AuthContext → this switches you out of the Auth stack
       console.log('Fetching profile...');
       const me = await userApi.getUser(); // GET /api/v1/user/get_user/

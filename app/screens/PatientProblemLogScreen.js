@@ -146,7 +146,7 @@ function PatientProblemLog(props) {
   // Get problem log data from backend
   const getLogData = async () => {
     if (patientID) {
-      const response = await patientApi.getPatientProblemLog(patientID);
+      const response = await patientApi.listPatientProblemLogsV1(patientID);
       if (response.ok) {
         console.log(response.data.data);
         setOriginalData([...response.data.data]);
@@ -171,19 +171,19 @@ function PatientProblemLog(props) {
   // Parse data
   const parseLogData = (tempData) => {
     return tempData.map((item) => ({
-      // for add/edit form
-      problemLogID: item.problemLogID,
-      problemLogRemarks: item.problemLogRemarks,
-      authorName: item.authorName,
-      problemLogListDesc: item.problemLogListDesc,
-      createdDateTime: item.createdDateTime,
+      problemLogID: item.problemLogID ?? item.problem_log_id ?? item.id,
+      problemLogRemarks: item.problemLogRemarks ?? item.problem_log_remarks ?? '',
+      authorName: item.authorName ?? item.author_name ?? '',
+      problemLogListDesc: item.problemLogListDesc ?? item.problem_log_list_desc ?? '',
+      createdDateTime: item.createdDateTime ?? item.created_at ?? item.date ?? null,
     }));
   };
+  
 
   // Get patient data from backend
   const getPatientData = async () => {
     if (patientID) {
-      const response = await patientApi.getPatient(patientID);
+      const response = await patientApi.readPatientV1(patientID);
       if (response.ok) {
         setPatientData(response.data.data);
         setIsError(false);
@@ -213,11 +213,11 @@ function PatientProblemLog(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.addPatientProblemLog(
+    const result = await patientApi.addPatientProblemLogV1(
       patientID,
-      userID,
       tempLogFormData,
     );
+    
     if (result.ok) {
       console.log('submitting problem log data', tempLogFormData);
       refreshLogData();
@@ -263,11 +263,12 @@ function PatientProblemLog(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.updateProblemLog(
+    const result = await patientApi.updatePatientProblemLogV1(
       patientID,
-      userID,
+      formData.problemLogID,
       tempFormData,
     );
+    
     if (result.ok) {
       refreshLogData();
       setIsModalVisible(false);
@@ -317,7 +318,11 @@ function PatientProblemLog(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.deleteProblemLog(tempData);
+    const result = await patientApi.deletePatientProblemLogV1(
+      patientID,
+      logID,
+    );
+    
     if (result.ok) {
       refreshLogData();
       setIsModalVisible(false);

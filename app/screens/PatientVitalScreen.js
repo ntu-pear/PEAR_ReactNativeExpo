@@ -41,24 +41,19 @@ import DynamicTable from 'app/components/DynamicTable';
 import PatientVitalItem from 'app/components/PatientVitalItem';
 import AddPatientVitalModalNEW from 'app/components/AddPatientVitalModalNEW';
 
-// --- helper: normalize FastAPI patient to legacy fields this screen expects ---
-const normalizePatientV1 = (p = {}) => {
-  const name = typeof p.name === 'string' ? p.name.trim() : '';
-  const first = p.first_name ?? p.firstName ?? (name ? name.split(' ')[0] : '');
-  const last  = p.last_name ?? p.lastName ?? (name ? name.split(' ').slice(1).join(' ') : '');
-  return {
-    patientID: p.patient_id ?? p.id ?? p.PatientID ?? p.PatientId ?? null,
-    firstName: String(first || '').trim(),
-    lastName: String(last || '').trim(),
-    preferredName: p.preferred_name ?? p.preferredName ?? '',
-    fullName: `${first || ''} ${last || ''}`.trim(),
-    profilePicture: p.profile_picture ?? p.profilePhoto ?? p.avatar ?? p.photoUrl ?? null,
-    isActive: typeof p.is_active === 'boolean' ? p.is_active : p.isActive,
-    startDate: p.start_date ?? p.startDate ?? null,
-    caregiverName: p.caregiver_name ?? p.caregiverName ?? null,
-    ...p,
-  };
-};
+
+// --- helper: safely extract v1 patient fields ---
+const normalizePatientV1 = (p = {}) => ({
+  patientID: p.id,
+  firstName: p.first_name || '',
+  lastName: p.last_name || '',
+  preferredName: p.preferred_name || '',
+  profilePicture: p.profile_picture || null,
+  isActive: p.is_active ?? true,
+  startDate: p.start_date || null,
+  caregiverName: p.caregiver_name || null,
+});
+
 
 function PatientVitalScreen(props) {
   let { patientID, patientId } = props.route.params;

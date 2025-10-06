@@ -138,7 +138,8 @@ function PatientPrescriptionScreen(props) {
   // Get prescription data from backend
   const getPrescriptionData = async () => {
     if (patientID) {
-      const response = await patientApi.getPatientPrescriptionList(patientID);
+      const response = await patientApi.listPatientPrescriptionsV1(patientID);
+      
       if (response.ok) {
         console.log(response.data.data);
         setOriginalPrescriptionData([...response.data.data]);
@@ -163,22 +164,21 @@ function PatientPrescriptionScreen(props) {
   // Parse data
   const parsePrescriptionData = (tempData) => {
     return tempData.map((item) => ({
-      // for add/edit form
-      prescriptionID: item.prescriptionID,
-      prescriptionListID: item.prescriptionListID,
-      dosage: item.dosage,
-      frequencyPerDay: item.frequencyPerDay,
-      isChronic: item.isChronic,
-      instruction: item.instruction,
-      startDate: item.startDate,
-      endDate: item.endDate,
-      afterMeal: item.afterMeal,
-      prescriptionRemarks: item.prescriptionRemarks,
-      prescriptionListDesc: item.prescriptionListDesc,
-      date: item.date,
+      prescriptionID: item.prescription_id ?? item.id ?? null,
+      prescriptionListID: item.prescription_list_id ?? item.prescriptionListID ?? null,
+      dosage: item.dosage ?? '',
+      frequencyPerDay: item.frequency_per_day ?? item.frequencyPerDay ?? 1,
+      isChronic: item.is_chronic ?? item.isChronic ?? false,
+      instruction: item.instruction ?? '',
+      startDate: item.start_date ?? item.startDate ?? null,
+      endDate: item.end_date ?? item.endDate ?? null,
+      afterMeal: item.after_meal ?? item.afterMeal ?? false,
+      prescriptionRemarks: item.prescription_remarks ?? item.prescriptionRemarks ?? '',
+      prescriptionListDesc: item.prescription_list_desc ?? item.prescriptionListDesc ?? '',
+      date: item.created_at ?? item.date ?? null,
     }));
   };
-
+  
   // Get patient data from backend
   const getPatientData = async () => {
     if (patientID) {
@@ -212,10 +212,8 @@ function PatientPrescriptionScreen(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.addPatientPrescription(
-      patientID,
-      tempPrescriptionFormData,
-    );
+    const result = await patientApi.addPatientPrescriptionV1(patientID, tempPrescriptionFormData);
+
     if (result.ok) {
       console.log('submitting prescription data', tempPrescriptionFormData);
       refreshPrescriptionData();
@@ -270,7 +268,7 @@ function PatientPrescriptionScreen(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.updatePrescription(patientID, tempFormData);
+    const result = await patientApi.updatePatientPrescriptionV1(patientID, formData.prescriptionID, tempFormData)
     if (result.ok) {
       refreshPrescriptionData();
       setIsModalVisible(false);
@@ -329,7 +327,7 @@ function PatientPrescriptionScreen(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.deletePrescription(tempData);
+    const result = await patientApi.deletePatientPrescriptionV1(patientID, prescriptionID);
     if (result.ok) {
       refreshPrescriptionData();
       setIsModalVisible(false);

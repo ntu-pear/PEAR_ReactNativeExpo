@@ -140,7 +140,7 @@ function PatientMedicalHistory(props) {
   // Get medical history data from backend
   const getHxData = async () => {
     if (patientID) {
-      const response = await patientApi.getPatientMedicalHistory(patientID);
+      const response = await patientApi.listPatientMedicalHistoriesV1(patientID);
       if (response.ok) {
         setOriginalList([...response.data.data]);
         setData(parseHxData([...response.data.data]));
@@ -164,13 +164,14 @@ function PatientMedicalHistory(props) {
   // Parse data
   const parseHxData = (tempData) => {
     return tempData.map((item) => ({
-      medicalHistoryId: item.medicalHistoryId,
-      informationSource: item.informationSource,
-      medicalDetails: item.medicalDetails,
-      medicalRemarks: item.medicalRemarks,
-      medicalEstimatedDate: item.medicalEstimatedDate,
+      medicalHistoryId: item.medicalHistoryId ?? item.id ?? item.medical_history_id,
+      informationSource: item.informationSource ?? item.information_source ?? '',
+      medicalDetails: item.medicalDetails ?? item.medical_details ?? '',
+      medicalRemarks: item.medicalRemarks ?? item.medical_remarks ?? '',
+      medicalEstimatedDate: item.medicalEstimatedDate ?? item.estimated_date ?? item.date ?? null,
     }));
   };
+  
 
   // Get patient data from backend
   const getPatientData = async () => {
@@ -205,10 +206,7 @@ function PatientMedicalHistory(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.addPatientMedicalHistory(
-      patientID,
-      medData,
-    );
+    const result = await patientApi.addPatientMedicalHistoryV1(patientID, medData);
     if (result.ok) {
       console.log('submitting medical history data', medData);
       alertTitle = 'Sucessfully added medical history';
@@ -260,7 +258,7 @@ function PatientMedicalHistory(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.deleteMedicalHistory(tempData);
+    const result = await patientApi.deletePatientMedicalHistoryV1(patientID, hxID);
     if (result.ok) {
       refreshData();
       setIsModalVisible(false);

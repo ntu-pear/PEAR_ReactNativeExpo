@@ -30,6 +30,7 @@ import * as fav from 'app/utility/favorites';
 import scheduleApi from 'app/api/schedule';
 import patientApi from 'app/api/patient';
 
+
 // Configurations
 import colors from 'app/config/colors';
 import routes from 'app/navigation/routes';
@@ -331,8 +332,8 @@ function DashboardScreen({ navigation }) {
   const getSchedule = async (tempPatientInfo = patientInfo) => {
     const response =
       viewMode === 'myPatients'
-        ? await scheduleApi.getPatientWeeklySchedule()
-        : await scheduleApi.getPatientWeeklySchedule();
+        ? await scheduleApi.getScheduleV1()
+        : await scheduleApi.getScheduleV1();
 
     if (response.ok) {
       const scheduleData = response.data?.data ?? []; // Safely access and default to an empty array if undefined/null
