@@ -12,7 +12,6 @@ import {
 
 // API
 import patientApi from 'app/api/patient';
-// import doctorNoteApi from 'app/api/doctorNote';
 import guardianApi from 'app/api/guardian';
 import socialHistoryApi from 'app/api/socialHistory';
 
@@ -26,19 +25,20 @@ import PatientProfileCard from 'app/components/PatientProfileCard';
 import PatientInformationAccordion from 'app/components/PatientInformationAccordion';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 
+// Import default placeholder image
+const defaultProfilePicture = require('app/assets/placeholder.png');
+
 function PatientProfileScreen(props) {
-  const { navigation , route } = props;
+  const { navigation, route } = props;
   const toStr = (v) => (v == null ? '' : String(v));
 
   const logResp = (tag, resp) => {
     const ct = resp?.headers?.['content-type'] || resp?.headers?.get?.('content-type');
     console.log(`[${tag}] status=${resp?.status} ok=${resp?.ok} ct=${ct}`);
   };
-  
-  
+
   const sanitizeGuardianData = (gd) => {
     if (!gd) return gd;
-    // handle both { guardian: {...} } and flat shapes gracefully
     const out = { ...gd };
     if (out.guardian) {
       const g = { ...out.guardian };
@@ -48,121 +48,68 @@ function PatientProfileScreen(props) {
       out.guardian = g;
     } else {
       const n = toStr(out.NRIC ?? out.nric);
-      out.NRIC = n; out.nric = n;
+      out.NRIC = n;
+      out.nric = n;
     }
     return out;
   };
 
   const toISODateOrNull = (v) => {
-     if (!v) return null;
-     const d = new Date(v);
-     return isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10); // YYYY-MM-DD
-     };
-  
-const STRINGY_KEYS = [
-  'NRIC',
-  'PhoneNumber',
-  'HomeNumber',
-  'Address',
-  'PostalCode',
-  'Email',
-  'Gender',
-  'PreferredName',
-  'FirstName',
-  'LastName',
-  'FullName',
-  'CaregiverName',
-  'StartDate',
-  'EndDate',
-  'DateOfBirth',
-];
-const ensurePatientId = React.useCallback(() => {
-  const pid = getPatientIdFromParams(route?.params || {});
-  if (!pid) {
-    console.warn('[Profile] No patientID in route params; going back.');
-    navigation.goBack();      // or navigate to Patients list
-    return null;
-  }
-  if (pid !== patientID) setPatientID(pid);
-  return pid;
-}, [route?.params, patientID, navigation]);
+    if (!v) return null;
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
+  };
 
-  const getPatientIdFromParams = (p = {}) =>  // NEW
+  const STRINGY_KEYS = [
+    'NRIC',
+    'PhoneNumber',
+    'HomeNumber',
+    'Address',
+    'PostalCode',
+    'Email',
+    'Gender',
+    'PreferredName',
+    'FirstName',
+    'LastName',
+    'FullName',
+    'CaregiverName',
+    'StartDate',
+    'EndDate',
+    'DateOfBirth',
+  ];
+
+  const getPatientIdFromParams = (p = {}) =>
     p.patientId ?? p.patientID ?? p.PatientID ?? p.PatientId ?? p.id ?? null;
 
+  const ensurePatientId = React.useCallback(() => {
+    const pid = getPatientIdFromParams(route?.params || {});
+    if (!pid) {
+      console.warn('[Profile] No patientID in route params; going back.');
+      navigation.goBack();
+      return null;
+    }
+    if (pid !== patientID) setPatientID(pid);
+    return pid;
+  }, [route?.params, patientID, navigation]);
+
   const [patientProfile, setPatientProfile] = useState({});
-  // const [doctorsNoteData, setDoctorNoteData] = useState([]);
   const [guardianData, setGuardianData] = useState([]);
   const [socialHistoryData, setSocialHistoryData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isPatientLoading, setIsPatientLoading] = useState(true);
   const [isSocialHistoryLoading, setIsSocialHistoryLoading] = useState(true);
   const [isGuardianLoading, setIsGuardianLoading] = useState(true);
-  // const [isDoctorsNoteLoading, setIsDoctorsNoteLoading] = useState(true);
-  const [patientID, setPatientID] = useState(getPatientIdFromParams(route?.params || {})); // CHANGED);
-  const ICON = 28;      // good on most phones
-  const ICON_SM = 24;  
+  const [patientID, setPatientID] = useState(getPatientIdFromParams(route?.params || {}));
+
+  const ICON = 28;
+  const ICON_SM = 24;
   const scrollViewRef = useRef(null);
 
-  const normalizeV1 = (p = {}) => {
-    const nameRaw = p.name ?? p.full_name ?? p.fullName ?? '';
-    const first = (p.first_name ?? p.firstName ?? '').toString().trim();
-    const last = (p.last_name ?? p.lastName ?? '').toString().trim();
-
-    let firstName = first;
-    let lastName = last;
-    if (!firstName || !lastName) {
-      const parts = typeof nameRaw === 'string' ? nameRaw.trim().split(/\s+/) : [];
-      if (!firstName && parts[0]) firstName = parts[0];
-      if (!lastName && parts.length > 1) lastName = parts.slice(1).join(' ');
-    }
-
-    const statusStr = typeof p.status === 'string' ? p.status.toLowerCase().trim() : null;
-    const isActive =
-      typeof p.is_active === 'boolean' ? p.is_active :
-      typeof p.isActive === 'boolean' ? p.isActive :
-      (statusStr ? statusStr.startsWith('act') : undefined);
-
-    return {
-      ...p,
-      patientID: p.patient_id ?? p.id ?? p.patientID ?? null,
-      firstName,
-      lastName,
-      fullName,
-      preferredName,
-      fullName: `${firstName} ${lastName}`.trim() || (typeof nameRaw === 'string' ? nameRaw : ''),
-      profilePicture: p.profile_picture ?? p.profile_photo ?? p.photoUrl ?? p.avatar ?? null,
-      preferredName: p.preferred_name ?? p.preferredName ?? '',
-      isActive,
-      startDate: p.start_date ?? p.startDate ?? null,
-    };
-  };
-
-  
-  // useEffect(() => {
-  //   // navigated from Highlights Modal or Dashboard Screen
-  //   console.log('id', patientID);
-  //   setIsLoading(true);
-  //   getPatient(patientID);
-  //   // retrieveDoctorsNote(patientID);
-  //   retrieveGuardian(patientID);
-  //   retrieveSocialHistory(patientID);
-  // }, [patientID, route.params.patientProfile]);
-
- // useFocusEffect(
-    //React.useCallback(() => {
-      //setIsLoading(true);
-     // getPatient(patientID);
-      //retrieveGuardian(route.params.id);
-     // retrieveSocialHistory(route.params.id);
-   // }, []),
-  //);
-
-  // Retrieval of Patient Info, Doctor's Notes, Guardian Info and Social History
+  // Main patient data retrieval with transformation
   const getPatient = async (id) => {
     setIsPatientLoading(true);
     try {
-      // helpers
+      // Helper functions
       const toStr = (v) => (v === undefined || v === null ? '' : String(v));
       const nonEmpty = (v) => {
         const s = toStr(v).trim();
@@ -181,7 +128,7 @@ const ensurePatientId = React.useCallback(() => {
       const toISODateOrNull = (v) => {
         if (!v) return null;
         const d = new Date(v);
-        return isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10); // YYYY-MM-DD
+        return isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
       };
       const toGenderLetter = (g) => {
         const s = toStr(g).trim().toUpperCase();
@@ -189,72 +136,93 @@ const ensurePatientId = React.useCallback(() => {
         if (s.startsWith('M')) return 'M';
         return '';
       };
-  
+
       let ui = null;
-  
-      // --- 1) New Patient Service (detail)
+
+      // Try new Patient Service V1
       const v1 = await patientApi.readPatientV1(id, { require_auth: true, mask: true });
+      
       if (v1?.ok && v1.data) {
-        const p = v1.data || {};
-  
+        // Handle nested data structure - check if data is inside v1.data.data
+        const p = v1.data.data || v1.data || {};
+
+        console.log('[PROFILE V1] raw', p);
+
         const first = pickFirstFrom(p, ['first_name', 'firstName', 'given_name', 'givenName']);
-        const last  = pickFirstFrom(p, ['last_name', 'lastName', 'family_name', 'familyName', 'surname']);
+        const last = pickFirstFrom(p, ['last_name', 'lastName', 'family_name', 'familyName', 'surname']);
         const fullRaw = pickFirstFrom(p, ['name', 'full_name', 'fullName', 'display_name', 'displayName']);
         const full = (nonEmpty(first) && nonEmpty(last)) ? `${first} ${last}`.trim() : fullRaw;
-  
+
         const preferred = nonEmpty(
-          pickFirstFrom(p, ['preferred_name','preferredName','nickname','nick_name','short_name'])
+          pickFirstFrom(p, ['preferredName', 'preferred_name', 'nickname', 'nick_name', 'short_name'])
         ) || nonEmpty(first) || full;
-  
+
         const nric = pickFirstFrom(p, [
-          'NRIC','nric','nric_no','national_id','nationalId','id_no',
-          'identifiers.national_id','identification.nric'
+          'nric', 'NRIC', 'nric_no', 'national_id', 'nationalId', 'id_no',
+          'identifiers.national_id', 'identification.nric'
         ]);
-  
+
         const phone = pickFirstFrom(p, [
-          'PhoneNumber','handphoneNo','phone','mobile','mobile_number','phone_number',
-          'contact.mobile','contact.phone'
+          'handphoneNo', 'PhoneNumber', 'phone', 'mobile', 'mobile_number', 'phone_number',
+          'contact.mobile', 'contact.phone'
         ]);
-  
-        const picture = pickFirstFrom(p, [
-          'profile_picture','profile_photo','photoUrl','avatar','profilePhoto','avatar_url'
+
+        // PROFILE PICTURE WITH FALLBACK
+        let picture = pickFirstFrom(p, [
+          'profilePicture', 'profile_picture', 'profile_photo', 'photoUrl', 'avatar', 'profilePhoto', 'avatar_url'
         ]);
-  
-        const genderLetter = toGenderLetter(p.Gender || p.gender || p.sex);
-  
+        
+        // If no picture or empty string, use default placeholder
+        if (!picture || (typeof picture === 'string' && picture.trim() === '')) {
+          console.log('[PROFILE PICTURE] Using default placeholder for patient:', id);
+          picture = defaultProfilePicture;
+        } else {
+          console.log('[PROFILE PICTURE] Using API picture for patient:', id);
+        }
+
+        const genderLetter = toGenderLetter(p.gender || p.Gender || p.sex);
+
         const dobISO = toISODateOrNull(
-          p.DateOfBirth || p.dob || p.date_of_birth || p.birth_date || p.birthDate
+          p.dateOfBirth || p.DateOfBirth || p.dob || p.date_of_birth || p.birth_date || p.birthDate
         );
-  
+
         ui = {
           patientID: p.patient_id || p.id || p.patientID || id,
-  
+
           // names
-          firstName: first,  FirstName: first,
-          lastName:  last,   LastName:  last,
-          fullName:  nonEmpty(full),   FullName:  nonEmpty(full),
-          preferredName: preferred,    PreferredName: preferred,
-  
+          firstName: first,
+          FirstName: first,
+          lastName: last,
+          LastName: last,
+          fullName: nonEmpty(full),
+          FullName: nonEmpty(full),
+          preferredName: preferred,
+          PreferredName: preferred,
+
           // identifiers & contact
-          nric: toStr(nric), NRIC: toStr(nric),
-          handphoneNo: toStr(phone), PhoneNumber: toStr(phone),
-  
+          nric: toStr(nric),
+          NRIC: toStr(nric),
+          handphoneNo: toStr(phone),
+          PhoneNumber: toStr(phone),
+
           // other
-          gender: genderLetter, Gender: genderLetter,
-          preferredLanguage: pickFirstFrom(p, ['preferred_language','preferredLanguage','language']),
-          PreferredLanguage: pickFirstFrom(p, ['preferred_language','preferredLanguage','language']),
-          dob: dobISO, DateOfBirth: dobISO,
-          profilePicture: nonEmpty(picture) ? picture : null,
-          isActive: (typeof p.is_active === 'boolean') ? p.is_active : p.isActive,
-          startDate: p.start_date || p.startDate || null,
+          gender: genderLetter,
+          Gender: genderLetter,
+          preferredLanguage: pickFirstFrom(p, ['preferred_language', 'preferredLanguageId', 'language']),
+          PreferredLanguage: pickFirstFrom(p, ['preferred_language', 'preferredLanguageId', 'language']),
+          dob: dobISO,
+          DateOfBirth: dobISO,
+          profilePicture: picture, // Will be either URL or default placeholder
+          isActive: (typeof p.isActive === 'boolean') ? p.isActive : (p.isActive === '1' || p.isActive === 1 || p.is_active === true),
+          startDate: p.startDate || p.start_date || null,
         };
-  
+
         const missingKey =
           !nonEmpty(ui.PreferredName) ||
           !nonEmpty(ui.NRIC) ||
           !nonEmpty(ui.Gender) ||
           !ui.DateOfBirth;
-  
+
         if (!missingKey) {
           console.log('[PROFILE V1 SET]', ui);
           setPatientProfile(ui);
@@ -265,10 +233,8 @@ const ensurePatientId = React.useCallback(() => {
       } else {
         console.log('[PROFILE V1] not ok, status=', v1?.status, 'id=', id);
       }
-  
-    
-  
-      // --- 3) Nothing worked: still set a minimal object so UI renders
+
+      // Fallback if nothing worked
       const fallback = {
         patientID: id,
         PreferredName: '',
@@ -284,7 +250,7 @@ const ensurePatientId = React.useCallback(() => {
         firstName: '',
         lastName: '',
         fullName: '',
-        profilePicture: null,
+        profilePicture: defaultProfilePicture, // Use placeholder for fallback
         isActive: undefined,
         startDate: null,
       };
@@ -292,73 +258,68 @@ const ensurePatientId = React.useCallback(() => {
       setPatientProfile(fallback);
     } catch (e) {
       console.log('Patient load error:', e?.message || e);
+      // Set fallback on error
+      setPatientProfile({
+        patientID: id,
+        PreferredName: '',
+        preferredName: '',
+        profilePicture: defaultProfilePicture,
+      });
     } finally {
       setIsPatientLoading(false);
     }
   };
 
-  // const retrieveDoctorsNote = async (id) => {
-  //   setIsDoctorsNoteLoading(true);
-  //   const response = await doctorNoteApi.getDoctorNote(id);
-  //   if (!response.ok) {
-  //     console.log('Request failed with status code: ', response.status);
-  //     // setIsDoctorsNoteLoading(false);
-  //     return;
-  //   }
-  //   // setIsDoctorsNoteLoading(false);
-  //   setDoctorNoteData(response.data.data);
-  // };
-
   const retrieveGuardian = async (id) => {
-  setIsGuardianLoading(true);
-  try {
-    const resp = await guardianApi.getPatientGuardian(id, false);
-    logResp('Guardian', resp);
+    setIsGuardianLoading(true);
+    try {
+      const resp = await guardianApi.getPatientGuardian(id, false);
+      logResp('Guardian', resp);
 
-    if (resp?.ok && Array.isArray(resp?.data?.data)) {
-      setGuardianData(resp.data.data);
-    } else {
-      // 401/500/HTML => skip silently, do not break the screen
+      if (resp?.ok && Array.isArray(resp?.data?.data)) {
+        setGuardianData(resp.data.data);
+      } else {
+        setGuardianData([]);
+      }
+    } catch (e) {
+      console.log('[Guardian] error:', e?.message || e);
       setGuardianData([]);
+    } finally {
+      setIsGuardianLoading(false);
     }
-  } catch (e) {
-    console.log('[Guardian] error:', e?.message || e);
-    setGuardianData([]);
-  } finally {
-    setIsGuardianLoading(false);
-  }
-};
+  };
+
   const retrieveSocialHistory = async (id) => {
     setIsSocialHistoryLoading(true);
-  try {
-    const resp = await socialHistoryApi.getSocialHistory(id);
-    logResp('SocialHistory', resp);
+    try {
+      const resp = await socialHistoryApi.getSocialHistory(id);
+      logResp('SocialHistory', resp);
 
-    if (resp?.ok) {
-      const payload = resp?.data?.data;
-      setSocialHistoryData(payload ?? []);
-    } else {
+      if (resp?.ok) {
+        const payload = resp?.data?.data;
+        setSocialHistoryData(payload ?? []);
+      } else {
+        setSocialHistoryData([]);
+      }
+    } catch (e) {
+      console.log('[SocialHistory] error:', e?.message || e);
       setSocialHistoryData([]);
+    } finally {
+      setIsSocialHistoryLoading(false);
     }
-  } catch (e) {
-    console.log('[SocialHistory] error:', e?.message || e);
-    setSocialHistoryData([]);
-  } finally {
-    setIsSocialHistoryLoading(false);
-  }
-};
+  };
 
-  // NEW: react if navigation params change later
+  // React if navigation params change
   useEffect(() => {
     const next = getPatientIdFromParams(route?.params || {});
     if (next && next !== patientID) setPatientID(next);
-  }, [route?.params]); // NEW
+  }, [route?.params]);
 
-  // CHANGED: include patientID in deps and always call with the resolved id
+  // Load data on focus
   useFocusEffect(
     React.useCallback(() => {
       const pid = ensurePatientId();
-      if (!pid) return;     // don’t try to load without an id
+      if (!pid) return;
       setIsLoading(true);
       getPatient(pid);
       retrieveGuardian(pid);
@@ -366,12 +327,9 @@ const ensurePatientId = React.useCallback(() => {
     }, [ensurePatientId])
   );
 
-  // Check if all the data has been loaded before loading page
+  // Check if all data loaded
   useEffect(() => {
-    if (
-      patientProfile !== undefined &&
-      Object.keys(patientProfile).length > 0
-    ) {
+    if (patientProfile !== undefined && Object.keys(patientProfile).length > 0) {
       setIsPatientLoading(false);
     }
     if (socialHistoryData !== undefined) {
@@ -380,12 +338,6 @@ const ensurePatientId = React.useCallback(() => {
     if (guardianData !== undefined && guardianData.length !== 0) {
       setIsGuardianLoading(false);
     }
-    // if(doctorsNoteData !== undefined){
-    //   setIsDoctorsNoteLoading(false);
-    // }
-    // if(isPatientLoading === false && isSocialHistoryLoading === false && isGuardianLoading === false && isDoctorsNoteLoading === false ){
-    //   setIsLoading(false);
-    // }
 
     if (
       isPatientLoading === false &&
@@ -394,9 +346,6 @@ const ensurePatientId = React.useCallback(() => {
     ) {
       setIsLoading(false);
     }
-
-    // }, [patientProfile, isPatientLoading, socialHistoryData, isSocialHistoryLoading,
-    //   guardianData, isGuardianLoading, doctorsNoteData, isDoctorsNoteLoading]);
   }, [
     patientProfile,
     isPatientLoading,
@@ -424,7 +373,7 @@ const ensurePatientId = React.useCallback(() => {
             }}
             ref={scrollViewRef}
           >
-            <View testID={'profile'} w="100%" style={{ flex: 1 }}>
+            <View testID={'profile'} w="100%">
               <PatientInformationCard
                 patientProfile={patientProfile}
                 navigation={navigation}
@@ -476,7 +425,6 @@ const ensurePatientId = React.useCallback(() => {
                   navigation={navigation}
                   routes={routes.PATIENT_MEDICATION}
                   patientId={patientID}
-                  // patientProfile={patientProfile}
                 />
                 <PatientProfileCard
                   vectorIconComponent={
@@ -491,7 +439,6 @@ const ensurePatientId = React.useCallback(() => {
                   navigation={navigation}
                   routes={routes.PATIENT_PRESCRIPTION}
                   patientId={patientID}
-                  // patientProfile={patientProfile}
                 />
               </View>
               <View flexDirection="row" width="100%">
@@ -611,7 +558,6 @@ const ensurePatientId = React.useCallback(() => {
                   patientProfile={patientProfile}
                 />
               </View>
-              {/* //temporary values for doctor icon, change later */}
               <View flexDirection="row" width="100%">
                 <PatientProfileCard
                   vectorIconComponent={
@@ -627,8 +573,6 @@ const ensurePatientId = React.useCallback(() => {
                   routes={routes.DOCTORNOTE_SCREEN}
                   patientProfile={patientProfile}
                 />
-
-                {/* Below are empty placeholder icons to fix doctor note position, only edit if you know what you're doing */}
                 <PatientProfileCard
                   routes={routes.DOCTORNOTE_SCREEN}
                   navigation={navigation}
@@ -654,7 +598,6 @@ const ensurePatientId = React.useCallback(() => {
                 patientID={patientID}
                 patientProfile={patientProfile}
                 guardianData={guardianData}
-                // doctorsNoteData={doctorsNoteData}
                 socialHistoryData={socialHistoryData}
                 scrollViewRef={scrollViewRef}
               />
