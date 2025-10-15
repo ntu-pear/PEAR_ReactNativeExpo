@@ -25,136 +25,31 @@ function PatientInformationCard(props) {
   // useNavigate() hook cannot work on mobile
   const navigate = Platform.OS === 'web' ? useNavigate() : null;
 
-  // const handleOnPress = () => {
-  //   if (Platform.OS === 'web') {
-  //     navigate('/' + routes.PATIENT_INFORMATION, {
-  //       state: { displayPicUrl: `${displayPicUrl}`, ...patientProfile },
-  //     });
-  //   } else {
-  //     navigation.push(routes.PATIENT_INFORMATION, {
-  //       displayPicUrl: `${displayPicUrl}`,
-  //       navigation: navigation,
-  //       ...patientProfile,
-  //     });
-  //   }
-  // };
-
   const calcAge = (dob) => {
     const today = new Date().getFullYear();
     const _dob = new Date(dob).getFullYear();
     return today - _dob;
   };
 
-  // const extractFullYear = (dob) => {
-  //   const _date = new Date(dob);
-
-  //   const day = String(_date.getDate()).padStart(2, '0');
-  //   const month = String(_date.getMonth() + 1).padStart(2, '0');
-  //   const year = _date.getFullYear();
-  //   return `${day}-${month}-${year}`;
-  // };
-
   const SCREEN_HEIGHT = Dimensions.get('window').height;
 
-  const MyComponent = () => {
-    return (
-      <HStack space={'10%'} justifyContent="flex-end">
-        <VStack>
-          <Text
-            testID="nric_label"
-            thin
-            fontSize={SCREEN_HEIGHT * 0.014}
-            color={colors.grey_lightest}
-          >
-            NRIC NO.
-          </Text>
-          <Text
-            testID="nric_value"
-            bold
-            fontSize={SCREEN_HEIGHT * 0.024}
-            lineHeight="xs"
-            color={colors.grey_lightest}
-          >
-            {`${patientProfile?.nric}`}
-          </Text>
-          <Text
-            testID="dob_label"
-            thin
-            fontSize={SCREEN_HEIGHT * 0.014}
-            mt="2"
-            color={colors.grey_lightest}
-          >
-            DATE OF BIRTH
-          </Text>
-          <Text
-            testID="dob_value"
-            bold
-            fontSize={SCREEN_HEIGHT * 0.024}
-            lineHeight="xs"
-            color={colors.grey_lightest}
-          >
-            {`${formatDateTime(patientProfile?.dob, true)}`}
-          </Text>
-        </VStack>
-
-        <VStack>
-          <Text
-            testID="age_label"
-            thin
-            fontSize={SCREEN_HEIGHT * 0.014}
-            color={colors.grey_lightest}
-          >
-            AGE
-          </Text>
-          <Text
-            testID="age_value"
-            bold
-            fontSize={SCREEN_HEIGHT * 0.024}
-            lineHeight="xs"
-            color={colors.grey_lightest}
-          >
-            {`${calcAge(patientProfile?.dob)}`}
-          </Text>
-          {/* <Text
-            thin
-            fontSize={SCREEN_HEIGHT * 0.014}
-            mt="2"
-            color={colors.grey_lightest}
-          >
-            LANGUAGE
-          </Text>
-          <Text
-            bold
-            fontSize={SCREEN_HEIGHT * 0.024}
-            lineHeight="xs"
-            color={colors.grey_lightest}
-          >
-            {`${patientProfile?.preferredLanguage}`}
-          </Text> */}
-          <Text
-            testID="mobile_number_label"
-            thin
-            fontSize={SCREEN_HEIGHT * 0.014}
-            mt="2"
-            color={colors.grey_lightest}
-          >
-            Mobile Number
-          </Text>
-          <Text
-            testID="mobile_number_value"
-            bold
-            fontSize={SCREEN_HEIGHT * 0.024}
-            lineHeight="xs"
-            color={colors.grey_lightest}
-          >
-            {patientProfile.handphoneNo !== null &&
-            patientProfile.handphoneNo !== ''
-              ? patientProfile.handphoneNo
-              : '-'}
-          </Text>
-        </VStack>
-      </HStack>
-    );
+  // Helper function to get the correct image source format
+  const getImageSource = () => {
+    if (!patientProfile?.profilePicture) {
+      return null; // Will show initials
+    }
+    
+    // If it's a number (local require), use it directly
+    if (typeof patientProfile.profilePicture === 'number') {
+      return patientProfile.profilePicture;
+    }
+    
+    // If it's a string URL, wrap it in { uri: ... }
+    if (typeof patientProfile.profilePicture === 'string') {
+      return { uri: patientProfile.profilePicture };
+    }
+    
+    return null;
   };
 
   return (
@@ -165,45 +60,32 @@ function PatientInformationCard(props) {
       borderBottomWidth="3"
       style={styles.container}
     >
-      <HStack space={'4%'} justifyContent="center">
+      <HStack space={4} width="100%" alignItems="flex-start">
+        {/* Avatar */}
         <Avatar
           testID="patient_profile_picture"
           size={Platform.OS === 'web' ? '28vh' : SCREEN_HEIGHT * 0.11}
           bg={colors.pink}
-          marginY="auto"
-          source={
-            patientProfile?.profilePicture
-              ? {
-                  uri: `${patientProfile.profilePicture}`,
-                }
-              : null
-          }
+          source={getImageSource()}
           borderColor={colors.grey_lightest}
           borderWidth="2"
         >
-          {' '}
-          {patientProfile &&
-          patientProfile.firstName &&
-          patientProfile.firstName.substring(0, 1)
-            ? patientProfile.firstName.substring(0, 1)
-            : '--'}{' '}
+          {patientProfile?.firstName?.substring(0, 1) || 
+           patientProfile?.preferredName?.substring(0, 1) || 
+           '--'}
         </Avatar>
-        <VStack space={'8%'}>
-          <VStack>
-            {/* <Text
-                bold
-                fontSize={SCREEN_HEIGHT * 0.034}
-                color={colors.grey_lightest}
-              >
-                {`${patientProfile?.firstName} ${patientProfile?.lastName}`}
-              </Text> */}
+        
+        {/* Content Section - All in one HStack for mobile */}
+        <HStack flex={1} justifyContent="space-between">
+          {/* Left side: Name, Gender, Language */}
+          <VStack justifyContent="center">
             <Text
               testID="patient_preferred_name"
               bold
               fontSize={SCREEN_HEIGHT * 0.024}
               color={colors.grey_lightest}
             >
-              {`${patientProfile?.preferredName}`}
+              {patientProfile?.preferredName || '-'}
             </Text>
             <Text
               testID="patient_gender"
@@ -211,7 +93,8 @@ function PatientInformationCard(props) {
               fontSize={SCREEN_HEIGHT * 0.024}
               color={colors.grey_lightest}
             >
-              {patientProfile?.gender === 'F' ? 'FEMALE' : 'MALE'}
+              {patientProfile?.gender === 'F' ? 'FEMALE' : 
+               patientProfile?.gender === 'M' ? 'MALE' : '-'}
             </Text>
             <Text
               testID="patient_preferred_language"
@@ -219,13 +102,92 @@ function PatientInformationCard(props) {
               fontSize={SCREEN_HEIGHT * 0.024}
               color={colors.grey_lightest}
             >
-              {`${patientProfile?.preferredLanguage}`}
+              {patientProfile?.preferredLanguage || '-'}
             </Text>
           </VStack>
-          {Platform.OS === 'web' ? MyComponent() : null}
-        </VStack>
+
+          {/* Right side: NRIC/DOB and Age/Mobile */}
+          <HStack space={4}>
+            {/* NRIC and DOB Column */}
+            <VStack>
+              <Text
+                testID="nric_label"
+                thin
+                fontSize={SCREEN_HEIGHT * 0.014}
+                color={colors.grey_lightest}
+              >
+                NRIC NO.
+              </Text>
+              <Text
+                testID="nric_value"
+                bold
+                fontSize={SCREEN_HEIGHT * 0.024}
+                lineHeight="xs"
+                color={colors.grey_lightest}
+              >
+                {`${patientProfile?.nric || '-'}`}
+              </Text>
+              <Text
+                testID="dob_label"
+                thin
+                fontSize={SCREEN_HEIGHT * 0.014}
+                mt="2"
+                color={colors.grey_lightest}
+              >
+                DATE OF BIRTH
+              </Text>
+              <Text
+                testID="dob_value"
+                bold
+                fontSize={SCREEN_HEIGHT * 0.024}
+                lineHeight="xs"
+                color={colors.grey_lightest}
+              >
+                {patientProfile?.dob ? formatDateTime(patientProfile.dob, true) : '-'}
+              </Text>
+            </VStack>
+
+            {/* Age and Mobile Column */}
+            <VStack>
+              <Text
+                testID="age_label"
+                thin
+                fontSize={SCREEN_HEIGHT * 0.014}
+                color={colors.grey_lightest}
+              >
+                AGE
+              </Text>
+              <Text
+                testID="age_value"
+                bold
+                fontSize={SCREEN_HEIGHT * 0.024}
+                lineHeight="xs"
+                color={colors.grey_lightest}
+              >
+                {patientProfile?.dob ? calcAge(patientProfile.dob) : '-'}
+              </Text>
+              <Text
+                testID="mobile_number_label"
+                thin
+                fontSize={SCREEN_HEIGHT * 0.014}
+                mt="2"
+                color={colors.grey_lightest}
+              >
+                Mobile Number
+              </Text>
+              <Text
+                testID="mobile_number_value"
+                bold
+                fontSize={SCREEN_HEIGHT * 0.024}
+                lineHeight="xs"
+                color={colors.grey_lightest}
+              >
+                {patientProfile?.handphoneNo || '-'}
+              </Text>
+            </VStack>
+          </HStack>
+        </HStack>
       </HStack>
-      {Platform.OS === 'web' ? null : MyComponent()}
     </Box>
   );
 }
@@ -233,16 +195,12 @@ function PatientInformationCard(props) {
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    //flex: 1,
     alignItems: 'flex-start',
-    //justifyContent: 'space-between',
     flexDirection: 'column',
-    paddingBottom: 1,
+    paddingBottom: 12,
     paddingHorizontal: 25,
     paddingTop: 12,
-    rowGap: 8,
   },
-
 });
 
 export default PatientInformationCard;
