@@ -1,5 +1,6 @@
 // Base
 import React, { useState, useEffect, useContext, useCallback } from 'react';
+import client, { V1_BASE } from 'app/api/client';
 import { StyleSheet, Platform, View } from 'react-native';
 import {
   Box,
@@ -32,9 +33,12 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 import InputField from 'app/components/input-components/InputField';
 import SensitiveInputField from 'app/components/input-components/SensitiveInputField';
 
-// APIs
-import patientApi from 'app/api/patient';
+
 import AuthContext from 'app/auth/context';
+
+// --- v1 helpers (local to this screen) ---
+const as01 = (v) => (v === true || v === 'Yes' || v === '1' ? '1' : '0'); // booleans -> "1"/"0"
+const toIso = (d) => (d ? new Date(d).toISOString() : null);
 
 function PatientAddPatientInfoScreen({
   testID = '',
@@ -163,21 +167,43 @@ function PatientAddPatientInfoScreen({
   // Get patient preferred names from API
   useEffect(() => {
     getPrefNames();
-    patient.EndDate = new Date(null); //to set inital value of enddate to null, unless updated via selection
+    patient.EndDate = null; //to set inital value of enddate to null, unless updated via selection
   }, []);
 
   // Get list of preferred names from backend to detect duplicate preferred names
   const getPrefNames = async () => {
     setIsPrefNamesLoading(true);
-    const response = await patientApi.getPatientList(false, 'active');
-    if (!response.ok) {
-      setUser(null);
-      return;
+    try {
+      // GET /api/v1/patients/ supports filters and pagination
+      // We only need active patients for duplicate PreferredName checks.
+      const res = await client.get(`${V1_BASE}/patients/`, {
+        name: null,                // leave null to fetch all (or you can pass a prefix for server-side search)
+        isActive: '1',             // API expects "0"/"1" as strings for filters
+        pageNo: 0,
+        pageSize: 1000,            // pull a big page so the dropdown check is easy
+        require_auth: true
+      });
+  
+      if (!res.ok) { 
+        if (res.status === 401) setUser(null);
+         return; }
+  
+      // PaginatedResponse[Patient] => { data: Patient[], pageNo, pageSize, totalRecords, totalPages }
+      const rows = Array.isArray(res.data?.data) ? res.data.data : [];
+      setPrefNames(rows.map(x => x.preferredName).filter(Boolean));
+    } finally {
+      setIsPrefNamesLoading(false);
     }
-    setPrefNames(response.data.data.map((x) => x.preferredName));
-    setIsPrefNamesLoading(false);
   };
 
+  const fmtDDMMMYYYY = (d) => {
+    if (!d) return '';
+    const date = (d instanceof Date) ? d : new Date(d);
+    const dd = String(date.getDate()).padStart(2, '0');
+    const mmm = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][date.getMonth()];
+    const yyyy = date.getFullYear();
+    return `${dd}-${mmm}-${yyyy}`;
+  };
   // Functions for error state reporting for the child components
   const handleFirstNameError = useCallback(
     (state) => {

@@ -8,8 +8,8 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import routes from 'app/navigation/routes';
 import colors from 'app/config/colors';
 
-// API
-import patientApi from 'app/api/patient';
+// API (v1 direct)
+import client, { V1_BASE } from 'app/api/client';
 
 // Components
 import RadioButtonInput from 'app/components/input-components/RadioButtonsInput';
@@ -48,7 +48,14 @@ function EditPatientInfoScreen(props) {
     { label: 'Yes', value: true },
     { label: 'No', value: false },
   ]);
-
+  const pickLangId = (label, options) => {
+    const key = (label ?? '').toString().trim().toLowerCase();
+    const match = options?.find(o => (o.label ?? '').toLowerCase() === key);
+    return match?.value ?? options?.[0]?.value ?? 1; // fallback to first option or 1
+  };
+  const from01 = (v) => v === true || v === 1 || v === '1'; // "1"/1/true -> true, else false
+  const as01 = (v) => (v === true || v === 'Yes' || v === '1' ? '1' : '0'); // booleans -> "1"/"0"
+  const toIso = (d) => (d ? new Date(d).toISOString() : null);              // ensure ISO
   // Screen error state: This = true when the child components report error(input fields)
   // Enables use of dynamic rendering of components when the page error = true/false.
   const [isInputErrors, setIsInputErrors] = useState(false);
@@ -68,9 +75,7 @@ function EditPatientInfoScreen(props) {
   // Patient data to be submitted
   const [formData, setFormData] = useState({
     PatientID: patientProfile.patientID,
-    PreferredLanguageListID: listOfLanguages.find(
-      (item) => item.label === patientProfile.preferredLanguage,
-    ).value, // convert label to value with listOfLanguages
+    PreferredLanguageListID: pickLangId(patientProfile.preferredLanguage, listOfLanguages),
     PrefLanguage: patientProfile.preferredLanguage != null && patientProfile.preferredLanguage != 'null' ? patientProfile.preferredLanguage : '',
     FirstName: patientProfile.firstName != null && patientProfile.firstName != 'null' ? patientProfile.firstName : '',
     LastName: patientProfile.lastName != null && patientProfile.lastName != 'null' ? patientProfile.lastName : '',
@@ -86,7 +91,7 @@ function EditPatientInfoScreen(props) {
     HandphoneNo: patientProfile.handphoneNo != null && patientProfile.handphoneNo != 'null' ? patientProfile.handphoneNo : '',
     StartDate: patientProfile.startDate != null && patientProfile.startDate != 'null' ? patientProfile.startDate : null,
     EndDate: patientProfile.endDate != null && patientProfile.endDate != 'null' ? patientProfile.endDate : null,
-    IsRespiteCare: patientProfile.isRespiteCare != null && patientProfile.isRespiteCare != 'null' ? patientProfile.isRespiteCare : '',
+    IsRespiteCare: from01(patientProfile.isRespiteCare),
     PrivacyLevel: patientProfile.privacyLevel != null && patientProfile.privacyLevel != 'null' ? patientProfile.privacyLevel : '',
     UpdateBit: patientProfile.updateBit != null && patientProfile.updateBit != 'null' ? patientProfile.updateBit : '',
     AutoGame: patientProfile.autoGame != null && patientProfile.autoGame != 'null' ? patientProfile.autoGame : '',
@@ -136,7 +141,7 @@ function EditPatientInfoScreen(props) {
     },
     [isAddrError],
   );
-
+  
   const handlePostalCodeError = useCallback(
     (state) => {
       setIsPostalCodeError(state);
@@ -216,17 +221,66 @@ function EditPatientInfoScreen(props) {
     }
   };
 
+  const toPatientUpdatePayload = (f) => {
+    // IMPORTANT: your screen stores StartDate/EndDate as strings already (you set ISO in handleFormData).
+    // We'll still normalize to ISO to be safe.
+    const withPostal = (addr, pc) =>
+      pc && pc.length ? `${addr || ''} S(${pc})`.trim() : (addr ?? null);
+  
+    return {
+      // required by PatientUpdate
+      name: [f.FirstName, f.LastName].filter(Boolean).join(' ').trim(),
+      nric: f.NRIC ?? '',
+      gender: f.Gender ?? '',                       // "M" or "F"
+      dateOfBirth: toIso(f.DOB),
+      isApproved: '0',
+      updateBit: '0',
+      autoGame: '0',
+      startDate: toIso(f.StartDate),
+      isActive: '1',
+      isRespiteCare: as01(f.IsRespiteCare),
+      
+      privacyLevel: toInt(f.PrivacyLevel, 0),
+  
+      // optional / nullable fields
+      preferredName: f.PreferredName ?? null,
+      preferredLanguageId: f.PreferredLanguageListID ?? 1,
+      endDate: toIso(f.EndDate),
+      address: withPostal(f.Address, f.PostalCode),             // v1 has no postalCode field
+      tempAddress: withPostal(f.TempAddress, f.TempPostalCode), // concat temp postal
+      homeNo: f.HomeNo ?? null,
+      handphoneNo: f.HandphoneNo ?? null,
+      terminationReason: f.TerminationReason ?? null,
+      inActiveReason: f.InactiveReason ?? null,
+      inActiveDate: toIso(f.InactiveDate),
+      profilePicture: null,
+      isDeleted: null,
+  
+      // server requires these in v1 update
+      modifiedDate: new Date().toISOString(),
+      ModifiedById: String(f.ModifiedById ?? '0'),
+    };
+  };
   // form submission when save button is pressed
   const submitForm = async () => {
     let tempFormData = {...formData};
     let alertTitle = '';
     let alertDetails = '';
 
-    if(tempFormData['EndDate'] === "1970-01-01T00:00:00" || tempFormData['EndDate'] === "1970-01-01T00:00:000Z") {
-      tempFormData['EndDate'] = new Date(null).toISOString();
-    }
+    // treat epoch or empty as null
+      if (
+        !tempFormData['EndDate'] ||
+        tempFormData['EndDate'] === '1970-01-01T00:00:00' ||
+        tempFormData['EndDate'] === '1970-01-01T00:00:00Z' ||
+        tempFormData['EndDate'] === '1970-01-01T00:00:000Z'
+      ) {
+        tempFormData['EndDate'] = null;
+      }
     
-    else if(tempFormData['EndDate'] < tempFormData['StartDate']) {
+    else if(tempFormData['EndDate'] &&
+      tempFormData['StartDate'] &&
+      new Date(tempFormData['EndDate']).getTime() < new Date(tempFormData['StartDate']).getTime()
+    ) {
       alertTitle = 'Error in Editing Patient Information';
       alertDetails = 'Leave date cannot be earlier than join date!';
       Alert.alert(alertTitle, alertDetails);
@@ -234,7 +288,11 @@ function EditPatientInfoScreen(props) {
       return null;
     }
 
-    const result = await patientApi.updatePatient(tempFormData);
+       // v1 PUT /patients/update/{patient_id}
+    const payload = toPatientUpdatePayload(tempFormData);
+    const url = `${V1_BASE}/patients/update/${tempFormData.PatientID}`;
+    const result = await client.put(url, payload, { require_auth: true });
+
 
     if (result.ok) {
       navigation.goBack(routes.PATIENT_PROFILE, {
@@ -335,7 +393,7 @@ function EditPatientInfoScreen(props) {
                   <DateInputField
                     isRequired
                     title={'Start Date'}
-                    value={new Date(formData['StartDate'])}
+                    value={formData['StartDate'] ? new Date(formData['StartDate']) : null}
                     hideDayOfWeek={true}
                     handleFormData={handleFormData('StartDate')}
                     onEndEditing={handleJoiningError}
@@ -347,7 +405,9 @@ function EditPatientInfoScreen(props) {
                 <View style={styles.dateSelectionContainer}>
                   <DateInputField
                     title={'End Date'}
-                    value={formData['EndDate'] === "1970-01-01T00:00:00" ? null : new Date(formData['EndDate'])}
+                    value={!formData['EndDate'] || formData['EndDate'] === '1970-01-01T00:00:00' || formData['EndDate'] === '1970-01-01T00:00:00Z' ||
+                      formData['EndDate'] === '1970-01-01T00:00:000Z' ? null : new Date(formData['EndDate'])
+                    }
                     handleFormData={handleFormData('EndDate')}
                     hideDayOfWeek={true}
                     onEndEditing={handleLeavingError}
