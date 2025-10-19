@@ -1,19 +1,18 @@
 // Lib
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, Platform } from 'react-native';
-import { VStack, HStack, IconButton } from 'native-base';
+import { View, StyleSheet, Platform } from 'react-native';
+import { VStack, HStack, Text, IconButton, Box, Divider } from 'native-base';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 // Hooks
 import formatDateTime from 'app/hooks/useFormatDateTime.js';
 
-//Configuration
+// Config
 import typography from 'app/config/typography';
 import colors from 'app/config/colors';
 
 // Components
 import AppButton from 'app/components/AppButton';
-import { configureProps } from 'react-native-reanimated/lib/reanimated2/core';
 
 function InformationCard({
   displayData,
@@ -25,32 +24,20 @@ function InformationCard({
   const [itemizedData, setItemizedData] = useState(displayData);
   const [masked, setMasked] = useState(true);
 
-  // Handling of unmasking of NRIC
   const handleUnmaskNRIC = () => {
-    if (masked) {
-      const newData = itemizedData.map((item) => {
-        if (item.label === 'NRIC') {
-          return { ...item, value: unMaskedNRIC };
-        }
-        return item;
-      });
-
-      setItemizedData(newData);
-      setMasked(false);
-    } else {
-      const newData = itemizedData.map((item) => {
-        if (item.label === 'NRIC') {
-          return {
-            ...item,
-            value: unMaskedNRIC.replace(/\d{4}(\d{3})/, 'xxxx$1'),
-          };
-        }
-        return item;
-      });
-
-      setItemizedData(newData);
-      setMasked(true);
-    }
+    const newData = itemizedData.map((item) => {
+      if (item.label === 'NRIC') {
+        return {
+          ...item,
+          value: masked
+            ? unMaskedNRIC
+            : unMaskedNRIC.replace(/\d{4}(\d{3})/, 'xxxx$1'),
+        };
+      }
+      return item;
+    });
+    setItemizedData(newData);
+    setMasked(!masked);
   };
 
   useEffect(() => {
@@ -60,95 +47,111 @@ function InformationCard({
   }, [itemizedData, displayData]);
 
   return (
-    <View style={styles.cardContainer}>
-      <HStack>
-        <VStack>
-          <HStack style={styles.buttonContainer}>
-            {subtitle ? (
-              <Text style={[styles.TextContent, styles.subtitleText]}>
-                {subtitle}
+    <Box
+      bg={colors.white}
+      borderRadius={16}
+      shadow={2}
+      p={Platform.OS === 'web' ? 6 : 5}
+      mb={4}
+      style={styles.cardContainer}
+    >
+      {/* Title and Edit button */}
+      <HStack
+        alignItems="center"
+        justifyContent="space-between"
+        mb={subtitle ? 3 : 4}
+        px={1}
+        style={{ flexGrow: 1, flexShrink: 1 }}
+      >
+        {title && (
+          <View style={{ flex: 1, paddingRight: 12 }}>
+            <Text
+              numberOfLines={2}
+              ellipsizeMode="tail"
+              adjustsFontSizeToFit
+              minimumFontScale={0.9}
+              style={styles.titleText}
+            >
+              {title}
+            </Text>
+          </View>
+        )}
+        {handleOnPress && !subtitle && (
+          <AppButton title="EDIT" onPress={handleOnPress} color="green" />
+        )}
+      </HStack>
+
+
+      {subtitle && (
+        <HStack alignItems="center" justifyContent="space-between" mb={4}>
+          <Text style={styles.subtitleText}>{subtitle}</Text>
+          <AppButton title="EDIT" onPress={handleOnPress} color="green" />
+        </HStack>
+      )}
+
+      {/* Data rows */}
+      {itemizedData && itemizedData.length > 0 ? (
+        itemizedData.map((data, index) => (
+          <View key={index}>
+            <HStack
+              justifyContent="space-between"
+              alignItems="center"
+              py={2}
+              flexWrap="nowrap"
+            >
+              {/* Label */}
+              <Text
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={styles.fieldLabel}
+              >
+                {data?.label ?? '-'}
               </Text>
-            ) : null}
-            {subtitle ? (
-              <View style={{ marginLeft: 10 }}>
-                <AppButton title="EDIT" onPress={handleOnPress} color="green" />
-              </View>
-            ) : null}
-          </HStack>
-          {itemizedData.length !== 0 ? (
-            itemizedData.map((data, index) => (
-              <View style={styles.fieldContainer} key={index}>
-                <Text style={[styles.TextContent, styles.fieldLabel]}>
-                  {data === undefined ? 'undefined' : `${data.label}:  `}
-                </Text>
+
+              {/* Value + Eye icon */}
+              <HStack alignItems="center" flexShrink={1}>
                 <Text
-                  style={[styles.TextContent, styles.fieldValue]}
-                  key={index + 'text'}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={styles.fieldValue}
                 >
                   {data === undefined
-                    ? 'undefined' // formatting of data
-                    : data.value === 1
-                    ? 'Yes'
-                    : data.value === true
+                    ? 'undefined'
+                    : data.value === 1 || data.value === true
                     ? 'Yes'
                     : data.value === 0
                     ? 'No'
-                    : data.value === null
+                    : !data.value || data.value === 'null'
                     ? '-'
-                    : data.value === 'null'
-                    ? '-'
-                    : data.value === '-'
-                    ? '-'
-                    : data.label === 'DOB'
-                    ? `${formatDateTime(data.value, true)}`
-                    : data.label === 'Start Date'
-                    ? `${formatDateTime(data.value, true)}`
-                    : data.label === 'End Date'
-                    ? `${formatDateTime(data.value, true)}`
-                    : data.label === 'Date'
-                    ? `${formatDateTime(data.value, true)}`
-                    : `${data.value}`}
+                    : ['DOB', 'Start Date', 'End Date', 'Date'].includes(
+                        data.label
+                      )
+                    ? formatDateTime(data.value, true)
+                    : data.value}
                 </Text>
-                {data.label !== null &&
-                data.label === 'NRIC' &&
-                masked === true ? (
+
+                {data.label === 'NRIC' && (
                   <IconButton
                     _icon={{
                       as: MaterialCommunityIcons,
-                      name: 'eye-outline',
+                      name: masked ? 'eye-outline' : 'eye',
                     }}
-                    padding={0}
-                    onPress={() => handleUnmaskNRIC()}
+                    onPress={handleUnmaskNRIC}
+                    p={0}
+                    ml={1}
                   />
-                ) : data.label !== null &&
-                  data.label === 'NRIC' &&
-                  masked === false ? (
-                  <IconButton
-                    _icon={{
-                      as: MaterialCommunityIcons,
-                      name: 'eye',
-                    }}
-                    padding={0}
-                    onPress={() => handleUnmaskNRIC()}
-                  />
-                ) : null}
-              </View>
-            ))
-          ) : (
-            <View style={styles.fieldContainer}>
-              <Text style={[styles.TextContent, styles.fieldLabel]}>
-                Not available
-              </Text>
-            </View>
-          )}
-        </VStack>
-        {handleOnPress != null && title != null && subtitle == null ? (
-          <View style={styles.editButton}>
-            <AppButton title="EDIT" onPress={handleOnPress} color="green" />
+                )}
+              </HStack>
+            </HStack>
+            {index < itemizedData.length - 1 && (
+              <Divider my={1.5} bg={colors.grey_lighter} />
+            )}
           </View>
-        ) : null}
-      </HStack>
-    </View>
+        ))
+      ) : (
+        <Text color={colors.grey}>Not available</Text>
+      )}
+    </Box>
   );
 }
 
@@ -161,40 +164,28 @@ const styles = StyleSheet.create({
   cardContainer: {
     width: '100%',
   },
-  TextContent: {
-    fontFamily: typography.baseFontFamily,
-    marginTop: 10,
-    marginBottom: 10,
-    marginRight: 10,
-  },
   titleText: {
     ...typography.heading1,
+    fontWeight: 'bold',
     color: colors.black,
-    marginRight: 0,
+    flexShrink: 1,
   },
   subtitleText: {
-    ...typography.heading1,
+    ...typography.subheading1,
     fontWeight: 'bold',
+    color: colors.black,
   },
   fieldLabel: {
     ...typography.subheading1,
-    color: colors.grey,
     textTransform: 'uppercase',
+    color: colors.grey_dark,
+    flexBasis: '45%',
   },
   fieldValue: {
     ...typography.subheading1SemiBoldheading1,
-    maxWidth: '65%',
-  },
-  fieldContainer: {
-    flexDirection: 'row',
-  },
-  buttonContainer: {
-    w: '100%',
-  },
-  editButton: {
-    flexDirection: 'column',
-    justifyContent: 'flex-start',
-    marginLeft: 'auto',
+    color: colors.black,
+    textAlign: 'right',
+    flexShrink: 1,
   },
 });
 
