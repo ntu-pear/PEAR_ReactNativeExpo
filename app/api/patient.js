@@ -98,7 +98,7 @@ const deletePatientMedicationV1 = ({ patientID, patient_id, medicationID, medica
 
 // ---------- Allergy (v1) ----------
 const listPatientAllergiesV1 = async (patient_id) => {
-  const url = `/get_patient_allergy/${patient_id}`;
+  const url = `/api/v1/get_patient_allergy/${patient_id}`;
   const res = await client.get(url, {}, withPatientV1Base());
   if (!res.ok) console.log('[ALLERGY v1][GET]', url, res.status, res.data);
   return res;
@@ -114,7 +114,7 @@ const addPatientAllergyV1 = async (patient_id, data) => {
     allergy_remarks:
       data.AllergyRemarks ?? data.allergy_remarks ?? data.allergyRemarks ?? '',
   };
-  const url = `/create_patient_allergy`;
+  const url = `/api/v1/create_patient_allergy`;
   const res = await client.post(url, payload, withPatientV1Base());
   if (!res.ok) console.log('[ALLERGY v1][POST]', url, res.status, payload, res.data);
   return res;
@@ -129,18 +129,19 @@ const updatePatientAllergyV1 = async (patient_id, data) => {
     allergy_remarks:
       data.AllergyRemarks ?? data.allergy_remarks ?? data.allergyRemarks ?? '',
   };
-  const url = `/update_patient_allergy/${patient_id}`;
+  const url = `/api/v1/update_patient_allergy/${patient_id}`;
   const res = await client.put(url, payload, withPatientV1Base());
   if (!res.ok) console.log('[ALLERGY v1][PUT]', url, res.status, payload, res.data);
   return res;
 };
 
 const deletePatientAllergyV1 = async (patient_allergy_id) => {
-  const url = `/delete_patient_allergy/${patient_allergy_id}`;
+  const url = `/api/v1/delete_patient_allergy/${patient_allergy_id}`;
   const res = await client.delete(url, {}, withPatientV1Base());
   if (!res.ok) console.log('[ALLERGY v1][DELETE]', url, res.status, res.data);
   return res;
 };
+
 // ---------- Mobility (v1) ----------
 const listPatientMobilityAidsV1 = async (patient_id) => {
   const url = v1MobilityMapListByPatientEndpoint(patient_id);
