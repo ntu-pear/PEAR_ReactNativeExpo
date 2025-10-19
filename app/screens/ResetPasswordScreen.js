@@ -20,6 +20,7 @@ function ResetPasswordScreen(props) {
   const [dob, setDob] = useState(''); // optional: 'YYYY-MM-DD'
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
   const testID = 'reset_password_screen';
 
@@ -30,10 +31,39 @@ function ResetPasswordScreen(props) {
     role: Yup.string().required('Role is a required field.'),
     nric_DateOfBirth: Yup.string()
      .required('Date of Birth is required.')
-     .matches(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD'),
+     .matches(/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/, 'Use DD-MMM-YYYY (e.g., 05-Oct-2001)')
+    .test('valid-ui-dob', 'Invalid date', (val) => isValidUiDob(val || '')),
     // dob optional – add rules if your backend strictly validates format:
     // nric_DateOfBirth: Yup.string().matches(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD'),
     });
+
+    const isValidUiDob = (val) => {
+      if (!val) return false;
+      // Accept 1 or 2 digits for day, normalize later
+      const m = val.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/);
+      if (!m) return false;
+      let [_, d, monStr, y] = m;
+      const monIdx = MONTHS.findIndex(mn => mn.toLowerCase() === monStr.toLowerCase());
+      if (monIdx === -1) return false;
+    
+      const day = parseInt(d, 10);
+      const year = parseInt(y, 10);
+      // days in month w/ leap-year check
+      const daysInMonth = [31, (year%4===0 && (year%100!==0 || year%400===0)) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      return day >= 1 && day <= daysInMonth[monIdx];
+    };
+
+    // Convert "DD-MMM-YYYY" -> "YYYY-MM-DD"
+    const uiDobToIso = (val) => {
+      const m = val.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/);
+       if (!m) return undefined;
+      let [_, d, monStr, y] = m;
+      const monIdx = MONTHS.findIndex(mn => mn.toLowerCase() === monStr.toLowerCase());
+      if (monIdx === -1) return undefined;
+      const day = String(d).padStart(2, '0');
+      const month = String(monIdx + 1).padStart(2, '0');
+      return `${y}-${month}-${day}`;
+      }; 
 
     const validate = async () => {
       const formData = { nric, email, role, nric_DateOfBirth: dob };
@@ -60,18 +90,16 @@ function ResetPasswordScreen(props) {
     }
 
     setIsLoading(true);
-    const payload = {
+
+    const dobISO = uiDobToIso(dob); // convert UI format -> ISO for backend
+    const result = await userApi.requestResetPassword({
       nric: (nric || '').trim().toUpperCase(),
       email: (email || '').trim().toLowerCase(),
       roleName: (role || '').trim().toUpperCase(),
-      nric_DateOfBirth: dob,
-    };
-    const result = await userApi.requestResetPassword({
-      nric,
-      email,
-      roleName: role,
-      nric_DateOfBirth: dob || undefined,
-      });
+      // send ISO to backend; if conversion fails (shouldn’t after validation), omit it
+      nric_DateOfBirth: dobISO || undefined,
+    });
+    
 
       if (!result?.ok) {
         // Map FastAPI-style errors into a friendly message
@@ -155,7 +183,7 @@ function ResetPasswordScreen(props) {
       <Input
         value={dob}
         onChangeText={setDob}
-        placeholder="YYYY-MM-DD"
+        placeholder="DD-MMM-YYYY"
         borderRadius="25"
         height="50"
         px="4"

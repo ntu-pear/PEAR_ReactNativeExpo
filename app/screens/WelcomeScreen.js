@@ -92,7 +92,11 @@ function WelcomeScreen(props) {
     setIsLoading(true);
     setIsError(false);    
     
-    const result = await loginWithTimeout();
+    const result = await userApi.loginUser({
+      email: (username || '').trim().toLowerCase(),
+      role: userRole,
+      password,
+    });
 
     if(result && result.ok) {
       console.log('User authenticated - storing tokens...');
@@ -136,29 +140,7 @@ function WelcomeScreen(props) {
   
   // If user is not connected to NTU network, takes about 30 seconds for call to return
   // Instead timeout in 5 seconds
-  const loginWithTimeout = async() => {
-    const timeoutPromise = new Promise((resolve, reject) => {
-      setTimeout(() => {
-        reject(new Error('Request timed out. Ensure you are connected to the NTU network.'));
-      }, 5000);
-    });
 
-    const apiPromise = userApi.loginUser({
-      email: (username || '').trim().toLowerCase(),
-      role: userRole,
-      password,
-    });
-    
-    try {
-      const result = await Promise.race([apiPromise, timeoutPromise]);
-      return result;
-    } catch (error) {
-      console.log('Error:', error.message);
-      setIsLoading(false);
-      setIsError(true);
-      setErrorMsg(error.message);
-    }
-  }
 
   const handleUsernameError = useCallback(
     (state) => {
