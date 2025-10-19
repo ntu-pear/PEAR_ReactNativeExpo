@@ -13,20 +13,20 @@ const v1 = {
   requestReset: '/user/request_reset_password/',
   resetPassword: (token) => `/user/reset_user_password/${encodeURIComponent(token)}`,
   logout: '/logout/',
-  updateUser: '/user/update_user/',                 // NEW
-  uploadProfilePic: '/user/upload_profile_pic/',    // NEW
-  getProfilePic: '/user/profile_pic/',              // NEW
-  deleteProfilePic: '/user/delete_profile_pic/',    // NEW
-  rolesName: '/roles_name/',                        // NEW
-  resendRegistrationEmail: '/user/request/resend_registration_email', // NEW
-  requestOtp: '/request-otp/',                      // NEW
-  verifyOtp: '/verify-otp/',                        // NEW
+  updateUser: '/user/update_user/',                 
+  uploadProfilePic: '/user/upload_profile_pic/',   
+  getProfilePic: '/user/profile_pic/',              
+  deleteProfilePic: '/user/delete_profile_pic/',    
+  rolesName: '/roles_name/',                        
+  resendRegistrationEmail: '/user/request/resend_registration_email', 
+  requestOtp: '/request-otp/',                      
+  verifyOtp: '/verify-otp/',                        
 };
 
 // **********************  GET REQUESTS *************************
 
 // New service returns the current user's profile; userID is ignored now.
-const getUser = async (userID, maskNRIC = true) => {
+const getUser = async () => {
   const token = await authStorage.getToken('userAuthTokenV1');
   const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
   return client.get(v1.getUser, {}, { baseURL: V1_BASE, headers });
@@ -98,18 +98,16 @@ const resetPassword = (token, { newPassword, confirmPassword }) =>
 
 /* ======================= PUT / UPDATE ======================= */
 
-const changePassword = (Email /*unused*/, OldPassword, NewPassword) =>
+const changePassword = (OldPassword, NewPassword) =>
   client.put(
     v1.changePassword,
     { currentPassword: OldPassword, newPassword: NewPassword, confirmPassword: NewPassword },
     { baseURL: V1_BASE }
   );
 
-// New API for updateUser
+//API for updateUser
 const updateUserV1 = async (data) =>
   client.put(v1.updateUser, data, { baseURL: V1_BASE });
-
-const updateUser = async (data) => updateUserV1(data);
 
 // **********************  PROFILE PIC *************************
 
@@ -154,10 +152,6 @@ const logoutUser = async () => {
   } catch {}
   await authStorage.deleteToken?.('userAuthTokenV1');
   await authStorage.deleteToken?.('userRefreshTokenV1');
-  await authStorage.deleteToken?.('userAuthTokenLegacy');
-  await authStorage.deleteToken?.('userRefreshTokenLegacy');
-  await authStorage.deleteToken?.('userAuthToken');
-  await authStorage.deleteToken?.('userRefreshToken');
 };
 
 /*
