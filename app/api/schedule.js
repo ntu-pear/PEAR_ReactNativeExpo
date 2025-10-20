@@ -19,18 +19,15 @@ const schedulerClient = create({
 // Debug base URL
 console.log('🧭 Using Scheduler Base:', SCHEDULER_V1_BASE);
 
-// Attach Authorization header (JWT → Basic fallback for dev)
+// Attach Authorization header (JWT token only)
 schedulerClient.addAsyncRequestTransform(async (request) => {
   const jwtToken = await authStorage.getToken('userAuthTokenV1');
   if (jwtToken) {
     request.headers.Authorization = `Bearer ${jwtToken}`;
     console.log('🔑 Using JWT token for Scheduler');
-  } else {
-    const credentials = Buffer.from('jess@gmail.com:Supervisor!23').toString('base64');
-    request.headers.Authorization = `Basic ${credentials}`;
-    console.log('🧩 Using Basic Auth fallback for Scheduler');
   }
 });
+
 
 /*
  * Endpoints
