@@ -136,8 +136,8 @@ function PatientViewPhoto(props) {
 
   // Get photo data from backend
   const getPhotoData = async () => {
-    if (patientID) {
-      const response = await patientApi.getPatientPhoto(patientID);
+    if (photoID) {
+      const response = await patientApi.getPatientPhotoV1(photoID);
       if (response.ok) {
         console.log('response.data.data: ', response.data.data);
         setOriginalData(
@@ -231,9 +231,9 @@ function PatientViewPhoto(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.addPatientPhoto(patientID, tempPhotoData);
+    const result = await patientApi.addPatientPhotoV1(patientID, tempPhotoData);
     if (result.ok) {
-      console.log('submitting photo data', tempPhotoData);
+      console.log('Submitting photo data', tempPhotoData);
       refreshPhotoData();
       setIsModalVisible(false);
 
@@ -250,12 +250,13 @@ function PatientViewPhoto(props) {
     Alert.alert(alertTitle, alertDetails);
   };
 
-  const handleEditPhoto = (photoID) => {
+  const handleEditPhoto = (patientID) => {
     setIsModalVisible(true);
     setModalMode('edit');
 
-    // Find the photo data by photoID
-    const tempPhotoData = photoData.find((x) => x.patientPhotoID == photoID);
+    // Find the photo data by patientID
+    const tempPhotoData = photoData.find((x) => x.patientID == patientID);
+
 
     setFormData({
       PhotoDetails: tempPhotoData.photoDetails,
@@ -298,7 +299,7 @@ function PatientViewPhoto(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.updatePatientPhoto(patientID, tempFormData);
+    const result = await patientApi.updatePatientPhotoV1(patientID, tempFormData);
 
     if (result.ok) {
       refreshPhotoData();
@@ -319,9 +320,9 @@ function PatientViewPhoto(props) {
     Alert.alert(alertTitle, alertDetails);
   };
 
-  const handleDeletePhoto = (photoID) => {
-    // Find the photo data by photoID
-    const tempData = photoData.find((x) => x.patientPhotoID == photoID);
+  const handleDeletePhoto = (patientID) => {
+    // Find the photo data by patientID
+    const tempData = photoData.find((x) => x.patientID == patientID);
 
     Alert.alert(
       'Are you sure you wish to delete this photo?',
@@ -333,20 +334,20 @@ function PatientViewPhoto(props) {
           onPress: () => {},
           style: 'cancel',
         },
-        { text: 'OK', onPress: () => deletePhoto(photoID) },
+        { text: 'OK', onPress: () => deletePhoto(patientID) },
       ],
     );
   };
 
-  const deletePhoto = async (photoID) => {
+  const deletePhoto = async (patientID) => {
     setIsLoading(true);
 
-    let tempData = { patientPhotoID: photoID };
+    let tempData = { patientID: patientID };
 
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.deletePatientPhoto(tempData);
+    const result = await patientApi.deletePatientPhotoV1(tempData);
     if (result.ok) {
       await refreshPhotoData();
       setIsModalVisible(false);
@@ -368,10 +369,12 @@ function PatientViewPhoto(props) {
     if (!date) return 'Unknown';
     const parsedDate = new Date(date);
     const day = String(parsedDate.getDate()).padStart(2, '0');
-    const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const month = monthNames[parsedDate.getMonth()];
     const year = parsedDate.getFullYear();
 
-    return `${day}/${month}/${year}`;
+    return `${day}-${month}-${year}`;
   };
 
   return isLoading ? (
@@ -426,7 +429,7 @@ function PatientViewPhoto(props) {
           <View style={styles.buttonContainer}>
             <Button
               mode="outlined"
-              onPress={() => handleEditPhoto(photoData[0].patientPhotoID)}
+              onPress={() => handleEditPhoto(photoData[0].patientID)}
               style={[
                 styles.button,
                 { borderColor: colors.green, borderWidth: 2 },
@@ -438,7 +441,7 @@ function PatientViewPhoto(props) {
             </Button>
             <Button
               mode="outlined"
-              onPress={() => handleDeletePhoto(photoData[0].patientPhotoID)}
+              onPress={() => handleDeletePhoto(photoData[0].patientID)}
               style={[
                 styles.button,
                 { borderColor: colors.pink, borderWidth: 2 },
@@ -503,3 +506,4 @@ const styles = StyleSheet.create({
 });
 
 export default PatientViewPhoto;
+
