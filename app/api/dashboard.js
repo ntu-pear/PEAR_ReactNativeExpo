@@ -1,29 +1,40 @@
-/*eslint eslint-comments/no-unlimited-disable: error */
-import client from 'app/api/client';
+/* eslint eslint-comments/no-unlimited-disable: error */
+import scheduleApi from 'app/api/schedule';
 
 /*
- * List all end points here
- */
-const endpoint = '/Dashboard';
-
-/*
- * List all functions here
- * Refer to this api doc: https://github.com/infinitered/apisauce
+ * Dashboard API — wrapper around Scheduler v1
+ * The Dashboard screen displays weekly/daily patient schedules.
+ * This simply delegates calls to Scheduler Service v1 endpoints.
  */
 
-// **********************  GET REQUESTS *************************
+// ------------------- GET REQUESTS -------------------
 
-const getDashboard = async () => {
-  return await client.get(endpoint, {});
+// Fetch the weekly schedule for all patients (used in Dashboard & Patient Schedule)
+const getDashboardSchedule = async () => {
+  console.log('🧭 [Dashboard API] Fetching weekly patient schedule via Scheduler Service...');
+  const response = await scheduleApi.getPatientWeeklySchedule();
+
+  // Safely handle different response structures
+  const scheduleData = response.data?.data ?? response.data ?? [];
+
+  console.log(
+    '📦 [Dashboard API] Response status:',
+    response.status,
+    '| Schedule entries:',
+    Array.isArray(scheduleData) ? scheduleData.length : 'not an array'
+  );
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    data: scheduleData,
+  };
 };
 
-// **********************  POST REQUESTS *************************
+// ------------------- POST / UPDATE (future) -------------------
+// You can extend here if dashboard analytics or filters are handled server-side later.
 
-// ************************* UPDATE REQUESTS *************************
-
-/*
- * Expose your end points here
- */
+// ------------------- EXPORT -------------------
 export default {
-  getDashboard,
+  getDashboardSchedule,
 };
