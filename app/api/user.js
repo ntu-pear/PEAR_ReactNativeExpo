@@ -22,6 +22,9 @@ const v1 = {
   requestOtp: '/request-otp/',                      
   verifyOtp: '/verify-otp/',                        
 };
+const audit = (label, obj) => {
+  try { console.log(label, JSON.stringify(obj)); } catch { console.log(label, obj); }
+};
 
 // **********************  GET REQUESTS *************************
 
@@ -78,16 +81,34 @@ export const loginUser = async ({ email, role, password }) => {
 };
 
 /* Forgot password (request email with reset link) */
-const requestResetPassword = ({ nric, email, roleName, nric_DateOfBirth }) => {
-  const body = {
-    nric: (nric || '').trim().toUpperCase(),
-    email: (email || '').trim().toLowerCase(),
-    roleName: (roleName || '').trim().toUpperCase(),
+const requestResetPassword = async ({ nric, email, roleName, nric_DateOfBirth }) => {
+  const mkBody = (r) => {
+    const b = {
+      nric: (nric || '').trim().toUpperCase(),
+      email: (email || '').trim(),      // keep as stored
+      roleName: (r || '').trim(),       // send as selected
+    };
+    if (nric_DateOfBirth) b.nric_DateOfBirth = nric_DateOfBirth; // YYYY-MM-DD
+    return b;
   };
-  if (nric_DateOfBirth) body.nric_DateOfBirth = nric_DateOfBirth; // "YYYY-MM-DD"
-  return client.post(v1.requestReset, body, { baseURL: V1_BASE });
-};
 
+  // 1) try as-is
+  let body = mkBody(roleName);
+  console.log('[REQUEST RESET v1] →', V1_BASE + v1.requestReset, JSON.stringify(body));
+  let resp = await client.post(v1.requestReset, body, { baseURL: V1_BASE });
+  if (resp?.ok) return resp;
+
+  // 2) if "Invalid Details", retry once with UPPERCASE role (common enum strictness)
+  const msg = resp?.data?.detail || resp?.data?.message || '';
+  const isNotFound = typeof msg === 'string' && /invalid\s*details/i.test(msg);
+  if (isNotFound && roleName !== roleName.toUpperCase()) {
+    body = mkBody(roleName.toUpperCase()); // "SUPERVISOR"
+    console.log('[REQUEST RESET v1][retry role ↑] →', V1_BASE + v1.requestReset, JSON.stringify(body));
+    resp = await client.post(v1.requestReset, body, { baseURL: V1_BASE });
+  }
+
+  return resp;
+};
 // Set new password using token from email link
 const resetPassword = (token, { newPassword, confirmPassword }) =>
   client.put(

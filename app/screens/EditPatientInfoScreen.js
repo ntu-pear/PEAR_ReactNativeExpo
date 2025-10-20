@@ -9,7 +9,7 @@ import routes from 'app/navigation/routes';
 import colors from 'app/config/colors';
 
 // API (v1 direct)
-import client, { V1_BASE } from 'app/api/client';
+import client, { PATIENT_V1_BASE } from 'app/api/client';
 
 // Components
 import RadioButtonInput from 'app/components/input-components/RadioButtonsInput';
@@ -43,6 +43,11 @@ function EditPatientInfoScreen(props) {
     ]),
     );
   
+  
+    const looksMaskedNRIC = (v) => {
+      const s = (v ?? '').toString();
+      return /(x{2,}|\*{2,}|•{2,}|#{2,})/i.test(s);
+    };
     // Used for the RadioButtonInput dataArray prop -> follow format of "label" and "value"
   const [listOfRespiteCare, setListOfRespiteCare] = useState([
     { label: 'Yes', value: true },
@@ -53,11 +58,19 @@ function EditPatientInfoScreen(props) {
     const match = options?.find(o => (o.label ?? '').toLowerCase() === key);
     return match?.value ?? options?.[0]?.value ?? 1; // fallback to first option or 1
   };
-  const from01 = (v) => v === true || v === 1 || v === '1'; // "1"/1/true -> true, else false
-  const as01 = (v) => (v === true || v === 'Yes' || v === '1' ? '1' : '0'); // booleans -> "1"/"0"
-  const toIso = (d) => (d ? new Date(d).toISOString() : null);              // ensure ISO
+  //const from01 = (v) => v === true || v === 1 || v === '1'; // "1"/1/true -> true, else false
+  //const as01 = (v) => (v === true || v === 'Yes' || v === '1' ? '1' : '0'); 
+  const fromBoolish = (v) => v === true || v === 1 || v === '1' || v === 'true';// booleans -> "1"/"0"
+  const toStr = v => (v ?? '').toString().trim();
+  const toISO = d => (d ? new Date(d).toISOString().slice(0,10) : null);
+  const asBool01 = v => v === 1 || v === '1' || v === true;
   // Screen error state: This = true when the child components report error(input fields)
   // Enables use of dynamic rendering of components when the page error = true/false.
+  const toInt = (v, fallback = null) => {
+    if (v === undefined || v === null || v === '') return fallback;
+    const n = parseInt(String(v), 10);
+    return Number.isNaN(n) ? fallback : n;
+  };
   const [isInputErrors, setIsInputErrors] = useState(false);
 
   // Input error states (Child components)
@@ -91,8 +104,11 @@ function EditPatientInfoScreen(props) {
     HandphoneNo: patientProfile.handphoneNo != null && patientProfile.handphoneNo != 'null' ? patientProfile.handphoneNo : '',
     StartDate: patientProfile.startDate != null && patientProfile.startDate != 'null' ? patientProfile.startDate : null,
     EndDate: patientProfile.endDate != null && patientProfile.endDate != 'null' ? patientProfile.endDate : null,
-    IsRespiteCare: from01(patientProfile.isRespiteCare),
-    PrivacyLevel: patientProfile.privacyLevel != null && patientProfile.privacyLevel != 'null' ? patientProfile.privacyLevel : '',
+    IsRespiteCare: fromBoolish(patientProfile.isRespiteCare),
+    PrivacyLevel:
+  patientProfile.privacyLevel != null && patientProfile.privacyLevel !== 'null'
+    ? String(patientProfile.privacyLevel)
+    : '',
     UpdateBit: patientProfile.updateBit != null && patientProfile.updateBit != 'null' ? patientProfile.updateBit : '',
     AutoGame: patientProfile.autoGame != null && patientProfile.autoGame != 'null' ? patientProfile.autoGame : '',
     IsActive: patientProfile.isActive != null && patientProfile.isActive != 'null' ? patientProfile.isActive : '',
@@ -221,96 +237,155 @@ function EditPatientInfoScreen(props) {
     }
   };
 
+  const present = (v) => v !== undefined && v !== null && v !== '';
+  const as01 = (v) =>
+    (v === true || v === 1 || v === '1' || v === 'true') ? '1' : '0';
+
   const toPatientUpdatePayload = (f) => {
-    // IMPORTANT: your screen stores StartDate/EndDate as strings already (you set ISO in handleFormData).
-    // We'll still normalize to ISO to be safe.
-    const withPostal = (addr, pc) =>
-      pc && pc.length ? `${addr || ''} S(${pc})`.trim() : (addr ?? null);
+    const withPostal = (addr, pc) => {
+      const a = (addr ?? '').toString().trim();
+      const p = (pc ?? '').toString().trim();
+      if (!a && !p) return '';          // empty string means “clear”
+      return p ? `${a} S(${p})` : a;    // keep address even if postal is blank
+    };
+  
+    const fullName = [f.FirstName, f.LastName].filter(Boolean).join(' ').trim();
+    const safeName = fullName || (f.PreferredName ?? '').toString().trim();
+  
+    // helpers
+    const asBoolString = (v) => (v === true || v === 1 || v === '1' || v === 'true' ? 'true' : 'false');
+    const toInt = (v, fb = 0) => {
+      if (v === undefined || v === null || v === '') return fb;
+      const n = parseInt(String(v), 10);
+      return Number.isNaN(n) ? fb : n;
+    };
   
     return {
-      // required by PatientUpdate
-      name: [f.FirstName, f.LastName].filter(Boolean).join(' ').trim(),
+      // strings
+      name: safeName,
       nric: f.NRIC ?? '',
-      gender: f.Gender ?? '',                       // "M" or "F"
-      dateOfBirth: toIso(f.DOB),
-      isApproved: '0',
-      updateBit: '0',
-      autoGame: '0',
-      startDate: toIso(f.StartDate),
-      isActive: '1',
+      gender: f.Gender ?? '',
+  
+      // ISO datetimes
+      dateOfBirth: f.DOB ? new Date(f.DOB).toISOString() : null,
+      startDate:   f.StartDate ? new Date(f.StartDate).toISOString() : null,
+      endDate:     f.EndDate ? new Date(f.EndDate).toISOString() : null,    
+  
+      isActive:      as01(f.IsActive),       // "1" or "0"
       isRespiteCare: as01(f.IsRespiteCare),
-      
+  
+      // ints
       privacyLevel: toInt(f.PrivacyLevel, 0),
   
-      // optional / nullable fields
-      preferredName: f.PreferredName ?? null,
+      // optionals
+      preferredName:       f.PreferredName ?? null,
       preferredLanguageId: f.PreferredLanguageListID ?? 1,
-      endDate: toIso(f.EndDate),
-      address: withPostal(f.Address, f.PostalCode),             // v1 has no postalCode field
-      tempAddress: withPostal(f.TempAddress, f.TempPostalCode), // concat temp postal
-      homeNo: f.HomeNo ?? null,
+      address:     withPostal(f.Address, f.PostalCode),
+      tempAddress: withPostal(f.TempAddress, f.TempPostalCode),
+      homeNo:      f.HomeNo ?? null,
       handphoneNo: f.HandphoneNo ?? null,
       terminationReason: f.TerminationReason ?? null,
-      inActiveReason: f.InactiveReason ?? null,
-      inActiveDate: toIso(f.InactiveDate),
+      inActiveReason:    f.InactiveReason ?? null,
+      inActiveDate:      f.InactiveDate ? new Date(f.InactiveDate).toISOString() : null,
       profilePicture: null,
-      isDeleted: null,
+      isDeleted: '0',
   
-      // server requires these in v1 update
+      // meta (strings per your previous calls)
+      isApproved: '0',
+      updateBit:  '0',
+      autoGame:   '0',
       modifiedDate: new Date().toISOString(),
       ModifiedById: String(f.ModifiedById ?? '0'),
     };
   };
+  
+
+  useEffect(() => {
+    const looksMasked = v => !v || /[*xX]/.test(String(v));
+    if (!looksMasked(formData.NRIC)) return;
+  
+    let cancelled = false;
+    (async () => {
+      try {
+        const id = patientProfile?.patientID;
+        if (!id) return;
+        // if your backend supports mask=false, great; if not, remove the query
+        const res = await client.get(`${PATIENT_V1_BASE}/patients/${id}/?mask=false`, { require_auth: true });
+        if (!cancelled && res?.ok && res.data) {
+          const nric = res.data.nric ?? res.data.NRIC;
+          if (nric && !looksMasked(nric)) {
+            setFormData(prev => ({ ...prev, NRIC: nric }));
+          }
+        }
+      } catch (e) {
+        console.log('[Edit] v1 unmask NRIC failed:', e?.message || e);
+      }
+    })();
+  
+    return () => { cancelled = true; };
+  }, [patientProfile?.patientID, formData.NRIC]);// runs once per patient
   // form submission when save button is pressed
   const submitForm = async () => {
-    let tempFormData = {...formData};
-    let alertTitle = '';
-    let alertDetails = '';
-
-    // treat epoch or empty as null
-      if (
-        !tempFormData['EndDate'] ||
-        tempFormData['EndDate'] === '1970-01-01T00:00:00' ||
-        tempFormData['EndDate'] === '1970-01-01T00:00:00Z' ||
-        tempFormData['EndDate'] === '1970-01-01T00:00:000Z'
-      ) {
-        tempFormData['EndDate'] = null;
+    let tempFormData = { ...formData };
+  
+    // normalize EndDate
+    const isEpoch = (d) =>
+      !d ||
+      d === '1970-01-01T00:00:00' ||
+      d === '1970-01-01T00:00:00Z' ||
+      d === '1970-01-01T00:00:000Z';
+    if (isEpoch(tempFormData.EndDate)) tempFormData.EndDate = null;
+  
+    // date guard
+    if (
+      tempFormData.EndDate &&
+      tempFormData.StartDate &&
+      new Date(tempFormData.EndDate).getTime() < new Date(tempFormData.StartDate).getTime()
+    ) {
+      Alert.alert('Error in Editing Patient Information', 'Leave date cannot be earlier than join date!');
+      return;
+    }
+  
+    // (Optional) NRIC mask guard — remove if not needed on this screen
+    // const nricStr = (tempFormData.NRIC ?? '').toString();
+    // if (/(x{2,}|\*{2,}|•{2,}|#{2,})/i.test(nricStr)) {
+    //   Alert.alert('Invalid NRIC', 'The NRIC appears masked (e.g., Sxxxx443F). Please enter the full NRIC before saving.');
+    //   return;
+    // }
+  
+    // build payload & PUT
+    const payload = toPatientUpdatePayload(tempFormData);
+    console.log('[DEBUG] form Address/Postal ->', tempFormData.Address, tempFormData.PostalCode);
+    console.log('[DEBUG] payload.address ->', payload.address);
+    const url = `${PATIENT_V1_BASE}/patients/update/${tempFormData.PatientID}`;
+    console.log('[PUT] url=', url);
+    console.log('[PUT] payload=', JSON.stringify(payload));
+  
+    const result = await client.put(url, payload, { require_auth: true });
+    console.log('[PUT] status=', result.status, 'ok=', result.ok, 'data=', result.data);
+  
+    if (result.ok) {
+      Alert.alert('Saved Successfully', '');
+      navigation.goBack(routes.PATIENT_PROFILE, { navigation });
+    } else {
+      // unwrap common error shapes: string | {detail} | {message}
+      let msg = 'Please try again.';
+      const data = result.data;
+    
+      if (typeof data?.detail === 'string') {
+        msg = data.detail;
+      } else if (Array.isArray(data?.detail)) {
+        // join validation messages from pydantic/fastapi style errors
+        msg = data.detail.map(e => e.msg || JSON.stringify(e)).join('\n');
+      } else if (typeof data?.message === 'string') {
+        msg = data.message;
       }
     
-    else if(tempFormData['EndDate'] &&
-      tempFormData['StartDate'] &&
-      new Date(tempFormData['EndDate']).getTime() < new Date(tempFormData['StartDate']).getTime()
-    ) {
-      alertTitle = 'Error in Editing Patient Information';
-      alertDetails = 'Leave date cannot be earlier than join date!';
-      Alert.alert(alertTitle, alertDetails);
-
-      return null;
+      console.log('[PUT ERROR]', JSON.stringify(result));
+      Alert.alert('Error in Editing Patient Information', msg);
     }
-
-       // v1 PUT /patients/update/{patient_id}
-    const payload = toPatientUpdatePayload(tempFormData);
-    const url = `${V1_BASE}/patients/update/${tempFormData.PatientID}`;
-    const result = await client.put(url, payload, { require_auth: true });
-
-
-    if (result.ok) {
-      navigation.goBack(routes.PATIENT_PROFILE, {
-        navigation: navigation,
-      });
-      alertTitle = 'Saved Successfully';
-    } else {
-      const errors = result.data?.message;
-
-      result.data
-        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-        : (alertDetails = 'Please try again.');
-
-      alertTitle = 'Error in Editing Patient Information';
-      console.log('result error ' + JSON.stringify(result));
-    }
-    Alert.alert(alertTitle, alertDetails);
-    console.log('formData ' + JSON.stringify(formData));
+  
+    console.log('formData', JSON.stringify(formData));
   };
 
   return (
@@ -321,44 +396,43 @@ function EditPatientInfoScreen(props) {
           <Box w="100%">
             <VStack>
               <View style={styles.formContainer}>
-                <InputField
-                  isRequired
-                  title={'Address'}
-                  dataType="address"
-                  value={formData.Address}
-                  onChangeText={handleFormData('Address')}
-                  onEndEditing={handleAddrError}
-                />
-                
-                <InputField
-                  isRequired={formData.Address.length > 0}
-                  title={'Postal Code'}
-                  value={formData.PostalCode}
-                  onChangeText={handleFormData('PostalCode')}
-                  onEndEditing={handlePostalCodeError}
-                  dataType='postal code'
-                  keyboardType='numeric'
-                  maxLength={6}
+              <InputField
+              isRequired
+              title="Address"
+              dataType="address"
+              value={formData.Address}
+              onChangeText={(t) => handleFormData('Address')((t ?? '').toString())}
+              onEndEditing={handleAddrError}
+              />
+
+              <InputField
+              isRequired={formData.Address.length > 0}
+              title="Postal Code"
+              value={formData.PostalCode}
+              onChangeText={(t) => handleFormData('PostalCode')((t ?? '').toString())}
+              onEndEditing={handlePostalCodeError}
+              dataType="postal code"
+              keyboardType="numeric"
+               maxLength={6}
                 />
 
-                <InputField
-                  title={'Temporary Address'}
-                  value={formData.TempAddress}
-                  dataType="address"
-                  onChangeText={handleFormData('TempAddress')}
-                  onEndEditing={handleTempAddrError}
-                />
+              <InputField
+               title="Temporary Address"
+              value={formData.TempAddress}
+              dataType="address"
+              onChangeText={(t) => handleFormData('TempAddress')((t ?? '').toString())}
+               onEndEditing={handleTempAddrError}
+              />
 
-                <InputField
-                  //isRequired={formData.TempAddress ? formData.TempAddress.length > 0 : false}
-                  title={'Temporary Postal Code'}
-                  value={formData.TempPostalCode}
-                  onChangeText={handleFormData('TempPostalCode')}
-                  onEndEditing={handleTempPostalCodeError}
-                  dataType='postal code'
-                  keyboardType='numeric'
-                  maxLength={6}
-                />
+              <InputField
+              title="Temporary Postal Code"
+              value={formData.TempPostalCode}
+              onChangeText={(t) => handleFormData('TempPostalCode')((t ?? '').toString())}
+               onEndEditing={handleTempPostalCodeError}
+              dataType="postal code"
+              keyboardType="numeric"
+              maxLength={6}
+                  />
 
                 <InputField
                   title={'Home Telephone No.'}

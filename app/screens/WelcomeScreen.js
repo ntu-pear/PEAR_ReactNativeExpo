@@ -200,24 +200,7 @@ function WelcomeScreen(props) {
                   }
                 />
               </View>
-              <View style={styles.inputContainer}>
-                <SelectionInputField
-                  testID="role"
-                  isRequired
-                  showTitle={false}
-                  title="Select Role"
-                  inputLeftElement={
-                    <Icon
-                      as={<MaterialIcons name="settings" />}
-                      size={5}
-                      ml="5"
-                    />
-                  }
-                  placeholder="Supervisor"
-                  onDataChange={(e)=>setUserRole(listOfUserRoles[e-1].label)}
-                  dataArray={listOfUserRoles}
-                />
-              </View>
+              
               <View style={styles.inputContainer}>
                 <SensitiveInputField
                   testID="password"
