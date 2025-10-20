@@ -158,13 +158,10 @@ function PatientScheduleScreen(props) {
     promiseFunction();
   };
 
-// Fetch schedule from Scheduler v1 with debug and safe guards
+// Fetch schedule from Scheduler v1 
 const getSchedule = async () => {
   try {
-    console.log('Fetching schedule via Scheduler v1');
     const response = await scheduleApi.getPatientWeeklySchedule();
-    console.log(' scheduleApi.getPatientWeeklySchedule() response:', response);
-
     if (response && response.ok && response.data) {
       const scheduleData = response.data.Data || response.data.data || [];
       console.log('Schedule data received:', scheduleData);
@@ -201,16 +198,13 @@ const getSchedule = async () => {
   }
 };
 
-// ✅ Get patient info from Patient Service first, then fetch schedule
+// Get patient info from Patient Service first, then fetch schedule
 const getPatientData = async () => {
   try {
     if (patientID) {
-      console.log('👤 Fetching patient info for ID:', patientID);
       const response = await patientApi.getPatient(patientID);
-      console.log('🧠 patientApi.getPatient response:', response);
 
       if (response && response.ok) {
-        console.log('✅ Patient info retrieved:', response.data);
         const raw = response.data.data;
         setPatientInfo({
           firstName: raw.FirstName || raw.first_name || '',
@@ -221,15 +215,12 @@ const getPatientData = async () => {
         });
 
 
-        console.log('Now fetching schedule...');
         const scheduleResponse = await getSchedule();
-        console.log(' getSchedule() returned:', scheduleResponse);
 
         setIsError(false);
         setIsRetry(false);
         setStatusCode(response.status);
       } else {
-        console.log('Failed to fetch patient info:', response?.status);
         setPatientInfo({});
         setIsError(true);
         setStatusCode(response?.status);
@@ -237,7 +228,6 @@ const getPatientData = async () => {
       }
     }
   } catch (error) {
-    console.log('🔥 Exception in getPatientData:', error);
     setIsError(true);
     setIsRetry(true);
   }
