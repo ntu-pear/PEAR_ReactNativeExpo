@@ -141,7 +141,7 @@ function PatientPhotoAlbum(props) {
   // Get photo data from backend
   const getPhotoData = async () => {
     if (patientID) {
-      const response = await patientApi.getPatientPhoto(patientID);
+      const response = await patientApi.getPatientPhotoV1(photoID);
       if (response.ok) {
         const photoCount = countPhotosByAlbum([...response.data.data]);
         setPhotoCount(photoCount);
