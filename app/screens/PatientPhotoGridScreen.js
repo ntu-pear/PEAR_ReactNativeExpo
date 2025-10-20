@@ -161,7 +161,7 @@ function PatientPhotoGrid(props) {
   // Get photo data from backend
   const getPhotoData = async () => {
     if (patientID) {
-      const response = await patientApi.getPatientPhoto(patientID);
+      const response = await patientApi.getPatientPhotoV1(photoID);
       if (response.ok) {
         console.log(
           'parsed response.data.data: ',
@@ -275,7 +275,7 @@ function PatientPhotoGrid(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.addPatientPhoto(patientID, tempPhotoData);
+    const result = await patientApi.addPatientPhotoV1(patientID, tempPhotoData);
     if (result.ok) {
       console.log('submitting photo data', tempPhotoData);
       refreshPhotoData();
@@ -297,12 +297,12 @@ function PatientPhotoGrid(props) {
     Alert.alert(alertTitle, alertDetails);
   };
 
-  const handleEditPhoto = (photoID) => {
+  const handleEditPhoto = (patientID) => {
     setIsModalVisible(true);
     setModalMode('edit');
 
-    // Find the photo data by photoID
-    const tempPhotoData = photoData.find((x) => x.patientPhotoID == photoID);
+    // Find the photo data by patientID
+    const tempPhotoData = photoData.find((x) => x.patientID == patientID);
 
     setFormData({
       PhotoDetails: tempPhotoData.photoDetails,
@@ -344,7 +344,7 @@ function PatientPhotoGrid(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.updatePatientPhoto(patientID, tempFormData);
+    const result = await patientApi.updatePatientPhotoV1(patientID, tempFormData);
 
     console.log('Update result:', result);
 
@@ -367,9 +367,9 @@ function PatientPhotoGrid(props) {
     Alert.alert(alertTitle, alertDetails);
   };
 
-  const handleDeletePhoto = (photoID) => {
-    // Find the photo data by photoID
-    const tempData = photoData.find((x) => x.patientPhotoID == photoID);
+  const handleDeletePhoto = (patientID) => {
+    // Find the photo data by patientID
+    const tempData = photoData.find((x) => x.patientID == patientID);
 
     Alert.alert(
       'Are you sure you wish to delete this photo?',
@@ -381,21 +381,21 @@ function PatientPhotoGrid(props) {
           onPress: () => {},
           style: 'cancel',
         },
-        { text: 'OK', onPress: () => deletePhoto(photoID) },
+        { text: 'OK', onPress: () => deletePhoto(patientID) },
       ],
     );
   };
 
   // Delete photo
-  const deletePhoto = async (photoID) => {
+  const deletePhoto = async (patientID) => {
     setIsLoading(true);
 
-    let tempData = { patientPhotoID: photoID };
+    let tempData = { patientID: patientID };
 
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.deletePatientPhoto(tempData);
+    const result = await patientApi.deletePatientPhotoV1(tempData);
     if (result.ok) {
       refreshPhotoData();
       setIsModalVisible(false);
@@ -510,8 +510,8 @@ function PatientPhotoGrid(props) {
                     patientID={item.patientID}
                     numPhotos={photoData.length}
                     initialIndex={index}
-                    onDelete={() => handleDeletePhoto(item.patientPhotoID)}
-                    onEdit={() => handleEditPhoto(item.patientPhotoID)}
+                    onDelete={() => handleDeletePhoto(item.patientID)}
+                    onEdit={() => handleEditPhoto(item.patientID)}
                     handleOnPress={onClickPhoto}
                   />
                 </TouchableOpacity>
