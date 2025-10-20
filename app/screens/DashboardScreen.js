@@ -191,15 +191,6 @@ function DashboardScreen({ navigation }) {
     }, [])
   );
 
-  // // Refresh schedule when screen comes into focus
-  // useFocusEffect(
-  //   React.useCallback(() => {
-  //     const today = new Date();
-  //     setSelectedDate(today);
-  //     refreshSchedule();
-  //     setScheduleXOffset(tempOffset);
-  //   }, [])
-  // );
 
   // Refresh schedule from backend when user switches between 'My Patients' and 'All Patients'
   useEffect(() => {
@@ -306,21 +297,13 @@ function DashboardScreen({ navigation }) {
   };
 
 
-  
-
- // ✅ Fetch schedule for all patients from Scheduler v1 (using PatientScheduleScreen logic)
+ // Fetch schedule for all patients from Scheduler v1 
 const getSchedule = async (tempPatientInfo = patientInfo) => {
   try {
-    console.log('📅 [Dashboard] Fetching schedule via Scheduler v1...');
     const response = await scheduleApi.getPatientWeeklySchedule();
-    console.log('🧠 [Dashboard] scheduleApi.getPatientWeeklySchedule() response:', response);
-
     if (response && response.ok && response.data) {
       const scheduleData = response.data.Data || response.data.data || [];
-      console.log('✅ [Dashboard] Schedule data received:', scheduleData.length);
-
       if (!Array.isArray(scheduleData) || scheduleData.length === 0) {
-        console.log('⚠️ [Dashboard] No schedule data returned from server');
         setOriginalScheduleWeekly({});
         setOriginalSchedule([]);
         setSchedule([]);
@@ -336,7 +319,7 @@ const getSchedule = async (tempPatientInfo = patientInfo) => {
       setIsRetry(false);
       setStatusCode(response.status);
     } else {
-      console.log('❌ [Dashboard] Schedule fetch failed:', response?.problem || response?.status);
+      console.log('[Dashboard] Schedule fetch failed:', response?.problem || response?.status);
       setOriginalScheduleWeekly({});
       setOriginalSchedule([]);
       setSchedule([]);
@@ -345,7 +328,7 @@ const getSchedule = async (tempPatientInfo = patientInfo) => {
       setStatusCode(response?.status);
     }
   } catch (error) {
-    console.log('🔥 [Dashboard] Exception in getSchedule:', error);
+    console.log('[Dashboard] Exception in getSchedule:', error);
     setIsError(true);
     setIsRetry(true);
   } finally {
@@ -353,7 +336,7 @@ const getSchedule = async (tempPatientInfo = patientInfo) => {
   }
 };
 
-// ✅ Parse weekly schedule — only include patients who actually have scheduled activities
+//  Parse weekly schedule 
 const parseScheduleData = ({ tempPatientInfo, tempSchedule }) => {
   if (!tempSchedule || tempSchedule.length === 0) {
     console.log('⚠️ [Dashboard] Empty schedule data');
@@ -420,16 +403,16 @@ const parseScheduleData = ({ tempPatientInfo, tempSchedule }) => {
     }
 
     if (!hasAnyActivity) {
-      console.log(`⚠️ [Dashboard] Skipping patient ${patientData.firstName} — no valid schedule`);
+      console.log(`[Dashboard] Skipping patient ${patientData.firstName} — no valid schedule`);
     }
   });
 
-  console.log('✅ [Dashboard] Parsed schedule dates:', Object.keys(tempScheduleWeekly));
+  console.log(' [Dashboard] Parsed schedule dates:', Object.keys(tempScheduleWeekly));
   setOriginalScheduleWeekly(tempScheduleWeekly);
   updateSchedule({ tempScheduleWeekly });
 };
 
-// ✅ Safe updateSchedule using ISO key
+//  Safe updateSchedule using ISO key
 const updateSchedule = ({
   tempScheduleWeekly = originalScheduleWeekly,
   tempSelectedDate = selectedDate,
@@ -444,15 +427,15 @@ const updateSchedule = ({
 
     const currentDate = tempSelectedDate.toISOString().split('T')[0];
     const dailySchedule = tempScheduleWeekly[currentDate] ?? [];
-    console.log('🧾 [Dashboard] All available dates:', Object.keys(tempScheduleWeekly));
-    console.log('🧩 [Dashboard] Selected date key:', currentDate);
-    console.log('🧠 [Dashboard] tempScheduleWeekly:', JSON.stringify(tempScheduleWeekly, null, 2).substring(0, 800));
-    console.log('📅 [Dashboard] Updating schedule for', currentDate, '| Items:', dailySchedule.length);
+    console.log(' Dashboard] All available dates:', Object.keys(tempScheduleWeekly));
+    console.log('[Dashboard] Selected date key:', currentDate);
+    console.log('[Dashboard] tempScheduleWeekly:', JSON.stringify(tempScheduleWeekly, null, 2).substring(0, 800));
+    console.log('[Dashboard] Updating schedule for', currentDate, '| Items:', dailySchedule.length);
 
     setOriginalSchedule([...dailySchedule]);
     setSchedule([...dailySchedule]);
   } catch (error) {
-    console.error('❌ Error updating schedule:', error);
+    console.error('Error updating schedule:', error);
     Alert.alert('Error', 'There was an error updating the schedule. Please try again later.', [{ text: 'OK' }]);
   }
 };
