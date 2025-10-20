@@ -136,7 +136,7 @@ function PatientScheduleScreen(props) {
   useEffect(() => {
     const checkToken = async () => {
       const token = await authStorage.getToken('userAuthTokenV1');
-      console.log('🧩 JWT Token:', token);
+      console.log('JWT Token:', token);
     };
     checkToken();
   }, []);
@@ -158,19 +158,19 @@ function PatientScheduleScreen(props) {
     promiseFunction();
   };
 
-// ✅ Fetch schedule from Scheduler v1 with debug and safe guards
+// Fetch schedule from Scheduler v1 with debug and safe guards
 const getSchedule = async () => {
   try {
-    console.log('📅 Fetching schedule via Scheduler v1');
+    console.log('Fetching schedule via Scheduler v1');
     const response = await scheduleApi.getPatientWeeklySchedule();
-    console.log('🧠 scheduleApi.getPatientWeeklySchedule() response:', response);
+    console.log(' scheduleApi.getPatientWeeklySchedule() response:', response);
 
     if (response && response.ok && response.data) {
       const scheduleData = response.data.Data || response.data.data || [];
-      console.log('✅ Schedule data received:', scheduleData);
+      console.log('Schedule data received:', scheduleData);
 
       if (!Array.isArray(scheduleData) || scheduleData.length === 0) {
-        console.log('⚠️ No schedule data returned from server');
+        console.log(' No schedule data returned from server');
         setOriginalScheduleWeekly([]);
         setScheduleWeekly([]);
         return;
@@ -221,15 +221,15 @@ const getPatientData = async () => {
         });
 
 
-        console.log('📅 Now fetching schedule...');
+        console.log('Now fetching schedule...');
         const scheduleResponse = await getSchedule();
-        console.log('🧩 getSchedule() returned:', scheduleResponse);
+        console.log(' getSchedule() returned:', scheduleResponse);
 
         setIsError(false);
         setIsRetry(false);
         setStatusCode(response.status);
       } else {
-        console.log('❌ Failed to fetch patient info:', response?.status);
+        console.log('Failed to fetch patient info:', response?.status);
         setPatientInfo({});
         setIsError(true);
         setStatusCode(response?.status);
@@ -244,18 +244,29 @@ const getPatientData = async () => {
 };
 
 const parseScheduleData = ({ tempPatientInfo, tempSchedule }) => {
-  if (!tempSchedule || tempSchedule.length === 0 || !tempSchedule[0]) {
-    console.log('⚠️ Empty or invalid schedule data:', tempSchedule);
-    setOriginalScheduleWeekly([]);
-    setScheduleWeekly([]);
-    return;
-  }
-  
   if (!tempSchedule || tempSchedule.length === 0) {
+    console.log('Empty or invalid schedule data:', tempSchedule);
     setOriginalScheduleWeekly([]);
     setScheduleWeekly([]);
     return;
   }
+
+  // Find the correct schedule entry for this patient
+  const matchedSchedule = tempSchedule.find(
+    (s) =>
+      s.PatientID === patientID ||
+      s.PatientID === tempPatientInfo?.id ||
+      s.PatientID === tempPatientInfo?.patientID
+  );
+
+  if (!matchedSchedule) {
+    console.log(`No schedule found for patient ID ${patientID}`);
+    setOriginalScheduleWeekly([]);
+    setScheduleWeekly([]);
+    return;
+  }
+
+  console.log(`Found schedule for patient ${matchedSchedule.Name} (ID ${matchedSchedule.PatientID})`);
 
   const daysOfWeek = [
     'Monday',
@@ -268,16 +279,16 @@ const parseScheduleData = ({ tempPatientInfo, tempSchedule }) => {
   ];
 
   let tempScheduleWeekly = [];
-  let scheduleDate = new Date(tempSchedule[0]['StartDate']);
+  let scheduleDate = new Date(matchedSchedule['StartDate']);
 
   for (let j = 0; j < daysOfWeek.length; j++) {
     const day = daysOfWeek[j];
-    const dailyActivities = tempSchedule[0][day] || '';
+    const dailyActivities = matchedSchedule[day] || '';
 
     const patientDailySchedule = {
-      patientID: tempSchedule[0]['PatientID'],
-      patientName: tempSchedule[0]['Name'],
-      patientStartDate: tempSchedule[0]['StartDate'],
+      patientID: matchedSchedule['PatientID'],
+      patientName: matchedSchedule['Name'],
+      patientStartDate: matchedSchedule['StartDate'],
       patientFullName:
         (tempPatientInfo['firstName'] || '') +
         ' ' +
@@ -288,8 +299,8 @@ const parseScheduleData = ({ tempPatientInfo, tempSchedule }) => {
       activities: parseScheduleString(
         dailyActivities,
         scheduleDate,
-        tempSchedule[0]['PatientID'],
-        tempSchedule[0]['Name']
+        matchedSchedule['PatientID'],
+        matchedSchedule['Name']
       ),
       date: new Date(scheduleDate),
     };
@@ -298,7 +309,7 @@ const parseScheduleData = ({ tempPatientInfo, tempSchedule }) => {
     tempScheduleWeekly.push(patientDailySchedule);
   }
 
-  console.log('✅ Parsed weekly schedule:', tempScheduleWeekly);
+  console.log('Parsed weekly schedule:', tempScheduleWeekly);
   setOriginalScheduleWeekly(tempScheduleWeekly);
   setScheduleWeekly(tempScheduleWeekly);
 };
