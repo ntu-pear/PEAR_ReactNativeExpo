@@ -78,8 +78,19 @@ function PatientProfileScreen(props) {
     'DateOfBirth',
   ];
 
-  const getPatientIdFromParams = (p = {}) =>
-    p.patientId ?? p.patientID ?? p.PatientID ?? p.PatientId ?? p.id ?? null;
+  const getPatientIdFromParams = (p = {}) => {
+    // direct
+    const direct =
+      p.patientId ?? p.patientID ?? p.PatientID ?? p.PatientId ?? p.id ?? null;
+  
+    if (direct) return direct;
+  
+    // nested in patientProfile
+    const prof = p.patientProfile || {};
+    return (
+      prof.patientID ?? prof.patientId ?? prof.PatientID ?? prof.id ?? null
+    );
+  };
 
   const ensurePatientId = React.useCallback(() => {
     const pid = getPatientIdFromParams(route?.params || {});
@@ -152,6 +163,17 @@ function PatientProfileScreen(props) {
         const last = pickFirstFrom(p, ['last_name', 'lastName', 'family_name', 'familyName', 'surname']);
         const fullRaw = pickFirstFrom(p, ['name', 'full_name', 'fullName', 'display_name', 'displayName']);
         const full = (nonEmpty(first) && nonEmpty(last)) ? `${first} ${last}`.trim() : fullRaw;
+        // Fallback: derive first/last from preferred or full name if API didn't provide them
+        let firstFinal = nonEmpty(first);
+        let lastFinal  = nonEmpty(last);
+
+        const baseName = nonEmpty(preferred) || nonEmpty(full); // prefer PreferredName, else FullName
+        if (!firstFinal && !lastFinal && baseName) {
+        const parts = baseName.split(/\s+/).filter(Boolean);
+        firstFinal = parts[0] || '';
+        lastFinal  = parts.length > 1 ? parts.slice(1).join(' ') : '';
+        }
+
 
         const preferred = nonEmpty(
           pickFirstFrom(p, ['preferredName', 'preferred_name', 'nickname', 'nick_name', 'short_name'])
@@ -186,18 +208,74 @@ function PatientProfileScreen(props) {
           p.dateOfBirth || p.DateOfBirth || p.dob || p.date_of_birth || p.birth_date || p.birthDate
         );
 
+        // Address + Postal normalisation
+        const fullAddressRaw = pickFirstFrom(p, [ 'address', 'Address', 'home_address', 'homeAddress', 'residential_address']);
+        const postalRaw = pickFirstFrom(p, [ 'postal_code', 'postalCode', 'postal', 'zip', 'zipCode']);
+
+        let Address = nonEmpty(fullAddressRaw);
+        let PostalCode = nonEmpty(postalRaw);
+
+        // If postal is missing but address ends with a 6-digit code (optionally prefixed by S)
+        // Handles: "… 123456", "… S123456", "… S 123456", "… S(123456)".
+        if (!PostalCode && Address) {
+        const tail = Address.match(/(?:\bS\s*\(?\s*)?(\d{6})\)?\s*$/i);
+        if (tail) {
+          PostalCode = tail[1];
+        // Remove the matched S(123456)/S 123456/123456 from the end of the address
+        Address = Address.replace(/(?:\bS\s*\(?\s*)?\d{6}\)?\s*$/i, '').trim();
+        }
+        }
+
+        const toBool01 = (v) => v === true || v === 1 || v === '1' || v === 'true';
+
+        // TEMP Address + Postal normalisation (v1 → UI)
+      const fullTempAddrRaw = pickFirstFrom(p, [ 'tempAddress', 'TempAddress', 'temporary_address', 'temp_address']);
+      const tempPostalRaw = pickFirstFrom(p, ['temp_postal_code', 'tempPostalCode', 'TempPostalCode']);
+
+      let TempAddress = (fullTempAddrRaw ?? '').toString().trim();
+      let TempPostalCode = (tempPostalRaw ?? '').toString().trim();
+
+      // If temp postal missing but TempAddress ends with postal, extract it.
+      // Handles "… 123456", "… S123456", "… S 123456", "… S(123456)"
+      if (!TempPostalCode && TempAddress) {
+      const t = TempAddress.match(/(?:\bS\s*\(?\s*)?(\d{6})\)?\s*$/i);
+      if (t) {
+        TempPostalCode = t[1];
+        TempAddress = TempAddress.replace(/(?:\bS\s*\(?\s*)?\d{6}\)?\s*$/i, '').trim();
+       }
+        }
+
+      // Home telephone
+      const HomeNo = toStr(
+      pickFirstFrom(p, ['homeNo', 'home_number', 'homeNumber', 'HomeNo'])
+      );
+
         ui = {
           patientID: p.patient_id || p.id || p.patientID || id,
 
           // names
-          firstName: first,
-          FirstName: first,
-          lastName: last,
-          LastName: last,
+          firstName: firstFinal,
+          FirstName: firstFinal,
+          lastName: lastFinal,
+          LastName: lastFinal,
           fullName: nonEmpty(full),
           FullName: nonEmpty(full),
           preferredName: preferred,
           PreferredName: preferred,
+          Address,
+          address: Address,
+          PostalCode,
+          postalCode: PostalCode,
+
+          // Temporary
+          TempAddress,
+           tempAddress: TempAddress,
+          TempPostalCode,
+          tempPostalCode: TempPostalCode,
+
+          // Home phone
+          HomeNo,
+          homeNo: HomeNo,
 
           // identifiers & contact
           nric: toStr(nric),
@@ -215,7 +293,11 @@ function PatientProfileScreen(props) {
           profilePicture: picture, // Will be either URL or default placeholder
           isActive: (typeof p.isActive === 'boolean') ? p.isActive : (p.isActive === '1' || p.isActive === 1 || p.is_active === true),
           startDate: p.startDate || p.start_date || null,
+          isRespiteCare: toBool01(p.isRespiteCare ?? p.IsRespiteCare ?? p.respite_care),
+          IsRespiteCare: toBool01(p.isRespiteCare ?? p.IsRespiteCare ?? p.respite_care),
         };
+
+        console.log('[PROFILE V1 UI TEMP]', { tempAddress: ui.tempAddress, tempPostalCode: ui.tempPostalCode, homeNo: ui.homeNo });
 
         const missingKey =
           !nonEmpty(ui.PreferredName) ||

@@ -62,8 +62,38 @@ function EditPatientInfoScreen(props) {
   //const as01 = (v) => (v === true || v === 'Yes' || v === '1' ? '1' : '0'); 
   const fromBoolish = (v) => v === true || v === 1 || v === '1' || v === 'true';// booleans -> "1"/"0"
   const toStr = v => (v ?? '').toString().trim();
+  const toISOd = d => (d ? new Date(d).toISOString().slice(0, 10) : null); // <-- this was missing
   const toISO = d => (d ? new Date(d).toISOString().slice(0,10) : null);
   const asBool01 = v => v === 1 || v === '1' || v === true;
+
+  function normalizePatientV1(p = {}) {
+    return {
+      patientID: p.id ?? p.patientID ?? null,
+      fullName:  toStr(p.name),
+      firstName: toStr(p.firstName),
+      lastName:  toStr(p.lastName),
+      preferredName: toStr(p.preferredName),
+  
+      nric:   toStr(p.nric),
+      gender: toStr(p.gender),
+      dob:    toISOd(p.dateOfBirth),
+      DateOfBirth: toISOd(p.dateOfBirth),
+  
+      address:     toStr(p.address),
+      tempAddress: toStr(p.tempAddress),
+      homeNo:      toStr(p.homeNo),
+      handphoneNo: toStr(p.handphoneNo),
+  
+      startDate: p.startDate ?? null,
+      endDate:   p.endDate ?? null,
+  
+      isActive:      asBool01(p.isActive),
+      isRespiteCare: asBool01(p.isRespiteCare),
+      preferredLanguage: toStr(p.preferredLanguageId ?? p.preferredLanguage),
+      privacyLevel: p.privacyLevel ?? '',
+      profilePicture: p.profilePicture ?? null,
+    };
+  }
   // Screen error state: This = true when the child components report error(input fields)
   // Enables use of dynamic rendering of components when the page error = true/false.
   const toInt = (v, fallback = null) => {
@@ -280,9 +310,13 @@ function EditPatientInfoScreen(props) {
       // optionals
       preferredName:       f.PreferredName ?? null,
       preferredLanguageId: f.PreferredLanguageListID ?? 1,
-      address:     withPostal(f.Address, f.PostalCode),
-      tempAddress: withPostal(f.TempAddress, f.TempPostalCode),
-      homeNo:      f.HomeNo ?? null,
+      address:       (f.Address && f.PostalCode)
+                  ? `${toStr(f.Address)} S(${toStr(f.PostalCode)})`
+                  : (toStr(f.Address) || undefined),
+      tempAddress:   (f.TempAddress && f.TempPostalCode)
+                  ? `${toStr(f.TempAddress)} S(${toStr(f.TempPostalCode)})`
+                  : (toStr(f.TempAddress) || undefined),
+      homeNo:        toStr(f.HomeNo || ''),  // omit later if empty via your prune step
       handphoneNo: f.HandphoneNo ?? null,
       terminationReason: f.TerminationReason ?? null,
       inActiveReason:    f.InactiveReason ?? null,
@@ -362,28 +396,36 @@ function EditPatientInfoScreen(props) {
     console.log('[PUT] payload=', JSON.stringify(payload));
   
     const result = await client.put(url, payload, { require_auth: true });
+    console.log('[DEBUG] TEMP form ->', formData.TempAddress, formData.TempPostalCode, formData.HomeNo);
+    console.log('[DEBUG] payload.tempAddress/homeNo ->', payload.tempAddress, payload.homeNo);
     console.log('[PUT] status=', result.status, 'ok=', result.ok, 'data=', result.data);
   
     if (result.ok) {
-      Alert.alert('Saved Successfully', '');
-      navigation.goBack(routes.PATIENT_PROFILE, { navigation });
+       // Refetch the just-updated patient from v1
+      const res = await client.get(
+       `${PATIENT_V1_BASE}/patients/${tempFormData.PatientID}/`,
+        { require_auth: true }
+      );
+
+  // If we got it, normalize and replace the screen with the fresh data
+      if (res?.ok && res.data) {
+        const updated = normalizePatientV1(res.data);
+     navigation.replace(routes.PATIENT_PROFILE, {
+      patientId: updated.patientID ?? tempFormData.PatientID, // ✅ ensure id is present
+      patientProfile: updated,
+      // optional flag your teammate can use to skip their own fetch
+      skipFetch: true,
+    });
     } else {
-      // unwrap common error shapes: string | {detail} | {message}
-      let msg = 'Please try again.';
-      const data = result.data;
-    
-      if (typeof data?.detail === 'string') {
-        msg = data.detail;
-      } else if (Array.isArray(data?.detail)) {
-        // join validation messages from pydantic/fastapi style errors
-        msg = data.detail.map(e => e.msg || JSON.stringify(e)).join('\n');
-      } else if (typeof data?.message === 'string') {
-        msg = data.message;
-      }
-    
-      console.log('[PUT ERROR]', JSON.stringify(result));
-      Alert.alert('Error in Editing Patient Information', msg);
+    // fallback to current behavior
+      navigation.replace(routes.PATIENT_PROFILE, {
+      patientId: tempFormData.PatientID, // ✅ even on fallback
+    });
     }
+
+  Alert.alert('Saved Successfully', '');
+  return;
+}
   
     console.log('formData', JSON.stringify(formData));
   };
