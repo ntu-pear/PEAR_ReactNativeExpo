@@ -26,7 +26,6 @@ function AccountViewScreen(props) {
 
 
 const onPickAndUploadPhoto = async () => {
-  // Ask permission
   const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (perm.status !== 'granted') {
     Alert.alert('Profile Photo', 'Permission to access photos is required.');
