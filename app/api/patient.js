@@ -65,7 +65,7 @@ const deletePatientPhotoV1 = async (patient_id) => {
     return client.delete(v1PatientPhotoDeleteEndpoint(patient_id), {}, withPatientV1Base())
 }
 
-const updatePatientPhoto = async (patientID, photoData) => {
+const updatePatientPhotoV1 = async (patientID, photoData) => {
   const photoFormData = new FormData();
   if (photoData.Photo) {
     if (typeof photoData.Photo === 'object' && photoData.Photo.uri) {
