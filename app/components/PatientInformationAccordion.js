@@ -48,6 +48,19 @@ function PatientInformationAccordion({
 
   // const [guardianData, setGuardianData] = useState([]);
   const [guardianInfoData, setGuardianInfoData] = useState([]);
+  const pick = (...vals) => {
+    for (const v of vals) if (v !== undefined && v !== null && v !== '') return v;
+    return '';
+  };
+  const maskNRIC = (v) => {
+    const s = String(v || '');
+    // only mask when the server returned a full NRIC (7 digits inside)
+    return s.replace(/\d{4}(\d{3})$/, 'xxxx$1');
+  };
+  
+  // where you set values for the accordion rows (illustrative):
+  const phone = pick(patientProfile.handphoneNo, patientProfile.PhoneNumber, patientProfile.phone);
+  const nric  = pick(patientProfile.NRIC, patientProfile.nric);
   const [secondGuardianInfoData, setSecondGuardianInfoData] = useState([]);
   const [isSecondGuardian, setIsSecondGuardian] = useState(false);
   // const [socialHistoryData, setSocialHistoryData] = useState([]);
@@ -101,11 +114,9 @@ function PatientInformationAccordion({
         setPatientData([
           { label: 'First Name', value: patientProfile.firstName },
           { label: 'Last Name', value: patientProfile.lastName },
-          {
-            label: 'NRIC',
-            value: patientProfile?.nric?.replace(/(\d{4})(\d{3})/, 'xxxx$1') ?? 'N/A',
-
-          },
+          
+          { label: 'NRIC',   value: nric ? maskNRIC(nric) : '-' },
+          
           {
             label: 'DOB',
             value: patientProfile.dob || '-',
