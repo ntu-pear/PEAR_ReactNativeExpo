@@ -43,10 +43,20 @@ import MobilityAidItem from 'app/components/MobilityAidItem';
 import AddPatientMobilityAidModal from 'app/components/AddPatientMobilityAidModal';
 
 function PatientMobilityAidScreen(props) {
-  let { patientID, patientId } = props.route.params;
-  if (patientId) {
-    patientID = patientId;
-  }
+ // --- Retrieve patientID safely from navigation params ---
+let { patientID, patientId, patientProfile } = props.route.params ?? {};
+
+if (!patientID && !patientId && patientProfile) {
+  patientID =
+    patientProfile.patientID ||
+    patientProfile.patientId ||
+    patientProfile.PatientID ||
+    patientProfile.id;
+}
+if (patientId) patientID = patientId;
+console.log('[MOBILITY] Route params:', props.route.params);
+console.log('[MOBILITY] Using patientID:', patientID);
+
 
   const testID = `mobility_aid_screen_${patientID}`;
 
@@ -146,6 +156,8 @@ function PatientMobilityAidScreen(props) {
     if (!patientID) return;
     try {
       const rows = await listPatientMobilityAidsV1(patientID);
+      console.log('[MOBILITY] rows:', rows);
+
       setOriginalMobilityData([...rows]);
       setMobilityData([...rows]); // already normalized to UI shape
       setIsDataInitialized(true);
@@ -176,12 +188,30 @@ function PatientMobilityAidScreen(props) {
     }));
   };
 
-  // Read patient header (v1)
   const getPatientData = async () => {
     if (!patientID) return;
     try {
-      const data = await readPatientV1(patientID);
-      setPatientData(data);
+      const response = await readPatientV1(patientID);
+      const p = response?.data?.data || response?.data || {};
+      console.log('[MOBILITY] Patient data from API:', p);
+  
+      // Normalize key names and assign sensible fallbacks
+      const preferredName =
+        p.preferredName || p.PreferredName || p.fullName || p.FullName || '';
+      const firstName =
+        p.firstName || p.FirstName || preferredName?.split(' ')[0] || '';
+      const lastName =
+        p.lastName || p.LastName || preferredName?.split(' ').slice(1).join(' ') || '';
+      const profilePicture =
+        p.profilePicture || p.ProfilePicture || null;
+  
+      setPatientData({
+        preferredName,
+        firstName,
+        lastName,
+        profilePicture,
+      });
+  
       setIsError(false);
       setIsRetry(false);
       setStatusCode(200);
@@ -194,7 +224,8 @@ function PatientMobilityAidScreen(props) {
       setIsRetry(true);
     }
   };
-
+  
+  
   // Show form to add mobility aid when add button is clicked
   const handleOnClickAddMobility = () => {
     setIsModalVisible(true);
@@ -323,17 +354,24 @@ function PatientMobilityAidScreen(props) {
       const isRecoveredDisplay = item.isRecovered
         ? 'Fully Recovered'
         : 'Not Recovered';
-
+  
+      // ✅ Fix invalid or empty date values
+      let displayDate = 'N/A';
+      if (item.date && !isNaN(new Date(item.date).getTime())) {
+        displayDate = formatDate(new Date(item.date), true);
+      }
+  
       let rowData = [
         item.mobilityListDesc,
         item.mobilityRemark,
         isRecoveredDisplay,
-        formatDate(new Date(item.date), true),
+        displayDate,
       ];
-
+  
       return rowData;
     });
   };
+  
 
   const getTableHeaderData = () => {
     return ['Mobility Aids', 'Remark', 'Condition', 'Date'];
@@ -429,10 +467,11 @@ function PatientMobilityAidScreen(props) {
                       mobilityRemarks={item.mobilityRemark}
                       isRecovered={item.isRecovered}
                       mobilityListDesc={item.mobilityListDesc}
-                      date={item.date}
+                      date={item.date && !isNaN(new Date(item.date).getTime()) ? item.date : null}
                       onDelete={() => handleDeleteMobilityAid(item.mobilityId)}
                       onEdit={() => handleEditMobilityAid(item.mobilityId)}
                     />
+
                   </TouchableOpacity>
                 }
               />
