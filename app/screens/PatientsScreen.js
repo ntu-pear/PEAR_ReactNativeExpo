@@ -130,7 +130,7 @@ const normalizePatientV1 = (p = {}) => {
   const [isReloadPatientList, setIsReloadPatientList] = useState(false);
   const [applySortFilter, setApplySortFilter] = useState(true);
 
-  // ⭐ favourites state
+  //  favourites state
   const [favoriteIds, setFavoriteIds] = useState(new Set());
   const [showFavOnly, setShowFavOnly] = useState(false);
 
@@ -393,7 +393,7 @@ const normalizePatientV1 = (p = {}) => {
     navigation.push(routes.PATIENT_PROFILE, { id: patientID });
   };
 
-  // ⭐ toggle favourite for a patient
+  // Toggle a patient’s favourite status
   const toggleFavourite = async (patient) => {
     const id = String(patient.patientID ?? fav.getPatientId(patient));
     const updated = await fav.toggle(id);
@@ -415,13 +415,13 @@ const normalizePatientV1 = (p = {}) => {
     );
   };
 
-  // ⭐ derived list: favourites first, then keep existing order from SearchFilterBar
+  //  derived list: favourites first, then keep existing order from SearchFilterBar
   const listWithFavPinned = React.useMemo(() => {
     const arr = [...(listOfPatients || [])];
     arr.sort((a, b) => {
       const fa = favoriteIds.has(String(a.patientID ?? fav.getPatientId(a))) ? 0 : 1;
       const fb = favoriteIds.has(String(b.patientID ?? fav.getPatientId(b))) ? 0 : 1;
-      if (fa !== fb) return fa - fb; // ⭐ first
+      if (fa !== fb) return fa - fb; // 
       return 0; // preserve current order
     });
     return arr;
@@ -473,7 +473,7 @@ const normalizePatientV1 = (p = {}) => {
             setSearchQuery={setSearchQuery}
           />
 
-          {/* ⭐ Optional: show favourites-only toggle */}
+          {/* show favourites-only toggle */}
           <Button
             onPress={() => setShowFavOnly(v => !v)}
             variant={showFavOnly ? 'solid' : 'outline'}
@@ -535,7 +535,7 @@ const normalizePatientV1 = (p = {}) => {
                           : null}
                       </Text>
                     </View>
-                    {/* ⭐ star toggle */}
+                    {/*  star toggle */}
                     <IconButton
                       onPress={() => toggleFavourite(item)}
                       icon={

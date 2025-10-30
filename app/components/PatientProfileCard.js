@@ -25,8 +25,8 @@ function PatientProfileCard(props) {
 
   const handleOnPressToNextScreen = () => {
     navigation.navigate(routes, {
-      patientId: patientId,
-      ...patientProfile,
+      patientProfile: patientProfile,
+      patientId: patientId ?? patientProfile?.patientID ?? patientProfile?.id,
     });
   };
 

@@ -27,19 +27,19 @@ function ChangePasswordScreen(props) {
   const handleOnPress = async () => {
     Keyboard.dismiss();
 
-    // ✅ Step 1: Check password match
+    // Step 1: Check password match
     if (newPassword !== confirmPassword) {
       Alert.alert('Please try again', 'New passwords do not match.');
       return;
     }
 
-    // ✅ Step 2: Validate new vs old difference
+    // Step 2: Validate new vs old difference
     if (normalize(currentPassword) === normalize(newPassword)) {
       Alert.alert('Please try again', 'New password must be different from current password.');
       return;
     }
 
-    // ✅ Step 3: Check format
+    // Step 3: Check format
     const isPasswordFormatValid =
       passwordFormat(currentPassword) && passwordFormat(newPassword);
     if (!isPasswordFormatValid) {
@@ -47,7 +47,7 @@ function ChangePasswordScreen(props) {
       return;
     }
 
-    // ✅ Step 4: Proceed with API call
+    // Step 4: Proceed with API call
     setIsLoading(true);
     const resp = await userApi.changePassword('', currentPassword, newPassword);
 
@@ -101,7 +101,7 @@ function ChangePasswordScreen(props) {
             maxLength={16}
           />
 
-          {/* ✅ New confirm password field */}
+          {/* New confirm password field */}
           <SensitiveInputField
             isRequired
             title={'Confirm New Password'}

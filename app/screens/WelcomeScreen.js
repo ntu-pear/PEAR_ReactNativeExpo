@@ -100,12 +100,12 @@ function WelcomeScreen(props) {
 
     if(result && result.ok) {
       console.log('User authenticated - storing tokens...');
-      // Fetch profile and put it into AuthContext → this switches you out of the Auth stack
+      // Fetch profile and put it into AuthContext 
       console.log('Fetching profile...');
       const me = await userApi.getUser(); // GET /api/v1/user/get_user/
       if (me?.ok) {
-        authContext.setUser(me.data);     // main way your app knows you’re logged in
-        console.log('Profile loaded, user set in context'); // NEW
+        authContext.setUser(me.data);     
+        console.log('Profile loaded, user set in context'); 
       } else {
     // NEW: show a clean error if profile fails (don’t silently proceed)
     console.log('Profile fetch failed after login:', me?.status, me?.data);
