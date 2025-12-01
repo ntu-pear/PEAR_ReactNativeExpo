@@ -42,15 +42,15 @@ function PatientDailyHighlights() {
 
   // searchValue for SearchBar, filterValue for DropDownPicker
   const [searchValue, setSearchValue] = useState('');
-  const [filterValue, setFilterValue] = useState([]);
+  const [filterValue, setFilterValue] = useState('All');
 
   // new API v1 type values 
   const [dropdownItems, setDropdownItems] = useState([
-    { label: 'All', value: [] },
+    { label: 'All', value: 'All' },
     { label: 'New Prescription', value: 'Prescription' }, // Match API value
     { label: 'New Allergy', value: 'Allergy' },
     { label: 'New Activity Exclusion', value: 'ActivityExclusion' },
-    { label: 'Abnormal Vital', value: 'Vital' },
+    { label: 'Abnormal Vital', value: ['Vital', 'AbnormalVital'] },
     { label: 'Problem', value: 'Problem' },
     { label: 'New Medical Records', value: 'MedicalHistory' },
   ]);
@@ -253,10 +253,12 @@ function PatientDailyHighlights() {
     // Filter by filterValue (highlight types)
     let dataAfterFilter = highlightsData;
     
-    // FIX: Handle both string and array values from dropdowns
-    if (filterValue && filterValue.length > 0) {
-      // Convert to array if it's a string
-      const filterArray = Array.isArray(filterValue) ? filterValue : [filterValue];
+    // Handle filter: skip if 'All' or empty
+    if (filterValue && filterValue !== 'All' && filterValue.length > 0) {
+    // Flatten the filterValue in case it contains arrays (like ['Vital', 'AbnormalVital'])
+      const filterArray = Array.isArray(filterValue) 
+        ? filterValue.flat() // flatten nested arrays
+        : [filterValue];
       
       dataAfterFilter = highlightsData.filter((item) =>
         item.highlights.some((h) => filterArray.includes(h.highlightType)),

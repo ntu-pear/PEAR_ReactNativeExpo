@@ -52,6 +52,7 @@ function HighlightsCard({ item, setModalVisible }) {
         desc = 'New Activity Exclusion';
         break;
       case 'Vital':
+      case 'AbnormalVital':
         desc = 'Abnormal Vital';
         break;
       case 'Problem':
@@ -96,6 +97,7 @@ function HighlightsCard({ item, setModalVisible }) {
         );
         break;
       case 'Vital':
+      case 'AbnormalVital':
         icon = (
           <MaterialCommunityIcons
             name="heart-pulse"
@@ -163,6 +165,7 @@ function HighlightsCard({ item, setModalVisible }) {
         });
         break;
       case 'Vital':
+      case 'AbnormalVital':
         console.log('Vital');
         navigation.navigate(routes.PATIENT_VITAL, {
           patientID: item.patientInfo.patientId,
