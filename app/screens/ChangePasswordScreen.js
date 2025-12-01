@@ -49,7 +49,12 @@ function ChangePasswordScreen(props) {
 
     // Step 4: Proceed with API call
     setIsLoading(true);
-    const resp = await userApi.changePassword('', currentPassword, newPassword);
+    const resp = await userApi.changePassword(
+      currentPassword,
+      newPassword,
+      confirmPassword
+    );
+    
 
     if (!resp?.ok) {
       const data = resp?.data || {};

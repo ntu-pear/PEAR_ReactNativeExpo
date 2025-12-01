@@ -119,12 +119,25 @@ const resetPassword = (token, { newPassword, confirmPassword }) =>
 
 /* ======================= PUT / UPDATE ======================= */
 
-const changePassword = (OldPassword, NewPassword) =>
-  client.put(
+const changePassword = async (currentPassword, newPassword, confirmPassword) => {
+  const token = await authStorage.getToken('userAuthTokenV1');
+
+  return client.put(
     v1.changePassword,
-    { currentPassword: OldPassword, newPassword: NewPassword, confirmPassword: NewPassword },
-    { baseURL: V1_BASE }
+    {
+      currentPassword,
+      newPassword,
+      confirmPassword,
+    },
+    {
+      baseURL: V1_BASE,
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+    }
   );
+};
+
 
 //API for updateUser
 const updateUserV1 = async (data) =>
