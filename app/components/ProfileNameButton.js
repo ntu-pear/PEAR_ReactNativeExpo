@@ -53,7 +53,7 @@ function ProfileNameButton({
   };
 
   const handleProfilePicError = (e) => {
-    ToastAndroid.show(('Error loading profile picture for ' + profileLineOne.trim()), ToastAndroid.SHORT)
+    //ToastAndroid.show(('Error loading profile picture for ' + profileLineOne.trim()), ToastAndroid.SHORT)
     setIsError(true);
   }
   
