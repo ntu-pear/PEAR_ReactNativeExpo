@@ -15,6 +15,7 @@ import { FlatList, Icon } from 'native-base';
 
 // APIs
 import highlightApi from 'app/api/highlight';
+import patientApi from 'app/api/patient';
 
 // Configs
 import colors from 'app/config/colors';
@@ -42,36 +43,20 @@ function PatientDailyHighlights() {
   // searchValue for SearchBar, filterValue for DropDownPicker
   const [searchValue, setSearchValue] = useState('');
   const [filterValue, setFilterValue] = useState([]);
+
+  // new API v1 type values 
   const [dropdownItems, setDropdownItems] = useState([
-    {
-      label: 'All',
-      value: [],
-    },
-    {
-      label: 'New Prescription',
-      value: 'newPrescription',
-    },
-    {
-      label: 'New Allergy',
-      value: 'newAllergy',
-    },
-    {
-      label: 'New Activity Exclusion',
-      value: 'newActivityExclusion',
-    },
-    {
-      label: 'Abnormal Vital',
-      value: 'abnormalVital',
-    },
-    {
-      label: 'Problem',
-      value: 'problem',
-    },
-    {
-      label: 'New Medical Records',
-      value: 'medicalHistory',
-    },
+    { label: 'All', value: [] },
+    { label: 'New Prescription', value: 'Prescription' }, // Match API value
+    { label: 'New Allergy', value: 'Allergy' },
+    { label: 'New Activity Exclusion', value: 'ActivityExclusion' },
+    { label: 'Abnormal Vital', value: 'Vital' },
+    { label: 'Problem', value: 'Problem' },
+    { label: 'New Medical Records', value: 'MedicalHistory' },
   ]);
+
+
+
 
   const navigation = useNavigation();
 
@@ -95,35 +80,170 @@ function PatientDailyHighlights() {
     }
   }, [isRetry]);
 
+  // Using the new API v1 
   const getAllHighlights = async () => {
-    setIsLoading(true);
-    setIsError(false);
-    const response = await highlightApi.getHighlight();
+  setIsLoading(true);
+  setIsError(false);
+
+  try {
+    // Call the new API endpoint that returns ALL patients' highlights
+    const response = await highlightApi.getAllHighlights();
+
+    // ADD THIS: Log raw highlights response
+    console.log('[HIGHLIGHTS API] Raw response:', JSON.stringify(response, null, 2));
+    console.log('[HIGHLIGHTS API] Response status:', response.status);
+    console.log('[HIGHLIGHTS API] Response ok:', response.ok);
+    console.log('[HIGHLIGHTS API] Response data type:', typeof response.data);
+    console.log('[HIGHLIGHTS API] Is Array?:', Array.isArray(response.data));
+
     if (!response.ok) {
-      // console.log('Request failed with status code: ', response.status);
       setIsLoading(false);
       setIsError(true);
       setIsRetry(true);
       setStatusCode(response.status);
       return;
-    } else {
-      const aggregatedData = aggregateHighlightsByType(response.data.data);
-      setHighlightsData(aggregatedData);
-      setFilteredData(aggregatedData);
-      setIsLoading(false);
-      setStatusCode(response.status);
-      setIsError(false);
-      setIsRetry(false);
     }
 
-    // console.log('Request successful with response: ', response);
-  };
+    // Response is an array of highlights
+    const allHighlights = Array.isArray(response.data) ? response.data : [];
+    
+    // Filter out deleted highlights
+    const activeHighlights = allHighlights.filter(h => h.IsDeleted !== "1");
+    
+    console.log('[HIGHLIGHTS] Active highlights after filtering:', activeHighlights.length, 'of', allHighlights.length);
+
+    // Get unique patient IDs from highlights
+    const uniquePatientIds = [...new Set(activeHighlights.map(h => h.PatientId))];
+
+    // ADD THIS: Log patient IDs being fetched
+    console.log('[HIGHLIGHTS] Unique patient IDs:', uniquePatientIds);
+    console.log('[HIGHLIGHTS] Fetching details for', uniquePatientIds.length, 'patients');
+
+    
+    // Fetch patient details for all patients with highlights
+    const patientDetailsPromises = uniquePatientIds.map(id => 
+      patientApi.readPatientV1(id)
+    );
+    const patientDetailsResponses = await Promise.all(patientDetailsPromises);
+
+    // ✅ ADD THIS: Log each patient response
+    patientDetailsResponses.forEach((res, index) => {
+      const patientId = uniquePatientIds[index];
+      console.log(`[PATIENT ${patientId}] Status: ${res.status}, OK: ${res.ok}`);
+      console.log(`[PATIENT ${patientId}] Raw data:`, JSON.stringify(res.data, null, 2));
+      
+      // Log the nested structure
+      if (res.ok && res.data) {
+        console.log(`[PATIENT ${patientId}] res.data.data exists?`, !!res.data.data);
+        console.log(`[PATIENT ${patientId}] Actual patient object:`, JSON.stringify(res.data.data || res.data, null, 2));
+      }
+    });
+    
+    // Helper function to pick first non-empty value from object
+    const pickFirstFrom = (obj, ...paths) => {
+      for (const path of paths) {
+        const val = obj?.[path];
+        if (val) return String(val).trim();
+      }
+      return '';
+    };
+    
+    // Create a map of patient ID to patient details
+    const patientDetailsMap = {};
+    patientDetailsResponses.forEach((res, index) => {
+      if (res.ok && res.data) {
+        const patientId = uniquePatientIds[index];
+        
+        // Handle nested data structure - try both res.data.data and res.data
+        const p = res.data.data || res.data;
+        
+        // Extract name fields using multiple possible field names
+        const firstName = pickFirstFrom(p, 'firstname', 'firstName', 'givenname', 'givenName');
+        const lastName = pickFirstFrom(p, 'lastname', 'lastName', 'familyname', 'familyName', 'surname');
+        const preferred = pickFirstFrom(p, 'preferredName', 'preferredname', 'nickname');
+        const fullName = pickFirstFrom(p, 'name', 'fullname', 'fullName', 'displayname', 'displayName');
+        
+        // Compute display name (preferred > full > first+last)
+        let displayName = '';
+        if (preferred) {
+          displayName = preferred;
+        } else if (fullName) {
+          displayName = fullName;
+        } else if (firstName && lastName) {
+          displayName = `${firstName} ${lastName}`.trim();
+        } else if (firstName) {
+          displayName = firstName;
+        } else if (lastName) {
+          displayName = lastName;
+        }
+        
+        patientDetailsMap[patientId] = {
+          firstName: firstName,
+          lastName: lastName,
+          displayName: displayName,
+          photo: p.profilePicture || p.profilepicture || p.photo || null,
+        };
+      }
+    });
+
+    // Group by patient and transform to match your UI structure
+    const groupedByPatient = activeHighlights.reduce((acc, h) => {
+      const patientId = h.PatientId;
+      if (!acc[patientId]) {
+        const patientDetails = patientDetailsMap[patientId] || {};
+        // Use display name, fallback to "Patient X" if not found
+        const patientName = patientDetails.displayName || `Patient ${patientId}`;
+        
+        acc[patientId] = {
+          patientInfo: {
+            patientId: patientId,
+            patientName: patientName,
+            patientPhoto: patientDetails.photo || null,
+          },
+          highlights: []
+        };
+      }
+      
+      // Transform highlight to match your UI format
+      acc[patientId].highlights.push({
+        highlightID: h.Id,
+        highlightType: h.Type,
+        highlightJson: h.HighlightJSON,
+        startDate: h.StartDate,
+        endDate: h.EndDate,
+      });
+      
+      return acc;
+    }, {});
+
+    // Convert to array
+    const transformedData = Object.values(groupedByPatient);
+
+    // Apply your existing aggregation logic
+    const aggregatedData = aggregateHighlightsByType(transformedData);
+    
+    console.log('[HIGHLIGHTS] Final aggregated data:', aggregatedData.length, 'patients with highlights');
+    
+    setHighlightsData(aggregatedData);
+    setFilteredData(aggregatedData);
+    setIsLoading(false);
+    setStatusCode(response.status);
+    setIsError(false);
+    setIsRetry(false);
+  } catch (error) {
+    console.error('[HIGHLIGHTS] Error fetching highlights:', error);
+    setIsLoading(false);
+    setIsError(true);
+    setStatusCode(500);
+  }
+};
+
+
 
   // Filter data when either searchValue or filterValue changes
   useEffect(() => {
+
     // Search by searchValue
-    // .toLowerCase() ensures that the search is not case sensitive
-    // console.log(filterValue);
     const dataAfterSearch = highlightsData.filter((item) =>
       item.patientInfo.patientName
         .toLowerCase()
@@ -132,11 +252,14 @@ function PatientDailyHighlights() {
 
     // Filter by filterValue (highlight types)
     let dataAfterFilter = highlightsData;
-    // Check if a highlight type is chosen
-    // If no highlight type chosen, all patients should be displayed
-    if (Array.isArray(filterValue) && filterValue.length) {
+    
+    // FIX: Handle both string and array values from dropdowns
+    if (filterValue && filterValue.length > 0) {
+      // Convert to array if it's a string
+      const filterArray = Array.isArray(filterValue) ? filterValue : [filterValue];
+      
       dataAfterFilter = highlightsData.filter((item) =>
-        item.highlights.some((h) => filterValue.includes(h.highlightType)),
+        item.highlights.some((h) => filterArray.includes(h.highlightType)),
       );
     }
 
@@ -145,9 +268,9 @@ function PatientDailyHighlights() {
       dataAfterFilter.includes(value),
     );
 
-    // Update Highlights Data with the newly filtered data; to re-render flat list.
     setFilteredData(data);
   }, [highlightsData, searchValue, filterValue]);
+
 
   const handlePullToRefresh = async () => {
     await getAllHighlights();

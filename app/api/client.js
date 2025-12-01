@@ -10,7 +10,6 @@ export const V1_BASE = 'http://10.96.188.171:5678/api/v1';          // User Serv
 export const PATIENT_V1_BASE = 'http://10.96.188.172:5679/api/v1';  // Patient Service v1
 export const SCHEDULER_V1_BASE = 'http://10.96.188.186:5679'; // Scheduler Service v1
 
-
 const client = create({
   baseURL: V1_BASE,
   timeout: 15000,
