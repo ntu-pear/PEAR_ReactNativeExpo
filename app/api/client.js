@@ -7,7 +7,7 @@ import authStorage from 'app/auth/authStorage';
  * (update IPs if your backend changes)
  */
 export const V1_BASE = 'http://10.96.188.185/api/v1'; // User Service v1 (.185 - staging, .171:5678 - prod)
-export const PATIENT_V1_BASE = 'http://10.96.188.172:5679/api/v1'; // Patient Service v1 (.180 - staging, .172::5679 - prod)
+export const PATIENT_V1_BASE = 'http://10.96.188.180/api/v1'; // Patient Service v1 (.180 - staging, .172::5679 - prod)
 export const SCHEDULER_V1_BASE = 'http://10.96.188.186:5679'; // Scheduler Service v1
 
 const client = create({
