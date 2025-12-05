@@ -137,7 +137,7 @@ function PatientViewPhoto(props) {
   // Get photo data from backend
   const getPhotoData = async () => {
     if (photoID) {
-      const response = await patientApi.getPatientPhotoV1(photoID);
+      const response = await patientApi.getPatientPhotoV1(patientPhotoID);
       if (response.ok) {
         console.log('response.data.data: ', response.data.data);
         setOriginalData(
@@ -506,4 +506,3 @@ const styles = StyleSheet.create({
 });
 
 export default PatientViewPhoto;
-
