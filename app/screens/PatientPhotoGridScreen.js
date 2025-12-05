@@ -161,7 +161,7 @@ function PatientPhotoGrid(props) {
   // Get photo data from backend
   const getPhotoData = async () => {
     if (patientID) {
-      const response = await patientApi.getPatientPhotoV1(photoID);
+      const response = await patientApi.getPatientPhotoV1(patientPhotoID);
       if (response.ok) {
         console.log(
           'parsed response.data.data: ',
