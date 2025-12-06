@@ -68,7 +68,7 @@ function PatientDailyHighlights() {
       getAllHighlights();
       // Reset searchValue and filterValue when user navigates away
       setSearchValue('');
-      setFilterValue([]);
+      setFilterValue('All');
     }, []),
   );
 
@@ -76,7 +76,7 @@ function PatientDailyHighlights() {
     if (isRetry) {
       getAllHighlights();
       setSearchValue('');
-      setFilterValue([]);
+      setFilterValue('All');
     }
   }, [isRetry]);
 
@@ -332,7 +332,14 @@ function PatientDailyHighlights() {
   return (
     <>
       <TouchableOpacity
-        onPress={() => setModalVisible(!modalVisible)}
+        onPress={() => {
+          setModalVisible(!modalVisible);
+          // Reset filters when opening modal
+          if (!modalVisible) {
+            setSearchValue('');
+            setFilterValue('All');
+          }
+        }}
         testID={'highlightsButton'}
         style={{ flexDirection: 'row' }}
       >
@@ -357,6 +364,8 @@ function PatientDailyHighlights() {
         visible={modalVisible}
         onRequestClose={() => {
           setModalVisible(!modalVisible);
+          setSearchValue('');
+          setFilterValue('All');
         }}
         testID="highlightsModal"
       >
@@ -365,6 +374,8 @@ function PatientDailyHighlights() {
           activeOpacity={1}
           onPressOut={() => {
             setModalVisible(!modalVisible);
+            setSearchValue('');
+            setFilterValue('All');
           }}
         >
           <TouchableWithoutFeedback>
@@ -374,7 +385,11 @@ function PatientDailyHighlights() {
               </Text>
               <Pressable
                 style={styles.buttonClose}
-                onPress={() => setModalVisible(!modalVisible)}
+                onPress={() => {
+                  setModalVisible(!modalVisible);
+                  setSearchValue('');
+                  setFilterValue('All');
+                }}
                 testID="highlightsCloseButton"
               >
                 <MaterialCommunityIcons
