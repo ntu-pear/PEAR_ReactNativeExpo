@@ -45,7 +45,10 @@ export default function App() {
       background: colors.white,
     },
   };
-  LogBox.ignoreLogs(['Invalid prop textStyle of type array supplied to Cell']);
+  LogBox.ignoreLogs([
+    'Invalid prop textStyle of type array supplied to Cell',
+    'In React 18, SSRProvider is not necessary and is a noop',
+  ]);
 
   // Removal of user login persistence as recommendation by prof for security issue: Enforce login
   // long-term token persistence is not very secure - imagine a banking app (meeting: 14/10/2023) -- Justin
