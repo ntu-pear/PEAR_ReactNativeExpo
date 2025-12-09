@@ -139,68 +139,68 @@ function HighlightsCard({ item, setModalVisible }) {
   };
 
   // 3. UPDATE handleNavigation - Change highlightTypeID to highlightType
-  const handleNavigation = (element) => {
-    setModalVisible(false);
-
-    // CHANGED: highlightTypeID → highlightType
-    switch (element.highlightType) {
-      case 'Prescription':
-      case 'Medication':
-        console.log('Prescription');
-        navigation.navigate(routes.PATIENT_PRESCRIPTION, {
-          patientID: item.patientInfo.patientId,
-        });
-        break;
-      case 'Allergy':
-        console.log('Allergy');
-        console.log('item.patientInfo.patientId', item.patientInfo.patientId);
-        navigation.navigate(routes.PATIENT_ALLERGY, {
-          patientId: item.patientInfo.patientId,
-        });
-        break;
-      case 'ActivityExclusion':
-        console.log('ActivityExclusion');
-        navigation.navigate(routes.PATIENT_ROUTINE, {
-          patientID: item.patientInfo.patientId,
-        });
-        break;
-      case 'Vital':
-      case 'AbnormalVital':
-        console.log('Vital');
-        navigation.navigate(routes.PATIENT_VITAL, {
-          patientID: item.patientInfo.patientId,
-        });
-        break;
-      case 'Problem':
-        console.log('Problem');
-        navigation.navigate(routes.PATIENT_PROBLEM_LOG, {
-          patientID: item.patientInfo.patientId,
-        });
-        break;
-      case 'MedicalHistory':
-        console.log('MedicalHistory');
-        navigation.navigate(routes.PATIENT_MEDICAL_HISTORY, {
-          patientID: item.patientInfo.patientId,
-        });
-        break;
-      default:
-        console.log('Unknown type');
-        break;
-    }
-  };
+  // const handleNavigation = (element) => {
+  //   setModalVisible(false);
+  //
+  //   // CHANGED: highlightTypeID → highlightType
+  //   switch (element.highlightType) {
+  //     case 'Prescription':
+  //     case 'Medication':
+  //       console.log('Prescription');
+  //       navigation.navigate(routes.PATIENT_PRESCRIPTION, {
+  //         patientID: item.patientInfo.patientId,
+  //       });
+  //       break;
+  //     case 'Allergy':
+  //       console.log('Allergy');
+  //       console.log('item.patientInfo.patientId', item.patientInfo.patientId);
+  //       navigation.navigate(routes.PATIENT_ALLERGY, {
+  //         patientId: item.patientInfo.patientId,
+  //       });
+  //       break;
+  //     case 'ActivityExclusion':
+  //       console.log('ActivityExclusion');
+  //       navigation.navigate(routes.PATIENT_ROUTINE, {
+  //         patientID: item.patientInfo.patientId,
+  //       });
+  //       break;
+  //     case 'Vital':
+  //     case 'AbnormalVital':
+  //       console.log('Vital');
+  //       navigation.navigate(routes.PATIENT_VITAL, {
+  //         patientID: item.patientInfo.patientId,
+  //       });
+  //       break;
+  //     case 'Problem':
+  //       console.log('Problem');
+  //       navigation.navigate(routes.PATIENT_PROBLEM_LOG, {
+  //         patientID: item.patientInfo.patientId,
+  //       });
+  //       break;
+  //     case 'MedicalHistory':
+  //       console.log('MedicalHistory');
+  //       navigation.navigate(routes.PATIENT_MEDICAL_HISTORY, {
+  //         patientID: item.patientInfo.patientId,
+  //       });
+  //       break;
+  //     default:
+  //       console.log('Unknown type');
+  //       break;
+  //   }
+  // };
 
   const list = () => {
     return item.highlights.map((element) => (
       <View key={element.highlightID} style={styles.highlightsList}>
         <HStack w="100%" space={2} alignItems="center">
           {getIcon(element)}
-          <TouchableOpacity onPress={() => handleNavigation(element)}>
+          {/* <TouchableOpacity onPress={() => handleNavigation(element)}> */}
             {/* Show description with count if more than 1 */}
             <Text fontSize="13">
               {getDescription(element)}
               {element.count > 1 ? ` (x${element.count})` : ''}
             </Text>
-          </TouchableOpacity>
+          {/* </TouchableOpacity> */}
         </HStack>
       </View>
     ));
@@ -217,32 +217,32 @@ function HighlightsCard({ item, setModalVisible }) {
   (rawPhoto.startsWith('http://') || rawPhoto.startsWith('https://'));
 
   const safePhoto = isValidPhoto ? rawPhoto : null;
-  return (
-    <TouchableOpacity testID="highlightsCard" onPress={goToPatientProfile}>
-      <Box
-        w="100%"
-        borderWidth="1"
-        borderColor={colors.grey_lighter}
-        rounded="lg"
-        p="2"
-        mt="3"
-      >
-        <HStack w="100%" space={3} flexWrap="wrap" mb="1">
-          <VStack w="28%">
-            {/* --- Replace Avatar and Text component with ProfileNameButton --- Justin */}
-            <ProfileNameButton
-              profilePicture={safePhoto}
-              profileLineOne={item.patientInfo.patientName}
-              handleOnPress={goToPatientProfile}
-            />
-          </VStack>
-          <VStack w="68%" space={2}>
-            {list()}
-          </VStack>
-        </HStack>
-      </Box>
-    </TouchableOpacity>
-  );
+return (
+  <View testID="highlightsCard">
+    <Box
+      w="100%"
+      borderWidth="1"
+      borderColor={colors.grey_lighter}
+      rounded="lg"
+      p="2"
+      mt="3"
+    >
+      <HStack w="100%" space={3} flexWrap="wrap" mb="1">
+        <VStack w="28%">
+          {/* --- Replace Avatar and Text component with ProfileNameButton --- Justin */}
+          <ProfileNameButton
+            profilePicture={safePhoto}
+            profileLineOne={item.patientInfo.patientName}
+            handleOnPress={goToPatientProfile}
+          />
+        </VStack>
+        <VStack w="68%" space={2}>
+          {list()}
+        </VStack>
+      </HStack>
+    </Box>
+  </View>
+);
 }
 
 const styles = StyleSheet.create({
