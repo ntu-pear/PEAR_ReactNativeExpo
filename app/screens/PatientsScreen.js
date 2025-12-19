@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
 import { Center, VStack, ScrollView, Fab, Icon, FlatList, IconButton, Button } from 'native-base';
 import {
   StyleSheet,
@@ -35,6 +35,107 @@ import * as fav from 'app/utility/favorites'; // ⭐ favourites helper
 
  // NEW (TEMP): disable legacy Core counts during Patient Service migration
 const ENABLE_OLD_COUNTS = false;
+
+// Memoized PatientRow component for performance
+const PatientRow = memo(({ 
+  item, 
+  onPressPatient, 
+  onToggleFavourite, 
+  isFavourite, 
+  viewMode, 
+  patientStatus, 
+  showStartDate,
+  screenWidth 
+}) => {
+  const patientID = item.patientID;
+  
+  const handlePress = useCallback(() => {
+    onPressPatient(patientID);
+  }, [patientID, onPressPatient]);
+
+  const handleToggleFav = useCallback(() => {
+    onToggleFavourite(item);
+  }, [patientID, onToggleFavourite]);
+
+  return (
+    <TouchableOpacity
+      testID={`patientprofile_${item.patientID}`}
+      style={rowStyles.patientRowContainer}
+      onPress={handlePress}
+    >
+      <ProfileNameButton
+        profileLineOne={`${item.firstName} ${item.lastName}`}
+        profileLineTwo={item.preferredName}
+        profilePicture={item.profilePicture}
+        handleOnPress={handlePress}
+        isPatient={true}
+        size={screenWidth / 10}
+        isVertical={false}
+        isActive={patientStatus === '' ? item.isActive : null}
+        startDate={showStartDate ? item.startDate : null}
+      />
+      <View style={rowStyles.caregiverNameContainer}>
+        <Text style={rowStyles.caregiverName}>
+          {viewMode === 'allPatients'
+            ? item.caregiverName !== null
+              ? item.caregiverName
+              : 'No Caregiver'
+            : null}
+        </Text>
+      </View>
+      <IconButton
+        onPress={handleToggleFav}
+        icon={
+          <Icon
+            as={MaterialIcons}
+            name={isFavourite ? 'star' : 'star-border'}
+            size="sm"
+            color={isFavourite ? 'amber.500' : 'coolGray.500'}
+          />
+        }
+        accessibilityLabel="Toggle favourite"
+        alignSelf="center"
+      />
+    </TouchableOpacity>
+  );
+}, (prevProps, nextProps) => {
+  // Custom comparison: only re-render if these specific props change
+  return (
+    prevProps.item.patientID === nextProps.item.patientID &&
+    prevProps.isFavourite === nextProps.isFavourite &&
+    prevProps.viewMode === nextProps.viewMode &&
+    prevProps.patientStatus === nextProps.patientStatus &&
+    prevProps.showStartDate === nextProps.showStartDate &&
+    prevProps.screenWidth === nextProps.screenWidth &&
+    prevProps.item.firstName === nextProps.item.firstName &&
+    prevProps.item.lastName === nextProps.item.lastName &&
+    prevProps.item.preferredName === nextProps.item.preferredName &&
+    prevProps.item.caregiverName === nextProps.item.caregiverName &&
+    prevProps.item.profilePicture === nextProps.item.profilePicture &&
+    prevProps.item.startDate === nextProps.item.startDate
+  );
+});
+
+// Styles for PatientRow (defined outside component to prevent recreation)
+const rowStyles = StyleSheet.create({
+  patientRowContainer: {
+    marginVertical: '3%',
+    width: '100%',
+    flex: 2,
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    justifyContent: 'space-between',
+  },
+  caregiverNameContainer: {
+    marginLeft: '5%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  caregiverName: {
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+});
 
 function PatientsScreen({ navigation }) {
   // View modes user can switch between (displayed as tab on top)
@@ -134,6 +235,11 @@ const normalizePatientV1 = (p = {}) => {
   const [favoriteIds, setFavoriteIds] = useState(new Set());
   const [showFavOnly, setShowFavOnly] = useState(false);
 
+  // Pagination states for infinite scroll
+  const [currentPage, setCurrentPage] = useState(0);
+  const [hasMorePages, setHasMorePages] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
   // Search related states
   const [searchQuery, setSearchQuery] = useState('');
   const [searchOption, setSearchOption] = useState('Full Name');
@@ -220,55 +326,71 @@ const normalizePatientV1 = (p = {}) => {
   }, [chip['tempSel']['Patient Status']]);
 
   // --- list patients from the new Patient Service (V1)
-  const getListOfPatients = async (status = 'active') => {
-    // simple pagination; aggregate to keep current UI behavior
-    const page_size = 100; // adjust if needed
-    let page = 1;
-    let all = [];
-    let keepGoing = true;
+  const getListOfPatients = async (status = 'active', pageNo = 0, append = false) => {
+    const pageSize = 10; // API returns 10 at a time
 
-    while (keepGoing) {
-      // NOTE: we only pass q/page/page_size because patient.js forwards only those (no teammate code touched)
-      const res = await patientApi.listPatientsV1({
-        page,
-        page_size,
-        // q: searchQuery  // (optional: wire to backend later)
-      });
+    const res = await patientApi.listPatientsV1({
+      pageNo,
+      pageSize,
+      // q: searchQuery  // (optional: wire to backend later)
+    });
 
-      if (!res.ok) {
-        setStatusCode(res.status);
-        setIsError(true);
-        return { status: res.status, ok: false };
-      }
-
-      const body = res.data || {};
-      // support several common shapes: {results: []}, {items: []}, {data: []}, or an array
-      const pageArray =
-        (Array.isArray(body.results) && body.results) ||
-        (Array.isArray(body.items) && body.items) ||
-        (Array.isArray(body.data) && body.data) ||
-        (Array.isArray(body) && body) ||
-        [];
-
-      all = all.concat(pageArray.map(normalizePatientV1));
-
-      // stop when fewer than page_size came back, or backend says no next page
-      const nextUrl = body.next || body.nextPageUrl || null;
-      if (pageArray.length < page_size || !nextUrl) keepGoing = false;
-      page += 1;
+    if (!res.ok) {
+      setStatusCode(res.status);
+      setIsError(true);
+      return { status: res.status, ok: false };
     }
 
+    const body = res.data || {};
+    // support several common shapes: {results: []}, {items: []}, {data: []}, or an array
+    const pageArray =
+      (Array.isArray(body.results) && body.results) ||
+      (Array.isArray(body.items) && body.items) ||
+      (Array.isArray(body.data) && body.data) ||
+      (Array.isArray(body) && body) ||
+      [];
+
+    const normalizedPage = pageArray.map(normalizePatientV1);
+
+    // Check if there are more pages
+    const totalPages = body.totalPages ?? body.total_pages ?? null;
+    const totalRecords = body.totalRecords ?? body.total_records ?? body.total ?? null;
+    const moreAvailable = totalPages !== null 
+      ? pageNo < totalPages - 1 
+      : (totalRecords !== null 
+          ? (pageNo + 1) * pageSize < totalRecords 
+          : pageArray.length === pageSize);
+    setHasMorePages(moreAvailable);
+    setCurrentPage(pageNo);
+
     // --- apply patient status filter LOCALLY (no API change needed)
-    // AFTER (NEW)
     const want = status === 'active' ? true : status === 'inactive' ? false : undefined;
-// Treat missing isActive as "active" during migration so nothing disappears
+    // Treat missing isActive as "active" during migration so nothing disappears
     const filtered =
-      want === undefined ? all : all.filter(p => (p.isActive ?? true) === want);
-    setOriginalListOfPatients([...filtered]);
-    setListOfPatients([...filtered]);
+      want === undefined ? normalizedPage : normalizedPage.filter(p => (p.isActive ?? true) === want);
+
+    if (append) {
+      // Append to existing list for infinite scroll
+      setOriginalListOfPatients(prev => [...prev, ...filtered]);
+      setListOfPatients(prev => [...prev, ...filtered]);
+    } else {
+      // Replace list (initial load or refresh)
+      setOriginalListOfPatients([...filtered]);
+      setListOfPatients([...filtered]);
+    }
+
     setIsError(false);
     setStatusCode(200);
     return { status: 200, ok: true };
+  };
+
+  // Load more patients when user scrolls to bottom
+  const loadMorePatients = async () => {
+    if (isLoadingMore || !hasMorePages) return;
+    
+    setIsLoadingMore(true);
+    await getListOfPatients(patientStatus, currentPage + 1, true);
+    setIsLoadingMore(false);
   };
 
   // Retrieve caregivers patient count list from backend (legacy for now)
@@ -299,12 +421,14 @@ const normalizePatientV1 = (p = {}) => {
   // Set screen to loading wheel when retrieving patient list from backend
   const refreshPatientData = (tempPatientStatus = patientStatus) => {
     setIsLoading(true);
+    setCurrentPage(0);
+    setHasMorePages(true);
     const run = async () => {
-      await getListOfPatients(tempPatientStatus);
+      await getListOfPatients(tempPatientStatus, 0, false);
       // NEW (TEMP)
-    if (ENABLE_OLD_COUNTS && viewMode === 'allPatients') {
-      await getPatientCountInfo(tempPatientStatus);
-    }
+      if (ENABLE_OLD_COUNTS && viewMode === 'allPatients') {
+        await getPatientCountInfo(tempPatientStatus);
+      }
 
       setIsLoading(false);
       setIsDataInitialized(true);
@@ -388,20 +512,23 @@ const normalizePatientV1 = (p = {}) => {
     setIsReloadPatientList(true);
   };
 
-  // Navigate to patient profile when patient item is clicked
-  const handleOnClickPatientItem = (patientID) => {
-    navigation.push(routes.PATIENT_PROFILE, { id: patientID });
-  };
+  // Cache screen width
+  const screenWidth = useMemo(() => Dimensions.get('window').width, []);
 
-  // Toggle a patient’s favourite status
-  const toggleFavourite = async (patient) => {
+  // Navigate to patient profile when patient item is clicked
+  const handleOnClickPatientItem = useCallback((patientID) => {
+    navigation.push(routes.PATIENT_PROFILE, { id: patientID });
+  }, [navigation]);
+
+  // Toggle a patient's favourite status
+  const toggleFavourite = useCallback(async (patient) => {
     const id = String(patient.patientID ?? fav.getPatientId(patient));
     const updated = await fav.toggle(id);
     setFavoriteIds(new Set(updated));
-  };
+  }, []);
 
   // Whether to show start date for each patient - depends on whether sort/filter using start date applied
-  const showStartDate = () => {
+  const showStartDate = useMemo(() => {
     return (
       (!isEmptyObject(sort['sel'])
         ? sort['sel']['option']['label'] == 'Start Date'
@@ -413,18 +540,27 @@ const normalizePatientV1 = (p = {}) => {
             datetime['sel']['Start Date']['max'] != null)
         : false)
     );
-  };
+  }, [sort, datetime]);
 
   //  derived list: favourites first, then keep existing order from SearchFilterBar
   const listWithFavPinned = React.useMemo(() => {
-    const arr = [...(listOfPatients || [])];
-    arr.sort((a, b) => {
-      const fa = favoriteIds.has(String(a.patientID ?? fav.getPatientId(a))) ? 0 : 1;
-      const fb = favoriteIds.has(String(b.patientID ?? fav.getPatientId(b))) ? 0 : 1;
-      if (fa !== fb) return fa - fb; // 
-      return 0; // preserve current order
-    });
-    return arr;
+    if (!listOfPatients || listOfPatients.length === 0) return [];
+    if (favoriteIds.size === 0) return listOfPatients; // No sorting needed
+    
+    // Partition into favorites and non-favorites for performance
+    const favorites = [];
+    const nonFavorites = [];
+    
+    for (const patient of listOfPatients) {
+      const id = String(patient.patientID ?? fav.getPatientId(patient));
+      if (favoriteIds.has(id)) {
+        favorites.push(patient);
+      } else {
+        nonFavorites.push(patient);
+      }
+    }
+    
+    return [...favorites, ...nonFavorites];
   }, [listOfPatients, favoriteIds]);
 
   const visiblePatients = React.useMemo(() => {
@@ -434,12 +570,40 @@ const normalizePatientV1 = (p = {}) => {
     );
   }, [listWithFavPinned, showFavOnly, favoriteIds]);
 
+  // Memoized renderItem for FlatList - favoriteIds intentionally excluded from deps
+  // We'll use extraData prop on FlatList to trigger re-renders when favorites change
+  const renderPatientItem = useCallback(({ item }) => {
+    const patientId = String(item.patientID ?? fav.getPatientId(item));
+    return (
+      <PatientRow
+        item={item}
+        onPressPatient={handleOnClickPatientItem}
+        onToggleFavourite={toggleFavourite}
+        isFavourite={favoriteIds.has(patientId)}
+        viewMode={viewMode}
+        patientStatus={patientStatus}
+        showStartDate={showStartDate}
+        screenWidth={screenWidth}
+      />
+    );
+  }, [handleOnClickPatientItem, toggleFavourite, favoriteIds, viewMode, patientStatus, showStartDate, screenWidth]);
+
+  // Fixed item layout for better scroll performance
+  const getItemLayout = useCallback(
+    (data, index) => ({
+      length: 70,
+      offset: 70 * index,
+      index,
+    }),
+    []
+  );
+
   return (
     <>
       {isLoading ? (
         <ActivityIndicator testID="patients_loading" visible />
       ) : (
-        <View testID="patients" backgroundColor={colors.white}>
+        <View testID="patients" style={styles.container}>
           <SearchFilterBar
             testID="patients_searchFilter"
             originalList={originalListOfPatients}
@@ -485,13 +649,15 @@ const normalizePatientV1 = (p = {}) => {
             {showFavOnly ? 'Showing favourites' : '⭐ Favourites only'}
           </Button>
 
-          <View style={{ height: '85%' }}>
+          <View style={styles.listWrapper}>
             <FlatList
               testID="patients_flatlist"
               ref={patientListRef}
-              marginBottom={'20'}
+              contentContainerStyle={styles.flatListContent}
               onRefresh={refreshPatientData}
               refreshing={isLoading}
+              onEndReached={loadMorePatients}
+              onEndReachedThreshold={0.5}
               ListEmptyComponent={() =>
                 noDataMessage(
                   statusCode,
@@ -501,90 +667,50 @@ const normalizePatientV1 = (p = {}) => {
                   true,
                 )
               }
+              ListFooterComponent={() =>
+                isLoadingMore ? (
+                  <View style={styles.loadingMoreContainer}>
+                    <ActivityIndicator visible size="small" />
+                  </View>
+                ) : null
+              }
               data={visiblePatients}
               keyExtractor={(item) => String(item.patientID ?? fav.getPatientId(item))}
               style={styles.patientListContainer}
-              renderItem={({ item, index }) => {
-                return (
-                  <TouchableOpacity
-                    testID={`patientprofile_${item.patientID}`}
-                    style={styles.patientRowContainer}
-                    key={index}
-                    onPress={() => handleOnClickPatientItem(item.patientID)}
-                  >
-                    <ProfileNameButton
-                      profileLineOne={item.preferredName}
-                      profileLineTwo={`${item.firstName} ${item.lastName}`}
-                      profilePicture={item.profilePicture}
-                      handleOnPress={() =>
-                        handleOnClickPatientItem(item.patientID)
-                      }
-                      isPatient={true}
-                      size={Dimensions.get('window').width / 10}
-                      key={index}
-                      isVertical={false}
-                      isActive={patientStatus == '' ? item.isActive : null}
-                      startDate={showStartDate() ? item.startDate : null}
-                    />
-                    <View style={styles.caregiverNameContainer}>
-                      <Text style={styles.caregiverName}>
-                        {viewMode === 'allPatients'
-                          ? item.caregiverName !== null
-                            ? item.caregiverName
-                            : 'No Caregiver'
-                          : null}
-                      </Text>
-                    </View>
-                    {/*  star toggle */}
-                    <IconButton
-                      onPress={() => toggleFavourite(item)}
-                      icon={
-                        <Icon
-                          as={MaterialIcons}
-                          name={
-                            favoriteIds.has(String(item.patientID ?? fav.getPatientId(item)))
-                              ? 'star'
-                              : 'star-border'
-                          }
-                          size="sm"
-                          color={
-                            favoriteIds.has(String(item.patientID ?? fav.getPatientId(item)))
-                              ? 'amber.500'
-                              : 'coolGray.500'
-                          }
-                        />
-                      }
-                      accessibilityLabel="Toggle favourite"
-                      alignSelf="center"
-                    />
-                  </TouchableOpacity>
-                );
-              }}
+              renderItem={renderPatientItem}
+              getItemLayout={getItemLayout}
+              extraData={favoriteIds}
+              removeClippedSubviews={true}
+              maxToRenderPerBatch={5}
+              updateCellsBatchingPeriod={100}
+              windowSize={21}
+              initialNumToRender={10}
             />
-            <Center position="absolute" right="5" bottom="15%">
-              <Fab
-                testID="addPatients"
-                backgroundColor={colors.pink}
-                icon={
-                  <Icon
-                    as={MaterialIcons}
-                    color={colors.white}
-                    name="person-add-alt"
-                    size="lg"
-                    placement="bottom-right"
-                  />
-                }
-                onPress={handleOnClickAddPatient}
-                renderInPortal={false}
-                shadow={2}
-                size="sm"
-              />
+          </View>
+          <View style={styles.fabContainer}>
+            <Fab
+              testID="addPatients"
+              backgroundColor={colors.pink}
+              icon={
+                <Icon
+                  as={MaterialIcons}
+                  color={colors.white}
+                  name="person-add-alt"
+                  size="lg"
+                />
+              }
+              onPress={handleOnClickAddPatient}
+              renderInPortal={false}
+              shadow={2}
+              size="sm"
+            />
+            <View style={{ marginTop: 16 }}>
               <BackToTopButton
                 flatListRef={patientListRef}
                 position="bottom-right"
-                offset={17.5}
+                offset={0}
               />
-            </Center>
+            </View>
           </View>
         </View>
       )}
@@ -593,26 +719,28 @@ const normalizePatientV1 = (p = {}) => {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.white,
+  },
+  listWrapper: {
+    flex: 1,
+  },
   patientListContainer: {
     paddingHorizontal: '5%',
-    zIndex: -1,
   },
-  patientRowContainer: {
-    marginVertical: '3%',
-    width: '100%',
-    flex: 2,
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    justifyContent: 'space-between',
+  flatListContent: {
+    paddingBottom: 100, // Extra padding at bottom for FAB clearance
   },
-  caregiverNameContainer: {
-    marginLeft: '5%',
-    justifyContent: 'center',
-    alignItem: 'center',
+  fabContainer: {
+    position: 'absolute',
+    right: 20,
+    bottom: 30,
+    alignItems: 'center',
   },
-  caregiverName: {
-    fontSize: 15,
-    fontWeight: 'bold',
+  loadingMoreContainer: {
+    paddingVertical: 20,
+    alignItems: 'center',
   },
 });
 

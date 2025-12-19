@@ -33,10 +33,15 @@ const v1VitalDeleteEndpoint = `/Vital/delete`;                  // DELETE (expec
 
 // ---------- Patient list/read (v1) ----------
 const listPatientsV1 = (params = {}) => {
-  const { q, page, page_size } = params; // neutral; backend can ignore if unsupported
+  // Pass through all params to support pagination (pageNo, pageSize), 
+  // search (q), and filters (status, mask, etc.)
+  // Remove undefined values to keep the query string clean
+  const cleanParams = Object.fromEntries(
+    Object.entries(params).filter(([_, v]) => v !== undefined && v !== null)
+  );
   return client.get(
     v1PatientsListEndpoint,
-    { ...(q ? { q } : {}), ...(page ? { page } : {}), ...(page_size ? { page_size } : {}) },
+    cleanParams,
     withPatientV1Base()
   );
 };
@@ -444,8 +449,13 @@ const getPatient = async (patientID) => {
 };
 
 // List patients (used by dashboard, preferences, etc.)
+// NOTE: Fetches a large page by default to maintain backward compatibility
+// with screens that expect all patients at once
 const getPatientList = async (maskNRIC = true, patientStatus = null) => {
-  const params = {};
+  const params = {
+    pageNo: 0,
+    pageSize: 1000,  // Large page to get all patients for screens that need full list
+  };
   if (patientStatus) params.status = patientStatus;
   if (maskNRIC !== undefined) params.mask = maskNRIC;
   return listPatientsV1(params);
