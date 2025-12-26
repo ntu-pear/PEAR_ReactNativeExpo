@@ -239,6 +239,8 @@ const normalizePatientV1 = (p = {}) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [hasMorePages, setHasMorePages] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [displayCount, setDisplayCount] = useState(10); // Client-side pagination: how many to show
+  const ITEMS_PER_PAGE = 10;
 
   // Search related states
   const [searchQuery, setSearchQuery] = useState('');
@@ -327,7 +329,7 @@ const normalizePatientV1 = (p = {}) => {
 
   // --- list patients from the new Patient Service (V1)
   const getListOfPatients = async (status = 'active', pageNo = 0, append = false) => {
-    const pageSize = 10; // API returns 10 at a time
+    const pageSize = 1000; // Load all patients for client-side sorting/pagination
 
     const res = await patientApi.listPatientsV1({
       pageNo,
@@ -355,13 +357,13 @@ const normalizePatientV1 = (p = {}) => {
     // Check if there are more pages
     const totalPages = body.totalPages ?? body.total_pages ?? null;
     const totalRecords = body.totalRecords ?? body.total_records ?? body.total ?? null;
-    const moreAvailable = totalPages !== null 
-      ? pageNo < totalPages - 1 
-      : (totalRecords !== null 
-          ? (pageNo + 1) * pageSize < totalRecords 
-          : pageArray.length === pageSize);
-    setHasMorePages(moreAvailable);
+    // We load all data upfront, so no more backend pages needed
+    setHasMorePages(false);
     setCurrentPage(pageNo);
+    // Reset display count for new data load
+    if (!append) {
+      setDisplayCount(ITEMS_PER_PAGE);
+    }
 
     // --- apply patient status filter LOCALLY (no API change needed)
     const want = status === 'active' ? true : status === 'inactive' ? false : undefined;
@@ -384,14 +386,11 @@ const normalizePatientV1 = (p = {}) => {
     return { status: 200, ok: true };
   };
 
-  // Load more patients when user scrolls to bottom
-  const loadMorePatients = async () => {
-    if (isLoadingMore || !hasMorePages) return;
-    
-    setIsLoadingMore(true);
-    await getListOfPatients(patientStatus, currentPage + 1, true);
-    setIsLoadingMore(false);
-  };
+  // Load more patients when user scrolls to bottom (client-side pagination)
+  const loadMorePatients = useCallback(() => {
+    // Show 10 more items from the already-loaded list
+    setDisplayCount(prev => prev + ITEMS_PER_PAGE);
+  }, []);
 
   // Retrieve caregivers patient count list from backend (legacy for now)
   const getPatientCountInfo = async (tempPatientStatus = patientStatus) => {
@@ -502,6 +501,8 @@ const normalizePatientV1 = (p = {}) => {
         tempSearchMode: tempSearchMode,
       });
 
+      // Reset display count when sorting/filtering changes
+      setDisplayCount(ITEMS_PER_PAGE);
       setIsLoading(false);
     }
   };
@@ -570,6 +571,14 @@ const normalizePatientV1 = (p = {}) => {
     );
   }, [listWithFavPinned, showFavOnly, favoriteIds]);
 
+  // Client-side pagination: only show up to displayCount items
+  const displayedPatients = React.useMemo(() => {
+    return visiblePatients.slice(0, displayCount);
+  }, [visiblePatients, displayCount]);
+
+  // Check if there are more items to show
+  const hasMoreToShow = displayCount < visiblePatients.length;
+
   // Memoized renderItem for FlatList - favoriteIds intentionally excluded from deps
   // We'll use extraData prop on FlatList to trigger re-renders when favorites change
   const renderPatientItem = useCallback(({ item }) => {
@@ -613,7 +622,7 @@ const normalizePatientV1 = (p = {}) => {
             onInitialize={() => setIsDataInitialized(false)}
             applySortFilter={applySortFilter}
             setApplySortFilter={setApplySortFilter}
-            itemCount={listOfPatients ? listOfPatients.length : null}
+            itemCount={displayedPatients ? displayedPatients.length : null}
             handleSearchSortFilterCustom={handleSearchSortFilter}
             VIEW_MODES={VIEW_MODES}
             viewMode={viewMode}
@@ -668,13 +677,13 @@ const normalizePatientV1 = (p = {}) => {
                 )
               }
               ListFooterComponent={() =>
-                isLoadingMore ? (
+                hasMoreToShow ? (
                   <View style={styles.loadingMoreContainer}>
                     <ActivityIndicator visible size="small" />
                   </View>
                 ) : null
               }
-              data={visiblePatients}
+              data={displayedPatients}
               keyExtractor={(item) => String(item.patientID ?? fav.getPatientId(item))}
               style={styles.patientListContainer}
               renderItem={renderPatientItem}
