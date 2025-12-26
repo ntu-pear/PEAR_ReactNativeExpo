@@ -193,9 +193,15 @@ function PatientProfileScreen(props) {
         let picture = pickFirstFrom(p, [
           'profilePicture', 'profile_picture', 'profile_photo', 'photoUrl', 'avatar', 'profilePhoto', 'avatar_url'
         ]);
-        
-        // If no picture or empty string, use default placeholder
-        if (!picture || (typeof picture === 'string' && picture.trim() === '')) {
+
+         // Validate profile picture (must not be null, empty, whitespace, or literal "string")
+        const hasValidProfilePicture = 
+          picture && 
+          typeof picture === "string" && 
+          picture.trim().length > 0 &&
+          picture.trim().toLowerCase() !== "string";
+
+        if (!hasValidProfilePicture) {
           console.log('[PROFILE PICTURE] Using default placeholder for patient:', id);
           picture = defaultProfilePicture;
         } else {

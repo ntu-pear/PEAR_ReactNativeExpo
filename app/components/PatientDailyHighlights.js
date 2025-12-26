@@ -1,5 +1,5 @@
 // Base
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Modal,
   StyleSheet,
@@ -7,7 +7,6 @@ import {
   Pressable,
   View,
   TouchableOpacity,
-  TouchableWithoutFeedback,
 } from 'react-native';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -47,16 +46,13 @@ function PatientDailyHighlights() {
   // new API v1 type values 
   const [dropdownItems, setDropdownItems] = useState([
     { label: 'All', value: 'All' },
-    { label: 'New Prescription', value: 'Prescription' }, // Match API value
+    { label: 'New Prescription', value: 'Prescription' },
     { label: 'New Allergy', value: 'Allergy' },
     { label: 'New Activity Exclusion', value: 'ActivityExclusion' },
     { label: 'Abnormal Vital', value: ['Vital', 'AbnormalVital'] },
     { label: 'Problem', value: 'Problem' },
     { label: 'New Medical Records', value: 'MedicalHistory' },
   ]);
-
-
-
 
   const navigation = useNavigation();
 
@@ -80,184 +76,158 @@ function PatientDailyHighlights() {
     }
   }, [isRetry]);
 
-  // Using the new API v1 
-  const getAllHighlights = async () => {
-  setIsLoading(true);
-  setIsError(false);
-
-  try {
-    // Call the new API endpoint that returns ALL patients' highlights
-    const response = await highlightApi.getAllHighlights();
-
-    // ADD THIS: Log raw highlights response
-    console.log('[HIGHLIGHTS API] Raw response:', JSON.stringify(response, null, 2));
-    console.log('[HIGHLIGHTS API] Response status:', response.status);
-    console.log('[HIGHLIGHTS API] Response ok:', response.ok);
-    console.log('[HIGHLIGHTS API] Response data type:', typeof response.data);
-    console.log('[HIGHLIGHTS API] Is Array?:', Array.isArray(response.data));
-
-    if (!response.ok) {
-      setIsLoading(false);
-      setIsError(true);
-      setIsRetry(true);
-      setStatusCode(response.status);
-      return;
+  // Helper function to pick first non-empty value from object
+  const pickFirstFrom = useCallback((obj, ...paths) => {
+    for (const path of paths) {
+      const val = obj?.[path];
+      if (val) return String(val).trim();
     }
+    return '';
+  }, []);
 
-    // Response is an array of highlights
-    const allHighlights = Array.isArray(response.data) ? response.data : [];
-    
-    // Filter out deleted highlights
-    const activeHighlights = allHighlights.filter(h => h.IsDeleted !== "1");
-    
-    console.log('[HIGHLIGHTS] Active highlights after filtering:', activeHighlights.length, 'of', allHighlights.length);
-
-    // Get unique patient IDs from highlights
-    const uniquePatientIds = [...new Set(activeHighlights.map(h => h.PatientId))];
-
-    // ADD THIS: Log patient IDs being fetched
-    console.log('[HIGHLIGHTS] Unique patient IDs:', uniquePatientIds);
-    console.log('[HIGHLIGHTS] Fetching details for', uniquePatientIds.length, 'patients');
-
-    
-    // Fetch patient details for all patients with highlights
-    const patientDetailsPromises = uniquePatientIds.map(id => 
-      patientApi.readPatientV1(id)
-    );
-    const patientDetailsResponses = await Promise.all(patientDetailsPromises);
-
-    // ✅ ADD THIS: Log each patient response
-    patientDetailsResponses.forEach((res, index) => {
-      const patientId = uniquePatientIds[index];
-      console.log(`[PATIENT ${patientId}] Status: ${res.status}, OK: ${res.ok}`);
-      console.log(`[PATIENT ${patientId}] Raw data:`, JSON.stringify(res.data, null, 2));
+  // Memoize aggregation function to prevent unnecessary recalculations
+  const aggregateHighlightsByType = useCallback((highlights) => {
+    return highlights.map((highlight) => {
+      const aggregated = {};
       
-      // Log the nested structure
-      if (res.ok && res.data) {
-        console.log(`[PATIENT ${patientId}] res.data.data exists?`, !!res.data.data);
-        console.log(`[PATIENT ${patientId}] Actual patient object:`, JSON.stringify(res.data.data || res.data, null, 2));
-      }
+      highlight.highlights.forEach((h) => {
+        if (!aggregated[h.highlightType]) {
+          aggregated[h.highlightType] = { ...h, count: 1 };
+        } else {
+          aggregated[h.highlightType].count += 1;
+        }
+      });
+
+      return {
+        ...highlight,
+        highlights: Object.values(aggregated),
+      };
     });
-    
-    // Helper function to pick first non-empty value from object
-    const pickFirstFrom = (obj, ...paths) => {
-      for (const path of paths) {
-        const val = obj?.[path];
-        if (val) return String(val).trim();
+  }, []);
+
+  // Using the new API v1 with optimizations
+  const getAllHighlights = useCallback(async () => {
+    setIsLoading(true);
+    setIsError(false);
+
+    try {
+      // Call the new API endpoint that returns ALL patients' highlights
+      const response = await highlightApi.getAllHighlights();
+
+      if (!response.ok) {
+        setIsLoading(false);
+        setIsError(true);
+        setIsRetry(true);
+        setStatusCode(response.status);
+        return;
       }
-      return '';
-    };
-    
-    // Create a map of patient ID to patient details
-    const patientDetailsMap = {};
-    patientDetailsResponses.forEach((res, index) => {
-      if (res.ok && res.data) {
-        const patientId = uniquePatientIds[index];
-        
-        // Handle nested data structure - try both res.data.data and res.data
-        const p = res.data.data || res.data;
-        
-        // Extract name fields using multiple possible field names
-        const firstName = pickFirstFrom(p, 'firstname', 'firstName', 'givenname', 'givenName');
-        const lastName = pickFirstFrom(p, 'lastname', 'lastName', 'familyname', 'familyName', 'surname');
-        const preferred = pickFirstFrom(p, 'preferredName', 'preferredname', 'nickname');
-        const fullName = pickFirstFrom(p, 'name', 'fullname', 'fullName', 'displayname', 'displayName');
-        
-        // Compute display name (preferred > full > first+last)
-        let displayName = '';
-        if (preferred) {
-          displayName = preferred;
-        } else if (fullName) {
-          displayName = fullName;
-        } else if (firstName && lastName) {
-          displayName = `${firstName} ${lastName}`.trim();
-        } else if (firstName) {
-          displayName = firstName;
-        } else if (lastName) {
-          displayName = lastName;
+
+      // Response is an array of highlights
+      const allHighlights = Array.isArray(response.data) ? response.data : [];
+      
+      // Filter out deleted highlights
+      const activeHighlights = allHighlights.filter(h => h.IsDeleted !== "1");
+      
+      console.log('[HIGHLIGHTS] Active highlights:', activeHighlights.length);
+
+      // Get unique patient IDs from highlights
+      const uniquePatientIds = [...new Set(activeHighlights.map(h => h.PatientId))];
+
+      // Use Promise.allSettled for better error handling
+      const patientDetailsResponses = await Promise.allSettled(
+        uniquePatientIds.map(id => patientApi.readPatientV1(id))
+      );
+      
+      const patientDetailsMap = {};
+      patientDetailsResponses.forEach((result, index) => {
+        if (result.status === 'fulfilled' && result.value.ok && result.value.data) {
+          const patientId = uniquePatientIds[index];
+          const p = result.value.data.data || result.value.data;
+          
+          const firstName = pickFirstFrom(p, 'firstname', 'firstName', 'givenname', 'givenName');
+          const lastName = pickFirstFrom(p, 'lastname', 'lastName', 'familyname', 'familyName', 'surname');
+          const preferred = pickFirstFrom(p, 'preferredName', 'preferredname', 'nickname');
+          const fullName = pickFirstFrom(p, 'name', 'fullname', 'fullName', 'displayname', 'displayName');
+          
+          let displayName = '';
+          if (preferred) {
+            displayName = preferred;
+          } else if (fullName) {
+            displayName = fullName;
+          } else if (firstName && lastName) {
+            displayName = `${firstName} ${lastName}`.trim();
+          } else if (firstName) {
+            displayName = firstName;
+          } else if (lastName) {
+            displayName = lastName;
+          }
+          
+          patientDetailsMap[patientId] = {
+            firstName,
+            lastName,
+            displayName,
+            photo: p.profilePicture || p.profilepicture || p.photo || null,
+          };
+        }
+      });
+
+      const groupedByPatient = activeHighlights.reduce((acc, h) => {
+        const patientId = h.PatientId;
+        if (!acc[patientId]) {
+          const patientDetails = patientDetailsMap[patientId] || {};
+          const patientName = patientDetails.displayName || `Patient ${patientId}`;
+          
+          acc[patientId] = {
+            patientInfo: {
+              patientId,
+              patientName,
+              patientPhoto: patientDetails.photo || null,
+            },
+            highlights: []
+          };
         }
         
-        patientDetailsMap[patientId] = {
-          firstName: firstName,
-          lastName: lastName,
-          displayName: displayName,
-          photo: p.profilePicture || p.profilepicture || p.photo || null,
-        };
-      }
-    });
-
-    // Group by patient and transform to match your UI structure
-    const groupedByPatient = activeHighlights.reduce((acc, h) => {
-      const patientId = h.PatientId;
-      if (!acc[patientId]) {
-        const patientDetails = patientDetailsMap[patientId] || {};
-        // Use display name, fallback to "Patient X" if not found
-        const patientName = patientDetails.displayName || `Patient ${patientId}`;
+        acc[patientId].highlights.push({
+          highlightID: h.Id,
+          highlightType: h.Type,
+          highlightJson: h.HighlightJSON,
+          startDate: h.StartDate,
+          endDate: h.EndDate,
+        });
         
-        acc[patientId] = {
-          patientInfo: {
-            patientId: patientId,
-            patientName: patientName,
-            patientPhoto: patientDetails.photo || null,
-          },
-          highlights: []
-        };
-      }
+        return acc;
+      }, {});
+
+      const transformedData = Object.values(groupedByPatient);
+      const aggregatedData = aggregateHighlightsByType(transformedData);
       
-      // Transform highlight to match your UI format
-      acc[patientId].highlights.push({
-        highlightID: h.Id,
-        highlightType: h.Type,
-        highlightJson: h.HighlightJSON,
-        startDate: h.StartDate,
-        endDate: h.EndDate,
-      });
-      
-      return acc;
-    }, {});
-
-    // Convert to array
-    const transformedData = Object.values(groupedByPatient);
-
-    // Apply your existing aggregation logic
-    const aggregatedData = aggregateHighlightsByType(transformedData);
-    
-    console.log('[HIGHLIGHTS] Final aggregated data:', aggregatedData.length, 'patients with highlights');
-    
-    setHighlightsData(aggregatedData);
-    setFilteredData(aggregatedData);
-    setIsLoading(false);
-    setStatusCode(response.status);
-    setIsError(false);
-    setIsRetry(false);
-  } catch (error) {
-    console.error('[HIGHLIGHTS] Error fetching highlights:', error);
-    setIsLoading(false);
-    setIsError(true);
-    setStatusCode(500);
-  }
-};
-
-
+      setHighlightsData(aggregatedData);
+      setFilteredData(aggregatedData);
+      setIsLoading(false);
+      setStatusCode(response.status);
+      setIsError(false);
+      setIsRetry(false);
+    } catch (error) {
+      console.error('[HIGHLIGHTS] Error:', error);
+      setIsLoading(false);
+      setIsError(true);
+      setStatusCode(500);
+    }
+  }, [pickFirstFrom, aggregateHighlightsByType]);
 
   // Filter data when either searchValue or filterValue changes
   useEffect(() => {
-
-    // Search by searchValue
     const dataAfterSearch = highlightsData.filter((item) =>
       item.patientInfo.patientName
         .toLowerCase()
         .includes(searchValue.toLowerCase()),
     );
 
-    // Filter by filterValue (highlight types)
     let dataAfterFilter = highlightsData;
     
-    // Handle filter: skip if 'All' or empty
     if (filterValue && filterValue !== 'All' && filterValue.length > 0) {
-    // Flatten the filterValue in case it contains arrays (like ['Vital', 'AbnormalVital'])
       const filterArray = Array.isArray(filterValue) 
-        ? filterValue.flat() // flatten nested arrays
+        ? filterValue.flat()
         : [filterValue];
       
       dataAfterFilter = highlightsData.filter((item) =>
@@ -265,7 +235,6 @@ function PatientDailyHighlights() {
       );
     }
 
-    // Find intersection of dataAfterSearch and dataAfterFilter
     const data = dataAfterSearch.filter((value) =>
       dataAfterFilter.includes(value),
     );
@@ -273,37 +242,11 @@ function PatientDailyHighlights() {
     setFilteredData(data);
   }, [highlightsData, searchValue, filterValue]);
 
-
-  const handlePullToRefresh = async () => {
+  const handlePullToRefresh = useCallback(async () => {
     await getAllHighlights();
-    return;
-  };
+  }, [getAllHighlights]);
 
-  const aggregateHighlightsByType = (highlights) => {
-    const aggregatedHighlights = [];
-
-    highlights.forEach((highlight) => {
-      const { highlights } = highlight; // Assuming this is an array of highlight objects
-      const aggregated = {};
-
-      highlights.forEach((h) => {
-        if (!aggregated[h.highlightType]) {
-          aggregated[h.highlightType] = { ...h, count: 1 }; // Copy the highlight and add a count
-        } else {
-          aggregated[h.highlightType].count += 1; // Increment the count
-        }
-      });
-
-      aggregatedHighlights.push({
-        ...highlight,
-        highlights: Object.values(aggregated), // Replace with aggregated highlights
-      });
-    });
-
-    return aggregatedHighlights;
-  };
-
-  const noDataMessage = () => {
+  const noDataMessage = useCallback(() => {
     if (isLoading) {
       return <></>;
     }
@@ -327,19 +270,34 @@ function PatientDailyHighlights() {
         topPaddingSize={'32%'}
       />
     );
-  };
+  }, [isLoading, isError, statusCode]);
+
+  const renderHighlightItem = useCallback(({ item }) => (
+    <HighlightsCard
+      item={item}
+      navigation={navigation}
+      setModalVisible={setModalVisible}
+    />
+  ), [navigation]);
+
+  const keyExtractor = useCallback((item) => String(item.patientInfo.patientId), []);
+
+  const closeModal = useCallback(() => {
+    setModalVisible(false);
+    setSearchValue('');
+    setFilterValue('All');
+  }, []);
+
+  const openModal = useCallback(() => {
+    setModalVisible(true);
+    setSearchValue('');
+    setFilterValue('All');
+  }, []);
 
   return (
     <>
       <TouchableOpacity
-        onPress={() => {
-          setModalVisible(!modalVisible);
-          // Reset filters when opening modal
-          if (!modalVisible) {
-            setSearchValue('');
-            setFilterValue('All');
-          }
-        }}
+        onPress={openModal}
         testID={'highlightsButton'}
         style={{ flexDirection: 'row' }}
       >
@@ -347,7 +305,7 @@ function PatientDailyHighlights() {
           as={<MaterialIcons name="announcement" />}
           size={10}
           color={colors.black}
-        ></Icon>
+        />
         {highlightsData.length > 0 ? (
           <View style={styles.iconNumber}>
             <Text
@@ -362,78 +320,65 @@ function PatientDailyHighlights() {
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
-          setSearchValue('');
-          setFilterValue('All');
-        }}
+        onRequestClose={closeModal}
         testID="highlightsModal"
       >
-        <TouchableOpacity
+        <Pressable 
           style={styles.centeredView}
-          activeOpacity={1}
-          onPressOut={() => {
-            setModalVisible(!modalVisible);
-            setSearchValue('');
-            setFilterValue('All');
-          }}
+          onPress={closeModal}
         >
-          <TouchableWithoutFeedback>
-            <View style={styles.modalView}>
-              <Text style={styles.modalHeaderText}>
-                Patients Daily Highlights
-              </Text>
-              <Pressable
-                style={styles.buttonClose}
-                onPress={() => {
-                  setModalVisible(!modalVisible);
-                  setSearchValue('');
-                  setFilterValue('All');
-                }}
-                testID="highlightsCloseButton"
-              >
-                <MaterialCommunityIcons
-                  name="close"
-                  size={Platform.OS === 'web' ? 42 : 20}
-                />
-              </Pressable>
-              <View style={styles.searchBarDropDownView}>
-                <View style={styles.flex}>
-                  <SearchBar
-                    value={searchValue}
-                    onChangeText={setSearchValue}
-                  />
-                </View>
-                <View style={styles.flex}>
-                  <SelectionInputField
-                    showTitle={false}
-                    value={filterValue}
-                    dataArray={dropdownItems}
-                    onDataChange={setFilterValue}
-                    placeholder={'Select Filter'}
-                  />
-                </View>
-              </View>
-              <FlatList
-                w="100%"
-                showsVerticalScrollIndicator={true}
-                data={filteredData}
-                keyExtractor={(item) => item.patientInfo.patientId}
-                onRefresh={handlePullToRefresh}
-                refreshing={isLoading}
-                ListEmptyComponent={noDataMessage}
-                renderItem={({ item }) => (
-                  <HighlightsCard
-                    item={item}
-                    navigation={navigation}
-                    setModalVisible={setModalVisible}
-                  />
-                )}
-                testID="flatList"
+          <Pressable 
+            style={styles.modalView}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <Text style={styles.modalHeaderText}>
+              Patients Daily Highlights
+            </Text>
+            <Pressable
+              style={styles.buttonClose}
+              onPress={closeModal}
+              testID="highlightsCloseButton"
+            >
+              <MaterialCommunityIcons
+                name="close"
+                size={Platform.OS === 'web' ? 42 : 20}
               />
+            </Pressable>
+            <View style={styles.searchBarDropDownView}>
+              <View style={styles.flex}>
+                <SearchBar
+                  value={searchValue}
+                  onChangeText={setSearchValue}
+                />
+              </View>
+              <View style={styles.flex}>
+                <SelectionInputField
+                  showTitle={false}
+                  value={filterValue}
+                  dataArray={dropdownItems}
+                  onDataChange={setFilterValue}
+                  placeholder={'Select Filter'}
+                />
+              </View>
             </View>
-          </TouchableWithoutFeedback>
-        </TouchableOpacity>
+            <FlatList
+              w="100%"
+              showsVerticalScrollIndicator={true}
+              data={filteredData}
+              keyExtractor={keyExtractor}
+              onRefresh={handlePullToRefresh}
+              refreshing={isLoading}
+              ListEmptyComponent={noDataMessage}
+              renderItem={renderHighlightItem}
+              testID="flatList"
+              removeClippedSubviews={Platform.OS === 'android'}
+              maxToRenderPerBatch={10}
+              windowSize={10}
+              initialNumToRender={10}
+              scrollEnabled={true}
+            />
+          </Pressable>
+        </Pressable>
       </Modal>
     </>
   );
@@ -444,7 +389,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalView: {
     margin: 20,
@@ -467,13 +412,13 @@ const styles = StyleSheet.create({
     padding: 10,
     alignSelf: 'flex-end',
     position: 'absolute',
+    zIndex: 10,
   },
   modalHeaderText: {
     marginBottom: 15,
     marginTop: 10,
     textAlign: 'center',
-    fontSize: Platform.OS === 'web' ? 18 : null,
-    fontSize: 25,
+    fontSize: Platform.OS === 'web' ? 18 : 25,
   },
   modalText: {
     marginTop: Platform.OS === 'web' ? 24 : 15,

@@ -56,6 +56,13 @@ function ProfileNameButton({
     //ToastAndroid.show(('Error loading profile picture for ' + profileLineOne.trim()), ToastAndroid.SHORT)
     setIsError(true);
   }
+
+  // Check if profile picture is valid (not null, undefined, empty string, whitespace, or literal "string")
+  const hasValidProfilePicture = 
+    profilePicture && 
+    typeof profilePicture === "string" && 
+    profilePicture.trim().length > 0 &&
+    profilePicture.trim().toLowerCase() !== "string";
   
   return (
     <View alignItems="center">
@@ -65,12 +72,10 @@ function ProfileNameButton({
             style={customProfilePictureStyle}
             alt={isPatient === true ? 'patient_image' : 'user_image'}
             onError={handleProfilePicError}
-            // Note: This is a fall-back uri. Will only be used if source fails to render the image.
+            // Fallback to assets/placeholder.png if no valid picture or error occurred
             source={
-              profilePicture 
-                ? isError 
-                  ? DefaultImage
-                  : { uri: `${profilePicture}` } 
+              hasValidProfilePicture && !isError
+                ? { uri: profilePicture }
                 : DefaultImage
             }
           />
