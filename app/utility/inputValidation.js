@@ -37,35 +37,38 @@ export const addressFormat = (value) => {
 };
 
 export const nricValid = (value) => {
-  const first = value[0];
-  const digits = value.slice(1, -1);
-  const last = value[8];
+  if (!value || value.length !== 9) return errors.nricError;
+
+  const first = value[0].toUpperCase();
+  const last = value[8].toUpperCase();
+  const digits = value.slice(1, 8);
+
+  if (!/^\d{7}$/.test(digits)) return errors.nricError;
 
   const weights = [2, 7, 6, 5, 4, 3, 2];
-  let checksum = 0;
+  let sum = 0;
 
-  for (var c in digits) {
-    checksum += digits[c] * weights[c];
-  }
+  for (let i = 0; i < 7; i++) sum += Number(digits[i]) * weights[i];
 
-  if (first.toUpperCase() == 'T' || first.toUpperCase() == 'G') {
-    checksum += 4;
-  }
+  if (first === 'T' || first === 'G') sum += 4;
+  else if (first === 'M') sum += 3;
 
-  checksum = checksum % 11;
+  const remainder = sum % 11;
+  const checkDigit = 11 - (remainder + 1); // == 10 - remainder, gives 0..10
 
-  const checkFG = ['X', 'W', 'U', 'T', 'R', 'Q', 'P', 'N', 'M', 'L', 'K'];
-  const checkST = ['J', 'Z', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A'];
+  const tableST = ['A','B','C','D','E','F','G','H','I','Z','J'];
+  const tableFG = ['K','L','M','N','P','Q','R','T','U','W','X'];
+  const tableM  = ['K','L','J','N','P','Q','R','T','U','W','X'];
 
-  const valid =
-    ((first.toUpperCase() == 'F' || first.toUpperCase() == 'G') &&
-      last.toUpperCase() == checkFG[checksum]) ||
-    ((first.toUpperCase() == 'S' || first.toUpperCase() == 'T') &&
-      last.toUpperCase() == checkST[checksum]);
-  if (!valid) {
-    return errors.nricError;
-  }
+  let expected;
+  if (first === 'S' || first === 'T') expected = tableST[checkDigit];
+  else if (first === 'F' || first === 'G') expected = tableFG[checkDigit];
+  else if (first === 'M') expected = tableM[checkDigit];
+  else return errors.nricError;
+
+  return last === expected ? undefined : errors.nricError;
 };
+
 
 export const homePhoneNoFormat = (value) => {
   if (!/^$|^6[0-9]{7}$/.test(value)) {
