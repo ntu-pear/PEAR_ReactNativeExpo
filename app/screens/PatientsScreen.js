@@ -696,7 +696,12 @@ const normalizePatientV1 = (p = {}) => {
               initialNumToRender={10}
             />
           </View>
-          <View style={styles.fabContainer}>
+          <Center position="absolute" right="5" bottom="8%">
+            <BackToTopButton
+              flatListRef={patientListRef}
+              position="bottom-right"
+              offset={17.5}
+            />
             <Fab
               testID="addPatients"
               backgroundColor={colors.pink}
@@ -713,14 +718,7 @@ const normalizePatientV1 = (p = {}) => {
               shadow={2}
               size="sm"
             />
-            <View style={{ marginTop: 16 }}>
-              <BackToTopButton
-                flatListRef={patientListRef}
-                position="bottom-right"
-                offset={0}
-              />
-            </View>
-          </View>
+          </Center>
         </View>
       )}
     </>

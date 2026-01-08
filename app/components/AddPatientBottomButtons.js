@@ -80,9 +80,10 @@ function AddPatientBottomButtons({
                   width={12}
                   height={12}
                   variant="outline"
-                  colorScheme={colors.white}
+                  borderColor={colors.grey}
                   borderRadius="full"
                   onPress={removeComponent}
+                  _text={{ color: colors.grey }}
                 >
                   -
                 </Button>
@@ -107,9 +108,10 @@ function AddPatientBottomButtons({
                   width={12}
                   height={12}
                   variant="outline"
-                  colorScheme={colors.white}
+                  borderColor={colors.grey}
                   borderRadius="full"
                   onPress={removeComponent}
+                  _text={{ color: colors.grey }}
                 >
                   -
                 </Button>
