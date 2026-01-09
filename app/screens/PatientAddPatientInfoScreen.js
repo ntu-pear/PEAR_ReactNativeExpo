@@ -94,9 +94,7 @@ function PatientAddPatientInfoScreen({
   const [isDOBError, setIsDOBError] = useState(false);
   const [isGenderError, setIsGenderError] = useState(false);
   const [isAddrError, setIsAddrError] = useState(false);
-  const [isPostalCodeError, setIsPostalCodeError] = useState(false);
   const [isTempAddrError, setIsTempAddrError] = useState(false);
-  const [isTempPostalCodeError, setIsTempPostalCodeError] = useState(false);
   const [isHomeNoError, setIsHomeNoError] = useState(false);
   const [isMobileNoError, setIsMobileNoError] = useState(false);
   const [isPrefNameError, setIsPrefNameError] = useState(false);
@@ -127,9 +125,7 @@ function PatientAddPatientInfoScreen({
         isDOBError ||
         isGenderError ||
         isAddrError ||
-        isPostalCodeError ||
         isTempAddrError ||
-        isTempPostalCodeError ||
         isHomeNoError ||
         isMobileNoError ||
         isPrefNameError ||
@@ -144,9 +140,7 @@ function PatientAddPatientInfoScreen({
     isDOBError,
     isGenderError,
     isAddrError,
-    isPostalCodeError,
     isTempAddrError,
-    isTempPostalCodeError,
     isHomeNoError,
     isMobileNoError,
     isPrefNameError,
@@ -254,13 +248,6 @@ function PatientAddPatientInfoScreen({
     [isAddrError],
   );
 
-  const handlePostalCodeError = useCallback(
-    (state) => {
-      setIsPostalCodeError(state);
-      // console.log("addr", state)
-    },
-    [isPostalCodeError],
-  );
 
   const handleTempAddrError = useCallback(
     (state) => {
@@ -270,13 +257,6 @@ function PatientAddPatientInfoScreen({
     [isTempAddrError],
   );
 
-  const handleTempPostalCodeError = useCallback(
-    (state) => {
-      setIsTempPostalCodeError(state);
-      // console.log("addr", state)
-    },
-    [isTempPostalCodeError],
-  );
 
   const handleHomeNoError = useCallback(
     (state) => {
@@ -341,7 +321,7 @@ function PatientAddPatientInfoScreen({
   ) : (
     <>
       <Center>
-        <AddPatientProgress value={30} />
+        <AddPatientProgress value={50} />
       </Center>
       <FlatList
         testID={testID}
@@ -355,7 +335,7 @@ function PatientAddPatientInfoScreen({
                   <View style={styles.titleAndPictureContainer}>
                     <Text
                       testID={`${testID}_title`}
-                      marginTop={6}
+                      marginTop={8}
                       color={colors.green}
                       style={styles.titleText}
                     >
@@ -441,6 +421,7 @@ function PatientAddPatientInfoScreen({
                   <SensitiveInputField
                     testID={`${testID}_NRIC`}
                     isRequired
+                    hideError={false}
                     title={'NRIC'}
                     autoCapitalize="characters"
                     value={patient.NRIC}
@@ -484,18 +465,6 @@ function PatientAddPatientInfoScreen({
                   />
 
                   <InputField
-                    testID={`${testID}_PostalCode`}
-                    isRequired
-                    title={'Postal Code'}
-                    value={patient.PostalCode}
-                    onChangeText={handleFormData('PostalCode')}
-                    onEndEditing={handlePostalCodeError}
-                    dataType="postal code"
-                    keyboardType="numeric"
-                    maxLength={6}
-                  />
-
-                  <InputField
                     testID={`${testID}_TempAddress`}
                     title={'Temporary Address'}
                     value={patient.TempAddress}
@@ -504,17 +473,6 @@ function PatientAddPatientInfoScreen({
                     onEndEditing={handleTempAddrError}
                   />
 
-                  <InputField
-                    testID={`${testID}_TempPostalCode`}
-                    isRequired={patient.TempAddress.length > 0}
-                    title={'Temporary Postal Code'}
-                    value={patient.TempPostalCode}
-                    onChangeText={handleFormData('TempPostalCode')}
-                    onEndEditing={handleTempPostalCodeError}
-                    dataType="postal code"
-                    keyboardType="numeric"
-                    maxLength={6}
-                  />
                   <InputField
                     testID={`${testID}_HomeNo`}
                     title={'Home Telephone No.'}
@@ -624,6 +582,7 @@ const styles = StyleSheet.create({
   },
   titleText: {
     ...typography.heading1,
+    lineHeight: 32,
   },
   errorText: {
     fontSize: 20,

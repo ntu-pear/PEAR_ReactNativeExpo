@@ -32,6 +32,15 @@ export default function useGetSelectionOptions(option) {
       try {
         console.log('Retrieving from API!');
         const response = await apiFunction.request(option);
+        
+        // Handle API failure or empty response gracefully
+        if (!response.ok || !response.data || !response.data.data) {
+          console.log(`[useGetSelectionOptions] API failed for ${option}, using fallback`);
+          setIsError(true);
+          setIsLoading(false);
+          return;
+        }
+        
         const responseData = response.data.data;
         // console.log('response data = ');
         // console.log(responseData);
@@ -56,6 +65,7 @@ export default function useGetSelectionOptions(option) {
           setIsLoading(false);
         }
       } catch (error) {
+        console.log(`[useGetSelectionOptions] Error for ${option}:`, error);
         setIsError(error);
       }
     } else {

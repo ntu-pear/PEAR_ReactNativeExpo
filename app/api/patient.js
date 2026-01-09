@@ -26,6 +26,9 @@ const v1VitalAddEndpoint = `/Vital/add`;                        // POST
 const v1VitalUpdateEndpoint = (vital_id) => `/Vital/update/${vital_id}`; // PUT
 const v1VitalDeleteEndpoint = `/Vital/delete`;                  // DELETE (expects vital_id)
 
+// ---------- Profile Picture (v1) ----------
+const v1UpdateProfilePictureEndpoint = (patient_id) => `/patients/update/${patient_id}/update_patient_profile_picture`;
+
 /*
  * List all functions here
  * Refer to this api doc: https://github.com/infinitered/apisauce
@@ -111,13 +114,11 @@ const listPatientAllergiesV1 = async (patient_id) => {
 
 const addPatientAllergyV1 = async (patient_id, data) => {
   const payload = {
-    patient_id,
-    allergy_type_id:
-      data.AllergyListID ?? data.allergy_type_id ?? data.allergyListID,
-    allergy_reaction_type_id:
-      data.AllergyReactionListID ?? data.allergy_reaction_type_id ?? data.allergyReactionListID,
-    allergy_remarks:
-      data.AllergyRemarks ?? data.allergy_remarks ?? data.allergyRemarks ?? '',
+    PatientID: patient_id,
+    AllergyTypeID: data.AllergyListID ?? data.allergy_type_id ?? data.allergyListID ?? data.AllergyTypeID,
+    AllergyReactionTypeID: data.AllergyReactionListID ?? data.allergy_reaction_type_id ?? data.allergyReactionListID ?? data.AllergyReactionTypeID,
+    AllergyRemarks: data.AllergyRemarks ?? data.allergy_remarks ?? data.allergyRemarks ?? '',
+    IsDeleted: '0',
   };
   const url = `/api/v1/create_patient_allergy`;
   const res = await client.post(url, payload, withPatientV1Base());
@@ -462,18 +463,16 @@ const getPatientList = async (maskNRIC = true, patientStatus = null) => {
 };
 
 // Create patient (used by AddPatient screen)
-const addPatient = async (patientFormData) => {
-  const formData = new FormData();
+// Expects a properly formatted payload matching the API schema
+const addPatient = async (patientPayload) => {
+  console.log('[ADD PATIENT] Sending patient payload:', patientPayload);
+  return client.post('/patients/add', patientPayload, withPatientV1Base());
+};
 
-  for (const key in patientFormData.patientInfo) {
-    let value = patientFormData.patientInfo[key];
-    if (value instanceof Date) value = value.toISOString().split('T')[0];
-    if (key === 'NRIC') value = String(value || '').toUpperCase();
-    if (key === 'IsChecked') continue;
-    formData.append(key, value);
-  }
-
-  return client.post('/patients/', formData, withPatientV1Base());
+// Add guardian for a patient
+const addGuardian = async (guardianPayload) => {
+  console.log('[ADD GUARDIAN] Sending guardian payload:', guardianPayload);
+  return client.post('/Guardian/add', guardianPayload, withPatientV1Base());
 };
 
 // Update patient (used by EditPatientInfoScreen)
@@ -509,6 +508,16 @@ const getAllergyReactionTypesV1 = async () => {
   return res;
 };
 
+// ---------- Profile Picture Upload (v1) ----------
+const uploadPatientProfilePictureV1 = (patient_id, file) => {
+  const form = new FormData();
+  form.append('file', file);
+  return client.put(v1UpdateProfilePictureEndpoint(patient_id), form, {
+    ...withPatientV1Base(),
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+
 /*
  * Expose your end points here
  */
@@ -517,6 +526,7 @@ export default {
   getPatient,
   getPatientList,
   addPatient,
+  addGuardian,
   updatePatient,
 
   // --- v1 Patient Service (new) ---
@@ -570,6 +580,6 @@ export default {
   updatePatientPrescriptionV1,
   deletePatientPrescriptionV1,
 
-
+  // --- v1 Profile Picture ---
+  uploadPatientProfilePictureV1,
 };
-

@@ -57,9 +57,8 @@ function DateInputField({
   const minimumDOB = new Date();
   minimumDOB.setFullYear(minimumDOB.getFullYear() - 150);
 
-  // Latest year user can be born (15 years ago)
+  // Maximum date is today (no restriction on how recent DOB can be)
   const maximumDOB = new Date();
-  maximumDOB.setFullYear(maximumDOB.getFullYear() - 15);
 
   // Validation function for user input:
   // Error if:

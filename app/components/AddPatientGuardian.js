@@ -35,8 +35,8 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError, testI
       'Husband',
       'Wife',
       'Child',
-      'Parent',
       'Sibling',
+      'Parent',
       'Grandchild',
       'Friend',
       'Nephew',
@@ -66,9 +66,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError, testI
   const [isDOBError, setIsDOBError] = useState(false);
   const [isRelationError, setIsRelationError] = useState(false);
   const [isTempAddrError, setIsTempAddrError] = useState(false);
-  const [isTempPostalCodeError, setIsTempPostalCodeError] = useState(false);
   const [isAddrError, setIsAddrError] = useState(false);
-  const [isPostalCodeError, setIsPostalCodeError] = useState(false);
   const [isMobileNoError, setIsMobileNoError] = useState(false);
   const [isEmailError, setIsEmailError] = useState(false);
   const [isLoginError, setIsLoginError] = useState(false);
@@ -83,9 +81,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError, testI
       isDOBError ||
       isRelationError ||
       isAddrError ||
-      isPostalCodeError ||
       isTempAddrError ||
-      isTempPostalCodeError ||
       isMobileNoError ||
       isEmailError ||
       isLoginError,
@@ -101,9 +97,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError, testI
     isDOBError,
     isRelationError,
     isAddrError,
-    isPostalCodeError,
     isTempAddrError,
-    isTempPostalCodeError,
     isMobileNoError,
     isEmailError,
     isLoginError,
@@ -123,7 +117,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError, testI
   // Try to get relationships list from backend. If retrieval from the hook is successful,
   // replace the content in listOfRelationships with the retrieved one
   useEffect(() => {
-    if (!isLoading && !isError && data) {
+    if (!isLoading && !isError && data && data.length > 0) {
       setListOfRelationships(data); // sort by value
     }
   }, [data, isError, isLoading]);
@@ -194,14 +188,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError, testI
       [isAddrError]
     );
   
-    const handlePostalCodeError = useCallback(
-      (state) => {
-        setIsPostalCodeError(state);
-        // console.log("addr", state)
-      },
-      [isPostalCodeError]
-    );
-  
+
     const handleTempAddrError = useCallback(
       (state) => {
         setIsTempAddrError(state);
@@ -210,14 +197,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError, testI
       [isTempAddrError]
     );
   
-    const handleTempPostalCodeError = useCallback(
-      (state) => {
-        setIsTempPostalCodeError(state);
-        // console.log("temp postal code", state)
-      },
-      [isTempPostalCodeError]
-    );
-  
+
     const handleMobileNoError = useCallback(
       (state) => {
         setIsMobileNoError(state);
@@ -256,7 +236,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError, testI
               color={colors.green}
               style={styles.text}
             >
-              Guardian Information {title}
+              {title == 1 ? 'Primary Guardian' : 'Secondary Guardian (Optional)'}
             </Text>
           </View>
 
@@ -326,36 +306,12 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError, testI
           />
 
           <InputField
-            testID={`${testID}_PostalCode`}
-            isRequired
-            title={'Postal Code'}
-            value={guardian.PostalCode}
-            onChangeText={handleFormData('PostalCode', i)}
-            onEndEditing={handlePostalCodeError}
-            dataType='postal code'
-            keyboardType='numeric'
-            maxLength={6}
-          />
-
-          <InputField
             testID={`${testID}_TempAddress`}
             title={'Temporary Address'}
             value={guardian.TempAddress}
             dataType="address"
             onChangeText={handleFormData('TempAddress', i)}
             onEndEditing={handleTempAddrError}
-          />
-
-          <InputField
-            testID={`${testID}_TempPostalCode`}
-            isRequired={guardian.TempAddress.length > 0}
-            title={'Temporary Postal Code'}
-            value={guardian.TempPostalCode}
-            onChangeText={handleFormData('TempPostalCode', i)}
-            onEndEditing={handleTempPostalCodeError}
-            dataType='postal code'
-            keyboardType='numeric'
-            maxLength={6}
           />
           
           <InputField
@@ -426,6 +382,7 @@ const styles = StyleSheet.create({
   },
   text: {
     ...typography.heading1,
+    lineHeight: 32,
   },
   dateSelectionContainer: {
     width: '100%',
