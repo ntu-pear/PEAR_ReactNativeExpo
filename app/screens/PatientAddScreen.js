@@ -28,14 +28,12 @@ function PatientAddScreen() {
 
   //  State for components
   const [componentList, setComponentList] = useState({
-    guardian: [{}],
-    allergy: [{}],
+    guardian: [{}], // At least 1 primary guardian required
   });
 
   //  Maximum accepted value for date of birth
   const newDate = new Date();
-  const maximumDOB = new Date();
-  maximumDOB.setFullYear(maximumDOB.getFullYear() - 15);
+  const defaultDOB = new Date(); // Default to today's date, user can scroll to find correct DOB
 
   const addPatientData = {
     patientInfo: {
@@ -51,7 +49,7 @@ function PatientAddScreen() {
       HomeNo: '',
       HandphoneNo: '',
       Gender: 'M',
-      DOB: maximumDOB,
+      DOB: defaultDOB,
       StartDate: newDate,
       IsChecked: false, // additional item to check if user wants to enter EndDate value
       EndDate: new Date(), // default value of EndDate is beginning of Epoch time
@@ -74,13 +72,14 @@ function PatientAddScreen() {
       {
         FirstName: '',
         LastName: '',
+        ContactNo: '',
         NRIC: '',
-        IsChecked: false, // additional item to check if guardian wishes to log in in the future. if yes, email is required
+        IsChecked: false,
         Email: '',
         RelationshipID: 1,
+        RelationshipName: 'Husband',
         IsActive: true,
-        ContactNo: '',
-        DOB: maximumDOB,
+        DOB: new Date(), // Default to today's date
         Address: '',
         PostalCode: '',
         TempAddress: '',
@@ -88,15 +87,7 @@ function PatientAddScreen() {
         Gender: 'M',
         PreferredName: '',
       },
-    ],
-
-    allergyInfo: [
-      {
-        AllergyListID: 2,
-        AllergyReactionListID: 1,
-        AllergyRemarks: '',
-      },
-    ],
+    ], // At least 1 primary guardian required
   };
 
   const [formData, setFormData] = useState(addPatientData);
@@ -190,12 +181,33 @@ function PatientAddScreen() {
     }));
   };
 
+  // Helper to map RelationshipID to relationship name
+  const getRelationshipNameById = (id) => {
+    const relationships = {
+      1: 'Husband',
+      2: 'Wife',
+      3: 'Child',
+      4: 'Sibling',
+      5: 'Parent',
+      6: 'Grandchild',
+      7: 'Friend',
+      8: 'Nephew',
+      9: 'Niece',
+      10: 'Aunt',
+      11: 'Uncle',
+      12: 'Grandparent',
+    };
+    return relationships[id] || 'Other';
+  };
+
   // Function to update guardian data
   const handleGuardianData = (field, i) => (e) => {
     const newData = formData.guardianInfo;
 
     if (field === 'RelationshipID') {
-      newData[i][field] = parseInt(e);
+      const relationshipId = parseInt(e);
+      newData[i][field] = relationshipId;
+      newData[i]['RelationshipName'] = getRelationshipNameById(relationshipId);
     } else {
       newData[i][field] = e;
     }
@@ -211,7 +223,8 @@ function PatientAddScreen() {
     const newData = formData.allergyInfo;
 
     if (field === 'AllergyListID' || field === 'AllergyReactionListID') {
-      newData[i][field] = parseInt(e);
+      const parsedValue = parseInt(e);
+      newData[i][field] = isNaN(parsedValue) ? 1 : parsedValue; // Default to 1 if NaN
     } else {
       newData[i][field] = e;
     }
@@ -222,33 +235,165 @@ function PatientAddScreen() {
     }));
   };
 
+  // Helper to format date as ISO string
+  const formatDate = (date) => {
+    if (date instanceof Date) return date.toISOString();
+    return date;
+  };
+
   // Function to submit form
   const onSubmit = async () => {
     setIsSubmitting(true);
     console.log(formData);
-    const result = await patientApi.addPatient(formData);
+
+    const patientInfo = formData.patientInfo;
+    const guardianInfo = formData.guardianInfo;
+
+    // Build patient payload matching new API schema
+    const patientPayload = {
+      name: `${patientInfo.FirstName} ${patientInfo.LastName}`.trim(),
+      nric: String(patientInfo.NRIC || '').toUpperCase(),
+      address: patientInfo.Address || '',
+      tempAddress: patientInfo.TempAddress || '',
+      homeNo: patientInfo.HomeNo || '',
+      handphoneNo: patientInfo.HandphoneNo || '',
+      gender: patientInfo.Gender || 'M',
+      dateOfBirth: formatDate(patientInfo.DOB),
+      isApproved: '1',
+      preferredName: patientInfo.PreferredName || '',
+      preferredLanguageId: patientInfo.PreferredLanguageListID || 1,
+      updateBit: patientInfo.UpdateBit ? '1' : '0',
+      autoGame: patientInfo.AutoGame ? '1' : '0',
+      startDate: formatDate(patientInfo.StartDate),
+      endDate: patientInfo.IsChecked ? formatDate(patientInfo.EndDate) : null,
+      isActive: patientInfo.IsActive ? '1' : '0',
+      isRespiteCare: patientInfo.IsRespiteCare ? '1' : '0',
+      privacyLevel: parseInt(patientInfo.PrivacyLevel) || 2,
+      terminationReason: patientInfo.TerminationReason || '',
+      inActiveReason: patientInfo.InactiveReason || '',
+      inActiveDate: null,
+      profilePicture: '', // Will be updated separately if image was selected
+      isDeleted: 0,
+      createdDate: new Date().toISOString(),
+      modifiedDate: new Date().toISOString(),
+      CreatedById: '1',
+      ModifiedById: '1',
+    };
+
+    // Create patient first
+    const result = await patientApi.addPatient(patientPayload);
+    
+    console.log('[ADD PATIENT] API Response:', result);
 
     let alertTitle = '';
     let alertDetails = '';
 
     if (result.ok) {
-      const allocations = result.data.data.patientAllocationDTO;
-      const caregiver = allocations.caregiverName;
-      const doctor = allocations.doctorName;
-      const gameTherapist = allocations.gameTherapistName;
+      // Extract the new patient ID from the response
+      const newPatientId = result.data?.data?.id || result.data?.id || result.data?.patientId;
+      const isDeleted = result.data?.data?.isDeleted;
+      console.log('[ADD PATIENT] Patient created with ID:', newPatientId);
+      console.log('[ADD PATIENT] Patient isDeleted status:', isDeleted);
+      console.log('[ADD PATIENT] Full patient data:', result.data?.data);
+      
+      // Check if patient is marked as deleted
+      if (isDeleted === 1 || isDeleted === '1') {
+        alertTitle = 'Error in Adding Patient';
+        alertDetails = 'A patient with this NRIC already exists and is marked as deleted. Please use a different NRIC or contact support to restore the existing patient.';
+        Alert.alert(alertTitle, alertDetails);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Upload profile picture if one was selected
+      if (newPatientId && patientInfo.UploadProfilePicture && patientInfo.UploadProfilePicture.uri) {
+        console.log('[ADD PATIENT] Uploading profile picture...');
+        const imageUploadResult = await patientApi.uploadPatientProfilePictureV1(
+          newPatientId,
+          patientInfo.UploadProfilePicture
+        );
+        
+        if (imageUploadResult.ok) {
+          console.log('[ADD PATIENT] Profile picture uploaded successfully');
+        } else {
+          console.log('[ADD PATIENT] Failed to upload profile picture:', imageUploadResult.status, imageUploadResult.data);
+          // Don't fail the whole operation if image upload fails
+        }
+      }
+
+      // Create guardians (up to 2)
+      // Primary guardian (index 0) is required
+      // Secondary guardian (index 1) is optional - will be skipped if FirstName is empty
+      if (newPatientId && guardianInfo && guardianInfo.length > 0) {
+        for (let i = 0; i < Math.min(guardianInfo.length, 2); i++) {
+          const guardian = guardianInfo[i];
+          
+          // Skip if guardian has no first name (empty/incomplete guardian)
+          if (!guardian.FirstName || guardian.FirstName.trim() === '') continue;
+
+          const guardianPayload = {
+            active: 'Y',
+            firstName: guardian.FirstName || '',
+            lastName: guardian.LastName || '',
+            preferredName: guardian.PreferredName || '',
+            gender: guardian.Gender || 'M',
+            contactNo: guardian.ContactNo || '',
+            nric: String(guardian.NRIC || '').toUpperCase(),
+            dateOfBirth: formatDate(guardian.DOB),
+            address: guardian.Address || '',
+            tempAddress: guardian.TempAddress || '',
+            status: 'active',
+            isDeleted: '0',
+            guardianApplicationUserId: '',
+            createdDate: new Date().toISOString(),
+            modifiedDate: new Date().toISOString(),
+            CreatedById: '1',
+            ModifiedById: '1',
+            patientId: newPatientId,
+            relationshipName: guardian.RelationshipName || getRelationshipNameById(guardian.RelationshipID),
+          };
+          
+          // Only include email if guardian wants to log in (IsChecked is true)
+          if (guardian.IsChecked && guardian.Email && guardian.Email.trim() !== '') {
+            guardianPayload.email = guardian.Email;
+          }
+
+          const guardianResult = await patientApi.addGuardian(guardianPayload);
+          
+          if (!guardianResult.ok) {
+            console.log(`[ADD PATIENT] Failed to create guardian ${i + 1}:`, guardianResult.status, guardianResult.data);
+            console.log('[ADD PATIENT] Full error response:', JSON.stringify(guardianResult, null, 2));
+            if (guardianResult.data?.detail) {
+              console.log('[ADD PATIENT] Missing field details:', guardianResult.data.detail);
+            }
+          } else {
+            console.log(`[ADD PATIENT] Guardian ${i + 1} created successfully`);
+          }
+        }
+      }
+
+      const allocations = result.data?.data?.patientAllocationDTO;
+      if (allocations) {
+        const caregiver = allocations.caregiverName;
+        const doctor = allocations.doctorName;
+        const gameTherapist = allocations.gameTherapistName;
+        alertDetails = `Patient has been allocated to\nCaregiver: ${caregiver}\nDoctor: ${doctor}\nGame Therapist: ${gameTherapist}`;
+      } else {
+        alertDetails = 'Patient has been successfully added.';
+      }
 
       alertTitle = 'Successfully added Patient';
-      alertDetails = `Patient has been allocated to\nCaregiver: ${caregiver}\nDoctor: ${doctor}\nGame Therapist: ${gameTherapist}`;
-
       navigation.navigate(routes.PATIENTS_SCREEN);
     } else {
-      const errors = result.data?.message;
+      // Extract error message from various possible locations in the response
+      const errors = result.data?.message || result.data?.error || result.data?.errors || result.problem || 'Unknown error';
 
-      result.data
-        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-        : (alertDetails = 'Please try again.');
+      alertDetails = result.data
+        ? `\n${errors}\n\nPlease try again.`
+        : 'Please try again.';
 
       alertTitle = 'Error in Adding Patient';
+      console.log('[ADD PATIENT] Error response:', result);
     }
     Alert.alert(alertTitle, alertDetails);
     setIsSubmitting(false);
@@ -266,28 +411,15 @@ function PatientAddScreen() {
         />
       );
     case 2:
+      if(isSubmitting) {
+        return (<ActivityIndicator visible/>)  
+      }
       return (
         <PatientAddGuardianScreen
           testID='addPatients_guardian'
           nextQuestionHandler={nextQuestionHandler}
           prevQuestionHandler={prevQuestionHandler}
           handleFormData={handleGuardianData}
-          formData={formData}
-          componentList={componentList}
-          concatFormData={concatFormData}
-          removeFormData={removeFormData}
-        />
-      );
-    case 3:
-      if(isSubmitting) {
-        return (<ActivityIndicator visible/>)  
-      } 
-      return (
-        <PatientAddAllergyScreen
-          testID='addPatients_allergy'
-          nextQuestionHandler={nextQuestionHandler}
-          prevQuestionHandler={prevQuestionHandler}
-          handleFormData={handleAllergyData}
           formData={formData}
           componentList={componentList}
           concatFormData={concatFormData}
