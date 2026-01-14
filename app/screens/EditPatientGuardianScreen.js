@@ -16,6 +16,7 @@ import guardianApi from 'app/api/guardian';
 import SelectionInputField from 'app/components/input-components/SelectionInputField';
 import DateInputField from 'app/components/input-components/DateInputField';
 import AppButton from 'app/components/AppButton';
+import AppText from 'app/components/AppText';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import RadioButtonInput from 'app/components/input-components/RadioButtonsInput';
 import InputField from 'app/components/input-components/InputField';
@@ -24,7 +25,7 @@ import InputField from 'app/components/input-components/InputField';
 import { parseSelectOptions } from 'app/utility/miscFunctions';
 
 function EditPatientGuardianScreen(props) {
-  const { guardianProfile } = props.route.params;
+  const { guardianProfile, patientID } = props.route.params;
   const [isLoading, setIsLoading] = useState(true);
 
   const navigation = useNavigation();
@@ -78,9 +79,7 @@ function EditPatientGuardianScreen(props) {
   const [isDOBError, setIsDOBError] = useState(false);
   const [isRelationError, setIsRelationError] = useState(false);
   const [isTempAddrError, setIsTempAddrError] = useState(false);
-  const [isTempPostalCodeError, setIsTempPostalCodeError] = useState(false);
   const [isAddrError, setIsAddrError] = useState(false);
-  const [isPostalCodeError, setIsPostalCodeError] = useState(false);
   const [isMobileNoError, setIsMobileNoError] = useState(false);
   const [isEmailError, setIsEmailError] = useState(false);
   const [isLoginError, setIsLoginError] = useState(false);
@@ -96,15 +95,11 @@ function EditPatientGuardianScreen(props) {
     DOB: guardianProfile.dob ? new Date(guardianProfile.dob) : minimumJoiningDate,
     Address: guardianProfile.address ? guardianProfile.address : '',
     Nric: guardianProfile.nric ? guardianProfile.nric : '',
-    PostalCode: guardianProfile.postalCode ? guardianProfile.postalCode : '',
     TempAddress: guardianProfile.tempAddress ? guardianProfile.tempAddress : '',
-    TempPostalCode: guardianProfile.tempPostalCode ? guardianProfile.tempPostalCode : '',
     Email: guardianProfile.email ? guardianProfile.email : '',
-    RelationshipID: guardianProfile.relationshipID,
+    RelationshipID: guardianProfile.relationshipID || undefined,
     isActive: guardianProfile.isActive,
   });
-
-  console.log(formData);
 
   // To ensure that when the is guardian login required checkbox is checked, guardian email
   // must be filled before continuing. Done by verifying if guardian.Email is empty or not.
@@ -142,11 +137,26 @@ function EditPatientGuardianScreen(props) {
   // Try to get relationships list from backend. If retrieval from the hook is successful,
   // replace the content in listOfRelationships with the retrieved one
   useEffect(() => {
-    if (!relationshipLoading && !relationshipError && relationshipData) {
-      setListOfRelationships(relationshipData); // sort by value
-      setIsLoading(false);
+    if (!relationshipLoading && !relationshipError && relationshipData && relationshipData.length > 0) {
+      setListOfRelationships(relationshipData);
     }
+    setIsLoading(false);
   }, [relationshipData, relationshipError, relationshipLoading]);
+  
+  // Map relationship name to ID when listOfRelationships is available
+  useEffect(() => {
+    if (listOfRelationships.length > 0 && guardianProfile.relationship && !guardianProfile.relationshipID) {
+      const matchedRelationship = listOfRelationships.find(
+        (rel) => rel.label?.toLowerCase() === guardianProfile.relationship?.toLowerCase()
+      );
+      if (matchedRelationship) {
+        setFormData(prevState => ({
+          ...prevState,
+          RelationshipID: matchedRelationship.value
+        }));
+      }
+    }
+  }, [listOfRelationships, guardianProfile.relationship, guardianProfile.relationshipID]);
 
   // To ensure that when the is guardian login required checkbox is checked, guardian email
   // must be filled before continuing. Done by verifying if formData['Email'] is empty or not.
@@ -228,28 +238,12 @@ function EditPatientGuardianScreen(props) {
     [isAddrError]
   );
 
-  const handlePostalCodeError = useCallback(
-    (state) => {
-      setIsPostalCodeError(state);
-      // console.log("addr", state)
-    },
-    [isPostalCodeError]
-  );
-
   const handleTempAddrError = useCallback(
     (state) => {
       setIsTempAddrError(state);
       // console.log("temp addr", state)
     },
     [isTempAddrError]
-  );
-
-  const handleTempPostalCodeError = useCallback(
-    (state) => {
-      setIsTempPostalCodeError(state);
-      // console.log("temp postal code", state)
-    },
-    [isTempPostalCodeError]
   );
 
   const handleMobileNoError = useCallback(
@@ -293,18 +287,53 @@ function EditPatientGuardianScreen(props) {
 
   // form submission when save button is pressed
   const submitForm = async () => {
-    console.log(formData);
-    const result = await guardianApi.updateGuardian(formData);
+    // Get relationship name from RelationshipID
+    const relationship = listOfRelationships.find(
+      rel => rel.value === formData.RelationshipID
+    );
+    
+    // Transform formData to match API expectations
+    const apiPayload = {
+      active: formData.isActive || 'Y',
+      firstName: formData.FirstName,
+      lastName: formData.LastName,
+      preferredName: formData.PreferredName,
+      gender: formData.Gender,
+      contactNo: formData.ContactNo,
+      nric: formData.Nric,
+      email: formData.Email || null,
+      dateOfBirth: formData.DOB ? formData.DOB.toISOString() : null,
+      address: formData.Address,
+      tempAddress: formData.TempAddress || '',
+      status: 'active',
+      isDeleted: '0',
+      guardianApplicationUserId: '',
+      createdDate: guardianProfile.createdDate || new Date().toISOString(),
+      modifiedDate: new Date().toISOString(),
+      CreatedById: '1',
+      ModifiedById: '1',
+      patientId: patientID,
+      relationshipName: relationship ? relationship.label : guardianProfile.relationship
+    };
+    
+    console.log('=== PUT /api/v1/Guardian/update ===');
+    console.log('Guardian ID:', guardianProfile.guardianID);
+    console.log('API Payload:', JSON.stringify(apiPayload, null, 2));
+    
+    const result = await guardianApi.updateGuardian(apiPayload, guardianProfile.guardianID);
 
     let alertTitle = '';
     let alertDetails = '';
 
     if (result.ok) {
-      navigation.goBack(routes.PATIENT_PROFILE, {
-        navigation: navigation,
-        ...guardianProfile,
-      });
       alertTitle = 'Saved Successfully';
+      alertDetails = 'Guardian information has been updated.';
+      Alert.alert(alertTitle, alertDetails, [
+        {
+          text: 'OK',
+          onPress: () => navigation.goBack()
+        }
+      ]);
     } else {
       const errors = result.data?.message;
 
@@ -314,8 +343,8 @@ function EditPatientGuardianScreen(props) {
 
       alertTitle = 'Error in Editing Guardian Info';
       console.log('result error ' + JSON.stringify(result));
+      Alert.alert(alertTitle, alertDetails);
     }
-    Alert.alert(alertTitle, alertDetails);
   };
 
   return relationshipLoading || isLoading ? (
@@ -377,33 +406,11 @@ function EditPatientGuardianScreen(props) {
                 />
 
                 <InputField
-                  isRequired
-                  title={'Postal Code'}
-                  value={formData.PostalCode}
-                  onChangeText={handleFormData('PostalCode')}
-                  onEndEditing={handlePostalCodeError}
-                  dataType='postal code'
-                  keyboardType='numeric'
-                  maxLength={6}
-                />
-
-                <InputField
                   title={'Temporary Address'}
                   value={formData.TempAddress}
                   dataType="address"
                   onChangeText={handleFormData('TempAddress')}
                   onEndEditing={handleTempAddrError}
-                />
-
-                <InputField
-                  isRequired={formData.TempAddress.length > 0}
-                  title={'Temporary Postal Code'}
-                  value={formData.TempPostalCode}
-                  onChangeText={handleFormData('TempPostalCode')}
-                  onEndEditing={handleTempPostalCodeError}
-                  dataType='postal code'
-                  keyboardType='numeric'
-                  maxLength={6}
                 />
 
                 <InputField
@@ -429,11 +436,12 @@ function EditPatientGuardianScreen(props) {
                 <SelectionInputField
                   isRequired
                   title={"Guardian is Patient's"}
-                  placeholder={guardianProfile.relationship}
+                  value={formData.RelationshipID}
+                  placeholder={'Select Relationship'}
                   onDataChange={handleFormData('RelationshipID')}
-                  value={guardianProfile.relationship}
                   dataArray={listOfRelationships}
                   onChildData={handleRelationError}
+                  isDisabled={true}
                 />
 
                 {
@@ -490,6 +498,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 20,
+  },
+  warningText: {
+    fontSize: 12,
+    color: '#666',
+    fontStyle: 'italic',
+    marginTop: -10,
+    marginBottom: 10,
+    width: '100%',
   },
 });
 
