@@ -1,11 +1,20 @@
 /*eslint eslint-comments/no-unlimited-disable: error */
-import client from 'app/api/client';
+import client, { PATIENT_V1_BASE } from 'app/api/client';
+
+/*
+ * Helper to use Patient Service v1 base URL
+ */
+const withPatientV1Base = (cfg = {}) => ({
+  baseURL: PATIENT_V1_BASE,
+  timeout: 15000,
+  ...cfg,
+});
 
 /*
  * List all end points here
  */
 const endPoint = '/Guardian';
-const guardianPatientGuardian = `${endPoint}/PatientGuardian`;
+const guardianPatientGuardian = `${endPoint}/GetPatientGuardianByPatientId`;
 const guardianAdd = `${endPoint}/add`; //eslint-disable-line no-unused-vars
 const guardianUpdate = `${endPoint}/update`; //eslint-disable-line no-unused-vars
 const guaridanDelete = `${endPoint}/delete`; //eslint-disable-line no-unused-vars
@@ -17,24 +26,29 @@ const guaridanDelete = `${endPoint}/delete`; //eslint-disable-line no-unused-var
 
 // **********************  GET REQUESTS *************************
 
-// params: patientID
+// params: patient_id
 // purpose: retrieve's guardian tagged to the patient by patient's ID.
 const getPatientGuardian = (patientID, maskNRIC = false) => {
-  // Error Handling
+  // Error Handling - use patient_id (snake_case) as per API spec
   const params = {
-    patientID,
+    patient_id: patientID,
     maskNRIC,
   };
-  return client.get(guardianPatientGuardian, params);
+  return client.get(guardianPatientGuardian, params, withPatientV1Base());
 };
 
 // **********************  POST REQUESTS *************************
 
 // ************************* UPDATE REQUESTS *************************
-const updateGuardian = async (data) => {
+const updateGuardian = async (data, guardianId) => {
   const headers = { 'Content-Type': 'application/json-patch+json' };
+  const params = { guardian_id: guardianId };
 
-  return client.put(guardianUpdate, data, { headers });
+  return client.put(guardianUpdate, data, { 
+    ...withPatientV1Base(),
+    headers,
+    params
+  });
 };
 
 /*

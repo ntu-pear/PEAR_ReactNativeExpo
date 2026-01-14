@@ -191,39 +191,37 @@ function PatientInformationAccordion({
 
   useEffect(() => {
     const delayUpdate = setTimeout(() => {
-      if (Object.keys(guardianData).length > 0) {
+      if (guardianData && guardianData.guardian && Object.keys(guardianData.guardian).length > 0) {
         // get data of first guardian
-        setUnMaskedGuardianNRIC(guardianData.guardian.nric);
+        setUnMaskedGuardianNRIC(guardianData.guardian.nric || '');
+        
+        // Construct full name
+        const fullName = [guardianData.guardian.firstName, guardianData.guardian.lastName]
+          .filter(Boolean)
+          .join(' ') || '-';
+        
         setGuardianInfoData([
+          {
+            label: 'Guardian Name',
+            value: fullName,
+          },
           {
             label: 'Preferred Name',
             value: guardianData.guardian.preferredName || '-',
           },
           {
-            label: "Guardian is Patient's",
-            value: guardianData.guardian.relationship || '-',
-          },
-          {
-            label: 'First Name',
-            value: guardianData.guardian.firstName || '-',
-          },
-          {
-            label: 'Last Name',
-            value: guardianData.guardian.lastName || '-',
-          },
-          {
             label: 'NRIC',
             value:
-              guardianData.guardian.nric.replace(/\d{4}(\d{3})/, 'xxxx$1') ||
+              (guardianData.guardian.nric && guardianData.guardian.nric.replace(/\d{4}(\d{3})/, 'xxxx$1')) ||
               '-',
           },
           {
-            label: 'DOB',
-            value: guardianData.guardian.dob || '-',
+            label: "Patient's",
+            value: guardianData.guardian.relationship || '-',
           },
           {
-            label: 'Gender',
-            value: guardianData.guardian.gender === 'F' ? 'FEMALE' : 'MALE',
+            label: 'Contact Number',
+            value: guardianData.guardian.contactNo || '-',
           },
           {
             label: 'Address',
@@ -233,14 +231,6 @@ function PatientInformationAccordion({
             label: 'Email',
             value: guardianData.guardian.email || '-',
           },
-          {
-            label: 'Contact Number',
-            value: guardianData.guardian.contactNo || '-',
-          },
-          {
-            label: 'Temp. Address',
-            value: guardianData.guardian.tempAddress || '-',
-          },
         ]);
       }
       // get data of 2nd guardian if any.
@@ -248,37 +238,41 @@ function PatientInformationAccordion({
         guardianData &&
         guardianData.additionalGuardian &&
         guardianData.additionalGuardian.nric !== null &&
+        guardianData.guardian &&
         guardianData.additionalGuardian.nric !== guardianData.guardian.nric
       ) {
         setIsSecondGuardian(true);
         setUnMasked2ndGuardianNRIC(guardianData.additionalGuardian.nric);
+        
+        // Construct full name
+        const fullName = [guardianData.additionalGuardian.firstName, guardianData.additionalGuardian.lastName]
+          .filter(Boolean)
+          .join(' ') || '-';
+        
         setSecondGuardianInfoData([
           {
-            label: 'First Name',
-            value: guardianData.additionalGuardian.firstName || '-',
+            label: 'Guardian Name',
+            value: fullName,
           },
           {
-            label: 'Last Name',
-            value: guardianData.additionalGuardian.lastName || '-',
+            label: 'Preferred Name',
+            value: guardianData.additionalGuardian.preferredName || '-',
           },
           {
             label: 'NRIC',
             value:
-              guardianData.additionalGuardian.nric.replace(
+              (guardianData.additionalGuardian.nric && guardianData.additionalGuardian.nric.replace(
                 /\d{4}(\d{3})/,
                 'xxxx$1',
-              ) || '-',
+              )) || '-',
           },
           {
-            label: 'DOB',
-            value: guardianData.additionalGuardian.dob || '-',
+            label: "Patient's",
+            value: guardianData.additionalGuardian.relationship || '-',
           },
           {
-            label: 'Gender',
-            value:
-              guardianData.additionalGuardian.gender === 'F'
-                ? 'FEMALE'
-                : 'MALE',
+            label: 'Contact Number',
+            value: guardianData.additionalGuardian.contactNo || '-',
           },
           {
             label: 'Address',
@@ -287,22 +281,6 @@ function PatientInformationAccordion({
           {
             label: 'Email',
             value: guardianData.additionalGuardian.email || '-',
-          },
-          {
-            label: 'Relationship',
-            value: guardianData.additionalGuardian.relationship || '-',
-          },
-          {
-            label: 'Contact Number',
-            value: guardianData.additionalGuardian.contactNo || '-',
-          },
-          {
-            label: 'Preferred Name',
-            value: guardianData.additionalGuardian.preferredName || '-',
-          },
-          {
-            label: 'Temp. Address',
-            value: guardianData.additionalGuardian.tempAddress || '-',
           },
         ]);
       }
@@ -424,17 +402,23 @@ function PatientInformationAccordion({
   };
 
   const handlePatientGuardianOnPress = () => {
-    navigation.push(routes.EDIT_PATIENT_GUARDIAN, {
-      guardianProfile: guardianData.guardian,
-      // navigation: navigation,
-    });
+    if (guardianData && guardianData.guardian) {
+      navigation.push(routes.EDIT_PATIENT_GUARDIAN, {
+        guardianProfile: guardianData.guardian,
+        patientID: patientProfile?.patientID || patientProfile?.patientId || patientProfile?.PatientID,
+        // navigation: navigation,
+      });
+    }
   };
 
   const handlePatientSecondGuardianOnPress = () => {
-    navigation.push(routes.EDIT_PATIENT_GUARDIAN, {
-      guardianProfile: guardianData.additionalGuardian,
-      // navigation: navigation,
-    });
+    if (guardianData && guardianData.additionalGuardian) {
+      navigation.push(routes.EDIT_PATIENT_GUARDIAN, {
+        guardianProfile: guardianData.additionalGuardian,
+        patientID: patientProfile?.patientID || patientProfile?.patientId || patientProfile?.PatientID,
+        // navigation: navigation,
+      });
+    }
   };
 
   const handlePatientSocialHistOnPress = () => {
