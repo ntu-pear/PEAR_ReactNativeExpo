@@ -38,20 +38,50 @@ function PatientProfileScreen(props) {
   };
 
   const sanitizeGuardianData = (gd) => {
-    if (!gd) return gd;
-    const out = { ...gd };
-    if (out.guardian) {
-      const g = { ...out.guardian };
-      const n = toStr(g.NRIC ?? g.nric);
-      g.NRIC = n;
-      g.nric = n;
-      out.guardian = g;
-    } else {
-      const n = toStr(out.NRIC ?? out.nric);
-      out.NRIC = n;
-      out.nric = n;
-    }
-    return out;
+    if (!gd) return null;
+    
+    // Extract the actual guardian data from nested structure
+    // API returns: { patient_guardian: {...}, relationshipName: "..." }
+    const guardianData = gd.patient_guardian || gd;
+    const relationshipName = gd.relationshipName || gd.relationship;
+    
+    // Helper to get value from multiple possible keys
+    const getValue = (obj, keys) => {
+      for (const key of keys) {
+        if (obj[key] !== undefined && obj[key] !== null) {
+          return obj[key];
+        }
+      }
+      return undefined;
+    };
+    
+    // Normalize field names to camelCase as expected by the Edit screen
+    const normalized = {
+      guardianID: getValue(guardianData, ['guardianID', 'guardian_id', 'GuardianID', 'id', 'ID']),
+      firstName: getValue(guardianData, ['firstName', 'first_name', 'FirstName', 'given_name', 'givenName']),
+      lastName: getValue(guardianData, ['lastName', 'last_name', 'LastName', 'family_name', 'familyName', 'surname']),
+      preferredName: getValue(guardianData, ['preferredName', 'preferred_name', 'PreferredName', 'nickname']),
+      nric: toStr(getValue(guardianData, ['nric', 'NRIC', 'Nric', 'nric_no', 'NRIC_No'])),
+      NRIC: toStr(getValue(guardianData, ['NRIC', 'nric', 'Nric', 'nric_no', 'NRIC_No'])),
+      contactNo: getValue(guardianData, ['contactNo', 'contact_no', 'ContactNo', 'phoneNumber', 'phone_number', 'contact_number']),
+      gender: getValue(guardianData, ['gender', 'Gender', 'sex', 'Sex']),
+      dob: getValue(guardianData, ['dob', 'DOB', 'dateOfBirth', 'date_of_birth', 'DateOfBirth']),
+      address: getValue(guardianData, ['address', 'Address', 'home_address', 'homeAddress']),
+      postalCode: getValue(guardianData, ['postalCode', 'postal_code', 'PostalCode', 'postal', 'Postal']),
+      tempAddress: getValue(guardianData, ['tempAddress', 'temp_address', 'TempAddress', 'temporary_address']),
+      tempPostalCode: getValue(guardianData, ['tempPostalCode', 'temp_postal_code', 'TempPostalCode', 'temp_postal']),
+      email: getValue(guardianData, ['email', 'Email', 'EMAIL', 'email_address']),
+      relationshipID: getValue(guardianData, ['relationshipID', 'relationship_id', 'RelationshipID', 'relation_id']),
+      relationship: relationshipName || getValue(guardianData, ['relationship', 'Relationship', 'relation', 'Relation']),
+      isActive: getValue(guardianData, ['isActive', 'is_active', 'IsActive', 'active', 'Active']),
+    };
+    
+    // Ensure NRIC fields are strings
+    const nricValue = toStr(normalized.NRIC || normalized.nric);
+    normalized.NRIC = nricValue;
+    normalized.nric = nricValue;
+    
+    return normalized;
   };
 
   const toISODateOrNull = (v) => {
@@ -104,7 +134,7 @@ function PatientProfileScreen(props) {
   }, [route?.params, patientID, navigation]);
 
   const [patientProfile, setPatientProfile] = useState({});
-  const [guardianData, setGuardianData] = useState([]);
+  const [guardianData, setGuardianData] = useState({});
   const [socialHistoryData, setSocialHistoryData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isPatientLoading, setIsPatientLoading] = useState(true);
@@ -363,15 +393,46 @@ function PatientProfileScreen(props) {
     try {
       const resp = await guardianApi.getPatientGuardian(id, false);
       logResp('Guardian', resp);
+      
+      console.log('=== GET /api/v1/Guardian/GetPatientGuardianByPatientId ===');
+      console.log('Patient ID:', id);
+      console.log('Response Data:', JSON.stringify(resp?.data, null, 2));
 
-      if (resp?.ok && Array.isArray(resp?.data?.data)) {
-        setGuardianData(resp.data.data);
+      if (resp?.ok && resp?.data) {
+        // The API returns: { data: [{ patient: {...}, patient_guardians: [...] }] }
+        let responseData = resp.data.data || resp.data;
+        
+        // If it's an array, get the first element
+        if (Array.isArray(responseData) && responseData.length > 0) {
+          responseData = responseData[0];
+        }
+        
+        // Extract guardians from patient_guardians array
+        let guardianArray = [];
+        if (responseData?.patient_guardians && Array.isArray(responseData.patient_guardians)) {
+          guardianArray = responseData.patient_guardians;
+        } else if (responseData?.patient_guardians) {
+          guardianArray = [responseData.patient_guardians];
+        }
+        
+        // Transform to expected structure: first guardian + optional additional guardian
+        if (guardianArray.length > 0) {
+          const structured = {
+            guardian: sanitizeGuardianData(guardianArray[0]),
+            additionalGuardian: guardianArray.length > 1 
+              ? sanitizeGuardianData(guardianArray[1]) 
+              : null
+          };
+          setGuardianData(structured);
+        } else {
+          setGuardianData({});
+        }
       } else {
-        setGuardianData([]);
+        setGuardianData({});
       }
     } catch (e) {
       console.log('[Guardian] error:', e?.message || e);
-      setGuardianData([]);
+      setGuardianData({});
     } finally {
       setIsGuardianLoading(false);
     }
@@ -423,7 +484,7 @@ function PatientProfileScreen(props) {
     if (socialHistoryData !== undefined) {
       setIsSocialHistoryLoading(false);
     }
-    if (guardianData !== undefined && guardianData.length !== 0) {
+    if (guardianData !== undefined) {
       setIsGuardianLoading(false);
     }
 
