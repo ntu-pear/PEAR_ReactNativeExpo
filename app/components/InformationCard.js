@@ -41,10 +41,11 @@ function InformationCard({
   };
 
   useEffect(() => {
-    if (itemizedData.length === 0) {
-      setItemizedData(displayData);
-    }
-  }, [itemizedData, displayData]);
+    // Always sync with displayData when it changes
+    setItemizedData(displayData);
+    // Reset masked state when data changes
+    setMasked(true);
+  }, [displayData]);
 
   return (
     <Box
