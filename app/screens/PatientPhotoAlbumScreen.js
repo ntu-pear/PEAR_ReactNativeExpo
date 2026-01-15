@@ -141,7 +141,7 @@ function PatientPhotoAlbum(props) {
   // Get photo data from backend
   const getPhotoData = async () => {
     if (patientID) {
-      const response = await patientApi.getPatientPhoto(patientID);
+      const response = await patientApi.getPatientPhotoV1(patientPhotoID);
       if (response.ok) {
         const photoCount = countPhotosByAlbum([...response.data.data]);
         setPhotoCount(photoCount);
@@ -193,6 +193,49 @@ function PatientPhotoAlbum(props) {
           : latest;
       });
     });
+
+    const normalizePatientV1 = (p = {}) => {
+      const id =
+        p.patient_id ?? p.id ?? p.patientID ?? p.PatientId ?? p.PatientID ?? null;
+
+      const hasFirst = typeof p.first_name === 'string' || typeof p.firstName === 'string';
+      const hasLast  = typeof p.last_name  === 'string' || typeof p.lastName  === 'string';
+      const nameStr  = typeof p.name === 'string' ? p.name.trim() : '';
+
+      const firstName = String(
+        p.first_name ?? p.firstName ?? (hasFirst ? '' : (nameStr.split(' ')[0] ?? ''))
+      ).trim();
+
+      const lastName = String(
+        p.last_name ?? p.lastName ?? (hasLast ? '' : (nameStr.split(' ').slice(1).join(' ') ?? ''))
+      ).trim();
+
+      // NEW: derive isActive from multiple common shapes
+      const statusStr = typeof p.status === 'string' ? p.status.trim().toLowerCase() : null;
+      const statusAny = p.status ?? p.active ?? p.is_active ?? p.isActive ?? null;
+
+      const derivedIsActive =
+        typeof p.is_active === 'boolean' ? p.is_active :
+        typeof p.isActive === 'boolean' ? p.isActive :
+        (typeof statusAny === 'number' ? statusAny === 1 :
+         typeof statusAny === 'string'
+           ? ['1','true','active','yes'].includes(statusAny.trim().toLowerCase())
+           : (statusStr ? statusStr.startsWith('act') : undefined));
+
+      return {
+        ...p,
+        patientID: id,
+        firstName,
+        lastName,
+        fullName: `${firstName} ${lastName}`.trim(),
+        profilePicture:
+          p.profilePicture ?? p.profile_picture ?? p.profile_photo ?? p.photoUrl ?? p.avatar ?? null,
+        preferredName: p.preferred_name ?? p.preferredName ?? '',
+        caregiverName: p.caregiver_name ?? p.caregiverName ?? null,
+        startDate: p.start_date ?? p.startDate ?? null,
+        isActive: derivedIsActive, // NEW
+      };
+    };
 
     // Return the parsed and filtered photo data with only the latest photos per album
     return latestPhotos.map((item) => ({
@@ -280,6 +323,18 @@ function PatientPhotoAlbum(props) {
     { albumCategoryListID: '5', albumCategoryName: 'Food' },
     { albumCategoryListID: '6', albumCategoryName: 'Activity' },
   ];
+  const formatDate = (iso) => {
+    if (!iso) return '';
+
+    const d = new Date(iso);
+
+    const day = String(d.getDate()).padStart(2, '0');
+    const monthNames = ["JAN", "FED", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+    const month = monthNames[d.getMonth()];
+    const year = d.getFullYear();
+
+    return `${day}-${month}-${year}`;
+  };
 
   return isLoading ? (
     <ActivityIndicator visible />
@@ -292,9 +347,8 @@ function PatientPhotoAlbum(props) {
               testID={`${testID}_profileNameButton`}
               profilePicture={patientData.profilePicture}
               profileLineOne={patientData.preferredName}
-              profileLineTwo={
-                patientData.firstName + ' ' + patientData.lastName
-              }
+              profileLineTwo={patientData.name + ', ' + (patientData.gender === 'M' ? 'Male' : 'Female') + ', Date of Birth: ' + formatDate(patientData.dateOfBirth)}
+              ///profileLineTwo={patientData.gender === 'M' ? 'Male' : 'Female'}
               handleOnPress={onClickProfile}
               isPatient
               isVertical={false}
