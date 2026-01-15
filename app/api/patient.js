@@ -14,6 +14,12 @@ const v1PatientMedicationsEndpoint = (patient_id) => `/patients/${patient_id}/me
 const v1PatientMedicationDetailEndpoint = (patient_id, med_id) => `/patients/${patient_id}/medications/${med_id}/`;
 const USE_COLLECTION_STYLE_MED_ENDPOINT = false;
 
+// --- Patient Photos (v1) --- //
+const v1PatientPhotoUploadEndpoint = (patient_id, albumCategoryListID, createdByID, modifiedByID) => `/v1`;
+const v1PatientPhotoGetEndpoint = (photo_id) => `/v1/{photo_id}`;
+const v1PatientPhotoUpdateEndpoint = (patient_id, modifiedByID) => `/v1/{patient_id}`;
+const v1PatientPhotoDeleteEndpoint = (patient_id, modifiedByID) => `/v1/{patient_id}`
+
 // ---------- Patient Mobility (v1) ----------
 const v1MobilityMapListByPatientEndpoint = (patient_id) => `/MobilityMapping/List/Patient/${patient_id}`;
 const v1MobilityMapAddEndpoint = () => `/MobilityMapping/List/add`;
@@ -33,6 +39,63 @@ const v1UpdateProfilePictureEndpoint = (patient_id) => `/patients/update/${patie
  * List all functions here
  * Refer to this api doc: https://github.com/infinitered/apisauce
  */
+
+// --- Patient Photo (v1) --- //
+
+const getPatientPhotoV1 = async (photo_id) => {
+    return client.get(v1PatientPhotoGetEndpoint(photo_id), {}, withPatientV1Base())
+}
+
+const addPatientPhotoV1 = async (patient_id, photoData) => {
+  const photoFormData = new FormData();
+
+  if (photoData.Photo) {
+    photoFormData.append('Photo', {
+      uri: photoData.Photo.uri,
+      name: photoData.Photo.name,
+      type: photoData.Photo.type,
+    });
+  }
+  photoFormData.append('PhotoDetails', photoData.PhotoDetails || '');
+  photoFormData.append('AlbumCategoryName', photoData.AlbumCategoryName || '');
+  photoFormData.append('AlbumCategoryListID', photoData.AlbumCategoryListID ?? '');
+  photoFormData.append('PatientID', patientID);
+  photoFormData.append('PatientPhotoID', photoData.PatientPhotoID ?? '');
+  return client.post(v1PatientPhotoUploadEndpoint, photoFormData);
+};
+
+const deletePatientPhotoV1 = async (patient_id) => {
+    return client.delete(v1PatientPhotoDeleteEndpoint(patient_id), {}, withPatientV1Base())
+}
+
+const updatePatientPhotoV1 = async (patientID, photoData) => {
+  const photoFormData = new FormData();
+  if (photoData.Photo) {
+    if (typeof photoData.Photo === 'object' && photoData.Photo.uri) {
+      photoFormData.append('Photo', {
+        uri: photoData.Photo.uri,
+        name: photoData.Photo.name,
+        type: photoData.Photo.type,
+      });
+    } else if (typeof photoData.Photo === 'string') {
+      photoFormData.append('Photo', '');
+    }
+  } else {
+    photoFormData.append('Photo', '');
+  }
+  photoFormData.append('PhotoDetails', photoData.PhotoDetails || '');
+  if (photoData.AlbumCategoryListID) {
+    photoFormData.append('AlbumCategoryListID', photoData.AlbumCategoryListID);
+  } else {
+    photoFormData.append('AlbumCategoryName', photoData.AlbumCategoryName || '');
+  }
+  photoFormData.append('PatientID', patientID);
+  photoFormData.append('PatientPhotoID', photoData.PatientPhotoID);
+
+  return client.put(patientPhotoUpdate, photoFormData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
 
 // ---------- Patient list/read (v1) ----------
 const listPatientsV1 = (params = {}) => {
@@ -537,6 +600,12 @@ export default {
   normalizePatientV1,
   normalizePatientAllergyV1,
 
+  //--- v1 Patient Photos ---
+  getPatientPhotoV1,
+  addPatientPhotoV1,
+  deletePatientPhotoV1,
+  updatePatientPhotoV1,
+  
   // --- v1 Patient Medications ---
   listPatientMedicationsV1,
   addPatientMedicationV1,
