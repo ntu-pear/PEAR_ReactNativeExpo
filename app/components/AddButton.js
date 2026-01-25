@@ -13,13 +13,17 @@ function AddButton(props) {
     isDisabled = false,
     testID,
     iconName = 'plus', // default icon name is "plus"
+    containerStyle,
+    buttonStyle,
+    textStyle,
+    iconStyle,
   } = props;
 
   return (
-    <View style={styles.buttonContainer}>
+    <View style={[styles.buttonContainer, containerStyle]}>
       <Button
         testID={testID}
-        style={[styles.button, { backgroundColor: colors[color] }]}
+        style={[styles.button, { backgroundColor: colors[color] }, buttonStyle]}
         isDisabled={isDisabled}
         onPress={onPress}
       >
@@ -28,9 +32,9 @@ function AddButton(props) {
             name={iconName}
             size={20}
             color={colors.white}
-            style={styles.icon}
+            style={[styles.icon, iconStyle]}
           />
-          <Text style={styles.text}>{title}</Text>
+          <Text style={[styles.text, textStyle]}>{title}</Text>
         </View>
       </Button>
     </View>

@@ -16,6 +16,7 @@ const PatientAllergyItem = ({
   allergyListDesc,
   allergyReaction,
   allergyRemarks,
+  onEdit,
   onDelete,
 }) => {
   return (
@@ -32,7 +33,7 @@ const PatientAllergyItem = ({
         <TextRow testID={`${testID}_reaction`} label="Reaction" value={allergyReaction} />
         <TextRow testID={`${testID}_notes`} label="Notes" value={allergyRemarks} />
       </View>
-      <EditDeleteBtn testID={testID} onDelete={onDelete}/>
+      <EditDeleteBtn testID={testID} onDelete={onDelete} onEdit={onEdit}/>
     </View>
   );
 };
