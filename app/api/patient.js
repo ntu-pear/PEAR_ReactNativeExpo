@@ -148,6 +148,7 @@ const updatePatientAllergyV1 = async (patient_id, allergy_id, data) => {
     AllergyTypeID: data.AllergyListID ?? data.allergy_type_id ?? data.allergyListID,
     AllergyReactionTypeID: data.AllergyReactionListID ?? data.allergy_reaction_type_id ?? data.allergyReactionListID,
     AllergyRemarks: data.AllergyRemarks ?? data.allergy_remarks ?? data.allergyRemarks ?? '',
+    IsDeleted: data.IsDeleted ?? '0',
   };
   
   // NOTE: PATIENT_V1_BASE already includes `/api/v1`
