@@ -70,11 +70,16 @@ function SelectionInputField({
     }
   }, [error, onEndEditing]);
 
+  // Keep internal selected value in sync with prop changes (e.g. edit-mode prefills)
+  useEffect(() => {
+    setSelectedValue(value ? value : null);
+  }, [value]);
+
   // Filter data based on search input
   useEffect(() => {
     setFilteredData(
       dataArray.filter((item) =>
-        item.label.toLowerCase().includes(searchQuery.toLowerCase()),
+        (item.label ?? '').toLowerCase().includes(searchQuery.toLowerCase()),
       ),
     );
   }, [searchQuery, dataArray]);
@@ -112,7 +117,7 @@ function SelectionInputField({
             ]}
           >
             {selectedValue
-              ? dataArray.find((item) => item.value === selectedValue)?.label
+              ? dataArray.find((item) => String(item.value) === String(selectedValue))?.label
               : placeholder}
           </Text>
           <MaterialIcons
@@ -143,7 +148,7 @@ function SelectionInputField({
 
               <FlatList
                 data={filteredData}
-                keyExtractor={(item) => item.value}
+                keyExtractor={(item) => String(item.value)}
                 style={{ width: '100%' }}
                 renderItem={({ item }) => (
                   <TouchableOpacity
