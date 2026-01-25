@@ -23,6 +23,16 @@ function EditPatientSocialHistScreen(props) {
 
   const navigation = useNavigation();
   
+  // Detect if this is add mode (no socialHistoryId)
+  const isAddMode = !socialHistory?.socialHistoryId && !socialHistory?.id;
+  
+  // Set the screen title based on mode
+  useEffect(() => {
+    navigation.setOptions({
+      title: isAddMode ? 'Add Patient Social History' : 'Edit Patient Social History',
+    });
+  }, [navigation, isAddMode]);
+  
   // retrive list data from database using useGetSelectionOptions
   const {
     data: liveWithData,
@@ -320,7 +330,7 @@ function EditPatientSocialHistScreen(props) {
 
   const [formData, setFormData] = useState({
     PatientID: patientID,
-    SocialHistoryId: Object.keys(socialHistory).length>0 ? socialHistory.socialHistoryId : 1,
+    SocialHistoryId: Object.keys(socialHistory).length>0 ? socialHistory.socialHistoryId : null,
     LiveWithDescription: Object.keys(socialHistory).length>0 ? socialHistory.liveWithDescription : "Alone",
     LiveWithListId: Object.keys(socialHistory).length>0 ? socialHistory.liveWithListId : 1,
     EducationDescription: Object.keys(socialHistory).length>0 ? socialHistory.educationDescription : 'Primary or lower',
@@ -406,6 +416,18 @@ function EditPatientSocialHistScreen(props) {
   
   // form submission when save button is pressed
   const submitForm = async () => {
+    // Detect if this is add or update based on presence of ID
+    const isAddMode = !formData.SocialHistoryId && !formData.id;
+    
+    // Add mode is not yet supported by backend
+    if (isAddMode) {
+      Alert.alert(
+        'Feature Not Available',
+        'Adding new social history is not yet supported. Please contact the administrator.'
+      );
+      return;
+    }
+    
     const result = await socialHistoryApi.updateSocialHistory(formData);
 
     let alertTitle = '';
