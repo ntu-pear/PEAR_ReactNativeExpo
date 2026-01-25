@@ -36,6 +36,7 @@ function SearchFilterBar({
   setApplySortFilter = () => {},
 
   itemCount = null,
+  countRightComponent = null,
   handleSearchSortFilterCustom,
 
   VIEW_MODES = {},
@@ -90,8 +91,6 @@ function SearchFilterBar({
     tempSelDatetimeFilters = datetime['tempSel'],
     tempSearchMode = searchOption,
   }) => {
-    console.log('BAR 1 - handleSearchSortFilter');
-
     if (handleSearchSortFilterCustom) {
       handleSearchSortFilterCustom({
         text: text,
@@ -127,8 +126,6 @@ function SearchFilterBar({
     tempSelDatetimeFilters = datetime['tempSel'],
     tempSearchMode = searchOption,
   }) => {
-    console.log('BAR 2 - setFilteredList');
-
     let filteredList = [...originalList];
 
     // Search
@@ -340,7 +337,6 @@ function SearchFilterBar({
   // For example, patient status is not meant for filtering - it requires new API call, so do not filter
   // Use custom options if declared in FILTER_MAPPING
   const getSubFilteredList = (filteredList, filter, id, tempSelFilters) => {
-    console.log('BAR 3 - getSubFilteredList');
     if (filterOptionDetails[filter]['isFilter']) {
       const fieldKey = FIELD_MAPPING[filter];
       if (isEmptyObject(filterOptionDetails[filter]['options'])) {
@@ -381,7 +377,6 @@ function SearchFilterBar({
     id,
     tempSelFilters,
   ) => {
-    console.log('BAR 4 - getNestedSubfilteredList');
 
     const key = filterOptionDetails[filter]['nestedFilter'];
     const tempFilteredList = [];
@@ -414,7 +409,6 @@ function SearchFilterBar({
 
   // Switch between search modes (full name, preferred name)
   const handleOnToggleSearchOptions = async (item) => {
-    console.log('BAR 5 - handleOnToggleSearchOptions');
 
     const label = SEARCH_OPTIONS[item - 1];
     setSearchOption(label);
@@ -426,7 +420,6 @@ function SearchFilterBar({
   // Switch between tabs
   // If user clicks on same tab, reset all search/sort/filter options
   const handleOnToggleViewMode = (mode) => {
-    console.log('BAR 6 - handleOnToggleViewMode');
 
     if (mode != viewMode) {
       setIsLoading(true);
@@ -435,7 +428,6 @@ function SearchFilterBar({
 
   // Update search state and handle searching when user changes search query
   const handleSearch = (text) => {
-    console.log('BAR 7 - handleSearch');
 
     setSearchQuery(text);
     handleSearchSortFilter({ text: text });
@@ -474,9 +466,7 @@ function SearchFilterBar({
   const countComponent = () => {
     return itemCount != null ? (
       <View style={styles.itemCount} testID={`${testID}_count`}>
-        <Text>
-          No. of {itemType}: {itemCount}
-        </Text>
+        <Text>No. of {itemType}: {itemCount}</Text>
       </View>
     ) : null;
   };
@@ -603,10 +593,15 @@ function SearchFilterBar({
               {displayModeComponent()}
             </View>
           </View>
-          <View style={[styles.optionsContainer, { paddingTop: 0 }]}>
-            {countComponent()}
-            {verticalDividerComponent()}
-            {filterIndicatorComponent()}
+          <View style={[styles.optionsContainer, { paddingTop: 0, width: '100%' }]}>
+            <View style={styles.bottomRowLeft}>
+              {countComponent()}
+              {verticalDividerComponent()}
+              {filterIndicatorComponent()}
+            </View>
+            {countRightComponent ? (
+              <View style={styles.bottomRowRight}>{countRightComponent}</View>
+            ) : null}
           </View>
         </>
       )}
@@ -636,6 +631,16 @@ const styles = StyleSheet.create({
     paddingVertical: '1.5%',
     alignSelf: 'flex-start',
     ...typography.body1,
+  },
+  bottomRowLeft: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  },
+  bottomRowRight: {
+    alignSelf: 'center',
+    marginRight: '2%',
   },
 });
 
