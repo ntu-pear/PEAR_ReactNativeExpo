@@ -17,6 +17,9 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Accordion from 'react-native-collapsible/Accordion';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
+// Hooks
+import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
+
 // API
 import patientApi from 'app/api/patient';
 import doctorNoteApi from 'app/api/doctorNote';
@@ -29,6 +32,7 @@ import typography from 'app/config/typography';
 // Components
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import InformationCard from 'app/components/InformationCard';
+import AppButton from 'app/components/AppButton';
 
 // function PatientInformationAccordion({patientID, patientProfile, guardianData, doctorsNoteData, socialHistoryData}) {
 function PatientInformationAccordion({
@@ -65,6 +69,7 @@ function PatientInformationAccordion({
   const [isSecondGuardian, setIsSecondGuardian] = useState(false);
   // const [socialHistoryData, setSocialHistoryData] = useState([]);
   const [socialHistoryInfo, setSocialHistoryInfo] = useState([]);
+  const [isSocialHistoryEmpty, setIsSocialHistoryEmpty] = useState(false);
   // const [patientProfile, setPatientProfile] = useState({});
   const [patientData, setPatientData] = useState([]);
   const [preferenceData, setPreferences] = useState([]);
@@ -73,6 +78,30 @@ function PatientInformationAccordion({
   const [unMaskedPatientNRIC, setUnMaskedPatientNRIC] = useState('');
   const [unMaskedGuardianNRIC, setUnMaskedGuardianNRIC] = useState('');
   const [unMasked2ndGuardianNRIC, setUnMasked2ndGuardianNRIC] = useState('');
+
+  // Social History list option lookups (used when API returns only list IDs)
+  const { data: liveWithOptions } = useGetSelectionOptions('livewith');
+  const { data: educationOptions } = useGetSelectionOptions('education');
+  const { data: occupationOptions } = useGetSelectionOptions('occupation');
+  const { data: religionOptions } = useGetSelectionOptions('religion');
+  const { data: petOptions } = useGetSelectionOptions('pet');
+  const { data: dietOptions } = useGetSelectionOptions('diet');
+
+  const triStateLabel = (v) => {
+    if (v === undefined || v === null || v === '') return '-';
+    const n = Number(v);
+    if (n === 1) return 'YES';
+    if (n === 0) return 'NO';
+    // Historically the app uses 2 as a sentinel for "not stated" / "prefer not to say".
+    return 'Not available';
+  };
+
+  const optionLabelById = (options, id) => {
+    if (!options || !Array.isArray(options) || id === undefined || id === null) return '';
+    const needle = Number(id);
+    const found = options.find((o) => Number(o.value) === needle);
+    return found?.label || '';
+  };
 
   const [activeSections, setActiveSections] = useState([]);
   const [sections, setSections] = useState([]);
@@ -291,69 +320,109 @@ function PatientInformationAccordion({
 
   useEffect(() => {
     const delayUpdate = setTimeout(() => {
-      if (
-        socialHistoryData !== null &&
-        Object.keys(socialHistoryData).length > 0
-      ) {
+      const src = Array.isArray(socialHistoryData)
+        ? socialHistoryData[0]
+        : socialHistoryData;
+
+      const isEmpty = !src || Object.keys(src).length === 0;
+      setIsSocialHistoryEmpty(isEmpty);
+
+      if (src !== null && src !== undefined && Object.keys(src).length > 0) {
+        const secondHandSmoker =
+          src.secondhandSmoker ?? src.secondHandSmoker ?? src.SecondhandSmoker;
+
+        const liveWithDesc =
+          src.liveWithDescription ??
+          src.LiveWithDescription ??
+          optionLabelById(liveWithOptions, src.liveWithListId ?? src.LiveWithListId);
+        const educationDesc =
+          src.educationDescription ??
+          src.EducationDescription ??
+          optionLabelById(educationOptions, src.educationListId ?? src.EducationListId);
+        const occupationDesc =
+          src.occupationDescription ??
+          src.OccupationDescription ??
+          optionLabelById(occupationOptions, src.occupationListId ?? src.OccupationListId);
+        const religionDesc =
+          src.religionDescription ??
+          src.ReligionDescription ??
+          optionLabelById(religionOptions, src.religionListId ?? src.ReligionListId);
+        const petDesc =
+          src.petDescription ??
+          src.PetDescription ??
+          optionLabelById(petOptions, src.petListId ?? src.PetListId);
+        const dietDesc =
+          src.dietDescription ??
+          src.DietDescription ??
+          optionLabelById(dietOptions, src.dietListId ?? src.DietListId);
+
         setSocialHistoryInfo([
           {
             label: 'Live with',
-            value: socialHistoryData.liveWithDescription || '-',
+            value: liveWithDesc || '-',
           },
           {
             label: 'Education',
-            value: socialHistoryData.educationDescription || '-',
+            value: educationDesc || '-',
           },
           {
             label: 'Occupation',
-            value: socialHistoryData.occupationDescription || '-',
+            value: occupationDesc || '-',
           },
           {
             label: 'Religion',
-            value: socialHistoryData.religionDescription || '-',
+            value: religionDesc || '-',
           },
           {
             label: 'Pet',
-            value: socialHistoryData.petDescription || '-',
+            value: petDesc || '-',
           },
           {
             label: 'Diet',
-            value: socialHistoryData.dietDescription || '-',
+            value: dietDesc || '-',
           },
           {
             label: 'Exercise',
-            value: socialHistoryData.exercise,
+            value: triStateLabel(src.exercise ?? src.Exercise),
           },
           {
             label: 'Sexually active',
-            value: socialHistoryData.sexuallyActive,
+            value: triStateLabel(src.sexuallyActive ?? src.SexuallyActive),
           },
           {
             label: 'Drug use',
-            value: socialHistoryData.drugUse,
+            value: triStateLabel(src.drugUse ?? src.DrugUse),
           },
           {
             label: 'Caffeine use',
-            value: socialHistoryData.caffeineUse,
+            value: triStateLabel(src.caffeineUse ?? src.CaffeineUse),
           },
           {
             label: 'Alcohol use',
-            value: socialHistoryData.alcoholUse,
+            value: triStateLabel(src.alcoholUse ?? src.AlcoholUse),
           },
           {
             label: 'Tobacco use',
-            value: socialHistoryData.tobaccoUse,
+            value: triStateLabel(src.tobaccoUse ?? src.TobaccoUse),
           },
           {
             label: 'Secondhand smoker',
-            value: socialHistoryData.secondhandSmoker,
+            value: triStateLabel(secondHandSmoker),
           },
         ]);
       }
     }, 100);
 
     return () => clearTimeout(delayUpdate);
-  }, [socialHistoryData]);
+  }, [
+    socialHistoryData,
+    liveWithOptions,
+    educationOptions,
+    occupationOptions,
+    religionOptions,
+    petOptions,
+    dietOptions,
+  ]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -422,8 +491,58 @@ function PatientInformationAccordion({
   };
 
   const handlePatientSocialHistOnPress = () => {
+    const src = Array.isArray(socialHistoryData)
+      ? socialHistoryData[0]
+      : socialHistoryData;
+
+    // If empty, pass an empty object to trigger add mode
+    if (!src || Object.keys(src).length === 0) {
+      navigation.push(routes.EDIT_PATIENT_SOCIALHIST, {
+        socialHistory: {},
+        patientID: patientID,
+      });
+      return;
+    }
+
+    const decoded = {
+      ...(src || {}),
+      liveWithDescription:
+        src?.liveWithDescription ??
+        src?.LiveWithDescription ??
+        optionLabelById(liveWithOptions, src?.liveWithListId ?? src?.LiveWithListId) ??
+        '',
+      educationDescription:
+        src?.educationDescription ??
+        src?.EducationDescription ??
+        optionLabelById(educationOptions, src?.educationListId ?? src?.EducationListId) ??
+        '',
+      occupationDescription:
+        src?.occupationDescription ??
+        src?.OccupationDescription ??
+        optionLabelById(occupationOptions, src?.occupationListId ?? src?.OccupationListId) ??
+        '',
+      religionDescription:
+        src?.religionDescription ??
+        src?.ReligionDescription ??
+        optionLabelById(religionOptions, src?.religionListId ?? src?.ReligionListId) ??
+        '',
+      petDescription:
+        src?.petDescription ??
+        src?.PetDescription ??
+        optionLabelById(petOptions, src?.petListId ?? src?.PetListId) ??
+        '',
+      dietDescription:
+        src?.dietDescription ??
+        src?.DietDescription ??
+        optionLabelById(dietOptions, src?.dietListId ?? src?.DietListId) ??
+        '',
+      // normalize secondhand field name for the edit screen
+      secondhandSmoker:
+        src?.secondhandSmoker ?? src?.secondHandSmoker ?? src?.SecondhandSmoker ?? null,
+    };
+
     navigation.push(routes.EDIT_PATIENT_SOCIALHIST, {
-      socialHistory: socialHistoryData,
+      socialHistory: decoded,
       patientID: patientID,
       // navigation: navigation,
     });
@@ -532,6 +651,7 @@ function PatientInformationAccordion({
           displayData={section.content}
           handleOnPress={handleOnPress(section.title)}
           unMaskedNRIC={unmaskedNRIC(section.title)}
+          buttonTitle={section.title === 'Social History' && isSocialHistoryEmpty ? 'ADD' : null}
         />
         {section.title === 'Guardian(s) Information' && isSecondGuardian ? (
           <InformationCard
