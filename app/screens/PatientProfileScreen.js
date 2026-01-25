@@ -135,7 +135,7 @@ function PatientProfileScreen(props) {
 
   const [patientProfile, setPatientProfile] = useState({});
   const [guardianData, setGuardianData] = useState({});
-  const [socialHistoryData, setSocialHistoryData] = useState([]);
+  const [socialHistoryData, setSocialHistoryData] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [isPatientLoading, setIsPatientLoading] = useState(true);
   const [isSocialHistoryLoading, setIsSocialHistoryLoading] = useState(true);
@@ -393,10 +393,6 @@ function PatientProfileScreen(props) {
     try {
       const resp = await guardianApi.getPatientGuardian(id, false);
       logResp('Guardian', resp);
-      
-      console.log('=== GET /api/v1/Guardian/GetPatientGuardianByPatientId ===');
-      console.log('Patient ID:', id);
-      console.log('Response Data:', JSON.stringify(resp?.data, null, 2));
 
       if (resp?.ok && resp?.data) {
         // The API returns: { data: [{ patient: {...}, patient_guardians: [...] }] }
@@ -445,14 +441,46 @@ function PatientProfileScreen(props) {
       logResp('SocialHistory', resp);
 
       if (resp?.ok) {
-        const payload = resp?.data?.data;
-        setSocialHistoryData(payload ?? []);
+        let payload = resp?.data?.data ?? resp?.data;
+        if (Array.isArray(payload)) payload = payload[0];
+
+        // Patient Service v1 response - normalize to UI format
+        const normalized = payload ? {
+          id: payload.id,
+          socialHistoryId: payload.id,
+          patientId: payload.patientId,
+          
+          liveWithDescription: payload.liveWithDescription,
+          liveWithListId: payload.liveWithListId,
+          educationDescription: payload.educationDescription,
+          educationListId: payload.educationListId,
+          occupationDescription: payload.occupationDescription,
+          occupationListId: payload.occupationListId,
+          religionDescription: payload.religionDescription,
+          religionListId: payload.religionListId,
+          petDescription: payload.petDescription,
+          petListId: payload.petListId,
+          dietDescription: payload.dietDescription,
+          dietListId: payload.dietListId,
+          
+          exercise: payload.exercise,
+          sexuallyActive: payload.sexuallyActive,
+          drugUse: payload.drugUse,
+          caffeineUse: payload.caffeineUse,
+          alcoholUse: payload.alcoholUse,
+          tobaccoUse: payload.tobaccoUse,
+          secondhandSmoker: payload.secondHandSmoker,
+        } : {};
+
+        setSocialHistoryData(normalized);
       } else {
-        setSocialHistoryData([]);
+        // Handle API errors gracefully - show empty state
+        console.log('[SocialHistory] API error - showing empty state');
+        setSocialHistoryData({});
       }
     } catch (e) {
       console.log('[SocialHistory] error:', e?.message || e);
-      setSocialHistoryData([]);
+      setSocialHistoryData({});
     } finally {
       setIsSocialHistoryLoading(false);
     }
