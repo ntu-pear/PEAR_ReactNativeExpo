@@ -1,5 +1,5 @@
 // Libs
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { Box, VStack, FlatList } from 'native-base'
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -9,6 +9,9 @@ import routes from 'app/navigation/routes';
 
 // Hooks
 import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
+
+// Auth
+import AuthContext from 'app/auth/context';
 
 // APIs
 import patientApi from 'app/api/patient';
@@ -25,6 +28,8 @@ import { parseSelectOptions } from 'app/utility/miscFunctions';
 function EditPatientPreferencesScreen(props) {
   const { patientProfile } = props.route.params;
   const [isLoading, setIsLoading] = useState(true);
+
+  const { setUser } = useContext(AuthContext);
   
   const navigation = useNavigation();
   
@@ -123,9 +128,11 @@ function EditPatientPreferencesScreen(props) {
    // Try to get langugage list from backend. If retrieval from the hook is successful, replace the content in
   // listOfLanguages with the retrieved one.
   useEffect(() => {
-    if (!languageLoading && !languageError && languageData) {
-      // console.log('selection data!');
-      setListOfLanguages(languageData);
+    if (!languageLoading) {
+      if (!languageError && Array.isArray(languageData) && languageData.length > 0) {
+        setListOfLanguages(languageData);
+      }
+      // Even if the API fails, fall back to the hard-coded list and allow the user to continue.
       setIsLoading(false);
     }
   }, [languageData, languageError, languageLoading]);
@@ -141,6 +148,7 @@ function EditPatientPreferencesScreen(props) {
     const response = await patientApi.getPatientList(false, 'active');
     if (!response.ok) {
       setUser(null);
+      setIsPrefNamesLoading(false);
       return;
     }
     setPrefNames(response.data.data.map((x) => x.preferredName));
