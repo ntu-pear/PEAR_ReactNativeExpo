@@ -46,11 +46,14 @@ function AddPatientAllergyModal({
   const { data: reactions } = useGetSelectionOptions('AllergyReaction');
   const sortedReactions = reactions?.sort((a, b) => a.value - b.value) || [];
 
-  // Filter out allergyID1 and allergyID2 if there is an existing allergy
+  // Filter out allergyID1 and allergyID2 if there is an existing allergy (add mode only)
   const hiddenAllergyIDs = [1, 2]; // AllergyID1 and AllergyID2
-  const filteredAllergies = existingAllergyIDs.length > 0
-    ? sortedAllergies.filter(allergy => !hiddenAllergyIDs.includes(allergy.value))
-    : sortedAllergies;
+  const filteredAllergies =
+    modalMode === 'add'
+      ? (existingAllergyIDs.length > 0
+          ? sortedAllergies.filter((allergy) => !hiddenAllergyIDs.includes(allergy.value))
+          : sortedAllergies)
+      : sortedAllergies;
 
   // Error handling useEffect
   useEffect(() => {
@@ -90,14 +93,49 @@ function AddPatientAllergyModal({
     }
   }, [showModal]);
 
+  // Prefill data for edit mode
+  useEffect(() => {
+    if (!showModal || modalMode !== 'edit') return;
+
+    const resolveIdFromLabel = (options = [], label = '') => {
+      const needle = (label ?? '').toString().trim().toLowerCase();
+      if (!needle) return null;
+      const hit = options.find((o) => (o.label ?? '').toString().trim().toLowerCase() === needle);
+      return hit?.value ?? null;
+    };
+
+    const prefillAllergyId =
+      allergyFormData?.allergyListID ??
+      resolveIdFromLabel(sortedAllergies, allergyFormData?.allergyListDesc);
+    const prefillReactionId =
+      allergyFormData?.allergyReactionListID ??
+      resolveIdFromLabel(sortedReactions, allergyFormData?.allergyReaction);
+
+    const prefill = {
+      AllergyListID: prefillAllergyId ?? 1,
+      AllergyReactionListID: prefillReactionId ?? 1,
+      AllergyRemarks: allergyFormData?.allergyRemarks ?? '',
+    };
+
+    setAllergyData(prefill);
+    setIsAllergyError(false);
+    setIsReactionError(false);
+    setIsRemarksError(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showModal, modalMode, allergyFormData, sortedAllergies.length, sortedReactions.length]);
+
   // Update disabled options based on existing allergies
   useEffect(() => {
     const newDisabledOptions = {};
     existingAllergyIDs.forEach((id) => {
       newDisabledOptions[id] = true;
     });
+    // In edit mode, allow re-selecting the current allergy type
+    if (modalMode === 'edit' && allergyData?.AllergyListID != null) {
+      delete newDisabledOptions[allergyData.AllergyListID];
+    }
     setDisabledAllergyOptions(newDisabledOptions);
-  }, [existingAllergyIDs, allergies]);
+  }, [existingAllergyIDs, allergies, modalMode, allergyData?.AllergyListID]);
 
   // Handle form data change
   const handleAllergyChange = (value) => {
@@ -130,10 +168,44 @@ function AddPatientAllergyModal({
 
   // Handle form submission
   const handleSubmit = () => {
-    if (!isInputErrors) {
-      onSubmit(allergyData);
-      onClose();
+    // Basic required-field validation (prevents unstable submissions)
+    const trimmedNotes = (allergyData?.AllergyRemarks ?? '').toString().trim();
+
+    let hasError = false;
+
+    // Allergy selection should always exist, but guard anyway
+    if (allergyData?.AllergyListID == null) {
+      setIsAllergyError(true);
+      hasError = true;
     }
+
+    // When an actual allergy is selected (IDs > 2 in this flow), require reaction + notes
+    if ((allergyData?.AllergyListID ?? 0) > 2) {
+      if (allergyData?.AllergyReactionListID == null) {
+        setIsReactionError(true);
+        hasError = true;
+      }
+      if (!trimmedNotes) {
+        setIsRemarksError(true);
+        hasError = true;
+      }
+    }
+
+    if (hasError || isInputErrors) {
+      return;
+    }
+
+    const payload =
+      modalMode === 'edit'
+        ? {
+            ...allergyData,
+            Patient_AllergyID: allergyFormData?.allergyID ?? null,
+            IsDeleted: '0',
+          }
+        : allergyData;
+
+    onSubmit(payload);
+    onClose();
   };
 
   return (
@@ -173,10 +245,11 @@ function AddPatientAllergyModal({
               <InputField
                 testID={`${testID}_remarks`}
                 isRequired
-                title="Remarks"
+                title="Notes"
                 value={allergyData.AllergyRemarks}
                 onChangeText={handleRemarksChange}
                 variant="multiLine"
+                autoCapitalize="none"
                 onEndEditing={setIsRemarksError}
                 isInvalid={isRemarksError}
               />
