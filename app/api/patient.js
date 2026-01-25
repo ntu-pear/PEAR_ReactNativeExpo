@@ -9,7 +9,8 @@ import { Image } from 'react-native';
 // --- Patient Service v1 base (new server) ---
 const withPatientV1Base = (cfg = {}) => ({ baseURL: PATIENT_V1_BASE, timeout: 15000, ...cfg });
 const v1PatientsListEndpoint = '/patients/';
-const v1PatientReadEndpoint = (patient_id) => `/patients/${patient_id}/`;
+// NOTE: patient service v1 is strict about trailing slashes for some routes
+const v1PatientReadEndpoint = (patient_id) => `/patients/${patient_id}`;
 const v1PatientMedicationsEndpoint = (patient_id) => `/patients/${patient_id}/medications/`;
 const v1PatientMedicationDetailEndpoint = (patient_id, med_id) => `/patients/${patient_id}/medications/${med_id}/`;
 const USE_COLLECTION_STYLE_MED_ENDPOINT = false;
@@ -105,14 +106,23 @@ const deletePatientMedicationV1 = ({ patientID, patient_id, medicationID, medica
 };
 
 // ---------- Allergy (v1) ----------
-const listPatientAllergiesV1 = async (patient_id) => {
-  const url = `/api/v1/get_patient_allergy/${patient_id}`;
-  const res = await client.get(url, {}, withPatientV1Base());
+const listPatientAllergiesV1 = async (patient_id, params = {}) => {
+  if (!patient_id) {
+    return { ok: false, status: 400, data: { detail: 'patient_id is required' } };
+  }
+
+  // NOTE: PATIENT_V1_BASE already includes `/api/v1`
+  const url = `/get_patient_allergy/${patient_id}`;
+  const res = await client.get(url, params, withPatientV1Base());
   if (!res.ok) console.log('[ALLERGY v1][GET]', url, res.status, res.data);
   return res;
 };
 
 const addPatientAllergyV1 = async (patient_id, data) => {
+  if (!patient_id) {
+    return { ok: false, status: 400, data: { detail: 'patient_id is required' } };
+  }
+
   const payload = {
     PatientID: patient_id,
     AllergyTypeID: data.AllergyListID ?? data.allergy_type_id ?? data.allergyListID ?? data.AllergyTypeID,
@@ -120,29 +130,40 @@ const addPatientAllergyV1 = async (patient_id, data) => {
     AllergyRemarks: data.AllergyRemarks ?? data.allergy_remarks ?? data.allergyRemarks ?? '',
     IsDeleted: '0',
   };
-  const url = `/api/v1/create_patient_allergy`;
+  
+  // NOTE: PATIENT_V1_BASE already includes `/api/v1`
+  const url = `/create_patient_allergy`;
   const res = await client.post(url, payload, withPatientV1Base());
   if (!res.ok) console.log('[ALLERGY v1][POST]', url, res.status, payload, res.data);
   return res;
 };
 
-const updatePatientAllergyV1 = async (patient_id, data) => {
+const updatePatientAllergyV1 = async (patient_id, allergy_id, data) => {
+  if (!patient_id || !allergy_id) {
+    return { ok: false, status: 400, data: { detail: 'patient_id and allergy_id are required' } };
+  }
+
   const payload = {
-    allergy_type_id:
-      data.AllergyListID ?? data.allergy_type_id ?? data.allergyListID,
-    allergy_reaction_type_id:
-      data.AllergyReactionListID ?? data.allergy_reaction_type_id ?? data.allergyReactionListID,
-    allergy_remarks:
-      data.AllergyRemarks ?? data.allergy_remarks ?? data.allergyRemarks ?? '',
+    Patient_AllergyID: allergy_id,
+    AllergyTypeID: data.AllergyListID ?? data.allergy_type_id ?? data.allergyListID,
+    AllergyReactionTypeID: data.AllergyReactionListID ?? data.allergy_reaction_type_id ?? data.allergyReactionListID,
+    AllergyRemarks: data.AllergyRemarks ?? data.allergy_remarks ?? data.allergyRemarks ?? '',
   };
-  const url = `/api/v1/update_patient_allergy/${patient_id}`;
+  
+  // NOTE: PATIENT_V1_BASE already includes `/api/v1`
+  const url = `/update_patient_allergy/${patient_id}`;
   const res = await client.put(url, payload, withPatientV1Base());
   if (!res.ok) console.log('[ALLERGY v1][PUT]', url, res.status, payload, res.data);
   return res;
 };
 
-const deletePatientAllergyV1 = async (patient_allergy_id) => {
-  const url = `/api/v1/delete_patient_allergy/${patient_allergy_id}`;
+const deletePatientAllergyV1 = async (patient_id, patient_allergy_id) => {
+  if (!patient_id || !patient_allergy_id) {
+    return { ok: false, status: 400, data: { detail: 'patient_id and patient_allergy_id are required' } };
+  }
+
+  // NOTE: PATIENT_V1_BASE already includes `/api/v1`
+  const url = `/delete_patient_allergy/${patient_allergy_id}`;
   const res = await client.delete(url, {}, withPatientV1Base());
   if (!res.ok) console.log('[ALLERGY v1][DELETE]', url, res.status, res.data);
   return res;
@@ -321,17 +342,6 @@ const deletePatientProblemLogV1 = async (patient_id, log_id) => {
 };
 
 
-// Normalize v1 -> legacy shape your UI already expects
-export const normalizePatientAllergyV1 = (a = {}) => ({
-  allergyID: a.patient_allergy_id ?? a.id ?? a.allergy_id ?? null,
-  allergyListID: a.allergy_type_id ?? a.AllergyListID ?? null,
-  allergyReactionListID: a.allergy_reaction_type_id ?? a.AllergyReactionListID ?? null,
-  allergyRemarks: a.allergy_remarks ?? a.AllergyRemarks ?? '',
-  allergyListDesc: a.allergy_type_desc ?? a.allergyListDesc ?? '',          // if backend returns description
-  allergyReaction: a.allergy_reaction_type_desc ?? a.allergyReaction ?? '', // if backend returns description
-  createdDate: a.created_at ?? a.createdDate ?? null,
-});
-
 // ---------- Medical History (v1) ----------
 const v1PatientMedicalHistoriesEndpoint = (patient_id) => `/patients/${patient_id}/medical_histories/`;
 const v1PatientMedicalHistoryDetailEndpoint = (patient_id, hx_id) => `/patients/${patient_id}/medical_histories/${hx_id}/`;
@@ -482,16 +492,36 @@ const updatePatient = async (patientID, data) => {
 
 
 // ---------- NORMALIZERS ----------
-export const normalizePatientV1 = (p = {}) => ({
-  id: p.id ?? p.patient_id ?? p.uuid ?? null,
-  firstName: p.first_name ?? p.given_name ?? p.first ?? '',
-  lastName: p.last_name ?? p.family_name ?? p.last ?? '',
-  fullName:
-    [p.first_name ?? p.given_name ?? p.first, p.last_name ?? p.family_name ?? p.last]
-      .filter(Boolean)
-      .join(' ') || p.name || '',
-  nric: p.nric ?? p.nric_number ?? p.id_number ?? null,
-});
+// Normalize patient data from v1 API to UI shape (shared across screens)
+export const normalizePatientV1 = (p = {}) => {
+  const nameParts = (p.name ?? '').split(' ');
+  const inferredFirst = nameParts[0] ?? '';
+  const inferredLast = nameParts.slice(1).join(' ') ?? '';
+
+  const firstName =
+    p.firstName ?? p.FirstName ?? p.first_name ?? p.given_name ?? p.first ?? inferredFirst;
+  const lastName =
+    p.lastName ?? p.LastName ?? p.last_name ?? p.family_name ?? p.last ?? inferredLast;
+
+  return {
+    id: p.id ?? p.patientID ?? p.PatientID ?? p.patient_id ?? p.uuid ?? null,
+    patientID: p.patientID ?? p.PatientID ?? p.id ?? p.patient_id ?? null,
+    firstName,
+    lastName,
+    preferredName: p.preferredName ?? p.PreferredName ?? p.preferred_name ?? '',
+    fullName:
+      (p.fullName ?? p.FullName ?? p.name ?? [firstName, lastName].filter(Boolean).join(' ')) || '',
+    nric: p.nric ?? p.NRIC ?? p.nric_number ?? p.id_number ?? null,
+    profilePicture:
+      p.profilePicture ??
+      p.ProfilePicture ??
+      p.profile_picture ??
+      p.profile_picture_url ??
+      p.photoUrl ??
+      null,
+  };
+};
+
 
 // --- v1 Allergy dropdown sources ---
 const getAllergyTypesV1 = async () => {
@@ -535,7 +565,6 @@ export default {
 
   // --- normalizers ---
   normalizePatientV1,
-  normalizePatientAllergyV1,
 
   // --- v1 Patient Medications ---
   listPatientMedicationsV1,

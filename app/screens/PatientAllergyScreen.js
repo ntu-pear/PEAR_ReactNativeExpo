@@ -11,7 +11,7 @@ import {
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 // API
-import patientApi, { normalizePatientAllergyV1 } from 'app/api/patient';
+import patientApi, { normalizePatientV1 } from 'app/api/patient';
 
 // Utilities
 import {
@@ -40,6 +40,33 @@ import DynamicTable from 'app/components/DynamicTable';
 import Swipeable from 'app/components/swipeable-components/Swipeable';
 import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
 import PatientAllergyItem from 'app/components/PatientAllergyItem';
+
+// ---------- Local Normalizers ----------
+// Normalize allergy data from v1 API to UI shape (only used in this screen)
+const normalizePatientAllergyV1 = (a = {}) => ({
+  allergyID:
+    a.Patient_AllergyID ?? a.patient_allergy_id ?? a.id ?? a.allergy_id ?? null,
+  patientID: a.PatientID ?? a.patient_id ?? null,
+  allergyListID:
+    a.AllergyTypeID ?? a.allergy_type_id ?? a.AllergyListID ?? null,
+  allergyReactionListID:
+    a.AllergyReactionTypeID ?? a.allergy_reaction_type_id ?? a.AllergyReactionListID ?? null,
+  allergyRemarks: a.AllergyRemarks ?? a.allergy_remarks ?? '',
+  allergyListDesc:
+    a.AllergyTypeValue ??
+    a.allergy_type_desc ??
+    a.allergyListDesc ??
+    a.allergy_type?.description ??
+    '',
+  allergyReaction:
+    a.AllergyReactionTypeValue ??
+    a.allergy_reaction_type_desc ??
+    a.allergyReaction ??
+    a.allergy_reaction_type?.description ??
+    '',
+  createdDate:
+    a.CreatedDateTime ?? a.created_at ?? a.createdDate ?? a.created_date ?? null,
+});
 
 function PatientAllergyScreen(props) {
   let { patientID, patientId } = props.route.params;
@@ -143,8 +170,12 @@ function PatientAllergyScreen(props) {
     if (patientID) {
       const response = await patientApi.readPatientV1(patientID);
       if (response.ok) {
-        // v1 returns data directly, not inside response.data.data
-        setPatientData(response.data);
+        // v1 wraps the patient in response.data.data; extract before normalizing
+        const rawPatient = response.data?.data ?? response.data;
+        const normalized = normalizePatientV1(rawPatient);
+        console.log('[ALLERGY SCREEN] Raw patient data:', JSON.stringify(rawPatient));
+        console.log('[ALLERGY SCREEN] Normalized patient data:', JSON.stringify(normalized));
+        setPatientData(normalized);
         setIsError(false);
         setIsRetry(false);
         setStatusCode(response.status);
@@ -163,11 +194,12 @@ function PatientAllergyScreen(props) {
   // Get allergy data from backend
   const getAllergyData = async () => {
     if (patientID) {
-      const response = await patientApi.listPatientAllergiesV1(patientID);
+      const response = await patientApi.listPatientAllergiesV1(patientID, { pageNo: 0, pageSize: 100 });
       if (response.ok) {
+        // Patient service v1 returns a paginated payload with `data` array
         const raw = Array.isArray(response.data)
           ? response.data
-          : response.data?.results ?? [];
+          : response.data?.data ?? response.data?.results ?? [];
       
         const normalized = raw.map(normalizePatientAllergyV1);
       
@@ -268,7 +300,7 @@ function PatientAllergyScreen(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.deletePatientAllergyV1(allergyID);
+    const result = await patientApi.deletePatientAllergyV1(patientID, allergyID);
     if (result.ok) {
       refreshAllergyData();
       setIsModalVisible(false);
