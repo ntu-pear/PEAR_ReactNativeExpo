@@ -419,37 +419,44 @@ function EditPatientSocialHistScreen(props) {
     // Detect if this is add or update based on presence of ID
     const isAddMode = !formData.SocialHistoryId && !formData.id;
     
-    // Add mode is not yet supported by backend
-    if (isAddMode) {
-      Alert.alert(
-        'Feature Not Available',
-        'Adding new social history is not yet supported. Please contact the administrator.'
-      );
-      return;
-    }
+    let result;
     
-    const result = await socialHistoryApi.updateSocialHistory(formData);
+    if (isAddMode) {
+      console.log('[EditPatientSocialHist] ADD mode - calling addSocialHistory');
+      console.log('[EditPatientSocialHist] formData:', JSON.stringify(formData, null, 2));
+      result = await socialHistoryApi.addSocialHistory(formData);
+    } else {
+      console.log('[EditPatientSocialHist] UPDATE mode - calling updateSocialHistory');
+      console.log('[EditPatientSocialHist] formData:', JSON.stringify(formData, null, 2));
+      result = await socialHistoryApi.updateSocialHistory(formData);
+    }
 
     let alertTitle = '';
     let alertDetails = '';
 
     if (result.ok) {
-      navigation.goBack(routes.PATIENT_PROFILE, {
-        navigation: navigation,
-      });
-      alertTitle = 'Saved Successfully';
+      alertTitle = isAddMode ? 'Added Successfully' : 'Saved Successfully';
+      alertDetails = isAddMode 
+        ? 'Social history has been added successfully.' 
+        : 'Social history has been updated successfully.';
+      
+      Alert.alert(alertTitle, alertDetails, [
+        {
+          text: 'OK',
+          onPress: () => navigation.goBack()
+        }
+      ]);
     } else {
-      const errors = result.data?.message;
+      const backendDetail = result.data?.detail;
+      const backendMessage = result.data?.message;
+      const errors = backendDetail || backendMessage || 'Unknown error occurred';
 
-      result.data
-        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-        : (alertDetails = 'Please try again.');
-
-      alertTitle = 'Error in Editing Patient Preferences';
-      console.log("result error "+JSON.stringify(result));
+      alertTitle = isAddMode ? 'Error Adding Social History' : 'Error Updating Social History';
+      alertDetails = `${errors}\n\nPlease try again.`;
+      
+      console.log('[EditPatientSocialHist] API Error:', JSON.stringify(result, null, 2));
+      Alert.alert(alertTitle, alertDetails);
     }
-    Alert.alert(alertTitle, alertDetails);
-    console.log("formData "+JSON.stringify(formData));
   };
 
   /* If retrieval from the hook is successful, replace the content in the list with the retrieved one. */
