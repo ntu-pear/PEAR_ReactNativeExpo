@@ -15,6 +15,7 @@ import client, { PATIENT_V1_BASE } from 'app/api/client';
 import RadioButtonInput from 'app/components/input-components/RadioButtonsInput';
 import DateInputField from 'app/components/input-components/DateInputField';
 import InputField from 'app/components/input-components/InputField';
+import SelectionInputField from 'app/components/input-components/SelectionInputField';
 import AppButton from 'app/components/AppButton';
 
 // Utilities
@@ -52,6 +53,13 @@ function EditPatientInfoScreen(props) {
   const [listOfRespiteCare, setListOfRespiteCare] = useState([
     { label: 'Yes', value: true },
     { label: 'No', value: false },
+  ]);
+  
+  // Privacy level options
+  const [privacyLevelOptions] = useState([
+    { label: 'Low', value: 1 },
+    { label: 'Medium', value: 2 },
+    { label: 'High', value: 3 },
   ]);
   const pickLangId = (label, options) => {
     const key = (label ?? '').toString().trim().toLowerCase();
@@ -138,7 +146,7 @@ function EditPatientInfoScreen(props) {
     PrivacyLevel:
   patientProfile.privacyLevel != null && patientProfile.privacyLevel !== 'null'
     ? String(patientProfile.privacyLevel)
-    : '',
+    : '2',
     UpdateBit: patientProfile.updateBit != null && patientProfile.updateBit != 'null' ? patientProfile.updateBit : '',
     AutoGame: patientProfile.autoGame != null && patientProfile.autoGame != 'null' ? patientProfile.autoGame : '',
     IsActive: patientProfile.isActive != null && patientProfile.isActive != 'null' ? patientProfile.isActive : '',
@@ -495,6 +503,16 @@ function EditPatientInfoScreen(props) {
                   keyboardType='numeric'                      
                   maxLength={8}
                 />   
+
+                <SelectionInputField
+                  title={'Privacy Level'}
+                  value={formData.PrivacyLevel ? parseInt(formData.PrivacyLevel) : 2}
+                  onDataChange={(selectedValue) => {
+                    handleFormData('PrivacyLevel')(selectedValue.toString());
+                  }}
+                  dataArray={privacyLevelOptions}
+                  placeholder="Select privacy level"
+                />
 
                 <RadioButtonInput
                   isRequired

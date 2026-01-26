@@ -331,6 +331,7 @@ function PatientProfileScreen(props) {
           startDate: p.startDate || p.start_date || null,
           isRespiteCare: toBool01(p.isRespiteCare ?? p.IsRespiteCare ?? p.respite_care),
           IsRespiteCare: toBool01(p.isRespiteCare ?? p.IsRespiteCare ?? p.respite_care),
+          privacyLevel: p.privacyLevel ?? p.privacy_level ?? p.PrivacyLevel ?? 2, // Default to Medium
         };
 
         console.log('[PROFILE V1 UI TEMP]', { tempAddress: ui.tempAddress, tempPostalCode: ui.tempPostalCode, homeNo: ui.homeNo });
@@ -438,11 +439,21 @@ function PatientProfileScreen(props) {
     setIsSocialHistoryLoading(true);
     try {
       const resp = await socialHistoryApi.getSocialHistory(id);
-      logResp('SocialHistory', resp);
+      
+      console.log('[SocialHistory] Full Response:', {
+        ok: resp?.ok,
+        status: resp?.status,
+        problem: resp?.problem,
+        headers: resp?.headers,
+        dataType: typeof resp?.data,
+        data: resp?.data,
+      });
 
       if (resp?.ok) {
         let payload = resp?.data?.data ?? resp?.data;
         if (Array.isArray(payload)) payload = payload[0];
+
+        console.log('[SocialHistory] Normalized payload:', payload);
 
         // Patient Service v1 response - normalize to UI format
         const normalized = payload ? {
@@ -472,14 +483,19 @@ function PatientProfileScreen(props) {
           secondhandSmoker: payload.secondHandSmoker,
         } : {};
 
+        console.log('[SocialHistory] Setting normalized data:', normalized);
         setSocialHistoryData(normalized);
       } else {
         // Handle API errors gracefully - show empty state
-        console.log('[SocialHistory] API error - showing empty state');
+        console.warn('[SocialHistory] API error response:', {
+          status: resp?.status,
+          problem: resp?.problem,
+          data: resp?.data,
+        });
         setSocialHistoryData({});
       }
     } catch (e) {
-      console.log('[SocialHistory] error:', e?.message || e);
+      console.error('[SocialHistory] Exception:', e?.message || e, e?.stack);
       setSocialHistoryData({});
     } finally {
       setIsSocialHistoryLoading(false);

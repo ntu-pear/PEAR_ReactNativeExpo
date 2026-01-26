@@ -7,6 +7,7 @@ import * as ImagePicker from 'expo-image-picker';
 
 // API
 import patientApi from 'app/api/patient';
+import privacyLevelApi from 'app/api/privacyLevel';
 
 // Configurations
 import routes from 'app/navigation/routes';
@@ -318,6 +319,24 @@ function PatientAddScreen() {
         } else {
           console.log('[ADD PATIENT] Failed to upload profile picture:', imageUploadResult.status, imageUploadResult.data);
           // Don't fail the whole operation if image upload fails
+        }
+      }
+
+      // Create default privacy level (Medium = 2) for the new patient
+      if (newPatientId) {
+        console.log('[ADD PATIENT] Creating default privacy level (Medium)...');
+        const privacyLevelPayload = {
+          patientId: newPatientId,
+          privacyLevel: 2, // Default to Medium
+        };
+        
+        const privacyLevelResult = await privacyLevelApi.createPrivacyLevel(privacyLevelPayload);
+        
+        if (privacyLevelResult.ok) {
+          console.log('[ADD PATIENT] Privacy level created successfully');
+        } else {
+          console.log('[ADD PATIENT] Failed to create privacy level:', privacyLevelResult.status, privacyLevelResult.data);
+          // Don't fail the whole operation if privacy level creation fails
         }
       }
 

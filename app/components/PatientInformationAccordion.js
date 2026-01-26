@@ -76,6 +76,16 @@ function PatientInformationAccordion({
       return [];
     }
     const nric = pick(patientProfile.NRIC, patientProfile.nric);
+    
+    // Format privacy level
+    const getPrivacyLevelLabel = (level) => {
+      const levelNum = parseInt(level);
+      if (levelNum === 1) return 'Low';
+      if (levelNum === 2) return 'Medium';
+      if (levelNum === 3) return 'High';
+      return '-';
+    };
+    
     return [
       { label: 'First Name', value: patientProfile.firstName || '-' },
       { label: 'Last Name', value: patientProfile.lastName || '-' },
@@ -96,6 +106,7 @@ function PatientInformationAccordion({
             : null,
       },
       { label: 'Respite Care', value: patientProfile.isRespiteCare ? 'YES' : 'NO' },
+      { label: 'Privacy Level', value: getPrivacyLevelLabel(patientProfile.privacyLevel) },
     ];
   }, [patientProfile]);
 
