@@ -115,7 +115,7 @@ const addSocialHistory = async (data, { require_auth = true } = {}) => {
       }
     }
   } catch (e) {
-    console.warn('[addSocialHistory] Failed to extract userId from token:', e);
+    // Token extraction failed, use default
   }
   
   // Use extracted userId or default to a placeholder the backend accepts

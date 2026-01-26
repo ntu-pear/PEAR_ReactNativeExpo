@@ -456,33 +456,12 @@ function EditPatientInfoScreen(props) {
               />
 
               <InputField
-              isRequired={formData.Address.length > 0}
-              title="Postal Code"
-              value={formData.PostalCode}
-              onChangeText={(t) => handleFormData('PostalCode')((t ?? '').toString())}
-              onEndEditing={handlePostalCodeError}
-              dataType="postal code"
-              keyboardType="numeric"
-               maxLength={6}
-                />
-
-              <InputField
                title="Temporary Address"
               value={formData.TempAddress}
               dataType="address"
               onChangeText={(t) => handleFormData('TempAddress')((t ?? '').toString())}
                onEndEditing={handleTempAddrError}
               />
-
-              <InputField
-              title="Temporary Postal Code"
-              value={formData.TempPostalCode}
-              onChangeText={(t) => handleFormData('TempPostalCode')((t ?? '').toString())}
-               onEndEditing={handleTempPostalCodeError}
-              dataType="postal code"
-              keyboardType="numeric"
-              maxLength={6}
-                  />
 
                 <InputField
                   title={'Home Telephone No.'}
