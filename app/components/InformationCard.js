@@ -20,6 +20,7 @@ function InformationCard({
   subtitle,
   handleOnPress = null,
   unMaskedNRIC = null,
+  buttonTitle = null,
 }) {
   const [itemizedData, setItemizedData] = useState(displayData);
   const [masked, setMasked] = useState(true);
@@ -78,7 +79,7 @@ function InformationCard({
           </View>
         )}
         {handleOnPress && !subtitle && (
-          <AppButton title="EDIT" onPress={handleOnPress} color="green" />
+          <AppButton title={buttonTitle || "EDIT"} onPress={handleOnPress} color="green" />
         )}
       </HStack>
 
@@ -86,7 +87,7 @@ function InformationCard({
       {subtitle && (
         <HStack alignItems="center" justifyContent="space-between" mb={4}>
           <Text style={styles.subtitleText}>{subtitle}</Text>
-          <AppButton title="EDIT" onPress={handleOnPress} color="green" />
+          <AppButton title={buttonTitle || "EDIT"} onPress={handleOnPress} color="green" />
         </HStack>
       )}
 

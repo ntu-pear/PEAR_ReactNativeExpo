@@ -23,6 +23,16 @@ function EditPatientSocialHistScreen(props) {
 
   const navigation = useNavigation();
   
+  // Detect if this is add mode (no socialHistoryId)
+  const isAddMode = !socialHistory?.socialHistoryId && !socialHistory?.id;
+  
+  // Set the screen title based on mode
+  useEffect(() => {
+    navigation.setOptions({
+      title: isAddMode ? 'Add Patient Social History' : 'Edit Patient Social History',
+    });
+  }, [navigation, isAddMode]);
+  
   // retrive list data from database using useGetSelectionOptions
   const {
     data: liveWithData,
@@ -320,7 +330,7 @@ function EditPatientSocialHistScreen(props) {
 
   const [formData, setFormData] = useState({
     PatientID: patientID,
-    SocialHistoryId: Object.keys(socialHistory).length>0 ? socialHistory.socialHistoryId : 1,
+    SocialHistoryId: Object.keys(socialHistory).length>0 ? socialHistory.socialHistoryId : null,
     LiveWithDescription: Object.keys(socialHistory).length>0 ? socialHistory.liveWithDescription : "Alone",
     LiveWithListId: Object.keys(socialHistory).length>0 ? socialHistory.liveWithListId : 1,
     EducationDescription: Object.keys(socialHistory).length>0 ? socialHistory.educationDescription : 'Primary or lower',
@@ -406,28 +416,47 @@ function EditPatientSocialHistScreen(props) {
   
   // form submission when save button is pressed
   const submitForm = async () => {
-    const result = await socialHistoryApi.updateSocialHistory(formData);
+    // Detect if this is add or update based on presence of ID
+    const isAddMode = !formData.SocialHistoryId && !formData.id;
+    
+    let result;
+    
+    if (isAddMode) {
+      console.log('[EditPatientSocialHist] ADD mode - calling addSocialHistory');
+      console.log('[EditPatientSocialHist] formData:', JSON.stringify(formData, null, 2));
+      result = await socialHistoryApi.addSocialHistory(formData);
+    } else {
+      console.log('[EditPatientSocialHist] UPDATE mode - calling updateSocialHistory');
+      console.log('[EditPatientSocialHist] formData:', JSON.stringify(formData, null, 2));
+      result = await socialHistoryApi.updateSocialHistory(formData);
+    }
 
     let alertTitle = '';
     let alertDetails = '';
 
     if (result.ok) {
-      navigation.goBack(routes.PATIENT_PROFILE, {
-        navigation: navigation,
-      });
-      alertTitle = 'Saved Successfully';
+      alertTitle = isAddMode ? 'Added Successfully' : 'Saved Successfully';
+      alertDetails = isAddMode 
+        ? 'Social history has been added successfully.' 
+        : 'Social history has been updated successfully.';
+      
+      Alert.alert(alertTitle, alertDetails, [
+        {
+          text: 'OK',
+          onPress: () => navigation.goBack()
+        }
+      ]);
     } else {
-      const errors = result.data?.message;
+      const backendDetail = result.data?.detail;
+      const backendMessage = result.data?.message;
+      const errors = backendDetail || backendMessage || 'Unknown error occurred';
 
-      result.data
-        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-        : (alertDetails = 'Please try again.');
-
-      alertTitle = 'Error in Editing Patient Preferences';
-      console.log("result error "+JSON.stringify(result));
+      alertTitle = isAddMode ? 'Error Adding Social History' : 'Error Updating Social History';
+      alertDetails = `${errors}\n\nPlease try again.`;
+      
+      console.log('[EditPatientSocialHist] API Error:', JSON.stringify(result, null, 2));
+      Alert.alert(alertTitle, alertDetails);
     }
-    Alert.alert(alertTitle, alertDetails);
-    console.log("formData "+JSON.stringify(formData));
   };
 
   /* If retrieval from the hook is successful, replace the content in the list with the retrieved one. */
