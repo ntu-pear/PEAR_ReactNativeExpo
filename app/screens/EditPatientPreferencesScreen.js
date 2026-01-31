@@ -200,6 +200,7 @@ function EditPatientPreferencesScreen(props) {
         navigation: navigation,
       });
       alertTitle = 'Saved Successfully';
+      alertDetails = 'Patient preferences have been updated.';
     } else {
       const errors = result.data?.message;
 
