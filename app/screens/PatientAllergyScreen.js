@@ -239,8 +239,9 @@ function PatientAllergyScreen(props) {
 
     if (!isActive()) return;
 
-    if (response.ok) {
+    if (response.ok || response.status === 404) {
       // Patient service v1 returns a paginated payload with `data` array
+      // Treat 404 as "no allergies found" rather than an error
       const raw = Array.isArray(response.data)
         ? response.data
         : response.data?.data ?? response.data?.results ?? [];
