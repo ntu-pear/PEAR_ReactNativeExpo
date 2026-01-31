@@ -502,25 +502,20 @@ function PatientProfileScreen(props) {
     React.useCallback(() => {
       const pid = ensurePatientId();
       if (!pid) return;
+      // Reset all loading states to show the loading animation
       setIsLoading(true);
+      setIsPatientLoading(true);
+      setIsSocialHistoryLoading(true);
+      setIsGuardianLoading(true);
       getPatient(pid);
       retrieveGuardian(pid);
       retrieveSocialHistory(pid);
     }, [ensurePatientId])
   );
 
-  // Check if all data loaded
+  // Check if all data loaded - only check the loading states, not the data
+  // The individual loading states are set to false by the API functions when they complete
   useEffect(() => {
-    if (patientProfile !== undefined && Object.keys(patientProfile).length > 0) {
-      setIsPatientLoading(false);
-    }
-    if (socialHistoryData !== undefined) {
-      setIsSocialHistoryLoading(false);
-    }
-    if (guardianData !== undefined) {
-      setIsGuardianLoading(false);
-    }
-
     if (
       isPatientLoading === false &&
       isSocialHistoryLoading === false &&
@@ -529,11 +524,8 @@ function PatientProfileScreen(props) {
       setIsLoading(false);
     }
   }, [
-    patientProfile,
     isPatientLoading,
-    socialHistoryData,
     isSocialHistoryLoading,
-    guardianData,
     isGuardianLoading,
   ]);
 
