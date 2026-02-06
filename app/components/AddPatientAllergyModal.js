@@ -42,7 +42,6 @@ function AddPatientAllergyModal({
 
   const { data: allergies } = useGetSelectionOptions('Allergy');
   const sortedAllergies = allergies?.sort((a, b) => a.value - b.value) || [];
-  console.log('🔍 Loaded Allergy Options:', JSON.stringify(sortedAllergies, null, 2));
   
   const { data: reactions } = useGetSelectionOptions('AllergyReaction');
   const sortedReactions = reactions?.sort((a, b) => a.value - b.value) || [];
@@ -58,8 +57,9 @@ function AddPatientAllergyModal({
 
   // Error handling useEffect
   useEffect(() => {
-    setIsInputErrors(isAllergyError || isReactionError || isRemarksError);
-  }, [isAllergyError, isReactionError, isRemarksError]);
+    const isNoneSelected = allergyData.AllergyListID === 2;
+    setIsInputErrors(isAllergyError || isReactionError || isRemarksError || isNoneSelected);
+  }, [isAllergyError, isReactionError, isRemarksError, allergyData.AllergyListID]);
 
   // Reset form to initial state
   const resetForm = () => {
@@ -140,9 +140,7 @@ function AddPatientAllergyModal({
 
   // Handle form data change
   const handleAllergyChange = (value) => {
-    console.log('🎯 Allergy Changed - Selected ID:', value);
     const isNone = value === 2; // Only "None" (ID 2) should hide fields
-    console.log('🎯 Is "None"?', isNone, '- Will hide fields:', isNone);
     if (isNone) {
       // "None" selected - hide reaction/notes fields
       setAllergyData({
@@ -183,6 +181,13 @@ function AddPatientAllergyModal({
     if (allergyData?.AllergyListID == null) {
       setIsAllergyError(true);
       hasError = true;
+    }
+
+    // Cannot submit "None" - it doesn't make sense to add "None" as an allergy
+    if ((allergyData?.AllergyListID ?? 0) === 2) {
+      setIsAllergyError(true);
+      hasError = true;
+      return;
     }
 
     // When an actual allergy is selected (anything except "None" ID 2), require reaction + notes
@@ -236,11 +241,6 @@ function AddPatientAllergyModal({
             isDisabledItems={disabledAllergyOptions}
             isInvalid={isAllergyError}
           />
-          {(() => {
-            const showFields = allergyData.AllergyListID !== 2; // Show fields for everything except "None" (ID 2)
-            console.log('👁️ Rendering check - AllergyListID:', allergyData.AllergyListID, 'Show fields?', showFields);
-            return null;
-          })()}
           {allergyData.AllergyListID !== 2 && (
             <>
               <SelectionInputField
