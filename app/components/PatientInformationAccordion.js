@@ -79,11 +79,15 @@ function PatientInformationAccordion({
     
     // Format privacy level
     const getPrivacyLevelLabel = (level) => {
-      const levelNum = parseInt(level);
+      // Handle null, undefined, or empty values - default to Medium (2)
+      const defaultLevel = 2;
+      const levelNum = level != null && level !== '' ? parseInt(level) : defaultLevel;
+      
+      if (isNaN(levelNum)) return 'Medium'; // Fallback to Medium if parse fails
       if (levelNum === 1) return 'Low';
       if (levelNum === 2) return 'Medium';
       if (levelNum === 3) return 'High';
-      return '-';
+      return 'Medium'; // Default to Medium for any other value
     };
     
     return [

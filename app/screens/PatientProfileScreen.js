@@ -326,7 +326,7 @@ function PatientProfileScreen(props) {
           startDate: p.startDate || p.start_date || null,
           isRespiteCare: toBool01(p.isRespiteCare ?? p.IsRespiteCare ?? p.respite_care),
           IsRespiteCare: toBool01(p.isRespiteCare ?? p.IsRespiteCare ?? p.respite_care),
-          privacyLevel: p.privacyLevel ?? p.privacy_level ?? p.PrivacyLevel ?? 2, // Default to Medium
+          privacyLevel: p.privacyLevel ?? p.privacy_level ?? p.PrivacyLevel ?? p.accessLevelSensitive ?? 2, // Default to Medium
         };
 
         const missingKey =
@@ -476,11 +476,6 @@ function PatientProfileScreen(props) {
         setSocialHistoryData(normalized);
       } else {
         // Handle API errors gracefully - show empty state
-        console.warn('[SocialHistory] API error response:', {
-          status: resp?.status,
-          problem: resp?.problem,
-          data: resp?.data,
-        });
         setSocialHistoryData({});
       }
     } catch (e) {
