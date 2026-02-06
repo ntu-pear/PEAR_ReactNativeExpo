@@ -144,6 +144,7 @@ const updatePatientAllergyV1 = async (patient_id, allergy_id, data) => {
   }
 
   const payload = {
+    PatientID: patient_id,
     Patient_AllergyID: allergy_id,
     AllergyTypeID: data.AllergyListID ?? data.allergy_type_id ?? data.allergyListID,
     AllergyReactionTypeID: data.AllergyReactionListID ?? data.allergy_reaction_type_id ?? data.allergyReactionListID,
@@ -152,7 +153,7 @@ const updatePatientAllergyV1 = async (patient_id, allergy_id, data) => {
   };
   
   // NOTE: PATIENT_V1_BASE already includes `/api/v1`
-  const url = `/update_patient_allergy/${patient_id}`;
+  const url = `/update_patient_allergy/${allergy_id}`;
   const res = await client.put(url, payload, withPatientV1Base());
   if (!res.ok) console.log('[ALLERGY v1][PUT]', url, res.status, payload, res.data);
   return res;
