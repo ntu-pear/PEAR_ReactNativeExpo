@@ -474,13 +474,17 @@ function PatientProfileScreen(props) {
 
         console.log('[SocialHistory] Setting normalized data:', normalized);
         setSocialHistoryData(normalized);
-      } else {
-        // Handle API errors gracefully - show empty state
+      } else if (resp?.status === 404) {
+        // 404 = No record found - this is OK, show "not found" message
         setSocialHistoryData({});
+      } else {
+        // Other errors (500, 400, etc.) - don't show anything, keep it null
+        setSocialHistoryData(null);
       }
     } catch (e) {
       console.error('[SocialHistory] Exception:', e?.message || e, e?.stack);
-      setSocialHistoryData({});
+      // Exception means error - don't show "not found", keep it null
+      setSocialHistoryData(null);
     } finally {
       setIsSocialHistoryLoading(false);
     }
