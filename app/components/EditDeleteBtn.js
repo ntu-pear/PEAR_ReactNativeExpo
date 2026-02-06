@@ -15,13 +15,23 @@ const EditDeleteBtn = ({
   return (
     <View style={styles.editDelContainer}>
       {onEdit ? (
-        <TouchableOpacity testID={`${testID}_edit`} style={styles.editBtn} onPress={onEdit}>
-          <Text style={{color: colors.green, fontSize: 16}}>Edit</Text>
+        <TouchableOpacity
+          testID={`${testID}_edit`}
+          style={[styles.btnBase, styles.editBtn]}
+          onPress={onEdit}
+          activeOpacity={0.8}
+        >
+          <Text style={[styles.btnText, styles.editText]}>Edit</Text>
         </TouchableOpacity>
       ) : null}
       {onDelete ? (
-        <TouchableOpacity testID={`${testID}_delete`} style={styles.delBtn} onPress={onDelete}>
-          <Text style={{color: colors.red, fontSize: 16}}>Delete</Text>
+        <TouchableOpacity
+          testID={`${testID}_delete`}
+          style={[styles.btnBase, styles.deleteBtn]}
+          onPress={onDelete}
+          activeOpacity={0.8}
+        >
+          <Text style={[styles.btnText, styles.deleteText]}>Delete</Text>
         </TouchableOpacity>
       ) : null}
     </View>
@@ -34,13 +44,34 @@ const styles = StyleSheet.create({
     right: 14,
     top: 10,
     flexDirection: 'row',
-    justifyContent: 'flex-end'
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  btnBase: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    backgroundColor: colors.white,
+    minWidth: 64,
+    alignItems: 'center',
   },
   editBtn: {
-    paddingHorizontal: '7%'
+    borderColor: colors.green,
+    marginRight: 10,
   },
   deleteBtn: {
-    paddingHorizontal: '7%'
+    borderColor: colors.red,
+  },
+  btnText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  editText: {
+    color: colors.green,
+  },
+  deleteText: {
+    color: colors.red,
   },
 });
 

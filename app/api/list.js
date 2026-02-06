@@ -15,6 +15,8 @@ const v1EndpointMap = {
   occupation: '/get_occupation_types',
   pet: '/get_pet_types',
   religion: '/get_religion_types',
+  allergy: '/get_allergy_types',
+  allergyreaction: '/get_allergy_reaction_types',
 };
 
 // Helper for Patient Service v1 base
@@ -32,58 +34,84 @@ const getSelectionOptionList = async (option) => {
   const optionKey = option.toLowerCase();
   const v1Endpoint = v1EndpointMap[optionKey];
 
+  const legacyFallback = () => {
+    // Legacy List endpoint expects type=OptionName (case-sensitive in some backends)
+    const params = { type: option };
+    return client.get(listOptions, params);
+  };
+
   // If we have a v1 endpoint for this option type, use it
   if (v1Endpoint) {
-    if (typeof __DEV__ !== 'undefined' && __DEV__) {
-      console.log(`[LIST API] GET ${optionKey} from v1:`, {
-        baseURL: PATIENT_V1_BASE,
-        path: v1Endpoint,
-      });
-    }
+    try {
+      // Some v1 endpoints are paginated; request a larger page size when using `/get_*` routes.
+      const paginationParams = { pageNo: 0, pageSize: 200 };
+      const queryParams = v1Endpoint.startsWith('/get_') ? paginationParams : {};
+      const res = await client.get(v1Endpoint, queryParams, withPatientV1Base());
 
-    const res = await client.get(v1Endpoint, {}, withPatientV1Base());
+      if (res.ok && res.data) {
+        // v1 endpoints can return either an array or a paginated wrapper with `data`/`results`
+        const rawData = Array.isArray(res.data) ? res.data : (res.data.data ?? res.data.results ?? []);
 
-    if (typeof __DEV__ !== 'undefined' && __DEV__) {
-      console.log(`[LIST API] GET ${optionKey} response:`, {
-        ok: res?.ok,
-        status: res?.status,
-        dataLength: Array.isArray(res?.data) ? res.data.length : 'not array',
-      });
-    }
+        const toLegacyIdValue = (item) => {
+          // Prefer specific keys where we know them, otherwise fall back.
+          if (optionKey === 'allergy') {
+            return {
+              id:
+                item.AllergyTypeID ??
+                item.allergyTypeID ??
+                item.allergy_type_id ??
+                item.Id ??
+                item.id,
+              value: item.Value ?? item.value ?? item.name ?? '',
+            };
+          }
+          if (optionKey === 'allergyreaction') {
+            return {
+              id:
+                item.AllergyReactionTypeID ??
+                item.allergyReactionTypeID ??
+                item.allergy_reaction_type_id ??
+                item.Id ??
+                item.id,
+              value: item.Value ?? item.value ?? item.name ?? '',
+            };
+          }
 
-    if (res.ok && res.data) {
-      // v1 endpoints return array directly (no wrapper), with { Id, Value, ... } structure
-      const rawData = Array.isArray(res.data) ? res.data : (res.data.data || []);
-      
-      const transformedData = {
-        ok: true,
-        data: {
-          data: rawData.map((item) => ({
-            // v1 uses PascalCase: Id, Value
-            list_ID: item.Id ?? item.id ?? item.patientListLanguageId ?? item.listId,
+          return {
+            id: item.Id ?? item.id ?? item.patientListLanguageId ?? item.listId,
             value: item.Value ?? item.value ?? item.name ?? item.language ?? '',
-          })),
-        },
-      };
-      return transformedData;
-    }
+          };
+        };
 
-    console.log(`[LIST v1] Failed to get ${option}:`, res.status, res.problem);
-    // Return error response so screens can use their fallback lists
-    return { ok: false, data: null };
+        return {
+          ok: true,
+          data: {
+            data: rawData.map((item) => {
+              const mapped = toLegacyIdValue(item);
+              return {
+                // Use a stable, legacy-ish shape so `useGetSelectionOptions` keeps working.
+                list_ID: mapped.id ?? '',
+                value: mapped.value ?? '',
+              };
+            }),
+          },
+        };
+      }
+
+      // If v1 is down / returns unexpected shape, fall back to legacy `/List`.
+      return legacyFallback();
+    } catch (e) {
+      return legacyFallback();
+    }
   }
 
   // Relationship has no v1 endpoint - return error so screens use fallback lists
   if (optionKey === 'relationship') {
-    console.log('[LIST] Relationship has no API endpoint, using fallback list');
     return { ok: false, data: null };
   }
 
   // Fallback to old endpoint for any other option types not in the v1 map
-  const params = {
-    type: option,
-  };
-  return client.get(listOptions, params);
+  return legacyFallback();
 };
 
 // **********************  POST REQUESTS *************************

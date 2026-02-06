@@ -187,8 +187,6 @@ function PatientProfileScreen(props) {
         // Handle nested data structure - check if data is inside v1.data.data
         const p = v1.data.data || v1.data || {};
 
-        console.log('[PROFILE V1] raw', p);
-
         const first = pickFirstFrom(p, ['first_name', 'firstName', 'given_name', 'givenName']);
         const last = pickFirstFrom(p, ['last_name', 'lastName', 'family_name', 'familyName', 'surname']);
         const fullRaw = pickFirstFrom(p, ['name', 'full_name', 'fullName', 'display_name', 'displayName']);
@@ -232,10 +230,7 @@ function PatientProfileScreen(props) {
           picture.trim().toLowerCase() !== "string";
 
         if (!hasValidProfilePicture) {
-          console.log('[PROFILE PICTURE] Using default placeholder for patient:', id);
           picture = defaultProfilePicture;
-        } else {
-          console.log('[PROFILE PICTURE] Using API picture for patient:', id);
         }
 
         const genderLetter = toGenderLetter(p.gender || p.Gender || p.sex);
@@ -334,8 +329,6 @@ function PatientProfileScreen(props) {
           privacyLevel: p.privacyLevel ?? p.privacy_level ?? p.PrivacyLevel ?? 2, // Default to Medium
         };
 
-        console.log('[PROFILE V1 UI TEMP]', { tempAddress: ui.tempAddress, tempPostalCode: ui.tempPostalCode, homeNo: ui.homeNo });
-
         const missingKey =
           !nonEmpty(ui.PreferredName) ||
           !nonEmpty(ui.NRIC) ||
@@ -343,14 +336,11 @@ function PatientProfileScreen(props) {
           !ui.DateOfBirth;
 
         if (!missingKey) {
-          console.log('[PROFILE V1 SET]', ui);
           setPatientProfile(ui);
           return;
         } else {
-          console.log('[PROFILE V1 PARTIAL]', ui);
         }
       } else {
-        console.log('[PROFILE V1] not ok, status=', v1?.status, 'id=', id);
       }
 
       // Fallback if nothing worked
@@ -373,7 +363,6 @@ function PatientProfileScreen(props) {
         isActive: undefined,
         startDate: null,
       };
-      console.log('[PROFILE FALLBACK]', fallback);
       setPatientProfile(fallback);
     } catch (e) {
       console.log('Patient load error:', e?.message || e);
@@ -513,25 +502,20 @@ function PatientProfileScreen(props) {
     React.useCallback(() => {
       const pid = ensurePatientId();
       if (!pid) return;
+      // Reset all loading states to show the loading animation
       setIsLoading(true);
+      setIsPatientLoading(true);
+      setIsSocialHistoryLoading(true);
+      setIsGuardianLoading(true);
       getPatient(pid);
       retrieveGuardian(pid);
       retrieveSocialHistory(pid);
     }, [ensurePatientId])
   );
 
-  // Check if all data loaded
+  // Check if all data loaded - only check the loading states, not the data
+  // The individual loading states are set to false by the API functions when they complete
   useEffect(() => {
-    if (patientProfile !== undefined && Object.keys(patientProfile).length > 0) {
-      setIsPatientLoading(false);
-    }
-    if (socialHistoryData !== undefined) {
-      setIsSocialHistoryLoading(false);
-    }
-    if (guardianData !== undefined) {
-      setIsGuardianLoading(false);
-    }
-
     if (
       isPatientLoading === false &&
       isSocialHistoryLoading === false &&
@@ -540,11 +524,8 @@ function PatientProfileScreen(props) {
       setIsLoading(false);
     }
   }, [
-    patientProfile,
     isPatientLoading,
-    socialHistoryData,
     isSocialHistoryLoading,
-    guardianData,
     isGuardianLoading,
   ]);
 

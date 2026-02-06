@@ -107,9 +107,10 @@ function DynamicTable({
                 widthArr={getWidthData()}
                 data={getHeaderData()}
               />
-              {getRowData().map((row, index) => (
+              {getRowData().map((row, index) => {
+                return (
                 <Row
-                  textStyle={styles.rowText}
+                  textStyle={Array.isArray(styles.rowText) ? Object.assign({}, ...styles.rowText) : styles.rowText}
                   widthArr={getWidthData()}
                   key={index}
                   data={row.concat(
@@ -127,7 +128,7 @@ function DynamicTable({
                     )),
                   )}
                 />
-              ))}
+              )})}
             </Table>
             <Divider />
           </View>

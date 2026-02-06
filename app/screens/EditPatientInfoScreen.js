@@ -431,7 +431,7 @@ function EditPatientInfoScreen(props) {
     });
     }
 
-  Alert.alert('Saved Successfully', '');
+  Alert.alert('Saved Successfully', 'Patient information has been updated.');
   return;
 }
   

@@ -73,14 +73,7 @@ const FilterModalCard = ({
 
   // Whenever data changes, reinitialize sort and filter options and apply search, sort, filter
   useEffect(() => {
-    console.log(
-      'MODAL 1 - useEffect [initializeData, filterOptionDetails]',
-      initializeData,
-    );
     if (initializeData) {
-      console.log(
-        'MODAL 1.5 - useEffect [initializeData, filterOptionDetails]',
-      );
       initSortFilterOptions();
       onInitialize();
     }
@@ -88,7 +81,6 @@ const FilterModalCard = ({
 
   // Re-initialize sort and filter values to currently applied values whenever modal opens
   useEffect(() => {
-    console.log('MODAL 2 - useEffect [isModalVisible]');
     setIsLoading(true);
 
     const update = (prevState) => ({
@@ -109,8 +101,6 @@ const FilterModalCard = ({
 
   // Initialize sort and filteroptions based on view mode
   const initSortFilterOptions = () => {
-    console.log('MODAL 3 - initSortFilterOptions');
-
     let tempSort = initSort();
     setSort(tempSort);
 
@@ -290,7 +280,6 @@ const FilterModalCard = ({
   // Otherwise set to first option
   // Note: real time update of tempsel value will not be reflected in autocomplete
   const initSelectedFilters = (temp, filter, og, key = 'value') => {
-    console.log('MODAL 4 - initSelectedFilters');
     if (filter in og['tempSel']) {
       let sel = og['sel'][filter][key];
       temp['sel'][filter] =
@@ -309,7 +298,6 @@ const FilterModalCard = ({
 
   // Apply sort and filter values and close modal
   const handleApply = () => {
-    console.log('MODAL 5 - handleApply');
     updateState(setIsModalVisible, setModalVisible, false);
     const update = (prevState) => ({
       ...prevState,

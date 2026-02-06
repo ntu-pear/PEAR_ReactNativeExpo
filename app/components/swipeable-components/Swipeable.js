@@ -18,8 +18,6 @@ const Swipeable = ({item, underlay, onSwipeLeft, onSwipeRight, setIsScrolling=()
         let dx = gestureState.dx;
         const dy = gestureState.dy;
 
-        console.log(dx, dy);
-
         // Limit how far user can swipe
         if (gestureState.dx < 0 && onSwipeRight) {
           dx = Math.max(-150, Math.min(0, gestureState.dx));           

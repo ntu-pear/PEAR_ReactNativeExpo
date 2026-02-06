@@ -1,9 +1,10 @@
 // Libs
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   Alert,
   StyleSheet,
   View,
+  Text,
   FlatList,
   TouchableOpacity,
   Keyboard,
@@ -11,7 +12,7 @@ import {
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 // API
-import patientApi, { normalizePatientAllergyV1 } from 'app/api/patient';
+import patientApi, { normalizePatientV1 } from 'app/api/patient';
 
 // Utilities
 import {
@@ -30,19 +31,44 @@ import colors from 'app/config/colors';
 import formatDateTime from 'app/hooks/useFormatDateTime.js';
 
 // Components
-import ActivityIndicator from 'app/components/ActivityIndicator';
-import AddButton from 'app/components/AddButton';
 import AddPatientAllergyModal from 'app/components/AddPatientAllergyModal';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
 import LoadingWheel from 'app/components/LoadingWheel';
 import DynamicTable from 'app/components/DynamicTable';
-import Swipeable from 'app/components/swipeable-components/Swipeable';
-import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
 import PatientAllergyItem from 'app/components/PatientAllergyItem';
+import AddButton from 'app/components/AddButton';
+
+// ---------- Local Normalizers ----------
+// Normalize allergy data from v1 API to UI shape (only used in this screen)
+const normalizePatientAllergyV1 = (a = {}) => ({
+  allergyID:
+    a.Patient_AllergyID ?? a.patient_allergy_id ?? a.id ?? a.allergy_id ?? null,
+  patientID: a.PatientID ?? a.patient_id ?? null,
+  allergyListID:
+    a.AllergyTypeID ?? a.allergy_type_id ?? a.AllergyListID ?? null,
+  allergyReactionListID:
+    a.AllergyReactionTypeID ?? a.allergy_reaction_type_id ?? a.AllergyReactionListID ?? null,
+  allergyRemarks: a.AllergyRemarks ?? a.allergy_remarks ?? '',
+  allergyListDesc:
+    a.AllergyTypeValue ??
+    a.allergy_type_desc ??
+    a.allergyListDesc ??
+    a.allergy_type?.description ??
+    '',
+  allergyReaction:
+    a.AllergyReactionTypeValue ??
+    a.allergy_reaction_type_desc ??
+    a.allergyReaction ??
+    a.allergy_reaction_type?.description ??
+    '',
+  createdDate:
+    a.CreatedDateTime ?? a.created_at ?? a.createdDate ?? a.created_date ?? null,
+});
 
 function PatientAllergyScreen(props) {
-  let { patientID, patientId } = props.route.params;
+  const routeParams = props?.route?.params ?? {};
+  let { patientID, patientId, patientProfile } = routeParams;
   if (patientId) {
     patientID = patientId;
   }
@@ -104,10 +130,28 @@ function PatientAllergyScreen(props) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // either 'add' or 'edit'
 
-  const [isScrolling, setIsScrolling] = useState(false);
   const [patientAllergyIDs, setPatientAllergyIDs] = useState([]);
 
-  const [patientData, setPatientData] = useState({});
+  const normalizePatientHeader = (p) => {
+    if (!p) return {};
+    const preferredName = p.preferredName ?? p.PreferredName ?? '';
+    let firstName = p.firstName ?? p.FirstName ?? '';
+    let lastName = p.lastName ?? p.LastName ?? '';
+    const fullName = p.fullName ?? p.FullName ?? '';
+    if ((!firstName || !lastName) && fullName) {
+      const parts = String(fullName).split(/\s+/).filter(Boolean);
+      firstName = firstName || parts[0] || '';
+      lastName = lastName || (parts.length > 1 ? parts.slice(1).join(' ') : '');
+    }
+    return {
+      profilePicture: p.profilePicture ?? p.ProfilePicture ?? p.profile_photo ?? p.profile_picture,
+      preferredName,
+      firstName,
+      lastName,
+    };
+  };
+
+  const [patientData, setPatientData] = useState(() => normalizePatientHeader(patientProfile));
   const [isReloadPatientList, setIsReloadPatientList] = useState(true);
 
   // Allergy data related states
@@ -116,80 +160,112 @@ function PatientAllergyScreen(props) {
   const [allergyFormData, setAllergyFormData] = useState({
     allergyID: null,
     allergyListID: 1,
+    allergyReactionListID: 1,
     allergyListDesc: '',
     allergyReaction: '',
     allergyRemarks: '',
   });
 
+  // Track whether this screen is currently active to avoid setState after navigating away
+  const isActiveRef = useRef(false);
+  // Monotonic request id to ignore out-of-order async responses
+  const requestIdRef = useRef(0);
+
+  const refreshAllergyData = useCallback(async () => {
+    if (!patientID) return;
+
+    const requestId = ++requestIdRef.current;
+    setIsLoading(true);
+
+    const shouldFetchPatient = !patientProfile && isEmptyObject(patientData);
+
+    try {
+      await Promise.all([
+        getAllergyData(() => isActiveRef.current && requestIdRef.current === requestId),
+        shouldFetchPatient
+          ? getPatientData(() => isActiveRef.current && requestIdRef.current === requestId)
+          : Promise.resolve(),
+      ]);
+    } finally {
+      if (isActiveRef.current && requestIdRef.current === requestId) {
+        setIsLoading(false);
+      }
+    }
+  }, [patientID, patientProfile, patientData]);
+
   useFocusEffect(
     useCallback(() => {
+      isActiveRef.current = true;
+
       if (isReloadPatientList) {
         refreshAllergyData();
         setIsReloadPatientList(false);
       }
-    }, [isReloadPatientList]),
+
+      return () => {
+        // Prevent setState / heavy logs after leaving screen
+        isActiveRef.current = false;
+      };
+    }, [isReloadPatientList, refreshAllergyData]),
   );
 
-  const refreshAllergyData = () => {
-    setIsLoading(true);
-    const promiseFunction = async () => {
-      await getAllergyData();
-      await getPatientData();
-    };
-    promiseFunction();
-  };
+  const getPatientData = async (isActive = () => true) => {
+    if (!patientID) return;
+    const response = await patientApi.readPatientV1(patientID);
 
-  const getPatientData = async () => {
-    if (patientID) {
-      const response = await patientApi.readPatientV1(patientID);
-      if (response.ok) {
-        // v1 returns data directly, not inside response.data.data
-        setPatientData(response.data);
-        setIsError(false);
-        setIsRetry(false);
-        setStatusCode(response.status);
-      } else {
-        console.log('Request failed with status code: ', response.status);
-        setPatientData({});
-        setIsLoading(false);
-        setIsError(true);
-        setStatusCode(response.status);
-        setIsRetry(true);
-      }
+    if (!isActive()) return;
+
+    if (response.ok) {
+      // v1 wraps the patient in response.data.data; extract before normalizing
+      const rawPatient = response.data?.data ?? response.data;
+      const normalized = normalizePatientV1(rawPatient);
+      setPatientData(normalized);
+      setIsError(false);
+      setIsRetry(false);
+      setStatusCode(response.status);
+    } else {
+      setPatientData({});
+      setIsError(true);
+      setStatusCode(response.status);
+      setIsRetry(true);
     }
   };
 
 
   // Get allergy data from backend
-  const getAllergyData = async () => {
-    if (patientID) {
-      const response = await patientApi.listPatientAllergiesV1(patientID);
-      if (response.ok) {
-        const raw = Array.isArray(response.data)
-          ? response.data
-          : response.data?.results ?? [];
-      
-        const normalized = raw.map(normalizePatientAllergyV1);
-      
-        setOriginalAllergyData(normalized);
-        setAllergyData(parseAllergyData(normalized));
-        setPatientAllergyIDs(normalized.map((a) => a.allergyID));
-        setIsDataInitialized(true);
-        setIsLoading(false);
-        setIsError(false);
-        setIsRetry(false);
-        setStatusCode(response.status);
-      
-      } else {
-        console.log('Request failed with status code: ', response.status);
-        setOriginalAllergyData([]);
-        setAllergyData([]);
-        setPatientAllergyIDs([]); // Reset allergy IDs
-        setIsLoading(false);
-        setIsError(true);
-        setStatusCode(response.status);
-        setIsRetry(true);
-      }
+  const getAllergyData = async (isActive = () => true) => {
+    if (!patientID) return;
+    const response = await patientApi.listPatientAllergiesV1(patientID, { pageNo: 0, pageSize: 100 });
+
+    if (!isActive()) return;
+
+    if (response.ok || response.status === 404) {
+      // Patient service v1 returns a paginated payload with `data` array
+      // Treat 404 as "no allergies found" rather than an error
+      const raw = Array.isArray(response.data)
+        ? response.data
+        : response.data?.data ?? response.data?.results ?? [];
+
+      const normalized = raw.map(normalizePatientAllergyV1);
+
+      setOriginalAllergyData(normalized);
+      setAllergyData(parseAllergyData(normalized));
+      const existingTypeIds = normalized
+        .map((a) => a.allergyListID)
+        .filter((x) => x !== null && x !== undefined);
+
+      setPatientAllergyIDs(existingTypeIds);
+      setIsDataInitialized(true);
+      setIsError(false);
+      setIsRetry(false);
+      setStatusCode(response.status);
+    } else {
+      setOriginalAllergyData([]);
+      setAllergyData([]);
+      setPatientAllergyIDs([]); // Reset allergy IDs
+      setIsError(true);
+      setStatusCode(response.status);
+      setIsRetry(true);
     }
   };
 
@@ -199,6 +275,7 @@ function PatientAllergyScreen(props) {
       // for add/edit form
       allergyID: item.allergyID,
       allergyListID: item.allergyListID,
+      allergyReactionListID: item.allergyReactionListID,
       allergyRemarks: item.allergyRemarks,
       allergyListDesc: item.allergyListDesc,
       allergyReaction: item.allergyReaction,
@@ -207,8 +284,29 @@ function PatientAllergyScreen(props) {
   };
 
   const handleAddAllergy = () => {
+    setAllergyFormData({
+      allergyID: null,
+      allergyListID: 1,
+      allergyReactionListID: 1,
+      allergyListDesc: '',
+      allergyReaction: '',
+      allergyRemarks: '',
+    });
     setIsModalVisible(true);
     setModalMode('add');
+  };
+
+  const handleEditAllergy = (item) => {
+    setAllergyFormData({
+      allergyID: item.allergyID,
+      allergyListID: item.allergyListID,
+      allergyReactionListID: item.allergyReactionListID,
+      allergyListDesc: item.allergyListDesc,
+      allergyReaction: item.allergyReaction,
+      allergyRemarks: item.allergyRemarks,
+    });
+    setIsModalVisible(true);
+    setModalMode('edit');
   };
 
   const handleModalSubmit = async (allergyData) => {
@@ -217,13 +315,26 @@ function PatientAllergyScreen(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.addPatientAllergyV1(patientID, allergyData);
+    const result =
+      modalMode === 'edit'
+        ? await patientApi.updatePatientAllergyV1(
+            patientID,
+            allergyFormData?.allergyID ?? allergyData?.Patient_AllergyID,
+            {
+              // Normalize into the same shape expected by the API helper
+              AllergyListID: allergyData?.AllergyListID,
+              AllergyReactionListID: allergyData?.AllergyReactionListID,
+              AllergyRemarks: allergyData?.AllergyRemarks,
+              IsDeleted: '0',
+            },
+          )
+        : await patientApi.addPatientAllergyV1(patientID, allergyData);
+
     if (result.ok) {
-      console.log('submitting allergy data', allergyData);
-      refreshAllergyData();
+      await refreshAllergyData();
       setIsModalVisible(false);
 
-      alertTitle = 'Successfully added allergy';
+      alertTitle = modalMode === 'edit' ? 'Successfully updated allergy' : 'Successfully added allergy';
     } else {
       const errors = result.data?.message;
 
@@ -231,7 +342,8 @@ function PatientAllergyScreen(props) {
         ? (alertDetails = `\n${errors}\n\nPlease try again.`)
         : (alertDetails = 'Please try again.');
 
-      alertTitle = 'Error adding allergy';
+      alertTitle = modalMode === 'edit' ? 'Error updating allergy' : 'Error adding allergy';
+      setIsLoading(false);
     }
 
     Alert.alert(alertTitle, alertDetails);
@@ -263,26 +375,24 @@ function PatientAllergyScreen(props) {
   const deleteAllergy = async (allergyID) => {
     setIsLoading(true);
 
-    let tempData = { allergyID: allergyID };
-
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.deletePatientAllergyV1(allergyID);
+    const result = await patientApi.deletePatientAllergyV1(patientID, allergyID);
     if (result.ok) {
-      refreshAllergyData();
+      await refreshAllergyData();
       setIsModalVisible(false);
 
       alertTitle = 'Successfully deleted allergy';
     } else {
       const errors = result.data?.message;
-      console.log('Error deleting allergy', result);
 
       result.data
         ? (alertDetails = `\n${errors}\n\nPlease try again.`)
         : (alertDetails = 'Please try again.');
 
       alertTitle = 'Error deleting allergy';
+      setIsLoading(false);
     }
 
     Alert.alert(alertTitle, alertDetails);
@@ -319,9 +429,7 @@ function PatientAllergyScreen(props) {
     return ['Date', 'Time', 'Allergic To', 'Reaction', 'Notes'];
   };
 
-  return isLoading ? (
-    <ActivityIndicator visible />
-  ) : (
+  return (
     <View testID={testID} style={styles.container}>
       <View style={{ justifyContent: 'space-between' }}>
         <View style={{ alignSelf: 'center', marginTop: 15, maxHeight: 120 }}>
@@ -371,11 +479,9 @@ function PatientAllergyScreen(props) {
         <FlatList
           testID={`${testID}_flatlist`}
           onTouchStart={() => Keyboard.dismiss()}
-          onScrollBeginDrag={() => setIsScrolling(true)}
-          onScrollEndDrag={() => setIsScrolling(false)}
           onRefresh={refreshAllergyData}
           refreshing={isLoading}
-          height={'72%'}
+          style={{ flex: 1 }}
           ListEmptyComponent={() =>
             noDataMessage(
               statusCode,
@@ -390,33 +496,25 @@ function PatientAllergyScreen(props) {
           keyExtractor={(item) => item.allergyID}
           renderItem={({ item }) => {
             return (
-              <Swipeable
-                setIsScrolling={setIsScrolling}
-                onSwipeRight={() => handleDeleteAllergy(item.allergyID)}
-                underlay={<EditDeleteUnderlay />}
-                item={
-                  <TouchableOpacity
-                    testID={`${testID}_${item.allergyID}_touchable`}
-                    style={styles.logContainer}
-                    activeOpacity={1}
-                    disabled={!isScrolling}
-                  >
-                    <PatientAllergyItem
-                      testID={`${testID}_${item.allergyID}`}
-                      createdDate={item.createdDate}
-                      allergyListDesc={item.allergyListDesc}
-                      allergyReaction={item.allergyReaction}
-                      allergyRemarks={item.allergyRemarks}
-                      onDelete={() => handleDeleteAllergy(item.allergyID)}
-                    />
-                  </TouchableOpacity>
-                }
-              />
+              <View
+                testID={`${testID}_${item.allergyID}_container`}
+                style={styles.logContainer}
+              >
+                <PatientAllergyItem
+                  testID={`${testID}_${item.allergyID}`}
+                  createdDate={item.createdDate}
+                  allergyListDesc={item.allergyListDesc}
+                  allergyReaction={item.allergyReaction}
+                  allergyRemarks={item.allergyRemarks}
+                  onEdit={() => handleEditAllergy(item)}
+                  onDelete={() => handleDeleteAllergy(item.allergyID)}
+                />
+              </View>
             );
           }}
         />
       ) : (
-        <View style={{ height: '72%', marginBottom: 20, marginHorizontal: 40 }}>
+        <View style={{ flex: 1, marginBottom: 20, marginHorizontal: 40 }}>
           <DynamicTable
             headerData={getTableHeaderData()}
             rowData={getTableRowData()}
@@ -433,17 +531,22 @@ function PatientAllergyScreen(props) {
           />
         </View>
       )}
+
       <View style={styles.addBtn}>
         <AddButton
           testID={`${testID}_addAllergy`}
           title="Add Allergy"
           onPress={handleAddAllergy}
+          containerStyle={{ flex: 0, marginTop: 8, marginBottom: 0 }}
         />
       </View>
+
       <AddPatientAllergyModal
         testID={`${testID}_modal_${modalMode === 'add' ? 'add' : 'edit'}`}
         showModal={isModalVisible}
         modalMode={modalMode}
+        allergyFormData={allergyFormData}
+        setAllergyFormData={setAllergyFormData}
         onClose={() => setIsModalVisible(false)}
         onSubmit={handleModalSubmit}
         existingAllergyIDs={patientAllergyIDs}
@@ -455,6 +558,8 @@ function PatientAllergyScreen(props) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.white,
+    flex: 1,
+    paddingBottom: 10,
   },
   logContainer: {
     padding: 20,
@@ -463,6 +568,7 @@ const styles = StyleSheet.create({
   },
   addBtn: {
     marginTop: '0.01%',
+    paddingBottom: 8,
   },
 });
 

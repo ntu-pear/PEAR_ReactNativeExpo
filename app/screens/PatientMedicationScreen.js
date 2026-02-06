@@ -181,7 +181,7 @@ function PatientMedicationScreen(props) {
     if (result.ok) {
       refreshMedData();
       setIsModalVisible(false);
-      Alert.alert('Successfully added medication');
+      Alert.alert('Successfully added medication', 'Medication has been added to the patient.');
     } else {
       Alert.alert('Error adding medication', result.data?.message || 'Please try again.');
     }
@@ -250,7 +250,7 @@ function PatientMedicationScreen(props) {
     if (result.ok) {
       refreshMedData();
       setIsModalVisible(false);
-      Alert.alert('Successfully deleted medication');
+      Alert.alert('Successfully deleted medication', 'Medication has been removed from the patient.');
     } else {
       Alert.alert('Error deleting medication', result.data?.message || 'Please try again.');
     }
