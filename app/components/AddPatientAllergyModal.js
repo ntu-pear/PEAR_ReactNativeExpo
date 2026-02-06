@@ -42,12 +42,13 @@ function AddPatientAllergyModal({
 
   const { data: allergies } = useGetSelectionOptions('Allergy');
   const sortedAllergies = allergies?.sort((a, b) => a.value - b.value) || [];
+  console.log('🔍 Loaded Allergy Options:', JSON.stringify(sortedAllergies, null, 2));
   
   const { data: reactions } = useGetSelectionOptions('AllergyReaction');
   const sortedReactions = reactions?.sort((a, b) => a.value - b.value) || [];
 
-  // Filter out allergyID1 and allergyID2 if there is an existing allergy (add mode only)
-  const hiddenAllergyIDs = [1, 2]; // AllergyID1 and AllergyID2
+  // Filter out "None" (ID 2) if there is an existing allergy (add mode only)
+  const hiddenAllergyIDs = [2]; // Only hide "None" when patient already has allergies
   const filteredAllergies =
     modalMode === 'add'
       ? (existingAllergyIDs.length > 0
@@ -75,8 +76,8 @@ function AddPatientAllergyModal({
     }
 
     setAllergyData({
-      // if all allergies taken after finding nextAvaiableAllergy, then default fallback to Corn
-      AllergyListID: existingAllergyIDs.length > 0 ? (nextAvailableAllergyID || 3) : 1, 
+      // if all allergies taken after finding nextAvailableAllergy, then default fallback to Rice (ID 3)
+      AllergyListID: existingAllergyIDs.length > 0 ? (nextAvailableAllergyID || 3) : 2, 
       AllergyReactionListID: existingAllergyIDs.length > 0 ? 2 : 1,
       AllergyRemarks: existingAllergyIDs.length > 0 ? '' : 'NIL',
     });
@@ -139,7 +140,11 @@ function AddPatientAllergyModal({
 
   // Handle form data change
   const handleAllergyChange = (value) => {
-    if (value < 3) {
+    console.log('🎯 Allergy Changed - Selected ID:', value);
+    const isNone = value === 2; // Only "None" (ID 2) should hide fields
+    console.log('🎯 Is "None"?', isNone, '- Will hide fields:', isNone);
+    if (isNone) {
+      // "None" selected - hide reaction/notes fields
       setAllergyData({
         ...allergyData,
         AllergyListID: value,
@@ -149,6 +154,7 @@ function AddPatientAllergyModal({
       setIsReactionError(false);
       setIsRemarksError(false);
     } else {
+      // Real allergy selected (Corn, Rice, Eggs, etc.) - show all fields
       setAllergyData({
         ...allergyData,
         AllergyListID: value,
@@ -179,8 +185,8 @@ function AddPatientAllergyModal({
       hasError = true;
     }
 
-    // When an actual allergy is selected (IDs > 2 in this flow), require reaction + notes
-    if ((allergyData?.AllergyListID ?? 0) > 2) {
+    // When an actual allergy is selected (anything except "None" ID 2), require reaction + notes
+    if ((allergyData?.AllergyListID ?? 0) !== 2) {
       if (allergyData?.AllergyReactionListID == null) {
         setIsReactionError(true);
         hasError = true;
@@ -230,7 +236,12 @@ function AddPatientAllergyModal({
             isDisabledItems={disabledAllergyOptions}
             isInvalid={isAllergyError}
           />
-          {allergyData.AllergyListID > 2 && (
+          {(() => {
+            const showFields = allergyData.AllergyListID !== 2; // Show fields for everything except "None" (ID 2)
+            console.log('👁️ Rendering check - AllergyListID:', allergyData.AllergyListID, 'Show fields?', showFields);
+            return null;
+          })()}
+          {allergyData.AllergyListID !== 2 && (
             <>
               <SelectionInputField
                 testID={`${testID}_reaction_select`}
