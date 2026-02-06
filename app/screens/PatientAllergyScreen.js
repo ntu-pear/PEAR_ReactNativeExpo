@@ -413,11 +413,11 @@ function PatientAllergyScreen(props) {
       }) => {
         // Convert the rest of the item properties and handle the date separately
         let rowData = [
-          formatDateTime(new Date(item.createdDate), true),
-          formatDateTime(new Date(item.createdDate), false),
-          item.allergyListDesc,
-          item.allergyReaction,
-          item.allergyRemarks,
+          String(formatDateTime(new Date(item.createdDate), true) || ''),
+          String(formatDateTime(new Date(item.createdDate), false) || ''),
+          String(item.allergyListDesc || ''),
+          String(item.allergyReaction || ''),
+          String(item.allergyRemarks || ''),
         ];
 
         return rowData;
