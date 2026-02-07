@@ -20,7 +20,9 @@ const v1 = {
   rolesName: '/roles_name/',                        
   resendRegistrationEmail: '/user/request/resend_registration_email', 
   requestOtp: '/request-otp/',                      
-  verifyOtp: '/verify-otp/',                        
+  verifyOtp: '/verify-otp/',
+  activeStaff: '/supervisor/get_active_staff',
+  usernameById: (userId) => `/user/username/${encodeURIComponent(userId)}`,
 };
 const audit = (label, obj) => {
   try { console.log(label, JSON.stringify(obj)); } catch { console.log(label, obj); }
@@ -33,6 +35,35 @@ const getUser = async () => {
   const token = await authStorage.getToken('userAuthTokenV1');
   const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
   return client.get(v1.getUser, {}, { baseURL: V1_BASE, headers });
+};
+
+// Get all active staff members (returns { users: [{ id, role, nric_FullName }] })
+const getActiveStaff = () =>
+  client.get(v1.activeStaff, {}, { baseURL: V1_BASE });
+
+// Get a single user's name by their ID (returns { id, preferredName, nric_FullName })
+const getUsernameById = async (userId) => {
+  const url = v1.usernameById(userId);
+  const fullUrl = `${V1_BASE}${url}`;
+  console.log('[DEBUG getUsernameById] calling:', fullUrl);
+  const res = await client.get(url, {}, { baseURL: V1_BASE });
+  console.log('[DEBUG getUsernameById]', userId, '=> status:', res.status, 'ok:', res.ok, 'data:', JSON.stringify(res.data));
+  return res;
+};
+
+// Build a map of userId -> display name from all active staff
+const buildStaffNameMap = async () => {
+  const res = await getActiveStaff();
+  const map = {};
+  if (res.ok) {
+    const users = res.data?.users || (Array.isArray(res.data) ? res.data : []);
+    for (const u of users) {
+      if (u.id) {
+        map[u.id] = u.preferredName || u.nric_FullName || u.fullName || u.id;
+      }
+    }
+  }
+  return map;
 };
 
 // **********************  POST REQUESTS *************************
@@ -206,4 +237,7 @@ export default {
   resendRegistrationEmailV1,
   requestOtpV1,
   verifyOtpV1,
+  getActiveStaff,
+  getUsernameById,
+  buildStaffNameMap,
 };

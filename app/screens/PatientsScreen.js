@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo, memo, useContext } from 'react';
 import { Center, VStack, ScrollView, Fab, Icon, FlatList, IconButton, Button } from 'native-base';
 import {
   StyleSheet,
@@ -13,6 +13,8 @@ import { useFocusEffect } from '@react-navigation/native';
 
 // API
 import patientApi from 'app/api/patient';
+import userApi from 'app/api/user';
+import AuthContext from 'app/auth/context';
 
 // Configurations
 import routes from 'app/navigation/routes';
@@ -188,6 +190,9 @@ const normalizePatientV1 = (p = {}) => {
   };
 };
 
+  // Get current user from AuthContext
+  const { user } = useContext(AuthContext);
+
   // Options for user to search by
   const SEARCH_OPTIONS = ['Full Name', 'Preferred Name'];
 
@@ -225,8 +230,8 @@ const normalizePatientV1 = (p = {}) => {
   const [listOfPatients, setListOfPatients] = useState([]); // list of patients after sort, search, filter
   const [patientCountInfo, setPatientCountInfo] = useState({}); // list of patients for each caregiver (differentiated by patient status)
   const [justUpdated, setJustUpdated] = useState(false);
-  const [patientStatus, setPatientStatus] = useState('active'); // active, inactive, ''
-  const [tempSelPatientStatus, setTempSelPatientStatus] = useState('active'); // active, inactive, ''
+  const [patientStatus, setPatientStatus] = useState(''); // active, inactive, '' (default: All)
+  const [tempSelPatientStatus, setTempSelPatientStatus] = useState(''); // active, inactive, '' (default: All)
   const [viewMode, setViewMode] = useState('myPatients'); // myPatients, allPatients
   const [isReloadPatientList, setIsReloadPatientList] = useState(false);
   const [applySortFilter, setApplySortFilter] = useState(true);
@@ -262,7 +267,7 @@ const normalizePatientV1 = (p = {}) => {
     'Patient Status': {
       type: 'chip',
       options: { Active: true, Inactive: false, All: undefined }, // define custom options and map to corresponding values in patient data
-      isFilter: false,
+      isFilter: true,
     },
     'Start Date': {
       type: 'date',
@@ -327,15 +332,29 @@ const normalizePatientV1 = (p = {}) => {
     }
   }, [chip['tempSel']['Patient Status']]);
 
+  // Ensure the chip indicator shows 'All' by default on first render
+  useEffect(() => {
+    // Only set if not already set
+    try {
+      if (!chip || !chip.sel || !chip.sel['Patient Status']) {
+        setChip((prev) => ({
+          ...prev,
+          sel: { ...(prev.sel || {}), ['Patient Status']: { label: 'All', value: 3 } },
+          tempSel: { ...(prev.tempSel || {}), ['Patient Status']: { label: 'All', value: 3 } },
+        }));
+      }
+    } catch (e) {}
+  }, []);
+
   // --- list patients from the new Patient Service (V1)
   const getListOfPatients = async (status = 'active', pageNo = 0, append = false) => {
     const pageSize = 1000; // Load all patients for client-side sorting/pagination
 
-    const res = await patientApi.listPatientsV1({
-      pageNo,
-      pageSize,
-      // q: searchQuery  // (optional: wire to backend later)
-    });
+    const userId = user?.id || user?.userID || user?.userId;
+    const userRole = user?.roleName || user?.role;
+
+    // Fetch all patients first
+    const res = await patientApi.listPatientsV1({ pageNo, pageSize });
 
     if (!res.ok) {
       setStatusCode(res.status);
@@ -354,6 +373,61 @@ const normalizePatientV1 = (p = {}) => {
 
     const normalizedPage = pageArray.map(normalizePatientV1);
 
+    // --- Fetch allocation data + staff names to enrich patients ---
+    let allocFiltered = normalizedPage;
+    try {
+      // Fetch allocations and staff names in parallel
+      const [allocationMap, staffNameMap] = await Promise.all([
+        patientApi.getAllocationMap(),
+        userApi.buildStaffNameMap(),
+      ]);
+
+      // Collect caregiver/doctor/supervisor IDs that are missing from staffNameMap
+      const missingIds = new Set();
+      for (const alloc of Object.values(allocationMap)) {
+        for (const field of ['caregiverId', 'doctorId', 'supervisorId', 'gameTherapistId']) {
+          if (alloc[field] && !staffNameMap[alloc[field]]) missingIds.add(alloc[field]);
+        }
+      }
+
+      // Resolve missing names individually (fallback)
+      await Promise.all([...missingIds].map(async (uid) => {
+        try {
+          const r = await userApi.getUsernameById(uid);
+          if (r.ok && r.data) {
+            staffNameMap[uid] = r.data.preferredName || r.data.nric_FullName || uid;
+          }
+        } catch {}
+      }));
+
+      // Enrich each patient with caregiver/doctor/supervisor names from allocation + staff data
+      allocFiltered = normalizedPage.map(p => {
+        const alloc = allocationMap[String(p.patientID)];
+        if (alloc) {
+          return {
+            ...p,
+            caregiverName: p.caregiverName || staffNameMap[alloc.caregiverId] || null,
+            doctorName: p.doctorName || staffNameMap[alloc.doctorId] || null,
+            supervisorName: p.supervisorName || staffNameMap[alloc.supervisorId] || null,
+          };
+        }
+        return p;
+      });
+
+      // "My Patients" mode: filter to only allocated patients
+      if (viewMode === 'myPatients' && userId) {
+        const myPatientIds = await patientApi.getMyAllocatedPatientIds(userId, userRole);
+        if (myPatientIds.length > 0) {
+          const idSet = new Set(myPatientIds);
+          allocFiltered = allocFiltered.filter(p => idSet.has(p.patientID));
+        } else {
+          allocFiltered = [];
+        }
+      }
+    } catch (err) {
+      // Fallback: continue with normalizedPage without enrichment
+    }
+
     // Check if there are more pages
     const totalPages = body.totalPages ?? body.total_pages ?? null;
     const totalRecords = body.totalRecords ?? body.total_records ?? body.total ?? null;
@@ -369,7 +443,7 @@ const normalizePatientV1 = (p = {}) => {
     const want = status === 'active' ? true : status === 'inactive' ? false : undefined;
     // Treat missing isActive as "active" during migration so nothing disappears
     const filtered =
-      want === undefined ? normalizedPage : normalizedPage.filter(p => (p.isActive ?? true) === want);
+      want === undefined ? allocFiltered : allocFiltered.filter(p => (p.isActive ?? true) === want);
 
     if (append) {
       // Append to existing list for infinite scroll
