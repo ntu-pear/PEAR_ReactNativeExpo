@@ -45,9 +45,7 @@ const getActiveStaff = () =>
 const getUsernameById = async (userId) => {
   const url = v1.usernameById(userId);
   const fullUrl = `${V1_BASE}${url}`;
-  console.log('[DEBUG getUsernameById] calling:', fullUrl);
   const res = await client.get(url, {}, { baseURL: V1_BASE });
-  console.log('[DEBUG getUsernameById]', userId, '=> status:', res.status, 'ok:', res.ok, 'data:', JSON.stringify(res.data));
   return res;
 };
 
