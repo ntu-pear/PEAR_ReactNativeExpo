@@ -35,14 +35,19 @@ const deletePrivacyLevel = '/privacy_levels/delete'; // DELETE /{patient_id}
 const getPrivacyLevel = (patientID) => {
   const endpoint = `${getPatientPrivacyLevel}/${patientID}`;
   
+  const params = {
+    patient_id: patientID.toString(),
+  };
+
   if (typeof __DEV__ !== 'undefined' && __DEV__) {
     console.log('[API PrivacyLevel] GET', {
       baseURL: PATIENT_V1_BASE,
       endpoint,
+      params,
     });
   }
 
-  return client.get(endpoint, {}, withPatientV1Base()).then((resp) => {
+  return client.get(endpoint, params, withPatientV1Base()).then((resp) => {
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
       console.log('[API PrivacyLevel] GET response', {
         ok: resp?.ok,
@@ -180,14 +185,19 @@ const updatePrivacyLevelForPatient = async (patientID, data) => {
 const deletePrivacyLevelForPatient = async (patientID) => {
   const endpoint = `${deletePrivacyLevel}/${patientID}`;
 
+  const params = {
+    require_auth: true,
+  };
+
   if (typeof __DEV__ !== 'undefined' && __DEV__) {
     console.log('[API PrivacyLevel] DELETE', {
       baseURL: PATIENT_V1_BASE,
       endpoint,
+      params,
     });
   }
 
-  const resp = await client.delete(endpoint, {}, withPatientV1Base());
+  const resp = await client.delete(endpoint, params, withPatientV1Base());
 
   if (typeof __DEV__ !== 'undefined' && __DEV__) {
     console.log('[API PrivacyLevel] DELETE response', {

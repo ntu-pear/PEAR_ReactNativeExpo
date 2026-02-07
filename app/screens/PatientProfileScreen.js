@@ -326,7 +326,7 @@ function PatientProfileScreen(props) {
           startDate: p.startDate || p.start_date || null,
           isRespiteCare: toBool01(p.isRespiteCare ?? p.IsRespiteCare ?? p.respite_care),
           IsRespiteCare: toBool01(p.isRespiteCare ?? p.IsRespiteCare ?? p.respite_care),
-          privacyLevel: p.privacyLevel ?? p.privacy_level ?? p.PrivacyLevel ?? 2, // Default to Medium
+          privacyLevel: p.privacyLevel ?? p.privacy_level ?? p.PrivacyLevel ?? p.accessLevelSensitive ?? 2, // Default to Medium
         };
 
         const missingKey =
@@ -474,18 +474,17 @@ function PatientProfileScreen(props) {
 
         console.log('[SocialHistory] Setting normalized data:', normalized);
         setSocialHistoryData(normalized);
-      } else {
-        // Handle API errors gracefully - show empty state
-        console.warn('[SocialHistory] API error response:', {
-          status: resp?.status,
-          problem: resp?.problem,
-          data: resp?.data,
-        });
+      } else if (resp?.status === 404) {
+        // 404 = No record found - this is OK, show "not found" message
         setSocialHistoryData({});
+      } else {
+        // Other errors (500, 400, etc.) - don't show anything, keep it null
+        setSocialHistoryData(null);
       }
     } catch (e) {
       console.error('[SocialHistory] Exception:', e?.message || e, e?.stack);
-      setSocialHistoryData({});
+      // Exception means error - don't show "not found", keep it null
+      setSocialHistoryData(null);
     } finally {
       setIsSocialHistoryLoading(false);
     }

@@ -79,11 +79,15 @@ function PatientInformationAccordion({
     
     // Format privacy level
     const getPrivacyLevelLabel = (level) => {
-      const levelNum = parseInt(level);
+      // Handle null, undefined, or empty values - default to Medium (2)
+      const defaultLevel = 2;
+      const levelNum = level != null && level !== '' ? parseInt(level) : defaultLevel;
+      
+      if (isNaN(levelNum)) return 'Medium'; // Fallback to Medium if parse fails
       if (levelNum === 1) return 'Low';
       if (levelNum === 2) return 'Medium';
       if (levelNum === 3) return 'High';
-      return '-';
+      return 'Medium'; // Default to Medium for any other value
     };
     
     return [
@@ -167,11 +171,21 @@ function PatientInformationAccordion({
 
   // Memoized derived data - Social History
   const { socialHistoryInfo, isSocialHistoryEmpty } = useMemo(() => {
+    // null means error - don't show anything (hide section content)
+    if (socialHistoryData === null) {
+      return { socialHistoryInfo: [], isSocialHistoryEmpty: true };
+    }
+    
     const src = Array.isArray(socialHistoryData) ? socialHistoryData[0] : socialHistoryData;
     const isEmpty = !src || Object.keys(src).length === 0;
 
     if (isEmpty) {
-      return { socialHistoryInfo: [], isSocialHistoryEmpty: true };
+      // Empty object {} means 404 not found - show message on left side
+      // Note: Left side (label) may have different styling than right side (value) due to component design
+      return { 
+        socialHistoryInfo: [{ label: 'No social history found', value: '' }], 
+        isSocialHistoryEmpty: true 
+      };
     }
 
     const secondHandSmoker = src.secondhandSmoker ?? src.secondHandSmoker ?? src.SecondhandSmoker;
