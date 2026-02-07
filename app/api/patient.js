@@ -50,6 +50,63 @@ const listPatientsV1 = (params = {}) => {
   );
 };
 
+// ---------- Patient Allocation (v1) ----------
+// Get all allocations (paginated)
+const listAllocationsV1 = (params = {}) => {
+  const cleanParams = Object.fromEntries(
+    Object.entries({ skip: 0, limit: 1000, ...params }).filter(([_, v]) => v !== undefined && v !== null)
+  );
+  return client.get('/allocations/', cleanParams, withPatientV1Base());
+};
+
+// Parse allocation response into a normalized array
+const parseAllocations = (res) => {
+  if (!res.ok) return [];
+  const d = res.data;
+  return Array.isArray(d) ? d
+    : Array.isArray(d?.data) ? d.data
+    : Array.isArray(d?.results) ? d.results
+    : Array.isArray(d?.items) ? d.items
+    : [];
+};
+
+// Fetch all allocations and return a map: patientId -> allocation object
+const getAllocationMap = async () => {
+  const res = await listAllocationsV1({ skip: 0, limit: 5000 });
+  const allocations = parseAllocations(res);
+  const map = {};
+  for (const a of allocations) {
+    if (a.active === 'N' || a.isDeleted) continue;
+    // Use String key for consistent lookup (patientID may be number or string)
+    if (a.patientId != null) map[String(a.patientId)] = a;
+  }
+  return map;
+};
+
+// Get patient IDs allocated to a specific user (by role)
+const getMyAllocatedPatientIds = async (userId, roleName) => {
+  if (!userId || !roleName) return [];
+  const role = roleName.toLowerCase();
+  
+  const res = await listAllocationsV1({ skip: 0, limit: 5000 });
+  const allocations = parseAllocations(res);
+  
+  // Filter allocations where this user is assigned based on their role
+  const myAllocations = allocations.filter((a) => {
+    if (a.active === 'N' || a.isDeleted) return false;
+    
+    if (role.includes('supervisor')) return a.supervisorId === userId;
+    if (role.includes('doctor') || role.includes('physician')) return a.doctorId === userId;
+    if (role.includes('caregiver')) return a.caregiverId === userId;
+    if (role.includes('game') || role.includes('therapist')) return a.gameTherapistId === userId;
+    // For admin or unknown roles, show all
+    return true;
+  });
+
+  const patientIds = myAllocations.map((a) => a.patientId).filter(Boolean);
+  return patientIds;
+};
+
 const readPatientV1 = async (patient_id, { require_auth = true, mask = true } = {}) => {
   return client.get(v1PatientReadEndpoint(patient_id), { require_auth, mask }, withPatientV1Base());
 };
@@ -550,6 +607,11 @@ const uploadPatientProfilePictureV1 = (patient_id, file) => {
   });
 };
 
+// Legacy: get patient counts grouped by caregiver/status
+// Some screens call this; keep a defensive wrapper in case backend route is missing
+const getPatientStatusCountList = () =>
+  client.get('/patient_status_counts/', {}, withPatientV1Base());
+
 /*
  * Expose your end points here
  */
@@ -563,6 +625,9 @@ export default {
 
   // --- v1 Patient Service (new) ---
   listPatientsV1,
+  listAllocationsV1,
+  getAllocationMap,
+  getMyAllocatedPatientIds,
   readPatientV1,
 
   // --- normalizers ---
@@ -613,4 +678,5 @@ export default {
 
   // --- v1 Profile Picture ---
   uploadPatientProfilePictureV1,
+  getPatientStatusCountList,
 };
