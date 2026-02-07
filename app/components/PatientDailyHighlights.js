@@ -49,8 +49,8 @@ function PatientDailyHighlights() {
     { label: 'New Prescription', value: 'Prescription' },
     { label: 'New Allergy', value: 'Allergy' },
     { label: 'New Activity Exclusion', value: 'ActivityExclusion' },
-    { label: 'Abnormal Vital', value: ['Vital', 'AbnormalVital'] },
-    { label: 'Problem', value: 'Problem' },
+    { label: 'New Abnormal Vital', value: ['Vital', 'AbnormalVital'] },
+    { label: 'New Problem', value: 'Problem' },
     { label: 'New Medical Records', value: 'MedicalHistory' },
   ]);
 
