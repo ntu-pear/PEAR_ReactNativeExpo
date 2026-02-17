@@ -11,10 +11,10 @@ const withPatientV1Base = (cfg = {}) => ({
   ...cfg,
 });
 
-// CORRECTED: Use underscores, and remove /api/v1 prefix (already in PATIENT_V1_BASE)
-const v1AllHighlightsEndpoint = '/get_all_highlights';
+// Highlight endpoints with /Highlight prefix as per staging spec
+const v1AllHighlightsEndpoint = '/Highlight/get_all_highlights';
 const v1HighlightsByPatientEndpoint = (patient_id) =>
-  `/get_highlights_by_patient/${patient_id}`;
+  `/Highlight/get_highlights_by_patient/${patient_id}`;
 
 /*
  * List all functions here

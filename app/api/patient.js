@@ -546,7 +546,7 @@ const addGuardian = async (guardianPayload) => {
 
 // Update patient (used by EditPatientInfoScreen)
 const updatePatient = async (patientID, data) => {
-  return client.put(`/patients/${patientID}/`, data, withPatientV1Base());
+  return client.put(`/patients/update/${patientID}`, data, withPatientV1Base());
 };
 
 
