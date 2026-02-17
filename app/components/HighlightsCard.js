@@ -31,9 +31,8 @@ function HighlightsCard({ item, setModalVisible }) {
     try {
       if (element.highlightJson && typeof element.highlightJson === 'string') {
         const parsed = JSON.parse(element.highlightJson);
-        // Staging API: text field contains full description
-        // Legacy API: value field contains description
-        highlightText = parsed.text || parsed.value || '';
+        // Staging API provides text field with full description
+        highlightText = parsed.text || '';
       }
     } catch (error) {
       console.error('Error parsing highlightJson:', error);
@@ -44,7 +43,7 @@ function HighlightsCard({ item, setModalVisible }) {
       return highlightText;
     }
 
-    // Fallback: generate description from type (for legacy or missing text)
+    // Fallback: generate description from type if text is missing
     switch (element.highlightType) {
       case 'Prescription':
       case 'Medication':

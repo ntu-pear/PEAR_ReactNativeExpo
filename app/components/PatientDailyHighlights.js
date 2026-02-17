@@ -190,12 +190,12 @@ function PatientDailyHighlights() {
           };
         }
         
-        // Map staging API fields to legacy format expected by UI
-        // Staging uses: HighlightTypeId, HighlightText, highlight_type_code, highlight_type_name
-        // Legacy expects: Type (string), HighlightJSON (JSON string)
+        // Transform staging API response to UI format
+        // Staging API provides: HighlightTypeId, HighlightText, highlight_type_code, highlight_type_name
+        // UI expects: highlightType (string), highlightJson (JSON string)
         
-        // Map type code to legacy type string
-        const typeCodeToLegacy = {
+        // Map staging type codes to UI type strings
+        const stagingTypeToUIType = {
           'VITAL': 'Vital',
           'ABNORMAL_VITAL': 'AbnormalVital',
           'PRESCRIPTION': 'Prescription',
@@ -206,12 +206,11 @@ function PatientDailyHighlights() {
           'MEDICAL_HISTORY': 'MedicalHistory',
         };
         
-        const highlightType = typeCodeToLegacy[h.highlight_type_code?.toUpperCase()] 
+        const highlightType = stagingTypeToUIType[h.highlight_type_code?.toUpperCase()] 
           || h.highlight_type_name 
           || 'Highlight';
         
-        // Pass HighlightText directly since it already contains the full description
-        // Don't wrap in value property to avoid duplication in UI
+        // Wrap HighlightText in JSON format for consistent parsing in UI components
         const highlightJson = JSON.stringify({
           text: h.HighlightText || '',
           ...(h.additional_fields || {})
@@ -221,7 +220,7 @@ function PatientDailyHighlights() {
           highlightID: h.Id,
           highlightType: highlightType,
           highlightJson: highlightJson,
-          // Staging removed StartDate/EndDate, use CreatedDate as fallback
+          // Staging API uses CreatedDate/ModifiedDate instead of StartDate/EndDate
           startDate: h.CreatedDate,
           endDate: h.ModifiedDate,
         });
