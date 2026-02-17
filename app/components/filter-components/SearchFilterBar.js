@@ -349,6 +349,12 @@ function SearchFilterBar({
         const mappedValue = filterOptionDetails[filter]['options'][tempSelFilters[filter][id]];
         if (mappedValue === undefined) {
           // do not filter
+        } else if (mappedValue === '__NO_CAREGIVER__') {
+          // Special case: filter for patients with no caregiver
+          filteredList =
+            filteredList.filter(
+              (obj) => !obj[fieldKey] || obj[fieldKey] === null,
+            ) || [];
         } else {
           filteredList =
             filteredList.filter(
