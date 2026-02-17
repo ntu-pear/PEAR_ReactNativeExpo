@@ -190,7 +190,30 @@ function EditPatientPreferencesScreen(props) {
 
   // form submission when save button is pressed
   const submitForm = async () => {
-    const result = await patientApi.updatePatient(formData);
+    // Transform formData to match API schema (camelCase)
+    const updatePayload = {
+      name: `${formData.FirstName} ${formData.LastName}`.trim(),
+      nric: formData.NRIC,
+      address: formData.Address || '',
+      tempAddress: formData.TempAddress || '',
+      homeNo: formData.HomeNo || '',
+      handphoneNo: formData.HandphoneNo || '',
+      gender: formData.Gender,
+      dateOfBirth: formData.DOB instanceof Date ? formData.DOB.toISOString() : formData.DOB,
+      isApproved: '1',
+      preferredName: formData.PreferredName || '',
+      preferredLanguageId: parseInt(formData.PreferredLanguageListID) || 1,
+      updateBit: formData.UpdateBit ? '1' : '0',
+      autoGame: formData.AutoGame ? '1' : '0',
+      startDate: formData.StartDate instanceof Date ? formData.StartDate.toISOString() : formData.StartDate,
+      isActive: formData.IsActive ? '1' : '0',
+      isRespiteCare: formData.IsRespiteCare ? '1' : '0',
+      privacyLevel: parseInt(formData.PrivacyLevel) || 2,
+      modifiedDate: new Date().toISOString(),
+      ModifiedById: '1',
+    };
+
+    const result = await patientApi.updatePatient(formData.PatientID, updatePayload);
 
     let alertTitle = '';
     let alertDetails = '';
