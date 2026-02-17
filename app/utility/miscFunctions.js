@@ -30,14 +30,41 @@ export const initSelectDisable = (list) => {
 
 // Function to sort array of objects on a property
 export const sortArray = (arr, property, asc) => {
-  if(asc) {
-    return arr.sort((a,b) => 
-      (a[property].toString().toLowerCase().trim() > b[property].toString().toLowerCase().trim()) ? 1 :
-      (b[property].toString().toLowerCase().trim() > a[property].toString().toLowerCase().trim()) ? -1 : 0)
-  } else {    
-    return arr.sort((a,b) => 
-      (a[property].toString().toLowerCase().trim() < b[property].toString().toLowerCase().trim()) ? 1 :
-      (b[property].toString().toLowerCase().trim() < a[property].toString().toLowerCase().trim()) ? -1 : 0)
+  const getVal = (obj, prop) => {
+    try {
+      const v = obj[prop];
+      return v == null ? '' : String(v).toLowerCase().trim();
+    } catch (e) {
+      return '';
+    }
+  };
+
+  const compareNames = (a, b) => {
+    const aName = (a.fullName || (a.firstName && a.lastName ? `${a.firstName} ${a.lastName}` : '') || '').toLowerCase().trim();
+    const bName = (b.fullName || (b.firstName && b.lastName ? `${b.firstName} ${b.lastName}` : '') || '').toLowerCase().trim();
+    if (aName > bName) return 1;
+    if (aName < bName) return -1;
+    return 0;
+  };
+
+  if (asc) {
+    return arr.sort((a, b) => {
+      const va = getVal(a, property);
+      const vb = getVal(b, property);
+      if (va > vb) return 1;
+      if (va < vb) return -1;
+      // tie: fallback to alphabetical by name (ascending)
+      return compareNames(a, b);
+    });
+  } else {
+    return arr.sort((a, b) => {
+      const va = getVal(a, property);
+      const vb = getVal(b, property);
+      if (va < vb) return 1;
+      if (va > vb) return -1;
+      // tie: fallback to alphabetical by name (ascending)
+      return compareNames(a, b);
+    });
   }
 }
 

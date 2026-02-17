@@ -308,17 +308,11 @@ function EditPatientGuardianScreen(props) {
       status: 'active',
       isDeleted: '0',
       guardianApplicationUserId: '',
-      createdDate: guardianProfile.createdDate || new Date().toISOString(),
       modifiedDate: new Date().toISOString(),
-      CreatedById: '1',
       ModifiedById: '1',
       patientId: patientID,
       relationshipName: relationship ? relationship.label : guardianProfile.relationship
     };
-    
-    console.log('=== PUT /api/v1/Guardian/update ===');
-    console.log('Guardian ID:', guardianProfile.guardianID);
-    console.log('API Payload:', JSON.stringify(apiPayload, null, 2));
     
     const result = await guardianApi.updateGuardian(apiPayload, guardianProfile.guardianID);
 

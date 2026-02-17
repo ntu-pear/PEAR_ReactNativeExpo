@@ -41,12 +41,10 @@ const getPatientGuardian = (patientID, maskNRIC = false) => {
 
 // ************************* UPDATE REQUESTS *************************
 const updateGuardian = async (data, guardianId) => {
-  const headers = { 'Content-Type': 'application/json-patch+json' };
   const params = { guardian_id: guardianId };
 
   return client.put(guardianUpdate, data, { 
     ...withPatientV1Base(),
-    headers,
     params
   });
 };

@@ -47,10 +47,11 @@ function PatientDailyHighlights() {
   const [dropdownItems, setDropdownItems] = useState([
     { label: 'All', value: 'All' },
     { label: 'New Prescription', value: 'Prescription' },
+    { label: 'New Medication', value: 'Medication' },
     { label: 'New Allergy', value: 'Allergy' },
     { label: 'New Activity Exclusion', value: 'ActivityExclusion' },
-    { label: 'Abnormal Vital', value: ['Vital', 'AbnormalVital'] },
-    { label: 'Problem', value: 'Problem' },
+    { label: 'New Abnormal Vital', value: ['Vital', 'AbnormalVital'] },
+    { label: 'New Problem', value: 'Problem' },
     { label: 'New Medical Records', value: 'MedicalHistory' },
   ]);
 
@@ -125,8 +126,10 @@ function PatientDailyHighlights() {
       // Response is an array of highlights
       const allHighlights = Array.isArray(response.data) ? response.data : [];
       
-      // Filter out deleted highlights
-      const activeHighlights = allHighlights.filter(h => h.IsDeleted !== "1");
+      // Filter out deleted highlights (staging can return "1", 1, "0", or 0)
+      const activeHighlights = allHighlights.filter(h => 
+        h.IsDeleted !== "1" && h.IsDeleted !== 1 && h.IsDeleted !== true
+      );
       
       console.log('[HIGHLIGHTS] Active highlights:', activeHighlights.length);
 
@@ -187,12 +190,39 @@ function PatientDailyHighlights() {
           };
         }
         
+        // Transform staging API response to UI format
+        // Staging API provides: HighlightTypeId, HighlightText, highlight_type_code, highlight_type_name
+        // UI expects: highlightType (string), highlightJson (JSON string)
+        
+        // Map staging type codes to UI type strings
+        const stagingTypeToUIType = {
+          'VITAL': 'Vital',
+          'ABNORMAL_VITAL': 'AbnormalVital',
+          'PRESCRIPTION': 'Prescription',
+          'MEDICATION': 'Medication',
+          'ALLERGY': 'Allergy',
+          'ACTIVITY_EXCLUSION': 'ActivityExclusion',
+          'PROBLEM': 'Problem',
+          'MEDICAL_HISTORY': 'MedicalHistory',
+        };
+        
+        const highlightType = stagingTypeToUIType[h.highlight_type_code?.toUpperCase()] 
+          || h.highlight_type_name 
+          || 'Highlight';
+        
+        // Wrap HighlightText in JSON format for consistent parsing in UI components
+        const highlightJson = JSON.stringify({
+          text: h.HighlightText || '',
+          ...(h.additional_fields || {})
+        });
+        
         acc[patientId].highlights.push({
           highlightID: h.Id,
-          highlightType: h.Type,
-          highlightJson: h.HighlightJSON,
-          startDate: h.StartDate,
-          endDate: h.EndDate,
+          highlightType: highlightType,
+          highlightJson: highlightJson,
+          // Staging API uses CreatedDate/ModifiedDate instead of StartDate/EndDate
+          startDate: h.CreatedDate,
+          endDate: h.ModifiedDate,
         });
         
         return acc;

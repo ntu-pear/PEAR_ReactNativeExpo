@@ -345,14 +345,22 @@ function SearchFilterBar({
             (obj) => obj[fieldKey] === tempSelFilters[filter][id],
           ) || [];
       } else {
-        filteredList =
-          filteredList.filter(
-            (obj) =>
-              obj[fieldKey] ===
-              filterOptionDetails[filter]['options'][
-                tempSelFilters[filter][id]
-              ],
-          ) || [];
+        // If the selected option maps to undefined (e.g., 'All'), treat as no filter
+        const mappedValue = filterOptionDetails[filter]['options'][tempSelFilters[filter][id]];
+        if (mappedValue === undefined) {
+          // do not filter
+        } else if (mappedValue === '__NO_CAREGIVER__') {
+          // Special case: filter for patients with no caregiver
+          filteredList =
+            filteredList.filter(
+              (obj) => !obj[fieldKey] || obj[fieldKey] === null,
+            ) || [];
+        } else {
+          filteredList =
+            filteredList.filter(
+              (obj) => obj[fieldKey] === mappedValue,
+            ) || [];
+        }
       }
     } else if (
       filterOptionDetails[filter]['nestedFilter'] != undefined &&
@@ -504,6 +512,7 @@ function SearchFilterBar({
             setSort={setSort}
             dropdown={dropdown}
             chip={chip}
+            setChip={setChip}
             autocomplete={autocomplete}
             datetime={datetime}
             handleSortFilter={handleSearchSortFilter}

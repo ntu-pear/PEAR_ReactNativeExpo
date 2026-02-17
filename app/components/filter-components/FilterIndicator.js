@@ -24,11 +24,36 @@ function FilterIndicator({
   setSort = () => {},
   dropdown = {},
   chip = {},
+  setChip = () => {},
   autocomplete = {},
   datetime = {},
 
   handleSortFilter = () => {},
 }) {
+  // Cycle chip values for quick toggle (Active -> Inactive -> All)
+  const handleChipPress = (filter) => {
+    try {
+      const options = chip['filterOptions'][filter] || [];
+      if (!options.length) return;
+
+      const current = chip['sel'] && chip['sel'][filter] ? chip['sel'][filter] : options[0];
+      const idx = options.findIndex((o) => o.label === current.label);
+      const next = options[(idx + 1) % options.length];
+
+      // Update both selected and temp selected so UI and filtering apply immediately
+      setChip((prev) => ({
+        ...prev,
+        sel: { ...(prev.sel || {}), [filter]: next },
+        tempSel: { ...(prev.tempSel || {}), [filter]: next },
+      }));
+
+      // Call filter handler with updated chip temp selection
+      const tempSelChipFilters = { ...(chip['tempSel'] || {}), [filter]: next };
+      handleSortFilter({ tempSelChipFilters });
+    } catch (e) {
+      // ignore
+    }
+  };
   // Toggle sort order (asc/desc)
   const toggleSortOrder = () => {
     // console.log('IND -', 1, 'toggleSortOrder')
@@ -80,7 +105,17 @@ function FilterIndicator({
             buttonStyle={{ backgroundColor: colors.green }}
             containerStyle={{ marginLeft: 5 }}
             onPress={
-              modalVisible != undefined ? () => setModalVisible(true) : () => {}
+              // If this filter is a chip and isFilter=true and setChip is available,
+              // cycle through options on tap. Otherwise open modal.
+              filterOptionDetails &&
+              filterOptionDetails[filter] &&
+              filterOptionDetails[filter]['type'] === 'chip' &&
+              filterOptionDetails[filter]['isFilter'] &&
+              setChip
+                ? () => handleChipPress(filter)
+                : modalVisible != undefined
+                ? () => setModalVisible(true)
+                : () => {}
             }
             disabled={modalVisible == undefined}
             disabledStyle={{ backgroundColor: colors.green }}

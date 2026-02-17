@@ -26,48 +26,42 @@ function HighlightsCard({ item, setModalVisible }) {
 
   // 1. UPDATE getDescription - Change highlightTypeID to highlightType and add value parsing
   const getDescription = (element) => {
-    let desc;
-
-    // Parse the value from highlightJson
-    let highlightJsonValue = '';
+    // Parse highlightJson for the text
+    let highlightText = '';
     try {
       if (element.highlightJson && typeof element.highlightJson === 'string') {
         const parsed = JSON.parse(element.highlightJson);
-        highlightJsonValue = parsed.value || '';
+        // Staging API provides text field with full description
+        highlightText = parsed.text || '';
       }
     } catch (error) {
       console.error('Error parsing highlightJson:', error);
     }
 
-    // CHANGED: highlightTypeID → highlightType
+    // If we have text from JSON, return it directly (staging already includes type)
+    if (highlightText) {
+      return highlightText;
+    }
+
+    // Fallback: generate description from type if text is missing
     switch (element.highlightType) {
       case 'Prescription':
       case 'Medication':
-        desc = 'New Prescription';
-        break;
+        return 'New Prescription';
       case 'Allergy':
-        desc = 'New Allergy';
-        break;
+        return 'New Allergy';
       case 'ActivityExclusion':
-        desc = 'New Activity Exclusion';
-        break;
+        return 'New Activity Exclusion';
       case 'Vital':
       case 'AbnormalVital':
-        desc = 'Abnormal Vital';
-        break;
+        return 'Abnormal Vital';
       case 'Problem':
-        desc = 'Problem';
-        break;
+        return 'Problem';
       case 'MedicalHistory':
-        desc = 'New Medical Record';
-        break;
+        return 'New Medical Record';
       default:
-        desc = 'Highlight';
-        break;
+        return 'Highlight';
     }
-
-    // Add the value if it exists
-    return highlightJsonValue ? `${desc} - ${highlightJsonValue}` : desc;
   };
 
   // 2. UPDATE getIcon - Change highlightTypeID to highlightType
