@@ -47,6 +47,7 @@ function PatientDailyHighlights() {
   const [dropdownItems, setDropdownItems] = useState([
     { label: 'All', value: 'All' },
     { label: 'New Prescription', value: 'Prescription' },
+    { label: 'New Medication', value: 'Medication' },
     { label: 'New Allergy', value: 'Allergy' },
     { label: 'New Activity Exclusion', value: 'ActivityExclusion' },
     { label: 'New Abnormal Vital', value: ['Vital', 'AbnormalVital'] },
@@ -125,8 +126,10 @@ function PatientDailyHighlights() {
       // Response is an array of highlights
       const allHighlights = Array.isArray(response.data) ? response.data : [];
       
-      // Filter out deleted highlights
-      const activeHighlights = allHighlights.filter(h => h.IsDeleted !== "1");
+      // Filter out deleted highlights (staging can return "1", 1, "0", or 0)
+      const activeHighlights = allHighlights.filter(h => 
+        h.IsDeleted !== "1" && h.IsDeleted !== 1 && h.IsDeleted !== true
+      );
       
       console.log('[HIGHLIGHTS] Active highlights:', activeHighlights.length);
 
@@ -187,12 +190,40 @@ function PatientDailyHighlights() {
           };
         }
         
+        // Map staging API fields to legacy format expected by UI
+        // Staging uses: HighlightTypeId, HighlightText, highlight_type_code, highlight_type_name
+        // Legacy expects: Type (string), HighlightJSON (JSON string)
+        
+        // Map type code to legacy type string
+        const typeCodeToLegacy = {
+          'VITAL': 'Vital',
+          'ABNORMAL_VITAL': 'AbnormalVital',
+          'PRESCRIPTION': 'Prescription',
+          'MEDICATION': 'Medication',
+          'ALLERGY': 'Allergy',
+          'ACTIVITY_EXCLUSION': 'ActivityExclusion',
+          'PROBLEM': 'Problem',
+          'MEDICAL_HISTORY': 'MedicalHistory',
+        };
+        
+        const highlightType = typeCodeToLegacy[h.highlight_type_code?.toUpperCase()] 
+          || h.highlight_type_name 
+          || 'Highlight';
+        
+        // Pass HighlightText directly since it already contains the full description
+        // Don't wrap in value property to avoid duplication in UI
+        const highlightJson = JSON.stringify({
+          text: h.HighlightText || '',
+          ...(h.additional_fields || {})
+        });
+        
         acc[patientId].highlights.push({
           highlightID: h.Id,
-          highlightType: h.Type,
-          highlightJson: h.HighlightJSON,
-          startDate: h.StartDate,
-          endDate: h.EndDate,
+          highlightType: highlightType,
+          highlightJson: highlightJson,
+          // Staging removed StartDate/EndDate, use CreatedDate as fallback
+          startDate: h.CreatedDate,
+          endDate: h.ModifiedDate,
         });
         
         return acc;
