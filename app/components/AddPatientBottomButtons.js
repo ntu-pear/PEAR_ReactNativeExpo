@@ -85,15 +85,22 @@ function AddPatientBottomButtons({
               <HStack space={4}>
                 <Button
                   testID={`${testID}_remove`}
-                  width={12}
-                  height={12}
                   variant="outline"
-                  borderColor={colors.grey}
+                  borderColor={colors.red}
                   borderRadius="full"
                   onPress={removeComponent}
-                  _text={{ color: colors.grey }}
+                  leftIcon={
+                    <Icon
+                      as={<MaterialIcons name="remove" />}
+                      color={colors.red}
+                      size="sm"
+                    />
+                  }
+                  _text={{ color: colors.red, fontWeight: 'bold' }}
+                  px={4}
+                  py={2}
                 >
-                  -
+                  Remove Secondary Guardian
                 </Button>
               </HStack>
             </Box>
@@ -121,15 +128,22 @@ function AddPatientBottomButtons({
                 </Button>
                 <Button
                   testID={`${testID}_remove`}
-                  width={12}
-                  height={12}
                   variant="outline"
-                  borderColor={colors.grey}
+                  borderColor={colors.red}
                   borderRadius="full"
                   onPress={removeComponent}
-                  _text={{ color: colors.grey }}
+                  leftIcon={
+                    <Icon
+                      as={<MaterialIcons name="remove" />}
+                      color={colors.red}
+                      size="sm"
+                    />
+                  }
+                  _text={{ color: colors.red, fontWeight: 'bold' }}
+                  px={4}
+                  py={2}
                 >
-                  -
+                  Remove Secondary Guardian
                 </Button>
               </HStack>
             </Box>
