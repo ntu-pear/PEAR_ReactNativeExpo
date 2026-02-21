@@ -236,7 +236,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError, testI
               color={colors.green}
               style={styles.text}
             >
-              {title == 1 ? 'Primary Guardian' : 'Secondary Guardian (Optional)'}
+              {title == 1 ? 'Add Primary Guardian' : 'Add Secondary Guardian (Optional)'}
             </Text>
           </View>
 
@@ -270,6 +270,7 @@ function AddPatientGuardian({ i, title, formData, handleFormData, onError, testI
             onEndEditing={handleNRICError}
             dataType="nric"
             maxLength={9}
+            initiallyVisible={true}
           />          
 
           <View style={styles.dateSelectionContainer}>
