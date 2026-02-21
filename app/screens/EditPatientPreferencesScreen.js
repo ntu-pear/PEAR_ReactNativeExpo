@@ -147,7 +147,6 @@ function EditPatientPreferencesScreen(props) {
     setIsPrefNamesLoading(true);
     const response = await patientApi.getPatientList(false, 'active');
     if (!response.ok) {
-      setUser(null);
       setIsPrefNamesLoading(false);
       return;
     }

@@ -49,15 +49,26 @@ const getUser = async () => {
 };
 
 /*
- * Removes token from global secure storage when user logs out
+ * Removes a single token by key from storage
+ */
+const deleteToken = async (key) => {
+  try {
+    await AsyncStorage.removeItem(key);
+  } catch (error) {
+    console.log('Error deleting token', key, error);
+  }
+};
+
+/*
+ * Removes all known tokens from global secure storage when user logs out
  */
 const removeToken = async () => {
   try {
-    // await AsyncStorage.removeItem(authKey);
-    // await AsyncStorage.removeItem(refreshKey);
     await Promise.all([
       AsyncStorage.removeItem('userAuthToken'),
       AsyncStorage.removeItem('userRefreshToken'),
+      AsyncStorage.removeItem('userAuthTokenV1'),
+      AsyncStorage.removeItem('userRefreshTokenV1'),
     ]);
   } catch (error) {
     console.log('Error removing the auth token', error);
@@ -68,5 +79,6 @@ export default {
   getUser,
   getToken,
   removeToken,
+  deleteToken,
   storeToken,
 };
