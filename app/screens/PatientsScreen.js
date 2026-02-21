@@ -91,7 +91,7 @@ const PatientRow = memo(({
           <Icon
             as={MaterialIcons}
             name={isFavourite ? 'star' : 'star-border'}
-            size="sm"
+            size="md"
             color={isFavourite ? 'amber.500' : 'coolGray.500'}
           />
         }
@@ -127,6 +127,7 @@ const rowStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'stretch',
     justifyContent: 'space-between',
+    paddingRight: 100,
   },
   caregiverNameContainer: {
     marginLeft: '5%',
