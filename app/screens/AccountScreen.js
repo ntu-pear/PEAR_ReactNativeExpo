@@ -17,6 +17,9 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 // API
 import userApi from 'app/api/user';
 
+// Utilities
+import patientDraft from 'app/utility/patientDraft';
+
 // Configurations
 import colors from 'app/config/colors';
 
@@ -31,6 +34,7 @@ function AccountScreen(props) {
     console.log('Logging out!');
     userApi.logoutUser()
     .then(() => authStorage.removeToken())
+    .then(() => patientDraft.clearDraft())
     .then(() => setUser(null))
     .catch(error => console.error('Logout failed:', error));
     // console.log('Logging out!');

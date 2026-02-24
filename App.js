@@ -18,6 +18,7 @@ import AppNavigator from 'app/navigation/AppNavigator';
 import AuthContext from 'app/auth/context';
 import { setSessionExpiredHandler } from 'app/api/client';
 import authStorage from 'app/auth/authStorage';
+import patientDraft from 'app/utility/patientDraft';
 import DebugNavigator from 'app/navigation/DebugNavigator';
 
 // Removal of token/user login persistence (see lines 36-37) -- Justin
@@ -47,6 +48,7 @@ export default function App() {
         text: 'OK',
         onPress: async () => {
           await authStorage.removeToken();
+          await patientDraft.clearDraft();
           setUser(null);
         },
       }],

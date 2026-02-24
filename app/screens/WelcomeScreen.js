@@ -13,6 +13,7 @@ import {
 import { Center, Icon, Box } from 'native-base';
 import { MaterialIcons } from '@expo/vector-icons';
 import jwt_decode from 'jwt-decode';
+import patientDraft from 'app/utility/patientDraft';
 import AuthContext from 'app/auth/context';
 import authStorage from 'app/auth/authStorage';
 
@@ -100,6 +101,8 @@ function WelcomeScreen(props) {
 
     if(result && result.ok) {
       console.log('User authenticated - storing tokens...');
+      // Clear any stale patient draft from a previous session
+      await patientDraft.clearDraft();
       // Fetch profile and put it into AuthContext 
       console.log('Fetching profile...');
       const me = await userApi.getUser(); // GET /api/v1/user/get_user/
