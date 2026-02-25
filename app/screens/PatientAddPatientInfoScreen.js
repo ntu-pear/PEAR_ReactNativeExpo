@@ -179,7 +179,6 @@ function PatientAddPatientInfoScreen({
       });
   
       if (!res.ok) { 
-        if (res.status === 401) setUser(null);
          return; }
   
       // PaginatedResponse[Patient] => { data: Patient[], pageNo, pageSize, totalRecords, totalPages }
@@ -429,6 +428,7 @@ function PatientAddPatientInfoScreen({
                     onEndEditing={handleNRICError}
                     dataType="nric"
                     maxLength={9}
+                    initiallyVisible={true}
                   />
 
                   <View style={styles.dateSelectionContainer}>

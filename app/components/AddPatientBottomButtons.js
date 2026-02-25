@@ -59,8 +59,6 @@ function AddPatientBottomButtons({
           list.length === 1 ? (
             <Button
               testID={`${testID}_add`}
-              width={12}
-              height={12}
               variant="outline"
               colorScheme="success"
               borderRadius="full"
@@ -69,23 +67,40 @@ function AddPatientBottomButtons({
               accessibilityTraits={
                 isAddDisabled ? ['button', 'disabled'] : ['button']
               }
+              leftIcon={
+                <Icon
+                  as={<MaterialIcons name="add" />}
+                  color={colors.green}
+                  size="sm"
+                />
+              }
+              _text={{ color: colors.green, fontWeight: 'bold' }}
+              px={4}
+              py={2}
             >
-              +
+              Add Secondary Guardian
             </Button>
           ) : list.length === max ? (
             <Box>
               <HStack space={4}>
                 <Button
                   testID={`${testID}_remove`}
-                  width={12}
-                  height={12}
                   variant="outline"
-                  borderColor={colors.grey}
+                  borderColor={colors.red}
                   borderRadius="full"
                   onPress={removeComponent}
-                  _text={{ color: colors.grey }}
+                  leftIcon={
+                    <Icon
+                      as={<MaterialIcons name="remove" />}
+                      color={colors.red}
+                      size="sm"
+                    />
+                  }
+                  _text={{ color: colors.red, fontWeight: 'bold' }}
+                  px={4}
+                  py={2}
                 >
-                  -
+                  Remove Secondary Guardian
                 </Button>
               </HStack>
             </Box>
@@ -94,26 +109,41 @@ function AddPatientBottomButtons({
               <HStack space={4}>
                 <Button
                   testID={`${testID}_add`}
-                  width={12}
-                  height={12}
                   variant="outline"
                   colorScheme="success"
                   borderRadius="full"
                   onPress={addComponent}
+                  leftIcon={
+                    <Icon
+                      as={<MaterialIcons name="add" />}
+                      color={colors.green}
+                      size="sm"
+                    />
+                  }
+                  _text={{ color: colors.green, fontWeight: 'bold' }}
+                  px={4}
+                  py={2}
                 >
-                  +
+                  Add Secondary Guardian
                 </Button>
                 <Button
                   testID={`${testID}_remove`}
-                  width={12}
-                  height={12}
                   variant="outline"
-                  borderColor={colors.grey}
+                  borderColor={colors.red}
                   borderRadius="full"
                   onPress={removeComponent}
-                  _text={{ color: colors.grey }}
+                  leftIcon={
+                    <Icon
+                      as={<MaterialIcons name="remove" />}
+                      color={colors.red}
+                      size="sm"
+                    />
+                  }
+                  _text={{ color: colors.red, fontWeight: 'bold' }}
+                  px={4}
+                  py={2}
                 >
-                  -
+                  Remove Secondary Guardian
                 </Button>
               </HStack>
             </Box>

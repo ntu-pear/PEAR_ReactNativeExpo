@@ -31,8 +31,9 @@ function SensitiveInputField({
   maxLength = null,
   onEndEditing = () => {},
   variant = 'singleLine',
+  initiallyVisible = false,
 }) {
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState(initiallyVisible);
 
   const handleVisibilityToggle = () => {
     setShow(!show);

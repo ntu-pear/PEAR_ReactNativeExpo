@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { LogBox } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { LogBox, Alert } from 'react-native';
 import { View } from 'native-base';
 
 // Custom import from https://docs.nativebase.io/
@@ -16,6 +16,8 @@ import AuthNavigator from 'app/navigation/AuthNavigator';
 import AppNavigator from 'app/navigation/AppNavigator';
 
 import AuthContext from 'app/auth/context';
+import { setSessionExpiredHandler } from 'app/api/client';
+import authStorage from 'app/auth/authStorage';
 import DebugNavigator from 'app/navigation/DebugNavigator';
 
 // Removal of token/user login persistence (see lines 36-37) -- Justin
@@ -35,6 +37,25 @@ const AppStackScreen = ({ user }) => (
 export default function App() {
   const [user, setUser] = useState(null);
   const [acceptRejectNotifID, setAcceptRejectNotifID] = useState(-1);
+
+  // Global handler for expired sessions (401 from any API call)
+  const handleSessionExpired = useCallback(() => {
+    Alert.alert(
+      'Session Expired',
+      'Your session has expired. Please log in again.',
+      [{
+        text: 'OK',
+        onPress: async () => {
+          await authStorage.removeToken();
+          setUser(null);
+        },
+      }],
+    );
+  }, []);
+
+  useEffect(() => {
+    setSessionExpiredHandler(handleSessionExpired);
+  }, [handleSessionExpired]);
 
   // Reference on fixing theme issue
   // https://stackoverflow.com/questions/48253357/react-navigation-default-background-color
