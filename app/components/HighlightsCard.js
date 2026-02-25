@@ -186,11 +186,11 @@ function HighlightsCard({ item, setModalVisible }) {
   const list = () => {
     return item.highlights.map((element) => (
       <View key={element.highlightID} style={styles.highlightsList}>
-        <HStack w="100%" space={2} alignItems="center">
-          {getIcon(element)}
+        <HStack w="100%" space={2} alignItems="flex-start">
+          <View style={{ marginTop: 2 }}>{getIcon(element)}</View>
           {/* <TouchableOpacity onPress={() => handleNavigation(element)}> */}
             {/* Show description with count if more than 1 */}
-            <Text fontSize="13">
+            <Text fontSize="13" flex={1} flexWrap="wrap">
               {getDescription(element)}
               {element.count > 1 ? ` (x${element.count})` : ''}
             </Text>

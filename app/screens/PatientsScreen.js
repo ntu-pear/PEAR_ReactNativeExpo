@@ -231,8 +231,8 @@ const normalizePatientV1 = (p = {}) => {
   const [listOfPatients, setListOfPatients] = useState([]); // list of patients after sort, search, filter
   const [patientCountInfo, setPatientCountInfo] = useState({}); // list of patients for each caregiver (differentiated by patient status)
   const [justUpdated, setJustUpdated] = useState(false);
-  const [patientStatus, setPatientStatus] = useState(''); // active, inactive, '' (default: All)
-  const [tempSelPatientStatus, setTempSelPatientStatus] = useState(''); // active, inactive, '' (default: All)
+  const [patientStatus, setPatientStatus] = useState('active'); // active, inactive, '' (default: All)
+  const [tempSelPatientStatus, setTempSelPatientStatus] = useState('active'); // active, inactive, '' (default: All)
   const [viewMode, setViewMode] = useState('myPatients'); // myPatients, allPatients
   const [isReloadPatientList, setIsReloadPatientList] = useState(false);
   const [applySortFilter, setApplySortFilter] = useState(true);
@@ -333,13 +333,13 @@ const normalizePatientV1 = (p = {}) => {
     }
   }, [chip['tempSel']['Patient Status']]);
 
-  // Ensure the chip indicator shows 'All' by default on first render and on login
+  // Ensure the chip indicator shows 'Active' by default on first render and on login
   useEffect(() => {
     try {
       setChip((prev) => ({
         ...prev,
-        sel: { ...(prev.sel || {}), ['Patient Status']: { label: 'All', value: 1 } },
-        tempSel: { ...(prev.tempSel || {}), ['Patient Status']: { label: 'All', value: 1 } },
+        sel: { ...(prev.sel || {}), ['Patient Status']: { label: 'Active', value: 2 } },
+        tempSel: { ...(prev.tempSel || {}), ['Patient Status']: { label: 'Active', value: 2 } },
       }));
     } catch (e) {}
   }, [user?.id]);
