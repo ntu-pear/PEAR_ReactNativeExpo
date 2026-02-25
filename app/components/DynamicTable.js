@@ -103,14 +103,14 @@ function DynamicTable({
             >
               <Row
                 style={styles.head}
-                textStyle={styles.titleText}
+                textStyle={StyleSheet.flatten(styles.titleText)}
                 widthArr={getWidthData()}
                 data={getHeaderData()}
               />
               {getRowData().map((row, index) => {
                 return (
                 <Row
-                  textStyle={Array.isArray(styles.rowText) ? Object.assign({}, ...styles.rowText) : styles.rowText}
+                  textStyle={StyleSheet.flatten(styles.rowText)}
                   widthArr={getWidthData()}
                   key={index}
                   data={row.concat(
