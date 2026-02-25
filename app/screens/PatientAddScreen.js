@@ -1,5 +1,5 @@
 // Libs
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import mime from 'mime';
@@ -11,6 +11,9 @@ import privacyLevelApi from 'app/api/privacyLevel';
 
 // Configurations
 import routes from 'app/navigation/routes';
+
+// Utilities
+import patientDraft from 'app/utility/patientDraft';
 
 // Components
 import PatientAddPatientInfoScreen from 'app/screens/PatientAddPatientInfoScreen';
@@ -93,6 +96,83 @@ function PatientAddScreen() {
 
   const [formData, setFormData] = useState(addPatientData);
 
+  // Track whether the form has been touched (to avoid saving defaults as a draft)
+  const formTouched = useRef(false);
+
+  // Restore draft on mount (if one exists)
+  const [isDraftLoading, setIsDraftLoading] = useState(true);
+  useEffect(() => {
+    const restore = async () => {
+      const draft = await patientDraft.loadDraft();
+      if (draft) {
+        Alert.alert(
+          'Resume Draft',
+          'You have an unsaved patient form. Would you like to continue where you left off?',
+          [
+            {
+              text: 'Discard',
+              style: 'destructive',
+              onPress: async () => {
+                await patientDraft.clearDraft();
+                setIsDraftLoading(false);
+              },
+            },
+            {
+              text: 'Resume',
+              onPress: () => {
+                setFormData(draft.formData);
+                setStep(draft.step);
+                if (draft.componentList) setComponentList(draft.componentList);
+                formTouched.current = true;
+                setIsDraftLoading(false);
+              },
+            },
+          ],
+        );
+      } else {
+        setIsDraftLoading(false);
+      }
+    };
+    restore();
+  }, []);
+
+  // Auto-save draft on form or step changes (debounced 800ms)
+  useEffect(() => {
+    if (isDraftLoading || !formTouched.current) return;
+
+    const timer = setTimeout(() => {
+      patientDraft.saveDraft(formData, step, componentList);
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [formData, step, componentList, isDraftLoading]);
+
+  // Navigation guard — warn user if they navigate away with unsaved data
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      // Allow navigation if form hasn't been touched or submission is in progress
+      if (!formTouched.current || isSubmitting) return;
+
+      // Prevent default back action
+      e.preventDefault();
+
+      Alert.alert(
+        'Discard Changes?',
+        'You have unsaved patient data. If you leave, your draft will be saved and you can resume later.',
+        [
+          { text: 'Stay', style: 'cancel' },
+          {
+            text: 'Leave',
+            style: 'destructive',
+            onPress: () => navigation.dispatch(e.data.action),
+          },
+        ],
+      );
+    });
+
+    return unsubscribe;
+  }, [navigation, isSubmitting]);
+
   // Function to handle form sections which can have multiple items (like allergies/guardians - can have multiple)
   const componentHandler = (page = '', list = []) => {
     if (list) {
@@ -163,6 +243,7 @@ function PatientAddScreen() {
 
   // Function to update patient data
   const handlePatientData = (field) => (e) => {
+    formTouched.current = true;
     const newData = formData.patientInfo;
 
     if (field === 'IsChecked') {
@@ -203,6 +284,7 @@ function PatientAddScreen() {
 
   // Function to update guardian data
   const handleGuardianData = (field, i) => (e) => {
+    formTouched.current = true;
     const newData = formData.guardianInfo;
 
     if (field === 'RelationshipID') {
@@ -402,6 +484,9 @@ function PatientAddScreen() {
       }
 
       alertTitle = 'Successfully added Patient';
+      // Clear draft on successful submission
+      formTouched.current = false;
+      await patientDraft.clearDraft();
       navigation.navigate(routes.PATIENTS_SCREEN);
     } else {
       // Extract error message from various possible locations in the response
@@ -417,6 +502,11 @@ function PatientAddScreen() {
     Alert.alert(alertTitle, alertDetails);
     setIsSubmitting(false);
   };
+
+  // Show loading while checking for existing draft
+  if (isDraftLoading) {
+    return <ActivityIndicator visible />;
+  }
 
   switch (step) {
     case 1:
