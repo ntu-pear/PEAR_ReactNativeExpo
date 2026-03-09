@@ -524,7 +524,7 @@ const getPatient = async (patientID) => {
 const getPatientList = async (maskNRIC = true, patientStatus = null) => {
   const params = {
     pageNo: 0,
-    pageSize: 1000,  // Large page to get all patients for screens that need full list
+    pageSize: 80,  // Max patients fetched upfront for client-side pagination
   };
   if (patientStatus) params.status = patientStatus;
   if (maskNRIC !== undefined) params.mask = maskNRIC;
