@@ -1,7 +1,6 @@
 
 /*eslint eslint-comments/no-unlimited-disable: error */
 import client, { PATIENT_V1_BASE } from 'app/api/client';
-import { Image } from 'react-native';
 
 /*
  * List all end points here
@@ -11,9 +10,10 @@ const withPatientV1Base = (cfg = {}) => ({ baseURL: PATIENT_V1_BASE, timeout: 15
 const v1PatientsListEndpoint = '/patients/';
 // NOTE: patient service v1 is strict about trailing slashes for some routes
 const v1PatientReadEndpoint = (patient_id) => `/patients/${patient_id}`;
-const v1PatientMedicationsEndpoint = (patient_id) => `/patients/${patient_id}/medications/`;
-const v1PatientMedicationDetailEndpoint = (patient_id, med_id) => `/patients/${patient_id}/medications/${med_id}/`;
-const USE_COLLECTION_STYLE_MED_ENDPOINT = false;
+const v1PatientMedicationListEndpoint = '/Medication/PatientMedication';
+const v1PatientMedicationAddEndpoint = '/Medication/add';
+const v1PatientMedicationUpdateEndpoint = (med_id) => `/Medication/update/${med_id}`;
+const v1PatientMedicationDeleteEndpoint = (med_id) => `/Medication/delete/${med_id}`;
 
 // ---------- Patient Mobility (v1) ----------
 const v1MobilityMapListByPatientEndpoint = (patient_id) => `/MobilityMapping/List/Patient/${patient_id}`;
@@ -27,8 +27,17 @@ const v1VitalAddEndpoint = `/Vital/add`;                        // POST
 const v1VitalUpdateEndpoint = (vital_id) => `/Vital/update/${vital_id}`; // PUT
 const v1VitalDeleteEndpoint = `/Vital/delete`;                  // DELETE (expects vital_id)
 
+// ---------- Prescription Lists / Prescriptions (v1) ----------
+const v1PrescriptionListEndpoint = '/PrescriptionList';
+const v1PatientPrescriptionListEndpoint = '/Prescription/PatientPrescription';
+const v1PatientPrescriptionAddEndpoint = '/Prescription/add';
+const v1PatientPrescriptionUpdateEndpoint = (presc_id) => `/Prescription/update/${presc_id}`;
+const v1PatientPrescriptionDeleteEndpoint = (presc_id) => `/Prescription/delete/${presc_id}`;
+
 // ---------- Profile Picture (v1) ----------
 const v1UpdateProfilePictureEndpoint = (patient_id) => `/patients/update/${patient_id}/update_patient_profile_picture`;
+
+let cachedPrescriptionListMap = null;
 
 /*
  * List all functions here
@@ -111,55 +120,218 @@ const readPatientV1 = async (patient_id, { require_auth = true, mask = true } = 
   return client.get(v1PatientReadEndpoint(patient_id), { require_auth, mask }, withPatientV1Base());
 };
 
+const extractListData = (payload) =>
+  Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload?.data)
+      ? payload.data
+      : Array.isArray(payload?.results)
+        ? payload.results
+        : Array.isArray(payload?.items)
+          ? payload.items
+          : [];
+
+const toPositiveInteger = (value, fallback = 1) => {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+};
+
+const toNumericValue = (value, parser = Number.parseFloat) => {
+  if (value === '' || value === null || value === undefined) return value;
+  const parsed = parser(value);
+  return Number.isFinite(parsed) ? parsed : value;
+};
+
+const toIsoStringOrValue = (value, fallback = null) => {
+  if (value === '' || value === null || value === undefined) return fallback;
+  return value instanceof Date ? value.toISOString() : value;
+};
+
+const toBoolLike = (value) => {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'number') return value === 1;
+  const normalized = String(value ?? '').trim().toLowerCase();
+  return ['1', 'true', 'yes', 'y', 'after meal'].includes(normalized);
+};
+
+const toFlagString = (value) => (toBoolLike(value) ? '1' : '0');
+
+const normalizeErrorResponse = (res, fallbackMessage = 'Request failed') => {
+  const detail = res?.data?.detail ?? res?.data?.message ?? fallbackMessage;
+  return {
+    ...res,
+    data: {
+      ...(res?.data ?? {}),
+      detail,
+      message: detail,
+    },
+  };
+};
+
+const getAuditMetadata = (data = {}, includeCreateFields = true) => {
+  const timestamp = new Date().toISOString();
+  const base = {
+    UpdatedDateTime: toIsoStringOrValue(data.UpdatedDateTime, timestamp),
+    ModifiedById: String(data.ModifiedById ?? '0'),
+  };
+
+  if (!includeCreateFields) {
+    return base;
+  }
+
+  return {
+    ...base,
+    CreatedDateTime: toIsoStringOrValue(data.CreatedDateTime, timestamp),
+    CreatedById: String(data.CreatedById ?? '0'),
+  };
+};
+
+const getPrescriptionListMapV1 = async ({ forceRefresh = false } = {}) => {
+  if (!forceRefresh && cachedPrescriptionListMap) {
+    return cachedPrescriptionListMap;
+  }
+
+  const res = await client.get(
+    v1PrescriptionListEndpoint,
+    { pageNo: 0, pageSize: 500 },
+    withPatientV1Base(),
+  );
+
+  if (!res.ok) {
+    console.log('[PRESCRIPTION LIST v1][GET]', res.status, res.data);
+    return {};
+  }
+
+  const map = extractListData(res.data).reduce((acc, item) => {
+    const isDeleted = item.IsDeleted === true || item.IsDeleted === '1' || item.IsDeleted === 1;
+    if (isDeleted) {
+      return acc;
+    }
+
+    const id =
+      item.Id ??
+      item.id ??
+      item.PrescriptionListId ??
+      item.prescriptionListId ??
+      item.prescription_list_id;
+    const value = item.Value ?? item.value ?? item.name ?? item.prescriptionName ?? '';
+
+    if (id !== null && id !== undefined) {
+      acc[String(id)] = value;
+    }
+
+    return acc;
+  }, {});
+
+  cachedPrescriptionListMap = map;
+  return map;
+};
+
+const normalizeMedicationRecordV1 = (item = {}, prescriptionListMap = {}) => {
+  const prescriptionListID =
+    item.PrescriptionListId ??
+    item.prescriptionListId ??
+    item.prescription_list_id ??
+    item.prescriptionListID ??
+    null;
+  const administerTime = item.AdministerTime ?? item.administerTime ?? item.administer_time ?? '';
+  const prescriptionName =
+    prescriptionListMap[String(prescriptionListID)] ??
+    item.PrescriptionName ??
+    item.prescriptionName ??
+    item.prescription_name ??
+    '';
+
+  return {
+    medicationID: item.Id ?? item.id ?? item.medicationID ?? item.medication_id ?? null,
+    patientID: item.PatientId ?? item.PatientID ?? item.patientID ?? item.patient_id ?? null,
+    prescriptionListID: prescriptionListID != null ? Number(prescriptionListID) : null,
+    prescriptionName,
+    prescriptionListDesc: prescriptionName,
+    dosage: item.Dosage ?? item.dosage ?? '',
+    administerTime: Array.isArray(administerTime)
+      ? administerTime.filter(Boolean).join(',')
+      : String(administerTime ?? ''),
+    instruction: item.Instruction ?? item.instruction ?? '',
+    startDateTime: item.StartDate ?? item.startDateTime ?? item.startDate ?? null,
+    endDateTime: item.EndDate ?? item.endDateTime ?? item.endDate ?? null,
+    prescriptionRemarks: item.PrescriptionRemarks ?? item.prescriptionRemarks ?? '',
+    createdDateTime: item.CreatedDateTime ?? item.createdDateTime ?? null,
+    updatedDateTime: item.UpdatedDateTime ?? item.updatedDateTime ?? null,
+  };
+};
+
+const buildMedicationPayloadV1 = (patient_id, data = {}, includeCreateFields = true) => ({
+  IsDeleted: data.IsDeleted ?? '0',
+  PatientId: Number(patient_id),
+  PrescriptionListId: toPositiveInteger(
+    data.prescriptionListID ?? data.prescriptionListId ?? data.PrescriptionListId,
+    1,
+  ),
+  AdministerTime: String(data.administerTime ?? data.AdministerTime ?? ''),
+  Dosage: data.dosage ?? data.Dosage ?? '',
+  Instruction: data.instruction ?? data.Instruction ?? '',
+  StartDate: toIsoStringOrValue(data.startDateTime ?? data.startDate ?? data.StartDate),
+  EndDate: toIsoStringOrValue(data.endDateTime ?? data.endDate ?? data.EndDate),
+  PrescriptionRemarks: data.prescriptionRemarks ?? data.PrescriptionRemarks ?? '',
+  ...getAuditMetadata(data, includeCreateFields),
+});
+
 // ---------- Patient Medications (v1) ----------
 const listPatientMedicationsV1 = async (patient_id, params = {}) => {
   if (!patient_id) {
-    return { ok: false, status: 400, data: { detail: 'patient_id is required' } };
+    throw { status: 400, data: { detail: 'patient_id is required', message: 'patient_id is required' } };
   }
 
-  // candidates in order: nested, id-in-path, collection with query
-  const candidates = [
-    { path: `/patients/${patient_id}/medications/`, query: params },
-    { path: `/patient-medications/${patient_id}/`, query: params },
-    { path: `/patient-medications/`,              query: { patient_id, ...params } },
-    { path: `/medications/`,                      query: { patient_id, ...params } },
-    { path: `/medication/`,                       query: { patient_id, ...params } },
-  ];
+  const [res, prescriptionListMap] = await Promise.all([
+    client.get(
+      v1PatientMedicationListEndpoint,
+      { patient_id, pageNo: 0, pageSize: 100, ...params },
+      withPatientV1Base(),
+    ),
+    getPrescriptionListMapV1(),
+  ]);
 
-  for (const c of candidates) {
-    const res = await client.get(c.path, c.query, withPatientV1Base());
-    if (res.ok) {
-      console.log('[MEDS v1] ✅ using', c.path);
-      return res;
-    }
-    // stop early on non-404 (e.g., 401/500) since that’s a real response
-    if (res.status && res.status !== 404) {
-      console.log('[MEDS v1] ❌', c.path, res.status);
-      return res;
-    }
-    console.log('[MEDS v1] 404', c.path);
+  if (!res.ok) {
+    console.log('[MEDICATION v1][GET LIST]', res.status, res.data);
+    throw normalizeErrorResponse(res);
   }
 
-  // nothing matched
-  return { ok: false, status: 404, data: { detail: 'No matching medications endpoint' } };
+  return extractListData(res.data).map((item) => normalizeMedicationRecordV1(item, prescriptionListMap));
 };
 
 
 
-const addPatientMedicationV1 = (patient_id, payload) => {
-  return client.post(v1PatientMedicationsEndpoint(patient_id), payload, withPatientV1Base());
+const addPatientMedicationV1 = async (patient_id, payload) => {
+  const res = await client.post(
+    v1PatientMedicationAddEndpoint,
+    buildMedicationPayloadV1(patient_id, payload, true),
+    withPatientV1Base(),
+  );
+  if (!res.ok) console.log('[MEDICATION v1][POST]', res.status, res.data);
+  return res.ok ? res : normalizeErrorResponse(res);
 };
 
-const updatePatientMedicationV1 = (patient_id, payload) => {
-  // Accept legacy/v1 id keys
+const updatePatientMedicationV1 = async (patient_id, payload) => {
   const med_id = payload.medicationID ?? payload.medication_id ?? payload.id;
-  return client.put(v1PatientMedicationDetailEndpoint(patient_id, med_id), payload, withPatientV1Base());
+  const res = await client.put(
+    v1PatientMedicationUpdateEndpoint(med_id),
+    buildMedicationPayloadV1(patient_id, payload, false),
+    withPatientV1Base(),
+  );
+  if (!res.ok) console.log('[MEDICATION v1][PUT]', res.status, res.data);
+  return res.ok ? res : normalizeErrorResponse(res);
 };
 
-const deletePatientMedicationV1 = ({ patientID, patient_id, medicationID, medication_id, id }) => {
-  const pid = patientID ?? patient_id;
+const deletePatientMedicationV1 = async ({ patientID, patient_id, medicationID, medication_id, id }) => {
   const mid = medicationID ?? medication_id ?? id;
-  return client.delete(v1PatientMedicationDetailEndpoint(pid, mid), {}, withPatientV1Base());
+  const res = await client.delete(
+    v1PatientMedicationDeleteEndpoint(mid),
+    {},
+    withPatientV1Base(),
+  );
+  if (!res.ok) console.log('[MEDICATION v1][DELETE]', res.status, res.data, { patientID, patient_id });
+  return res.ok ? res : normalizeErrorResponse(res);
 };
 
 // ---------- Allergy (v1) ----------
@@ -283,81 +455,89 @@ const deletePatientMobilityV1 = async (patient_id, mobility_id) => {
 };
 
 // ---------- Vitals (v1) ----------
+const normalizeVitalV1 = (item = {}) => ({
+  vitalID: item.Id ?? item.id ?? item.vitalID ?? item.vital_id ?? null,
+  patientID: item.PatientId ?? item.patientID ?? item.patient_id ?? null,
+  temperature: item.Temperature ?? item.temperature ?? '',
+  weight: item.Weight ?? item.weight ?? '',
+  height: item.Height ?? item.height ?? '',
+  systolicBP: item.SystolicBP ?? item.systolicBP ?? item.systolic_bp ?? '',
+  diastolicBP: item.DiastolicBP ?? item.diastolicBP ?? item.diastolic_bp ?? '',
+  heartRate: item.HeartRate ?? item.heartRate ?? item.heart_rate ?? '',
+  spO2: item.SpO2 ?? item.spO2 ?? item.spo2 ?? '',
+  bloodSugarLevel:
+    item.BloodSugarLevel ?? item.bloodSugarLevel ?? item.bloodSugarlevel ?? item.blood_sugar_level ?? '',
+  vitalRemarks: item.VitalRemarks ?? item.vitalRemarks ?? item.vital_remarks ?? '',
+  afterMeal: toBoolLike(item.IsAfterMeal ?? item.afterMeal ?? item.after_meal),
+  createdDateTime: String(item.CreatedDateTime ?? item.createdDateTime ?? item.created_at ?? item.date ?? ''),
+});
+
+const buildVitalPayloadV1 = (patient_id, data = {}, includeCreateFields = true) => ({
+  IsDeleted: data.IsDeleted ?? '0',
+  PatientId: Number(patient_id),
+  IsAfterMeal: toFlagString(data.afterMeal ?? data.IsAfterMeal),
+  Temperature: toNumericValue(data.temperature ?? data.Temperature),
+  SystolicBP: toNumericValue(data.systolicBP ?? data.SystolicBP, Number.parseInt),
+  DiastolicBP: toNumericValue(data.diastolicBP ?? data.DiastolicBP, Number.parseInt),
+  HeartRate: toNumericValue(data.heartRate ?? data.HeartRate, Number.parseInt),
+  SpO2: toNumericValue(data.spO2 ?? data.SpO2, Number.parseInt),
+  BloodSugarLevel: toNumericValue(
+    data.bloodSugarLevel ?? data.bloodSugarlevel ?? data.BloodSugarLevel,
+    Number.parseFloat,
+  ),
+  Height: toNumericValue(data.height ?? data.Height, Number.parseFloat),
+  Weight: toNumericValue(data.weight ?? data.Weight, Number.parseFloat),
+  VitalRemarks: data.vitalRemarks ?? data.VitalRemarks ?? '',
+  ...(includeCreateFields
+    ? { CreatedById: String(data.CreatedById ?? '0'), ModifiedById: String(data.ModifiedById ?? '0') }
+    : {
+        UpdatedDateTime: toIsoStringOrValue(data.UpdatedDateTime, new Date().toISOString()),
+        ModifiedById: String(data.ModifiedById ?? '0'),
+      }),
+});
+
 const listPatientVitalsV1 = async (patient_id, params = {}) => {
   const res = await client.get(
     v1VitalListEndpoint,
-    { patient_id, ...params },
+    { patient_id, pageNo: 0, pageSize: 100, ...params },
     withPatientV1Base()
   );
   if (!res.ok) {
     console.log('[VITAL v1][GET LIST]', res.status, res.data);
-    throw res;
+    throw normalizeErrorResponse(res);
   }
 
-  // normalize: FastAPI -> UI shape already used on the screen
-  const raw = Array.isArray(res.data) ? res.data : res.data?.data ?? [];
-  return raw.map((x) => ({
-    vitalID:           x.vital_id ?? x.id,
-    temperature:       x.temperature ?? null,
-    weight:            x.weight ?? null,
-    height:            x.height ?? null,
-    systolicBP:        x.systolic_bp ?? x.systolicBP ?? null,
-    diastolicBP:       x.diastolic_bp ?? x.diastolicBP ?? null,
-    heartRate:         x.heart_rate ?? x.heartRate ?? null,
-    spO2:              x.spo2 ?? x.SpO2 ?? null,
-    bloodSugarlevel:   x.blood_sugar_level ?? x.bloodSugarlevel ?? null, // keep UI’s key
-    vitalRemarks:      x.vital_remarks ?? x.vitalRemarks ?? '',
-    afterMeal:         x.after_meal ?? x.afterMeal ?? false,
-    createdDateTime:   x.created_at ?? x.createdDateTime ?? x.date ?? null,
-  }));
+  return extractListData(res.data).map(normalizeVitalV1);
 };
 
-const addPatientVitalV1 = (patient_id, data) => {
-  const payload = {
-    patient_id,
-    temperature:        data.temperature,
-    weight:             data.weight,
-    height:             data.height,
-    systolic_bp:        data.systolicBP,
-    diastolic_bp:       data.diastolicBP,
-    heart_rate:         data.heartRate,
-    spo2:               data.spO2,
-    blood_sugar_level:  data.bloodSugarLevel ?? data.bloodSugarlevel,
-    vital_remarks:      data.vitalRemarks,
-    after_meal:         data.afterMeal,
-  };
-  return client.post(v1VitalAddEndpoint, payload, withPatientV1Base());
+const addPatientVitalV1 = async (patient_id, data) => {
+  const res = await client.post(
+    v1VitalAddEndpoint,
+    buildVitalPayloadV1(patient_id, data, true),
+    withPatientV1Base(),
+  );
+  if (!res.ok) console.log('[VITAL v1][POST]', res.status, res.data);
+  return res.ok ? res : normalizeErrorResponse(res);
 };
 
-const updatePatientVitalV1 = (patient_id, data) => {
-  const payload = {
-    patient_id,
-    temperature:        data.temperature,
-    weight:             data.weight,
-    height:             data.height,
-    systolic_bp:        data.systolicBP,
-    diastolic_bp:       data.diastolicBP,
-    heart_rate:         data.heartRate,
-    spo2:               data.spO2,
-    blood_sugar_level:  data.bloodSugarLevel ?? data.bloodSugarlevel,
-    vital_remarks:      data.vitalRemarks,
-    after_meal:         data.afterMeal,
-  };
-  return client.put(v1VitalUpdateEndpoint(data.vitalID), payload, withPatientV1Base());
+const updatePatientVitalV1 = async (patient_id, data) => {
+  const res = await client.put(
+    v1VitalUpdateEndpoint(data.vitalID),
+    buildVitalPayloadV1(patient_id, data, false),
+    withPatientV1Base(),
+  );
+  if (!res.ok) console.log('[VITAL v1][PUT]', res.status, res.data);
+  return res.ok ? res : normalizeErrorResponse(res);
 };
 
 const deletePatientVitalV1 = async (vital_id) => {
-  // Try query param first (most common). If backend needs JSON body for DELETE, try again with `data`.
-  let res = await client.delete(v1VitalDeleteEndpoint, { vital_id }, withPatientV1Base());
-  if (!res.ok) {
-    res = await client.delete(
-      v1VitalDeleteEndpoint,
-      {},
-      { baseURL: PATIENT_V1_BASE, timeout: 15000, data: { vital_id } }
-    );
-  }
+  const res = await client.delete(
+    v1VitalDeleteEndpoint,
+    {},
+    { baseURL: PATIENT_V1_BASE, timeout: 15000, data: { Id: vital_id } }
+  );
   if (!res.ok) console.log('[VITAL v1][DELETE]', res.status, res.data);
-  return res;
+  return res.ok ? res : normalizeErrorResponse(res);
 };
 
 // ---------- Problem Logs (v1) ----------
@@ -433,53 +613,108 @@ const deletePatientMedicalHistoryV1 = async (patient_id, hx_id) => {
 };
 
 // ---------- Prescriptions (v1) ----------
-const v1PatientPrescriptionsEndpoint = (patient_id) => `/patients/${patient_id}/prescriptions/`;
-const v1PatientPrescriptionDetailEndpoint = (patient_id, presc_id) => `/patients/${patient_id}/prescriptions/${presc_id}/`;
+const statusToIsChronic = (status) =>
+  ['chronic', 'long term', 'long_term'].includes(String(status ?? '').trim().toLowerCase());
+
+const isChronicToStatus = (value) => (toBoolLike(value) ? 'Chronic' : 'Active');
+
+const normalizePrescriptionV1 = (item = {}, prescriptionListMap = {}) => {
+  const prescriptionListID =
+    item.PrescriptionListId ??
+    item.prescriptionListID ??
+    item.prescription_list_id ??
+    item.prescriptionListId ??
+    null;
+  const status = item.Status ?? item.status ?? item.prescriptionStatus ?? null;
+  const prescriptionListDesc =
+    prescriptionListMap[String(prescriptionListID)] ??
+    item.prescriptionListDesc ??
+    item.prescription_list_desc ??
+    item.PrescriptionName ??
+    item.prescriptionName ??
+    '';
+
+  return {
+    prescriptionID: item.Id ?? item.id ?? item.prescriptionID ?? item.prescription_id ?? null,
+    patientID: item.PatientId ?? item.PatientID ?? item.patientID ?? item.patient_id ?? null,
+    prescriptionListID: prescriptionListID != null ? Number(prescriptionListID) : null,
+    dosage: item.Dosage ?? item.dosage ?? '',
+    frequencyPerDay: toPositiveInteger(item.FrequencyPerDay ?? item.frequencyPerDay ?? item.frequency_per_day, 1),
+    isChronic: statusToIsChronic(status ?? item.is_chronic ?? item.isChronic),
+    status: status ?? isChronicToStatus(item.isChronic),
+    instruction: item.Instruction ?? item.instruction ?? '',
+    startDate: item.StartDate ?? item.startDate ?? item.start_date ?? null,
+    endDate: item.EndDate ?? item.endDate ?? item.end_date ?? null,
+    afterMeal: toBoolLike(item.IsAfterMeal ?? item.afterMeal ?? item.after_meal),
+    prescriptionRemarks: item.PrescriptionRemarks ?? item.prescriptionRemarks ?? item.prescription_remarks ?? '',
+    prescriptionListDesc,
+    date: item.CreatedDateTime ?? item.createdDateTime ?? item.created_at ?? item.date ?? null,
+  };
+};
+
+const buildPrescriptionPayloadV1 = (patient_id, data = {}, includeCreateFields = true) => ({
+  IsDeleted: data.IsDeleted ?? '0',
+  PatientId: Number(patient_id),
+  PrescriptionListId: toPositiveInteger(
+    data.prescriptionListID ?? data.prescriptionListId ?? data.PrescriptionListId,
+    1,
+  ),
+  Dosage: data.dosage ?? data.Dosage ?? '',
+  FrequencyPerDay: toPositiveInteger(data.frequencyPerDay ?? data.FrequencyPerDay, 1),
+  Instruction: data.instruction ?? data.Instruction ?? '',
+  StartDate: toIsoStringOrValue(data.startDate ?? data.StartDate),
+  EndDate: toIsoStringOrValue(data.endDate ?? data.EndDate),
+  IsAfterMeal: toFlagString(data.afterMeal ?? data.IsAfterMeal),
+  PrescriptionRemarks: data.prescriptionRemarks ?? data.PrescriptionRemarks ?? '',
+  Status: data.Status ?? isChronicToStatus(data.isChronic),
+  ...getAuditMetadata(data, includeCreateFields),
+});
 
 const listPatientPrescriptionsV1 = async (patient_id) => {
-  const res = await client.get(v1PatientPrescriptionsEndpoint(patient_id), {}, withPatientV1Base());
+  const [res, prescriptionListMap] = await Promise.all([
+    client.get(
+      v1PatientPrescriptionListEndpoint,
+      { patient_id, pageNo: 0, pageSize: 100 },
+      withPatientV1Base(),
+    ),
+    getPrescriptionListMapV1(),
+  ]);
   if (!res.ok) console.log('[PRESCRIPTION v1][GET LIST]', res.status, res.data);
-  return res;
+  if (!res.ok) {
+    throw normalizeErrorResponse(res);
+  }
+  return extractListData(res.data).map((item) => normalizePrescriptionV1(item, prescriptionListMap));
 };
 
 const addPatientPrescriptionV1 = async (patient_id, data) => {
-  const payload = {
-    prescription_list_id: data.prescriptionListID ?? 1,
-    dosage: data.dosage ?? '',
-    frequency_per_day: Number(data.frequencyPerDay) ?? 1,
-    is_chronic: data.isChronic ?? false,
-    instruction: data.instruction ?? '',
-    start_date: data.startDate ?? null,
-    end_date: data.endDate ?? null,
-    after_meal: data.afterMeal ?? false,
-    prescription_remarks: data.prescriptionRemarks ?? '',
-  };
-  const res = await client.post(v1PatientPrescriptionsEndpoint(patient_id), payload, withPatientV1Base());
+  const payload = buildPrescriptionPayloadV1(patient_id, data, true);
+  const res = await client.post(
+    v1PatientPrescriptionAddEndpoint,
+    payload,
+    withPatientV1Base(),
+  );
   if (!res.ok) console.log('[PRESCRIPTION v1][POST]', res.status, payload, res.data);
-  return res;
+  return res.ok ? res : normalizeErrorResponse(res);
 };
 
 const updatePatientPrescriptionV1 = async (patient_id, presc_id, data) => {
-  const payload = {
-    prescription_list_id: data.prescriptionListID ?? 1,
-    dosage: data.dosage ?? '',
-    frequency_per_day: Number(data.frequencyPerDay) ?? 1,
-    is_chronic: data.isChronic ?? false,
-    instruction: data.instruction ?? '',
-    start_date: data.startDate ?? null,
-    end_date: data.endDate ?? null,
-    after_meal: data.afterMeal ?? false,
-    prescription_remarks: data.prescriptionRemarks ?? '',
-  };
-  const res = await client.patch(v1PatientPrescriptionDetailEndpoint(patient_id, presc_id), payload, withPatientV1Base());
-  if (!res.ok) console.log('[PRESCRIPTION v1][PATCH]', res.status, payload, res.data);
-  return res;
+  const res = await client.put(
+    v1PatientPrescriptionUpdateEndpoint(presc_id),
+    buildPrescriptionPayloadV1(patient_id, data, false),
+    withPatientV1Base(),
+  );
+  if (!res.ok) console.log('[PRESCRIPTION v1][PUT]', res.status, res.data);
+  return res.ok ? res : normalizeErrorResponse(res);
 };
 
-const deletePatientPrescriptionV1 = async (patient_id, presc_id) => {
-  const res = await client.delete(v1PatientPrescriptionDetailEndpoint(patient_id, presc_id), {}, withPatientV1Base());
+const deletePatientPrescriptionV1 = async (_patient_id, presc_id) => {
+  const res = await client.delete(
+    v1PatientPrescriptionDeleteEndpoint(presc_id),
+    {},
+    withPatientV1Base(),
+  );
   if (!res.ok) console.log('[PRESCRIPTION v1][DELETE]', res.status, res.data);
-  return res;
+  return res.ok ? res : normalizeErrorResponse(res);
 };
 
 

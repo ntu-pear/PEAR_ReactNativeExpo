@@ -19,7 +19,6 @@ export default function useGetSelectionOptions(option) {
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const apiFunction = useApi(listApi.getSelectionOptionList);
-  let extractedObjects = [];
 
   // function to get data from API -> used only when no previous instance is cached.
   const getSelectionOptions = useCallback(async () => {
@@ -33,16 +32,14 @@ export default function useGetSelectionOptions(option) {
         const response = await apiFunction.request(option);
         
         // Handle API failure or empty response gracefully
-        if (!response.ok || !response.data || !response.data.data) {
+        const responseData = response?.data?.data ?? [];
+        if (!response.ok || !Array.isArray(responseData)) {
           setIsError(true);
           setIsLoading(false);
           return;
         }
-        
-        const responseData = response.data.data;
-        // console.log('response data = ');
-        // console.log(responseData);
-        responseData.map((object) => {
+
+        const extractedObjects = responseData.map((object) => {
           /* response have inconsistent key name for ID (e.g: list_RelationshipID, list_EducationID)
              but have consistent position i.e: required value is always in position 0
              after extracting the values(only!) from each object in responseData.
@@ -50,8 +47,7 @@ export default function useGetSelectionOptions(option) {
           const valuesArray = Object.values(object);
           const id = valuesArray[0];
           const value = object.value;
-          const extractedObject = { label: value, value: id };
-          extractedObjects.push(extractedObject);
+          return { label: value, value: id };
         });
         setData(extractedObjects);
         // store the data locally after retrieval

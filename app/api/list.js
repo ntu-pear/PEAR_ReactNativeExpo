@@ -17,6 +17,7 @@ const v1EndpointMap = {
   religion: '/get_religion_types',
   allergy: '/get_allergy_types',
   allergyreaction: '/get_allergy_reaction_types',
+  prescription: '/PrescriptionList',
 };
 
 // Helper for Patient Service v1 base
@@ -45,7 +46,8 @@ const getSelectionOptionList = async (option) => {
     try {
       // Some v1 endpoints are paginated; request a larger page size when using `/get_*` routes.
       const paginationParams = { pageNo: 0, pageSize: 200 };
-      const queryParams = v1Endpoint.startsWith('/get_') ? paginationParams : {};
+      const queryParams =
+        v1Endpoint.startsWith('/get_') || optionKey === 'prescription' ? paginationParams : {};
       const res = await client.get(v1Endpoint, queryParams, withPatientV1Base());
 
       if (res.ok && res.data) {
@@ -76,6 +78,17 @@ const getSelectionOptionList = async (option) => {
               value: item.Value ?? item.value ?? item.name ?? '',
             };
           }
+          if (optionKey === 'prescription') {
+            return {
+              id:
+                item.Id ??
+                item.id ??
+                item.PrescriptionListId ??
+                item.prescriptionListId ??
+                item.prescription_list_id,
+              value: item.Value ?? item.value ?? item.name ?? item.prescriptionName ?? '',
+            };
+          }
 
           return {
             id: item.Id ?? item.id ?? item.patientListLanguageId ?? item.listId,
@@ -86,14 +99,16 @@ const getSelectionOptionList = async (option) => {
         return {
           ok: true,
           data: {
-            data: rawData.map((item) => {
-              const mapped = toLegacyIdValue(item);
-              return {
-                // Use a stable, legacy-ish shape so `useGetSelectionOptions` keeps working.
-                list_ID: mapped.id ?? '',
-                value: mapped.value ?? '',
-              };
-            }),
+            data: rawData
+              .filter((item) => !(item.IsDeleted === true || item.IsDeleted === '1' || item.IsDeleted === 1))
+              .map((item) => {
+                const mapped = toLegacyIdValue(item);
+                return {
+                  // Use a stable, legacy-ish shape so `useGetSelectionOptions` keeps working.
+                  list_ID: mapped.id ?? '',
+                  value: mapped.value ?? '',
+                };
+              }),
           },
         };
       }

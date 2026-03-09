@@ -12,6 +12,7 @@ const {
   updatePatientVitalV1,
   deletePatientVitalV1,
   readPatientV1,
+  normalizePatientV1,
 } = patientApi;
 
 
@@ -40,19 +41,6 @@ import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUn
 import DynamicTable from 'app/components/DynamicTable';
 import PatientVitalItem from 'app/components/PatientVitalItem';
 import AddPatientVitalModalNEW from 'app/components/AddPatientVitalModalNEW';
-
-
-// --- helper: safely extract v1 patient fields ---
-const normalizePatientV1 = (p = {}) => ({
-  patientID: p.id,
-  firstName: p.first_name || '',
-  lastName: p.last_name || '',
-  preferredName: p.preferred_name || '',
-  profilePicture: p.profile_picture || null,
-  isActive: p.is_active ?? true,
-  startDate: p.start_date || null,
-  caregiverName: p.caregiver_name || null,
-});
 
 
 function PatientVitalScreen(props) {
@@ -117,7 +105,7 @@ function PatientVitalScreen(props) {
     diastolicBP: '',
     heartRate: '',
     spO2: '',
-    bloodSugarlevel: '',
+    bloodSugarLevel: '',
     height: '',
     weight: '',
     vitalRemarks: '',
@@ -150,51 +138,17 @@ function PatientVitalScreen(props) {
 
   const getVitalData = async () => {
     if (!patientID) return;
-  
+
     try {
-      const resOrRows = await listPatientVitalsV1(patientID);
-  
-      // Handle both shapes: array or { ok, data, status }
-      let rows;
-      if (Array.isArray(resOrRows)) {
-        rows = resOrRows;
-        setStatusCode(200);
-      } else if (resOrRows?.ok) {
-        const payload = resOrRows.data?.data ?? resOrRows.data ?? [];
-        rows = Array.isArray(payload) ? payload : [];
-        setStatusCode(resOrRows.status ?? 200);
-      } else {
-        throw resOrRows || { status: 500, data: { detail: 'Unknown vitals response' } };
-      }
-  
-      // Normalize + make Date a guaranteed string (prevents .toLowerCase() crash)
-      const normalized = rows.map((x) => ({
-        vitalID: x.vitalID ?? x.id ?? x.vital_id ?? null,
-        temperature: x.temperature ?? x.Temperature ?? '',
-        weight: x.weight ?? x.Weight ?? '',
-        height: x.height ?? x.Height ?? '',
-        systolicBP: x.systolicBP ?? x.SystolicBP ?? x.systolic_bp ?? '',
-        diastolicBP: x.diastolicBP ?? x.DiastolicBP ?? x.diastolic_bp ?? '',
-        heartRate: x.heartRate ?? x.HeartRate ?? x.heart_rate ?? '',
-        spO2: x.spO2 ?? x.SpO2 ?? '',
-        bloodSugarlevel: x.bloodSugarlevel ?? x.bloodSugarLevel ?? x.blood_sugar_level ?? '',
-        vitalRemarks: x.vitalRemarks ?? x.VitalRemarks ?? '',
-        afterMeal: x.afterMeal ?? x.AfterMeal ?? false,
-        createdDateTime: String(
-          x.createdDateTime ??
-          x.CreatedDateTime ??
-          x.created_at ??
-          x.date ??
-          ''
-        ),
-      }));
-  
-      setOriginalVitalData(normalized);
-      setVitalData(normalized);
+      const rows = await listPatientVitalsV1(patientID);
+
+      setOriginalVitalData(rows);
+      setVitalData(rows);
       setIsDataInitialized(true);
       setIsLoading(false);
       setIsError(false);
       setIsRetry(false);
+      setStatusCode(200);
     } catch (e) {
       console.log('Vitals v1 list failed', e?.status, e?.data || e?.message);
       setOriginalVitalData([]);
@@ -244,10 +198,7 @@ function PatientVitalScreen(props) {
     // Create and store the original FormData
     const originalVitalFormData = { ...tempVitalFormData };
 
-    const result = await addPatientVitalV1(patientID, {
-      ...tempVitalFormData,
-      bloodSugarLevel: tempVitalFormData.bloodSugarlevel,
-    });
+    const result = await addPatientVitalV1(patientID, tempVitalFormData);
     
     if (result.ok) {
       console.log('submitted vital data', tempVitalFormData);
@@ -255,7 +206,7 @@ function PatientVitalScreen(props) {
       setIsModalVisible(false);
       alertTitle = 'Successfully added vital data';
     } else {
-      const errors = result.data?.message;
+      const errors = result.data?.message || result.data?.detail;
 
       result.data
         ? (alertDetails = `\n${errors}\n\nPlease try again.`)
@@ -282,18 +233,14 @@ function PatientVitalScreen(props) {
   const handleModalSubmitEdit = async () => {
     setIsLoading(true);
 
-    // FIX: drop undefined userID param; map bloodSugarlevel -> bloodSugarLevel
-    const result = await updatePatientVitalV1(patientID, {
-      ...vitalFormData,
-      bloodSugarLevel: vitalFormData.bloodSugarlevel,
-    });
+    const result = await updatePatientVitalV1(patientID, vitalFormData);
     
     if (result.ok) {
       refreshVitalData();
       setIsModalVisible(false);
       Alert.alert('Success', 'Vital updated successfully');
     } else {
-      Alert.alert('Error', 'Failed to update vital');
+      Alert.alert('Error', result.data?.message || result.data?.detail || 'Failed to update vital');
     }
 
     setIsLoading(false);
@@ -317,7 +264,7 @@ function PatientVitalScreen(props) {
         `diastolicBP: ${tempData.diastolicBP} mmHg\n` +
         `heartRate: ${tempData.heartRate} bpm \n` +
         `spO2: ${tempData.spO2}% \n` +
-        `bloodSugarLevel: ${tempData.bloodSugarlevel} mg/dL \n` +
+        `bloodSugarLevel: ${tempData.bloodSugarLevel} mmol/L \n` +
         `vitalRemarks: ${tempData.vitalRemarks}\n` +
         `afterMeal: ${tempData.afterMeal}\n` +
         `Created: ${formatDate(new Date(tempData.createdDateTime), true)}`,
@@ -346,7 +293,7 @@ function PatientVitalScreen(props) {
 
       alertTitle = 'Successfully deleted vital';
     } else {
-      const errors = result.data?.message;
+      const errors = result.data?.message || result.data?.detail;
       console.log('Error deleting vital', result);
 
       result.data
@@ -357,6 +304,7 @@ function PatientVitalScreen(props) {
     }
 
     Alert.alert(alertTitle, alertDetails);
+    setIsLoading(false);
   };
 
   // Navigate to patient profile on click profile image
@@ -376,7 +324,7 @@ function PatientVitalScreen(props) {
         item.diastolicBP,
         item.heartRate,
         item.spO2,
-        item.bloodSugarlevel,
+        item.bloodSugarLevel,
         item.height,
         item.weight,
         item.vitalRemarks,
@@ -495,7 +443,7 @@ function PatientVitalScreen(props) {
                       diastolicBP={item.diastolicBP}
                       heartRate={item.heartRate}
                       spO2={item.spO2}
-                      bloodSugarlevel={item.bloodSugarlevel}
+                      bloodSugarLevel={item.bloodSugarLevel}
                       vitalRemarks={item.vitalRemarks}
                       afterMeal={item.afterMeal}
                       createdDateTime={item.createdDateTime}

@@ -18,7 +18,7 @@ const PatientVitalItem = ({
   diastolicBP,
   heartRate,
   spO2,
-  bloodSugarlevel,
+  bloodSugarLevel,
   vitalRemarks,
   createdDateTime,
   afterMeal,
@@ -37,7 +37,7 @@ const PatientVitalItem = ({
         <TextRow label="Diastolic BP" value={`${diastolicBP} mmHg`} />
         <TextRow label="Heart Rate" value={`${heartRate} bpm`} />
         <TextRow label="SpO2" value={`${spO2}%`} />
-        <TextRow label="Blood Sugar" value={`${bloodSugarlevel} mg/dL`} />
+        <TextRow label="Blood Sugar" value={`${bloodSugarLevel} mmol/L`} />
         <TextRow label="Height" value={`${height} cm`} />
         <TextRow label="Weight" value={`${weight} kg`} />
         <TextRow label="After Meal" value={afterMeal ? 'Yes' : 'No'} />

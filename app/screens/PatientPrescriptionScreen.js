@@ -138,24 +138,22 @@ function PatientPrescriptionScreen(props) {
   // Get prescription data from backend
   const getPrescriptionData = async () => {
     if (patientID) {
-      const response = await patientApi.listPatientPrescriptionsV1(patientID);
-      
-      if (response.ok) {
-        console.log(response.data.data);
-        setOriginalPrescriptionData([...response.data.data]);
-        setPrescriptionData(parsePrescriptionData([...response.data.data]));
+      try {
+        const rows = await patientApi.listPatientPrescriptionsV1(patientID);
+        setOriginalPrescriptionData([...rows]);
+        setPrescriptionData(parsePrescriptionData([...rows]));
         setIsDataInitialized(true);
         setIsLoading(false);
         setIsError(false);
         setIsRetry(false);
-        setStatusCode(response.status);
-      } else {
-        console.log('Request failed with status code: ', response.status);
+        setStatusCode(200);
+      } catch (error) {
+        console.log('Request failed with status code: ', error?.status);
         setOriginalPrescriptionData([]);
         setPrescriptionData([]);
         setIsLoading(false);
         setIsError(true);
-        setStatusCode(response.status);
+        setStatusCode(error?.status ?? 500);
         setIsRetry(true);
       }
     }
@@ -164,18 +162,18 @@ function PatientPrescriptionScreen(props) {
   // Parse data
   const parsePrescriptionData = (tempData) => {
     return tempData.map((item) => ({
-      prescriptionID: item.prescription_id ?? item.id ?? null,
-      prescriptionListID: item.prescription_list_id ?? item.prescriptionListID ?? null,
+      prescriptionID: item.prescriptionID ?? item.prescription_id ?? item.id ?? null,
+      prescriptionListID: item.prescriptionListID ?? item.prescription_list_id ?? null,
       dosage: item.dosage ?? '',
-      frequencyPerDay: item.frequency_per_day ?? item.frequencyPerDay ?? 1,
-      isChronic: item.is_chronic ?? item.isChronic ?? false,
+      frequencyPerDay: item.frequencyPerDay ?? item.frequency_per_day ?? 1,
+      isChronic: item.isChronic ?? item.is_chronic ?? false,
       instruction: item.instruction ?? '',
-      startDate: item.start_date ?? item.startDate ?? null,
-      endDate: item.end_date ?? item.endDate ?? null,
-      afterMeal: item.after_meal ?? item.afterMeal ?? false,
-      prescriptionRemarks: item.prescription_remarks ?? item.prescriptionRemarks ?? '',
-      prescriptionListDesc: item.prescription_list_desc ?? item.prescriptionListDesc ?? '',
-      date: item.created_at ?? item.date ?? null,
+      startDate: item.startDate ?? item.start_date ?? null,
+      endDate: item.endDate ?? item.end_date ?? null,
+      afterMeal: item.afterMeal ?? item.after_meal ?? false,
+      prescriptionRemarks: item.prescriptionRemarks ?? item.prescription_remarks ?? '',
+      prescriptionListDesc: item.prescriptionListDesc ?? item.prescription_list_desc ?? '',
+      date: item.date ?? item.created_at ?? null,
     }));
   };
   
@@ -184,7 +182,8 @@ function PatientPrescriptionScreen(props) {
     if (patientID) {
       const response = await patientApi.getPatient(patientID);
       if (response.ok) {
-        setPatientData(response.data.data);
+        const rawPatient = response.data?.data ?? response.data ?? {};
+        setPatientData(patientApi.normalizePatientV1(rawPatient));
         setIsError(false);
         setIsRetry(false);
         setStatusCode(response.status);
@@ -221,7 +220,7 @@ function PatientPrescriptionScreen(props) {
 
       alertTitle = 'Successfully added prescription';
     } else {
-      const errors = result.data?.message;
+      const errors = result.data?.message || result.data?.detail;
 
       console.log(result);
 
@@ -275,7 +274,7 @@ function PatientPrescriptionScreen(props) {
 
       alertTitle = 'Successfully edited prescription';
     } else {
-      const errors = result.data?.message;
+      const errors = result.data?.message || result.data?.detail;
       console.log('Error editing prescription');
 
       result.data
@@ -322,8 +321,6 @@ function PatientPrescriptionScreen(props) {
   const deletePrescription = async (prescriptionID) => {
     setIsLoading(true);
 
-    let tempData = { prescriptionID: prescriptionID };
-
     let alertTitle = '';
     let alertDetails = '';
 
@@ -334,7 +331,7 @@ function PatientPrescriptionScreen(props) {
 
       alertTitle = 'Successfully deleted prescription';
     } else {
-      const errors = result.data?.message;
+      const errors = result.data?.message || result.data?.detail;
       console.log('Error deleting prescription', result);
 
       result.data
@@ -462,7 +459,7 @@ function PatientPrescriptionScreen(props) {
           }
           data={prescriptionData}
           keyboardShouldPersistTaps="handled"
-          keyExtractor={(item) => item.prescriptionID}
+          keyExtractor={(item) => String(item.prescriptionID)}
           renderItem={({ item }) => {
             return (
               <Swipeable

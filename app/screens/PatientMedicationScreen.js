@@ -12,6 +12,7 @@ const {
   updatePatientMedicationV1,
   deletePatientMedicationV1,
   readPatientV1,
+  normalizePatientV1,
 } = patientApi;
 
 // Utilities
@@ -74,6 +75,7 @@ function PatientMedicationScreen(props) {
   const [data, setData] = useState([]);
   const [formData, setFormData] = useState({
     medicationID: null,
+    prescriptionListID: 1,
     prescriptionName: '',
     dosage: '',
     administerTime: [],
@@ -106,21 +108,21 @@ function PatientMedicationScreen(props) {
 
   const getMedicationData = async () => {
     if (patientID) {
-      const response = await listPatientMedicationsV1(patientID);
-      if (response.ok) {
-        setOriginalUnparsedData(response.data.data || []);
-        parseMedicationData(response.data.data || []);
+      try {
+        const medications = await listPatientMedicationsV1(patientID);
+        setOriginalUnparsedData(medications);
+        parseMedicationData(medications);
         setIsError(false);
         setIsRetry(false);
-        setStatusCode(response.status);
-      } else {
-        console.log('Request failed with status code: ', response.status);
+        setStatusCode(200);
+      } catch (error) {
+        console.log('Request failed with status code: ', error?.status);
         setOriginalUnparsedData([]);
         setOriginalData([]);
         setData([]);
         setIsError(true);
         setIsRetry(true);
-        setStatusCode(response.status);
+        setStatusCode(error?.status ?? 500);
       }
       setIsLoading(false);
     }
@@ -130,7 +132,8 @@ function PatientMedicationScreen(props) {
     if (patientID) {
       const response = await readPatientV1(patientID);
       if (response.ok) {
-        setPatientData(response.data.data);
+        const rawPatient = response.data?.data ?? response.data ?? {};
+        setPatientData(normalizePatientV1(rawPatient));
         setIsError(false);
         setIsRetry(false);
         setStatusCode(response.status);
@@ -148,7 +151,10 @@ function PatientMedicationScreen(props) {
   const parseMedicationData = (tempData) => {
     const tempMedData = [];
     tempData.forEach((item) => {
-      const medTimes = item.administerTime.split(',');
+      const medTimes = String(item.administerTime ?? '')
+        .split(',')
+        .map((time) => time.trim())
+        .filter(Boolean);
       medTimes.forEach((time) => {
         tempMedData.push({
           medID: item.medicationID,
@@ -183,7 +189,7 @@ function PatientMedicationScreen(props) {
       setIsModalVisible(false);
       Alert.alert('Successfully added medication', 'Medication has been added to the patient.');
     } else {
-      Alert.alert('Error adding medication', result.data?.message || 'Please try again.');
+      Alert.alert('Error adding medication', result.data?.message || result.data?.detail || 'Please try again.');
     }
     setIsLoading(false);
   };
@@ -191,27 +197,30 @@ function PatientMedicationScreen(props) {
   const handleEditMedication = (medID) => {
     setIsModalVisible(true);
     setModalMode('edit');
-    const unparsedMedData = originalUnparsedData.find(
-      (x) => x.medicationID == medID && x.patientID == patientID,
-    );
+    const unparsedMedData = originalUnparsedData.find((x) => x.medicationID == medID);
     if (!unparsedMedData) {
       Alert.alert('Medication not found', 'Please refresh and try again.');
       return;
     }
     setFormData({
       medicationID: unparsedMedData.medicationID,
+      prescriptionListID: unparsedMedData.prescriptionListID ?? 1,
       prescriptionName: unparsedMedData.prescriptionName,
       dosage: unparsedMedData.dosage,
       administerTime: admStrToTime(unparsedMedData.administerTime),
       instruction: unparsedMedData.instruction,
-      startDateTime: new Date(unparsedMedData.startDateTime),
-      endDateTime: new Date(unparsedMedData.endDateTime),
+      startDateTime: new Date(unparsedMedData.startDateTime ?? Date.now()),
+      endDateTime: new Date(unparsedMedData.endDateTime ?? Date.now()),
       prescriptionRemarks: unparsedMedData.prescriptionRemarks,
     });
   };
 
-  const admStrToTime = (admStr) =>
-    admStr.split(',').map((item) => new Date(convertTimeMilitary(item)));
+  const admStrToTime = (admStr = '') =>
+    String(admStr)
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .map((item) => new Date(convertTimeMilitary(item)));
 
   const handleModalSubmitEdit = async () => {
     setIsLoading(true);
@@ -223,15 +232,13 @@ function PatientMedicationScreen(props) {
       setIsModalVisible(false);
       Alert.alert('Successfully edited medication');
     } else {
-      Alert.alert('Error editing medication', result.data?.message || 'Please try again.');
+      Alert.alert('Error editing medication', result.data?.message || result.data?.detail || 'Please try again.');
     }
     setIsLoading(false);
   };
 
   const handleDeleteMedication = (medID) => {
-    const unparsedMedData = originalUnparsedData.find(
-      (x) => x.medicationID == medID && x.patientID == patientID,
-    );
+    const unparsedMedData = originalUnparsedData.find((x) => x.medicationID == medID);
     if (!unparsedMedData) return;
 
     Alert.alert(
@@ -252,7 +259,7 @@ function PatientMedicationScreen(props) {
       setIsModalVisible(false);
       Alert.alert('Successfully deleted medication', 'Medication has been removed from the patient.');
     } else {
-      Alert.alert('Error deleting medication', result.data?.message || 'Please try again.');
+      Alert.alert('Error deleting medication', result.data?.message || result.data?.detail || 'Please try again.');
     }
     setIsLoading(false);
   };

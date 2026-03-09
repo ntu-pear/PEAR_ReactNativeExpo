@@ -18,6 +18,7 @@ import {
   formatTimeHM24,
 } from 'app/utility/miscFunctions';
 import AddEditModal from './AddEditModal';
+import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
 function AddPatientMedicationModal({
   showModal,
@@ -27,6 +28,8 @@ function AddPatientMedicationModal({
   onClose,
   onSubmit,
 }) {
+  const { data: prescriptionOptions } = useGetSelectionOptions('Prescription');
+
   // Screen error state: This = true when the child components report error(input fields)
   // Enables use of dynamic rendering of components when the page error = true/false.
   const [isInputErrors, setIsInputErrors] = useState(false);
@@ -69,6 +72,7 @@ function AddPatientMedicationModal({
   const resetForm = () => {
     setFormData({
       medicationID: null,
+      prescriptionListID: 1,
       prescriptionName: '',
       dosage: '',
       administerTime: [],
@@ -110,9 +114,11 @@ function AddPatientMedicationModal({
         [field]: newTempTime,
       }));
     } else {
+      const nextValue =
+        field === 'prescriptionListID' ? Number.parseInt(e, 10) : e;
       setFormData((prevState) => ({
         ...prevState,
-        [field]: e,
+        [field]: nextValue,
       }));
     }
   };
@@ -154,13 +160,12 @@ function AddPatientMedicationModal({
       modalTitle="Medication"
       modalContent={
         <>
-          <InputField
+          <SelectionInputField
             isRequired={true}
-            title={'Prescription Name'}
-            value={formData.prescriptionName}
-            onChangeText={handleMedicationData('prescriptionName')}
-            onEndEditing={setIsPrescriptionNameError}
-            autoCapitalize="none"
+            title={'Prescription'}
+            value={formData.prescriptionListID}
+            dataArray={prescriptionOptions}
+            onDataChange={handleMedicationData('prescriptionListID')}
           />
           <InputField
             isRequired={true}
