@@ -1,0 +1,21 @@
+diff --git a/node_modules/react-native-table-component/components/rows.js b/node_modules/react-native-table-component/components/rows.js
+index 40cecc6..46b0dbe 100644
+--- a/node_modules/react-native-table-component/components/rows.js
++++ b/node_modules/react-native-table-component/components/rows.js
+@@ -4,6 +4,7 @@ import { View, Text, StyleSheet } from 'react-native';
+ import { Cell } from './cell';
+ import { sum } from '../utils';
+ 
++
+ export class Row extends Component {
+   static propTypes = {
+     style: PropTypes.object,
+@@ -26,7 +27,7 @@ export class Row extends Component {
+               width={wth}
+               height={height}
+               flex={flex}
+-              textStyle={[cellTextStyle && cellTextStyle(item), textStyle]}
++              textStyle={StyleSheet.flatten([cellTextStyle && cellTextStyle(item), textStyle])}
+               {...props}
+             />
+           );
