@@ -213,10 +213,15 @@ const FilterModalCard = ({
                 ),
               ];
             } else {
-              tempDropdown['filterOptions'][filter] = parseSelectOptions([
+              // Filter out null/undefined/empty values and add "No Caregiver" if any exist
+              const filteredOptionList = tempFilterOptionList.filter((x) => x != null && x !== '');
+              const hasEmptyValues = tempFilterOptionList.length > filteredOptionList.length;
+              const optionsToShow = [
                 'All',
-                ...tempFilterOptionList,
-              ]);
+                ...filteredOptionList,
+                ...(hasEmptyValues ? ['No Caregiver'] : []),
+              ];
+              tempDropdown['filterOptions'][filter] = parseSelectOptions(optionsToShow);
             }
             tempDropdown = initSelectedFilters(tempDropdown, filter, dropdown);
             break;
