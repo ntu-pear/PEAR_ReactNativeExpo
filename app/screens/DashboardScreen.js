@@ -366,9 +366,11 @@ const parseScheduleData = ({ tempPatientInfo, tempSchedule }) => {
 
     for (let j = 0; j < daysOfWeek.length; j++) {
       const day = daysOfWeek[j];
-      const dailyActivities = sched[day] || '';
-      const parsedActivities = parseScheduleString(
-        dailyActivities,
+      const dayScheduleData = sched[day] || '';
+      
+      // Parse JSON-formatted day schedule (new API format)
+      const parsedActivities = parseJsonScheduleDay(
+        dayScheduleData,
         scheduleDate,
         sched['PatientID'],
         sched['Name'] || `${patientData.firstName ?? ''} ${patientData.lastName ?? ''}`,
@@ -464,7 +466,107 @@ const updateSchedule = ({
   };
 
  
-  // Parse schedule of a patient for a specific date
+  // Parse JSON-formatted schedule for a single day
+  // Format: day is a JSON string like: {"09:00-09:30": "Activity", "10:00-10:30": "Activity | Medication..."}
+  const parseJsonScheduleDay = (dayJsonString, scheduleDate, patientID, patientName) => {
+    let scheduleData = [];
+    
+    if (!dayJsonString || typeof dayJsonString !== 'string' || dayJsonString.trim() === '') {
+      return scheduleData;
+    }
+
+    try {
+      // Parse the JSON string to get timeslot-activity pairs
+      const dayScheduleObj = JSON.parse(dayJsonString);
+      
+      Object.entries(dayScheduleObj).forEach(([timeslot, activityString]) => {
+        if (!activityString || typeof activityString !== 'string') {
+          return;
+        }
+
+        // Extract time range from timeslot key (e.g., "09:00-09:30")
+        const [startTimeStr, endTimeStr] = timeslot.split('-');
+        if (!startTimeStr || !endTimeStr) return;
+
+        const [startHour, startMin] = startTimeStr.split(':').map(Number);
+        const [endHour, endMin] = endTimeStr.split(':').map(Number);
+
+        if (isNaN(startHour) || isNaN(startMin) || isNaN(endHour) || isNaN(endMin)) {
+          return;
+        }
+
+        // Create start and end times
+        const startTime = new Date(scheduleDate);
+        startTime.setHours(startHour, startMin, 0, 0);
+        
+        const endTime = new Date(scheduleDate);
+        endTime.setHours(endHour, endMin, 0, 0);
+
+        // Parse activity and medications from the activity string
+        const activitySplit = activityString.split(' | ');
+        const activityTitle = activitySplit[0].trim();
+        
+        let medications = [];
+        if (activitySplit.length > 1) {
+          // Parse medication info: "Give Medication@1330: Ibuprofen(1)**Patient note"
+          const medicationPart = activitySplit[1];
+          
+          try {
+            const medAtIndex = medicationPart.indexOf('@');
+            const medColonIndex = medicationPart.indexOf(': ');
+            const medDoubleAsteriskIndex = medicationPart.indexOf('**');
+            
+            if (medAtIndex !== -1 && medColonIndex !== -1) {
+              // Extract medication time
+              const medTime = medicationPart.substring(medAtIndex + 1, medColonIndex).trim();
+              
+              // Extract medication details
+              let medDetails = medicationPart.substring(medColonIndex + 2);
+              let medNote = '';
+              
+              if (medDoubleAsteriskIndex !== -1) {
+                medNote = medDetails.substring(medDoubleAsteriskIndex + 2).trim();
+                medDetails = medDetails.substring(0, medDoubleAsteriskIndex).trim();
+              }
+              
+              // Parse medication name and dosage
+              const medNameDosageRegex = /(.+?)\((.+?)\)/;
+              const match = medDetails.match(medNameDosageRegex);
+              const medName = match ? match[1].trim() : medDetails.trim();
+              const medDosage = match ? match[2].trim() : '';
+              
+              medications.push({
+                patientID: patientID,
+                patientName: patientName,
+                medID: 0,
+                medName: medName,
+                medDosage: medDosage,
+                medTime: convertTimeMilitary(medTime),
+                medNote: medNote,
+              });
+            }
+          } catch (medError) {
+            console.warn('[Dashboard] Error parsing medication:', medicationPart, medError);
+          }
+        }
+        
+        const activityData = {
+          startTime: startTime,
+          endTime: endTime,
+          activityTitle: activityTitle,
+          medications: medications,
+        };
+        
+        scheduleData.push(activityData);
+      });
+    } catch (parseError) {
+      console.warn('[Dashboard] Error parsing day schedule JSON:', dayJsonString, parseError);
+    }
+    
+    return scheduleData;
+  };
+
+  // Parse schedule of a patient for a specific date (OLD FORMAT - keeping for backward compatibility)
   // Notes:
   // Activity timings range from 9 am to 5 pm
   // Time slot duration is 1 hour
@@ -485,6 +587,11 @@ const updateSchedule = ({
     startTime.setHours(8, 0, 0, 0);
     let endTime = new Date(scheduleDate);
     endTime.setHours(9, 0, 0, 0);
+
+    // Safely handle undefined, null, or non-string values
+    if (!scheduleString || typeof scheduleString !== 'string') {
+      return scheduleData;
+    }
 
     if (scheduleString.length > 0) {
       let timeslotSplit = scheduleString.split('--'); // split by timeslot
