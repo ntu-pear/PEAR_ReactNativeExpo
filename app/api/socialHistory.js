@@ -99,7 +99,7 @@ const addSocialHistory = async (data, { require_auth = true } = {}) => {
   // Get user ID from token directly
   let userId = ''; // backend might need empty string to use token user
   try {
-    const token = await authStorage.getToken('userAuthToken');
+    const token = await authStorage.getToken('userAuthTokenV1');
     if (token) {
       const decoded = jwt_decode(token);
       if (typeof __DEV__ !== 'undefined' && __DEV__) {

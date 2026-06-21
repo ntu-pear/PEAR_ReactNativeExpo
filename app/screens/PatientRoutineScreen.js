@@ -3,8 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { View } from 'native-base';
 
-// Hooks
-import formatDateTime from 'app/hooks/useFormatDateTime.js';
+// API
+import activityApi from 'app/api/activity';
 
 // Components
 import DynamicTable from 'app/components/DynamicTable';
@@ -18,10 +18,14 @@ function PatientRoutineScreen(props) {
   const [tableDataFormated, setTableDataFormated] = useState([]);
   const [patientID, setPatientID] = useState(props.route.params.patientID);
 
-  // Temporarily skip the API until Routine endpoint exists in v1
   const retrieveScreenData = async (id) => {
-    console.log('[Routine] Skipping API call — no v1 endpoint implemented yet.');
-    setTableDataFormated([]); // no data to show
+    const response = await activityApi.getPatientRoutine(id);
+    if (response.ok) {
+      setTableDataFormated(response.data.data || []);
+    } else {
+      console.log('[Routine] Request failed with status code: ', response.status);
+      setTableDataFormated([]);
+    }
     setIsLoading(false);
   };
 
@@ -39,7 +43,7 @@ function PatientRoutineScreen(props) {
 
   useEffect(() => {
     retrieveScreenData(patientID);
-    setWidthData([120, 120, 120, 150, 200, 150, 150]);
+    setWidthData([120, 150, 200, 120, 120, 150, 150]);
   }, [patientID]);
 
   return isLoading ? (

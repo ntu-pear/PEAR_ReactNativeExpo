@@ -1,16 +1,78 @@
 /*eslint eslint-comments/no-unlimited-disable: error */
-import client from 'app/api/client';
+import client, { ACTIVITY_V1_BASE } from 'app/api/client';
 
 /*
  * List all end points here
  */
-const endpoint = '/CentreActivityPreference';
-const patientActivityPreference = `${endpoint}/PatientCentreActivityPreference`;
-const addPatientActivityPreference = `${endpoint}/add`;
-const updatePatientActivityPreference = `${endpoint}/update`;
-const deletePatientActivityPreference = `${endpoint}/delete`;
+const centreActivityPreferences = '/centre_activity_preferences';
+const centreActivities = '/centre_activities';
+const routines = '/routines';
 
-const centreActivity = '/Activity/CentreActivity';
+const withActivityV1Base = (cfg = {}) => ({
+  baseURL: ACTIVITY_V1_BASE,
+  timeout: 15000,
+  ...cfg,
+});
+
+const unwrapArray = (data) => {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.results)) return data.results;
+  if (Array.isArray(data?.items)) return data.items;
+  return [];
+};
+
+const normalizePreference = (pref = {}) => ({
+  CentreActivityPreferenceID:
+    pref.CentreActivityPreferenceID ??
+    pref.centreActivityPreferenceID ??
+    pref.id,
+  centreActivityPreferenceID:
+    pref.centreActivityPreferenceID ??
+    pref.CentreActivityPreferenceID ??
+    pref.id,
+  CentreActivityID:
+    pref.CentreActivityID ??
+    pref.centreActivityID ??
+    pref.centre_activity_id,
+  centreActivityID:
+    pref.centreActivityID ??
+    pref.CentreActivityID ??
+    pref.centre_activity_id,
+  PatientID: pref.PatientID ?? pref.patientID ?? pref.patient_id,
+  patientID: pref.patientID ?? pref.PatientID ?? pref.patient_id,
+  activityTitle:
+    pref.activityTitle ??
+    pref.ActivityTitle ??
+    pref.activity_title ??
+    pref.centre_activity_title ??
+    pref.title ??
+    pref.activity?.title ??
+    'Untitled Activity',
+  isLike: pref.isLike ?? pref.IsLike ?? pref.is_like ?? 0,
+  ...pref,
+});
+
+const normalizeCentreActivity = (activity = {}) => ({
+  CentreActivityID: activity.CentreActivityID ?? activity.centreActivityID ?? activity.id,
+  centreActivityID: activity.centreActivityID ?? activity.CentreActivityID ?? activity.id,
+  activityTitle:
+    activity.activityTitle ??
+    activity.ActivityTitle ??
+    activity.activity_title ??
+    activity.title ??
+    activity.activity?.title ??
+    `Activity ${activity.id ?? ''}`.trim(),
+  ...activity,
+});
+
+const toMobileListResponse = (res, normalizer) => ({
+  ...res,
+  data: {
+    ...(res?.data && !Array.isArray(res.data) ? res.data : {}),
+    data: unwrapArray(res?.data).map(normalizer),
+  },
+});
 
 /*
  * List all functions here
@@ -20,42 +82,96 @@ const centreActivity = '/Activity/CentreActivity';
 // **********************  GET REQUESTS *************************
 
 const getActivityPreference = async (patientID) => {
-  const payload = {
-    patientID: patientID,
-  };
-
-  return client.get(patientActivityPreference, payload);
+  const res = await client.get(
+    `${centreActivityPreferences}/patient/${patientID}`,
+    {},
+    withActivityV1Base(),
+  );
+  return toMobileListResponse(res, normalizePreference);
 };
 
 const getCentreActivities = async () => {
-  return client.get(centreActivity);
+  const res = await client.get(centreActivities, {}, withActivityV1Base());
+  return toMobileListResponse(res, normalizeCentreActivity);
 };
 
 // **********************  POST REQUESTS *************************
 
 const addActivityPreference = async (patientID, data) => {
   const payload = {
-    patientID: patientID,
-    centreActivityID: data.centreActivityID,
-    isLike: data.isLike,
+    patient_id: patientID,
+    centre_activity_id: data.centreActivityID ?? data.CentreActivityID,
+    is_like: data.isLike ?? data.IsLike ?? 0,
+    created_by_id: data.createdById ?? data.CreatedById ?? 'MOBILE',
   };
 
-  return await client.post(addPatientActivityPreference, payload);
+  return await client.post(centreActivityPreferences, payload, withActivityV1Base());
 };
 
 // ************************* UPDATE REQUESTS *************************
 
 const updateActivityPreference = async (data) => {
-  const headers = { 'Content-Type': 'application/json-patch+json' };
+  const id =
+    data.CentreActivityPreferenceID ??
+    data.centreActivityPreferenceID ??
+    data.id;
+  const payload = {
+    id,
+    patient_id: data.PatientID ?? data.patientID ?? data.patient_id,
+    centre_activity_id: data.CentreActivityID ?? data.centreActivityID ?? data.centre_activity_id,
+    is_like: data.IsLike ?? data.isLike ?? data.is_like ?? 0,
+    is_deleted: data.isDeleted ?? data.is_deleted ?? false,
+    modified_by_id: data.modifiedById ?? data.ModifiedById ?? 'MOBILE',
+  };
 
-  return client.put(updatePatientActivityPreference, data, { headers });
+  return client.put(`${centreActivityPreferences}/${id}`, payload, withActivityV1Base());
 };
 
 const deleteActivityPreference = async (data) => {
-  const payload = {
-    centreActivityPreferenceID: data.centreActivityPreferenceID,
-  };
-  return client.put(deletePatientActivityPreference, payload);
+  const id =
+    data.centreActivityPreferenceID ??
+    data.CentreActivityPreferenceID ??
+    data.id;
+  return client.delete(`${centreActivityPreferences}/${id}`, {}, withActivityV1Base());
+};
+
+const convertDayOfWeek = (day) => {
+  const bitmask = Number(day);
+  const days = [
+    { label: 'Monday', bit: 1 },
+    { label: 'Tuesday', bit: 2 },
+    { label: 'Wednesday', bit: 4 },
+    { label: 'Thursday', bit: 8 },
+    { label: 'Friday', bit: 16 },
+    { label: 'Saturday', bit: 32 },
+    { label: 'Sunday', bit: 64 },
+  ];
+
+  if (!Number.isFinite(bitmask)) return String(day ?? '');
+  return days
+    .filter((d) => (bitmask & d.bit) !== 0)
+    .map((d) => d.label)
+    .join(', ');
+};
+
+const normalizeRoutine = (routine = {}) => ({
+  id: routine.id,
+  activityID: routine.activity_id ?? routine.activityID,
+  activityName: routine.name ?? routine.activityName ?? routine.activity?.title ?? '',
+  days: convertDayOfWeek(routine.day_of_week ?? routine.dayOfWeek),
+  startTime: routine.start_time ?? routine.startTime ?? '',
+  endTime: routine.end_time ?? routine.endTime ?? '',
+  startDate: routine.start_date ?? routine.startDate ?? '',
+  endDate: routine.end_date ?? routine.endDate ?? '',
+});
+
+const getPatientRoutine = async (patientID, includeDeleted = false) => {
+  const res = await client.get(
+    `${routines}/patient/${patientID}/`,
+    { include_deleted: includeDeleted },
+    withActivityV1Base(),
+  );
+  return toMobileListResponse(res, normalizeRoutine);
 };
 
 /*
@@ -67,4 +183,5 @@ export default {
   addActivityPreference,
   updateActivityPreference,
   deleteActivityPreference,
+  getPatientRoutine,
 };

@@ -3,6 +3,7 @@ import { useContext } from 'react';
 import client from '../api/client';
 import AuthContext from '../auth/context';
 import authStorage from '../auth/authStorage';
+import userApi from '../api/user';
 
 export default function useApiHandler() {
   const { setUser } = useContext(AuthContext);
@@ -22,7 +23,7 @@ export default function useApiHandler() {
     // === CHANGED: check axios defaults instead of client.headers ===
     const current = getAuthHeader();
     if (!current) {
-      const bearerToken = await authStorage.getToken('userAuthToken');
+      const bearerToken = await authStorage.getToken('userAuthTokenV1');
       if (bearerToken) {
         setAuthHeader(bearerToken);
       } else {
@@ -33,7 +34,7 @@ export default function useApiHandler() {
 
   const setHeader = async () => {
     // === CHANGED: compare against real axios header ===
-    const bearerToken = await authStorage.getToken('userAuthToken');
+    const bearerToken = await authStorage.getToken('userAuthTokenV1');
     const expected = bearerToken ? `Bearer ${bearerToken}` : null;
     const current = getAuthHeader();
 
@@ -61,5 +62,5 @@ export default function useApiHandler() {
     return me;
   };
 
-  return { setHeaderIfEmpty, setHeader };
+  return { setHeaderIfEmpty, setHeader, bootstrapAfterLogin };
 }

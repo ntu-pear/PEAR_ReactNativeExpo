@@ -40,7 +40,7 @@ const getToken = async (key) => {
  * and returning the `user` results [used in app.js]
  */
 const getUser = async () => {
-  const token = await getToken('userAuthToken');
+  const token = await getToken('userAuthTokenV1');
   if (token) {
     const user = jwt_decode(token);
     return user;

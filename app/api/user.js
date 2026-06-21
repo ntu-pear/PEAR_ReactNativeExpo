@@ -227,6 +227,7 @@ export default {
   getUser,
   changePassword,
   logoutUser,
+  updateUser: updateUserV1,
   updateUserV1,
   uploadProfilePicV1,
   getProfilePicV1,

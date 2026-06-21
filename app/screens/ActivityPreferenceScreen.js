@@ -146,7 +146,7 @@ function ActivityPreferenceScreen(props) {
     setIsLoading(true);
     const promiseFunction = async () => {
       await getPatientData();
-      await getPatientActivity();
+      await getPatientActivity(patientID);
     };
     promiseFunction();
   };
@@ -172,7 +172,7 @@ function ActivityPreferenceScreen(props) {
   };
 
   // Get patient activity preferences and mapping
-  const getPatientActivity = async (id) => {
+  const getPatientActivity = async (id = patientID) => {
     const response = await activity.getActivityPreference(id);
     if (!response.ok) {
       console.log('Request failed with status code: ', response.status);

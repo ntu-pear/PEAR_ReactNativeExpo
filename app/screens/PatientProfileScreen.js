@@ -1,5 +1,5 @@
 // Libs
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
 import { Center, VStack, HStack, ScrollView, View } from 'native-base';
 import { useFocusEffect } from '@react-navigation/native';
@@ -14,6 +14,7 @@ import {
 import patientApi from 'app/api/patient';
 import guardianApi from 'app/api/guardian';
 import socialHistoryApi from 'app/api/socialHistory';
+import AuthContext from 'app/auth/context';
 
 // Config
 import colors from 'app/config/colors';
@@ -30,6 +31,7 @@ const defaultProfilePicture = require('app/assets/placeholder.png');
 
 function PatientProfileScreen(props) {
   const { navigation, route } = props;
+  const { user } = useContext(AuthContext) || {};
   const toStr = (v) => (v == null ? '' : String(v));
 
   const logResp = (tag, resp) => {
@@ -141,6 +143,14 @@ function PatientProfileScreen(props) {
   const [isSocialHistoryLoading, setIsSocialHistoryLoading] = useState(true);
   const [isGuardianLoading, setIsGuardianLoading] = useState(true);
   const [patientID, setPatientID] = useState(getPatientIdFromParams(route?.params || {}));
+  const roleName = (user?.roleName || user?.role || '').toUpperCase();
+  const isSupervisor = roleName === 'SUPERVISOR';
+  const isDoctor = roleName === 'DOCTOR';
+  const isGuardian = roleName === 'GUARDIAN';
+  const isCaregiver = roleName === 'CAREGIVER';
+  const canViewRoutine = isSupervisor || isGuardian || isCaregiver;
+  const canManageActivityPreference = isSupervisor;
+  const canViewDoctorNotes = isSupervisor || isDoctor;
 
   const ICON = 28;
   const ICON_SM = 24;
@@ -191,6 +201,9 @@ function PatientProfileScreen(props) {
         const last = pickFirstFrom(p, ['last_name', 'lastName', 'family_name', 'familyName', 'surname']);
         const fullRaw = pickFirstFrom(p, ['name', 'full_name', 'fullName', 'display_name', 'displayName']);
         const full = (nonEmpty(first) && nonEmpty(last)) ? `${first} ${last}`.trim() : fullRaw;
+        const preferred = nonEmpty(
+          pickFirstFrom(p, ['preferredName', 'preferred_name', 'nickname', 'nick_name', 'short_name'])
+        ) || nonEmpty(first) || full;
         // Fallback: derive first/last from preferred or full name if API didn't provide them
         let firstFinal = nonEmpty(first);
         let lastFinal  = nonEmpty(last);
@@ -201,11 +214,6 @@ function PatientProfileScreen(props) {
         firstFinal = parts[0] || '';
         lastFinal  = parts.length > 1 ? parts.slice(1).join(' ') : '';
         }
-
-
-        const preferred = nonEmpty(
-          pickFirstFrom(p, ['preferredName', 'preferred_name', 'nickname', 'nick_name', 'short_name'])
-        ) || nonEmpty(first) || full;
 
         const nric = pickFirstFrom(p, [
           'nric', 'NRIC', 'nric_no', 'national_id', 'nationalId', 'id_no',
@@ -643,20 +651,22 @@ function PatientProfileScreen(props) {
                   routes={routes.PATIENT_MEDICAL_HISTORY}
                   patientProfile={patientProfile}
                 />
-                <PatientProfileCard
-                  vectorIconComponent={
-                    <MaterialCommunityIcons
-                      name="clock"
-                      size={SCREEN_HEIGHT * 0.04}
-                      color={colors.pink}
-                    />
-                  }
-                  testID={`activityRoutine_${patientID}`}
-                  text="Activity Routine"
-                  navigation={navigation}
-                  routes={routes.PATIENT_ROUTINE}
-                  patientProfile={patientProfile}
-                />
+                {canViewRoutine && (
+                  <PatientProfileCard
+                    vectorIconComponent={
+                      <MaterialCommunityIcons
+                        name="clock"
+                        size={SCREEN_HEIGHT * 0.04}
+                        color={colors.pink}
+                      />
+                    }
+                    testID={`activityRoutine_${patientID}`}
+                    text="Activity Routine"
+                    navigation={navigation}
+                    routes={routes.PATIENT_ROUTINE}
+                    patientProfile={patientProfile}
+                  />
+                )}
                 <PatientProfileCard
                   vectorIconComponent={
                     <FontAwesome5
@@ -673,21 +683,23 @@ function PatientProfileScreen(props) {
                 />
               </View>
               <View flexDirection="row" width="100%">
-                <PatientProfileCard
-                  vectorIconComponent={
-                    <MaterialCommunityIcons
-                      name="dumbbell"
-                      size={SCREEN_HEIGHT * 0.04}
-                      color={colors.pink}
-                    />
-                  }
-                  testID={`activityPreference_${patientID}`}
-                  text="Activity Preference"
-                  navigation={navigation}
-                  routes={routes.ACTIVITY_PREFERENCE}
-                  patientProfile={patientProfile}
-                  patientId={patientID}
-                />
+                {canManageActivityPreference && (
+                  <PatientProfileCard
+                    vectorIconComponent={
+                      <MaterialCommunityIcons
+                        name="dumbbell"
+                        size={SCREEN_HEIGHT * 0.04}
+                        color={colors.pink}
+                      />
+                    }
+                    testID={`activityPreference_${patientID}`}
+                    text="Activity Preference"
+                    navigation={navigation}
+                    routes={routes.ACTIVITY_PREFERENCE}
+                    patientProfile={patientProfile}
+                    patientId={patientID}
+                  />
+                )}
                 <PatientProfileCard
                   vectorIconComponent={
                     <MaterialIcons
@@ -732,20 +744,22 @@ function PatientProfileScreen(props) {
                 />
               </View>
               <View flexDirection="row" width="100%">
-                <PatientProfileCard
-                  vectorIconComponent={
-                    <MaterialCommunityIcons
-                      name="doctor"
-                      size={SCREEN_HEIGHT * 0.04}
-                      color={colors.pink}
-                    />
-                  }
-                  testID={`doctorNote_${patientID}`}
-                  text="Doctor's Note"
-                  navigation={navigation}
-                  routes={routes.DOCTORNOTE_SCREEN}
-                  patientProfile={patientProfile}
-                />
+                {canViewDoctorNotes && (
+                  <PatientProfileCard
+                    vectorIconComponent={
+                      <MaterialCommunityIcons
+                        name="doctor"
+                        size={SCREEN_HEIGHT * 0.04}
+                        color={colors.pink}
+                      />
+                    }
+                    testID={`doctorNote_${patientID}`}
+                    text="Doctor's Note"
+                    navigation={navigation}
+                    routes={routes.DOCTORNOTE_SCREEN}
+                    patientProfile={patientProfile}
+                  />
+                )}
                 <PatientProfileCard
                   routes={routes.DOCTORNOTE_SCREEN}
                   navigation={navigation}

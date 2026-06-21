@@ -29,8 +29,9 @@ function ConfigCard(props) {
 
   const checkSchedule = async () => {
     const response = await scheduleAPI.getPatientWeeklySchedule();
+    const scheduleData = response?.data?.data ?? response?.data?.Data ?? response?.data;
 
-    if (response.data.data === null) {
+    if (scheduleData === null) {
       setIsScheduleAvail(false);
     } else {
       setIsScheduleAvail(true);
@@ -69,7 +70,7 @@ function ConfigCard(props) {
 
     switch (checkWeek) {
       case thisWeek:
-        result = await scheduleAPI.generateThisWeek();
+        result = await scheduleAPI.generateScheduleV1();
         break;
 
       case nextWeek:

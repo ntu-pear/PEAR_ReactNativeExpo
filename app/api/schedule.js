@@ -52,6 +52,7 @@ const getPatientWeeklySchedule = async () => {
 export default {
   getScheduleV1,
   generateScheduleV1,
+  generateThisWeek: generateScheduleV1,
   refreshScheduleV1,
   adhocScheduleV1,
   getPatientWeeklySchedule,

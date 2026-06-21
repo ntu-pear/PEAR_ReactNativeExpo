@@ -612,6 +612,160 @@ const uploadPatientProfilePictureV1 = (patient_id, file) => {
 const getPatientStatusCountList = () =>
   client.get('/patient_status_counts/', {}, withPatientV1Base());
 
+// ---------- Patient Personal Photos / Albums (v1) ----------
+const photoAlbumListEndpoint = '/PhotoListAlbum/get_photo_list_albums';
+const personalPhotoEndpoint = '/PersonalPhoto';
+
+const unwrapArray = (data) => {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.results)) return data.results;
+  if (Array.isArray(data?.items)) return data.items;
+  return [];
+};
+
+const normalizeHolidayExperience = (holiday = {}) => {
+  if (!holiday || Object.keys(holiday).length === 0) return null;
+  return {
+    holidayExpID: holiday.holidayExpID ?? holiday.HolidayExpID ?? holiday.id ?? '',
+    countryListID: holiday.countryListID ?? holiday.CountryListID ?? '',
+    country: holiday.country ?? holiday.Country ?? holiday.countryName ?? holiday.CountryName ?? '',
+    startDate: holiday.startDate ?? holiday.StartDate ?? holiday.start_date ?? '',
+    endDate: holiday.endDate ?? holiday.EndDate ?? holiday.end_date ?? '',
+  };
+};
+
+const normalizePhoto = (photo = {}, albumMap = {}) => {
+  const albumCategoryListID =
+    photo.albumCategoryListID ??
+    photo.AlbumCategoryListID ??
+    photo.album_category_list_id;
+  const holidayExperience = normalizeHolidayExperience(
+    photo.holidayExperience ??
+      photo.HolidayExperience ??
+      photo.holiday_experience ??
+      photo.HolidayExperienceDTO,
+  );
+
+  return {
+    patientID: photo.patientID ?? photo.PatientID ?? photo.patient_id,
+    patientPhotoID:
+      photo.patientPhotoID ??
+      photo.PatientPhotoID ??
+      photo.patient_photo_id ??
+      photo.id,
+    photoPath: photo.photoPath ?? photo.PhotoPath ?? photo.photo_path ?? '',
+    albumCategoryName:
+      photo.albumCategoryName ??
+      photo.AlbumCategoryName ??
+      albumMap[String(albumCategoryListID)] ??
+      '',
+    albumCategoryListID,
+    photoDetails: photo.photoDetails ?? photo.PhotoDetails ?? photo.photo_details ?? '',
+    holidayExperience,
+    ...photo,
+  };
+};
+
+const getPhotoListAlbumsV1 = async () => {
+  const res = await client.get(photoAlbumListEndpoint, {}, withPatientV1Base());
+  return {
+    ...res,
+    data: unwrapArray(res.data).map((album) => ({
+      albumCategoryListID:
+        album.albumCategoryListID ??
+        album.AlbumCategoryListID ??
+        album.album_category_list_id ??
+        album.id,
+      albumCategoryName:
+        album.albumCategoryName ??
+        album.AlbumCategoryName ??
+        album.Value ??
+        album.value ??
+        album.name ??
+        '',
+      ...album,
+    })),
+  };
+};
+
+const getPatientPhoto = async (patientID) => {
+  const [photoRes, albumRes] = await Promise.all([
+    client.get(`${personalPhotoEndpoint}/by-patient-id/${patientID}`, {}, withPatientV1Base()),
+    getPhotoListAlbumsV1(),
+  ]);
+
+  const albumMap = {};
+  if (albumRes.ok) {
+    albumRes.data.forEach((album) => {
+      albumMap[String(album.albumCategoryListID)] = album.albumCategoryName;
+    });
+  }
+
+  return {
+    ...photoRes,
+    data: {
+      ...(photoRes.data && !Array.isArray(photoRes.data) ? photoRes.data : {}),
+      data: unwrapArray(photoRes.data).map((photo) => normalizePhoto(photo, albumMap)),
+    },
+  };
+};
+
+const appendFileIfPresent = (form, file) => {
+  if (!file || typeof file === 'string') return;
+  if (file.uri || file.name || file.type) {
+    form.append('file', file);
+  }
+};
+
+const getPhotoRequestParams = (patientID, data = {}) => {
+  const addHoliday = data.HolidayExperienceAddDTO ?? data.holidayExperience;
+  const updateHoliday = data.HolidayExperienceUpdateDTO ?? data.holidayExperience;
+  const holiday = addHoliday ?? updateHoliday ?? {};
+  return {
+    PatientID: patientID,
+    PhotoDetails: data.PhotoDetails ?? data.photoDetails ?? '',
+    AlbumCategoryListID:
+      data.AlbumCategoryListID ??
+      data.albumCategoryListID ??
+      data.AlbumCategoryID ??
+      null,
+    IsHoliday: data.IsHoliday ?? Boolean(addHoliday || updateHoliday),
+    HolidayExpID: holiday.HolidayExpID ?? holiday.holidayExpID,
+    CountryListID: holiday.CountryListID ?? holiday.countryListID,
+    StartDate: holiday.StartDate ?? holiday.startDate,
+    EndDate: holiday.EndDate ?? holiday.endDate,
+  };
+};
+
+const addPatientPhoto = (patientID, data = {}) => {
+  const form = new FormData();
+  appendFileIfPresent(form, data.Photo ?? data.photo ?? data.file);
+  return client.post(`${personalPhotoEndpoint}/upload`, form, {
+    ...withPatientV1Base(),
+    params: getPhotoRequestParams(patientID, data),
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+
+const updatePatientPhoto = (patientID, data = {}) => {
+  const photoID = data.PatientPhotoID ?? data.patientPhotoID ?? data.photoId ?? data.id;
+  const form = new FormData();
+  appendFileIfPresent(form, data.Photo ?? data.photo ?? data.file);
+  return client.put(`${personalPhotoEndpoint}/update/by-photo-id/${photoID}`, form, {
+    ...withPatientV1Base(),
+    params: getPhotoRequestParams(patientID, data),
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+
+const deletePatientPhoto = (data = {}) => {
+  const photoID = data.PatientPhotoID ?? data.patientPhotoID ?? data.photoId ?? data.id;
+  return client.delete(`${personalPhotoEndpoint}/delete/by-photo-id/${photoID}`, {}, withPatientV1Base());
+};
+
+const deletePatientAlbum = deletePatientPhoto;
+
 /*
  * Expose your end points here
  */
@@ -679,4 +833,12 @@ export default {
   // --- v1 Profile Picture ---
   uploadPatientProfilePictureV1,
   getPatientStatusCountList,
+
+  // --- v1 Personal Photos / Albums ---
+  getPhotoListAlbumsV1,
+  getPatientPhoto,
+  addPatientPhoto,
+  updatePatientPhoto,
+  deletePatientPhoto,
+  deletePatientAlbum,
 };
