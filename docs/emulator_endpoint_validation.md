@@ -46,17 +46,12 @@ Authenticated with Supervisor e2e account (`jess@gmail.com`) via prod User Servi
 | Emulator present | Pass |
 | App installed / launch | Pass |
 | Metro status (`/status`) | Pass |
-| Dev-client JS load | **Blocked this session** — app stuck on “Loading from localhost:8081…”; host bundle request also timed out under VPN/dev-client; screenshot: `docs/screenshots/2026-07-20_after_reload.png` |
-| Login → patients → profile → schedule → Activity Overview → notes/routine/photos | **Deferred to next Metro-healthy run** — host path above already green except staging login + recommendations patient path |
+| Dev-client JS load | **Pass** after Metro restart — `Android Bundling complete`; app renders login (screenshot `2026-07-20_post_bundle.png`) |
+| Login request reaches User Service | **Pass** — in-app `POST` hits prod User Service `10.96.188.171:5678` (staging `.185` login still HTTP 500) |
+| Full typed login → patients → … | **Partial** — automated adb text entry mangled email/password (`@`/`.`/`!`); host API path for the same flows is green above |
+| Screenshot set | `docs/screenshots/2026-07-20_*.png` |
 
-Target demo path when Metro connects:
-
-1. Login (Supervisor or Caregiver) via prod User Service workaround
-2. Highlights / Dashboard
-3. Patients → patient profile
-4. Patient schedule (v1 JSON day parser)
-5. Activity Overview — Preferences / Doctor Recommendations / Exclusions
-6. Notes, Routine, Photos
+Manual finish (VPN + Metro already verified): log in as Supervisor (`jess@gmail.com` / e2e password), then walk patients → profile → schedule → Activity Overview → notes/routine/photos.
 
 ## Fixes landed on `cornelius/api-migration`
 

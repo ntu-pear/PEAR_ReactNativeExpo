@@ -12,8 +12,8 @@ Paste-ready for the team minutes spreadsheet / tracker.
 
 ## In progress
 
-- Full in-app emulator walkthrough (login → profile → schedule → Activity Overview → notes/routine/photos) — Metro/dev-client JS load stuck this session after VPN; re-run once Metro connects cleanly.
-- Staging User Service login currently returns HTTP 500; mobile temporarily uses prod User Service for auth so login can proceed when the app loads.
+- Finish manual in-app tap-through on emulator (login → profile → schedule → Activity Overview → notes/routine/photos) — Metro loads; host APIs green; adb typing flaky so UI path needs a human login once.
+- Staging User Service login currently returns HTTP 500; mobile temporarily uses prod User Service for auth.
 
 ## Next week (waiting on web / deferred)
 
