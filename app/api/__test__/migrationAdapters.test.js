@@ -185,6 +185,61 @@ describe('migration API adapters', () => {
     );
   });
 
+  test('activity recommendations fall back to list filter when patient path is missing', async () => {
+    const activityApi = require('app/api/activity').default;
+    mockClient.get
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        data: { detail: 'Not Found' },
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        data: [
+          {
+            id: 3,
+            centre_activity_id: 8,
+            patient_id: 12,
+            doctor_recommendation: 1,
+            doctor_remarks: 'Good for mobility',
+            is_deleted: false,
+          },
+          {
+            id: 4,
+            centre_activity_id: 9,
+            patient_id: 99,
+            doctor_recommendation: -1,
+            doctor_remarks: 'Other patient',
+            is_deleted: false,
+          },
+        ],
+      });
+
+    const response = await activityApi.getActivityRecommendations(12);
+
+    expect(mockClient.get).toHaveBeenNthCalledWith(
+      1,
+      '/centre_activity_recommendations/patient/12',
+      {},
+      expect.objectContaining({ baseURL: 'http://activity-service/api/v1' }),
+    );
+    expect(mockClient.get).toHaveBeenNthCalledWith(
+      2,
+      '/centre_activity_recommendations/',
+      {},
+      expect.objectContaining({ baseURL: 'http://activity-service/api/v1' }),
+    );
+    expect(response.data.data).toHaveLength(1);
+    expect(response.data.data[0]).toEqual(
+      expect.objectContaining({
+        id: 3,
+        centreActivityID: 8,
+        doctorRecommendationLabel: 'Recommended',
+      }),
+    );
+  });
+
   test('activity exclusions fall back to list filter when patient path is missing', async () => {
     const activityApi = require('app/api/activity').default;
     mockClient.get

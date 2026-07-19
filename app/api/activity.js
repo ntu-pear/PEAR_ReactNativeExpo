@@ -232,13 +232,30 @@ const normalizeExclusion = (exclusion = {}) => ({
 });
 
 const getActivityRecommendations = async (patientID) => {
-  const res = await client.get(
+  // Prefer patient-scoped path; fall back to list + filter (web main pattern).
+  const scoped = await client.get(
     `${centreActivityRecommendations}/patient/${patientID}`,
     {},
     withActivityV1Base(),
   );
-  const normalized = toMobileListResponse(res, normalizeRecommendation);
-  normalized.data.data = normalized.data.data.filter((item) => !item.isDeleted);
+
+  if (scoped.ok || (scoped.status && scoped.status !== 404)) {
+    const normalized = toMobileListResponse(scoped, normalizeRecommendation);
+    normalized.data.data = normalized.data.data.filter(
+      (item) =>
+        !item.isDeleted &&
+        String(item.patientID ?? item.patient_id ?? patientID) === String(patientID),
+    );
+    return normalized;
+  }
+
+  const all = await client.get(`${centreActivityRecommendations}/`, {}, withActivityV1Base());
+  const normalized = toMobileListResponse(all, normalizeRecommendation);
+  normalized.data.data = normalized.data.data.filter(
+    (item) =>
+      !item.isDeleted &&
+      String(item.patientID ?? item.patient_id) === String(patientID),
+  );
   return normalized;
 };
 

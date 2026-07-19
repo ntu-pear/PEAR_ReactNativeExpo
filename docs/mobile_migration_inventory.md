@@ -20,9 +20,10 @@ Atlassian's mobile onboarding page states the current focus is migrating mobile 
 | Allergies, vitals, mobility, problem logs, medical history, prescriptions | Mostly migrated | Screens still contain some response-shape assumptions. |
 | Patient allocations and caregiver filters | Mostly migrated | Some legacy patient count behavior remains. |
 | Highlights | Mostly migrated | Uses Patient Service staging shape adapters. |
-| Scheduler read/generate | Mostly migrated | Shared schedule parser now tolerates activity-only slots and malformed medication segments; live re-validation pending on VPN. |
+| Scheduler read/generate | Mostly migrated | Shared `parseScheduleDay()` handles v1 JSON day maps and legacy `--` strings; host schedule GET validated 2026-07-20. |
 | Doctor notes | Mostly migrated | Mobile API now uses Patient Service and normalizes list responses for the existing screen. |
 | Activity preferences | Mostly migrated | Mobile API now uses Activity Service endpoints and preserves existing mobile response shape. |
+| Activity recommendations / exclusions | Migrated (web-parity) | Tablet `PatientActivityOverviewScreen` ports web-main prefs + doctor recommendations + exclusions (no silent mocks). |
 | Routine | Mostly migrated | Screen now calls Activity Service routine endpoint. |
 | Photos and holidays | Mostly migrated | Added `patientApi` methods for photo album/photo list, upload, update, and delete. Holiday metadata is passed through when the backend supports it. |
 | Notifications | Partial | User notification endpoints need live validation and accept/reject confirmation. |
