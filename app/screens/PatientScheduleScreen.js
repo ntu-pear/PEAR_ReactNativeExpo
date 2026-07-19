@@ -29,8 +29,11 @@ import {
   noDataMessage,
   sortFilterInitialState,
   formatDate,
-  convertTimeMilitary,
 } from 'app/utility/miscFunctions';
+import {
+  getScheduleDayValue,
+  parseScheduleDay,
+} from 'app/utility/parseScheduleString';
 
 // Navigation
 import routes from 'app/navigation/routes';
@@ -273,7 +276,7 @@ const parseScheduleData = ({ tempPatientInfo, tempSchedule }) => {
 
   for (let j = 0; j < daysOfWeek.length; j++) {
     const day = daysOfWeek[j];
-    const dailyActivities = matchedSchedule[day] || '';
+    const dailyActivities = getScheduleDayValue(matchedSchedule, day);
 
     const patientDailySchedule = {
       patientID: matchedSchedule['PatientID'],
@@ -286,7 +289,7 @@ const parseScheduleData = ({ tempPatientInfo, tempSchedule }) => {
       patientPreferredName: tempPatientInfo['preferredName'] || '',
       patientCaregiverName:
         tempPatientInfo?.['patientAllocationDTO']?.['caregiverName'] || '',
-      activities: parseScheduleString(
+      activities: parseScheduleDay(
         dailyActivities,
         scheduleDate,
         matchedSchedule['PatientID'],
@@ -303,76 +306,6 @@ const parseScheduleData = ({ tempPatientInfo, tempSchedule }) => {
   setOriginalScheduleWeekly(tempScheduleWeekly);
   setScheduleWeekly(tempScheduleWeekly);
 };
-
-
-  // Parse schedule of a patient for a specific date
-  // Notes:
-  // Activity timings range from 9 am to 5 pm
-  // Time slot duration is 1 hour
-  // '--' represents start of next activity/timeslot
-  // ' | ' represents medication to be administered during a timeslot
-  // '@abcd' represents timing of medication
-  // '**' represents notes/instructions for medication
-  // ', ' represents another medication following
-  // Example input: Breathing+Vital Check | Give Medication@0930: Diphenhydramine(2 tabs)**Always leave at least 4 hours between doses
-  const parseScheduleString = (
-    scheduleString,
-    scheduleDate,
-    patientID,
-    patientName,
-  ) => {
-    let scheduleData = [];
-    let startTime = new Date(scheduleDate);
-    startTime.setHours(8, 0, 0, 0);
-    let endTime = new Date(scheduleDate);
-    endTime.setHours(9, 0, 0, 0);
-
-    if (scheduleString.length > 0) {
-      let timeslotSplit = scheduleString.split('--'); // split by timeslot
-      for (var i = 0; i < timeslotSplit.length; i++) {
-        const activitySplit = timeslotSplit[i].split(' | '); // split to get medication info
-        const activityTitle = activitySplit[0];
-
-        let medications = [];
-        if (activitySplit.length > 1) {
-          let medicationSplit = activitySplit[1].split(', '); // split to get list of medications
-          for (var k = 0; k < medicationSplit.length; k++) {
-            const medicationInfo = medicationSplit[k].split('@')[1]; // spli to get time + medname + notes
-
-            const med = medicationInfo.split(': ')[1].split('**')[0];
-            const medName = med.split('(')[0];
-            const medDosage = med.split('(')[1].split(')')[0];
-            const medTime = medicationInfo.split(':')[0];
-            const medNote = medicationInfo.split('**')[1];
-
-            medications.push({
-              patientID: patientID,
-              patientName: patientName,
-              medID: 0, // to return with API so in future can save administration
-              medName: medName,
-              medDosage: medDosage,
-              medTime: convertTimeMilitary(medTime),
-              medNote: medNote,
-            });
-          }
-        }
-
-        let activityData = {
-          startTime: startTime,
-          endTime: endTime,
-          activityTitle: activityTitle,
-          medications: medications,
-        };
-
-        startTime = new Date(startTime.setHours(startTime.getHours() + 1));
-        endTime = new Date(endTime.setHours(endTime.getHours() + 1));
-
-        scheduleData.push(activityData);
-      }
-    }
-
-    return scheduleData;
-  };
 
   // Get list of activities from patient data
   const getActivityList = (tempWeeklySchedule = originalScheduleWeekly) => {
