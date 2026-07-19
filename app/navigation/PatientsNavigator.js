@@ -15,6 +15,7 @@ import PatientPhotoAlbumScreen from 'app/screens/PatientPhotoAlbumScreen';
 import PatientPhotoGridScreen from 'app/screens/PatientPhotoGridScreen';
 import PatientViewPhotoScreen from 'app/screens/PatientViewPhotoScreen';
 import ActivityPreferenceScreen from 'app/screens/ActivityPreferenceScreen';
+import PatientActivityOverviewScreen from 'app/screens/PatientActivityOverviewScreen';
 import PatientPrescriptionScreen from 'app/screens/PatientPrescriptionScreen';
 import PatientProblemLog from 'app/screens/PatientProblemLogScreen';
 import PatientVitalScreen from 'app/screens/PatientVitalScreen';
@@ -147,6 +148,15 @@ function PatientsNavigator() {
           headerShown: true,
           headerBackTitleVisible: false,
           title: 'Preference',
+        }}
+      />
+      <Stack.Screen
+        name={routes.PATIENT_ACTIVITY_OVERVIEW}
+        component={PatientActivityOverviewScreen}
+        options={{
+          headerShown: true,
+          headerBackTitleVisible: false,
+          title: 'Activity Overview',
         }}
       />
       <Stack.Screen

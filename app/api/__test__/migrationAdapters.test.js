@@ -150,4 +150,94 @@ describe('migration API adapters', () => {
       }),
     );
   });
+
+  test('activity recommendations use Activity Service and normalize labels', async () => {
+    const activityApi = require('app/api/activity').default;
+    mockClient.get.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      data: [
+        {
+          id: 3,
+          centre_activity_id: 8,
+          patient_id: 12,
+          doctor_recommendation: 1,
+          doctor_remarks: 'Good for mobility',
+          is_deleted: false,
+        },
+      ],
+    });
+
+    const response = await activityApi.getActivityRecommendations(12);
+
+    expect(mockClient.get).toHaveBeenCalledWith(
+      '/centre_activity_recommendations/patient/12',
+      {},
+      expect.objectContaining({ baseURL: 'http://activity-service/api/v1' }),
+    );
+    expect(response.data.data[0]).toEqual(
+      expect.objectContaining({
+        id: 3,
+        centreActivityID: 8,
+        doctorRecommendationLabel: 'Recommended',
+        doctorRemarks: 'Good for mobility',
+      }),
+    );
+  });
+
+  test('activity exclusions fall back to list filter when patient path is missing', async () => {
+    const activityApi = require('app/api/activity').default;
+    mockClient.get
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        data: { detail: 'Not Found' },
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        data: [
+          {
+            id: 1,
+            centre_activity_id: 9,
+            patient_id: 12,
+            exclusion_remarks: 'Avoid stairs',
+            start_date: '2026-07-01',
+            end_date: null,
+            is_deleted: false,
+          },
+          {
+            id: 2,
+            centre_activity_id: 10,
+            patient_id: 99,
+            exclusion_remarks: 'Other patient',
+            start_date: '2026-07-01',
+            is_deleted: false,
+          },
+        ],
+      });
+
+    const response = await activityApi.getActivityExclusions(12);
+
+    expect(mockClient.get).toHaveBeenNthCalledWith(
+      1,
+      '/centre_activity_exclusions/patient/12',
+      {},
+      expect.objectContaining({ baseURL: 'http://activity-service/api/v1' }),
+    );
+    expect(mockClient.get).toHaveBeenNthCalledWith(
+      2,
+      '/centre_activity_exclusions/',
+      {},
+      expect.objectContaining({ baseURL: 'http://activity-service/api/v1' }),
+    );
+    expect(response.data.data).toHaveLength(1);
+    expect(response.data.data[0]).toEqual(
+      expect.objectContaining({
+        id: 1,
+        centreActivityID: 9,
+        exclusionRemarks: 'Avoid stairs',
+      }),
+    );
+  });
 });

@@ -150,6 +150,7 @@ function PatientProfileScreen(props) {
   const isCaregiver = roleName === 'CAREGIVER';
   const canViewRoutine = isSupervisor || isGuardian || isCaregiver;
   const canManageActivityPreference = isSupervisor;
+  const canViewActivityOverview = isSupervisor || isCaregiver;
   const canViewDoctorNotes = isSupervisor || isDoctor;
 
   const ICON = 28;
@@ -682,7 +683,24 @@ function PatientProfileScreen(props) {
                   patientId={patientID}
                 />
               </View>
-              <View flexDirection="row" width="100%">
+              <View flexDirection="row" width="100%" flexWrap="wrap">
+                {canViewActivityOverview && (
+                  <PatientProfileCard
+                    vectorIconComponent={
+                      <MaterialCommunityIcons
+                        name="view-list"
+                        size={SCREEN_HEIGHT * 0.04}
+                        color={colors.pink}
+                      />
+                    }
+                    testID={`activityOverview_${patientID}`}
+                    text="Activity Overview"
+                    navigation={navigation}
+                    routes={routes.PATIENT_ACTIVITY_OVERVIEW}
+                    patientProfile={patientProfile}
+                    patientId={patientID}
+                  />
+                )}
                 {canManageActivityPreference && (
                   <PatientProfileCard
                     vectorIconComponent={

@@ -43,6 +43,7 @@ export default Object.freeze({
   PATIENT_PHOTO_GRID: 'PatientPhotoGrid',
   PATIENT_VIEW_PHOTO: 'PatientViewPhoto',
   ACTIVITY_PREFERENCE: 'ActivityPreference',
+  PATIENT_ACTIVITY_OVERVIEW: 'PatientActivityOverview',
   PATIENT_PRESCRIPTION: 'PatientPrescription',
   PATIENT_PROBLEM_LOG: 'PatientProblemLog',
   PATIENT_VITAL: 'PatientVital',

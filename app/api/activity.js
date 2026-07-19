@@ -6,6 +6,8 @@ import client, { ACTIVITY_V1_BASE } from 'app/api/client';
  */
 const centreActivityPreferences = '/centre_activity_preferences';
 const centreActivities = '/centre_activities';
+const centreActivityRecommendations = '/centre_activity_recommendations';
+const centreActivityExclusions = '/centre_activity_exclusions';
 const routines = '/routines';
 
 const withActivityV1Base = (cfg = {}) => ({
@@ -174,6 +176,100 @@ const getPatientRoutine = async (patientID, includeDeleted = false) => {
   return toMobileListResponse(res, normalizeRoutine);
 };
 
+const recommendationLabel = (value) => {
+  const n = Number(value);
+  if (n === 1) return 'Recommended';
+  if (n === -1) return 'Not Recommended';
+  return 'Neutral';
+};
+
+const normalizeRecommendation = (rec = {}) => {
+  const doctorRecommendation =
+    rec.doctor_recommendation ?? rec.doctorRecommendation ?? rec.DoctorRecommendation ?? 0;
+  return {
+    id: rec.id ?? rec.centreActivityRecommendationID ?? rec.CentreActivityRecommendationID,
+    centreActivityID:
+      rec.centre_activity_id ?? rec.centreActivityID ?? rec.CentreActivityID,
+    patientID: rec.patient_id ?? rec.patientID ?? rec.PatientID,
+    doctorID: rec.doctor_id ?? rec.doctorID ?? rec.DoctorID,
+    doctorRecommendation,
+    doctorRecommendationLabel: recommendationLabel(doctorRecommendation),
+    doctorRemarks:
+      rec.doctor_remarks ?? rec.doctorRemarks ?? rec.DoctorRemarks ?? '',
+    activityTitle:
+      rec.activityTitle ??
+      rec.activity_title ??
+      rec.centre_activity_title ??
+      rec.title ??
+      '',
+    isDeleted: Boolean(rec.is_deleted ?? rec.isDeleted),
+    ...rec,
+  };
+};
+
+const normalizeExclusion = (exclusion = {}) => ({
+  id: exclusion.id ?? exclusion.centreActivityExclusionID ?? exclusion.CentreActivityExclusionID,
+  centreActivityID:
+    exclusion.centre_activity_id ??
+    exclusion.centreActivityID ??
+    exclusion.CentreActivityID,
+  patientID: exclusion.patient_id ?? exclusion.patientID ?? exclusion.PatientID,
+  exclusionRemarks:
+    exclusion.exclusion_remarks ??
+    exclusion.exclusionRemarks ??
+    exclusion.ExclusionRemarks ??
+    '',
+  startDate: exclusion.start_date ?? exclusion.startDate ?? exclusion.StartDate ?? '',
+  endDate: exclusion.end_date ?? exclusion.endDate ?? exclusion.EndDate ?? '',
+  activityTitle:
+    exclusion.activityTitle ??
+    exclusion.activity_title ??
+    exclusion.centre_activity_title ??
+    exclusion.title ??
+    '',
+  isDeleted: Boolean(exclusion.is_deleted ?? exclusion.isDeleted),
+  ...exclusion,
+});
+
+const getActivityRecommendations = async (patientID) => {
+  const res = await client.get(
+    `${centreActivityRecommendations}/patient/${patientID}`,
+    {},
+    withActivityV1Base(),
+  );
+  const normalized = toMobileListResponse(res, normalizeRecommendation);
+  normalized.data.data = normalized.data.data.filter((item) => !item.isDeleted);
+  return normalized;
+};
+
+const getActivityExclusions = async (patientID) => {
+  // Prefer patient-scoped path when available; fall back to list + filter (web main pattern).
+  const scoped = await client.get(
+    `${centreActivityExclusions}/patient/${patientID}`,
+    {},
+    withActivityV1Base(),
+  );
+
+  if (scoped.ok || (scoped.status && scoped.status !== 404)) {
+    const normalized = toMobileListResponse(scoped, normalizeExclusion);
+    normalized.data.data = normalized.data.data.filter(
+      (item) =>
+        !item.isDeleted &&
+        String(item.patientID) === String(patientID),
+    );
+    return normalized;
+  }
+
+  const all = await client.get(`${centreActivityExclusions}/`, {}, withActivityV1Base());
+  const normalized = toMobileListResponse(all, normalizeExclusion);
+  normalized.data.data = normalized.data.data.filter(
+    (item) =>
+      !item.isDeleted &&
+      String(item.patientID) === String(patientID),
+  );
+  return normalized;
+};
+
 /*
  * Expose your end points here
  */
@@ -184,4 +280,6 @@ export default {
   updateActivityPreference,
   deleteActivityPreference,
   getPatientRoutine,
+  getActivityRecommendations,
+  getActivityExclusions,
 };
