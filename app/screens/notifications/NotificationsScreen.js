@@ -117,11 +117,18 @@ function NotificationsScreen(props) {
 
   /*
    *   *** Peforms action when Right boundary is opened ***
+   *   Approve / accept — same Action API as NotificationsApprovalRequestScreen.
    */
-  const swipeFromRightOpen = () => {
-    // requiresAction ? filterAndRerender() : null;
-    null;
-    // TODO: Call Accept Notification API
+  const swipeFromRightOpen = async () => {
+    if (selectedId == null) {
+      return;
+    }
+    // Approval-request items use the dedicated screen; keep swipe approve for others.
+    if (requiresAction) {
+      return;
+    }
+    filterAndRerender();
+    await notificationApi.setNotificationAction(selectedId, 'approve');
   };
 
   const filterAndRerender = () => {

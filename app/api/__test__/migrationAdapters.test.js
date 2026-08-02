@@ -295,4 +295,59 @@ describe('migration API adapters', () => {
       }),
     );
   });
+
+  test('notifications list normalizes snake_case fields into mobile shape', async () => {
+    const notificationApi = require('app/api/notification').default;
+    mockClient.get.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      data: {
+        data: {
+          results: [
+            {
+              notification_id: 7,
+              message: 'Please approve allocation',
+              status: null,
+              requires_action: true,
+              sender_name: 'Admin',
+              is_read: false,
+            },
+          ],
+        },
+        next_offset: 1,
+        next_limit: 20,
+      },
+    });
+
+    const response = await notificationApi.getNotificationOfUser(false, 0, 20, '');
+
+    expect(mockClient.get).toHaveBeenCalledWith(
+      '/Notification/User',
+      expect.objectContaining({ offset: 0, limit: 20, readStatus: false }),
+    );
+    expect(response.data.data.results[0]).toEqual(
+      expect.objectContaining({
+        notificationID: 7,
+        message: 'Please approve allocation',
+        requiresAction: true,
+        senderName: 'Admin',
+        readStatus: false,
+      }),
+    );
+    expect(response.data.next_offset).toBe(1);
+  });
+
+  test('notification approve action uses Action endpoint with params', async () => {
+    const notificationApi = require('app/api/notification').default;
+    mockClient.put.mockResolvedValueOnce({ ok: true, status: 200, data: {} });
+
+    const response = await notificationApi.setNotificationAction(7, 'approve');
+
+    expect(mockClient.put).toHaveBeenCalledWith(
+      '/Notification/Action',
+      {},
+      { params: { notificationID: 7, action: 'approve' } },
+    );
+    expect(response.ok).toBe(true);
+  });
 });

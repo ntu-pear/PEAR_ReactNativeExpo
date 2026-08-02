@@ -1,28 +1,46 @@
-# APK Delivery Stretch Path
+# APK Delivery Path
 
-Status: **deferred** until after school reopens (per 6 Jul meeting guidance).
+Status: **internal demo APK available** (2026-08-03).
 
-## Why deferred
+## Artifact
 
-Full APK packaging/signing is stretch work after core web-parity mobile flows are demoable on emulator. Interim report remains ~24 Aug.
+| Item | Value |
+| --- | --- |
+| Build | Local Gradle `assembleRelease` on `cornelius/api-migration` |
+| Output | `android/app/build/outputs/apk/release/app-release.apk` (~30 MB) |
+| Package | `com.pearreactnativeexpo` |
+| Signing | Debug keystore (internal tablet demo only — not Play Store) |
+| Cleartext HTTP | Enabled for `10.96.188.x` staging hosts |
 
-## Prep already in place
+Do **not** commit the APK binary to git. Rebuild locally or share the file out-of-band.
 
-- Branch: `cornelius/api-migration`
-- Emulator package: `com.pearreactnativeexpo` (installed and launchable)
-- Metro + `adb reverse tcp:8081 tcp:8081` for day-to-day validation
-- Jest adapters for schedule parser + activity prefs/recs/exclusions
+## Build steps
 
-## When unblocking APK
+1. Ensure Android SDK path in `android/local.properties` (`sdk.dir=...`) or `ANDROID_HOME`.
+2. From repo root / android:
 
-1. Confirm VPN + staging User/Patient/Activity/Scheduler healthy.
-2. Re-run E2E path in `docs/emulator_endpoint_validation.md`.
-3. Build release APK from Expo/EAS or local Gradle release assemble.
-4. Smoke-test install on a physical tablet without Metro.
-5. Share APK + short install notes with the team.
+```bat
+cd android
+set ANDROID_HOME=%LOCALAPPDATA%\Android\Sdk
+gradlew.bat assembleRelease
+```
 
-## Out of scope until then
+3. Install on emulator/tablet:
 
-- Store submission / Play Console
-- Production certificate rotation
+```bat
+adb install -r android\app\build\outputs\apk\release\app-release.apk
+```
+
+4. Smoke-test **without Metro**: login → patients → one profile card.
+
+## Validated 2026-08-03
+
+- Release APK installed on `emulator-5554` (`adb install -r` Success).
+- App launches to PEAR login screen without Metro (screenshot `docs/screenshots/2026-08-03_release_apk.png`).
+- Host API path for migrated flows validated with staging User login (see `emulator_endpoint_validation.md`).
+
+## Still out of scope
+
+- Play Console / store submission
+- Production signing key rotation
 - Backend ownership of staging outages

@@ -4,10 +4,10 @@ This inventory tracks the remaining migration from legacy/mobile-specific API ca
 
 ## Service Baseline
 
-- User Service: `http://10.96.188.185/api/v1` in `app/api/client.js`.
+- User Service: `http://10.96.188.185/api/v1` in `app/api/client.js` (prod fallback `.171:5678` if staging login fails).
 - Patient Service: `http://10.96.188.180/api/v1` in `app/api/client.js`.
 - Scheduler Service: `http://10.96.188.186:5679` in `app/api/client.js`.
-- Activity Service: not originally configured in mobile; web uses an Activity Service base for routines and activity preferences.
+- Activity Service: `http://10.96.188.186/api/v1` in `app/api/client.js`.
 
 Atlassian's mobile onboarding page states the current focus is migrating mobile services to the new server and fixing functionality broken by that migration. Treat Atlassian docs as supporting context; verify against staging Swagger and app behavior.
 
@@ -26,7 +26,7 @@ Atlassian's mobile onboarding page states the current focus is migrating mobile 
 | Activity recommendations / exclusions | Migrated (web-parity) | Tablet `PatientActivityOverviewScreen` ports web-main prefs + doctor recommendations + exclusions (no silent mocks). |
 | Routine | Mostly migrated | Screen now calls Activity Service routine endpoint. |
 | Photos and holidays | Mostly migrated | Added `patientApi` methods for photo album/photo list, upload, update, and delete. Holiday metadata is passed through when the backend supports it. |
-| Notifications | Partial | User notification endpoints need live validation and accept/reject confirmation. |
+| Notifications | Partial (web also mock) | Mobile wires `/Notification/User` + `/Notification/Action` with normalize + approve/clear/reject UI; User Service OpenAPI has no notification routes (404 on staging) — same gap as web Navbar mocks. |
 | Admin, role, access-level, logger, game therapist surfaces | Web-only for now | Do not port unless product scope changes. |
 
 ## Priority Migration Targets

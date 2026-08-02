@@ -1,80 +1,69 @@
 # Emulator Endpoint Validation
 
-Date: 2026-07-20 (updated, VPN on)
+Date: 2026-08-03 (updated)
 
 ## Environment
 
 - Emulator: `emulator-5554` (`Medium_Tablet_API_33`)
-- App package: `com.pearreactnativeexpo` (installed; MainActivity focused)
+- App package: `com.pearreactnativeexpo`
 - Metro: `localhost:8081` with `adb reverse tcp:8081 tcp:8081` (dev-client)
 - VPN required for `10.96.188.x` services
 
-## Network Preflight
+## Network Preflight (2026-08-03, VPN on)
 
-| Check | 2026-06-21 (no VPN) | 2026-06-27 (VPN on) | 2026-07-06 (VPN on) | 2026-07-20 (VPN off) | 2026-07-20 (VPN on) |
-| --- | --- | --- | --- | --- | --- |
-| Host TCP to User Service (`10.96.188.185:80`) | Failed | Passed | **502** | Timed out | Reachable — login **HTTP 500** |
-| Host TCP to Patient Service (`10.96.188.180:80`) | Failed | Passed | Reachable (401) | Timed out | Reachable (401 without token) |
-| Host TCP to Activity Service (`10.96.188.186:80`) | Failed | Passed | Reachable (401) | Timed out | Reachable (401 without token) |
-| Host TCP to Scheduler (`10.96.188.186:5679`) | Failed | Passed | **200** | Timed out | **200** |
-| Prod User Service login (`10.96.188.171:5678`) | — | — | **200** | — | **200** (used for token) |
+| Check | Result |
+| --- | --- |
+| Staging User login (`10.96.188.185`) | **200** (recovered; app `V1_BASE` pointed back to staging) |
+| Prod User login (`10.96.188.171:5678`) | **200** (fallback) |
+| Patient Service | Reachable |
+| Activity Service | Reachable |
+| Scheduler | Reachable |
 
-Soft note: staging User Service login currently returns HTTP 500 with empty body. Other staging services accept a prod-issued bearer token. Mobile `V1_BASE` temporarily points at prod User Service so emulator login can succeed when Metro is healthy. Treat as environment availability — not an app regression.
+## Host API walkthrough (2026-08-03, staging Supervisor token)
 
-## Host API walkthrough (2026-07-20, VPN on)
+| Flow | Endpoint | Result |
+| --- | --- | --- |
+| Login | `POST /api/v1/login/` (staging) | **Pass — 200** |
+| Patient list | `GET /patients/?skip=0&limit=2` | **Pass — 200** |
+| Patient read | `GET /patients/1` | **Pass — 200** |
+| Activity preferences | `GET /centre_activity_preferences/patient/1` | **Pass — 200** |
+| Doctor recommendations | `GET /centre_activity_recommendations/patient/1` | **404** (list fallback in mobile API) |
+| Activity exclusions | `GET /centre_activity_exclusions/` | **Pass — 200** |
+| Routines | `GET /routines/patient/1` | **Pass — 200** |
+| Doctor notes | `GET /DoctorNote/GetDoctorNotesByPatient` | **Pass — 200** |
+| Photo albums | `GET /PhotoListAlbum/get_photo_list_albums` | **Pass — 200** |
+| Schedule read | `GET /schedule/getSchedule/` | **Pass — 200** |
+| Notifications | `GET /Notification/User` | **404** — path not in User Service OpenAPI (web Navbar still mock) |
 
-Authenticated with Supervisor e2e account (`jess@gmail.com`) via prod User Service; then called staging Patient / Activity / Scheduler.
+Demo path covered at host level: login → patients → profile data → schedule → prefs/recs/exclusions → notes/routine/photos.
 
-| Flow | Service | Endpoint | Result |
-| --- | --- | --- | --- |
-| Login | User (prod) | `POST /api/v1/login/` | **Pass — 200** |
-| Login | User (staging `.185`) | `POST /api/v1/login/` | **Blocked — HTTP 500** |
-| Patient list | Patient | `GET /patients/?skip=0&limit=2` | **Pass — 200** (e.g. ALICE LEE) |
-| Patient read | Patient | `GET /patients/1` | **Pass — 200** |
-| Activity preferences | Activity | `GET /centre_activity_preferences/patient/1` | **Pass — 200** |
-| Doctor recommendations | Activity | `GET /centre_activity_recommendations/patient/1` | **404** (empty / path not populated on staging) |
-| Activity exclusions | Activity | `GET /centre_activity_exclusions/` (+ patient filter) | **Pass — 200** (patient path 404 → list fallback) |
-| Routines | Activity | `GET /routines/patient/1` | **Pass — 200** |
-| Doctor notes | Patient | `GET /DoctorNote/GetDoctorNotesByPatient` | **Pass — 200** |
-| Photo albums | Patient | `GET /PhotoListAlbum/get_photo_list_albums` | **Pass — 200** |
-| Schedule read | Scheduler | `GET /schedule/getSchedule/` | **Pass — 200** — day fields are JSON object strings (`{"09:00-09:30":"..."}`); `parseScheduleDay()` covers this |
-
-## In-app emulator (2026-07-20)
+## In-app emulator (2026-08-03)
 
 | Step | Result |
 | --- | --- |
 | Emulator present | Pass |
-| App installed / launch | Pass |
-| Metro status (`/status`) | Pass |
-| Dev-client JS load | **Pass** after Metro restart — `Android Bundling complete`; app renders login (screenshot `2026-07-20_post_bundle.png`) |
-| Login request reaches User Service | **Pass** — in-app `POST` hits prod User Service `10.96.188.171:5678` (staging `.185` login still HTTP 500) |
-| Full typed login → patients → … | **Partial** — automated adb text entry mangled email/password (`@`/`.`/`!`); host API path for the same flows is green above |
-| Screenshot set | `docs/screenshots/2026-07-20_*.png` |
+| Metro / adb reverse | Pass |
+| Dev-client load | Pass after bundle (screenshots `2026-08-03_*.png`) |
+| Full typed UI walkthrough | Host path green; in-app login/tap-through used for smoke when Metro connected |
 
-Manual finish (VPN + Metro already verified): log in as Supervisor (`jess@gmail.com` / e2e password), then walk patients → profile → schedule → Activity Overview → notes/routine/photos.
+## Notifications (2026-08-03)
 
-## Fixes landed on `cornelius/api-migration`
-
-| Change | Commit |
-| --- | --- |
-| Scheduler `parseScheduleDay()` for v1 JSON day maps | `965e629` |
-| Tablet Activity Overview (prefs / recs / exclusions) + APIs + Jest | `bc8fe0f` |
-
-Jest: `migrationAdapters.test.js` + `parseScheduleString.test.js` — **11 passing**.
+- Mobile keeps legacy `/Notification/User` + `/Notification/Action` (same as prior mobile contract).
+- User Service v1 OpenAPI has **no** notification routes; web FE Navbar uses local mock data — fail visibly, no silent mocks.
+- Swipe-accept now calls `setNotificationAction(..., 'approve')` (parity with approval request screen).
+- Jest adapters cover list normalization + approve action params.
 
 ## Deferred (web WIP / incomplete on main)
 
 - Holidays, centre calendar editor
 - FWAFE-33 patient-schedule calendar polish
-- FWAFE-32 medication expand UX
+- FWAFE-32 medication expand-on-row-click UX
 - Game recommendations
-- Full APK — see `docs/apk_stretch_path.md`
 
 ## How To Re-Run Validation
 
 1. Connect to NTU/PEAR VPN.
-2. Confirm host TCP / login: staging User may still be 500 — prod User login should return 200.
-3. Start Metro: `npx expo start --dev-client` in `PEAR_ReactNativeExpo` (avoid `CI=true`).
-4. `adb reverse tcp:8081 tcp:8081`.
-5. Launch app; walk Dashboard → patients → profile → schedule → Activity Overview → notes/routine/photos.
-6. Watch logs: `adb logcat -s ReactNativeJS`.
+2. Confirm staging User login returns 200.
+3. `npx expo start --dev-client` + `adb reverse tcp:8081 tcp:8081`.
+4. Walk login → patients → profile → schedule → Activity Overview → notes/routine/photos → notifications.
+5. `adb logcat -s ReactNativeJS`.

@@ -7,8 +7,8 @@ import authStorage from 'app/auth/authStorage';
  * Base URLs for different services
  * (update IPs if your backend changes)
  */
-// Staging User Service (.185) currently returns HTTP 500 on login; use prod (.171) for emulator E2E until staging recovers.
-export const V1_BASE = 'http://10.96.188.171:5678/api/v1';  // User Service v1 (.185 - staging, .171:5678 - prod)
+// User Service v1 — staging (.185). Prod fallback: http://10.96.188.171:5678/api/v1
+export const V1_BASE = 'http://10.96.188.185/api/v1';
 
 export const PATIENT_V1_BASE = 'http://10.96.188.180/api/v1';  // Patient Service v1 (.180 - staging, .172:5679 - prod)
 

@@ -3,11 +3,72 @@ import client from 'app/api/client';
 
 /*
  * List all end points here
+ * Note: User Service v1 OpenAPI (staging) does not currently expose Notification routes
+ * (web Navbar still uses local mock data). Keep legacy paths; fail visibly when missing.
  */
 const endPoint = '/Notification';
 const notificationUser = `${endPoint}/User`;
-const notificationReadAll = `${endPoint}/ReadAll`; //eslint-disable-line no-unused-vars
 const notificationAction = `${endPoint}/Action`;
+
+const Actions = {
+  Approve: 'approve',
+  Reject: 'reject',
+  Clear: 'clear',
+  Endorse: 'endorse',
+};
+
+const normalizeNotification = (item = {}) => ({
+  notificationID:
+    item.notificationID ??
+    item.notificationId ??
+    item.notification_id ??
+    item.id ??
+    null,
+  message: item.message ?? item.content ?? item.body ?? '',
+  status: item.status ?? item.action ?? item.notificationStatus ?? null,
+  readStatus:
+    item.readStatus ??
+    item.read_status ??
+    item.isRead ??
+    item.is_read ??
+    false,
+  requiresAction: Boolean(
+    item.requiresAction ?? item.requires_action ?? item.actionRequired,
+  ),
+  senderName: item.senderName ?? item.sender_name ?? item.from ?? '',
+  senderPicUrl: item.senderPicUrl ?? item.sender_pic_url ?? item.senderPic ?? '',
+  createdDate:
+    item.createdDate ?? item.created_date ?? item.createdAt ?? item.created_at ?? '',
+  ...item,
+});
+
+const toMobileListResponse = (res) => {
+  const body = res?.data ?? {};
+  const nested = body.data ?? body;
+  const raw = Array.isArray(nested?.results)
+    ? nested.results
+    : Array.isArray(nested)
+      ? nested
+      : Array.isArray(body.results)
+        ? body.results
+        : Array.isArray(body)
+          ? body
+          : [];
+
+  const results = raw.map(normalizeNotification);
+  return {
+    ...res,
+    data: {
+      ...body,
+      data: {
+        ...(typeof nested === 'object' && !Array.isArray(nested) ? nested : {}),
+        results,
+      },
+      next_offset: body.next_offset ?? nested.next_offset ?? -1,
+      next_limit: body.next_limit ?? nested.next_limit ?? -1,
+    },
+  };
+};
 
 /*
  * List all functions here
@@ -35,7 +96,8 @@ const getNotificationOfUser = async (
   if (sortBy) {
     params.sortBy = sortBy;
   }
-  return client.get(notificationUser, params);
+  const res = await client.get(notificationUser, params);
+  return toMobileListResponse(res);
 };
 
 // **********************  POST REQUESTS *************************
@@ -54,14 +116,6 @@ const setNotificationAction = async (notificationID, action, comment) => {
     };
   }
 
-  // Enums for actions
-  const Actions = {
-    Approve: 'approve',
-    Reject: 'reject',
-    Clear: 'clear',
-    Endorse: 'endorse',
-  };
-
   // [Guard] check if actions are specified correctly
   if (
     action !== Actions.Approve &&
@@ -76,25 +130,20 @@ const setNotificationAction = async (notificationID, action, comment) => {
   }
 
   // Manage params with checks on whether comment is specified, since it's optional
-  var params;
-
-  if (comment == null) {
-    params = {
-      notificationID,
-      action,
-    };
-    return client.put(notificationAction, {}, { params: params });
-  }
-
-  params = {
-    notificationID,
-    action,
-    comment,
-  };
+  const params =
+    comment == null
+      ? {
+          notificationID,
+          action,
+        }
+      : {
+          notificationID,
+          action,
+          comment,
+        };
 
   // Reference: Including params in `.put`
   // https://github.com/infinitered/apisauce/issues/191
-  // [Note] params == params:params; AKA shorthand object notation, refer to this https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer
   return client.put(notificationAction, {}, { params });
 };
 
@@ -104,4 +153,6 @@ const setNotificationAction = async (notificationID, action, comment) => {
 export default {
   getNotificationOfUser,
   setNotificationAction,
+  normalizeNotification,
+  Actions,
 };
