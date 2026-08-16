@@ -181,12 +181,22 @@ function PatientActivityOverviewScreen(props) {
       }
 
       setPreferences(
-        resolveTitles(prefsRes?.data?.data || [], activityMap).filter(
-          (p) => p.CentreActivityID != null || p.centreActivityID != null,
-        ),
+        prefsRes?.ok
+          ? resolveTitles(prefsRes?.data?.data || [], activityMap).filter(
+              (p) => p.CentreActivityID != null || p.centreActivityID != null,
+            )
+          : [],
       );
-      setRecommendations(resolveTitles(recsRes?.data?.data || [], activityMap));
-      setExclusions(resolveTitles(exclRes?.data?.data || [], activityMap));
+      setRecommendations(
+        recsRes?.ok
+          ? resolveTitles(recsRes?.data?.data || [], activityMap)
+          : [],
+      );
+      setExclusions(
+        exclRes?.ok
+          ? resolveTitles(exclRes?.data?.data || [], activityMap)
+          : [],
+      );
       setErrors(nextErrors);
     } catch (e) {
       setErrors(['preferences', 'recommendations', 'exclusions']);
@@ -238,7 +248,9 @@ function PatientActivityOverviewScreen(props) {
 
       <Text fontSize="md" color={MEDIUM} mt={2} mb={1}>
         Condensed view of preferences, doctor recommendations, and exclusions
-        (aligned with web patient activity tabs).
+        (aligned with web patient activity tabs). Caregivers can update
+        preferences here; recommendations and exclusions stay read-only on
+        mobile.
       </Text>
 
       {errors.length > 0 && (
@@ -271,7 +283,13 @@ function PatientActivityOverviewScreen(props) {
 
       <SectionHeader title="Preferences" count={preferences.length} />
       {preferences.length === 0 ? (
-        <EmptyRow message="No activity preferences recorded." />
+        <EmptyRow
+          message={
+            errors.includes('preferences')
+              ? 'Could not load preferences. Pull to refresh.'
+              : 'No activity preferences recorded.'
+          }
+        />
       ) : (
         preferences.map((item) => (
           <ListRow
@@ -285,7 +303,13 @@ function PatientActivityOverviewScreen(props) {
 
       <SectionHeader title="Doctor Recommendations" count={recommendations.length} />
       {recommendations.length === 0 ? (
-        <EmptyRow message="No doctor recommendations for this patient." />
+        <EmptyRow
+          message={
+            errors.includes('recommendations')
+              ? 'Could not load doctor recommendations. Pull to refresh.'
+              : 'No doctor recommendations for this patient.'
+          }
+        />
       ) : (
         recommendations.map((item) => (
           <ListRow
@@ -306,7 +330,13 @@ function PatientActivityOverviewScreen(props) {
 
       <SectionHeader title="Exclusions" count={exclusions.length} />
       {exclusions.length === 0 ? (
-        <EmptyRow message="No activity exclusions for this patient." />
+        <EmptyRow
+          message={
+            errors.includes('exclusions')
+              ? 'Could not load exclusions. Pull to refresh.'
+              : 'No activity exclusions for this patient.'
+          }
+        />
       ) : (
         exclusions.map((item) => (
           <ListRow
@@ -330,7 +360,9 @@ function PatientActivityOverviewScreen(props) {
       <Box mt={4} mb={8}>
         <Text fontSize="xs" color={MEDIUM}>
           Recommendations are read-only on mobile (doctor-managed on web).
-          Preference edits use the existing Preference screen.
+          Preference edits use the existing Preference screen. Creating
+          centre activities, generating schedules, exclusions, and routines
+          stay supervisor-only.
         </Text>
       </Box>
     </ScrollView>

@@ -27,6 +27,7 @@ Atlassian's mobile onboarding page states the current focus is migrating mobile 
 | Routine | Mostly migrated | Screen now calls Activity Service routine endpoint. |
 | Photos and holidays | Mostly migrated | Added `patientApi` methods for photo album/photo list, upload, update, and delete. Holiday metadata is passed through when the backend supports it. |
 | Notifications | Partial (web also mock) | Mobile wires `/Notification/User` + `/Notification/Action` with normalize + approve/clear/reject UI; User Service OpenAPI has no notification routes (404 on staging) — same gap as web Navbar mocks. |
+| Medication administer log | Partial (web-parity confirm) | Extra confirm when clicker is not assigned caregiver; persist via Scheduler `/MedicationSchedule/update/` when today’s slot exists. No silent success. Patient Service still has no administer-event API (latest staging work is guardian NRIC lookup). |
 | Admin, role, access-level, logger, game therapist surfaces | Web-only for now | Do not port unless product scope changes. |
 
 ## Priority Migration Targets

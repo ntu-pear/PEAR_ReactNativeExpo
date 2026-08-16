@@ -40,6 +40,12 @@ const generateScheduleV1 = async () => schedulerClient.get('/schedule/generate/'
 const refreshScheduleV1 = async () => schedulerClient.get('/schedule/regenerate/');
 const adhocScheduleV1 = async (payload) => schedulerClient.put('/schedule/adhoc/', payload);
 
+const getMedicationScheduleV1 = async () =>
+  schedulerClient.get('/MedicationSchedule/get/');
+
+const updateMedicationScheduleV1 = async (payload) =>
+  schedulerClient.put('/MedicationSchedule/update/', payload);
+
 // Wrapper for unified frontend call
 const getPatientWeeklySchedule = async () => {
   console.log('[Scheduler v1] Calling getScheduleV1()...');
@@ -56,4 +62,6 @@ export default {
   refreshScheduleV1,
   adhocScheduleV1,
   getPatientWeeklySchedule,
+  getMedicationScheduleV1,
+  updateMedicationScheduleV1,
 };

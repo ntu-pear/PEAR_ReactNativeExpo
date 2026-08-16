@@ -1,5 +1,11 @@
 // Libs;
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+  useContext,
+} from 'react';
 import { StyleSheet, SectionList, View, Text, Alert } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
@@ -15,6 +21,7 @@ import routes from 'app/navigation/routes';
 // API
 import activity from 'app/api/activity';
 import patientApi from 'app/api/patient';
+import AuthContext from 'app/auth/context';
 
 // Configurations
 import colors from 'app/config/colors';
@@ -36,6 +43,10 @@ function ActivityPreferenceScreen(props) {
 
   const testID = `activity_preference_screen_${patientID}`;
   const navigation = useNavigation();
+  const { user } = useContext(AuthContext) || {};
+  const roleName = (user?.roleName || user?.role || '').toUpperCase();
+  const canManagePreferences =
+    roleName === 'SUPERVISOR' || roleName === 'CAREGIVER';
 
   // Modal and API state
   const [showModal, setShowModal] = useState(false);
@@ -465,11 +476,13 @@ function ActivityPreferenceScreen(props) {
             />
           )}
           <View style={styles.button}>
-            <AddButton
-              title="Edit Activity Preference"
-              onPress={handleAddActivity}
-              iconName="pencil"
-            />
+            {canManagePreferences && (
+              <AddButton
+                title="Edit Activity Preference"
+                onPress={handleAddActivity}
+                iconName="pencil"
+              />
+            )}
             <AddActivityPreferenceModal
               showModal={showModal}
               onClose={() => setShowModal(false)}

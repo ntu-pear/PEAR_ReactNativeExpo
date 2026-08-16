@@ -1,23 +1,24 @@
 // Libs
-import React from 'react';
+import React, { useContext } from 'react';
 import { Text, Icon, View } from 'native-base';
-import { Alert, StyleSheet, Touchable, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 // Configurations
 import colors from 'app/config/colors';
+import AuthContext from 'app/auth/context';
 
 // Utilities
 import {
-  formatDate,
   formatTimeAMPM,
   setTimeToZero,
 } from 'app/utility/miscFunctions';
 import formatDateTime from 'app/hooks/useFormatDateTime.js';
+import { confirmAndLogMedicationAdministration } from 'app/utility/confirmMedicationAdministration';
 import EditDeleteBtn from './EditDeleteBtn';
 
 const MedicationItem = ({
-  medID,
+  medID: _medID,
   patientID,
   patientName,
   medName,
@@ -27,35 +28,28 @@ const MedicationItem = ({
   medStartDate,
   medEndDate,
   medRemarks,
+  caregiverId,
+  tempCaregiverId,
   date = new Date(),
   onEdit,
   onDelete,
 }) => {
+  const { user } = useContext(AuthContext) || {};
   //to check if the medication has ended
   const isMedicationEnded = new Date(medEndDate) < new Date();
 
-  // Get user confirmation to save adminstration status of medication
   const onClickAdminister = () => {
-    Alert.alert(
-      'Confirm medication adminstration',
-      `Patient: ${patientName}\n` +
-        `Medication: ${medName}\n` +
-        `Dosage: ${medDosage}\n` +
-        `Time: ${formatTimeAMPM(medTime)}`,
-      [
-        {
-          text: 'Cancel',
-          onPress: () => {},
-          style: 'cancel',
-        },
-        { text: 'OK', onPress: administerMed },
-      ],
-    );
-  };
-
-  // Save medicine administration
-  const administerMed = () => {
-    () => console.log('Administer');
+    confirmAndLogMedicationAdministration({
+      user,
+      patientID,
+      patientName,
+      medName,
+      medDosage,
+      medTime,
+      caregiverId,
+      tempCaregiverId,
+      formatTime: formatTimeAMPM,
+    });
   };
 
   const canAdminister = () => {

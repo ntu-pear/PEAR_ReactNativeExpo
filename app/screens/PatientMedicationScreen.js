@@ -5,6 +5,7 @@ import { FlatList, View } from 'native-base';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 import patientApi from 'app/api/patient';
+import { confirmAndLogMedicationAdministration } from 'app/utility/confirmMedicationAdministration';
 
 const {
   listPatientMedicationsV1,
@@ -85,6 +86,8 @@ function PatientMedicationScreen(props) {
 
   const [patientData, setPatientData] = useState({});
   const [isScrolling, setIsScrolling] = useState(false);
+  const [assignedCaregiverId, setAssignedCaregiverId] = useState(null);
+  const [tempCaregiverId, setTempCaregiverId] = useState(null);
 
   // Refresh list
   useFocusEffect(
@@ -101,7 +104,21 @@ function PatientMedicationScreen(props) {
     (async () => {
       await getMedicationData();
       await getPatientData();
+      await getAssignedCaregiver();
     })();
+  };
+
+  const getAssignedCaregiver = async () => {
+    if (!patientID || !patientApi.getAllocationMap) return;
+    try {
+      const map = await patientApi.getAllocationMap();
+      const allocation = map?.[String(patientID)] || {};
+      setAssignedCaregiverId(allocation.caregiverId || null);
+      setTempCaregiverId(allocation.tempCaregiverId || null);
+    } catch (error) {
+      setAssignedCaregiverId(null);
+      setTempCaregiverId(null);
+    }
   };
 
   const getMedicationData = async () => {
@@ -288,14 +305,18 @@ function PatientMedicationScreen(props) {
 
   const onClickAdminister = (index) => {
     const tempData = data[index];
-    Alert.alert(
-      'Confirm medication administration',
-      `Patient: ${patientData.preferredName}\nMedication: ${tempData.medName}\nDosage: ${tempData.medDosage}\nTime: ${formatTimeAMPM(tempData.medTime)}`,
-      [{ text: 'Cancel', style: 'cancel' }, { text: 'OK', onPress: administerMed }],
-    );
+    confirmAndLogMedicationAdministration({
+      user,
+      patientID,
+      patientName: patientData.preferredName,
+      medName: tempData.medName,
+      medDosage: tempData.medDosage,
+      medTime: tempData.medTime,
+      caregiverId: assignedCaregiverId,
+      tempCaregiverId,
+      formatTime: formatTimeAMPM,
+    });
   };
-
-  const administerMed = () => console.log('Administer');
 
   return isLoading ? (
     <ActivityIndicator visible />
@@ -385,6 +406,8 @@ function PatientMedicationScreen(props) {
                     medStartDate={item.medStartDate}
                     medEndDate={item.medEndDate}
                     medRemarks={item.medRemarks}
+                    caregiverId={assignedCaregiverId}
+                    tempCaregiverId={tempCaregiverId}
                     onEdit={() => handleEditMedication(item.medID)}
                     onDelete={() => handleDeleteMedication(item.medID)}
                   />

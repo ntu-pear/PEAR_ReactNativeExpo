@@ -165,6 +165,7 @@ describe('Test PatientProfileScreen', () => {
       expect(patientInformationCard).toBeVisible();
 
       expect(patientProfileScreen.getByTestId('activityRoutine_1')).toBeVisible();
+      expect(patientProfileScreen.getByTestId('activityOverview_1')).toBeVisible();
       expect(patientProfileScreen.getByTestId('activityPreference_1')).toBeVisible();
       expect(patientProfileScreen.getByTestId('doctorNote_1')).toBeVisible();
     });
@@ -191,6 +192,7 @@ describe('Test PatientProfileScreen', () => {
       expect(patientInformationCard).toBeVisible();
 
       expect(patientProfileScreen.getByTestId('activityRoutine_1')).toBeVisible();
+      expect(patientProfileScreen.getByTestId('activityOverview_1')).toBeVisible();
       expect(patientProfileScreen.getByTestId('activityPreference_1')).toBeVisible();
       expect(patientProfileScreen.getByTestId('doctorNote_1')).toBeVisible();
     });
@@ -212,6 +214,7 @@ describe('Test PatientProfileScreen', () => {
 
     await waitFor(() => {
       expect(patientProfileScreen.getByTestId('activityRoutine_1')).toBeVisible();
+      expect(patientProfileScreen.getByTestId('activityOverview_1')).toBeVisible();
       expect(patientProfileScreen.queryByTestId('activityPreference_1')).toBeNull();
       expect(patientProfileScreen.queryByTestId('doctorNote_1')).toBeNull();
     });
