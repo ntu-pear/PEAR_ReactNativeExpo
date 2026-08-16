@@ -56,13 +56,43 @@ Patient Service latest fetch (`origin/staging`) is guardian NRIC lookup / guardi
 | Schedule read | `GET /schedule/getSchedule/` | **Pass — 200** |
 | Notifications | `GET /Notification/User` | **404** — path not in User Service OpenAPI (web Navbar still mock) |
 
-## In-app emulator
+## In-app emulator (2026-08-17, release APK, VPN on)
 
-| Step | 2026-08-03 | 2026-08-17 |
-| --- | --- | --- |
-| Emulator present | Pass | Pass (`emulator-5554`) |
-| Metro / adb reverse | Pass | Not required for release APK |
-| Full typed UI walkthrough | Host path green; adb typing flaky | Still needs a human login; host path revalidated |
+Confluence staging Supervisor + Caregiver accounts. Emulator clock was **16 Aug 2026** (Sunday evening); schedule cards are for **17 Aug 2026**. Screenshots under `docs/screenshots/2026-08-17_e2e_*.png`. This is **not** “all E2E passed.”
+
+### Supervisor
+
+| Step | Result |
+| --- | --- |
+| Login → Patients Daily Highlights | **Pass** — ALICE, `Medication: TYLENOL 1 test med` |
+| ALICE Patient Profile | **Pass** — Overview + Preference + Routine + Schedule + Doctor's Note all visible |
+| Activity Overview | **Partial** — prefs (8) load; banner `Some sections could not be loaded: recommendations`; Manage Preferences visible. Activity titles show as `Untitled Activity` |
+| Manage Preferences | **Pass** — 4 liked / 2 neutral / 2 disliked; Edit button visible |
+| Schedule | **Partial** — week cards load (`Mon, 17/08/2026` …) but activity title is raw JSON `{"09:00-09:30": "Free and Easy"}` |
+| See medication | **Partial** — SALBUTAMOL (1) at 09:00 AM; button **Cannot administer today** (device date 16 Aug vs slot 17 Aug). Extra confirm not exercised |
+| Patient Medication list | **Fail/empty** — `No. of medications: 0` / `No medications found`; header shows `undefined undefined` |
+| Doctor notes | **Pass** — 13 notes (`Patient has many problemsN`, 14-APR-2026). Same `undefined undefined` subtitle |
+| Activity Routine | **Fail/empty** — title `Routine`, blank body after 8s wait (host `GET /routines/patient/1` was 200) |
+| Photo Album | **Pass** — albums render; items show `(No photos)` |
+| Notifications tab | **Not verified in-app** — `adb` tap on the tab hit the Android launcher (home), which killed the session |
+
+### Caregiver
+
+| Step | Result |
+| --- | --- |
+| Login → highlights | **Pass** — same ALICE / TYLENOL highlight |
+| My Patients | **Empty** — `No. of patients: 0` (ALICE shows `No Caregiver`) |
+| All Patients → ALICE profile | **Pass** — Overview + Routine visible; **no** Activity Preference card; **no** Doctor's Note card |
+| Activity Overview | **Partial** — prefs (8) + Manage Preferences; banner `recommendations, exclusions` (exclusions failed for caregiver; supervisor only failed recs) |
+| Manage Preferences → Edit | **Pass** — edit form opened with Like/Dislike/Neutral radios + CANCEL/SUBMIT. Did **not** submit (no write against staging) |
+
+### Known UI bugs seen in-app
+
+- `undefined undefined` under ALICE on Preference / Medication / Doctor Note headers
+- Preference activity names `Untitled Activity` / edit form `Activity N:`
+- Schedule cards render a JSON object string instead of `Free and Easy`
+- Medication list empty while schedule/highlights still show meds
+- Emulator date 16 Aug blocks 17 Aug administer (`Cannot administer today`)
 
 ## Notifications (2026-08-03)
 
