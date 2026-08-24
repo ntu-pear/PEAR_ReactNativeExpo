@@ -28,4 +28,7 @@ export default {
 
   //error management
   red: '#fd4734', //for error texts
+
+  // Status chips: tinted fill + dark text. Never white on grey_lighter.
+  purple_lightest: '#f3e5f5',
 };

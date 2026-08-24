@@ -543,6 +543,7 @@ const styles = StyleSheet.create({
   },
   activityText: {
     ...typography.subheading1,
+    color: colors.black_darker,
     paddingHorizontal: 15,
     paddingVertical: 12,
     borderRadius: 10,
@@ -558,8 +559,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.pink_lightest,
   },
   noItem: {
-    backgroundColor: colors.grey,
-    color: colors.white,
+    backgroundColor: colors.grey_lightest,
+    color: colors.black,
   },
 });
 

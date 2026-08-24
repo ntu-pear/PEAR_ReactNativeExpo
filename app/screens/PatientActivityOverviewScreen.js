@@ -35,11 +35,31 @@ const preferenceLabel = (isLike) => {
   return 'Neutral';
 };
 
-const preferenceColor = (isLike) => {
+const statusChip = (kind) => {
+  if (kind === 'like' || kind === 'recommend') {
+    return { bg: colors.green_lightest, fg: colors.black_darker };
+  }
+  if (kind === 'dislike' || kind === 'not-recommend') {
+    return { bg: colors.pink_lightest, fg: colors.black_darker };
+  }
+  if (kind === 'exclude') {
+    return { bg: colors.purple_lightest, fg: colors.black_darker };
+  }
+  return { bg: colors.grey_lightest, fg: colors.black_darker };
+};
+
+const preferenceChip = (isLike) => {
   const n = Number(isLike);
-  if (n === 1) return '#2e7d32';
-  if (n === -1) return '#c62828';
-  return MEDIUM;
+  if (n === 1) return statusChip('like');
+  if (n === -1) return statusChip('dislike');
+  return statusChip('neutral');
+};
+
+const recommendationChip = (value) => {
+  const n = Number(value);
+  if (n === 1) return statusChip('recommend');
+  if (n === -1) return statusChip('not-recommend');
+  return statusChip('neutral');
 };
 
 function SectionHeader({ title, count }) {
@@ -66,15 +86,16 @@ function EmptyRow({ message }) {
       py={3}
       mb={2}
     >
-      <Text color={MEDIUM}>{message}</Text>
+      <Text color={colors.black}>{message}</Text>
     </Box>
   );
 }
 
-function ListRow({ title, subtitle, badge, badgeColor, onPress, testID }) {
+function ListRow({ title, subtitle, badge, badgeBg, badgeFg, onPress, testID }) {
+  const chip = { bg: badgeBg || colors.grey_lightest, fg: badgeFg || colors.black_darker };
   const row = (
     <Box
-      bg="white"
+      bg={colors.white}
       borderRadius={12}
       borderWidth={1}
       borderColor={LIGHT}
@@ -90,14 +111,14 @@ function ListRow({ title, subtitle, badge, badgeColor, onPress, testID }) {
             {title || 'Activity'}
           </Text>
           {!!subtitle && (
-            <Text fontSize="sm" color={MEDIUM} mt={1}>
+            <Text fontSize="sm" color={colors.black} mt={1}>
               {subtitle}
             </Text>
           )}
         </Box>
         {!!badge && (
-          <Box px={3} py={1} borderRadius={999} bg={badgeColor || LIGHT}>
-            <Text fontSize="xs" fontWeight="700" color="white">
+          <Box px={3} py={1} borderRadius={999} bg={chip.bg}>
+            <Text fontSize="xs" fontWeight="700" color={chip.fg}>
               {badge}
             </Text>
           </Box>
@@ -267,7 +288,7 @@ function PatientActivityOverviewScreen(props) {
         }
       />
 
-      <Text fontSize="md" color={MEDIUM} mt={2} mb={1}>
+      <Text fontSize="md" color={colors.black} mt={2} mb={1}>
         Condensed view of preferences, doctor recommendations, and exclusions
         (aligned with web patient activity tabs). Caregivers can update
         preferences; supervisors can add dated exclusions. Recommendations
@@ -334,7 +355,8 @@ function PatientActivityOverviewScreen(props) {
             key={`pref-${item.centreActivityPreferenceID || item.CentreActivityPreferenceID || item.centreActivityID}`}
             title={item.activityTitle}
             badge={preferenceLabel(item.isLike)}
-            badgeColor={preferenceColor(item.isLike)}
+            badgeBg={preferenceChip(item.isLike).bg}
+            badgeFg={preferenceChip(item.isLike).fg}
           />
         ))
       )}
@@ -355,13 +377,8 @@ function PatientActivityOverviewScreen(props) {
             title={item.activityTitle}
             subtitle={item.doctorRemarks || undefined}
             badge={item.doctorRecommendationLabel}
-            badgeColor={
-              Number(item.doctorRecommendation) === 1
-                ? '#1565c0'
-                : Number(item.doctorRecommendation) === -1
-                  ? '#c62828'
-                  : '#757575'
-            }
+            badgeBg={recommendationChip(item.doctorRecommendation).bg}
+            badgeFg={recommendationChip(item.doctorRecommendation).fg}
           />
         ))
       )}
@@ -388,7 +405,8 @@ function PatientActivityOverviewScreen(props) {
               .filter(Boolean)
               .join(' · ')}
             badge="Excluded"
-            badgeColor="#6a1b9a"
+            badgeBg={statusChip('exclude').bg}
+            badgeFg={statusChip('exclude').fg}
             testID={`activity_overview_exclusion_${item.id}`}
             onPress={
               isSupervisor
@@ -404,7 +422,7 @@ function PatientActivityOverviewScreen(props) {
       )}
 
       <Box mt={4} mb={8}>
-        <Text fontSize="xs" color={MEDIUM}>
+        <Text fontSize="sm" color={colors.black}>
           Recommendations stay read-only on mobile (doctor-managed on web).
           Caregivers can update preferences. Supervisors can add or edit
           dated exclusions here. Creating centre activities and generating
@@ -431,7 +449,7 @@ function PatientActivityOverviewScreen(props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f7f7f8',
+    backgroundColor: colors.grey_lightest,
   },
   content: {
     paddingHorizontal: 20,

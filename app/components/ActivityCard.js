@@ -72,7 +72,7 @@ const ActivityCard = ({
                 medications.length > 0
                   ? isCurrentActivity()
                     ? colors.green
-                    : colors.grey
+                    : colors.black_darker
                   : null,
             },
           ]}
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     color: colors.black,
   },
   activityContainerGray: {
-    backgroundColor: colors.grey_lighter,
+    backgroundColor: colors.grey_lightest,
   },
   activityTitle: {
     textAlign: 'center',
@@ -137,10 +137,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   lightText: {
-    color: colors.white,
+    color: colors.black_darker,
   },
   darkText: {
-    color: colors.grey,
+    color: colors.black_darker,
   },
 });
 
