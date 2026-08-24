@@ -76,9 +76,17 @@ const getAllocationMap = async () => {
   const allocations = parseAllocations(res);
   const map = {};
   for (const a of allocations) {
-    if (a.active === 'N' || a.isDeleted) continue;
-    // Use String key for consistent lookup (patientID may be number or string)
-    if (a.patientId != null) map[String(a.patientId)] = a;
+    if (a.active === 'N' || a.isDeleted || a.is_deleted) continue;
+    const patientId = a.patientId ?? a.patientID ?? a.patient_id;
+    if (patientId != null) {
+      map[String(patientId)] = {
+        ...a,
+        patientId,
+        caregiverId: a.caregiverId ?? a.caregiverID ?? a.caregiver_id,
+        tempCaregiverId: a.tempCaregiverId ?? a.temp_caregiver_id,
+        supervisorId: a.supervisorId ?? a.supervisorID ?? a.supervisor_id,
+      };
+    }
   }
   return map;
 };
@@ -93,22 +101,47 @@ const getMyAllocatedPatientIds = async (userId, roleName) => {
   
   // Filter allocations where this user is assigned based on their role
   const myAllocations = allocations.filter((a) => {
-    if (a.active === 'N' || a.isDeleted) return false;
-    
-    if (role.includes('supervisor')) return a.supervisorId === userId;
-    if (role.includes('doctor') || role.includes('physician')) return a.doctorId === userId;
-    if (role.includes('caregiver')) return a.caregiverId === userId;
-    if (role.includes('game') || role.includes('therapist')) return a.gameTherapistId === userId;
+    if (a.active === 'N' || a.isDeleted || a.is_deleted) return false;
+    const caregiverId = a.caregiverId ?? a.caregiverID ?? a.caregiver_id;
+    const tempCaregiverId = a.tempCaregiverId ?? a.temp_caregiver_id;
+    const supervisorId = a.supervisorId ?? a.supervisorID ?? a.supervisor_id;
+    const doctorId = a.doctorId ?? a.doctorID ?? a.doctor_id;
+    const gameTherapistId = a.gameTherapistId ?? a.gameTherapistID ?? a.game_therapist_id;
+
+    if (role.includes('supervisor')) return String(supervisorId) === String(userId);
+    if (role.includes('doctor') || role.includes('physician')) return String(doctorId) === String(userId);
+    if (role.includes('caregiver')) {
+      return String(caregiverId) === String(userId) || String(tempCaregiverId) === String(userId);
+    }
+    if (role.includes('game') || role.includes('therapist')) return String(gameTherapistId) === String(userId);
     // For admin or unknown roles, show all
     return true;
   });
 
-  const patientIds = myAllocations.map((a) => a.patientId).filter(Boolean);
+  const patientIds = myAllocations
+    .map((a) => a.patientId ?? a.patientID ?? a.patient_id)
+    .filter((id) => id != null && id !== '')
+    .map(String);
   return patientIds;
 };
 
 const readPatientV1 = async (patient_id, { require_auth = true, mask = true } = {}) => {
-  return client.get(v1PatientReadEndpoint(patient_id), { require_auth, mask }, withPatientV1Base());
+  const res = await client.get(
+    v1PatientReadEndpoint(patient_id),
+    { require_auth, mask },
+    withPatientV1Base(),
+  );
+  if (!res.ok) return res;
+
+  const raw = res.data?.data ?? res.data ?? {};
+  const normalized = normalizePatientV1(raw);
+  return {
+    ...res,
+    data: {
+      ...(res.data && typeof res.data === 'object' && !Array.isArray(res.data) ? res.data : {}),
+      data: { ...raw, ...normalized },
+    },
+  };
 };
 
 // ---------- Patient Medications (v1) ----------
@@ -117,8 +150,31 @@ const listPatientMedicationsV1 = async (patient_id, params = {}) => {
     return { ok: false, status: 400, data: { detail: 'patient_id is required' } };
   }
 
+  const unwrapMeds = (data) =>
+    Array.isArray(data) ? data
+      : Array.isArray(data?.data) ? data.data
+      : Array.isArray(data?.results) ? data.results
+      : [];
+
+  const normalizeMedicationRecord = (item = {}) => ({
+    medicationID: item.medicationID ?? item.Id ?? item.id,
+    patientID: item.patientID ?? item.PatientId ?? item.patient_id ?? patient_id,
+    prescriptionName:
+      item.prescriptionName ??
+      item.PrescriptionName ??
+      item.prescription_name ??
+      (item.PrescriptionListId != null ? `Prescription ${item.PrescriptionListId}` : ''),
+    dosage: item.dosage ?? item.Dosage ?? '',
+    administerTime: String(item.administerTime ?? item.AdministerTime ?? ''),
+    instruction: item.instruction ?? item.Instruction ?? '',
+    startDateTime: item.startDateTime ?? item.StartDate ?? item.start_date,
+    endDateTime: item.endDateTime ?? item.EndDate ?? item.end_date,
+    prescriptionRemarks: item.prescriptionRemarks ?? item.PrescriptionRemarks ?? '',
+  });
+
   // candidates in order: nested, id-in-path, collection with query
   const candidates = [
+    { path: `/Medication/PatientMedication`, query: { patient_id, pageNo: 0, pageSize: 100, ...params } },
     { path: `/patients/${patient_id}/medications/`, query: params },
     { path: `/patient-medications/${patient_id}/`, query: params },
     { path: `/patient-medications/`,              query: { patient_id, ...params } },
@@ -130,7 +186,14 @@ const listPatientMedicationsV1 = async (patient_id, params = {}) => {
     const res = await client.get(c.path, c.query, withPatientV1Base());
     if (res.ok) {
       console.log('[MEDS v1] ✅ using', c.path);
-      return res;
+      const rows = unwrapMeds(res.data).map(normalizeMedicationRecord);
+      return {
+        ...res,
+        data: {
+          ...(res.data && !Array.isArray(res.data) ? res.data : {}),
+          data: rows,
+        },
+      };
     }
     // stop early on non-404 (e.g., 401/500) since that’s a real response
     if (res.status && res.status !== 404) {
@@ -563,11 +626,18 @@ export const normalizePatientV1 = (p = {}) => {
     p.lastName ?? p.LastName ?? p.last_name ?? p.family_name ?? p.last ?? inferredLast;
 
   return {
+    ...p,
     id: p.id ?? p.patientID ?? p.PatientID ?? p.patient_id ?? p.uuid ?? null,
     patientID: p.patientID ?? p.PatientID ?? p.id ?? p.patient_id ?? null,
     firstName,
     lastName,
-    preferredName: p.preferredName ?? p.PreferredName ?? p.preferred_name ?? '',
+    preferredName:
+      p.preferredName ??
+      p.PreferredName ??
+      p.preferred_name ??
+      p.name ??
+      [firstName, lastName].filter(Boolean).join(' ') ??
+      '',
     fullName:
       (p.fullName ?? p.FullName ?? p.name ?? [firstName, lastName].filter(Boolean).join(' ')) || '',
     nric: p.nric ?? p.NRIC ?? p.nric_number ?? p.id_number ?? null,

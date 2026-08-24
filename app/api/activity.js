@@ -8,6 +8,7 @@ const centreActivityPreferences = '/centre_activity_preferences';
 const centreActivities = '/centre_activities';
 const centreActivityRecommendations = '/centre_activity_recommendations';
 const centreActivityExclusions = '/centre_activity_exclusions';
+const activities = '/activities';
 const routines = '/routines';
 
 const withActivityV1Base = (cfg = {}) => ({
@@ -50,7 +51,7 @@ const normalizePreference = (pref = {}) => ({
     pref.centre_activity_title ??
     pref.title ??
     pref.activity?.title ??
-    'Untitled Activity',
+    '',
   isLike: pref.isLike ?? pref.IsLike ?? pref.is_like ?? 0,
   ...pref,
 });
@@ -64,7 +65,7 @@ const normalizeCentreActivity = (activity = {}) => ({
     activity.activity_title ??
     activity.title ??
     activity.activity?.title ??
-    `Activity ${activity.id ?? ''}`.trim(),
+    '',
   ...activity,
 });
 
@@ -93,9 +94,71 @@ const getActivityPreference = async (patientID) => {
 };
 
 const getCentreActivities = async () => {
-  const res = await client.get(centreActivities, {}, withActivityV1Base());
+  const res = await client.get(`${centreActivities}/`, {}, withActivityV1Base());
   return toMobileListResponse(res, normalizeCentreActivity);
 };
+
+const getActivities = async () => {
+  const res = await client.get(`${activities}/`, {}, withActivityV1Base());
+  return toMobileListResponse(res, (activity = {}) => ({
+    id: activity.id ?? activity.activityID ?? activity.ActivityID,
+    activityTitle:
+      activity.title ??
+      activity.activityTitle ??
+      activity.ActivityTitle ??
+      activity.activity_title ??
+      '',
+    ...activity,
+  }));
+};
+
+export const isMissingActivityTitle = (title) => {
+  const value = String(title ?? '').trim();
+  return !value || /^untitled activity$/i.test(value) || /^activity \d*$/i.test(value);
+};
+
+export const buildActivityTitleMap = (centreActivitiesList = [], activitiesList = []) => {
+  const activityTitles = {};
+  activitiesList.forEach((activity) => {
+    const id = activity.id ?? activity.activityID;
+    const title = activity.activityTitle ?? activity.title;
+    if (id != null && !isMissingActivityTitle(title)) {
+      activityTitles[String(id)] = title;
+    }
+  });
+
+  const map = {};
+  centreActivitiesList.forEach((centreActivity) => {
+    const centreId =
+      centreActivity.centreActivityID ??
+      centreActivity.CentreActivityID ??
+      centreActivity.id;
+    const activityId =
+      centreActivity.activity_id ??
+      centreActivity.activityID ??
+      centreActivity.ActivityID;
+    const rawTitle =
+      centreActivity.activityTitle ||
+      centreActivity.title ||
+      '';
+    const title = !isMissingActivityTitle(rawTitle)
+      ? rawTitle
+      : activityTitles[String(activityId)] || '';
+    if (centreId != null && !isMissingActivityTitle(title)) {
+      map[String(centreId)] = title;
+    }
+  });
+  return map;
+};
+
+export const applyActivityTitles = (items = [], titleMap = {}) =>
+  items.map((item) => {
+    const id = item.centreActivityID ?? item.CentreActivityID;
+    if (!isMissingActivityTitle(item.activityTitle)) return item;
+    const mapped = titleMap[String(id)];
+    if (!mapped) return item;
+    return { ...item, activityTitle: mapped };
+  });
 
 // **********************  POST REQUESTS *************************
 
@@ -168,9 +231,10 @@ const normalizeRoutine = (routine = {}) => ({
 });
 
 const getPatientRoutine = async (patientID, includeDeleted = false) => {
+  const params = includeDeleted ? { include_deleted: true } : {};
   const res = await client.get(
-    `${routines}/patient/${patientID}/`,
-    { include_deleted: includeDeleted },
+    `${routines}/patient/${patientID}`,
+    params,
     withActivityV1Base(),
   );
   return toMobileListResponse(res, normalizeRoutine);
@@ -239,7 +303,7 @@ const getActivityRecommendations = async (patientID) => {
     withActivityV1Base(),
   );
 
-  if (scoped.ok || (scoped.status && scoped.status !== 404)) {
+  if (scoped.ok) {
     const normalized = toMobileListResponse(scoped, normalizeRecommendation);
     normalized.data.data = normalized.data.data.filter(
       (item) =>
@@ -250,6 +314,7 @@ const getActivityRecommendations = async (patientID) => {
   }
 
   const all = await client.get(`${centreActivityRecommendations}/`, {}, withActivityV1Base());
+  if (!all.ok) return all;
   const normalized = toMobileListResponse(all, normalizeRecommendation);
   normalized.data.data = normalized.data.data.filter(
     (item) =>
@@ -267,7 +332,7 @@ const getActivityExclusions = async (patientID) => {
     withActivityV1Base(),
   );
 
-  if (scoped.ok || (scoped.status && scoped.status !== 404)) {
+  if (scoped.ok) {
     const normalized = toMobileListResponse(scoped, normalizeExclusion);
     normalized.data.data = normalized.data.data.filter(
       (item) =>
@@ -278,6 +343,7 @@ const getActivityExclusions = async (patientID) => {
   }
 
   const all = await client.get(`${centreActivityExclusions}/`, {}, withActivityV1Base());
+  if (!all.ok) return all;
   const normalized = toMobileListResponse(all, normalizeExclusion);
   normalized.data.data = normalized.data.data.filter(
     (item) =>
@@ -293,6 +359,7 @@ const getActivityExclusions = async (patientID) => {
 export default {
   getActivityPreference,
   getCentreActivities,
+  getActivities,
   addActivityPreference,
   updateActivityPreference,
   deleteActivityPreference,

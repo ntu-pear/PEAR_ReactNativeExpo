@@ -88,6 +88,22 @@ describe('parseScheduleString utility', () => {
       }),
     );
   });
+
+  it('parses stringified JSON day maps from the scheduler', () => {
+    const dayJson =
+      '{"09:00-09:30": "Free and Easy", "09:30-10:00": "Free and Easy | Give Medication@0930: SALBUTAMOL(1)**test med"}';
+
+    const result = parseScheduleDay(dayJson, scheduleDate, patientID, patientName);
+
+    expect(result).toHaveLength(2);
+    expect(result[0].activityTitle).toBe('Free and Easy');
+    expect(result[1].medications[0]).toEqual(
+      expect.objectContaining({
+        medName: 'SALBUTAMOL',
+        medDosage: '1',
+      }),
+    );
+  });
 });
 
 describe('getScheduleDayValue', () => {

@@ -350,4 +350,154 @@ describe('migration API adapters', () => {
     );
     expect(response.ok).toBe(true);
   });
+
+  test('activity exclusions fall back to list filter when patient path returns 403', async () => {
+    const activityApi = require('app/api/activity').default;
+    mockClient.get
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 403,
+        data: { detail: 'Forbidden' },
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        data: [
+          {
+            id: 1,
+            centre_activity_id: 9,
+            patient_id: 12,
+            exclusion_remarks: 'Avoid stairs',
+            start_date: '2026-07-01',
+            end_date: null,
+            is_deleted: false,
+          },
+        ],
+      });
+
+    const response = await activityApi.getActivityExclusions(12);
+
+    expect(mockClient.get).toHaveBeenNthCalledWith(
+      1,
+      '/centre_activity_exclusions/patient/12',
+      {},
+      expect.objectContaining({ baseURL: 'http://activity-service/api/v1' }),
+    );
+    expect(mockClient.get).toHaveBeenNthCalledWith(
+      2,
+      '/centre_activity_exclusions/',
+      {},
+      expect.objectContaining({ baseURL: 'http://activity-service/api/v1' }),
+    );
+    expect(response.ok).toBe(true);
+    expect(response.data.data[0]).toEqual(
+      expect.objectContaining({
+        id: 1,
+        centreActivityID: 9,
+        exclusionRemarks: 'Avoid stairs',
+      }),
+    );
+  });
+
+  test('activity title map fills untitled centre activities from the catalog', () => {
+    const { applyActivityTitles, buildActivityTitleMap, isMissingActivityTitle } = require('app/api/activity');
+    const map = buildActivityTitleMap(
+      [{ centreActivityID: 22, activityID: 5, activityTitle: 'Untitled Activity' }],
+      [{ id: 5, title: 'Mahjong' }],
+    );
+
+    expect(isMissingActivityTitle('Untitled Activity')).toBe(true);
+    expect(map['22']).toBe('Mahjong');
+    expect(
+      applyActivityTitles([{ centreActivityID: 22, activityTitle: '' }], map)[0].activityTitle,
+    ).toBe('Mahjong');
+  });
+
+  test('patient routines use Activity Service without a trailing slash', async () => {
+    const activityApi = require('app/api/activity').default;
+    mockClient.get.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      data: [
+        {
+          id: 1,
+          activity_id: 8,
+          name: 'Morning stretch',
+          day_of_week: 3,
+          start_time: '09:00',
+          end_time: '09:30',
+        },
+      ],
+    });
+
+    const response = await activityApi.getPatientRoutine(7);
+
+    expect(mockClient.get).toHaveBeenCalledWith(
+      '/routines/patient/7',
+      {},
+      expect.objectContaining({ baseURL: 'http://activity-service/api/v1' }),
+    );
+    expect(response.data.data[0]).toEqual(
+      expect.objectContaining({
+        activityName: 'Morning stretch',
+        days: expect.stringContaining('Monday'),
+        startTime: '09:00',
+      }),
+    );
+  });
+
+  test('patient medications normalize PascalCase PatientMedication rows', async () => {
+    const patientApi = require('app/api/patient').default;
+    mockClient.get.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      data: {
+        data: [
+          {
+            Id: 9,
+            PrescriptionName: 'Ibuprofen',
+            Dosage: '1 tab',
+            AdministerTime: '09:00',
+            Instruction: 'After food',
+            StartDate: '2026-08-01',
+            EndDate: '2026-08-31',
+          },
+        ],
+      },
+    });
+
+    const response = await patientApi.listPatientMedicationsV1(1);
+
+    expect(mockClient.get).toHaveBeenCalledWith(
+      '/Medication/PatientMedication',
+      expect.objectContaining({ patient_id: 1, pageNo: 0 }),
+      expect.objectContaining({ baseURL: 'http://patient-service/api/v1' }),
+    );
+    expect(response.data.data[0]).toEqual(
+      expect.objectContaining({
+        medicationID: 9,
+        prescriptionName: 'Ibuprofen',
+        administerTime: '09:00',
+        dosage: '1 tab',
+      }),
+    );
+  });
+
+  test('patient read fills firstName from name when first and last are missing', async () => {
+    const patientApi = require('app/api/patient').default;
+    mockClient.get.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      data: { id: 1, name: 'ALICE' },
+    });
+
+    const response = await patientApi.readPatientV1(1);
+
+    expect(response.data.data).toEqual(
+      expect.objectContaining({
+        firstName: 'ALICE',
+        preferredName: 'ALICE',
+      }),
+    );
+  });
 });

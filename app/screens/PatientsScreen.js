@@ -420,8 +420,8 @@ const normalizePatientV1 = (p = {}) => {
       if (viewMode === 'myPatients' && userId) {
         const myPatientIds = await patientApi.getMyAllocatedPatientIds(userId, userRole);
         if (myPatientIds.length > 0) {
-          const idSet = new Set(myPatientIds);
-          allocFiltered = allocFiltered.filter(p => idSet.has(p.patientID));
+          const idSet = new Set(myPatientIds.map(String));
+          allocFiltered = allocFiltered.filter((p) => idSet.has(String(p.patientID)));
         } else {
           allocFiltered = [];
         }

@@ -7,6 +7,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 // APIs
 import doctorNoteApi from 'app/api/doctorNote';
 import patientApi from 'app/api/patient';
+import { patientFromApiResponse, patientProfileLines } from 'app/utility/patientHeader';
 
 // Utilities
 import {
@@ -149,7 +150,7 @@ function DoctorNoteScreen(props) {
     if (patientID) {
       const response = await patientApi.getPatient(patientID);
       if (response.ok) {
-        setPatientData(response.data.data);
+        setPatientData(patientFromApiResponse(response));
         setIsError(false);
         setIsRetry(false);
         setStatusCode(response.status);
@@ -174,10 +175,8 @@ function DoctorNoteScreen(props) {
             <ProfileNameButton
               testID={`${testID}_profileNameButton`}
               profilePicture={patientData.profilePicture}
-              profileLineOne={patientData.preferredName}
-              profileLineTwo={
-                patientData.firstName + ' ' + patientData.lastName
-              }
+              profileLineOne={patientProfileLines(patientData).line1}
+              profileLineTwo={patientProfileLines(patientData).line2}
               handleOnPress={onClickProfile}
               isPatient
               isVertical={false}

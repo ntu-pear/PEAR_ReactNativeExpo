@@ -140,9 +140,21 @@ export const parseScheduleDay = (
 ) => {
   if (dayValue == null || dayValue === '') return [];
 
-  if (typeof dayValue === 'object' && !Array.isArray(dayValue)) {
-    return parseScheduleObjectDay(dayValue, scheduleDate, patientID, patientName);
+  let value = dayValue;
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+      try {
+        value = JSON.parse(trimmed);
+      } catch {
+        value = dayValue;
+      }
+    }
   }
 
-  return parseScheduleString(dayValue, scheduleDate, patientID, patientName);
+  if (typeof value === 'object' && !Array.isArray(value)) {
+    return parseScheduleObjectDay(value, scheduleDate, patientID, patientName);
+  }
+
+  return parseScheduleString(value, scheduleDate, patientID, patientName);
 };

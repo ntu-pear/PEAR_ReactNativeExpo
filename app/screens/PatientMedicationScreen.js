@@ -5,6 +5,8 @@ import { FlatList, View } from 'native-base';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 import patientApi from 'app/api/patient';
+import scheduleApi from 'app/api/schedule';
+import { patientFromApiResponse, patientProfileLines } from 'app/utility/patientHeader';
 import { confirmAndLogMedicationAdministration } from 'app/utility/confirmMedicationAdministration';
 
 const {
@@ -125,21 +127,62 @@ function PatientMedicationScreen(props) {
     if (patientID) {
       const response = await listPatientMedicationsV1(patientID);
       if (response.ok) {
-        setOriginalUnparsedData(response.data.data || []);
-        parseMedicationData(response.data.data || []);
+        let rows = response.data.data || [];
+        if (!rows.length) {
+          rows = await loadSchedulerMedications(patientID);
+        }
+        setOriginalUnparsedData(rows);
+        parseMedicationData(rows);
         setIsError(false);
         setIsRetry(false);
         setStatusCode(response.status);
       } else {
         console.log('Request failed with status code: ', response.status);
-        setOriginalUnparsedData([]);
-        setOriginalData([]);
-        setData([]);
-        setIsError(true);
-        setIsRetry(true);
-        setStatusCode(response.status);
+        const fallback = await loadSchedulerMedications(patientID);
+        if (fallback.length) {
+          setOriginalUnparsedData(fallback);
+          parseMedicationData(fallback);
+          setIsError(false);
+          setIsRetry(false);
+          setStatusCode(200);
+        } else {
+          setOriginalUnparsedData([]);
+          setOriginalData([]);
+          setData([]);
+          setIsError(true);
+          setIsRetry(true);
+          setStatusCode(response.status);
+        }
       }
       setIsLoading(false);
+    }
+  };
+
+  const loadSchedulerMedications = async (id) => {
+    try {
+      const res = await scheduleApi.getMedicationScheduleV1();
+      if (!res?.ok) return [];
+      const rows = Array.isArray(res.data) ? res.data : res.data?.data || [];
+      const today = new Date().toISOString().slice(0, 10);
+      return rows
+        .filter((item) => {
+          const patient = item.PatientID ?? item.patientID ?? item.patient_id;
+          const date = String(item.AdministerDate ?? item.administerDate ?? '').slice(0, 10);
+          return String(patient) === String(id) && (!date || date === today);
+        })
+        .map((item) => ({
+          medicationID: item.Id ?? item.id,
+          patientID: id,
+          prescriptionName: item.PrescriptionName ?? item.prescriptionName ?? 'Scheduled medication',
+          dosage: item.Dosage ?? item.dosage ?? '',
+          administerTime: String(item.AdministerTime ?? item.administerTime ?? ''),
+          instruction: item.Instruction ?? item.instruction ?? '',
+          startDateTime: item.AdministerDate ?? item.administerDate,
+          endDateTime: item.AdministerDate ?? item.administerDate,
+          prescriptionRemarks: '',
+        }));
+    } catch {
+      return [];
     }
   };
 
@@ -147,7 +190,7 @@ function PatientMedicationScreen(props) {
     if (patientID) {
       const response = await readPatientV1(patientID);
       if (response.ok) {
-        setPatientData(response.data.data);
+        setPatientData(patientFromApiResponse(response));
         setIsError(false);
         setIsRetry(false);
         setStatusCode(response.status);
@@ -165,13 +208,16 @@ function PatientMedicationScreen(props) {
   const parseMedicationData = (tempData) => {
     const tempMedData = [];
     tempData.forEach((item) => {
-      const medTimes = item.administerTime.split(',');
-      medTimes.forEach((time) => {
+      const medTimes = String(item.administerTime ?? '')
+        .split(',')
+        .map((time) => time.trim())
+        .filter(Boolean);
+      (medTimes.length ? medTimes : ['']).forEach((time) => {
         tempMedData.push({
           medID: item.medicationID,
           medName: item.prescriptionName,
           medDosage: item.dosage,
-          medTime: convertTimeMilitary(time),
+          medTime: time ? convertTimeMilitary(time) : '',
           medNote: item.instruction,
           medStartDate: item.startDateTime,
           medEndDate: item.endDateTime,
@@ -328,8 +374,8 @@ function PatientMedicationScreen(props) {
             <ProfileNameButton
               testID={`${testID}_profileNameButton`}
               profilePicture={patientData.profilePicture}
-              profileLineOne={patientData.preferredName}
-              profileLineTwo={patientData.firstName + ' ' + patientData.lastName}
+              profileLineOne={patientProfileLines(patientData).line1}
+              profileLineTwo={patientProfileLines(patientData).line2}
               handleOnPress={onClickProfile}
               isPatient
               isVertical={false}

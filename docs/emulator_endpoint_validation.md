@@ -78,6 +78,37 @@ Patient Service latest fetch (`origin/staging`) is guardian NRIC lookup / guardi
 - FWAFE-32 medication expand-on-row-click UX
 - Game recommendations
 
+## 2026-08-24 in-app tablet walkthrough (`emulator-5554`)
+
+Debug APK + Metro (release `assembleRelease` still hangs on Metro `createBundleReleaseJsAndAssets`). Same-scene PNGs under `docs/screenshots/2026-08-17_e2e_*.png` were **overwritten** with 24 Aug captures.
+
+| Scene | 24 Aug in-app |
+| --- | --- |
+| Supervisor patients / ALICE profile | **Pass** — `ALICE` / `ALICE LEE` |
+| Activity Overview prefs | **Pass** — `ART & CRAFT AM` etc. Recs banner still **fail visible** (404) |
+| Caregiver Overview | Prefs OK; banner **recommendations, exclusions** (404 + 403) |
+| Preference / caregiver edit | **Pass** — named chips + edit radios |
+| Schedule | **Pass** — `Free and Easy` / times, no raw JSON |
+| See medication | **Pass** — SALBUTAMOL for ALICE LEE |
+| Doctor notes / Photo album | **Pass** |
+| Routine | **Empty (honest)** — GET no longer 400 after omitting `include_deleted=false`; ALICE has no rows (`No routines recorded for this patient.`) |
+| Caregiver My Patients | **Pass** — 1 allocated (`TESTING GIDEON TAN`), not empty |
+| Caregiver All Patients | **Pass** — 10 including ALICE |
+
+Not a signed release APK. Recs 404 and caregiver exclusion 403 are staging/backend.
+
+| Issue from 17 Aug in-app | Adapter change |
+| --- | --- |
+| Schedule cards showed raw JSON day maps | `parseScheduleDay` JSON.parses stringified `{ "09:00-09:30": "..." }` objects |
+| `undefined undefined` under ALICE | `readPatientV1` / `getPatient` merge `normalizePatientV1` (`name` → first/preferred). Headers on Overview, Preference, Medication, Doctor Note, Schedule use `patientProfileLines` |
+| Preference titles `Untitled Activity` | Screens fetch `getCentreActivities` + `getActivities`, then `buildActivityTitleMap` (untitled centre titles fall through to catalog). `getActivityPreference` itself still one GET so existing Jest stays valid |
+| Routine screen blank / raw keys | Human columns Activity / Days / Start / End; empty copy via `noDataMessage`. GET `/routines/patient/:id` (no trailing slash) |
+| Medication list empty / PascalCase crash | `/Medication/PatientMedication?pageNo=0` rows mapped to camelCase; empty catalog falls back to today's Scheduler slots |
+| Caregiver My Patients empty | Allocation IDs compared as strings |
+| Recs 404 / caregiver exclusions 403 | Still fail visibly after list fallback; Jest covers 404 and 403 fallback |
+
+Recommendations remain 404 on live staging (patient path and list). Caregiver exclusion list remains 403 until backend grants read. Notifications remain 404.
+
 ## How To Re-Run Validation
 
 1. Connect to NTU/PEAR VPN.

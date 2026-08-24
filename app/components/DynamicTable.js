@@ -140,7 +140,7 @@ function DynamicTable({
       </Text>
     </ScrollView>
   ) : (
-    noDataMessage
+    typeof noDataMessage === 'function' ? noDataMessage() : noDataMessage
   );
 }
 

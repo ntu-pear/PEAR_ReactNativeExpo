@@ -8,7 +8,7 @@ import AddEditModal from 'app/components/AddEditModal';
 import RadioButtonInput from 'app/components/input-components/RadioButtonsInput';
 
 // API
-import activity from 'app/api/activity';
+import activity, { applyActivityTitles, buildActivityTitleMap, isMissingActivityTitle } from 'app/api/activity';
 
 function AddActivityPreferenceModal({
   testID,
@@ -36,11 +36,20 @@ function AddActivityPreferenceModal({
   // Fetch the full list of activities and initialize preferences to neutral
   const getListData = async () => {
     try {
-      const response = await activity.getCentreActivities();
-      const responseData = response.data.data;
-      const extractedObjects = responseData.map((object) => ({
-        label: object.activityTitle,
-        value: object.centreActivityID, // adjust if your API uses a different key
+      const [centreRes, activitiesRes] = await Promise.all([
+        activity.getCentreActivities(),
+        activity.getActivities(),
+      ]);
+      const responseData = centreRes.data.data || [];
+      const titleMap = buildActivityTitleMap(
+        responseData,
+        activitiesRes?.ok ? activitiesRes.data?.data || [] : [],
+      );
+      const extractedObjects = applyActivityTitles(responseData, titleMap).map((object) => ({
+        label: isMissingActivityTitle(object.activityTitle)
+          ? `Activity ${object.centreActivityID ?? ''}`.trim()
+          : object.activityTitle,
+        value: object.centreActivityID,
       }));
       setActivityList(extractedObjects);
       const initialPrefs = {};

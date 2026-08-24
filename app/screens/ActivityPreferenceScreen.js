@@ -19,9 +19,10 @@ import {
 import routes from 'app/navigation/routes';
 
 // API
-import activity from 'app/api/activity';
+import activity, { applyActivityTitles, buildActivityTitleMap } from 'app/api/activity';
 import patientApi from 'app/api/patient';
 import AuthContext from 'app/auth/context';
+import { patientFromApiResponse, patientProfileLines } from 'app/utility/patientHeader';
 
 // Configurations
 import colors from 'app/config/colors';
@@ -105,7 +106,7 @@ function ActivityPreferenceScreen(props) {
     const getData = async () => {
       const response = await activity.getActivityPreference(patientID);
       if (response.data.data !== null) {
-        const data = response.data.data;
+        const data = await withActivityTitles(response.data.data);
         setOriginalData(data);
         setActivityData(data);
         setIsDataInitialized(true);
@@ -162,12 +163,24 @@ function ActivityPreferenceScreen(props) {
     promiseFunction();
   };
 
+  const withActivityTitles = async (rows) => {
+    const [centreRes, activitiesRes] = await Promise.all([
+      activity.getCentreActivities(),
+      activity.getActivities(),
+    ]);
+    const titleMap = buildActivityTitleMap(
+      centreRes?.ok ? centreRes.data?.data || [] : [],
+      activitiesRes?.ok ? activitiesRes.data?.data || [] : [],
+    );
+    return applyActivityTitles(rows || [], titleMap);
+  };
+
   // Get patient data from backend
   const getPatientData = async () => {
     if (patientID) {
       const response = await patientApi.getPatient(patientID);
       if (response.ok) {
-        setPatientData(response.data.data);
+        setPatientData(patientFromApiResponse(response));
         setIsError(false);
         setIsRetry(false);
         setStatusCode(response.status);
@@ -190,7 +203,10 @@ function ActivityPreferenceScreen(props) {
       setIsLoading(false);
       return;
     }
-    const data = response.data.data || [];
+    const data = await withActivityTitles(response.data.data || []);
+    setOriginalData(data);
+    setActivityData(data);
+    setIsDataInitialized(true);
     // Extract array of CentreActivityIDs
     const activityIDs = data.map((activity) => activity.centreActivityID);
     setPatientActivityIDs(activityIDs);
@@ -432,8 +448,8 @@ function ActivityPreferenceScreen(props) {
               {!isEmptyObject(patientData) ? (
                 <ProfileNameButton
                   profilePicture={patientData.profilePicture}
-                  profileLineOne={patientData.preferredName}
-                  profileLineTwo={`${patientData.firstName} ${patientData.lastName}`}
+                  profileLineOne={patientProfileLines(patientData).line1}
+                  profileLineTwo={patientProfileLines(patientData).line2}
                   handleOnPress={onClickProfile}
                   isPatient
                   isVertical={false}

@@ -10,13 +10,18 @@ import { Box, Text } from 'native-base';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-import activityApi from 'app/api/activity';
+import activityApi, {
+  applyActivityTitles,
+  buildActivityTitleMap,
+  isMissingActivityTitle,
+} from 'app/api/activity';
 import patientApi from 'app/api/patient';
 import AuthContext from 'app/auth/context';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import colors from 'app/config/colors';
 import routes from 'app/navigation/routes';
+import { patientFromApiResponse, patientProfileLines } from 'app/utility/patientHeader';
 
 const MEDIUM = colors.grey;
 const LIGHT = colors.grey_lighter;
@@ -80,7 +85,7 @@ function ListRow({ title, subtitle, badge, badgeColor }) {
       <Box flexDirection="row" alignItems="center" justifyContent="space-between">
         <Box flex={1} pr={3}>
           <Text fontSize="md" fontWeight="600" color={colors.black}>
-            {title || 'Untitled activity'}
+            {title || 'Activity'}
           </Text>
           {!!subtitle && (
             <Text fontSize="sm" color={MEDIUM} mt={1}>
@@ -89,12 +94,7 @@ function ListRow({ title, subtitle, badge, badgeColor }) {
           )}
         </Box>
         {!!badge && (
-          <Box
-            px={3}
-            py={1}
-            borderRadius={999}
-            bg={badgeColor || LIGHT}
-          >
+          <Box px={3} py={1} borderRadius={999} bg={badgeColor || LIGHT}>
             <Text fontSize="xs" fontWeight="700" color="white">
               {badge}
             </Text>
@@ -124,20 +124,22 @@ function PatientActivityOverviewScreen(props) {
   const [errors, setErrors] = useState([]);
 
   const resolveTitles = (items, activityMap) =>
-    items.map((item) => ({
-      ...item,
-      activityTitle:
-        item.activityTitle ||
-        activityMap[String(item.centreActivityID)] ||
-        `Activity ${item.centreActivityID ?? ''}`.trim(),
-    }));
+    applyActivityTitles(items, activityMap).map((item) => {
+      const id = item.centreActivityID ?? item.CentreActivityID;
+      return {
+        ...item,
+        activityTitle: isMissingActivityTitle(item.activityTitle)
+          ? `Activity ${id ?? ''}`.trim()
+          : item.activityTitle,
+      };
+    });
 
   const loadData = useCallback(async () => {
     if (!patientID) return;
     setErrors([]);
 
     try {
-      const [patientRes, prefsRes, recsRes, exclRes, activitiesRes] =
+      const [patientRes, prefsRes, recsRes, exclRes, centreRes, activitiesRes] =
         await Promise.all([
           patientApi.readPatientV1
             ? patientApi.readPatientV1(patientID, { require_auth: true, mask: true })
@@ -146,6 +148,7 @@ function PatientActivityOverviewScreen(props) {
           activityApi.getActivityRecommendations(patientID),
           activityApi.getActivityExclusions(patientID),
           activityApi.getCentreActivities(),
+          activityApi.getActivities(),
         ]);
 
       const nextErrors = [];
@@ -153,29 +156,14 @@ function PatientActivityOverviewScreen(props) {
       if (recsRes && !recsRes.ok) nextErrors.push('recommendations');
       if (exclRes && !exclRes.ok) nextErrors.push('exclusions');
 
-      const activityMap = {};
-      (activitiesRes?.data?.data || []).forEach((a) => {
-        const id = a.centreActivityID ?? a.CentreActivityID ?? a.id;
-        if (id != null) {
-          activityMap[String(id)] = a.activityTitle || a.title || `Activity ${id}`;
-        }
-      });
+      const activityMap = buildActivityTitleMap(
+        centreRes?.ok ? centreRes.data?.data || [] : [],
+        activitiesRes?.ok ? activitiesRes.data?.data || [] : [],
+      );
 
       if (patientRes?.ok) {
-        const raw = patientRes.data?.data || patientRes.data || {};
         setPatientData({
-          firstName: raw.first_name || raw.firstName || patientProfile?.firstName || '',
-          lastName: raw.last_name || raw.lastName || patientProfile?.lastName || '',
-          preferredName:
-            raw.preferred_name ||
-            raw.preferredName ||
-            patientProfile?.preferredName ||
-            '',
-          profilePicture:
-            raw.profile_picture ||
-            raw.profilePicture ||
-            patientProfile?.profilePicture ||
-            '',
+          ...patientFromApiResponse(patientRes),
           patientID,
         });
       }
@@ -188,14 +176,10 @@ function PatientActivityOverviewScreen(props) {
           : [],
       );
       setRecommendations(
-        recsRes?.ok
-          ? resolveTitles(recsRes?.data?.data || [], activityMap)
-          : [],
+        recsRes?.ok ? resolveTitles(recsRes?.data?.data || [], activityMap) : [],
       );
       setExclusions(
-        exclRes?.ok
-          ? resolveTitles(exclRes?.data?.data || [], activityMap)
-          : [],
+        exclRes?.ok ? resolveTitles(exclRes?.data?.data || [], activityMap) : [],
       );
       setErrors(nextErrors);
     } catch (e) {
@@ -208,7 +192,7 @@ function PatientActivityOverviewScreen(props) {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [patientID, patientProfile]);
+  }, [patientID]);
 
   useFocusEffect(
     useCallback(() => {
@@ -221,6 +205,8 @@ function PatientActivityOverviewScreen(props) {
     setIsRefreshing(true);
     loadData();
   };
+
+  const profileLines = patientProfileLines(patientData);
 
   if (isLoading) {
     return <ActivityIndicator visible />;
@@ -236,9 +222,8 @@ function PatientActivityOverviewScreen(props) {
     >
       <ProfileNameButton
         testID={`activity_overview_screen_${patientID}_profileNameButton`}
-        profileLineOne={`${patientData.preferredName || patientData.firstName || ''} ${
-          patientData.lastName || ''
-        }`.trim()}
+        profileLineOne={profileLines.line1}
+        profileLineTwo={profileLines.line2}
         profilePicture={patientData.profilePicture}
         isPatient
         handleOnPress={() =>
@@ -344,9 +329,7 @@ function PatientActivityOverviewScreen(props) {
             title={item.activityTitle}
             subtitle={[
               item.exclusionRemarks,
-              item.startDate
-                ? `From ${String(item.startDate).slice(0, 10)}`
-                : null,
+              item.startDate ? `From ${String(item.startDate).slice(0, 10)}` : null,
               item.endDate ? `to ${String(item.endDate).slice(0, 10)}` : 'ongoing',
             ]
               .filter(Boolean)

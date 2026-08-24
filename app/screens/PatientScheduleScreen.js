@@ -21,6 +21,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 // API
 import patientApi from 'app/api/patient';
+import { patientFromApiResponse, patientProfileLines } from 'app/utility/patientHeader';
 import scheduleApi from 'app/api/schedule';
 
 // Utilities
@@ -208,12 +209,10 @@ const getPatientData = async () => {
       const response = await patientApi.getPatient(patientID);
 
       if (response && response.ok) {
-        const raw = response.data.data;
+        const normalized = patientFromApiResponse(response);
+        const raw = response.data.data || {};
         setPatientInfo({
-          firstName: raw.FirstName || raw.first_name || '',
-          lastName: raw.LastName || raw.last_name || '',
-          preferredName: raw.PreferredName || raw.preferredName || '',
-          profilePicture: raw.ProfilePicture || raw.profilePicture || '',
+          ...normalized,
           patientAllocationDTO: raw.PatientAllocationDTO || raw.patientAllocationDTO || {},
         });
 
@@ -379,10 +378,8 @@ const parseScheduleData = ({ tempPatientInfo, tempSchedule }) => {
             <ProfileNameButton
               testID={`${testID}_profileNameButton`}
               profilePicture={patientInfo.profilePicture}
-              profileLineOne={patientInfo.preferredName}
-              profileLineTwo={
-                patientInfo.firstName + ' ' + patientInfo.lastName
-              }
+              profileLineOne={patientProfileLines(patientInfo).line1}
+              profileLineTwo={patientProfileLines(patientInfo).line2}
               handleOnPress={onClickProfile}
               isPatient
               isVertical={false}
