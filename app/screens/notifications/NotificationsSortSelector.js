@@ -1,4 +1,5 @@
-import React, { StyleSheet, View } from 'react-native';
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
 import { HStack, Text } from 'native-base';
 
 const listOfSorts = [

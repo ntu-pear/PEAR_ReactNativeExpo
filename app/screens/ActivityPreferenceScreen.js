@@ -19,7 +19,7 @@ import {
 import routes from 'app/navigation/routes';
 
 // API
-import activity, { applyActivityTitles, buildActivityTitleMap } from 'app/api/activity';
+import activity, { mergeCataloguePreferences } from 'app/api/activity';
 import patientApi from 'app/api/patient';
 import AuthContext from 'app/auth/context';
 import { patientFromApiResponse, patientProfileLines } from 'app/utility/patientHeader';
@@ -168,11 +168,11 @@ function ActivityPreferenceScreen(props) {
       activity.getCentreActivities(),
       activity.getActivities(),
     ]);
-    const titleMap = buildActivityTitleMap(
+    return mergeCataloguePreferences(
       centreRes?.ok ? centreRes.data?.data || [] : [],
       activitiesRes?.ok ? activitiesRes.data?.data || [] : [],
+      rows || [],
     );
-    return applyActivityTitles(rows || [], titleMap);
   };
 
   // Get patient data from backend
@@ -243,7 +243,7 @@ function ActivityPreferenceScreen(props) {
           (pref) => pref.CentreActivityID === item.centreActivityID,
         );
 
-        if (existingPref) {
+        if (existingPref?.CentreActivityPreferenceID) {
           // Preference exists: update with PUT
           const updatePayload = {
             PatientID: patientID,

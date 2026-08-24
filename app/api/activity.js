@@ -25,49 +25,59 @@ const unwrapArray = (data) => {
   return [];
 };
 
-const normalizePreference = (pref = {}) => ({
-  CentreActivityPreferenceID:
-    pref.CentreActivityPreferenceID ??
-    pref.centreActivityPreferenceID ??
-    pref.id,
-  centreActivityPreferenceID:
-    pref.centreActivityPreferenceID ??
-    pref.CentreActivityPreferenceID ??
-    pref.id,
-  CentreActivityID:
-    pref.CentreActivityID ??
-    pref.centreActivityID ??
-    pref.centre_activity_id,
-  centreActivityID:
-    pref.centreActivityID ??
-    pref.CentreActivityID ??
-    pref.centre_activity_id,
-  PatientID: pref.PatientID ?? pref.patientID ?? pref.patient_id,
-  patientID: pref.patientID ?? pref.PatientID ?? pref.patient_id,
-  activityTitle:
-    pref.activityTitle ??
-    pref.ActivityTitle ??
-    pref.activity_title ??
-    pref.centre_activity_title ??
-    pref.title ??
-    pref.activity?.title ??
-    '',
-  isLike: pref.isLike ?? pref.IsLike ?? pref.is_like ?? 0,
-  ...pref,
-});
+const isDeletedRow = (row = {}) =>
+  Boolean(row.is_deleted ?? row.isDeleted ?? row.IsDeleted);
 
-const normalizeCentreActivity = (activity = {}) => ({
-  CentreActivityID: activity.CentreActivityID ?? activity.centreActivityID ?? activity.id,
-  centreActivityID: activity.centreActivityID ?? activity.CentreActivityID ?? activity.id,
-  activityTitle:
-    activity.activityTitle ??
-    activity.ActivityTitle ??
-    activity.activity_title ??
-    activity.title ??
-    activity.activity?.title ??
-    '',
-  ...activity,
-});
+const normalizePreference = (pref = {}) => {
+  const centreActivityID =
+    pref.CentreActivityID ?? pref.centreActivityID ?? pref.centre_activity_id;
+  return {
+    ...pref,
+    CentreActivityPreferenceID:
+      pref.CentreActivityPreferenceID ??
+      pref.centreActivityPreferenceID ??
+      pref.id,
+    centreActivityPreferenceID:
+      pref.centreActivityPreferenceID ??
+      pref.CentreActivityPreferenceID ??
+      pref.id,
+    CentreActivityID: centreActivityID,
+    centreActivityID,
+    PatientID: pref.PatientID ?? pref.patientID ?? pref.patient_id,
+    patientID: pref.patientID ?? pref.PatientID ?? pref.patient_id,
+    activityTitle:
+      pref.activityTitle ??
+      pref.ActivityTitle ??
+      pref.activity_title ??
+      pref.centre_activity_title ??
+      pref.title ??
+      pref.activity?.title ??
+      '',
+    isLike: pref.isLike ?? pref.IsLike ?? pref.is_like ?? 0,
+  };
+};
+
+const normalizeCentreActivity = (activity = {}) => {
+  const centreActivityID =
+    activity.CentreActivityID ?? activity.centreActivityID ?? activity.id;
+  const activityID =
+    activity.activity_id ?? activity.activityID ?? activity.ActivityID;
+  return {
+    ...activity,
+    CentreActivityID: centreActivityID,
+    centreActivityID,
+    activityID,
+    activity_id: activityID,
+    activityTitle:
+      activity.activityTitle ??
+      activity.ActivityTitle ??
+      activity.activity_title ??
+      activity.title ??
+      activity.activity?.title ??
+      '',
+    isDeleted: isDeletedRow(activity),
+  };
+};
 
 const toMobileListResponse = (res, normalizer) => ({
   ...res,
@@ -101,6 +111,7 @@ const getCentreActivities = async () => {
 const getActivities = async () => {
   const res = await client.get(`${activities}/`, {}, withActivityV1Base());
   return toMobileListResponse(res, (activity = {}) => ({
+    ...activity,
     id: activity.id ?? activity.activityID ?? activity.ActivityID,
     activityTitle:
       activity.title ??
@@ -108,7 +119,7 @@ const getActivities = async () => {
       activity.ActivityTitle ??
       activity.activity_title ??
       '',
-    ...activity,
+    isDeleted: isDeletedRow(activity),
   }));
 };
 
@@ -118,17 +129,20 @@ export const isMissingActivityTitle = (title) => {
 };
 
 export const buildActivityTitleMap = (centreActivitiesList = [], activitiesList = []) => {
-  const activityTitles = {};
+  // Same join as PEAR_WebFE origin/main: centre_activity.activity_id -> activity.title.
+  const catalogTitles = {};
   activitiesList.forEach((activity) => {
+    if (isDeletedRow(activity)) return;
     const id = activity.id ?? activity.activityID;
-    const title = activity.activityTitle ?? activity.title;
+    const title = activity.title ?? activity.activityTitle;
     if (id != null && !isMissingActivityTitle(title)) {
-      activityTitles[String(id)] = title;
+      catalogTitles[String(id)] = title;
     }
   });
 
   const map = {};
   centreActivitiesList.forEach((centreActivity) => {
+    if (isDeletedRow(centreActivity)) return;
     const centreId =
       centreActivity.centreActivityID ??
       centreActivity.CentreActivityID ??
@@ -137,14 +151,8 @@ export const buildActivityTitleMap = (centreActivitiesList = [], activitiesList 
       centreActivity.activity_id ??
       centreActivity.activityID ??
       centreActivity.ActivityID;
-    const rawTitle =
-      centreActivity.activityTitle ||
-      centreActivity.title ||
-      '';
-    const title = !isMissingActivityTitle(rawTitle)
-      ? rawTitle
-      : activityTitles[String(activityId)] || '';
-    if (centreId != null && !isMissingActivityTitle(title)) {
+    const title = catalogTitles[String(activityId)] || '';
+    if (centreId != null && title) {
       map[String(centreId)] = title;
     }
   });
@@ -154,11 +162,51 @@ export const buildActivityTitleMap = (centreActivitiesList = [], activitiesList 
 export const applyActivityTitles = (items = [], titleMap = {}) =>
   items.map((item) => {
     const id = item.centreActivityID ?? item.CentreActivityID;
-    if (!isMissingActivityTitle(item.activityTitle)) return item;
     const mapped = titleMap[String(id)];
-    if (!mapped) return item;
-    return { ...item, activityTitle: mapped };
+    if (mapped) return { ...item, activityTitle: mapped };
+    if (!isMissingActivityTitle(item.activityTitle)) return item;
+    return { ...item, activityTitle: item.activityTitle || '' };
   });
+
+export const keepNamedActivities = (items = []) =>
+  items.filter((item) => !isMissingActivityTitle(item.activityTitle));
+
+export const mergeCataloguePreferences = (
+  centreActivitiesList = [],
+  activitiesList = [],
+  preferencesList = [],
+) => {
+  const titleMap = buildActivityTitleMap(centreActivitiesList, activitiesList);
+  const prefByCentreId = {};
+  preferencesList.forEach((pref) => {
+    const id = pref.centreActivityID ?? pref.CentreActivityID;
+    if (id != null) prefByCentreId[String(id)] = pref;
+  });
+
+  const rows = [];
+  centreActivitiesList.forEach((centreActivity) => {
+    if (isDeletedRow(centreActivity)) return;
+    const centreId =
+      centreActivity.centreActivityID ??
+      centreActivity.CentreActivityID ??
+      centreActivity.id;
+    const title = titleMap[String(centreId)];
+    if (centreId == null || isMissingActivityTitle(title)) return;
+    const pref = prefByCentreId[String(centreId)] || {};
+    rows.push({
+      ...pref,
+      centreActivityID: centreId,
+      CentreActivityID: centreId,
+      activityTitle: title,
+      isLike: pref.isLike ?? pref.IsLike ?? pref.is_like ?? 0,
+      centreActivityPreferenceID:
+        pref.centreActivityPreferenceID ?? pref.CentreActivityPreferenceID,
+      CentreActivityPreferenceID:
+        pref.CentreActivityPreferenceID ?? pref.centreActivityPreferenceID,
+    });
+  });
+  return rows;
+};
 
 // **********************  POST REQUESTS *************************
 
@@ -251,6 +299,7 @@ const normalizeRecommendation = (rec = {}) => {
   const doctorRecommendation =
     rec.doctor_recommendation ?? rec.doctorRecommendation ?? rec.DoctorRecommendation ?? 0;
   return {
+    ...rec,
     id: rec.id ?? rec.centreActivityRecommendationID ?? rec.CentreActivityRecommendationID,
     centreActivityID:
       rec.centre_activity_id ?? rec.centreActivityID ?? rec.CentreActivityID,
@@ -266,12 +315,12 @@ const normalizeRecommendation = (rec = {}) => {
       rec.centre_activity_title ??
       rec.title ??
       '',
-    isDeleted: Boolean(rec.is_deleted ?? rec.isDeleted),
-    ...rec,
+    isDeleted: isDeletedRow(rec),
   };
 };
 
 const normalizeExclusion = (exclusion = {}) => ({
+  ...exclusion,
   id: exclusion.id ?? exclusion.centreActivityExclusionID ?? exclusion.CentreActivityExclusionID,
   centreActivityID:
     exclusion.centre_activity_id ??
@@ -291,9 +340,18 @@ const normalizeExclusion = (exclusion = {}) => ({
     exclusion.centre_activity_title ??
     exclusion.title ??
     '',
-  isDeleted: Boolean(exclusion.is_deleted ?? exclusion.isDeleted),
-  ...exclusion,
+  isDeleted: isDeletedRow(exclusion),
 });
+
+const isEmptyRecommendationsNotFound = (res) => {
+  if (res?.ok || res?.status !== 404) return false;
+  const detail = res?.data?.detail;
+  const text = typeof detail === 'string' ? detail : JSON.stringify(detail ?? '');
+  return /no centre activity recommendations found/i.test(text);
+};
+
+const emptyRecommendationList = (res) =>
+  toMobileListResponse({ ...res, ok: true, status: 200, data: [] }, normalizeRecommendation);
 
 const getActivityRecommendations = async (patientID) => {
   // Prefer patient-scoped path; fall back to list + filter (web main pattern).
@@ -313,15 +371,25 @@ const getActivityRecommendations = async (patientID) => {
     return normalized;
   }
 
+  if (isEmptyRecommendationsNotFound(scoped)) {
+    return emptyRecommendationList(scoped);
+  }
+
   const all = await client.get(`${centreActivityRecommendations}/`, {}, withActivityV1Base());
-  if (!all.ok) return all;
-  const normalized = toMobileListResponse(all, normalizeRecommendation);
-  normalized.data.data = normalized.data.data.filter(
-    (item) =>
-      !item.isDeleted &&
-      String(item.patientID ?? item.patient_id) === String(patientID),
-  );
-  return normalized;
+  if (all.ok) {
+    const normalized = toMobileListResponse(all, normalizeRecommendation);
+    normalized.data.data = normalized.data.data.filter(
+      (item) =>
+        !item.isDeleted &&
+        String(item.patientID ?? item.patient_id) === String(patientID),
+    );
+    return normalized;
+  }
+
+  if (isEmptyRecommendationsNotFound(all)) {
+    return emptyRecommendationList(all);
+  }
+  return all;
 };
 
 const getActivityExclusions = async (patientID) => {
@@ -353,6 +421,34 @@ const getActivityExclusions = async (patientID) => {
   return normalized;
 };
 
+const createActivityExclusion = async (data) => {
+  const endDate = data.endDate ?? data.end_date;
+  const payload = {
+    centre_activity_id: Number(data.centreActivityID ?? data.CentreActivityID),
+    patient_id: Number(data.patientID ?? data.PatientID),
+    exclusion_remarks: data.exclusionRemarks ?? data.exclusion_remarks ?? null,
+    start_date: data.startDate ?? data.start_date,
+    end_date: endDate === '' || endDate === undefined ? null : endDate,
+  };
+  return client.post(`${centreActivityExclusions}/`, payload, withActivityV1Base());
+};
+
+const updateActivityExclusion = async (data) => {
+  const id = data.id ?? data.centreActivityExclusionID;
+  const endDate = data.endDate ?? data.end_date;
+  const payload = {
+    id,
+    centre_activity_id: Number(data.centreActivityID ?? data.CentreActivityID),
+    patient_id: Number(data.patientID ?? data.PatientID),
+    exclusion_remarks: data.exclusionRemarks ?? data.exclusion_remarks ?? null,
+    start_date: data.startDate ?? data.start_date,
+    end_date: endDate === '' || endDate === undefined ? null : endDate,
+    is_deleted: data.isDeleted ?? data.is_deleted ?? false,
+    modified_by_id: data.modifiedById ?? data.ModifiedById ?? 'MOBILE',
+  };
+  return client.put(`${centreActivityExclusions}/`, payload, withActivityV1Base());
+};
+
 /*
  * Expose your end points here
  */
@@ -366,4 +462,6 @@ export default {
   getPatientRoutine,
   getActivityRecommendations,
   getActivityExclusions,
+  createActivityExclusion,
+  updateActivityExclusion,
 };

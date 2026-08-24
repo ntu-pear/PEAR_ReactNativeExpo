@@ -1,5 +1,6 @@
 // Base
 import React from 'react';
+import { Platform } from 'react-native';
 import { View } from 'native-base';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -35,6 +36,14 @@ function hideBottomTabOnSpecificRoute(route) {
   return;
 }
 
+// Tablet emulator 3-button / gesture nav sits under the default tab bar, so
+// Notifications (and nearby tabs) were dispatching Android Home/Back.
+const liftedTabBarStyle = {
+  height: Platform.OS === 'android' ? 104 : 56,
+  paddingBottom: Platform.OS === 'android' ? 40 : 0,
+  paddingTop: Platform.OS === 'android' ? 8 : 0,
+};
+
 // Refer to this for configuration: https://reactnavigation.org/docs/bottom-tab-navigator
 function AppNavigator() {
   const { panResponder } = useInactivityLogout();
@@ -47,6 +56,7 @@ function AppNavigator() {
         screenOptions={{
           headerShown: false,
           tabBarActiveTintColor: colors.pink,
+          tabBarStyle: liftedTabBarStyle,
         }}
       >
         <Tab.Screen
@@ -66,9 +76,12 @@ function AppNavigator() {
         <Tab.Screen
           name={routes.NOTIFICATION}
           component={NotificationNavigator}
-          options={{
+          options={({ route }) => ({
             tabBarTestID: 'Notification_Tab',
-            tabBarStyle: ({ route }) => hideBottomTabOnSpecificRoute(route),
+            tabBarStyle: {
+              ...liftedTabBarStyle,
+              ...(hideBottomTabOnSpecificRoute(route) || {}),
+            },
             headerShown: false,
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons
@@ -77,7 +90,7 @@ function AppNavigator() {
                 size={size}
               />
             ),
-          }}
+          })}
         />
         <Tab.Screen
           name={routes.PATIENTS}
@@ -111,9 +124,12 @@ function AppNavigator() {
         <Tab.Screen
           name={routes.ACCOUNT}
           component={AccountNavigator}
-          options={{
+          options={({ route }) => ({
             unmountOnBlur: true,
-            tabBarStyle: ({ route }) => hideBottomTabOnSpecificRoute(route),
+            tabBarStyle: {
+              ...liftedTabBarStyle,
+              ...(hideBottomTabOnSpecificRoute(route) || {}),
+            },
             tabBarTestID: 'Account_Tab',
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons
@@ -122,7 +138,7 @@ function AppNavigator() {
                 size={size}
               />
             ),
-          }}
+          })}
         />
       </Tab.Navigator>
     </View>

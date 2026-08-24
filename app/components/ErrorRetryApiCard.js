@@ -42,7 +42,7 @@ function ErrorRetryApiCard({ handleError }) {
           </HStack>
         </VStack>
       </Alert>
-      <Box position="fixed" my="50%" w="60%" mx="auto">
+      <Box flex={1} w="60%" mx="auto" justifyContent="center">
         {/* Take not to pass in handleError from parent component */}
         <AppButton title="Try Again" color="red" onPress={handleError} />
       </Box>

@@ -111,10 +111,18 @@ function ConfigCard(props) {
           },
         },
       ]);
+    } else if (!result) {
+      Alert.alert(
+        'Generate schedule',
+        'Tablet can generate this week only (GET /schedule/generate/). Next week and later are not wired yet.',
+      );
     } else {
-      console.log('Error');
-      const alertTitle = 'Something went wrong';
-      Alert.alert(alertTitle);
+      const detail =
+        result.data?.Message ||
+        result.data?.message ||
+        result.problem ||
+        `HTTP ${result.status || 'error'}`;
+      Alert.alert('Could not generate schedule', String(detail));
     }
   };
 

@@ -24,7 +24,7 @@ import NotificationSortSelector from 'app/screens/notifications/NotificationsSor
 import globalStyles from 'app/utility/styles.js';
 
 function NotificationsScreen(props) {
-  const { notificationType } = props.route.params;
+  const { notificationType } = props.route.params ?? {};
   const { navigation } = props;
   const { user } = useContext(AuthContext);
   const { acceptRejectNotifID } = useContext(AuthContext);

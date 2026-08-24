@@ -240,6 +240,21 @@ describe('migration API adapters', () => {
     );
   });
 
+  test('activity recommendations treat empty-not-found 404 as an empty list', async () => {
+    const activityApi = require('app/api/activity').default;
+    mockClient.get.mockResolvedValueOnce({
+      ok: false,
+      status: 404,
+      data: { detail: 'No Centre Activity Recommendations found for Patient ID 12' },
+    });
+
+    const response = await activityApi.getActivityRecommendations(12);
+
+    expect(response.ok).toBe(true);
+    expect(response.data.data).toEqual([]);
+    expect(mockClient.get).toHaveBeenCalledTimes(1);
+  });
+
   test('activity exclusions fall back to list filter when patient path is missing', async () => {
     const activityApi = require('app/api/activity').default;
     mockClient.get
@@ -411,6 +426,100 @@ describe('migration API adapters', () => {
     expect(
       applyActivityTitles([{ centreActivityID: 22, activityTitle: '' }], map)[0].activityTitle,
     ).toBe('Mahjong');
+  });
+
+  test('activity titles prefer the catalog name like web main, and skip unnamed rows', () => {
+    const {
+      applyActivityTitles,
+      buildActivityTitleMap,
+      keepNamedActivities,
+    } = require('app/api/activity');
+    const map = buildActivityTitleMap(
+      [
+        { id: 22, activity_id: 5, title: 'Centre nickname' },
+        { id: 23, activity_id: 9, is_deleted: true },
+        { id: 24, activity_id: 8 },
+      ],
+      [
+        { id: 5, title: 'Mahjong' },
+        { id: 8, title: '' },
+        { id: 9, title: 'Deleted Craft' },
+      ],
+    );
+
+    expect(map['22']).toBe('Mahjong');
+    expect(map['23']).toBeUndefined();
+    expect(map['24']).toBeUndefined();
+
+    const titled = applyActivityTitles(
+      [
+        { centreActivityID: 22, activityTitle: '' },
+        { centreActivityID: 24, activityTitle: '' },
+      ],
+      map,
+    );
+    expect(titled[0].activityTitle).toBe('Mahjong');
+    expect(keepNamedActivities(titled)).toHaveLength(1);
+    expect(keepNamedActivities(titled)[0].centreActivityID).toBe(22);
+  });
+
+  test('catalogue merge fills Neutral for named centre activities with no preference row', () => {
+    const { mergeCataloguePreferences } = require('app/api/activity');
+    const rows = mergeCataloguePreferences(
+      [
+        { id: 22, activity_id: 5 },
+        { id: 23, activity_id: 6 },
+        { id: 24, activity_id: 8, is_deleted: true },
+        { id: 25, activity_id: 9 },
+      ],
+      [
+        { id: 5, title: 'Mahjong' },
+        { id: 6, title: 'Art & Craft AM' },
+        { id: 9, title: '' },
+      ],
+      [{ centreActivityID: 22, isLike: 1, centreActivityPreferenceID: 90 }],
+    );
+
+    expect(rows).toHaveLength(2);
+    expect(rows.find((row) => row.centreActivityID === 22)).toEqual(
+      expect.objectContaining({
+        activityTitle: 'Mahjong',
+        isLike: 1,
+        centreActivityPreferenceID: 90,
+      }),
+    );
+    expect(rows.find((row) => row.centreActivityID === 23)).toEqual(
+      expect.objectContaining({
+        activityTitle: 'Art & Craft AM',
+        isLike: 0,
+      }),
+    );
+  });
+
+  test('create activity exclusion posts dated payload like web main', async () => {
+    const activityApi = require('app/api/activity').default;
+    mockClient.post.mockResolvedValueOnce({ ok: true, status: 201, data: { id: 4 } });
+
+    const response = await activityApi.createActivityExclusion({
+      centreActivityID: 22,
+      patientID: 1,
+      exclusionRemarks: 'Away this week',
+      startDate: '2026-08-25',
+      endDate: '2026-08-29',
+    });
+
+    expect(mockClient.post).toHaveBeenCalledWith(
+      '/centre_activity_exclusions/',
+      expect.objectContaining({
+        centre_activity_id: 22,
+        patient_id: 1,
+        exclusion_remarks: 'Away this week',
+        start_date: '2026-08-25',
+        end_date: '2026-08-29',
+      }),
+      expect.objectContaining({ baseURL: 'http://activity-service/api/v1' }),
+    );
+    expect(response.ok).toBe(true);
   });
 
   test('patient routines use Activity Service without a trailing slash', async () => {

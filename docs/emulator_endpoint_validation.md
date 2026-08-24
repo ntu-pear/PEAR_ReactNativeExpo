@@ -109,6 +109,45 @@ Not a signed release APK. Recs 404 and caregiver exclusion 403 are staging/backe
 
 Recommendations remain 404 on live staging (patient path and list). Caregiver exclusion list remains 403 until backend grants read. Notifications remain 404.
 
+## 2026-08-25 web-main tablet behaviour (`emulator-5554`)
+
+VPN on for `10.96.188.x`. Metro is **localhost via `adb reverse tcp:8081 tcp:8081`** — VPN does not replace that reverse; after a VPN reconnect the reverse list was empty and the tablet showed “Cannot connect to Metro” until reverse was reapplied, then Reload.
+
+Same-scene PNGs under `docs/screenshots/2026-08-17_e2e_*.png` were overwritten. New: `2026-08-17_e2e_supervisor_add_exclusion.png`, `2026-08-17_e2e_supervisor_generate_schedule.png`.
+
+| Scene | 25 Aug in-app |
+| --- | --- |
+| Supervisor Activity Overview (ALICE) | **Pass** — **26** named catalogue rows with Neutral fill (`Vital Check AM` Neutral, `tablet game` Like, `tee break` Dislike). Recs are **empty-state copy** (`No doctor recommendations for this patient.`) after treating staging’s empty-list 404 as []. **Add Exclusion** shown. Exclusions: 2 rows. |
+| Supervisor Add Exclusion sheet | **Pass** — named activity picker, remarks, required start date, end date or Indefinite. Not submitted (no staging write). |
+| Supervisor Manage Preferences | **Pass** — 26 named chips (2 Like / 22 Neutral / 2 Dislike). No empty pills. |
+| Supervisor Config generate this week | **Pass (confirm only)** — Config tab now uses AuthContext `roleName` (JWT has no role). Tapping This Week showed `Schedule already exists, continue to generate?`; **No** so the live schedule was not regenerated. Next week / 2 weeks later still unwired. |
+| Caregiver Overview (ALICE) | **Pass** — 26 Neutral-filled prefs; banner **recommendations, exclusions** (404 + 403); **no** Add Exclusion. Manage Preferences present. |
+| Caregiver Manage / Edit Preferences | **Pass** — 26 named chips; edit modal lists catalogue names with Like / Neutral / Dislike radios. Cancelled without saving. |
+
+Honest leftovers: caregiver recs/exclusions **403** (Activity Service role gates on `origin/staging`); User Service `origin/staging` still has **no** `/Notification` routes; generate was not executed against staging; **do not claim all E2E passed**.
+
+## 2026-08-25 continued walkthrough + other-repo heads
+
+Fetched remotes only (mobile stayed on `cornelius/api-migration`). Live tablet still talks to **deployed staging**, not local checkouts.
+
+| Repo | Local HEAD | Newest remote used by the team |
+| --- | --- | --- |
+| PEAR_ReactNativeExpo | `cornelius/api-migration` | same branch |
+| PEAR_WebFE | `FWAFE-30-Patient-Info-Tab-Improvement` (behind) | **`origin/main`** (2026-08-25, revert aggregated endpoints + FWAFE-36). Do not port FWAFE-30/32/33. |
+| PEAR_activity_service | `main` (Mar) | **`origin/staging`** (2026-08-21). Recs GET doctor/supervisor only; exclusions GET supervisor only. Aggregated routes exist in git; **live staging 404s** `/aggregated/activity-preference-table/patient/1`. Empty recs = 404 `"No Centre Activity Recommendations found for Patient ID 1"`. |
+| PEAR_patient_service | `staging` | `origin/staging` (2026-08-22) |
+| PEAR_scheduler | `scheduler_prod` | **`origin/scheduler_staging`** (2026-08-23) — med week-end Friday fix, don’t overwrite past days on regenerate |
+| PEAR_user_service | watchdog feature branch | **`origin/staging`** (2026-08-22) — **no Notification API** |
+| PEAR_logging_service | `main` | `origin/staging` (2026-08-22) |
+
+| Scene | Result |
+| --- | --- |
+| Supervisor routine / photos / notes / medication / see-med / schedule | **Pass** (ALICE). Routine empty copy is honest. See-med: SALBUTAMOL. |
+| Supervisor notifications | **Pass (fail-visible)** — Unread/Read/Accept/Reject. Staging has no Notification routes → `Unable to retrieve api data. Try again? Or Relogin`. Opening this tab previously **killed the app** (NativeBase `position="fixed"` on `ErrorRetryApiCard` is invalid on Android; material top-tabs + Reanimated also threw `ViewManager for tag could not be found`). |
+| Caregiver All Patients / ALICE profile / overview | **Pass** — 10 patients; banner `recommendations, exclusions`; 26 prefs; **no** Add Exclusion. |
+
+Fixes applied this pass (uncommitted): lift Android tab bar above the system nav inset; replace notification pager with a static Unread/Read/Accept/Reject strip; NativeBase `position="fixed"` → flex box on `ErrorRetryApiCard`.
+
 ## How To Re-Run Validation
 
 1. Connect to NTU/PEAR VPN.

@@ -1,7 +1,6 @@
 /* eslint-disable */
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Platform, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import routes from './routes';
 import NotificationsScreen from 'app/screens/notifications/NotificationsScreen';
 import NotificationsRejectScreen from 'app/screens/notifications/NotificationsRejectScreen';
@@ -10,84 +9,118 @@ import NotificationsReadScreen from 'app/screens/notifications/NotificationsRead
 import NotificationsApprovalRequestScreen from 'app/screens/notifications/NotificationsApprovalRequestScreen';
 import colors from '../config/colors';
 import typography from '../config/typography';
-import { useSafeArea } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import NotificationType from 'app/screens/notifications/NotificationType';
 import NotificationContext from 'app/screens/notifications/NotificationContext';
 import { useState } from 'react';
 
-const Tab = createMaterialTopTabNavigator();
 const Stack = createNativeStackNavigator();
 
+const NOTIFICATION_SUBTABS = [
+  {
+    key: 'unread',
+    title: 'Unread',
+    Comp: NotificationsScreen,
+    name: routes.NOTIFICATION,
+    type: NotificationType.Unread,
+  },
+  {
+    key: 'read',
+    title: 'Read',
+    Comp: NotificationsReadScreen,
+    name: routes.NOTIFICATION_READ,
+    type: NotificationType.Read,
+  },
+  {
+    key: 'accept',
+    title: 'Accept',
+    Comp: NotificationsAcceptScreen,
+    name: routes.NOTIFICATION_ACCEPT,
+    type: NotificationType.Accept,
+  },
+  {
+    key: 'reject',
+    title: 'Reject',
+    Comp: NotificationsRejectScreen,
+    name: routes.NOTIFICATION_REJECT,
+    type: NotificationType.Reject,
+  },
+];
+
 /*
- * Reference: https://reactnavigation.org/docs/material-top-tab-navigator/
- * Note: V6 of documentation
+ * Material top-tabs + Reanimated layout reanimation crashes this Expo Android
+ * build (IllegalViewOperationException: ViewManager for tag could not be found)
+ * as soon as the Notifications bottom tab is focused. A static tab strip keeps
+ * the same four lists without a pager.
  */
-// TODO: Passing props between neighbouring children
-// https://stackoverflow.com/questions/60439210/how-to-pass-props-to-screen-component-with-a-tab-navigator
-// https://reactnavigation.org/docs/navigation-prop/#setparams
-// https://www.reddit.com/r/reactnative/comments/td6ifk/passing_props_through_tab_navigator/
-function NotificationTabNavigator() {
-  const safeArea = useSafeArea();
+function NotificationTabNavigator({ navigation }) {
+  const safeArea = useSafeAreaInsets();
+  const [activeKey, setActiveKey] = useState(NOTIFICATION_SUBTABS[0].key);
+  const current =
+    NOTIFICATION_SUBTABS.find((tab) => tab.key === activeKey) ||
+    NOTIFICATION_SUBTABS[0];
+  const Comp = current.Comp;
+
   return (
     <View
+      collapsable={false}
       style={{
         flex: 1,
         paddingTop: safeArea.top,
-        justifyContent: 'space-between',
+        backgroundColor: colors.white,
       }}
     >
-      <Tab.Navigator
-        screenOptions={{
-          tabBarIndicatorStyle: {
-            backgroundColor: colors.pink,
-          },
-          tabBarLabelStyle: {
-            fontFamily: typography.baseFontFamily,
-          },
-          swipeEnabled: false,
+      <View
+        style={{
+          flexDirection: 'row',
+          borderBottomWidth: 1,
+          borderBottomColor: colors.grey_lighter,
         }}
       >
-        <Tab.Screen
-          component={NotificationsScreen}
-          initialParams={{ notificationType: NotificationType.Unread }}
-          name={routes.NOTIFICATION}
-          options={{
-            title: 'Unread',
+        {NOTIFICATION_SUBTABS.map((tab) => {
+          const selected = tab.key === current.key;
+          return (
+            <Pressable
+              key={tab.key}
+              onPress={() => setActiveKey(tab.key)}
+              style={{
+                flex: 1,
+                alignItems: 'center',
+                paddingVertical: 12,
+                borderBottomWidth: selected ? 2 : 0,
+                borderBottomColor: colors.pink,
+              }}
+              testID={`notification_subtab_${tab.key}`}
+            >
+              <Text
+                style={{
+                  fontFamily: typography.subheading1.fontFamily,
+                  fontSize: typography.subheading1.fontSize,
+                  fontWeight: selected ? '600' : '400',
+                  color: selected ? colors.pink : colors.black,
+                }}
+              >
+                {tab.title}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+      <View collapsable={false} style={{ flex: 1 }}>
+        <Comp
+          navigation={navigation}
+          route={{
+            key: current.key,
+            name: current.name,
+            params: { notificationType: current.type },
           }}
         />
-        <Tab.Screen
-          component={NotificationsReadScreen}
-          initialParams={{ notificationType: NotificationType.Read }}
-          name={routes.NOTIFICATION_READ}
-          options={{
-            title: 'Read',
-          }}
-        />
-        <Tab.Screen
-          component={NotificationsAcceptScreen}
-          initialParams={{ notificationType: NotificationType.Accept }}
-          name={routes.NOTIFICATION_ACCEPT}
-          options={{
-            title: 'Accept',
-          }}
-        />
-        <Tab.Screen
-          component={NotificationsRejectScreen}
-          initialParams={{ notificationType: NotificationType.Reject }}
-          name={routes.NOTIFICATION_REJECT}
-          options={{
-            title: 'Reject',
-          }}
-        />
-      </Tab.Navigator>
+      </View>
     </View>
   );
 }
-// Note: NotificationNavigator is an example of nested navigator
-// Purpose: To allow tab components to navigate to `NotificationApprovalRequestScreen`.
-// Reference: https://reactnavigation.org/docs/nesting-navigators/#each-navigator-keeps-its-own-navigation-history
+
 function NotificationNavigator() {
-  // add NotificationContext data here
   const [shouldRefetchAcceptNotifications, setRefetchAcceptNotifications] =
     useState(false);
   const [shouldRefetchRejectNotifications, setRefetchRejectNotifications] =
@@ -101,11 +134,11 @@ function NotificationNavigator() {
         setRefetchRejectNotifications,
       }}
     >
-      <Stack.Navigator>
+      <Stack.Navigator screenOptions={{ animation: 'none' }}>
         <Stack.Screen
           name={routes.NOTIFICATION_TAB}
           component={NotificationTabNavigator}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, animation: 'none' }}
         />
         <Stack.Screen
           name={routes.NOTIFICATION_APPROVAL_REQUEST}

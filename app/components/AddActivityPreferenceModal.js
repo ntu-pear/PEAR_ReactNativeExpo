@@ -45,12 +45,12 @@ function AddActivityPreferenceModal({
         responseData,
         activitiesRes?.ok ? activitiesRes.data?.data || [] : [],
       );
-      const extractedObjects = applyActivityTitles(responseData, titleMap).map((object) => ({
-        label: isMissingActivityTitle(object.activityTitle)
-          ? `Activity ${object.centreActivityID ?? ''}`.trim()
-          : object.activityTitle,
-        value: object.centreActivityID,
-      }));
+      const extractedObjects = applyActivityTitles(responseData, titleMap)
+        .filter((object) => !isMissingActivityTitle(object.activityTitle))
+        .map((object) => ({
+          label: object.activityTitle,
+          value: object.centreActivityID,
+        }));
       setActivityList(extractedObjects);
       const initialPrefs = {};
       extractedObjects.forEach((item) => {

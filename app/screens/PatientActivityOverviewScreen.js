@@ -13,11 +13,13 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import activityApi, {
   applyActivityTitles,
   buildActivityTitleMap,
-  isMissingActivityTitle,
+  keepNamedActivities,
+  mergeCataloguePreferences,
 } from 'app/api/activity';
 import patientApi from 'app/api/patient';
 import AuthContext from 'app/auth/context';
 import ActivityIndicator from 'app/components/ActivityIndicator';
+import AddActivityExclusionModal from 'app/components/AddActivityExclusionModal';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import colors from 'app/config/colors';
 import routes from 'app/navigation/routes';
@@ -69,8 +71,8 @@ function EmptyRow({ message }) {
   );
 }
 
-function ListRow({ title, subtitle, badge, badgeColor }) {
-  return (
+function ListRow({ title, subtitle, badge, badgeColor, onPress, testID }) {
+  const row = (
     <Box
       bg="white"
       borderRadius={12}
@@ -103,6 +105,13 @@ function ListRow({ title, subtitle, badge, badgeColor }) {
       </Box>
     </Box>
   );
+
+  if (!onPress) return row;
+  return (
+    <TouchableOpacity testID={testID} onPress={onPress} activeOpacity={0.85}>
+      {row}
+    </TouchableOpacity>
+  );
 }
 
 function PatientActivityOverviewScreen(props) {
@@ -122,17 +131,12 @@ function PatientActivityOverviewScreen(props) {
   const [recommendations, setRecommendations] = useState([]);
   const [exclusions, setExclusions] = useState([]);
   const [errors, setErrors] = useState([]);
+  const [showExclusionModal, setShowExclusionModal] = useState(false);
+  const [exclusionModalMode, setExclusionModalMode] = useState('add');
+  const [editingExclusion, setEditingExclusion] = useState(null);
 
   const resolveTitles = (items, activityMap) =>
-    applyActivityTitles(items, activityMap).map((item) => {
-      const id = item.centreActivityID ?? item.CentreActivityID;
-      return {
-        ...item,
-        activityTitle: isMissingActivityTitle(item.activityTitle)
-          ? `Activity ${id ?? ''}`.trim()
-          : item.activityTitle,
-      };
-    });
+    keepNamedActivities(applyActivityTitles(items, activityMap));
 
   const loadData = useCallback(async () => {
     if (!patientID) return;
@@ -170,8 +174,10 @@ function PatientActivityOverviewScreen(props) {
 
       setPreferences(
         prefsRes?.ok
-          ? resolveTitles(prefsRes?.data?.data || [], activityMap).filter(
-              (p) => p.CentreActivityID != null || p.centreActivityID != null,
+          ? mergeCataloguePreferences(
+              centreRes?.ok ? centreRes.data?.data || [] : [],
+              activitiesRes?.ok ? activitiesRes.data?.data || [] : [],
+              prefsRes?.data?.data || [],
             )
           : [],
       );
@@ -206,6 +212,36 @@ function PatientActivityOverviewScreen(props) {
     loadData();
   };
 
+  const handleExclusionSubmit = async (values) => {
+    const payload = {
+      id: values.id,
+      centreActivityID: values.centreActivityID,
+      patientID,
+      exclusionRemarks: values.exclusionRemarks,
+      startDate: values.startDate,
+      endDate: values.endDate,
+    };
+    const result =
+      exclusionModalMode === 'edit' && values.id
+        ? await activityApi.updateActivityExclusion(payload)
+        : await activityApi.createActivityExclusion(payload);
+
+    if (!result?.ok) {
+      Alert.alert(
+        'Could not save exclusion',
+        result?.data?.detail ||
+          result?.data?.message ||
+          result?.problem ||
+          `Request failed (${result?.status || 'unknown'}).`,
+      );
+      return;
+    }
+
+    setShowExclusionModal(false);
+    setEditingExclusion(null);
+    loadData();
+  };
+
   const profileLines = patientProfileLines(patientData);
 
   if (isLoading) {
@@ -234,8 +270,8 @@ function PatientActivityOverviewScreen(props) {
       <Text fontSize="md" color={MEDIUM} mt={2} mb={1}>
         Condensed view of preferences, doctor recommendations, and exclusions
         (aligned with web patient activity tabs). Caregivers can update
-        preferences here; recommendations and exclusions stay read-only on
-        mobile.
+        preferences; supervisors can add dated exclusions. Recommendations
+        stay read-only on mobile.
       </Text>
 
       {errors.length > 0 && (
@@ -266,13 +302,30 @@ function PatientActivityOverviewScreen(props) {
         </TouchableOpacity>
       )}
 
+      {isSupervisor && (
+        <TouchableOpacity
+          style={styles.manageButton}
+          onPress={() => {
+            setEditingExclusion(null);
+            setExclusionModalMode('add');
+            setShowExclusionModal(true);
+          }}
+          testID={`activity_overview_add_exclusion_${patientID}`}
+        >
+          <MaterialCommunityIcons name="plus" size={20} color="white" />
+          <Text color="white" fontWeight="700" ml={2}>
+            Add Exclusion
+          </Text>
+        </TouchableOpacity>
+      )}
+
       <SectionHeader title="Preferences" count={preferences.length} />
       {preferences.length === 0 ? (
         <EmptyRow
           message={
             errors.includes('preferences')
               ? 'Could not load preferences. Pull to refresh.'
-              : 'No activity preferences recorded.'
+              : 'No named centre activities to show.'
           }
         />
       ) : (
@@ -336,18 +389,41 @@ function PatientActivityOverviewScreen(props) {
               .join(' · ')}
             badge="Excluded"
             badgeColor="#6a1b9a"
+            testID={`activity_overview_exclusion_${item.id}`}
+            onPress={
+              isSupervisor
+                ? () => {
+                    setEditingExclusion(item);
+                    setExclusionModalMode('edit');
+                    setShowExclusionModal(true);
+                  }
+                : undefined
+            }
           />
         ))
       )}
 
       <Box mt={4} mb={8}>
         <Text fontSize="xs" color={MEDIUM}>
-          Recommendations are read-only on mobile (doctor-managed on web).
-          Preference edits use the existing Preference screen. Creating
-          centre activities, generating schedules, exclusions, and routines
-          stay supervisor-only.
+          Recommendations stay read-only on mobile (doctor-managed on web).
+          Caregivers can update preferences. Supervisors can add or edit
+          dated exclusions here. Creating centre activities and generating
+          schedules stay on Config.
         </Text>
       </Box>
+
+      <AddActivityExclusionModal
+        testID={`activity_overview_exclusion_modal_${patientID}`}
+        showModal={showExclusionModal}
+        modalMode={exclusionModalMode}
+        existingExclusion={editingExclusion}
+        excludedActivityIds={exclusions.map((item) => item.centreActivityID)}
+        onClose={() => {
+          setShowExclusionModal(false);
+          setEditingExclusion(null);
+        }}
+        onSubmit={handleExclusionSubmit}
+      />
     </ScrollView>
   );
 }
