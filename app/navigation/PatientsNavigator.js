@@ -37,7 +37,7 @@ const Stack = createNativeStackNavigator();
 // Refer to this for configuration: https://reactnavigation.org/docs/native-stack-navigator#options
 function PatientsNavigator() {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator initialRouteName={routes.PATIENTS_SCREEN}>
       <Stack.Screen
         name={routes.MANAGE_MEDICATION}
         component={ManageMedicationScreen}
