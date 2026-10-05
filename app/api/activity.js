@@ -1,4 +1,5 @@
 /*eslint eslint-comments/no-unlimited-disable: error */
+import { activityEntityId } from 'app/utility/exclusionEligibility';
 import client, { ACTIVITY_V1_BASE } from 'app/api/client';
 
 /*
@@ -537,8 +538,10 @@ const getActivityExclusions = async (patientID) => {
 const createActivityExclusion = async (data) => {
   const endDate = data.endDate ?? data.end_date;
   const payload = {
-    centre_activity_id: Number(data.centreActivityID ?? data.CentreActivityID),
-    patient_id: Number(data.patientID ?? data.PatientID),
+    centre_activity_id: activityEntityId(
+      data.centreActivityID ?? data.CentreActivityID,
+    ),
+    patient_id: activityEntityId(data.patientID ?? data.PatientID),
     exclusion_remarks: data.exclusionRemarks ?? data.exclusion_remarks ?? null,
     start_date: data.startDate ?? data.start_date,
     end_date: endDate === '' || endDate === undefined ? null : endDate,
@@ -555,8 +558,10 @@ const updateActivityExclusion = async (data) => {
   const endDate = data.endDate ?? data.end_date;
   const payload = {
     id,
-    centre_activity_id: Number(data.centreActivityID ?? data.CentreActivityID),
-    patient_id: Number(data.patientID ?? data.PatientID),
+    centre_activity_id: activityEntityId(
+      data.centreActivityID ?? data.CentreActivityID,
+    ),
+    patient_id: activityEntityId(data.patientID ?? data.PatientID),
     exclusion_remarks: data.exclusionRemarks ?? data.exclusion_remarks ?? null,
     start_date: data.startDate ?? data.start_date,
     end_date: endDate === '' || endDate === undefined ? null : endDate,

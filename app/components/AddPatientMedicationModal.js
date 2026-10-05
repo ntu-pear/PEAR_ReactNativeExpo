@@ -1,5 +1,5 @@
 // Libs
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, Button, VStack, Text } from 'native-base';
 import { StyleSheet, View } from 'react-native';
 
@@ -26,6 +26,11 @@ function AddPatientMedicationModal({
   setFormData,
   onClose,
   onSubmit,
+  prescriptionChoices = [],
+  catalogueError = '',
+  onRetryCatalogue,
+  isSaving = false,
+  isUncertain = false,
 }) {
   // Screen error state: This = true when the child components report error(input fields)
   // Enables use of dynamic rendering of components when the page error = true/false.
@@ -66,10 +71,11 @@ function AddPatientMedicationModal({
   ]);
 
   // Reset form
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setFormData({
       medicationID: null,
       prescriptionName: '',
+      prescriptionListID: null,
       dosage: '',
       administerTime: [],
       instruction: '',
@@ -84,14 +90,14 @@ function AddPatientMedicationModal({
     setIsStartDateTimeError(false);
     setIsEndDateTimeError(false);
     setIsPrescriptionRemarksError(false);
-  };
+  }, [setFormData]);
 
   // When modal is closed, reset form
   useEffect(() => {
     if (!showModal) {
       resetForm();
     }
-  }, [showModal]);
+  }, [showModal, resetForm]);
 
   // Update administer time error state whenever administer time data is updated
   useEffect(() => {
@@ -100,9 +106,8 @@ function AddPatientMedicationModal({
 
   // Function to update  data
   const handleMedicationData = (field) => (e) => {
-    const newData = formData;
     if (field == 'administerTime') {
-      let tempTime = formData.administerTime;
+      let tempTime = [...formData.administerTime];
       tempTime.push(e);
       const newTempTime = checkDuplicateAdministerTime(tempTime);
       setFormData((prevState) => ({
@@ -119,9 +124,16 @@ function AddPatientMedicationModal({
 
   // Handle form submission
   const handleSubmit = () => {
-    if (!isInputErrors) {
+    if (
+      !isInputErrors &&
+      !isSaving &&
+      !isUncertain &&
+      !catalogueError &&
+      prescriptionChoices.some(
+        (row) => String(row.value) === String(formData.prescriptionListID),
+      )
+    ) {
       onSubmit(formData);
-      onClose();
     }
   };
 
@@ -136,7 +148,7 @@ function AddPatientMedicationModal({
 
   // Delete an administer time option
   const deleteAdministerTime = (i) => {
-    let tempTime = formData.administerTime;
+    let tempTime = [...formData.administerTime];
     tempTime.splice(i, 1);
     setFormData((prevState) => ({
       ...prevState,
@@ -147,20 +159,33 @@ function AddPatientMedicationModal({
   return (
     <AddEditModal
       handleSubmit={handleSubmit}
-      isInputErrors={isInputErrors}
+      isInputErrors={
+        isInputErrors ||
+        isSaving ||
+        isUncertain ||
+        !!catalogueError ||
+        !prescriptionChoices.some(
+          (row) => String(row.value) === String(formData.prescriptionListID),
+        )
+      }
       modalMode={modalMode}
       onClose={onClose}
       showModal={showModal}
       modalTitle="Medication"
       modalContent={
         <>
-          <InputField
-            isRequired={true}
-            title={'Prescription Name'}
-            value={formData.prescriptionName}
-            onChangeText={handleMedicationData('prescriptionName')}
+          {catalogueError ? <Text>{catalogueError}</Text> : null}
+          {catalogueError && !isSaving ? (
+            <AppButton title="Retry prescriptions" onPress={onRetryCatalogue} />
+          ) : null}
+          <SelectionInputField
+            isRequired
+            title="Prescription"
+            placeholder="Select a prescription"
+            value={formData.prescriptionListID}
+            dataArray={prescriptionChoices}
+            onDataChange={handleMedicationData('prescriptionListID')}
             onEndEditing={setIsPrescriptionNameError}
-            autoCapitalize="none"
           />
           <InputField
             isRequired={true}
@@ -226,13 +251,12 @@ function AddPatientMedicationModal({
               hideDayOfWeek={true}
               handleFormData={handleMedicationData('startDateTime')}
               onEndEditing={setIsStartDateTimeError}
-              minimumInputDate={new Date()}
               maximumInputDate={formData.endDateTime}
             />
           </View>
           <View style={styles.dateSelectionContainer}>
             <DateInputField
-              isRequired
+              allowNull
               title={'End Date'}
               value={formData.endDateTime}
               hideDayOfWeek={true}

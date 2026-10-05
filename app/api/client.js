@@ -7,14 +7,15 @@ import authStorage from 'app/auth/authStorage';
  * Base URLs for different services
  * (update IPs if your backend changes)
  */
-// User Service v1 — staging (.185). Prod fallback: http://10.96.188.171:5678/api/v1
+// Staging service targets match Bryan-confirmed web frontend 10.96.188.185:5173.
+// Verified public schemas are recorded in the separate Oct 5 parity evidence.
 export const V1_BASE = 'http://10.96.188.185/api/v1';
 
 export const PATIENT_V1_BASE = 'http://10.96.188.180/api/v1'; // Patient Service v1 (.180 - staging, .172:5679 - prod)
 
-export const ACTIVITY_V1_BASE = 'http://10.96.188.186/api/v1'; // Activity Service v1
+export const ACTIVITY_V1_BASE = 'http://10.96.188.186:5681/api/v1'; // Verified staging Activity
 
-export const SCHEDULER_V1_BASE = 'http://10.96.188.186:5679'; // Scheduler Service v1
+export const SCHEDULER_V1_BASE = 'http://10.96.188.186:5682'; // Verified staging Scheduler
 
 const client = create({
   baseURL: V1_BASE,

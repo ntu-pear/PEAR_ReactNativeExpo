@@ -12,6 +12,7 @@ import {
 } from 'app/utility/patientHeader';
 import { confirmAndLogMedicationAdministration } from 'app/utility/confirmMedicationAdministration';
 import {
+  currentUserId,
   canRecordMedication,
   medicationPermissionMessage,
 } from 'app/utility/medicationAdminister';
@@ -56,6 +57,7 @@ import Swipeable from 'app/components/swipeable-components/Swipeable';
 import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
 import DynamicTable from 'app/components/DynamicTable';
 import AppText from 'app/components/AppText';
+import { loadPrescriptionCatalogue } from 'app/utility/prescriptionCatalogue';
 
 function PatientMedicationScreen(props) {
   let { patientID, patientId } = props.route.params;
@@ -68,6 +70,12 @@ function PatientMedicationScreen(props) {
   const { user } = useContext(AuthContext);
 
   // States
+  const courseSaving = useRef(false);
+  const [isSavingCourse, setIsSavingCourse] = useState(false);
+  const [courseUncertain, setCourseUncertain] = useState(false);
+  const [prescriptionChoices, setPrescriptionChoices] = useState([]);
+  const [catalogueError, setCatalogueError] = useState('');
+  const catalogueGeneration = useRef(0);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState('add');
   const [displayMode, setDisplayMode] = useState('rows');
@@ -86,6 +94,7 @@ function PatientMedicationScreen(props) {
   const [formData, setFormData] = useState({
     medicationID: null,
     prescriptionName: '',
+    prescriptionListID: null,
     dosage: '',
     administerTime: [],
     instruction: '',
@@ -113,6 +122,7 @@ function PatientMedicationScreen(props) {
       }
       return () => {
         readGeneration.current += 1;
+        catalogueGeneration.current += 1;
       };
     }, [patientID]),
   );
@@ -168,53 +178,108 @@ function PatientMedicationScreen(props) {
     setIsLoading(false);
   };
 
+  const loadChoices = async () => {
+    const generation = ++catalogueGeneration.current;
+    setPrescriptionChoices([]);
+    setCatalogueError('Loading prescription choices...');
+    try {
+      const options = await loadPrescriptionCatalogue(
+        patientApi.getPrescriptionListV1,
+      );
+      if (generation !== catalogueGeneration.current) {
+        return;
+      }
+      setPrescriptionChoices(options);
+      setCatalogueError(
+        options.length ? '' : 'No active prescriptions are available.',
+      );
+    } catch (error) {
+      if (generation === catalogueGeneration.current) {
+        setCatalogueError(error.message);
+      }
+    }
+  };
   const handleOnClickAddMedication = () => {
+    if (courseSaving.current || courseUncertain) {
+      return;
+    }
     setIsModalVisible(true);
     setModalMode('add');
+    loadChoices();
   };
-
-  const handleModalSubmitAdd = async (medData) => {
-    setIsLoading(true);
-    const tempData = {
-      ...medData,
-      administerTime: convertAdmTimeToMilitary(medData.administerTime),
-    };
-
-    const result = await addPatientMedicationV1(patientID, tempData);
-    if (result.ok) {
-      refreshMedData();
-      setIsModalVisible(false);
-      Alert.alert(
-        'Successfully added medication',
-        'Medication has been added to the patient.',
-      );
-    } else {
-      Alert.alert(
-        'Error adding medication',
-        result.data?.message || 'Please try again.',
-      );
+  const saveCourse = async (operation) => {
+    if (courseSaving.current || courseUncertain) {
+      return;
     }
-    setIsLoading(false);
+    courseSaving.current = true;
+    setIsSavingCourse(true);
+    try {
+      const result = await operation();
+      if (result?.ok) {
+        setIsModalVisible(false);
+        Alert.alert('Medication change saved');
+        await refreshMedData();
+      } else {
+        if (result?.problem === 'UNCERTAIN_WRITE') {
+          setCourseUncertain(true);
+        }
+        Alert.alert(
+          result?.problem === 'UNCERTAIN_WRITE'
+            ? 'Medication change unconfirmed'
+            : 'Medication was not changed',
+          result?.data?.detail ||
+            'Check your permissions and entered information, then retry.',
+        );
+      }
+    } catch (error) {
+      Alert.alert(
+        'Medication was not changed',
+        'The change could not be prepared. Please retry.',
+      );
+    } finally {
+      courseSaving.current = false;
+      setIsSavingCourse(false);
+    }
   };
+  const handleModalSubmitAdd = (medData) =>
+    saveCourse(() =>
+      addPatientMedicationV1(
+        patientID,
+        {
+          ...medData,
+          administerTime: convertAdmTimeToMilitary(medData.administerTime),
+        },
+        currentUserId(user),
+      ),
+    );
 
   const handleEditMedication = (medID) => {
-    setIsModalVisible(true);
+    if (courseSaving.current || courseUncertain) {
+      return;
+    }
     setModalMode('edit');
     const unparsedMedData = originalUnparsedData.find(
-      (x) => x.medicationID == medID && x.patientID == patientID,
+      (x) =>
+        String(x.medicationID) === String(medID) &&
+        String(x.patientID) === String(patientID),
     );
     if (!unparsedMedData) {
       Alert.alert('Medication not found', 'Please refresh and try again.');
       return;
     }
+    setIsModalVisible(true);
+    loadChoices();
     setFormData({
       medicationID: unparsedMedData.medicationID,
       prescriptionName: unparsedMedData.prescriptionName,
+      prescriptionListID: unparsedMedData.prescriptionListID,
       dosage: unparsedMedData.dosage,
       administerTime: admStrToTime(unparsedMedData.administerTime),
       instruction: unparsedMedData.instruction,
       startDateTime: new Date(unparsedMedData.startDateTime),
-      endDateTime: new Date(unparsedMedData.endDateTime),
+      endDateTime: unparsedMedData.endDateTime
+        ? new Date(unparsedMedData.endDateTime)
+        : null,
       prescriptionRemarks: unparsedMedData.prescriptionRemarks,
     });
   };
@@ -222,30 +287,26 @@ function PatientMedicationScreen(props) {
   const admStrToTime = (admStr) =>
     admStr.split(',').map((item) => new Date(convertTimeMilitary(item)));
 
-  const handleModalSubmitEdit = async () => {
-    setIsLoading(true);
-    const tempFormData = {
-      ...formData,
-      administerTime: convertAdmTimeToMilitary(formData.administerTime),
-    };
-
-    const result = await updatePatientMedicationV1(patientID, tempFormData);
-    if (result.ok) {
-      refreshMedData();
-      setIsModalVisible(false);
-      Alert.alert('Successfully edited medication');
-    } else {
-      Alert.alert(
-        'Error editing medication',
-        result.data?.message || 'Please try again.',
-      );
-    }
-    setIsLoading(false);
-  };
+  const handleModalSubmitEdit = (medData) =>
+    saveCourse(() =>
+      updatePatientMedicationV1(
+        patientID,
+        {
+          ...medData,
+          administerTime: convertAdmTimeToMilitary(medData.administerTime),
+        },
+        currentUserId(user),
+      ),
+    );
 
   const handleDeleteMedication = (medID) => {
+    if (courseSaving.current || courseUncertain) {
+      return;
+    }
     const unparsedMedData = originalUnparsedData.find(
-      (x) => x.medicationID == medID && x.patientID == patientID,
+      (x) =>
+        String(x.medicationID) === String(medID) &&
+        String(x.patientID) === String(patientID),
     );
     if (!unparsedMedData) {
       return;
@@ -263,27 +324,10 @@ function PatientMedicationScreen(props) {
     );
   };
 
-  const deleteMedication = async (medID) => {
-    setIsLoading(true);
-    const result = await deletePatientMedicationV1({
-      patientID,
-      medicationID: medID,
-    });
-    if (result.ok) {
-      refreshMedData();
-      setIsModalVisible(false);
-      Alert.alert(
-        'Successfully deleted medication',
-        'Medication has been removed from the patient.',
-      );
-    } else {
-      Alert.alert(
-        'Error deleting medication',
-        result.data?.message || 'Please try again.',
-      );
-    }
-    setIsLoading(false);
-  };
+  const deleteMedication = (medID) =>
+    saveCourse(() =>
+      deletePatientMedicationV1({ patientID, medicationID: medID }),
+    );
 
   const formatAdmString = (timeString) =>
     timeString
@@ -514,7 +558,18 @@ function PatientMedicationScreen(props) {
           onPress={handleOnClickAddMedication}
         />
       </View>
+      {courseUncertain && (
+        <AppText>
+          Medication change unconfirmed. Check the records with the staging team
+          before making another change.
+        </AppText>
+      )}
       <AddPatientMedicationModal
+        prescriptionChoices={prescriptionChoices}
+        catalogueError={catalogueError}
+        onRetryCatalogue={loadChoices}
+        isSaving={isSavingCourse}
+        isUncertain={courseUncertain}
         showModal={isModalVisible}
         modalMode={modalMode}
         formData={formData}

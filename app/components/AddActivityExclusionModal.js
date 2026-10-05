@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
-import { ScrollView } from 'native-base';
+import { ScrollView, Text } from 'native-base';
+import AppButton from 'app/components/AppButton';
 
 import AddEditModal from 'app/components/AddEditModal';
 import InputField from 'app/components/input-components/InputField';
@@ -11,17 +12,13 @@ import activity, {
   buildActivityTitleMap,
   isMissingActivityTitle,
 } from 'app/api/activity';
-import { dateKey } from 'app/utility/exclusionLifecycle';
-
-const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
-
-const todayIso = () => {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-};
+import { centreDay } from 'app/utility/centreClock';
+import requestDeadline from 'app/utility/requestDeadline';
+import {
+  activityEntityId,
+  validateExclusionDates,
+} from 'app/utility/exclusionEligibility';
+const todayIso = () => centreDay();
 
 const toDateOnly = (value) => String(value || '').slice(0, 10);
 
@@ -41,8 +38,12 @@ function AddActivityExclusionModal({
   onSubmit,
   existingExclusion,
   excludedActivityIds = [],
+  rulesUnavailable = false,
 }) {
   const [activityList, setActivityList] = useState([]);
+  const [loadError, setLoadError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [reload, setReload] = useState(0);
   const [centreActivityID, setCentreActivityID] = useState(null);
   const [exclusionRemarks, setExclusionRemarks] = useState('');
   const [startDate, setStartDate] = useState(todayIso());
@@ -53,37 +54,90 @@ function AddActivityExclusionModal({
   const existingCentreActivityID = existingExclusion?.centreActivityID;
   const excludedIdsKey = excludedActivityIds.map(String).sort().join(',');
 
-  const loadActivities = useCallback(async () => {
-    try {
-      const [centreRes, activitiesRes] = await Promise.all([
-        activity.getCentreActivities(),
-        activity.getActivities(),
-      ]);
-      const centreRows = centreRes?.ok ? centreRes.data?.data || [] : [];
-      const titleMap = buildActivityTitleMap(
-        centreRows,
-        activitiesRes?.ok ? activitiesRes.data?.data || [] : [],
-      );
-      const excluded = new Set(excludedIdsKey.split(','));
-      const options = applyActivityTitles(centreRows, titleMap)
-        .filter((row) => !isMissingActivityTitle(row.activityTitle))
-        .filter((row) => {
-          const id = row.centreActivityID ?? row.CentreActivityID;
-          if (isEdit) {
-            return String(id) === String(existingCentreActivityID);
-          }
-          return !excluded.has(String(id));
-        })
-        .map((row) => ({
-          label: row.activityTitle,
-          value: row.centreActivityID ?? row.CentreActivityID,
-        }));
-      setActivityList(options);
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Unable to load activities', 'Please try again.');
+  useEffect(() => {
+    let live = true;
+    if (!showModal) {
+      return;
     }
-  }, [excludedIdsKey, existingCentreActivityID, isEdit]);
+    setActivityList([]);
+    setLoadError('');
+    setIsLoading(true);
+    const load = async () => {
+      try {
+        if (rulesUnavailable && !isEdit) {
+          throw new Error('Eligibility unavailable');
+        }
+        const [centreRes, activitiesRes] = await requestDeadline(
+          Promise.all([
+            activity.getCentreActivities(),
+            activity.getActivities(),
+          ]),
+        );
+        if (
+          !centreRes?.ok ||
+          !activitiesRes?.ok ||
+          !Array.isArray(centreRes.data?.data) ||
+          !Array.isArray(activitiesRes.data?.data)
+        ) {
+          throw new Error('Catalogue unavailable');
+        }
+        const centreRows = centreRes.data.data;
+        const titleMap = buildActivityTitleMap(
+          centreRows,
+          activitiesRes.data.data,
+        );
+        const excluded = new Set(excludedIdsKey.split(','));
+        const options = applyActivityTitles(centreRows, titleMap)
+          .filter((row) => !isMissingActivityTitle(row.activityTitle))
+          .filter(
+            (row) =>
+              ![true, 1, '1', 'true'].includes(
+                row.isDeleted ?? row.is_deleted ?? row.IsDeleted,
+              ),
+          )
+          .filter((row) => {
+            const id = activityEntityId(
+              row.centreActivityID ?? row.CentreActivityID,
+            );
+            return isEdit
+              ? String(id) === String(existingCentreActivityID)
+              : !excluded.has(String(id));
+          })
+          .map((row) => ({
+            label: row.activityTitle,
+            value: activityEntityId(
+              row.centreActivityID ?? row.CentreActivityID,
+            ),
+          }));
+        if (live) {
+          setActivityList(options);
+        }
+      } catch {
+        if (live) {
+          setLoadError(
+            rulesUnavailable && !isEdit
+              ? 'Patient activity eligibility could not be verified. Close this form and refresh Activity Overview.'
+              : 'Activities could not be loaded. Retry to verify the available choices.',
+          );
+        }
+      } finally {
+        if (live) {
+          setIsLoading(false);
+        }
+      }
+    };
+    load();
+    return () => {
+      live = false;
+    };
+  }, [
+    showModal,
+    excludedIdsKey,
+    existingCentreActivityID,
+    isEdit,
+    reload,
+    rulesUnavailable,
+  ]);
 
   useEffect(() => {
     if (!showModal) {
@@ -95,8 +149,6 @@ function AddActivityExclusionModal({
       setIsIndefinite(false);
       return;
     }
-
-    loadActivities();
 
     if (isEdit) {
       setCentreActivityID(existingExclusion.centreActivityID);
@@ -112,7 +164,7 @@ function AddActivityExclusionModal({
       setEndDate('');
       setIsIndefinite(false);
     }
-  }, [showModal, isEdit, existingExclusion, loadActivities]);
+  }, [showModal, isEdit, existingExclusion]);
 
   const handleSubmit = () => {
     if (centreActivityID == null) {
@@ -127,35 +179,45 @@ function AddActivityExclusionModal({
       return;
     }
     if (
-      !ISO_DATE.test(String(startDate).trim()) ||
-      !dateKey(String(startDate).trim())
-    ) {
-      Alert.alert('Invalid start date', 'Use YYYY-MM-DD.');
-      return;
-    }
-    if (
-      !isIndefinite &&
-      (!ISO_DATE.test(String(endDate).trim()) ||
-        !dateKey(String(endDate).trim()))
+      isLoading ||
+      loadError ||
+      (rulesUnavailable && !isEdit) ||
+      !activityList.some(
+        (row) => String(row.value) === String(centreActivityID),
+      )
     ) {
       Alert.alert(
-        'Invalid end date',
-        'Enter an end date as YYYY-MM-DD, or tick Indefinite.',
+        'Activity unavailable',
+        'Verify the available choices before saving.',
       );
       return;
     }
-
-    onSubmit({
-      id: existingExclusion?.id,
-      centreActivityID: Number(centreActivityID),
-      exclusionRemarks: String(exclusionRemarks).trim(),
-      startDate: String(startDate).trim(),
-      endDate: isIndefinite ? null : String(endDate).trim(),
-    });
+    try {
+      const dates = validateExclusionDates(startDate, endDate, isIndefinite);
+      onSubmit({
+        id: existingExclusion?.id,
+        centreActivityID: activityEntityId(centreActivityID),
+        exclusionRemarks: String(exclusionRemarks).trim(),
+        ...dates,
+      });
+    } catch (error) {
+      Alert.alert('Check exclusion', error.message);
+    }
   };
 
   const modalContent = (
     <ScrollView>
+      {isLoading ? <Text>Loading activities...</Text> : null}
+      {loadError ? <Text>{loadError}</Text> : null}
+      {loadError && !(rulesUnavailable && !isEdit) ? (
+        <AppButton
+          title="Retry activities"
+          onPress={() => setReload((value) => value + 1)}
+        />
+      ) : null}
+      {!isLoading && !loadError && activityList.length === 0 ? (
+        <Text>No eligible activities available.</Text>
+      ) : null}
       <SelectionInputField
         testID={`${testID}_activity`}
         isRequired
@@ -213,7 +275,14 @@ function AddActivityExclusionModal({
     <AddEditModal
       testID={testID}
       handleSubmit={handleSubmit}
-      isInputErrors={false}
+      isInputErrors={
+        isLoading ||
+        !!loadError ||
+        (rulesUnavailable && !isEdit) ||
+        !activityList.some(
+          (row) => String(row.value) === String(centreActivityID),
+        )
+      }
       modalMode={isEdit ? 'edit' : 'add'}
       onClose={onClose}
       showModal={showModal}

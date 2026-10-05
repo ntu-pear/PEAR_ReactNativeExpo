@@ -2,6 +2,11 @@
 import client, { PATIENT_V1_BASE } from 'app/api/client';
 import { Image } from 'react-native';
 import { uppercasePersonFields } from 'app/utility/patientFieldPolicy';
+import {
+  buildMedicationCourse,
+  medicationCourseId,
+  createCourseWriter,
+} from 'app/utility/medicationCourse';
 
 /*
  * List all end points here
@@ -15,12 +20,6 @@ const withPatientV1Base = (cfg = {}) => ({
 const v1PatientsListEndpoint = '/patients/';
 // NOTE: patient service v1 is strict about trailing slashes for some routes
 const v1PatientReadEndpoint = (patient_id) => `/patients/${patient_id}`;
-const v1PatientMedicationsEndpoint = (patient_id) =>
-  `/patients/${patient_id}/medications/`;
-const v1PatientMedicationDetailEndpoint = (patient_id, med_id) =>
-  `/patients/${patient_id}/medications/${med_id}/`;
-const USE_COLLECTION_STYLE_MED_ENDPOINT = false;
-
 // ---------- Patient Mobility (v1) ----------
 const v1MobilityMapListByPatientEndpoint = (patient_id) =>
   `/MobilityMapping/List/Patient/${patient_id}`;
@@ -257,39 +256,61 @@ const listPatientMedicationsV1 = async (patient_id, params = {}) => {
   };
 };
 
-const addPatientMedicationV1 = (patient_id, payload) => {
-  return client.post(
-    v1PatientMedicationsEndpoint(patient_id),
-    payload,
+const writeCourse = createCourseWriter();
+const readMedicationCourseV1 = (id) =>
+  client.get(
+    `/Medication/${medicationCourseId(id)}`,
+    { require_auth: true },
     withPatientV1Base(),
   );
+const matchedCourse = async (patientId, medicationId) => {
+  const res = await readMedicationCourseV1(medicationId);
+  if (!res?.ok) {
+    throw new Error(
+      'Medication details could not be loaded. No change was sent.',
+    );
+  }
+  const row = res.data?.data;
+  if (
+    String(row?.Id) !== String(medicationCourseId(medicationId)) ||
+    String(row?.PatientId) !== String(medicationCourseId(patientId)) ||
+    [true, 1, '1', 'true'].includes(row?.IsDeleted)
+  ) {
+    throw new Error(
+      'The current medication record is unavailable or belongs to another patient.',
+    );
+  }
+  return row;
 };
-
-const updatePatientMedicationV1 = (patient_id, payload) => {
-  // Accept legacy/v1 id keys
-  const med_id = payload.medicationID ?? payload.medication_id ?? payload.id;
-  return client.put(
-    v1PatientMedicationDetailEndpoint(patient_id, med_id),
-    payload,
-    withPatientV1Base(),
-  );
-};
-
-const deletePatientMedicationV1 = ({
-  patientID,
-  patient_id,
-  medicationID,
-  medication_id,
-  id,
-}) => {
-  const pid = patientID ?? patient_id;
-  const mid = medicationID ?? medication_id ?? id;
-  return client.delete(
-    v1PatientMedicationDetailEndpoint(pid, mid),
-    {},
-    withPatientV1Base(),
-  );
-};
+const addPatientMedicationV1 = (patientId, form, actorId) =>
+  writeCourse(patientId, async () => {
+    const payload = buildMedicationCourse({
+      patientId,
+      form,
+      actorId,
+      create: true,
+    });
+    return () => client.post('/Medication/add', payload, withPatientV1Base());
+  });
+const updatePatientMedicationV1 = (patientId, form, actorId) =>
+  writeCourse(patientId, async () => {
+    const id = medicationCourseId(form.medicationID);
+    await matchedCourse(patientId, id);
+    const payload = buildMedicationCourse({ patientId, form, actorId });
+    return () =>
+      client.put(`/Medication/update/${id}`, payload, withPatientV1Base());
+  });
+const deletePatientMedicationV1 = ({ patientID, medicationID }) =>
+  writeCourse(patientID, async () => {
+    const id = medicationCourseId(medicationID);
+    await matchedCourse(patientID, id);
+    return () =>
+      client.delete(
+        `/Medication/delete/${id}`,
+        { require_auth: true },
+        withPatientV1Base(),
+      );
+  });
 
 // ---------- Allergy (v1) ----------
 const listPatientAllergiesV1 = async (patient_id, params = {}) => {

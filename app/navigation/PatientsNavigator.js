@@ -1,6 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import PatientsScreen from 'app/screens/PatientsScreen';
+import ActivityWideAdhocPreviewScreen from 'app/screens/ActivityWideAdhocPreviewScreen';
 import ManageMedicationScreen from 'app/screens/ManageMedicationScreen';
 import PatientProfile from 'app/screens/PatientProfileScreen';
 import PatientInformationAccordion from 'app/components/PatientInformationAccordion';
@@ -38,6 +39,11 @@ const Stack = createNativeStackNavigator();
 function PatientsNavigator() {
   return (
     <Stack.Navigator initialRouteName={routes.PATIENTS_SCREEN}>
+      <Stack.Screen
+        name={routes.ACTIVITY_WIDE_ADHOC_PREVIEW}
+        component={ActivityWideAdhocPreviewScreen}
+        options={{ headerShown: true, title: 'Activity-wide Ad Hoc Preview' }}
+      />
       <Stack.Screen
         name={routes.MANAGE_MEDICATION}
         component={ManageMedicationScreen}

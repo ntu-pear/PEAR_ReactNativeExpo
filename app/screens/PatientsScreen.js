@@ -847,14 +847,26 @@ function PatientsScreen({ navigation }) {
 
           {String(user?.roleName || user?.role || '').toUpperCase() ===
             'SUPERVISOR' && (
-            <Button
-              mx="5"
-              mt="2"
-              onPress={() => navigation.navigate(routes.MANAGE_MEDICATION)}
-              testID="patients_manage_medication"
-            >
-              Centre Medication Records
-            </Button>
+            <>
+              <Button
+                testID="patients_adhoc_preview"
+                mx="5"
+                mt="2"
+                onPress={() =>
+                  navigation.navigate(routes.ACTIVITY_WIDE_ADHOC_PREVIEW)
+                }
+              >
+                Activity-wide Ad Hoc Preview
+              </Button>
+              <Button
+                mx="5"
+                mt="2"
+                onPress={() => navigation.navigate(routes.MANAGE_MEDICATION)}
+                testID="patients_manage_medication"
+              >
+                Centre Medication Records
+              </Button>
+            </>
           )}
           {/* show favourites-only toggle */}
           <Button

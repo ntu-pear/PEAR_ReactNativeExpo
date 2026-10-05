@@ -20,6 +20,7 @@ import colors from 'app/config/colors';
 import routes from 'app/navigation/routes';
 import { patientProfileLines } from 'app/utility/patientHeader';
 import { exclusionLifecycle } from 'app/utility/exclusionLifecycle';
+import { exclusionBlockedIds } from 'app/utility/exclusionEligibility';
 
 const MEDIUM = colors.grey;
 const LIGHT = colors.grey_lighter;
@@ -226,6 +227,19 @@ function PatientActivityOverviewScreen(props) {
   };
 
   const profileLines = patientProfileLines(patientData);
+  let blockedActivityIds = [];
+  let eligibilityUnavailable = errors.some((section) =>
+    ['preferences', 'recommendations', 'exclusions'].includes(section),
+  );
+  try {
+    blockedActivityIds = exclusionBlockedIds({
+      preferences,
+      recommendations,
+      exclusions,
+    });
+  } catch {
+    eligibilityUnavailable = true;
+  }
 
   if (isLoading) {
     return <ActivityIndicator visible />;
@@ -414,9 +428,8 @@ function PatientActivityOverviewScreen(props) {
         showModal={showExclusionModal}
         modalMode={exclusionModalMode}
         existingExclusion={editingExclusion}
-        excludedActivityIds={exclusions
-          .filter((item) => exclusionLifecycle(item) !== 'Expired')
-          .map((item) => item.centreActivityID)}
+        excludedActivityIds={blockedActivityIds}
+        rulesUnavailable={eligibilityUnavailable}
         onClose={() => {
           setShowExclusionModal(false);
           setEditingExclusion(null);

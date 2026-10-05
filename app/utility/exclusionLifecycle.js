@@ -1,3 +1,5 @@
+import { centreDay } from 'app/utility/centreClock';
+
 export const dateKey = (value) => {
   const raw = String(value || '').slice(0, 10);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
@@ -11,10 +13,7 @@ export const dateKey = (value) => {
 };
 
 export const exclusionLifecycle = (record, now = new Date()) => {
-  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
-    2,
-    '0',
-  )}-${String(now.getDate()).padStart(2, '0')}`;
+  const today = centreDay(now);
   const start = dateKey(record.startDate);
   const rawEnd = record.endDate;
   const indefinite = !rawEnd || Number(String(rawEnd).slice(0, 4)) >= 2999;
