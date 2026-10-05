@@ -196,3 +196,38 @@ test('unrelated route updates do not repeat the profile request', async () => {
   await act(async () => screen.update(view()));
   expect(patientApi.readPatientV1).toHaveBeenCalledTimes(1);
 });
+
+test('a thrown offline transport error exits loading and app-level retry recovers', async () => {
+  patientApi.readPatientV1.mockRejectedValueOnce(new Error('mock offline'));
+  const screen = await mount();
+  expect(screen.root.findAllByProps({ testID: 'loading' })).toHaveLength(0);
+  expect(byId(screen, 'patient-load-error')).toBeTruthy();
+  expect(hasText(screen, 'TEST PATIENT')).toBe(false);
+  await act(async () => byId(screen, 'patient-load-retry').props.onPress());
+  expect(hasText(screen, 'TEST PATIENT')).toBe(true);
+  expect(patientApi.readPatientV1).toHaveBeenCalledTimes(2);
+});
+
+test('timeout retry recovers and a late response cannot replace the recovered profile', async () => {
+  jest.useFakeTimers();
+  let resolveTimedOut;
+  patientApi.readPatientV1.mockReturnValueOnce(
+    new Promise((resolve) => {
+      resolveTimedOut = resolve;
+    }),
+  );
+  const screen = await mount();
+  await act(async () => jest.advanceTimersByTime(30000));
+  expect(screen.root.findAllByProps({ testID: 'loading' })).toHaveLength(0);
+  expect(byId(screen, 'patient-load-error')).toBeTruthy();
+  patientApi.readPatientV1.mockResolvedValue(
+    response(1, 'RECOVERED TEST PATIENT'),
+  );
+  await act(async () => byId(screen, 'patient-load-retry').props.onPress());
+  expect(hasText(screen, 'RECOVERED TEST PATIENT')).toBe(true);
+  await act(async () =>
+    resolveTimedOut(response(1, 'STALE TIMED OUT PATIENT')),
+  );
+  expect(hasText(screen, 'STALE TIMED OUT PATIENT')).toBe(false);
+  expect(hasText(screen, 'RECOVERED TEST PATIENT')).toBe(true);
+});

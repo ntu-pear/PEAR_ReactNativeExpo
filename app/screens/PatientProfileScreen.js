@@ -221,7 +221,6 @@ function PatientProfileScreen(props) {
 
   const ICON = 28;
   const ICON_SM = 24;
-  const scrollViewRef = useRef(null);
   const currentLoad = useRef(null);
 
   // Main patient data retrieval with transformation
@@ -773,7 +772,6 @@ function PatientProfileScreen(props) {
               flexGrow: 1,
               flexDirection: 'column',
             }}
-            ref={scrollViewRef}
           >
             <View
               testID={'profile'}
@@ -1038,7 +1036,6 @@ function PatientProfileScreen(props) {
                 patientProfile={patientProfile}
                 guardianData={guardianData}
                 socialHistoryData={socialHistoryData}
-                scrollViewRef={scrollViewRef}
                 guardianLoading={isGuardianLoading}
                 guardianError={guardianError}
                 socialHistoryLoading={isSocialHistoryLoading}

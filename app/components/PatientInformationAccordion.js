@@ -65,7 +65,6 @@ function PatientInformationAccordion({
   patientProfile,
   guardianData,
   socialHistoryData,
-  scrollViewRef,
   guardianLoading = false,
   guardianError,
   socialHistoryLoading = false,
@@ -542,16 +541,10 @@ function PatientInformationAccordion({
     ],
   );
 
-  const handleOnChange = useCallback(
-    (newSections) => {
-      setActiveSections(newSections);
-
-      if (scrollViewRef?.current) {
-        scrollViewRef.current.scrollTo({ y: 2000, animated: true });
-      }
-    },
-    [scrollViewRef],
-  );
+  const handleOnChange = useCallback((newSections) => {
+    // Preserve the reader's position when expanding or collapsing a section.
+    setActiveSections(newSections);
+  }, []);
 
   const getUnmaskedNRIC = useCallback(
     (title) => {
