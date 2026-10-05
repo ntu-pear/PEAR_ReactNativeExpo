@@ -1,6 +1,7 @@
 /* eslint eslint-comments/no-unlimited-disable: error */
 import { create } from 'apisauce';
 import axios from 'axios';
+import { observeActivityRead } from 'app/utility/activityReadDiagnostics';
 import authStorage from 'app/auth/authStorage';
 
 /*
@@ -77,9 +78,13 @@ const processQueue = (error, token = null) => {
 };
 
 client.axiosInstance.interceptors.response.use(
-  (response) => response, // pass through successful responses
+  (response) => {
+    observeActivityRead(response);
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
+    observeActivityRead(error.response, originalRequest, error.code);
 
     // Only handle 401 and only retry once per request
     if (

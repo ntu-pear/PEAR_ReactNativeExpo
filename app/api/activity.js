@@ -313,6 +313,20 @@ const getPatientRoutine = async (patientID, includeDeleted = false) => {
     params,
     withActivityV1Base(),
   );
+  // Cached staging contract returns this exact 404 for an empty routine list.
+  // Other 404s and authorization/transport failures remain visible errors.
+  if (
+    res?.status === 404 &&
+    res.data?.detail === 'No Routine records for this patient'
+  ) {
+    return {
+      ...res,
+      ok: true,
+      problem: null,
+      emptyReason: 'NO_ROUTINE_RECORDS',
+      data: { data: [] },
+    };
+  }
   return toMobileListResponse(res, normalizeRoutine);
 };
 
