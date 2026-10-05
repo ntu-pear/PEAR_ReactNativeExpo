@@ -5,6 +5,46 @@ import com.android.build.OutputFile
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 def expoDebuggableVariants = ['debug']
+
+def pearReleaseIdentity = new Properties()
+file("../release-identity.properties").withInputStream { pearReleaseIdentity.load(it) }
+def pearGit = { List<String> arguments ->
+    def output = new ByteArrayOutputStream()
+    def result = exec {
+        workingDir projectRoot
+        commandLine(["git", "-c", "safe.directory=" + projectRoot.replace("\\", "/")] + arguments)
+        standardOutput = output
+        ignoreExitValue = true
+    }
+    result.exitValue == 0 ? output.toString("UTF-8").trim() : "unavailable"
+}
+def pearCommit = pearGit(["rev-parse", "HEAD"])
+def pearSourceDate = pearGit(["show", "-s", "--format=%cI", "HEAD"])
+def pearDirty = pearGit(["status", "--porcelain"]) != ""
+def pearGeneratedIdentity = file("../../app/config/generatedBuildIdentity.json")
+def generatePearBuildIdentity = tasks.register("generatePearBuildIdentity") {
+    inputs.file(file("../release-identity.properties"))
+    inputs.property("commit", pearCommit)
+    inputs.property("sourceDate", pearSourceDate)
+    inputs.property("sourceDirty", pearDirty)
+    outputs.file(pearGeneratedIdentity)
+    doLast {
+        pearGeneratedIdentity.parentFile.mkdirs()
+        pearGeneratedIdentity.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson([
+            versionName: pearReleaseIdentity.getProperty("versionName"),
+            versionCode: pearReleaseIdentity.getProperty("versionCode"),
+            buildDate: pearReleaseIdentity.getProperty("releaseDate"),
+            artifactName: pearReleaseIdentity.getProperty("artifactName"),
+            sourceCommit: pearCommit, sourceDate: pearSourceDate, sourceDirty: pearDirty
+        ]))
+    }
+}
+tasks.configureEach { task ->
+    if (task.name.startsWith("createBundle") || task.name == "preBuild") {
+        task.dependsOn(generatePearBuildIdentity)
+    }
+}
+
 // Override `debuggableVariants` for expo-updates debugging
 if (System.getenv('EX_UPDATES_NATIVE_DEBUG') == "1") {
   react {
@@ -118,8 +158,8 @@ android {
         applicationId "com.pearreactnativeexpo"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 7
-        versionName "1.0.6"
+        versionCode pearReleaseIdentity.getProperty("versionCode").toInteger()
+        versionName pearReleaseIdentity.getProperty("versionName")
     }
 
     splits {

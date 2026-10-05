@@ -5,7 +5,7 @@ import { FlatList, View } from 'native-base';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 import patientApi from 'app/api/patient';
-import scheduleApi from 'app/api/schedule';
+import requestDeadline from 'app/utility/requestDeadline';
 import {
   patientFromApiResponse,
   patientProfileLines,
@@ -52,7 +52,6 @@ import MedicationItem from 'app/components/MedicationItem';
 import AddPatientMedicationModal from 'app/components/AddPatientMedicationModal';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
-import LoadingWheel from 'app/components/LoadingWheel';
 import Swipeable from 'app/components/swipeable-components/Swipeable';
 import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
 import DynamicTable from 'app/components/DynamicTable';
@@ -80,7 +79,6 @@ function PatientMedicationScreen(props) {
   const [isError, setIsError] = useState(false);
   const [isRetry, setIsRetry] = useState(false);
   const [statusCode, setStatusCode] = useState(200);
-  const [isReloadPatientList, setIsReloadPatientList] = useState(true);
 
   const [originalUnparsedData, setOriginalUnparsedData] = useState([]);
   const [originalData, setOriginalData] = useState([]);
@@ -98,135 +96,51 @@ function PatientMedicationScreen(props) {
 
   const [patientData, setPatientData] = useState({});
   const [isScrolling, setIsScrolling] = useState(false);
-  const [assignedCaregiverId, setAssignedCaregiverId] = useState(null);
-  const [tempCaregiverId, setTempCaregiverId] = useState(null);
+  const assignedCaregiverId = null;
+  const tempCaregiverId = null;
   const refreshMedDataRef = useRef(null);
+  const readGeneration = useRef(0);
 
   // Refresh list
   useFocusEffect(
     React.useCallback(() => {
-      if (isReloadPatientList) {
+      if (patientID) {
         refreshMedDataRef.current();
-        setIsReloadPatientList(false);
+      } else {
+        setIsLoading(false);
+        setIsError(true);
+        setStatusCode(400);
       }
-    }, [isReloadPatientList]),
+      return () => {
+        readGeneration.current += 1;
+      };
+    }, [patientID]),
   );
 
-  const refreshMedData = () => {
+  const refreshMedData = async () => {
+    const current = ++readGeneration.current;
     setIsLoading(true);
-    (async () => {
-      await getMedicationData();
-      await getPatientData();
-      await getAssignedCaregiver();
-    })();
+    const results = await Promise.allSettled([
+      requestDeadline(
+        Promise.resolve().then(() => listPatientMedicationsV1(patientID)),
+      ),
+      requestDeadline(Promise.resolve().then(() => readPatientV1(patientID))),
+    ]);
+    if (current !== readGeneration.current) return;
+    const [medRes, patientRes] = results.map((result) =>
+      result.status === 'fulfilled' ? result.value : null,
+    );
+    const failed = !medRes?.ok || !patientRes?.ok;
+    const rows = medRes?.ok ? medRes.data?.data || [] : [];
+    setOriginalUnparsedData(rows);
+    parseMedicationData(rows);
+    setPatientData(patientRes?.ok ? patientFromApiResponse(patientRes) : {});
+    setIsError(failed);
+    setIsRetry(failed);
+    setStatusCode(!medRes?.ok ? medRes?.status : patientRes?.status);
+    setIsLoading(false);
   };
   refreshMedDataRef.current = refreshMedData;
-
-  const getAssignedCaregiver = async () => {
-    if (!patientID || !patientApi.getAllocationMap) {
-      return;
-    }
-    try {
-      const map = await patientApi.getAllocationMap();
-      const allocation = map?.[String(patientID)] || {};
-      setAssignedCaregiverId(allocation.caregiverId || null);
-      setTempCaregiverId(allocation.tempCaregiverId || null);
-    } catch (error) {
-      setAssignedCaregiverId(null);
-      setTempCaregiverId(null);
-    }
-  };
-
-  const getMedicationData = async () => {
-    if (patientID) {
-      const response = await listPatientMedicationsV1(patientID);
-      if (response.ok) {
-        let rows = response.data.data || [];
-        if (!rows.length) {
-          rows = await loadSchedulerMedications(patientID);
-        }
-        setOriginalUnparsedData(rows);
-        parseMedicationData(rows);
-        setIsError(false);
-        setIsRetry(false);
-        setStatusCode(response.status);
-      } else {
-        console.log('Request failed with status code: ', response.status);
-        const fallback = await loadSchedulerMedications(patientID);
-        if (fallback.length) {
-          setOriginalUnparsedData(fallback);
-          parseMedicationData(fallback);
-          setIsError(false);
-          setIsRetry(false);
-          setStatusCode(200);
-        } else {
-          setOriginalUnparsedData([]);
-          setOriginalData([]);
-          setData([]);
-          setIsError(true);
-          setIsRetry(true);
-          setStatusCode(response.status);
-        }
-      }
-      setIsLoading(false);
-    }
-  };
-
-  const loadSchedulerMedications = async (id) => {
-    try {
-      const res = await scheduleApi.getMedicationScheduleV1();
-      if (!res?.ok) {
-        return [];
-      }
-      const rows = Array.isArray(res.data) ? res.data : res.data?.data || [];
-      const today = new Date().toISOString().slice(0, 10);
-      return rows
-        .filter((item) => {
-          const patient = item.PatientID ?? item.patientID ?? item.patient_id;
-          const date = String(
-            item.AdministerDate ?? item.administerDate ?? '',
-          ).slice(0, 10);
-          return String(patient) === String(id) && (!date || date === today);
-        })
-        .map((item) => ({
-          medicationID: item.Id ?? item.id,
-          patientID: id,
-          prescriptionName:
-            item.PrescriptionName ??
-            item.prescriptionName ??
-            'Scheduled medication',
-          dosage: item.Dosage ?? item.dosage ?? '',
-          administerTime: String(
-            item.AdministerTime ?? item.administerTime ?? '',
-          ),
-          instruction: item.Instruction ?? item.instruction ?? '',
-          startDateTime: item.AdministerDate ?? item.administerDate,
-          endDateTime: item.AdministerDate ?? item.administerDate,
-          prescriptionRemarks: '',
-        }));
-    } catch {
-      return [];
-    }
-  };
-
-  const getPatientData = async () => {
-    if (patientID) {
-      const response = await readPatientV1(patientID);
-      if (response.ok) {
-        setPatientData(patientFromApiResponse(response));
-        setIsError(false);
-        setIsRetry(false);
-        setStatusCode(response.status);
-      } else {
-        console.log('Request failed with status code: ', response.status);
-        setPatientData({});
-        setIsError(true);
-        setIsRetry(true);
-        setStatusCode(response.status);
-      }
-      setIsLoading(false);
-    }
-  };
 
   const parseMedicationData = (tempData) => {
     const tempMedData = [];
@@ -450,7 +364,7 @@ function PatientMedicationScreen(props) {
               size={90}
             />
           ) : (
-            <LoadingWheel />
+            <AppText>Patient information unavailable. Pull to refresh.</AppText>
           )}
         </View>
         <View>

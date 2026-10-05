@@ -3,6 +3,8 @@ import { Text, View, Image, StyleSheet } from 'react-native';
 import colors from 'app/config/colors';
 import { Center } from 'native-base';
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
+import buildIdentity from 'app/config/generatedBuildIdentity.json';
 
 function AboutScreen(props) {
   const { sidebar } = props;
@@ -25,12 +27,17 @@ function AboutScreen(props) {
             source={require('../assets/pear_v2.png')}
             style={styles.logo}
           />
-          <Text style={styles.text}>
+          <Text style={styles.text} testID="about_installed_build_identity">
             PEAR Mobile App.
             {'\n\n\n'}
-            Version: 1.0.6
+            Version: {Constants.nativeAppVersion || 'Unavailable'}
+            {'\n'}
+            Build: {Constants.nativeBuildVersion || 'Unavailable'}
             {'\n\n'}
-            Build Date: 5 October 2026
+            Build Date: {buildIdentity.buildDate || 'Unavailable'}
+            {'\n'}
+            Source: {buildIdentity.sourceCommit?.slice(0, 12) || 'Unavailable'}
+            {buildIdentity.sourceDirty ? ' (modified source)' : ''}
           </Text>
         </View>
       </Center>

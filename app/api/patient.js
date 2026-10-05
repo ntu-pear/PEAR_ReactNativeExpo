@@ -1,34 +1,44 @@
-
 /*eslint eslint-comments/no-unlimited-disable: error */
 import client, { PATIENT_V1_BASE } from 'app/api/client';
 import { Image } from 'react-native';
+import { uppercasePersonFields } from 'app/utility/patientFieldPolicy';
 
 /*
  * List all end points here
  */
 // --- Patient Service v1 base (new server) ---
-const withPatientV1Base = (cfg = {}) => ({ baseURL: PATIENT_V1_BASE, timeout: 15000, ...cfg });
+const withPatientV1Base = (cfg = {}) => ({
+  baseURL: PATIENT_V1_BASE,
+  timeout: 15000,
+  ...cfg,
+});
 const v1PatientsListEndpoint = '/patients/';
 // NOTE: patient service v1 is strict about trailing slashes for some routes
 const v1PatientReadEndpoint = (patient_id) => `/patients/${patient_id}`;
-const v1PatientMedicationsEndpoint = (patient_id) => `/patients/${patient_id}/medications/`;
-const v1PatientMedicationDetailEndpoint = (patient_id, med_id) => `/patients/${patient_id}/medications/${med_id}/`;
+const v1PatientMedicationsEndpoint = (patient_id) =>
+  `/patients/${patient_id}/medications/`;
+const v1PatientMedicationDetailEndpoint = (patient_id, med_id) =>
+  `/patients/${patient_id}/medications/${med_id}/`;
 const USE_COLLECTION_STYLE_MED_ENDPOINT = false;
 
 // ---------- Patient Mobility (v1) ----------
-const v1MobilityMapListByPatientEndpoint = (patient_id) => `/MobilityMapping/List/Patient/${patient_id}`;
+const v1MobilityMapListByPatientEndpoint = (patient_id) =>
+  `/MobilityMapping/List/Patient/${patient_id}`;
 const v1MobilityMapAddEndpoint = () => `/MobilityMapping/List/add`;
-const v1MobilityMapUpdateEndpoint = (mobility_id) => `/MobilityMapping/List/update/${mobility_id}`;
-const v1MobilityMapDeleteEndpoint = (mobility_id) => `/MobilityMapping/List/delete/${mobility_id}`;
+const v1MobilityMapUpdateEndpoint = (mobility_id) =>
+  `/MobilityMapping/List/update/${mobility_id}`;
+const v1MobilityMapDeleteEndpoint = (mobility_id) =>
+  `/MobilityMapping/List/delete/${mobility_id}`;
 
 // ---------- Vitals (v1) ----------
-const v1VitalListEndpoint = `/Vital/list`;                      // GET ?patient_id=#
-const v1VitalAddEndpoint = `/Vital/add`;                        // POST
+const v1VitalListEndpoint = `/Vital/list`; // GET ?patient_id=#
+const v1VitalAddEndpoint = `/Vital/add`; // POST
 const v1VitalUpdateEndpoint = (vital_id) => `/Vital/update/${vital_id}`; // PUT
-const v1VitalDeleteEndpoint = `/Vital/delete`;                  // DELETE (expects vital_id)
+const v1VitalDeleteEndpoint = `/Vital/delete`; // DELETE (expects vital_id)
 
 // ---------- Profile Picture (v1) ----------
-const v1UpdateProfilePictureEndpoint = (patient_id) => `/patients/update/${patient_id}/update_patient_profile_picture`;
+const v1UpdateProfilePictureEndpoint = (patient_id) =>
+  `/patients/update/${patient_id}/update_patient_profile_picture`;
 
 /*
  * List all functions here
@@ -36,25 +46,45 @@ const v1UpdateProfilePictureEndpoint = (patient_id) => `/patients/update/${patie
  */
 
 // ---------- Patient list/read (v1) ----------
+// Same existing role-scoped Patient endpoints used by web My Patients.
+// A failed allocation lookup must never broaden My Patients to the global list.
+const listMyPatientsV1 = (userId, roleName, params = {}) => {
+  const pathRole = {
+    SUPERVISOR: 'supervisor',
+    DOCTOR: 'doctor',
+    CAREGIVER: 'caregiver',
+    GUARDIAN: 'guardian',
+  }[String(roleName || '').toUpperCase()];
+  if (!userId || !pathRole)
+    return Promise.resolve({
+      ok: false,
+      status: 400,
+      data: { detail: 'A supported signed-in role and user are required.' },
+    });
+  return client.get(
+    `/patients/by-${pathRole}/${encodeURIComponent(userId)}`,
+    { ...params, require_auth: true, mask: true },
+    withPatientV1Base(),
+  );
+};
+
 const listPatientsV1 = (params = {}) => {
-  // Pass through all params to support pagination (pageNo, pageSize), 
+  // Pass through all params to support pagination (pageNo, pageSize),
   // search (q), and filters (status, mask, etc.)
   // Remove undefined values to keep the query string clean
   const cleanParams = Object.fromEntries(
-    Object.entries(params).filter(([_, v]) => v !== undefined && v !== null)
+    Object.entries(params).filter(([_, v]) => v !== undefined && v !== null),
   );
-  return client.get(
-    v1PatientsListEndpoint,
-    cleanParams,
-    withPatientV1Base()
-  );
+  return client.get(v1PatientsListEndpoint, cleanParams, withPatientV1Base());
 };
 
 // ---------- Patient Allocation (v1) ----------
 // Get all allocations (paginated)
 const listAllocationsV1 = (params = {}) => {
   const cleanParams = Object.fromEntries(
-    Object.entries({ skip: 0, limit: 1000, ...params }).filter(([_, v]) => v !== undefined && v !== null)
+    Object.entries({ skip: 0, limit: 1000, ...params }).filter(
+      ([_, v]) => v !== undefined && v !== null,
+    ),
   );
   return client.get('/allocations/', cleanParams, withPatientV1Base());
 };
@@ -63,10 +93,14 @@ const listAllocationsV1 = (params = {}) => {
 const parseAllocations = (res) => {
   if (!res.ok) return [];
   const d = res.data;
-  return Array.isArray(d) ? d
-    : Array.isArray(d?.data) ? d.data
-    : Array.isArray(d?.results) ? d.results
-    : Array.isArray(d?.items) ? d.items
+  return Array.isArray(d)
+    ? d
+    : Array.isArray(d?.data)
+    ? d.data
+    : Array.isArray(d?.results)
+    ? d.results
+    : Array.isArray(d?.items)
+    ? d.items
     : [];
 };
 
@@ -95,10 +129,10 @@ const getAllocationMap = async () => {
 const getMyAllocatedPatientIds = async (userId, roleName) => {
   if (!userId || !roleName) return [];
   const role = roleName.toLowerCase();
-  
+
   const res = await listAllocationsV1({ skip: 0, limit: 5000 });
   const allocations = parseAllocations(res);
-  
+
   // Filter allocations where this user is assigned based on their role
   const myAllocations = allocations.filter((a) => {
     if (a.active === 'N' || a.isDeleted || a.is_deleted) return false;
@@ -106,14 +140,21 @@ const getMyAllocatedPatientIds = async (userId, roleName) => {
     const tempCaregiverId = a.tempCaregiverId ?? a.temp_caregiver_id;
     const supervisorId = a.supervisorId ?? a.supervisorID ?? a.supervisor_id;
     const doctorId = a.doctorId ?? a.doctorID ?? a.doctor_id;
-    const gameTherapistId = a.gameTherapistId ?? a.gameTherapistID ?? a.game_therapist_id;
+    const gameTherapistId =
+      a.gameTherapistId ?? a.gameTherapistID ?? a.game_therapist_id;
 
-    if (role.includes('supervisor')) return String(supervisorId) === String(userId);
-    if (role.includes('doctor') || role.includes('physician')) return String(doctorId) === String(userId);
+    if (role.includes('supervisor'))
+      return String(supervisorId) === String(userId);
+    if (role.includes('doctor') || role.includes('physician'))
+      return String(doctorId) === String(userId);
     if (role.includes('caregiver')) {
-      return String(caregiverId) === String(userId) || String(tempCaregiverId) === String(userId);
+      return (
+        String(caregiverId) === String(userId) ||
+        String(tempCaregiverId) === String(userId)
+      );
     }
-    if (role.includes('game') || role.includes('therapist')) return String(gameTherapistId) === String(userId);
+    if (role.includes('game') || role.includes('therapist'))
+      return String(gameTherapistId) === String(userId);
     // For admin or unknown roles, show all
     return true;
   });
@@ -125,7 +166,10 @@ const getMyAllocatedPatientIds = async (userId, roleName) => {
   return patientIds;
 };
 
-const readPatientV1 = async (patient_id, { require_auth = true, mask = true } = {}) => {
+const readPatientV1 = async (
+  patient_id,
+  { require_auth = true, mask = true } = {},
+) => {
   const res = await client.get(
     v1PatientReadEndpoint(patient_id),
     { require_auth, mask },
@@ -138,97 +182,123 @@ const readPatientV1 = async (patient_id, { require_auth = true, mask = true } = 
   return {
     ...res,
     data: {
-      ...(res.data && typeof res.data === 'object' && !Array.isArray(res.data) ? res.data : {}),
+      ...(res.data && typeof res.data === 'object' && !Array.isArray(res.data)
+        ? res.data
+        : {}),
       data: { ...raw, ...normalized },
     },
   };
 };
 
+// Reference catalogue used by the web Centre Medication record view.
+const getPrescriptionListV1 = (params = {}) =>
+  client.get(
+    '/PrescriptionList',
+    { pageNo: 0, pageSize: 100, ...params, require_auth: true },
+    withPatientV1Base(),
+  );
+
 // ---------- Patient Medications (v1) ----------
 const listPatientMedicationsV1 = async (patient_id, params = {}) => {
   if (!patient_id) {
-    return { ok: false, status: 400, data: { detail: 'patient_id is required' } };
+    return {
+      ok: false,
+      status: 400,
+      data: { detail: 'patient_id is required' },
+    };
   }
 
   const unwrapMeds = (data) =>
-    Array.isArray(data) ? data
-      : Array.isArray(data?.data) ? data.data
-      : Array.isArray(data?.results) ? data.results
+    Array.isArray(data)
+      ? data
+      : Array.isArray(data?.data)
+      ? data.data
+      : Array.isArray(data?.results)
+      ? data.results
       : [];
 
   const normalizeMedicationRecord = (item = {}) => ({
+    prescriptionListID: item.PrescriptionListId ?? item.prescriptionListId,
+    isDeleted: [true, 1, '1', 'true'].includes(
+      item.IsDeleted ?? item.isDeleted,
+    ),
     medicationID: item.medicationID ?? item.Id ?? item.id,
-    patientID: item.patientID ?? item.PatientId ?? item.patient_id ?? patient_id,
+    patientID:
+      item.patientID ?? item.PatientId ?? item.patient_id ?? patient_id,
     prescriptionName:
       item.prescriptionName ??
       item.PrescriptionName ??
       item.prescription_name ??
-      (item.PrescriptionListId != null ? `Prescription ${item.PrescriptionListId}` : ''),
+      (item.PrescriptionListId != null
+        ? `Prescription ${item.PrescriptionListId}`
+        : ''),
     dosage: item.dosage ?? item.Dosage ?? '',
     administerTime: String(item.administerTime ?? item.AdministerTime ?? ''),
     instruction: item.instruction ?? item.Instruction ?? '',
     startDateTime: item.startDateTime ?? item.StartDate ?? item.start_date,
     endDateTime: item.endDateTime ?? item.EndDate ?? item.end_date,
-    prescriptionRemarks: item.prescriptionRemarks ?? item.PrescriptionRemarks ?? '',
+    prescriptionRemarks:
+      item.prescriptionRemarks ?? item.PrescriptionRemarks ?? '',
   });
 
-  // candidates in order: nested, id-in-path, collection with query
-  const candidates = [
-    { path: `/Medication/PatientMedication`, query: { patient_id, pageNo: 0, pageSize: 100, ...params } },
-    { path: `/patients/${patient_id}/medications/`, query: params },
-    { path: `/patient-medications/${patient_id}/`, query: params },
-    { path: `/patient-medications/`,              query: { patient_id, ...params } },
-    { path: `/medications/`,                      query: { patient_id, ...params } },
-    { path: `/medication/`,                       query: { patient_id, ...params } },
-  ];
-
-  for (const c of candidates) {
-    const res = await client.get(c.path, c.query, withPatientV1Base());
-    if (res.ok) {
-      console.log('[MEDS v1] ✅ using', c.path);
-      const rows = unwrapMeds(res.data).map(normalizeMedicationRecord);
-      return {
-        ...res,
-        data: {
-          ...(res.data && !Array.isArray(res.data) ? res.data : {}),
-          data: rows,
-        },
-      };
-    }
-    // stop early on non-404 (e.g., 401/500) since that’s a real response
-    if (res.status && res.status !== 404) {
-      console.log('[MEDS v1] ❌', c.path, res.status);
-      return res;
-    }
-    console.log('[MEDS v1] 404', c.path);
-  }
-
-  // nothing matched
-  return { ok: false, status: 404, data: { detail: 'No matching medications endpoint' } };
+  const res = await client.get(
+    '/Medication/PatientMedication',
+    { pageNo: 0, pageSize: 100, ...params, patient_id },
+    withPatientV1Base(),
+  );
+  if (!res?.ok) return res;
+  const rows = unwrapMeds(res.data).map(normalizeMedicationRecord);
+  return {
+    ...res,
+    data: {
+      ...(res.data && !Array.isArray(res.data) ? res.data : {}),
+      data: rows,
+    },
+  };
 };
 
-
-
 const addPatientMedicationV1 = (patient_id, payload) => {
-  return client.post(v1PatientMedicationsEndpoint(patient_id), payload, withPatientV1Base());
+  return client.post(
+    v1PatientMedicationsEndpoint(patient_id),
+    payload,
+    withPatientV1Base(),
+  );
 };
 
 const updatePatientMedicationV1 = (patient_id, payload) => {
   // Accept legacy/v1 id keys
   const med_id = payload.medicationID ?? payload.medication_id ?? payload.id;
-  return client.put(v1PatientMedicationDetailEndpoint(patient_id, med_id), payload, withPatientV1Base());
+  return client.put(
+    v1PatientMedicationDetailEndpoint(patient_id, med_id),
+    payload,
+    withPatientV1Base(),
+  );
 };
 
-const deletePatientMedicationV1 = ({ patientID, patient_id, medicationID, medication_id, id }) => {
+const deletePatientMedicationV1 = ({
+  patientID,
+  patient_id,
+  medicationID,
+  medication_id,
+  id,
+}) => {
   const pid = patientID ?? patient_id;
   const mid = medicationID ?? medication_id ?? id;
-  return client.delete(v1PatientMedicationDetailEndpoint(pid, mid), {}, withPatientV1Base());
+  return client.delete(
+    v1PatientMedicationDetailEndpoint(pid, mid),
+    {},
+    withPatientV1Base(),
+  );
 };
 
 // ---------- Allergy (v1) ----------
 const listPatientAllergiesV1 = async (patient_id, params = {}) => {
   if (!patient_id) {
-    return { ok: false, status: 400, data: { detail: 'patient_id is required' } };
+    return {
+      ok: false,
+      status: 400,
+      data: { detail: 'patient_id is required' },
+    };
   }
 
   // NOTE: PATIENT_V1_BASE already includes `/api/v1`
@@ -240,48 +310,76 @@ const listPatientAllergiesV1 = async (patient_id, params = {}) => {
 
 const addPatientAllergyV1 = async (patient_id, data) => {
   if (!patient_id) {
-    return { ok: false, status: 400, data: { detail: 'patient_id is required' } };
+    return {
+      ok: false,
+      status: 400,
+      data: { detail: 'patient_id is required' },
+    };
   }
 
   const payload = {
     PatientID: patient_id,
-    AllergyTypeID: data.AllergyListID ?? data.allergy_type_id ?? data.allergyListID ?? data.AllergyTypeID,
-    AllergyReactionTypeID: data.AllergyReactionListID ?? data.allergy_reaction_type_id ?? data.allergyReactionListID ?? data.AllergyReactionTypeID,
-    AllergyRemarks: data.AllergyRemarks ?? data.allergy_remarks ?? data.allergyRemarks ?? '',
+    AllergyTypeID:
+      data.AllergyListID ??
+      data.allergy_type_id ??
+      data.allergyListID ??
+      data.AllergyTypeID,
+    AllergyReactionTypeID:
+      data.AllergyReactionListID ??
+      data.allergy_reaction_type_id ??
+      data.allergyReactionListID ??
+      data.AllergyReactionTypeID,
+    AllergyRemarks:
+      data.AllergyRemarks ?? data.allergy_remarks ?? data.allergyRemarks ?? '',
     IsDeleted: '0',
   };
-  
+
   // NOTE: PATIENT_V1_BASE already includes `/api/v1`
   const url = `/create_patient_allergy`;
   const res = await client.post(url, payload, withPatientV1Base());
-  if (!res.ok) console.log('[ALLERGY v1][POST]', url, res.status, payload, res.data);
+  if (!res.ok)
+    console.log('[ALLERGY v1][POST]', url, res.status, payload, res.data);
   return res;
 };
 
 const updatePatientAllergyV1 = async (patient_id, allergy_id, data) => {
   if (!patient_id || !allergy_id) {
-    return { ok: false, status: 400, data: { detail: 'patient_id and allergy_id are required' } };
+    return {
+      ok: false,
+      status: 400,
+      data: { detail: 'patient_id and allergy_id are required' },
+    };
   }
 
   const payload = {
     PatientID: patient_id,
     Patient_AllergyID: allergy_id,
-    AllergyTypeID: data.AllergyListID ?? data.allergy_type_id ?? data.allergyListID,
-    AllergyReactionTypeID: data.AllergyReactionListID ?? data.allergy_reaction_type_id ?? data.allergyReactionListID,
-    AllergyRemarks: data.AllergyRemarks ?? data.allergy_remarks ?? data.allergyRemarks ?? '',
+    AllergyTypeID:
+      data.AllergyListID ?? data.allergy_type_id ?? data.allergyListID,
+    AllergyReactionTypeID:
+      data.AllergyReactionListID ??
+      data.allergy_reaction_type_id ??
+      data.allergyReactionListID,
+    AllergyRemarks:
+      data.AllergyRemarks ?? data.allergy_remarks ?? data.allergyRemarks ?? '',
     IsDeleted: data.IsDeleted ?? '0',
   };
-  
+
   // NOTE: PATIENT_V1_BASE already includes `/api/v1`
   const url = `/update_patient_allergy/${allergy_id}`;
   const res = await client.put(url, payload, withPatientV1Base());
-  if (!res.ok) console.log('[ALLERGY v1][PUT]', url, res.status, payload, res.data);
+  if (!res.ok)
+    console.log('[ALLERGY v1][PUT]', url, res.status, payload, res.data);
   return res;
 };
 
 const deletePatientAllergyV1 = async (patient_id, patient_allergy_id) => {
   if (!patient_id || !patient_allergy_id) {
-    return { ok: false, status: 400, data: { detail: 'patient_id and patient_allergy_id are required' } };
+    return {
+      ok: false,
+      status: 400,
+      data: { detail: 'patient_id and patient_allergy_id are required' },
+    };
   }
 
   // NOTE: PATIENT_V1_BASE already includes `/api/v1`
@@ -319,7 +417,8 @@ const addPatientMobilityV1 = async (patient_id, data) => {
   };
   const url = v1MobilityMapAddEndpoint();
   const res = await client.post(url, payload, withPatientV1Base());
-  if (!res.ok) console.log('[MOBILITY v1][POST]', url, res.status, payload, res.data);
+  if (!res.ok)
+    console.log('[MOBILITY v1][POST]', url, res.status, payload, res.data);
   return res;
 };
 
@@ -334,7 +433,8 @@ const updatePatientMobilityV1 = async (patient_id, data) => {
   };
   const url = v1MobilityMapUpdateEndpoint(mobility_id);
   const res = await client.put(url, payload, withPatientV1Base());
-  if (!res.ok) console.log('[MOBILITY v1][PUT]', url, res.status, payload, res.data);
+  if (!res.ok)
+    console.log('[MOBILITY v1][PUT]', url, res.status, payload, res.data);
   return res;
 };
 
@@ -350,7 +450,7 @@ const listPatientVitalsV1 = async (patient_id, params = {}) => {
   const res = await client.get(
     v1VitalListEndpoint,
     { patient_id, ...params },
-    withPatientV1Base()
+    withPatientV1Base(),
   );
   if (!res.ok) {
     console.log('[VITAL v1][GET LIST]', res.status, res.data);
@@ -360,34 +460,34 @@ const listPatientVitalsV1 = async (patient_id, params = {}) => {
   // normalize: FastAPI -> UI shape already used on the screen
   const raw = Array.isArray(res.data) ? res.data : res.data?.data ?? [];
   return raw.map((x) => ({
-    vitalID:           x.vital_id ?? x.id,
-    temperature:       x.temperature ?? null,
-    weight:            x.weight ?? null,
-    height:            x.height ?? null,
-    systolicBP:        x.systolic_bp ?? x.systolicBP ?? null,
-    diastolicBP:       x.diastolic_bp ?? x.diastolicBP ?? null,
-    heartRate:         x.heart_rate ?? x.heartRate ?? null,
-    spO2:              x.spo2 ?? x.SpO2 ?? null,
-    bloodSugarlevel:   x.blood_sugar_level ?? x.bloodSugarlevel ?? null, // keep UI’s key
-    vitalRemarks:      x.vital_remarks ?? x.vitalRemarks ?? '',
-    afterMeal:         x.after_meal ?? x.afterMeal ?? false,
-    createdDateTime:   x.created_at ?? x.createdDateTime ?? x.date ?? null,
+    vitalID: x.vital_id ?? x.id,
+    temperature: x.temperature ?? null,
+    weight: x.weight ?? null,
+    height: x.height ?? null,
+    systolicBP: x.systolic_bp ?? x.systolicBP ?? null,
+    diastolicBP: x.diastolic_bp ?? x.diastolicBP ?? null,
+    heartRate: x.heart_rate ?? x.heartRate ?? null,
+    spO2: x.spo2 ?? x.SpO2 ?? null,
+    bloodSugarlevel: x.blood_sugar_level ?? x.bloodSugarlevel ?? null, // keep UI’s key
+    vitalRemarks: x.vital_remarks ?? x.vitalRemarks ?? '',
+    afterMeal: x.after_meal ?? x.afterMeal ?? false,
+    createdDateTime: x.created_at ?? x.createdDateTime ?? x.date ?? null,
   }));
 };
 
 const addPatientVitalV1 = (patient_id, data) => {
   const payload = {
     patient_id,
-    temperature:        data.temperature,
-    weight:             data.weight,
-    height:             data.height,
-    systolic_bp:        data.systolicBP,
-    diastolic_bp:       data.diastolicBP,
-    heart_rate:         data.heartRate,
-    spo2:               data.spO2,
-    blood_sugar_level:  data.bloodSugarLevel ?? data.bloodSugarlevel,
-    vital_remarks:      data.vitalRemarks,
-    after_meal:         data.afterMeal,
+    temperature: data.temperature,
+    weight: data.weight,
+    height: data.height,
+    systolic_bp: data.systolicBP,
+    diastolic_bp: data.diastolicBP,
+    heart_rate: data.heartRate,
+    spo2: data.spO2,
+    blood_sugar_level: data.bloodSugarLevel ?? data.bloodSugarlevel,
+    vital_remarks: data.vitalRemarks,
+    after_meal: data.afterMeal,
   };
   return client.post(v1VitalAddEndpoint, payload, withPatientV1Base());
 };
@@ -395,28 +495,36 @@ const addPatientVitalV1 = (patient_id, data) => {
 const updatePatientVitalV1 = (patient_id, data) => {
   const payload = {
     patient_id,
-    temperature:        data.temperature,
-    weight:             data.weight,
-    height:             data.height,
-    systolic_bp:        data.systolicBP,
-    diastolic_bp:       data.diastolicBP,
-    heart_rate:         data.heartRate,
-    spo2:               data.spO2,
-    blood_sugar_level:  data.bloodSugarLevel ?? data.bloodSugarlevel,
-    vital_remarks:      data.vitalRemarks,
-    after_meal:         data.afterMeal,
+    temperature: data.temperature,
+    weight: data.weight,
+    height: data.height,
+    systolic_bp: data.systolicBP,
+    diastolic_bp: data.diastolicBP,
+    heart_rate: data.heartRate,
+    spo2: data.spO2,
+    blood_sugar_level: data.bloodSugarLevel ?? data.bloodSugarlevel,
+    vital_remarks: data.vitalRemarks,
+    after_meal: data.afterMeal,
   };
-  return client.put(v1VitalUpdateEndpoint(data.vitalID), payload, withPatientV1Base());
+  return client.put(
+    v1VitalUpdateEndpoint(data.vitalID),
+    payload,
+    withPatientV1Base(),
+  );
 };
 
 const deletePatientVitalV1 = async (vital_id) => {
   // Try query param first (most common). If backend needs JSON body for DELETE, try again with `data`.
-  let res = await client.delete(v1VitalDeleteEndpoint, { vital_id }, withPatientV1Base());
+  let res = await client.delete(
+    v1VitalDeleteEndpoint,
+    { vital_id },
+    withPatientV1Base(),
+  );
   if (!res.ok) {
     res = await client.delete(
       v1VitalDeleteEndpoint,
       {},
-      { baseURL: PATIENT_V1_BASE, timeout: 15000, data: { vital_id } }
+      { baseURL: PATIENT_V1_BASE, timeout: 15000, data: { vital_id } },
     );
   }
   if (!res.ok) console.log('[VITAL v1][DELETE]', res.status, res.data);
@@ -424,12 +532,18 @@ const deletePatientVitalV1 = async (vital_id) => {
 };
 
 // ---------- Problem Logs (v1) ----------
-const v1PatientProblemLogsEndpoint = (patient_id) => `/patients/${patient_id}/problem_logs/`;
-const v1PatientProblemLogDetailEndpoint = (patient_id, log_id) => `/patients/${patient_id}/problem_logs/${log_id}/`;
+const v1PatientProblemLogsEndpoint = (patient_id) =>
+  `/patients/${patient_id}/problem_logs/`;
+const v1PatientProblemLogDetailEndpoint = (patient_id, log_id) =>
+  `/patients/${patient_id}/problem_logs/${log_id}/`;
 
 // List all logs for a patient
 const listPatientProblemLogsV1 = async (patient_id) => {
-  const res = await client.get(v1PatientProblemLogsEndpoint(patient_id), {}, withPatientV1Base());
+  const res = await client.get(
+    v1PatientProblemLogsEndpoint(patient_id),
+    {},
+    withPatientV1Base(),
+  );
   if (!res.ok) console.log('[PROBLEM LOG v1][GET LIST]', res.status, res.data);
   return res;
 };
@@ -438,10 +552,16 @@ const listPatientProblemLogsV1 = async (patient_id) => {
 const addPatientProblemLogV1 = async (patient_id, data) => {
   const payload = {
     problem_log_list_id: data.problemLogListID ?? data.problemLogListId ?? 1,
-    problem_log_remarks: data.problemLogRemarks ?? data.problem_log_remarks ?? '',
+    problem_log_remarks:
+      data.problemLogRemarks ?? data.problem_log_remarks ?? '',
   };
-  const res = await client.post(v1PatientProblemLogsEndpoint(patient_id), payload, withPatientV1Base());
-  if (!res.ok) console.log('[PROBLEM LOG v1][POST]', res.status, payload, res.data);
+  const res = await client.post(
+    v1PatientProblemLogsEndpoint(patient_id),
+    payload,
+    withPatientV1Base(),
+  );
+  if (!res.ok)
+    console.log('[PROBLEM LOG v1][POST]', res.status, payload, res.data);
   return res;
 };
 
@@ -449,29 +569,45 @@ const addPatientProblemLogV1 = async (patient_id, data) => {
 const updatePatientProblemLogV1 = async (patient_id, log_id, data) => {
   const payload = {
     problem_log_list_id: data.problemLogListID ?? data.problemLogListId ?? 1,
-    problem_log_remarks: data.problemLogRemarks ?? data.problem_log_remarks ?? '',
+    problem_log_remarks:
+      data.problemLogRemarks ?? data.problem_log_remarks ?? '',
   };
-  const res = await client.patch(v1PatientProblemLogDetailEndpoint(patient_id, log_id), payload, withPatientV1Base());
-  if (!res.ok) console.log('[PROBLEM LOG v1][PATCH]', res.status, payload, res.data);
+  const res = await client.patch(
+    v1PatientProblemLogDetailEndpoint(patient_id, log_id),
+    payload,
+    withPatientV1Base(),
+  );
+  if (!res.ok)
+    console.log('[PROBLEM LOG v1][PATCH]', res.status, payload, res.data);
   return res;
 };
 
 // Delete a problem log
 const deletePatientProblemLogV1 = async (patient_id, log_id) => {
-  const res = await client.delete(v1PatientProblemLogDetailEndpoint(patient_id, log_id), {}, withPatientV1Base());
+  const res = await client.delete(
+    v1PatientProblemLogDetailEndpoint(patient_id, log_id),
+    {},
+    withPatientV1Base(),
+  );
   if (!res.ok) console.log('[PROBLEM LOG v1][DELETE]', res.status, res.data);
   return res;
 };
 
-
 // ---------- Medical History (v1) ----------
-const v1PatientMedicalHistoriesEndpoint = (patient_id) => `/patients/${patient_id}/medical_histories/`;
-const v1PatientMedicalHistoryDetailEndpoint = (patient_id, hx_id) => `/patients/${patient_id}/medical_histories/${hx_id}/`;
+const v1PatientMedicalHistoriesEndpoint = (patient_id) =>
+  `/patients/${patient_id}/medical_histories/`;
+const v1PatientMedicalHistoryDetailEndpoint = (patient_id, hx_id) =>
+  `/patients/${patient_id}/medical_histories/${hx_id}/`;
 
 // List all medical histories for a patient
 const listPatientMedicalHistoriesV1 = async (patient_id) => {
-  const res = await client.get(v1PatientMedicalHistoriesEndpoint(patient_id), {}, withPatientV1Base());
-  if (!res.ok) console.log('[MEDICAL HISTORY v1][GET LIST]', res.status, res.data);
+  const res = await client.get(
+    v1PatientMedicalHistoriesEndpoint(patient_id),
+    {},
+    withPatientV1Base(),
+  );
+  if (!res.ok)
+    console.log('[MEDICAL HISTORY v1][GET LIST]', res.status, res.data);
   return res;
 };
 
@@ -483,24 +619,40 @@ const addPatientMedicalHistoryV1 = async (patient_id, data) => {
     medical_remarks: data.medicalRemarks ?? '',
     estimated_date: data.medicalEstimatedDate ?? null,
   };
-  const res = await client.post(v1PatientMedicalHistoriesEndpoint(patient_id), payload, withPatientV1Base());
-  if (!res.ok) console.log('[MEDICAL HISTORY v1][POST]', res.status, payload, res.data);
+  const res = await client.post(
+    v1PatientMedicalHistoriesEndpoint(patient_id),
+    payload,
+    withPatientV1Base(),
+  );
+  if (!res.ok)
+    console.log('[MEDICAL HISTORY v1][POST]', res.status, payload, res.data);
   return res;
 };
 
 // Delete a medical history
 const deletePatientMedicalHistoryV1 = async (patient_id, hx_id) => {
-  const res = await client.delete(v1PatientMedicalHistoryDetailEndpoint(patient_id, hx_id), {}, withPatientV1Base());
-  if (!res.ok) console.log('[MEDICAL HISTORY v1][DELETE]', res.status, res.data);
+  const res = await client.delete(
+    v1PatientMedicalHistoryDetailEndpoint(patient_id, hx_id),
+    {},
+    withPatientV1Base(),
+  );
+  if (!res.ok)
+    console.log('[MEDICAL HISTORY v1][DELETE]', res.status, res.data);
   return res;
 };
 
 // ---------- Prescriptions (v1) ----------
-const v1PatientPrescriptionsEndpoint = (patient_id) => `/patients/${patient_id}/prescriptions/`;
-const v1PatientPrescriptionDetailEndpoint = (patient_id, presc_id) => `/patients/${patient_id}/prescriptions/${presc_id}/`;
+const v1PatientPrescriptionsEndpoint = (patient_id) =>
+  `/patients/${patient_id}/prescriptions/`;
+const v1PatientPrescriptionDetailEndpoint = (patient_id, presc_id) =>
+  `/patients/${patient_id}/prescriptions/${presc_id}/`;
 
 const listPatientPrescriptionsV1 = async (patient_id) => {
-  const res = await client.get(v1PatientPrescriptionsEndpoint(patient_id), {}, withPatientV1Base());
+  const res = await client.get(
+    v1PatientPrescriptionsEndpoint(patient_id),
+    {},
+    withPatientV1Base(),
+  );
   if (!res.ok) console.log('[PRESCRIPTION v1][GET LIST]', res.status, res.data);
   return res;
 };
@@ -517,8 +669,13 @@ const addPatientPrescriptionV1 = async (patient_id, data) => {
     after_meal: data.afterMeal ?? false,
     prescription_remarks: data.prescriptionRemarks ?? '',
   };
-  const res = await client.post(v1PatientPrescriptionsEndpoint(patient_id), payload, withPatientV1Base());
-  if (!res.ok) console.log('[PRESCRIPTION v1][POST]', res.status, payload, res.data);
+  const res = await client.post(
+    v1PatientPrescriptionsEndpoint(patient_id),
+    payload,
+    withPatientV1Base(),
+  );
+  if (!res.ok)
+    console.log('[PRESCRIPTION v1][POST]', res.status, payload, res.data);
   return res;
 };
 
@@ -534,17 +691,25 @@ const updatePatientPrescriptionV1 = async (patient_id, presc_id, data) => {
     after_meal: data.afterMeal ?? false,
     prescription_remarks: data.prescriptionRemarks ?? '',
   };
-  const res = await client.patch(v1PatientPrescriptionDetailEndpoint(patient_id, presc_id), payload, withPatientV1Base());
-  if (!res.ok) console.log('[PRESCRIPTION v1][PATCH]', res.status, payload, res.data);
+  const res = await client.patch(
+    v1PatientPrescriptionDetailEndpoint(patient_id, presc_id),
+    payload,
+    withPatientV1Base(),
+  );
+  if (!res.ok)
+    console.log('[PRESCRIPTION v1][PATCH]', res.status, payload, res.data);
   return res;
 };
 
 const deletePatientPrescriptionV1 = async (patient_id, presc_id) => {
-  const res = await client.delete(v1PatientPrescriptionDetailEndpoint(patient_id, presc_id), {}, withPatientV1Base());
+  const res = await client.delete(
+    v1PatientPrescriptionDetailEndpoint(patient_id, presc_id),
+    {},
+    withPatientV1Base(),
+  );
   if (!res.ok) console.log('[PRESCRIPTION v1][DELETE]', res.status, res.data);
   return res;
 };
-
 
 // ---------- Helpers ----------
 const addPatientForm = (arr, str, patientData) => {
@@ -587,7 +752,7 @@ const getPatient = async (patientID) => {
 const getPatientList = async (maskNRIC = true, patientStatus = null) => {
   const params = {
     pageNo: 0,
-    pageSize: 80,  // Max patients fetched upfront for client-side pagination
+    pageSize: 80, // Max patients fetched upfront for client-side pagination
   };
   if (patientStatus) params.status = patientStatus;
   if (maskNRIC !== undefined) params.mask = maskNRIC;
@@ -597,21 +762,30 @@ const getPatientList = async (maskNRIC = true, patientStatus = null) => {
 // Create patient (used by AddPatient screen)
 // Expects a properly formatted payload matching the API schema
 const addPatient = async (patientPayload) => {
-  console.log('[ADD PATIENT] Sending patient payload:', patientPayload);
-  return client.post('/patients/add', patientPayload, withPatientV1Base());
+  return client.post(
+    '/patients/add',
+    uppercasePersonFields(patientPayload),
+    withPatientV1Base(),
+  );
 };
 
 // Add guardian for a patient
 const addGuardian = async (guardianPayload) => {
-  console.log('[ADD GUARDIAN] Sending guardian payload:', guardianPayload);
-  return client.post('/Guardian/add', guardianPayload, withPatientV1Base());
+  return client.post(
+    '/Guardian/add',
+    uppercasePersonFields(guardianPayload),
+    withPatientV1Base(),
+  );
 };
 
 // Update patient (used by EditPatientInfoScreen)
 const updatePatient = async (patientID, data) => {
-  return client.put(`/patients/update/${patientID}`, data, withPatientV1Base());
+  return client.put(
+    `/patients/update/${patientID}`,
+    uppercasePersonFields(data),
+    withPatientV1Base(),
+  );
 };
-
 
 // ---------- NORMALIZERS ----------
 // Normalize patient data from v1 API to UI shape (shared across screens)
@@ -621,9 +795,19 @@ export const normalizePatientV1 = (p = {}) => {
   const inferredLast = nameParts.slice(1).join(' ') ?? '';
 
   const firstName =
-    p.firstName ?? p.FirstName ?? p.first_name ?? p.given_name ?? p.first ?? inferredFirst;
+    p.firstName ??
+    p.FirstName ??
+    p.first_name ??
+    p.given_name ??
+    p.first ??
+    inferredFirst;
   const lastName =
-    p.lastName ?? p.LastName ?? p.last_name ?? p.family_name ?? p.last ?? inferredLast;
+    p.lastName ??
+    p.LastName ??
+    p.last_name ??
+    p.family_name ??
+    p.last ??
+    inferredLast;
 
   return {
     ...p,
@@ -639,7 +823,11 @@ export const normalizePatientV1 = (p = {}) => {
       [firstName, lastName].filter(Boolean).join(' ') ??
       '',
     fullName:
-      (p.fullName ?? p.FullName ?? p.name ?? [firstName, lastName].filter(Boolean).join(' ')) || '',
+      (p.fullName ??
+        p.FullName ??
+        p.name ??
+        [firstName, lastName].filter(Boolean).join(' ')) ||
+      '',
     nric: p.nric ?? p.NRIC ?? p.nric_number ?? p.id_number ?? null,
     profilePicture:
       p.profilePicture ??
@@ -651,19 +839,20 @@ export const normalizePatientV1 = (p = {}) => {
   };
 };
 
-
 // --- v1 Allergy dropdown sources ---
 const getAllergyTypesV1 = async () => {
   const url = `/get_allergy_types`;
   const res = await client.get(url, {}, withPatientV1Base());
-  if (!res.ok) console.log('[ALLERGY v1][GET TYPES]', url, res.status, res.data);
+  if (!res.ok)
+    console.log('[ALLERGY v1][GET TYPES]', url, res.status, res.data);
   return res;
 };
 
 const getAllergyReactionTypesV1 = async () => {
   const url = `/get_allergy_reaction_types`;
   const res = await client.get(url, {}, withPatientV1Base());
-  if (!res.ok) console.log('[ALLERGY v1][GET REACTION TYPES]', url, res.status, res.data);
+  if (!res.ok)
+    console.log('[ALLERGY v1][GET REACTION TYPES]', url, res.status, res.data);
   return res;
 };
 
@@ -697,10 +886,17 @@ const unwrapArray = (data) => {
 const normalizeHolidayExperience = (holiday = {}) => {
   if (!holiday || Object.keys(holiday).length === 0) return null;
   return {
-    holidayExpID: holiday.holidayExpID ?? holiday.HolidayExpID ?? holiday.id ?? '',
+    holidayExpID:
+      holiday.holidayExpID ?? holiday.HolidayExpID ?? holiday.id ?? '',
     countryListID: holiday.countryListID ?? holiday.CountryListID ?? '',
-    country: holiday.country ?? holiday.Country ?? holiday.countryName ?? holiday.CountryName ?? '',
-    startDate: holiday.startDate ?? holiday.StartDate ?? holiday.start_date ?? '',
+    country:
+      holiday.country ??
+      holiday.Country ??
+      holiday.countryName ??
+      holiday.CountryName ??
+      '',
+    startDate:
+      holiday.startDate ?? holiday.StartDate ?? holiday.start_date ?? '',
     endDate: holiday.endDate ?? holiday.EndDate ?? holiday.end_date ?? '',
   };
 };
@@ -731,7 +927,8 @@ const normalizePhoto = (photo = {}, albumMap = {}) => {
       albumMap[String(albumCategoryListID)] ??
       '',
     albumCategoryListID,
-    photoDetails: photo.photoDetails ?? photo.PhotoDetails ?? photo.photo_details ?? '',
+    photoDetails:
+      photo.photoDetails ?? photo.PhotoDetails ?? photo.photo_details ?? '',
     holidayExperience,
     ...photo,
   };
@@ -761,7 +958,11 @@ const getPhotoListAlbumsV1 = async () => {
 
 const getPatientPhoto = async (patientID) => {
   const [photoRes, albumRes] = await Promise.all([
-    client.get(`${personalPhotoEndpoint}/by-patient-id/${patientID}`, {}, withPatientV1Base()),
+    client.get(
+      `${personalPhotoEndpoint}/by-patient-id/${patientID}`,
+      {},
+      withPatientV1Base(),
+    ),
     getPhotoListAlbumsV1(),
   ]);
 
@@ -776,7 +977,9 @@ const getPatientPhoto = async (patientID) => {
     ...photoRes,
     data: {
       ...(photoRes.data && !Array.isArray(photoRes.data) ? photoRes.data : {}),
-      data: unwrapArray(photoRes.data).map((photo) => normalizePhoto(photo, albumMap)),
+      data: unwrapArray(photoRes.data).map((photo) =>
+        normalizePhoto(photo, albumMap),
+      ),
     },
   };
 };
@@ -790,7 +993,8 @@ const appendFileIfPresent = (form, file) => {
 
 const getPhotoRequestParams = (patientID, data = {}) => {
   const addHoliday = data.HolidayExperienceAddDTO ?? data.holidayExperience;
-  const updateHoliday = data.HolidayExperienceUpdateDTO ?? data.holidayExperience;
+  const updateHoliday =
+    data.HolidayExperienceUpdateDTO ?? data.holidayExperience;
   const holiday = addHoliday ?? updateHoliday ?? {};
   return {
     PatientID: patientID,
@@ -819,19 +1023,29 @@ const addPatientPhoto = (patientID, data = {}) => {
 };
 
 const updatePatientPhoto = (patientID, data = {}) => {
-  const photoID = data.PatientPhotoID ?? data.patientPhotoID ?? data.photoId ?? data.id;
+  const photoID =
+    data.PatientPhotoID ?? data.patientPhotoID ?? data.photoId ?? data.id;
   const form = new FormData();
   appendFileIfPresent(form, data.Photo ?? data.photo ?? data.file);
-  return client.put(`${personalPhotoEndpoint}/update/by-photo-id/${photoID}`, form, {
-    ...withPatientV1Base(),
-    params: getPhotoRequestParams(patientID, data),
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+  return client.put(
+    `${personalPhotoEndpoint}/update/by-photo-id/${photoID}`,
+    form,
+    {
+      ...withPatientV1Base(),
+      params: getPhotoRequestParams(patientID, data),
+      headers: { 'Content-Type': 'multipart/form-data' },
+    },
+  );
 };
 
 const deletePatientPhoto = (data = {}) => {
-  const photoID = data.PatientPhotoID ?? data.patientPhotoID ?? data.photoId ?? data.id;
-  return client.delete(`${personalPhotoEndpoint}/delete/by-photo-id/${photoID}`, {}, withPatientV1Base());
+  const photoID =
+    data.PatientPhotoID ?? data.patientPhotoID ?? data.photoId ?? data.id;
+  return client.delete(
+    `${personalPhotoEndpoint}/delete/by-photo-id/${photoID}`,
+    {},
+    withPatientV1Base(),
+  );
 };
 
 const deletePatientAlbum = deletePatientPhoto;
@@ -840,6 +1054,7 @@ const deletePatientAlbum = deletePatientPhoto;
  * Expose your end points here
  */
 export default {
+  listMyPatientsV1,
   // Core Patient v1 (used by screens)
   getPatient,
   getPatientList,
@@ -859,6 +1074,7 @@ export default {
 
   // --- v1 Patient Medications ---
   listPatientMedicationsV1,
+  getPrescriptionListV1,
   addPatientMedicationV1,
   updatePatientMedicationV1,
   deletePatientMedicationV1,

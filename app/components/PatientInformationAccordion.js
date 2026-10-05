@@ -1,6 +1,7 @@
 /*eslint eslint-comments/no-unlimited-disable: error */
 // Libs
 import { Button, Text } from 'native-base';
+import { guardianRoleLabel } from 'app/utility/guardianPrimary';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -216,6 +217,7 @@ function PatientInformationAccordion({
           [g.firstName, g.lastName].filter(Boolean).join(' ') || '-';
 
         result.guardianInfoData = [
+          { label: 'Guardian Role', value: guardianRoleLabel(g) },
           { label: 'Guardian Name', value: fullName },
           { label: 'Preferred Name', value: g.preferredName || '-' },
           { label: 'NRIC', value: g.nric ? maskNRIC(g.nric) : '-' },
@@ -237,6 +239,7 @@ function PatientInformationAccordion({
           [g2.firstName, g2.lastName].filter(Boolean).join(' ') || '-';
 
         result.secondGuardianInfoData = [
+          { label: 'Guardian Role', value: guardianRoleLabel(g2) },
           { label: 'Guardian Name', value: fullName },
           { label: 'Preferred Name', value: g2.preferredName || '-' },
           { label: 'NRIC', value: g2.nric ? maskNRIC(g2.nric) : '-' },

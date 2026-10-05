@@ -26,7 +26,9 @@ const unwrapArray = (data) => {
 };
 
 const isDeletedRow = (row = {}) =>
-  Boolean(row.is_deleted ?? row.isDeleted ?? row.IsDeleted);
+  [true, 1, '1', 'true'].includes(
+    row.is_deleted ?? row.isDeleted ?? row.IsDeleted,
+  );
 
 const normalizePreference = (pref = {}) => {
   const centreActivityID =
@@ -104,7 +106,11 @@ const getActivityPreference = async (patientID) => {
 };
 
 const getCentreActivities = async () => {
-  const res = await client.get(`${centreActivities}/`, {}, withActivityV1Base());
+  const res = await client.get(
+    `${centreActivities}/`,
+    {},
+    withActivityV1Base(),
+  );
   return toMobileListResponse(res, normalizeCentreActivity);
 };
 
@@ -125,10 +131,17 @@ const getActivities = async () => {
 
 export const isMissingActivityTitle = (title) => {
   const value = String(title ?? '').trim();
-  return !value || /^untitled activity$/i.test(value) || /^activity \d*$/i.test(value);
+  return (
+    !value ||
+    /^untitled activity$/i.test(value) ||
+    /^activity \d*$/i.test(value)
+  );
 };
 
-export const buildActivityTitleMap = (centreActivitiesList = [], activitiesList = []) => {
+export const buildActivityTitleMap = (
+  centreActivitiesList = [],
+  activitiesList = [],
+) => {
   // Same join as PEAR_WebFE origin/main: centre_activity.activity_id -> activity.title.
   const catalogTitles = {};
   activitiesList.forEach((activity) => {
@@ -218,7 +231,11 @@ const addActivityPreference = async (patientID, data) => {
     created_by_id: data.createdById ?? data.CreatedById ?? 'MOBILE',
   };
 
-  return await client.post(centreActivityPreferences, payload, withActivityV1Base());
+  return await client.post(
+    centreActivityPreferences,
+    payload,
+    withActivityV1Base(),
+  );
 };
 
 // ************************* UPDATE REQUESTS *************************
@@ -231,13 +248,18 @@ const updateActivityPreference = async (data) => {
   const payload = {
     id,
     patient_id: data.PatientID ?? data.patientID ?? data.patient_id,
-    centre_activity_id: data.CentreActivityID ?? data.centreActivityID ?? data.centre_activity_id,
+    centre_activity_id:
+      data.CentreActivityID ?? data.centreActivityID ?? data.centre_activity_id,
     is_like: data.IsLike ?? data.isLike ?? data.is_like ?? 0,
     is_deleted: data.isDeleted ?? data.is_deleted ?? false,
     modified_by_id: data.modifiedById ?? data.ModifiedById ?? 'MOBILE',
   };
 
-  return client.put(`${centreActivityPreferences}/${id}`, payload, withActivityV1Base());
+  return client.put(
+    `${centreActivityPreferences}/${id}`,
+    payload,
+    withActivityV1Base(),
+  );
 };
 
 const deleteActivityPreference = async (data) => {
@@ -245,7 +267,11 @@ const deleteActivityPreference = async (data) => {
     data.centreActivityPreferenceID ??
     data.CentreActivityPreferenceID ??
     data.id;
-  return client.delete(`${centreActivityPreferences}/${id}`, {}, withActivityV1Base());
+  return client.delete(
+    `${centreActivityPreferences}/${id}`,
+    {},
+    withActivityV1Base(),
+  );
 };
 
 const convertDayOfWeek = (day) => {
@@ -270,7 +296,8 @@ const convertDayOfWeek = (day) => {
 const normalizeRoutine = (routine = {}) => ({
   id: routine.id,
   activityID: routine.activity_id ?? routine.activityID,
-  activityName: routine.name ?? routine.activityName ?? routine.activity?.title ?? '',
+  activityName:
+    routine.name ?? routine.activityName ?? routine.activity?.title ?? '',
   days: convertDayOfWeek(routine.day_of_week ?? routine.dayOfWeek),
   startTime: routine.start_time ?? routine.startTime ?? '',
   endTime: routine.end_time ?? routine.endTime ?? '',
@@ -297,10 +324,16 @@ const recommendationLabel = (value) => {
 
 const normalizeRecommendation = (rec = {}) => {
   const doctorRecommendation =
-    rec.doctor_recommendation ?? rec.doctorRecommendation ?? rec.DoctorRecommendation ?? 0;
+    rec.doctor_recommendation ??
+    rec.doctorRecommendation ??
+    rec.DoctorRecommendation ??
+    0;
   return {
     ...rec,
-    id: rec.id ?? rec.centreActivityRecommendationID ?? rec.CentreActivityRecommendationID,
+    id:
+      rec.id ??
+      rec.centreActivityRecommendationID ??
+      rec.CentreActivityRecommendationID,
     centreActivityID:
       rec.centre_activity_id ?? rec.centreActivityID ?? rec.CentreActivityID,
     patientID: rec.patient_id ?? rec.patientID ?? rec.PatientID,
@@ -321,7 +354,10 @@ const normalizeRecommendation = (rec = {}) => {
 
 const normalizeExclusion = (exclusion = {}) => ({
   ...exclusion,
-  id: exclusion.id ?? exclusion.centreActivityExclusionID ?? exclusion.CentreActivityExclusionID,
+  id:
+    exclusion.id ??
+    exclusion.centreActivityExclusionID ??
+    exclusion.CentreActivityExclusionID,
   centreActivityID:
     exclusion.centre_activity_id ??
     exclusion.centreActivityID ??
@@ -332,7 +368,8 @@ const normalizeExclusion = (exclusion = {}) => ({
     exclusion.exclusionRemarks ??
     exclusion.ExclusionRemarks ??
     '',
-  startDate: exclusion.start_date ?? exclusion.startDate ?? exclusion.StartDate ?? '',
+  startDate:
+    exclusion.start_date ?? exclusion.startDate ?? exclusion.StartDate ?? '',
   endDate: exclusion.end_date ?? exclusion.endDate ?? exclusion.EndDate ?? '',
   activityTitle:
     exclusion.activityTitle ??
@@ -343,15 +380,86 @@ const normalizeExclusion = (exclusion = {}) => ({
   isDeleted: isDeletedRow(exclusion),
 });
 
+// Existing patient-scoped aggregate used by PEAR_WebFE origin/main.
+// Never fall back to a global collection or fan out on an auth/transport failure.
+const getPatientActivityAggregate = async (patientID) => {
+  const res = await client.get(
+    `/aggregated/activity-preference-table/patient/${patientID}`,
+    { include_deleted: false },
+    withActivityV1Base(),
+  );
+  if (!res?.ok) return res;
+  const payload = res.data;
+  const fields = [
+    'activities',
+    'centre_activities',
+    'preferences',
+    'recommendations',
+    'exclusions',
+    'patients',
+  ];
+  if (
+    !fields.every((key) => Array.isArray(payload?.[key])) ||
+    !payload.patients.some(
+      (patient) => String(patient.id) === String(patientID),
+    )
+  ) {
+    return {
+      ...res,
+      ok: false,
+      problem: 'INVALID_RESPONSE',
+      data: {
+        detail: 'Activity response does not match the selected patient.',
+      },
+    };
+  }
+  const activitiesList = payload.activities.filter((row) => !isDeletedRow(row));
+  const centreList = payload.centre_activities.filter(
+    (row) => !isDeletedRow(row),
+  );
+  const titleMap = buildActivityTitleMap(centreList, activitiesList);
+  const scoped = (rows, normalize) =>
+    rows
+      .filter((row) => !isDeletedRow(row))
+      .map(normalize)
+      .filter((row) => String(row.patientID) === String(patientID));
+  return {
+    ...res,
+    data: {
+      preferences: mergeCataloguePreferences(
+        centreList,
+        activitiesList,
+        scoped(payload.preferences, normalizePreference),
+      ),
+      recommendations: keepNamedActivities(
+        applyActivityTitles(
+          scoped(payload.recommendations, normalizeRecommendation),
+          titleMap,
+        ),
+      ),
+      exclusions: keepNamedActivities(
+        applyActivityTitles(
+          scoped(payload.exclusions, normalizeExclusion),
+          titleMap,
+        ),
+      ),
+    },
+  };
+};
+
 const isEmptyRecommendationsNotFound = (res) => {
   if (res?.ok || res?.status !== 404) return false;
   const detail = res?.data?.detail;
-  const text = typeof detail === 'string' ? detail : JSON.stringify(detail ?? '');
+  const text =
+    typeof detail === 'string' ? detail : JSON.stringify(detail ?? '');
   return /no centre activity recommendations found/i.test(text);
 };
 
 const emptyRecommendationList = (res) =>
-  toMobileListResponse({ ...res, ok: true, status: 200, data: [] }, normalizeRecommendation);
+  toMobileListResponse(
+    { ...res, ok: true, status: 200, data: [] },
+    normalizeRecommendation,
+  );
 
 const getActivityRecommendations = async (patientID) => {
   // Prefer patient-scoped path; fall back to list + filter (web main pattern).
@@ -366,7 +474,8 @@ const getActivityRecommendations = async (patientID) => {
     normalized.data.data = normalized.data.data.filter(
       (item) =>
         !item.isDeleted &&
-        String(item.patientID ?? item.patient_id ?? patientID) === String(patientID),
+        String(item.patientID ?? item.patient_id ?? patientID) ===
+          String(patientID),
     );
     return normalized;
   }
@@ -375,7 +484,11 @@ const getActivityRecommendations = async (patientID) => {
     return emptyRecommendationList(scoped);
   }
 
-  const all = await client.get(`${centreActivityRecommendations}/`, {}, withActivityV1Base());
+  const all = await client.get(
+    `${centreActivityRecommendations}/`,
+    {},
+    withActivityV1Base(),
+  );
   if (all.ok) {
     const normalized = toMobileListResponse(all, normalizeRecommendation);
     normalized.data.data = normalized.data.data.filter(
@@ -403,20 +516,20 @@ const getActivityExclusions = async (patientID) => {
   if (scoped.ok) {
     const normalized = toMobileListResponse(scoped, normalizeExclusion);
     normalized.data.data = normalized.data.data.filter(
-      (item) =>
-        !item.isDeleted &&
-        String(item.patientID) === String(patientID),
+      (item) => !item.isDeleted && String(item.patientID) === String(patientID),
     );
     return normalized;
   }
 
-  const all = await client.get(`${centreActivityExclusions}/`, {}, withActivityV1Base());
+  const all = await client.get(
+    `${centreActivityExclusions}/`,
+    {},
+    withActivityV1Base(),
+  );
   if (!all.ok) return all;
   const normalized = toMobileListResponse(all, normalizeExclusion);
   normalized.data.data = normalized.data.data.filter(
-    (item) =>
-      !item.isDeleted &&
-      String(item.patientID) === String(patientID),
+    (item) => !item.isDeleted && String(item.patientID) === String(patientID),
   );
   return normalized;
 };
@@ -430,7 +543,11 @@ const createActivityExclusion = async (data) => {
     start_date: data.startDate ?? data.start_date,
     end_date: endDate === '' || endDate === undefined ? null : endDate,
   };
-  return client.post(`${centreActivityExclusions}/`, payload, withActivityV1Base());
+  return client.post(
+    `${centreActivityExclusions}/`,
+    payload,
+    withActivityV1Base(),
+  );
 };
 
 const updateActivityExclusion = async (data) => {
@@ -446,13 +563,18 @@ const updateActivityExclusion = async (data) => {
     is_deleted: data.isDeleted ?? data.is_deleted ?? false,
     modified_by_id: data.modifiedById ?? data.ModifiedById ?? 'MOBILE',
   };
-  return client.put(`${centreActivityExclusions}/`, payload, withActivityV1Base());
+  return client.put(
+    `${centreActivityExclusions}/`,
+    payload,
+    withActivityV1Base(),
+  );
 };
 
 /*
  * Expose your end points here
  */
 export default {
+  getPatientActivityAggregate,
   getActivityPreference,
   getCentreActivities,
   getActivities,

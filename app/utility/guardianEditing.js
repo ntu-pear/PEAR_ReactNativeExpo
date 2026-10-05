@@ -1,4 +1,5 @@
 import { currentUserId } from 'app/utility/medicationAdminister';
+import { opaqueId } from 'app/utility/patientFieldPolicy';
 
 export const canEditGuardian = (user) =>
   ['SUPERVISOR', 'CAREGIVER'].includes(
@@ -66,7 +67,7 @@ export const buildGuardianUpdate = ({ guardian, edits, patientId, user }) => {
     isDeleted: guardian.isDeleted,
     guardianApplicationUserId: guardian.guardianApplicationUserId,
     ModifiedById: String(currentUserId(user)),
-    patientId: Number(patientId),
+    patientId: opaqueId(patientId),
     relationshipName: edits.relationshipName.trim(),
   };
 };
@@ -116,7 +117,7 @@ export const buildPrimaryGuardianUpdate = ({
   if (String(allocation.guardianId) !== String(guardianId)) {
     payload.guardian2Id = allocation.guardianId;
   }
-  payload.guardianId = Number(guardianId);
+  payload.guardianId = opaqueId(guardianId);
   payload.ModifiedById = String(currentUserId(user));
   return payload;
 };

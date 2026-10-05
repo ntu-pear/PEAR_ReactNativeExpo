@@ -7,9 +7,14 @@ export const idsEqual = (a, b) => {
   if (a == null || b == null) {
     return false;
   }
-  const left = String(a).trim().toLowerCase();
-  const right = String(b).trim().toLowerCase();
-  if (!left || !right || left === 'unassigned' || right === 'unassigned') {
+  const left = String(a).trim();
+  const right = String(b).trim();
+  if (
+    !left ||
+    !right ||
+    left.toLowerCase() === 'unassigned' ||
+    right.toLowerCase() === 'unassigned'
+  ) {
     return false;
   }
   return left === right;

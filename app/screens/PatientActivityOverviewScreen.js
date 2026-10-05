@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   Alert,
   RefreshControl,
@@ -7,26 +7,18 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Box, Text } from 'native-base';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-import activityApi, {
-  applyActivityTitles,
-  buildActivityTitleMap,
-  keepNamedActivities,
-  mergeCataloguePreferences,
-} from 'app/api/activity';
-import patientApi from 'app/api/patient';
+import activityApi from 'app/api/activity';
+import usePatientActivityData from 'app/hooks/usePatientActivityData';
 import AuthContext from 'app/auth/context';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import AddActivityExclusionModal from 'app/components/AddActivityExclusionModal';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import colors from 'app/config/colors';
 import routes from 'app/navigation/routes';
-import {
-  patientFromApiResponse,
-  patientProfileLines,
-} from 'app/utility/patientHeader';
+import { patientProfileLines } from 'app/utility/patientHeader';
 import { exclusionLifecycle } from 'app/utility/exclusionLifecycle';
 
 const MEDIUM = colors.grey;
@@ -175,7 +167,7 @@ function ListRow({
 }
 
 function PatientActivityOverviewScreen(props) {
-  let { patientID, patientId, patientProfile } = props.route.params || {};
+  let { patientID, patientId } = props.route.params || {};
   if (patientId) {
     patientID = patientId;
   }
@@ -186,106 +178,20 @@ function PatientActivityOverviewScreen(props) {
   const isSupervisor = roleName === 'SUPERVISOR';
   const canManagePreferences = isSupervisor || roleName === 'CAREGIVER';
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [patientData, setPatientData] = useState(patientProfile || {});
-  const [preferences, setPreferences] = useState([]);
-  const [recommendations, setRecommendations] = useState([]);
-  const [exclusions, setExclusions] = useState([]);
-  const [errors, setErrors] = useState([]);
+  const {
+    isLoading,
+    patientData,
+    preferences,
+    recommendations,
+    exclusions,
+    errors,
+    refresh: loadData,
+  } = usePatientActivityData(patientID);
   const [showExclusionModal, setShowExclusionModal] = useState(false);
   const [exclusionModalMode, setExclusionModalMode] = useState('add');
   const [editingExclusion, setEditingExclusion] = useState(null);
 
-  const resolveTitles = (items, activityMap) =>
-    keepNamedActivities(applyActivityTitles(items, activityMap));
-
-  const loadData = useCallback(async () => {
-    if (!patientID) {
-      return;
-    }
-    setErrors([]);
-
-    try {
-      const [patientRes, prefsRes, recsRes, exclRes, centreRes, activitiesRes] =
-        await Promise.all([
-          patientApi.readPatientV1
-            ? patientApi.readPatientV1(patientID, {
-                require_auth: true,
-                mask: true,
-              })
-            : patientApi.getPatient?.(patientID),
-          activityApi.getActivityPreference(patientID),
-          activityApi.getActivityRecommendations(patientID),
-          activityApi.getActivityExclusions(patientID),
-          activityApi.getCentreActivities(),
-          activityApi.getActivities(),
-        ]);
-
-      const nextErrors = [];
-      if (prefsRes && !prefsRes.ok) {
-        nextErrors.push('preferences');
-      }
-      if (recsRes && !recsRes.ok) {
-        nextErrors.push('recommendations');
-      }
-      if (exclRes && !exclRes.ok) {
-        nextErrors.push('exclusions');
-      }
-
-      const activityMap = buildActivityTitleMap(
-        centreRes?.ok ? centreRes.data?.data || [] : [],
-        activitiesRes?.ok ? activitiesRes.data?.data || [] : [],
-      );
-
-      if (patientRes?.ok) {
-        setPatientData({
-          ...patientFromApiResponse(patientRes),
-          patientID,
-        });
-      }
-
-      setPreferences(
-        prefsRes?.ok
-          ? mergeCataloguePreferences(
-              centreRes?.ok ? centreRes.data?.data || [] : [],
-              activitiesRes?.ok ? activitiesRes.data?.data || [] : [],
-              prefsRes?.data?.data || [],
-            )
-          : [],
-      );
-      setRecommendations(
-        recsRes?.ok
-          ? resolveTitles(recsRes?.data?.data || [], activityMap)
-          : [],
-      );
-      setExclusions(
-        exclRes?.ok
-          ? resolveTitles(exclRes?.data?.data || [], activityMap)
-          : [],
-      );
-      setErrors(nextErrors);
-    } catch (e) {
-      setErrors(['preferences', 'recommendations', 'exclusions']);
-      Alert.alert(
-        'Unable to load activity overview',
-        'Please check your connection and try again.',
-      );
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
-  }, [patientID]);
-
-  useFocusEffect(
-    useCallback(() => {
-      setIsLoading(true);
-      loadData();
-    }, [loadData]),
-  );
-
   const onRefresh = () => {
-    setIsRefreshing(true);
     loadData();
   };
 
@@ -330,7 +236,7 @@ function PatientActivityOverviewScreen(props) {
       style={styles.container}
       contentContainerStyle={styles.content}
       refreshControl={
-        <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+        <RefreshControl refreshing={isLoading} onRefresh={onRefresh} />
       }
     >
       <ProfileNameButton

@@ -1,5 +1,5 @@
 // Libs
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { SectionList, Center, View } from 'native-base';
 
 // Components
@@ -7,19 +7,21 @@ import AddPatientGuardian from 'app/components/AddPatientGuardian';
 import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import AddPatientProgress from 'app/components/AddPatientProgress';
 
-function PatientAddGuardianScreen({nextQuestionHandler,
-  testID='',
+function PatientAddGuardianScreen({
+  nextQuestionHandler,
+  testID = '',
   prevQuestionHandler,
   formData,
   handleFormData,
   componentList,
   concatFormData,
   removeFormData,
-  onSubmit
+  onSubmit,
 }) {
   const [guardianInfoDisplay, setGuardianInfoDisplay] = useState(
     componentList.guardian,
   );
+  const guardianCount = useRef(guardianInfoDisplay.length);
   // Start with error state for primary guardian (required)
   const [errorStates, setErrorStates] = useState(
     componentList.guardian.map(() => true), // Each guardian starts with error until form is valid
@@ -43,9 +45,11 @@ function PatientAddGuardianScreen({nextQuestionHandler,
   // errors present in the child Components or not.
   // Only check the first guardian (primary) for errors - it's required
   // Secondary guardian (index 1) is optional - can be empty or fully filled
-  let isNextDisabled = errorStates.length === 0 || (errorStates[0] === true);
+  let isNextDisabled = errorStates.length === 0 || errorStates[0] === true;
 
   const addNewGuardianComponent = () => {
+    if (guardianCount.current >= 2) return;
+    guardianCount.current += 1;
     // Add new error state for new child component
     setErrorStates((prev) => [...prev, true]);
     setGuardianInfoDisplay([...guardianInfoDisplay, {}]);
@@ -74,7 +78,8 @@ function PatientAddGuardianScreen({nextQuestionHandler,
     if (guardianInfoDisplay.length <= 1 || index === 0) {
       return;
     }
-    
+
+    guardianCount.current -= 1;
     // Remove error state for removed child component.
     const errorList = [...errorStates];
     let newErrorList = errorList.slice(0, -1);
@@ -115,7 +120,7 @@ function PatientAddGuardianScreen({nextQuestionHandler,
                 prevQuestionHandler('guardian', guardianInfoDisplay)
               }
               addComponent={addNewGuardianComponent}
-              removeComponent={removeGuardianComponent}
+              removeComponent={() => removeGuardianComponent(1)}
               max={2}
               submit={true}
               isSubmitDisabled={isNextDisabled}

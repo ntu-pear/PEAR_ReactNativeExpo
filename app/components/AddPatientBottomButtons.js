@@ -80,9 +80,21 @@ function AddPatientBottomButtons({
             >
               Add Secondary Guardian
             </Button>
-          ) : list.length === max ? (
+          ) : list.length >= max && max != null ? (
             <Box>
               <HStack space={4}>
+                <Button
+                  testID={`${testID}_add`}
+                  variant="outline"
+                  colorScheme="success"
+                  borderRadius="full"
+                  isDisabled
+                  accessibilityTraits={['button', 'disabled']}
+                  px={4}
+                  py={2}
+                >
+                  Add Secondary Guardian
+                </Button>
                 <Button
                   testID={`${testID}_remove`}
                   variant="outline"

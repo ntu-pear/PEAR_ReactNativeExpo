@@ -1,13 +1,7 @@
 // Libs;
-import React, {
-  useEffect,
-  useState,
-  useCallback,
-  useMemo,
-  useContext,
-} from 'react';
+import React, { useEffect, useState, useMemo, useContext } from 'react';
 import { StyleSheet, SectionList, View, Text, Alert } from 'react-native';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
 // Utilities
 import {
@@ -19,10 +13,10 @@ import {
 import routes from 'app/navigation/routes';
 
 // API
-import activity, { mergeCataloguePreferences } from 'app/api/activity';
-import patientApi from 'app/api/patient';
+import activity from 'app/api/activity';
+import usePatientActivityData from 'app/hooks/usePatientActivityData';
 import AuthContext from 'app/auth/context';
-import { patientFromApiResponse, patientProfileLines } from 'app/utility/patientHeader';
+import { patientProfileLines } from 'app/utility/patientHeader';
 
 // Configurations
 import colors from 'app/config/colors';
@@ -33,7 +27,6 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 import AddButton from 'app/components/AddButton';
 import AddActivityPreferenceModal from 'app/components/AddActivityPreferenceModal';
 import ProfileNameButton from 'app/components/ProfileNameButton';
-import LoadingWheel from 'app/components/LoadingWheel';
 import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
 
 function ActivityPreferenceScreen(props) {
@@ -55,7 +48,6 @@ function ActivityPreferenceScreen(props) {
   const [patientActivityPreferences, setPatientActivityPreferences] = useState(
     [],
   );
-  const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
 
   // Search, sort, and filter options
   const SEARCH_OPTIONS = ['Activity Name'];
@@ -71,53 +63,37 @@ function ActivityPreferenceScreen(props) {
   const [isDataInitialized, setIsDataInitialized] = useState(false);
   const [datetime, setDatetime] = useState(sortFilterInitialState);
 
-  // Loading and error states
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
-  const [isRetry, setIsRetry] = useState(false);
-  const [statusCode, setStatusCode] = useState(200);
-
-  // Patient data state
-  const [patientData, setPatientData] = useState({});
-  const [isReloadPatientList, setIsReloadPatientList] = useState(true);
+  const {
+    isLoading,
+    patientData,
+    preferences,
+    errors,
+    refresh: refreshActivityPreference,
+  } = usePatientActivityData(patientID);
 
   // Grouped activity preference arrays (for SectionList)
   const [likedItems, setLikedItems] = useState([]);
   const [dislikedItems, setDislikedItems] = useState([]);
   const [neutralItems, setNeutralItems] = useState([]);
-  const [emptyData, setEmptyData] = useState([{ activityTitle: 'None' }]);
+  const emptyData = useMemo(() => [{ activityTitle: 'None' }], []);
 
   // Data for filtering (flat list)
   const [originalData, setOriginalData] = useState([]);
   const [activityData, setActivityData] = useState([]);
 
-  // Fetch patient activity preferences when reloading
-  useFocusEffect(
-    useCallback(() => {
-      if (isReloadPatientList) {
-        refreshActivityPreference();
-        setIsReloadPatientList(false);
-      }
-    }, [isReloadPatientList]),
-  );
-
-  // Fetch activity preference data for filtering
   useEffect(() => {
-    const getData = async () => {
-      const response = await activity.getActivityPreference(patientID);
-      if (response.data.data !== null) {
-        const data = await withActivityTitles(response.data.data);
-        setOriginalData(data);
-        setActivityData(data);
-        setIsDataInitialized(true);
-      } else {
-        setOriginalData([]);
-        setActivityData([]);
-        setIsDataInitialized(true);
-      }
-    };
-    getData();
-  }, [isReloadPatientList]);
+    setOriginalData(preferences);
+    setActivityData(preferences);
+    setIsDataInitialized(true);
+    setPatientActivityIDs(preferences.map((item) => item.centreActivityID));
+    setPatientActivityPreferences(
+      preferences.map((item) => ({
+        CentreActivityID: item.centreActivityID,
+        isLike: item.isLike,
+        CentreActivityPreferenceID: item.centreActivityPreferenceID,
+      })),
+    );
+  }, [preferences]);
 
   // Update grouped sections when activityData changes
   useEffect(() => {
@@ -132,92 +108,10 @@ function ActivityPreferenceScreen(props) {
       setNeutralItems(emptyData);
       setDislikedItems(emptyData);
     }
-  }, [activityData]);
+  }, [activityData, emptyData]);
 
-  // Get patient data (for profile info)
-  useEffect(() => {
-    if (patientID) {
-      getPatientData();
-    }
-  }, []);
-
-  // Also get patient activity preferences mapping when reloading
-  useEffect(() => {
-    if (props.route.params.patientId) {
-      getPatientActivity(patientID);
-    }
-  }, [isReloadPatientList]);
-
-  // Navigate to profile
   const onClickProfile = () => {
     navigation.navigate(routes.PATIENT_PROFILE, { id: patientID });
-  };
-
-  // Set isLoading to true when retrieving data
-  const refreshActivityPreference = () => {
-    setIsLoading(true);
-    const promiseFunction = async () => {
-      await getPatientData();
-      await getPatientActivity(patientID);
-    };
-    promiseFunction();
-  };
-
-  const withActivityTitles = async (rows) => {
-    const [centreRes, activitiesRes] = await Promise.all([
-      activity.getCentreActivities(),
-      activity.getActivities(),
-    ]);
-    return mergeCataloguePreferences(
-      centreRes?.ok ? centreRes.data?.data || [] : [],
-      activitiesRes?.ok ? activitiesRes.data?.data || [] : [],
-      rows || [],
-    );
-  };
-
-  // Get patient data from backend
-  const getPatientData = async () => {
-    if (patientID) {
-      const response = await patientApi.getPatient(patientID);
-      if (response.ok) {
-        setPatientData(patientFromApiResponse(response));
-        setIsError(false);
-        setIsRetry(false);
-        setStatusCode(response.status);
-      } else {
-        console.log('Request failed with status code: ', response.status);
-        setPatientData({});
-        setIsLoading(false);
-        setIsError(true);
-        setStatusCode(response.status);
-        setIsRetry(true);
-      }
-    }
-  };
-
-  // Get patient activity preferences and mapping
-  const getPatientActivity = async (id = patientID) => {
-    const response = await activity.getActivityPreference(id);
-    if (!response.ok) {
-      console.log('Request failed with status code: ', response.status);
-      setIsLoading(false);
-      return;
-    }
-    const data = await withActivityTitles(response.data.data || []);
-    setOriginalData(data);
-    setActivityData(data);
-    setIsDataInitialized(true);
-    // Extract array of CentreActivityIDs
-    const activityIDs = data.map((activity) => activity.centreActivityID);
-    setPatientActivityIDs(activityIDs);
-    // Build mapping array with both CentreActivityID and CentreActivityPreferenceID
-    const preferencesMapping = data.map((activity) => ({
-      CentreActivityID: activity.centreActivityID,
-      isLike: activity.isLike,
-      CentreActivityPreferenceID: activity.centreActivityPreferenceID,
-    }));
-    setPatientActivityPreferences(preferencesMapping);
-    setIsLoading(false);
   };
 
   const handleAddActivity = () => {
@@ -278,9 +172,8 @@ function ActivityPreferenceScreen(props) {
       }
     }
 
-    await getPatientActivity(patientID);
     setShowModal(false);
-    setIsReloadPatientList(true);
+    await refreshActivityPreference();
 
     if (failCount === 0) {
       alertTitle = 'Success';
@@ -293,34 +186,12 @@ function ActivityPreferenceScreen(props) {
     Alert.alert(alertTitle, alertDetails);
   };
 
-  // const handleDeleteActivity = async (activityID) => {
-  //   Alert.alert('Are you sure you wish to delete this item?', '', [
-  //     {
-  //       text: 'Cancel',
-  //       onPress: () => {},
-  //       style: 'cancel',
-  //     },
-  //     {
-  //       text: 'OK',
-  //       onPress: async () => {
-  //         const result = await activity.deleteActivityPreference(activityID);
-  //         if (result.ok) {
-  //           Alert.alert('Success', 'Activity preference deleted successfully');
-  //           setIsReloadPatientList(true);
-  //         } else {
-  //           Alert.alert('Error', 'Failed to delete activity preference');
-  //         }
-  //       },
-  //     },
-  //   ]);
-  // };
-
-  const splitData = (data) => {
-    const likedItems = data.filter((item) => item.isLike === 1);
-    const neutralItems = data.filter((item) => item.isLike === 0);
-    const dislikedItems = data.filter((item) => item.isLike === -1);
+  function splitData(data) {
+    const likedItems = data.filter((item) => Number(item.isLike) === 1);
+    const neutralItems = data.filter((item) => Number(item.isLike) === 0);
+    const dislikedItems = data.filter((item) => Number(item.isLike) === -1);
     return { likedItems, neutralItems, dislikedItems };
-  };
+  }
 
   const ascending = sort?.sel?.asc ?? true;
 
@@ -394,32 +265,6 @@ function ActivityPreferenceScreen(props) {
     );
   };
 
-  // const renderItem = ({ item }) => {
-  //   // `item` is an array of activities (e.g., all neutral activities)
-  //   return (
-  //     <View style={styles.wrapContainer}>
-  //       {item.map((activity) => (
-  //         <View key={activity.centreActivityID} style={styles.gridItem}>
-  //           <Text
-  //             style={[
-  //               styles.activityText,
-  //               activity.activityTitle === 'None'
-  //                 ? styles.noItem
-  //                 : activity.isLike === 1
-  //                 ? styles.likedItems
-  //                 : activity.isLike === 0
-  //                 ? styles.neutralItems
-  //                 : styles.dislikedItems,
-  //             ]}
-  //           >
-  //             {activity.activityTitle}
-  //           </Text>
-  //         </View>
-  //       ))}
-  //     </View>
-  //   );
-  // };
-
   const renderSectionHeader = ({ section }) => {
     // section.data is an array with one element: the array of items
     let total = section.data.length ? section.data[0].length : 0;
@@ -441,12 +286,18 @@ function ActivityPreferenceScreen(props) {
         <ActivityIndicator visible />
       ) : (
         <View style={styles.container}>
+          {errors.length > 0 && (
+            <Text testID={`${testID}_load_error`}>
+              Could not load {errors.join(', ')}. Pull to refresh.
+            </Text>
+          )}
           <View style={{ justifyContent: 'space-between' }}>
             <View
               style={{ alignSelf: 'center', marginTop: 15, maxHeight: 120 }}
             >
               {!isEmptyObject(patientData) ? (
                 <ProfileNameButton
+                  testID={`${testID}_profileNameButton`}
                   profilePicture={patientData.profilePicture}
                   profileLineOne={patientProfileLines(patientData).line1}
                   profileLineTwo={patientProfileLines(patientData).line2}
@@ -456,7 +307,7 @@ function ActivityPreferenceScreen(props) {
                   size={90}
                 />
               ) : (
-                <LoadingWheel />
+                <Text>Patient information unavailable. Pull to refresh.</Text>
               )}
             </View>
             <View>
@@ -483,6 +334,7 @@ function ActivityPreferenceScreen(props) {
             neutralItems.length > 0 ||
             dislikedItems.length > 0) && (
             <SectionList
+              style={{ flex: 1 }}
               onRefresh={refreshActivityPreference}
               refreshing={isLoading}
               sections={sections}
@@ -515,6 +367,7 @@ function ActivityPreferenceScreen(props) {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     marginHorizontal: 20,
     marginVertical: 1,
   },
@@ -526,7 +379,8 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   button: {
-    paddingTop: 30,
+    paddingTop: 12,
+    paddingBottom: 12,
   },
 
   // Container for each row of activities in a section

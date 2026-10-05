@@ -1,5 +1,22 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo, memo, useContext } from 'react';
-import { Center, VStack, ScrollView, Fab, Icon, FlatList, IconButton, Button } from 'native-base';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+  memo,
+  useContext,
+} from 'react';
+import {
+  Center,
+  VStack,
+  ScrollView,
+  Fab,
+  Icon,
+  FlatList,
+  IconButton,
+  Button,
+} from 'native-base';
 import {
   StyleSheet,
   View,
@@ -13,6 +30,7 @@ import { useFocusEffect } from '@react-navigation/native';
 
 // API
 import patientApi from 'app/api/patient';
+import requestDeadline from 'app/utility/requestDeadline';
 import userApi from 'app/api/user';
 import AuthContext from 'app/auth/context';
 
@@ -35,88 +53,91 @@ import {
 } from 'app/utility/miscFunctions';
 import * as fav from 'app/utility/favorites'; // ⭐ favourites helper
 
- // NEW (TEMP): disable legacy Core counts during Patient Service migration
+// NEW (TEMP): disable legacy Core counts during Patient Service migration
 const ENABLE_OLD_COUNTS = false;
 
 // Memoized PatientRow component for performance
-const PatientRow = memo(({ 
-  item, 
-  onPressPatient, 
-  onToggleFavourite, 
-  isFavourite, 
-  viewMode, 
-  patientStatus, 
-  showStartDate,
-  screenWidth 
-}) => {
-  const patientID = item.patientID;
-  
-  const handlePress = useCallback(() => {
-    onPressPatient(patientID);
-  }, [patientID, onPressPatient]);
+const PatientRow = memo(
+  ({
+    item,
+    onPressPatient,
+    onToggleFavourite,
+    isFavourite,
+    viewMode,
+    patientStatus,
+    showStartDate,
+    screenWidth,
+  }) => {
+    const patientID = item.patientID;
 
-  const handleToggleFav = useCallback(() => {
-    onToggleFavourite(item);
-  }, [patientID, onToggleFavourite]);
+    const handlePress = useCallback(() => {
+      onPressPatient(patientID);
+    }, [patientID, onPressPatient]);
 
-  return (
-    <TouchableOpacity
-      testID={`patientprofile_${item.patientID}`}
-      style={rowStyles.patientRowContainer}
-      onPress={handlePress}
-    >
-      <ProfileNameButton
-        profileLineOne={`${item.firstName} ${item.lastName}`}
-        profileLineTwo={item.preferredName}
-        profilePicture={item.profilePicture}
-        handleOnPress={handlePress}
-        isPatient={true}
-        size={screenWidth / 10}
-        isVertical={false}
-        isActive={patientStatus === '' ? item.isActive : null}
-        startDate={showStartDate ? item.startDate : null}
-      />
-      <View style={rowStyles.caregiverNameContainer}>
-        <Text style={rowStyles.caregiverName}>
-          {viewMode === 'allPatients'
-            ? item.caregiverName !== null
-              ? item.caregiverName
-              : 'No Caregiver'
-            : null}
-        </Text>
-      </View>
-      <IconButton
-        onPress={handleToggleFav}
-        icon={
-          <Icon
-            as={MaterialIcons}
-            name={isFavourite ? 'star' : 'star-border'}
-            size="md"
-            color={isFavourite ? 'amber.500' : 'coolGray.500'}
-          />
-        }
-        accessibilityLabel="Toggle favourite"
-        alignSelf="center"
-      />
-    </TouchableOpacity>
-  );
-}, (prevProps, nextProps) => {
-  // Custom comparison: only re-render if these specific props change
-  return (
-    prevProps.item.patientID === nextProps.item.patientID &&
-    prevProps.isFavourite === nextProps.isFavourite &&
-    prevProps.viewMode === nextProps.viewMode &&
-    prevProps.patientStatus === nextProps.patientStatus &&
-    prevProps.showStartDate === nextProps.showStartDate &&
-    prevProps.screenWidth === nextProps.screenWidth &&
-    prevProps.item.firstName === nextProps.item.firstName &&
-    prevProps.item.lastName === nextProps.item.lastName &&
-    prevProps.item.preferredName === nextProps.item.preferredName &&
-    prevProps.item.caregiverName === nextProps.item.caregiverName &&
-    prevProps.item.profilePicture === nextProps.item.profilePicture &&
-    prevProps.item.startDate === nextProps.item.startDate
-  );
-});
+    const handleToggleFav = useCallback(() => {
+      onToggleFavourite(item);
+    }, [patientID, onToggleFavourite]);
+
+    return (
+      <TouchableOpacity
+        testID={`patientprofile_${item.patientID}`}
+        style={rowStyles.patientRowContainer}
+        onPress={handlePress}
+      >
+        <ProfileNameButton
+          profileLineOne={`${item.firstName} ${item.lastName}`}
+          profileLineTwo={item.preferredName}
+          profilePicture={item.profilePicture}
+          handleOnPress={handlePress}
+          isPatient={true}
+          size={screenWidth / 10}
+          isVertical={false}
+          isActive={patientStatus === '' ? item.isActive : null}
+          startDate={showStartDate ? item.startDate : null}
+        />
+        <View style={rowStyles.caregiverNameContainer}>
+          <Text style={rowStyles.caregiverName}>
+            {viewMode === 'allPatients'
+              ? item.caregiverName !== null
+                ? item.caregiverName
+                : 'No Caregiver'
+              : null}
+          </Text>
+        </View>
+        <IconButton
+          onPress={handleToggleFav}
+          icon={
+            <Icon
+              as={MaterialIcons}
+              name={isFavourite ? 'star' : 'star-border'}
+              size="md"
+              color={isFavourite ? 'amber.500' : 'coolGray.500'}
+            />
+          }
+          accessibilityLabel="Toggle favourite"
+          alignSelf="center"
+        />
+      </TouchableOpacity>
+    );
+  },
+  (prevProps, nextProps) => {
+    // Custom comparison: only re-render if these specific props change
+    return (
+      prevProps.item.patientID === nextProps.item.patientID &&
+      prevProps.isFavourite === nextProps.isFavourite &&
+      prevProps.viewMode === nextProps.viewMode &&
+      prevProps.patientStatus === nextProps.patientStatus &&
+      prevProps.showStartDate === nextProps.showStartDate &&
+      prevProps.screenWidth === nextProps.screenWidth &&
+      prevProps.item.firstName === nextProps.item.firstName &&
+      prevProps.item.lastName === nextProps.item.lastName &&
+      prevProps.item.preferredName === nextProps.item.preferredName &&
+      prevProps.item.caregiverName === nextProps.item.caregiverName &&
+      prevProps.item.profilePicture === nextProps.item.profilePicture &&
+      prevProps.item.startDate === nextProps.item.startDate
+    );
+  },
+);
 
 // Styles for PatientRow (defined outside component to prevent recreation)
 const rowStyles = StyleSheet.create({
@@ -148,48 +169,67 @@ function PatientsScreen({ navigation }) {
   };
 
   // NEW: more robust active/inactive derivation
-const normalizePatientV1 = (p = {}) => {
-  const id =
-    p.patient_id ?? p.id ?? p.patientID ?? p.PatientId ?? p.PatientID ?? null;
+  const normalizePatientV1 = (p = {}) => {
+    const id =
+      p.patient_id ?? p.id ?? p.patientID ?? p.PatientId ?? p.PatientID ?? null;
 
-  const hasFirst = typeof p.first_name === 'string' || typeof p.firstName === 'string';
-  const hasLast  = typeof p.last_name  === 'string' || typeof p.lastName  === 'string';
-  const nameStr  = typeof p.name === 'string' ? p.name.trim() : '';
+    const hasFirst =
+      typeof p.first_name === 'string' || typeof p.firstName === 'string';
+    const hasLast =
+      typeof p.last_name === 'string' || typeof p.lastName === 'string';
+    const nameStr = typeof p.name === 'string' ? p.name.trim() : '';
 
-  const firstName = String(
-    p.first_name ?? p.firstName ?? (hasFirst ? '' : (nameStr.split(' ')[0] ?? ''))
-  ).trim();
+    const firstName = String(
+      p.first_name ??
+        p.firstName ??
+        (hasFirst ? '' : nameStr.split(' ')[0] ?? ''),
+    ).trim();
 
-  const lastName = String(
-    p.last_name ?? p.lastName ?? (hasLast ? '' : (nameStr.split(' ').slice(1).join(' ') ?? ''))
-  ).trim();
+    const lastName = String(
+      p.last_name ??
+        p.lastName ??
+        (hasLast ? '' : nameStr.split(' ').slice(1).join(' ') ?? ''),
+    ).trim();
 
-  // NEW: derive isActive from multiple common shapes
-  const statusStr = typeof p.status === 'string' ? p.status.trim().toLowerCase() : null;
-  const statusAny = p.status ?? p.active ?? p.is_active ?? p.isActive ?? null;
+    // NEW: derive isActive from multiple common shapes
+    const statusStr =
+      typeof p.status === 'string' ? p.status.trim().toLowerCase() : null;
+    const statusAny = p.status ?? p.active ?? p.is_active ?? p.isActive ?? null;
 
-  const derivedIsActive =
-    typeof p.is_active === 'boolean' ? p.is_active :
-    typeof p.isActive === 'boolean' ? p.isActive :
-    (typeof statusAny === 'number' ? statusAny === 1 :
-     typeof statusAny === 'string'
-       ? ['1','true','active','yes'].includes(statusAny.trim().toLowerCase())
-       : (statusStr ? statusStr.startsWith('act') : undefined));
+    const derivedIsActive =
+      typeof p.is_active === 'boolean'
+        ? p.is_active
+        : typeof p.isActive === 'boolean'
+        ? p.isActive
+        : typeof statusAny === 'number'
+        ? statusAny === 1
+        : typeof statusAny === 'string'
+        ? ['1', 'true', 'active', 'yes'].includes(
+            statusAny.trim().toLowerCase(),
+          )
+        : statusStr
+        ? statusStr.startsWith('act')
+        : undefined;
 
-  return {
-    ...p,
-    patientID: id,
-    firstName,
-    lastName,
-    fullName: `${firstName} ${lastName}`.trim(),
-    profilePicture:
-      p.profilePicture ?? p.profile_picture ?? p.profile_photo ?? p.photoUrl ?? p.avatar ?? null,
-    preferredName: p.preferred_name ?? p.preferredName ?? '',
-    caregiverName: p.caregiver_name ?? p.caregiverName ?? null,
-    startDate: p.start_date ?? p.startDate ?? null,
-    isActive: derivedIsActive, // NEW
+    return {
+      ...p,
+      patientID: id,
+      firstName,
+      lastName,
+      fullName: `${firstName} ${lastName}`.trim(),
+      profilePicture:
+        p.profilePicture ??
+        p.profile_picture ??
+        p.profile_photo ??
+        p.photoUrl ??
+        p.avatar ??
+        null,
+      preferredName: p.preferred_name ?? p.preferredName ?? '',
+      caregiverName: p.caregiver_name ?? p.caregiverName ?? null,
+      startDate: p.start_date ?? p.startDate ?? null,
+      isActive: derivedIsActive, // NEW
+    };
   };
-};
 
   // Get current user from AuthContext
   const { user } = useContext(AuthContext);
@@ -338,23 +378,39 @@ const normalizePatientV1 = (p = {}) => {
     try {
       setChip((prev) => ({
         ...prev,
-        sel: { ...(prev.sel || {}), ['Patient Status']: { label: 'Active', value: 2 } },
-        tempSel: { ...(prev.tempSel || {}), ['Patient Status']: { label: 'Active', value: 2 } },
+        sel: {
+          ...(prev.sel || {}),
+          ['Patient Status']: { label: 'Active', value: 2 },
+        },
+        tempSel: {
+          ...(prev.tempSel || {}),
+          ['Patient Status']: { label: 'Active', value: 2 },
+        },
       }));
     } catch (e) {}
   }, [user?.id]);
 
   // --- list patients from the new Patient Service (V1)
-  const getListOfPatients = async (status = 'active', pageNo = 0, append = false) => {
+  const getListOfPatients = async (
+    status = 'active',
+    pageNo = 0,
+    append = false,
+  ) => {
     const pageSize = 1000; // Load all patients for client-side sorting/pagination
 
     const userId = user?.id || user?.userID || user?.userId;
     const userRole = user?.roleName || user?.role;
 
-    // Fetch all patients first
-    const res = await patientApi.listPatientsV1({ pageNo, pageSize });
+    // My Patients is server scoped, matching the web role-based workflow.
+    const res = await requestDeadline(
+      viewMode === 'myPatients'
+        ? patientApi.listMyPatientsV1(userId, userRole, { pageNo, pageSize })
+        : patientApi.listPatientsV1({ pageNo, pageSize }),
+    );
 
     if (!res.ok) {
+      setOriginalListOfPatients([]);
+      setListOfPatients([]);
       setStatusCode(res.status);
       setIsError(true);
       return { status: res.status, ok: false };
@@ -374,57 +430,60 @@ const normalizePatientV1 = (p = {}) => {
     // --- Fetch allocation data + staff names to enrich patients ---
     let allocFiltered = normalizedPage;
     try {
-      // Fetch allocations and staff names in parallel
-      const [allocationMap, staffNameMap] = await Promise.all([
-        patientApi.getAllocationMap(),
-        userApi.buildStaffNameMap(),
-      ]);
+      if (viewMode === 'allPatients') {
+        // Fetch allocations and staff names in parallel
+        const [allocationMap, staffNameMap] = await Promise.all([
+          patientApi.getAllocationMap(),
+          userApi.buildStaffNameMap(),
+        ]);
 
-      // Collect caregiver/doctor/supervisor IDs that are missing from staffNameMap
-      const missingIds = new Set();
-      for (const alloc of Object.values(allocationMap)) {
-        for (const field of ['caregiverId', 'doctorId', 'supervisorId', 'gameTherapistId']) {
-          if (alloc[field] && !staffNameMap[alloc[field]]) missingIds.add(alloc[field]);
-        }
-      }
-
-      // Resolve missing names individually (fallback)
-      await Promise.all([...missingIds].map(async (uid) => {
-        try {
-          const r = await userApi.getUsernameById(uid);
-          if (r.ok && r.data) {
-            staffNameMap[uid] = r.data.preferredName || r.data.nric_FullName || uid;
+        // Collect caregiver/doctor/supervisor IDs that are missing from staffNameMap
+        const missingIds = new Set();
+        for (const alloc of Object.values(allocationMap)) {
+          for (const field of [
+            'caregiverId',
+            'doctorId',
+            'supervisorId',
+            'gameTherapistId',
+          ]) {
+            if (alloc[field] && !staffNameMap[alloc[field]])
+              missingIds.add(alloc[field]);
           }
-        } catch {}
-      }));
-
-      // Enrich each patient with caregiver/doctor/supervisor names from allocation + staff data
-      allocFiltered = normalizedPage.map(p => {
-        const alloc = allocationMap[String(p.patientID)];
-        if (alloc) {
-          const caregiverName = p.caregiverName || staffNameMap[alloc.caregiverId] || null;
-          const doctorName = p.doctorName || staffNameMap[alloc.doctorId] || null;
-          const supervisorName = p.supervisorName || staffNameMap[alloc.supervisorId] || null;
-          
-          return {
-            ...p,
-            caregiverName,
-            doctorName,
-            supervisorName,
-          };
         }
-        return p;
-      });
 
-      // "My Patients" mode: filter to only allocated patients
-      if (viewMode === 'myPatients' && userId) {
-        const myPatientIds = await patientApi.getMyAllocatedPatientIds(userId, userRole);
-        if (myPatientIds.length > 0) {
-          const idSet = new Set(myPatientIds.map(String));
-          allocFiltered = allocFiltered.filter((p) => idSet.has(String(p.patientID)));
-        } else {
-          allocFiltered = [];
-        }
+        // Resolve missing names individually (fallback)
+        await Promise.all(
+          [...missingIds].map(async (uid) => {
+            try {
+              const r = await userApi.getUsernameById(uid);
+              if (r.ok && r.data) {
+                staffNameMap[uid] =
+                  r.data.preferredName || r.data.nric_FullName || uid;
+              }
+            } catch {}
+          }),
+        );
+
+        // Enrich each patient with caregiver/doctor/supervisor names from allocation + staff data
+        allocFiltered = normalizedPage.map((p) => {
+          const alloc = allocationMap[String(p.patientID)];
+          if (alloc) {
+            const caregiverName =
+              p.caregiverName || staffNameMap[alloc.caregiverId] || null;
+            const doctorName =
+              p.doctorName || staffNameMap[alloc.doctorId] || null;
+            const supervisorName =
+              p.supervisorName || staffNameMap[alloc.supervisorId] || null;
+
+            return {
+              ...p,
+              caregiverName,
+              doctorName,
+              supervisorName,
+            };
+          }
+          return p;
+        });
       }
     } catch (err) {
       // Fallback: continue with normalizedPage without enrichment
@@ -432,7 +491,8 @@ const normalizePatientV1 = (p = {}) => {
 
     // Check if there are more pages
     const totalPages = body.totalPages ?? body.total_pages ?? null;
-    const totalRecords = body.totalRecords ?? body.total_records ?? body.total ?? null;
+    const totalRecords =
+      body.totalRecords ?? body.total_records ?? body.total ?? null;
     // We load all data upfront, so no more backend pages needed
     setHasMorePages(false);
     setCurrentPage(pageNo);
@@ -442,20 +502,23 @@ const normalizePatientV1 = (p = {}) => {
     }
 
     // --- apply patient status filter LOCALLY (no API change needed)
-    const want = status === 'active' ? true : status === 'inactive' ? false : undefined;
+    const want =
+      status === 'active' ? true : status === 'inactive' ? false : undefined;
     // Treat missing isActive as "active" during migration so nothing disappears
     const filtered =
-      want === undefined ? allocFiltered : allocFiltered.filter(p => (p.isActive ?? true) === want);
+      want === undefined
+        ? allocFiltered
+        : allocFiltered.filter((p) => (p.isActive ?? true) === want);
 
     if (append) {
       // Append to existing list for infinite scroll
-      setOriginalListOfPatients(prev => [...prev, ...filtered]);
-      setListOfPatients(prev => [...prev, ...filtered]);
+      setOriginalListOfPatients((prev) => [...prev, ...filtered]);
+      setListOfPatients((prev) => [...prev, ...filtered]);
     } else {
       // Replace list (initial load or refresh)
       setOriginalListOfPatients([...filtered]);
       setListOfPatients([...filtered]);
-      
+
       // Update caregiver filter options after patient list is loaded
       if (viewMode === 'allPatients') {
         updateCaregiverFilterOptions({
@@ -473,7 +536,7 @@ const normalizePatientV1 = (p = {}) => {
   // Load more patients when user scrolls to bottom (client-side pagination)
   const loadMorePatients = useCallback(() => {
     // Show 10 more items from the already-loaded list
-    setDisplayCount(prev => prev + ITEMS_PER_PAGE);
+    setDisplayCount((prev) => prev + ITEMS_PER_PAGE);
   }, []);
 
   // Retrieve caregivers patient count list from backend (legacy for now)
@@ -492,9 +555,9 @@ const normalizePatientV1 = (p = {}) => {
     } else {
       setPatientCountInfo({});
       updateCaregiverFilterOptions({
-      tempPatientCountInfo: {},
-      tempPatientStatus: tempPatientStatus,
-    });
+        tempPatientCountInfo: {},
+        tempPatientStatus: tempPatientStatus,
+      });
       setIsError(false); // don't block the list UI
       setStatusCode(response.status);
       return { status: response.status, ok: false };
@@ -507,15 +570,20 @@ const normalizePatientV1 = (p = {}) => {
     setCurrentPage(0);
     setHasMorePages(true);
     const run = async () => {
-      await getListOfPatients(tempPatientStatus, 0, false);
-      // NEW (TEMP)
-      if (ENABLE_OLD_COUNTS && viewMode === 'allPatients') {
-        await getPatientCountInfo(tempPatientStatus);
+      try {
+        await getListOfPatients(tempPatientStatus, 0, false);
+        if (ENABLE_OLD_COUNTS && viewMode === 'allPatients') {
+          await getPatientCountInfo(tempPatientStatus);
+        }
+      } catch (error) {
+        setOriginalListOfPatients([]);
+        setListOfPatients([]);
+        setIsError(true);
+        setStatusCode(undefined);
+      } finally {
+        setIsLoading(false);
+        setIsDataInitialized(true);
       }
-
-      setIsLoading(false);
-      setIsDataInitialized(true);
-      // ⚠️ do NOT setIsLoading(true) again here – that caused the spinner to persist
     };
     run();
   };
@@ -527,39 +595,44 @@ const normalizePatientV1 = (p = {}) => {
     patientList = null,
   }) => {
     const patientsToCount = patientList || originalListOfPatients;
-    
+
     let caregiverPatientCount = {};
-    
+
     // If we have backend data, use it
     for (var caregiverID of Object.keys(tempPatientCountInfo)) {
       const caregiverName = tempPatientCountInfo[caregiverID]['fullName'];
       caregiverPatientCount[caregiverName] = caregiverName;
     }
-    
+
     // If no backend data, build from patient list directly
-    if (Object.keys(tempPatientCountInfo).length === 0 && patientsToCount.length > 0) {
+    if (
+      Object.keys(tempPatientCountInfo).length === 0 &&
+      patientsToCount.length > 0
+    ) {
       const caregiverSet = new Set();
-      
-      patientsToCount.forEach(p => {
-        const matchesStatus = tempPatientStatus === '' || 
-                             (tempPatientStatus === 'active' && p.isActive === '1') ||
-                             (tempPatientStatus === 'inactive' && p.isActive === '0');
-        
+
+      patientsToCount.forEach((p) => {
+        const matchesStatus =
+          tempPatientStatus === '' ||
+          (tempPatientStatus === 'active' && p.isActive === '1') ||
+          (tempPatientStatus === 'inactive' && p.isActive === '0');
+
         if (matchesStatus && p.caregiverName) {
           caregiverSet.add(p.caregiverName);
         }
       });
-      
-      caregiverSet.forEach(name => {
+
+      caregiverSet.forEach((name) => {
         caregiverPatientCount[name] = name;
       });
     }
 
     // Count patients with no caregiver from actual patient data
-    const noCaregiverCount = patientsToCount.filter(p => {
-      const matchesStatus = tempPatientStatus === '' || 
-                           (tempPatientStatus === 'active' && p.isActive === '1') ||
-                           (tempPatientStatus === 'inactive' && p.isActive === '0');
+    const noCaregiverCount = patientsToCount.filter((p) => {
+      const matchesStatus =
+        tempPatientStatus === '' ||
+        (tempPatientStatus === 'active' && p.isActive === '1') ||
+        (tempPatientStatus === 'inactive' && p.isActive === '0');
       return matchesStatus && !p.caregiverName;
     }).length;
 
@@ -629,9 +702,12 @@ const normalizePatientV1 = (p = {}) => {
   const screenWidth = useMemo(() => Dimensions.get('window').width, []);
 
   // Navigate to patient profile when patient item is clicked
-  const handleOnClickPatientItem = useCallback((patientID) => {
-    navigation.push(routes.PATIENT_PROFILE, { id: patientID });
-  }, [navigation]);
+  const handleOnClickPatientItem = useCallback(
+    (patientID) => {
+      navigation.push(routes.PATIENT_PROFILE, { id: patientID });
+    },
+    [navigation],
+  );
 
   // Toggle a patient's favourite status
   const toggleFavourite = useCallback(async (patient) => {
@@ -659,11 +735,11 @@ const normalizePatientV1 = (p = {}) => {
   const listWithFavPinned = React.useMemo(() => {
     if (!listOfPatients || listOfPatients.length === 0) return [];
     if (favoriteIds.size === 0) return listOfPatients; // No sorting needed
-    
+
     // Partition into favorites and non-favorites for performance
     const favorites = [];
     const nonFavorites = [];
-    
+
     for (const patient of listOfPatients) {
       const id = String(patient.patientID ?? fav.getPatientId(patient));
       if (favoriteIds.has(id)) {
@@ -672,14 +748,14 @@ const normalizePatientV1 = (p = {}) => {
         nonFavorites.push(patient);
       }
     }
-    
+
     return [...favorites, ...nonFavorites];
   }, [listOfPatients, favoriteIds]);
 
   const visiblePatients = React.useMemo(() => {
     if (!showFavOnly) return listWithFavPinned;
-    return listWithFavPinned.filter(p =>
-      favoriteIds.has(String(p.patientID ?? fav.getPatientId(p)))
+    return listWithFavPinned.filter((p) =>
+      favoriteIds.has(String(p.patientID ?? fav.getPatientId(p))),
     );
   }, [listWithFavPinned, showFavOnly, favoriteIds]);
 
@@ -693,21 +769,32 @@ const normalizePatientV1 = (p = {}) => {
 
   // Memoized renderItem for FlatList - favoriteIds intentionally excluded from deps
   // We'll use extraData prop on FlatList to trigger re-renders when favorites change
-  const renderPatientItem = useCallback(({ item }) => {
-    const patientId = String(item.patientID ?? fav.getPatientId(item));
-    return (
-      <PatientRow
-        item={item}
-        onPressPatient={handleOnClickPatientItem}
-        onToggleFavourite={toggleFavourite}
-        isFavourite={favoriteIds.has(patientId)}
-        viewMode={viewMode}
-        patientStatus={patientStatus}
-        showStartDate={showStartDate}
-        screenWidth={screenWidth}
-      />
-    );
-  }, [handleOnClickPatientItem, toggleFavourite, favoriteIds, viewMode, patientStatus, showStartDate, screenWidth]);
+  const renderPatientItem = useCallback(
+    ({ item }) => {
+      const patientId = String(item.patientID ?? fav.getPatientId(item));
+      return (
+        <PatientRow
+          item={item}
+          onPressPatient={handleOnClickPatientItem}
+          onToggleFavourite={toggleFavourite}
+          isFavourite={favoriteIds.has(patientId)}
+          viewMode={viewMode}
+          patientStatus={patientStatus}
+          showStartDate={showStartDate}
+          screenWidth={screenWidth}
+        />
+      );
+    },
+    [
+      handleOnClickPatientItem,
+      toggleFavourite,
+      favoriteIds,
+      viewMode,
+      patientStatus,
+      showStartDate,
+      screenWidth,
+    ],
+  );
 
   // Fixed item layout for better scroll performance
   const getItemLayout = useCallback(
@@ -716,7 +803,7 @@ const normalizePatientV1 = (p = {}) => {
       offset: 70 * index,
       index,
     }),
-    []
+    [],
   );
 
   return (
@@ -758,9 +845,20 @@ const normalizePatientV1 = (p = {}) => {
             setSearchQuery={setSearchQuery}
           />
 
+          {String(user?.roleName || user?.role || '').toUpperCase() ===
+            'SUPERVISOR' && (
+            <Button
+              mx="5"
+              mt="2"
+              onPress={() => navigation.navigate(routes.MANAGE_MEDICATION)}
+              testID="patients_manage_medication"
+            >
+              Centre Medication Records
+            </Button>
+          )}
           {/* show favourites-only toggle */}
           <Button
-            onPress={() => setShowFavOnly(v => !v)}
+            onPress={() => setShowFavOnly((v) => !v)}
             variant={showFavOnly ? 'solid' : 'outline'}
             leftIcon={<Icon as={MaterialIcons} name="star" />}
             mx="5"
@@ -796,7 +894,9 @@ const normalizePatientV1 = (p = {}) => {
                 ) : null
               }
               data={displayedPatients}
-              keyExtractor={(item) => String(item.patientID ?? fav.getPatientId(item))}
+              keyExtractor={(item) =>
+                String(item.patientID ?? fav.getPatientId(item))
+              }
               style={styles.patientListContainer}
               renderItem={renderPatientItem}
               getItemLayout={getItemLayout}

@@ -1,6 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import PatientsScreen from 'app/screens/PatientsScreen';
+import ManageMedicationScreen from 'app/screens/ManageMedicationScreen';
 import PatientProfile from 'app/screens/PatientProfileScreen';
 import PatientInformationAccordion from 'app/components/PatientInformationAccordion';
 import { format } from 'date-fns';
@@ -37,6 +38,11 @@ const Stack = createNativeStackNavigator();
 function PatientsNavigator() {
   return (
     <Stack.Navigator>
+      <Stack.Screen
+        name={routes.MANAGE_MEDICATION}
+        component={ManageMedicationScreen}
+        options={{ headerShown: true, title: 'Centre Medication Records' }}
+      />
       <Stack.Screen
         name={routes.PATIENTS_SCREEN}
         component={PatientsScreen}

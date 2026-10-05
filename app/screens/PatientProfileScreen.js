@@ -1,3 +1,4 @@
+import { primaryGuardianId } from 'app/utility/guardianPrimary';
 // Libs
 import React, { useContext, useState, useRef } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
@@ -562,8 +563,17 @@ function PatientProfileScreen(props) {
     const requestTiming = beginQaTiming('guardian-read', profileTiming);
     setIsGuardianLoading(true);
     try {
-      const resp = await requestDeadline(
-        guardianApi.getPatientGuardian(id, false),
+      const [guardianResult, allocationResult] = await Promise.allSettled([
+        requestDeadline(guardianApi.getPatientGuardian(id, false)),
+        typeof guardianApi.getPatientAllocation === 'function'
+          ? requestDeadline(guardianApi.getPatientAllocation(id))
+          : Promise.resolve(null),
+      ]);
+      if (guardianResult.status !== 'fulfilled') throw guardianResult.reason;
+      const resp = guardianResult.value;
+      const primaryId = primaryGuardianId(
+        allocationResult.status === 'fulfilled' ? allocationResult.value : null,
+        id,
       );
       markQaTiming(requestTiming, 'response', {
         status: resp?.status,
@@ -579,9 +589,17 @@ function PatientProfileScreen(props) {
 
         // If it's an array, get the first element
         if (Array.isArray(responseData) && responseData.length > 0) {
-          responseData = responseData[0];
+          const returnedRows = responseData;
+          responseData = responseData.find(
+            (row) =>
+              String(row?.patient?.id ?? row?.patient?.patientID) ===
+              String(id),
+          );
+          if (returnedRows.length && !responseData)
+            throw new Error(
+              'The guardian response did not match this patient.',
+            );
         }
-
         // Extract guardians from patient_guardians array
         let guardianArray = [];
         if (
@@ -593,14 +611,28 @@ function PatientProfileScreen(props) {
           guardianArray = [responseData.patient_guardians];
         }
 
-        // Transform to expected structure: first guardian + optional additional guardian
+        if (
+          guardianArray.length > 0 &&
+          String(
+            responseData?.patient?.id ?? responseData?.patient?.patientID,
+          ) !== String(id)
+        ) {
+          throw new Error('The guardian response did not match this patient.');
+        }
+        // API ordering does not identify the primary guardian: allocation does.
         if (guardianArray.length > 0) {
+          const guardians = guardianArray
+            .map(sanitizeGuardianData)
+            .map((guardian) => ({
+              ...guardian,
+              isPrimary:
+                primaryId == null
+                  ? null
+                  : String(guardian.guardianID) === primaryId,
+            }));
           const structured = {
-            guardian: sanitizeGuardianData(guardianArray[0]),
-            additionalGuardian:
-              guardianArray.length > 1
-                ? sanitizeGuardianData(guardianArray[1])
-                : null,
+            guardian: guardians[0],
+            additionalGuardian: guardians[1] ?? null,
           };
           setGuardianData(structured);
         } else {

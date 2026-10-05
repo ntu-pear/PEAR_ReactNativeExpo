@@ -1,5 +1,6 @@
 /*eslint eslint-comments/no-unlimited-disable: error */
 import client, { PATIENT_V1_BASE } from 'app/api/client';
+import { uppercasePersonFields } from 'app/utility/patientFieldPolicy';
 
 /*
  * Helper to use Patient Service v1 base URL
@@ -43,7 +44,7 @@ const getPatientGuardian = (patientID, maskNRIC = false) => {
 const updateGuardian = async (data, guardianId) => {
   const params = { guardian_id: guardianId };
 
-  return client.put(guardianUpdate, data, {
+  return client.put(guardianUpdate, uppercasePersonFields(data), {
     ...withPatientV1Base(),
     params,
   });
