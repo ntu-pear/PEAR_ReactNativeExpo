@@ -34,6 +34,7 @@ import PatientProfileCard from 'app/components/PatientProfileCard';
 import PatientInformationAccordion from 'app/components/PatientInformationAccordion';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import requestDeadline from 'app/utility/requestDeadline';
+import { beginQaTiming, markQaTiming } from 'app/utility/qaProfileTiming';
 
 // Import default placeholder image
 const defaultProfilePicture = require('app/assets/placeholder.png');
@@ -224,7 +225,8 @@ function PatientProfileScreen(props) {
   const currentLoad = useRef(null);
 
   // Main patient data retrieval with transformation
-  const getPatient = async (id, isCurrent) => {
+  const getPatient = async (id, isCurrent, profileTiming) => {
+    const requestTiming = beginQaTiming('patient-read', profileTiming);
     setIsPatientLoading(true);
     try {
       // Helper functions
@@ -271,10 +273,15 @@ function PatientProfileScreen(props) {
       const v1 = await requestDeadline(
         patientApi.readPatientV1(id, { require_auth: true, mask: true }),
       );
+      markQaTiming(requestTiming, 'response', {
+        status: v1?.status,
+        requestDurationMs: v1?.duration,
+      });
       if (!isCurrent()) {
         return;
       }
       if (!v1?.ok) {
+        markQaTiming(profileTiming, 'error', { status: v1?.status });
         setPatientError(loadError(v1));
         return;
       }
@@ -533,12 +540,15 @@ function PatientProfileScreen(props) {
 
         // Optional or masked fields must not erase a successfully returned patient.
         setPatientProfile(ui);
+        markQaTiming(profileTiming, 'data-ready', { status: v1.status });
       } else {
         setPatientError(
           'The patient service returned no patient information. Try again.',
         );
       }
     } catch (error) {
+      markQaTiming(requestTiming, 'error');
+      markQaTiming(profileTiming, 'error');
       if (isCurrent()) {
         setPatientError(loadError());
       }
@@ -549,12 +559,17 @@ function PatientProfileScreen(props) {
     }
   };
 
-  const retrieveGuardian = async (id, isCurrent) => {
+  const retrieveGuardian = async (id, isCurrent, profileTiming) => {
+    const requestTiming = beginQaTiming('guardian-read', profileTiming);
     setIsGuardianLoading(true);
     try {
       const resp = await requestDeadline(
         guardianApi.getPatientGuardian(id, false),
       );
+      markQaTiming(requestTiming, 'response', {
+        status: resp?.status,
+        requestDurationMs: resp?.duration,
+      });
       if (!isCurrent()) {
         return;
       }
@@ -596,6 +611,7 @@ function PatientProfileScreen(props) {
         setGuardianError(loadError(resp));
       }
     } catch (error) {
+      markQaTiming(requestTiming, 'error');
       if (isCurrent()) {
         setGuardianError(loadError());
       }
@@ -606,10 +622,15 @@ function PatientProfileScreen(props) {
     }
   };
 
-  const retrieveSocialHistory = async (id, isCurrent) => {
+  const retrieveSocialHistory = async (id, isCurrent, profileTiming) => {
+    const requestTiming = beginQaTiming('social-read', profileTiming);
     setIsSocialHistoryLoading(true);
     try {
       const resp = await requestDeadline(socialHistoryApi.getSocialHistory(id));
+      markQaTiming(requestTiming, 'response', {
+        status: resp?.status,
+        requestDurationMs: resp?.duration,
+      });
       if (!isCurrent()) {
         return;
       }
@@ -655,6 +676,7 @@ function PatientProfileScreen(props) {
         setSocialHistoryError(loadError(resp));
       }
     } catch (error) {
+      markQaTiming(requestTiming, 'error');
       if (isCurrent()) {
         setSocialHistoryError(loadError());
       }
@@ -669,6 +691,8 @@ function PatientProfileScreen(props) {
     React.useCallback(() => {
       const scope = {
         active: true,
+        timing: beginQaTiming('profile'),
+        layoutReported: false,
         guardianStarted: false,
         socialHistoryStarted: false,
       };
@@ -692,9 +716,10 @@ function PatientProfileScreen(props) {
       setIsPatientLoading(true);
       setIsGuardianLoading(true);
       setIsSocialHistoryLoading(true);
-      getPatient(patientID, isCurrent);
+      getPatient(patientID, isCurrent, scope.timing);
       return () => {
         scope.active = false;
+        markQaTiming(scope.timing, 'blur');
       };
       // Functions use only the supplied ID and the per-focus lifecycle guard.
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -707,7 +732,7 @@ function PatientProfileScreen(props) {
       return;
     }
     scope.guardianStarted = true;
-    retrieveGuardian(patientID, () => scope.active);
+    retrieveGuardian(patientID, () => scope.active, scope.timing);
   };
   const loadSocialHistory = () => {
     const scope = currentLoad.current;
@@ -715,7 +740,7 @@ function PatientProfileScreen(props) {
       return;
     }
     scope.socialHistoryStarted = true;
-    retrieveSocialHistory(patientID, () => scope.active);
+    retrieveSocialHistory(patientID, () => scope.active, scope.timing);
   };
 
   const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -750,7 +775,21 @@ function PatientProfileScreen(props) {
             }}
             ref={scrollViewRef}
           >
-            <View testID={'profile'} w="100%">
+            <View
+              testID={'profile'}
+              w="100%"
+              onLayout={() => {
+                const scope = currentLoad.current;
+                if (
+                  scope?.active &&
+                  !scope.layoutReported &&
+                  String(patientProfile.patientID) === String(patientID)
+                ) {
+                  scope.layoutReported = true;
+                  markQaTiming(scope.timing, 'layout-ready');
+                }
+              }}
+            >
               <PatientInformationCard
                 patientProfile={patientProfile}
                 navigation={navigation}

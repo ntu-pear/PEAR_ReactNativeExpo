@@ -10,6 +10,7 @@ import {
 // API
 import listApi from 'app/api/list';
 import useApi from 'app/hooks/useApi';
+import { beginQaTiming, markQaTiming } from 'app/utility/qaProfileTiming';
 /*
     This hook is used to get the list options for the input selection field component
     it formats and returns [{label: xxx, value: yyy}, ...] suitable for use in SelectionInputField component
@@ -29,8 +30,13 @@ export default function useGetSelectionOptions(option, enabled = true) {
     const storedData = getSelectionOptionCache(option);
     // Call API if there is no cached value.
     if (storedData === null || storedData === undefined) {
+      const requestTiming = beginQaTiming('selection-read');
       try {
         const response = await apiFunction.request(option);
+        markQaTiming(requestTiming, 'response', {
+          status: response?.status,
+          requestDurationMs: response?.duration,
+        });
 
         // Handle API failure or empty response gracefully
         if (!response.ok || !response.data || !response.data.data) {
@@ -63,6 +69,7 @@ export default function useGetSelectionOptions(option, enabled = true) {
           setIsLoading(false);
         }
       } catch (error) {
+        markQaTiming(requestTiming, 'error');
         setIsError(error);
       }
     } else {

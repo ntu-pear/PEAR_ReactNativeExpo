@@ -28,7 +28,7 @@ function AboutScreen(props) {
           <Text style={styles.text}>
             PEAR staging test build.
             {'\n\n\n'}
-            Version: 1.0.3-qa.20261005
+            Version: 1.0.4-qa.20261005
             {'\n\n'}
             Build Date: 5 October 2026
           </Text>
