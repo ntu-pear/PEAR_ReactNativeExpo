@@ -7,18 +7,16 @@ import userApi from '../api/user';
 
 export default function useApiHandler() {
   const { setUser } = useContext(AuthContext);
-    // === NEW: real axios header helpers ===
-    const getAuthHeader = () =>
-      client?.axiosInstance?.defaults?.headers?.common?.Authorization;
-  
-    const setAuthHeader = (token) => {
-      if (token) {
-        client.setHeaders({ Authorization: `Bearer ${token}` });
-        // (debug) see actual header path:
-        console.log('AUTH HEADER NOW:', getAuthHeader());
-      }
-    };
-    // === END NEW
+  // === NEW: real axios header helpers ===
+  const getAuthHeader = () =>
+    client?.axiosInstance?.defaults?.headers?.common?.Authorization;
+
+  const setAuthHeader = (token) => {
+    if (token) {
+      client.setHeaders({ Authorization: `Bearer ${token}` });
+    }
+  };
+  // === END NEW
   const setHeaderIfEmpty = async () => {
     // === CHANGED: check axios defaults instead of client.headers ===
     const current = getAuthHeader();
@@ -52,10 +50,10 @@ export default function useApiHandler() {
 
   // NEW: one-call bootstrap after login
   const bootstrapAfterLogin = async () => {
-    await setHeader();                              // ensure Authorization is set
-    const me = await userApi.getUser();             // GET /api/v1/user/get_user/
+    await setHeader(); // ensure Authorization is set
+    const me = await userApi.getUser(); // GET /api/v1/user/get_user/
     if (me?.ok) {
-      setUser(me.data);                             // put user into context → navigator can switch
+      setUser(me.data); // put user into context → navigator can switch
     } else {
       console.log('Failed to load profile after login:', me?.status, me?.data);
     }

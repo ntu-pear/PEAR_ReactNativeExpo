@@ -14,7 +14,7 @@ import useApi from 'app/hooks/useApi';
     This hook is used to get the list options for the input selection field component
     it formats and returns [{label: xxx, value: yyy}, ...] suitable for use in SelectionInputField component
 */
-export default function useGetSelectionOptions(option) {
+export default function useGetSelectionOptions(option, enabled = true) {
   const [data, setData] = useState([]);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -31,14 +31,14 @@ export default function useGetSelectionOptions(option) {
     if (storedData === null || storedData === undefined) {
       try {
         const response = await apiFunction.request(option);
-        
+
         // Handle API failure or empty response gracefully
         if (!response.ok || !response.data || !response.data.data) {
           setIsError(true);
           setIsLoading(false);
           return;
         }
-        
+
         const responseData = response.data.data;
         // console.log('response data = ');
         // console.log(responseData);
@@ -73,9 +73,11 @@ export default function useGetSelectionOptions(option) {
   }, [option]);
 
   useEffect(() => {
-    getSelectionOptions();
+    if (enabled) {
+      getSelectionOptions();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [option]);
+  }, [option, enabled]);
   // console.log(data);
   return { data, isLoading, isError };
 }

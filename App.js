@@ -13,13 +13,11 @@ import OfflineNotice from 'app/components/OfflineNotice';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AuthNavigator from 'app/navigation/AuthNavigator';
-import AppNavigator from 'app/navigation/AppNavigator';
 
 import AuthContext from 'app/auth/context';
 import { setSessionExpiredHandler } from 'app/api/client';
 import authStorage from 'app/auth/authStorage';
 import patientDraft from 'app/utility/patientDraft';
-import DebugNavigator from 'app/navigation/DebugNavigator';
 
 // Removal of token/user login persistence (see lines 36-37) -- Justin
 // import authStorage from './app/auth/authStorage';
@@ -28,7 +26,10 @@ const AppStack = createNativeStackNavigator();
 const AppStackScreen = ({ user }) => (
   <AppStack.Navigator screenOptions={{ headerShown: false }}>
     {user ? (
-      <AppStack.Screen name="App" component={AppNavigator} />
+      <AppStack.Screen
+        name="App"
+        getComponent={() => require('app/navigation/AppNavigator').default}
+      />
     ) : (
       <AppStack.Screen name="Auth" component={AuthNavigator} />
     )}
@@ -44,14 +45,16 @@ export default function App() {
     Alert.alert(
       'Session Expired',
       'Your session has expired. Please log in again.',
-      [{
-        text: 'OK',
-        onPress: async () => {
-          await authStorage.removeToken();
-          await patientDraft.clearDraft();
-          setUser(null);
+      [
+        {
+          text: 'OK',
+          onPress: async () => {
+            await authStorage.removeToken();
+            await patientDraft.clearDraft();
+            setUser(null);
+          },
         },
-      }],
+      ],
     );
   }, []);
 

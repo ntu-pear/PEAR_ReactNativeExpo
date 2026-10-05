@@ -1,13 +1,20 @@
 // Libs
-import React, { useContext, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import { Alert, Keyboard, StyleSheet, TouchableOpacity } from 'react-native';
 import { FlatList, View } from 'native-base';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 import patientApi from 'app/api/patient';
 import scheduleApi from 'app/api/schedule';
-import { patientFromApiResponse, patientProfileLines } from 'app/utility/patientHeader';
+import {
+  patientFromApiResponse,
+  patientProfileLines,
+} from 'app/utility/patientHeader';
 import { confirmAndLogMedicationAdministration } from 'app/utility/confirmMedicationAdministration';
+import {
+  canRecordMedication,
+  medicationPermissionMessage,
+} from 'app/utility/medicationAdminister';
 
 const {
   listPatientMedicationsV1,
@@ -49,10 +56,13 @@ import LoadingWheel from 'app/components/LoadingWheel';
 import Swipeable from 'app/components/swipeable-components/Swipeable';
 import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUnderlay';
 import DynamicTable from 'app/components/DynamicTable';
+import AppText from 'app/components/AppText';
 
 function PatientMedicationScreen(props) {
   let { patientID, patientId } = props.route.params;
-  if (patientId) patientID = patientId;
+  if (patientId) {
+    patientID = patientId;
+  }
 
   const testID = `medication_screen_${patientID}`;
   const navigation = useNavigation();
@@ -90,12 +100,13 @@ function PatientMedicationScreen(props) {
   const [isScrolling, setIsScrolling] = useState(false);
   const [assignedCaregiverId, setAssignedCaregiverId] = useState(null);
   const [tempCaregiverId, setTempCaregiverId] = useState(null);
+  const refreshMedDataRef = useRef(null);
 
   // Refresh list
   useFocusEffect(
     React.useCallback(() => {
       if (isReloadPatientList) {
-        refreshMedData();
+        refreshMedDataRef.current();
         setIsReloadPatientList(false);
       }
     }, [isReloadPatientList]),
@@ -109,9 +120,12 @@ function PatientMedicationScreen(props) {
       await getAssignedCaregiver();
     })();
   };
+  refreshMedDataRef.current = refreshMedData;
 
   const getAssignedCaregiver = async () => {
-    if (!patientID || !patientApi.getAllocationMap) return;
+    if (!patientID || !patientApi.getAllocationMap) {
+      return;
+    }
     try {
       const map = await patientApi.getAllocationMap();
       const allocation = map?.[String(patientID)] || {};
@@ -161,21 +175,30 @@ function PatientMedicationScreen(props) {
   const loadSchedulerMedications = async (id) => {
     try {
       const res = await scheduleApi.getMedicationScheduleV1();
-      if (!res?.ok) return [];
+      if (!res?.ok) {
+        return [];
+      }
       const rows = Array.isArray(res.data) ? res.data : res.data?.data || [];
       const today = new Date().toISOString().slice(0, 10);
       return rows
         .filter((item) => {
           const patient = item.PatientID ?? item.patientID ?? item.patient_id;
-          const date = String(item.AdministerDate ?? item.administerDate ?? '').slice(0, 10);
+          const date = String(
+            item.AdministerDate ?? item.administerDate ?? '',
+          ).slice(0, 10);
           return String(patient) === String(id) && (!date || date === today);
         })
         .map((item) => ({
           medicationID: item.Id ?? item.id,
           patientID: id,
-          prescriptionName: item.PrescriptionName ?? item.prescriptionName ?? 'Scheduled medication',
+          prescriptionName:
+            item.PrescriptionName ??
+            item.prescriptionName ??
+            'Scheduled medication',
           dosage: item.Dosage ?? item.dosage ?? '',
-          administerTime: String(item.AdministerTime ?? item.administerTime ?? ''),
+          administerTime: String(
+            item.AdministerTime ?? item.administerTime ?? '',
+          ),
           instruction: item.Instruction ?? item.instruction ?? '',
           startDateTime: item.AdministerDate ?? item.administerDate,
           endDateTime: item.AdministerDate ?? item.administerDate,
@@ -238,15 +261,24 @@ function PatientMedicationScreen(props) {
 
   const handleModalSubmitAdd = async (medData) => {
     setIsLoading(true);
-    const tempData = { ...medData, administerTime: convertAdmTimeToMilitary(medData.administerTime) };
+    const tempData = {
+      ...medData,
+      administerTime: convertAdmTimeToMilitary(medData.administerTime),
+    };
 
     const result = await addPatientMedicationV1(patientID, tempData);
     if (result.ok) {
       refreshMedData();
       setIsModalVisible(false);
-      Alert.alert('Successfully added medication', 'Medication has been added to the patient.');
+      Alert.alert(
+        'Successfully added medication',
+        'Medication has been added to the patient.',
+      );
     } else {
-      Alert.alert('Error adding medication', result.data?.message || 'Please try again.');
+      Alert.alert(
+        'Error adding medication',
+        result.data?.message || 'Please try again.',
+      );
     }
     setIsLoading(false);
   };
@@ -278,7 +310,10 @@ function PatientMedicationScreen(props) {
 
   const handleModalSubmitEdit = async () => {
     setIsLoading(true);
-    const tempFormData = { ...formData, administerTime: convertAdmTimeToMilitary(formData.administerTime) };
+    const tempFormData = {
+      ...formData,
+      administerTime: convertAdmTimeToMilitary(formData.administerTime),
+    };
 
     const result = await updatePatientMedicationV1(patientID, tempFormData);
     if (result.ok) {
@@ -286,7 +321,10 @@ function PatientMedicationScreen(props) {
       setIsModalVisible(false);
       Alert.alert('Successfully edited medication');
     } else {
-      Alert.alert('Error editing medication', result.data?.message || 'Please try again.');
+      Alert.alert(
+        'Error editing medication',
+        result.data?.message || 'Please try again.',
+      );
     }
     setIsLoading(false);
   };
@@ -295,11 +333,15 @@ function PatientMedicationScreen(props) {
     const unparsedMedData = originalUnparsedData.find(
       (x) => x.medicationID == medID && x.patientID == patientID,
     );
-    if (!unparsedMedData) return;
+    if (!unparsedMedData) {
+      return;
+    }
 
     Alert.alert(
       'Are you sure you wish to delete this medication?',
-      `Medication: ${unparsedMedData.prescriptionName}\nTime: ${formatAdmString(unparsedMedData.administerTime)}`,
+      `Medication: ${unparsedMedData.prescriptionName}\nTime: ${formatAdmString(
+        unparsedMedData.administerTime,
+      )}`,
       [
         { text: 'Cancel', style: 'cancel' },
         { text: 'OK', onPress: () => deleteMedication(medID) },
@@ -309,19 +351,31 @@ function PatientMedicationScreen(props) {
 
   const deleteMedication = async (medID) => {
     setIsLoading(true);
-    const result = await deletePatientMedicationV1({ patientID, medicationID: medID });
+    const result = await deletePatientMedicationV1({
+      patientID,
+      medicationID: medID,
+    });
     if (result.ok) {
       refreshMedData();
       setIsModalVisible(false);
-      Alert.alert('Successfully deleted medication', 'Medication has been removed from the patient.');
+      Alert.alert(
+        'Successfully deleted medication',
+        'Medication has been removed from the patient.',
+      );
     } else {
-      Alert.alert('Error deleting medication', result.data?.message || 'Please try again.');
+      Alert.alert(
+        'Error deleting medication',
+        result.data?.message || 'Please try again.',
+      );
     }
     setIsLoading(false);
   };
 
   const formatAdmString = (timeString) =>
-    timeString.split(',').map((item) => formatMilitaryToAMPM(item)).join(', ');
+    timeString
+      .split(',')
+      .map((item) => formatMilitaryToAMPM(item))
+      .join(', ');
 
   const onClickProfile = () => {
     navigation.navigate(routes.PATIENT_PROFILE, { id: patientID });
@@ -333,8 +387,12 @@ function PatientMedicationScreen(props) {
   const getTableRowData = () =>
     data.map((item) =>
       Object.entries(item).map(([key, value]) => {
-        if (key.toLowerCase().includes('date')) return formatDate(new Date(value), true);
-        if (key.toLowerCase().includes('time')) return formatTimeAMPM(new Date(value));
+        if (key.toLowerCase().includes('date')) {
+          return formatDate(new Date(value), true);
+        }
+        if (key.toLowerCase().includes('time')) {
+          return formatTimeAMPM(new Date(value));
+        }
         return String(value);
       }),
     );
@@ -345,7 +403,11 @@ function PatientMedicationScreen(props) {
           'ID',
           ...Object.keys(data[0])
             .filter((x) => x !== 'medID')
-            .map((item) => 'Prescription ' + item.split('med')[1].replace(/([a-z])([A-Z])/g, '$1 $2')),
+            .map(
+              (item) =>
+                'Prescription ' +
+                item.split('med')[1].replace(/([a-z])([A-Z])/g, '$1 $2'),
+            ),
         ]
       : null;
 
@@ -361,6 +423,7 @@ function PatientMedicationScreen(props) {
       caregiverId: assignedCaregiverId,
       tempCaregiverId,
       formatTime: formatTimeAMPM,
+      onRecorded: refreshMedData,
     });
   };
 
@@ -368,6 +431,11 @@ function PatientMedicationScreen(props) {
     <ActivityIndicator visible />
   ) : (
     <View style={styles.container}>
+      {!canRecordMedication(user) ? (
+        <View>
+          <AppText>{medicationPermissionMessage}</AppText>
+        </View>
+      ) : null}
       <View style={{ justifyContent: 'space-between' }}>
         <View style={{ alignSelf: 'center', marginTop: 15, maxHeight: 120 }}>
           {!isEmptyObject(patientData) ? (
@@ -396,12 +464,29 @@ function PatientMedicationScreen(props) {
               'End Date': 'medEndDate',
               'Medication Time': 'medTime',
             }}
-            SORT_OPTIONS={['End Date', 'Medication', 'Medication Time', 'Start Date']}
+            SORT_OPTIONS={[
+              'End Date',
+              'Medication',
+              'Medication Time',
+              'Start Date',
+            ]}
             FILTER_OPTIONS={['Medication Time', 'Start Date', 'End Date']}
             filterOptionDetails={{
-              'Medication Time': { type: 'time', options: { min: {}, max: {} }, isFilter: true },
-              'Start Date': { type: 'date', options: { min: {}, max: {} }, isFilter: true },
-              'End Date': { type: 'date', options: { min: {}, max: {} }, isFilter: true },
+              'Medication Time': {
+                type: 'time',
+                options: { min: {}, max: {} },
+                isFilter: true,
+              },
+              'Start Date': {
+                type: 'date',
+                options: { min: {}, max: {} },
+                isFilter: true,
+              },
+              'End Date': {
+                type: 'date',
+                options: { min: {}, max: {} },
+                isFilter: true,
+              },
             }}
             datetime={datetime}
             setDatetime={setDatetime}
@@ -428,11 +513,19 @@ function PatientMedicationScreen(props) {
           refreshing={isLoading}
           height={'72%'}
           ListEmptyComponent={() =>
-            noDataMessage(statusCode, isLoading, isError, 'No medications found', true)
+            noDataMessage(
+              statusCode,
+              isLoading,
+              isError,
+              'No medications found',
+              true,
+            )
           }
           data={data}
           keyboardShouldPersistTaps="handled"
-          keyExtractor={(item) => `${item.medID}-${new Date(item.medTime).getTime()}`}
+          keyExtractor={(item) =>
+            `${item.medID}-${new Date(item.medTime).getTime()}`
+          }
           renderItem={({ item }) => (
             <Swipeable
               setIsScrolling={setIsScrolling}
@@ -440,7 +533,11 @@ function PatientMedicationScreen(props) {
               onSwipeLeft={() => handleEditMedication(item.medID)}
               underlay={<EditDeleteUnderlay />}
               item={
-                <TouchableOpacity style={styles.medContainer} activeOpacity={1} disabled={!isScrolling}>
+                <TouchableOpacity
+                  style={styles.medContainer}
+                  activeOpacity={1}
+                  disabled={!isScrolling}
+                >
                   <MedicationItem
                     medID={item.medID}
                     patientID={patientID}
@@ -454,6 +551,7 @@ function PatientMedicationScreen(props) {
                     medRemarks={item.medRemarks}
                     caregiverId={assignedCaregiverId}
                     tempCaregiverId={tempCaregiverId}
+                    onRecorded={refreshMedData}
                     onEdit={() => handleEditMedication(item.medID)}
                     onDelete={() => handleDeleteMedication(item.medID)}
                   />
@@ -471,23 +569,36 @@ function PatientMedicationScreen(props) {
             screenName={'patient medication'}
             onClickEdit={handleEditMedication}
             onClickDelete={handleDeleteMedication}
-            noDataMessage={noDataMessage(statusCode, isLoading, isError, 'No medications found', false)}
-            customColumns={[
-              {
-                btnTitle: 'Log',
-                colTitle: 'Log medication administration',
-                onPress: onClickAdminister,
-                color: 'green',
-                width: 300,
-              },
-            ]}
+            noDataMessage={noDataMessage(
+              statusCode,
+              isLoading,
+              isError,
+              'No medications found',
+              false,
+            )}
+            customColumns={
+              canRecordMedication(user)
+                ? [
+                    {
+                      btnTitle: 'Log',
+                      colTitle: 'Log medication administration',
+                      onPress: onClickAdminister,
+                      color: 'green',
+                      width: 300,
+                    },
+                  ]
+                : []
+            }
             edit
             del
           />
         </View>
       )}
       <View style={styles.addBtn}>
-        <AddButton title="Add Medication" onPress={handleOnClickAddMedication} />
+        <AddButton
+          title="Add Medication"
+          onPress={handleOnClickAddMedication}
+        />
       </View>
       <AddPatientMedicationModal
         showModal={isModalVisible}
@@ -495,7 +606,9 @@ function PatientMedicationScreen(props) {
         formData={formData}
         setFormData={setFormData}
         onClose={() => setIsModalVisible(false)}
-        onSubmit={modalMode === 'add' ? handleModalSubmitAdd : handleModalSubmitEdit}
+        onSubmit={
+          modalMode === 'add' ? handleModalSubmitAdd : handleModalSubmitEdit
+        }
       />
     </View>
   );
@@ -503,7 +616,11 @@ function PatientMedicationScreen(props) {
 
 const styles = StyleSheet.create({
   container: { backgroundColor: colors.white },
-  medContainer: { padding: 20, borderBottomWidth: 1, borderBottomColor: '#ccc' },
+  medContainer: {
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
   addBtn: { marginTop: '0.01%' },
 });
 

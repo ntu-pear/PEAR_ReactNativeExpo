@@ -78,7 +78,9 @@ describe('medicationAdminister helpers', () => {
 
   test('listMedicationScheduleRows ignores message-only payloads', () => {
     expect(
-      listMedicationScheduleRows({ message: 'No medication schedules to be returned' }),
+      listMedicationScheduleRows({
+        message: 'No medication schedules to be returned',
+      }),
     ).toEqual([]);
   });
 
@@ -131,7 +133,9 @@ describe('medicationAdminister helpers', () => {
         },
       ],
     });
-    const updateSchedule = jest.fn().mockResolvedValue({ ok: true, status: 200, data: {} });
+    const updateSchedule = jest
+      .fn()
+      .mockResolvedValue({ ok: true, status: 200, data: {} });
 
     const result = await logMedicationAdministration({
       getSchedule,
@@ -140,6 +144,7 @@ describe('medicationAdminister helpers', () => {
       prescriptionName: 'Galantamine',
       administerTime: '1130',
       userId: 'CG-9',
+      now: new Date(2026, 7, 17, 11, 30),
     });
 
     expect(result.ok).toBe(true);
@@ -165,6 +170,8 @@ describe('medicationAdminister helpers', () => {
 
     expect(result.ok).toBe(false);
     expect(result.reason).toBe('slot_not_found');
-    expect(administrationFailureMessage(result.reason)).toMatch(/not recorded/i);
+    expect(administrationFailureMessage(result.reason)).toMatch(
+      /not recorded/i,
+    );
   });
 });

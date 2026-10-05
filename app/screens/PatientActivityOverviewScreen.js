@@ -23,15 +23,23 @@ import AddActivityExclusionModal from 'app/components/AddActivityExclusionModal'
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import colors from 'app/config/colors';
 import routes from 'app/navigation/routes';
-import { patientFromApiResponse, patientProfileLines } from 'app/utility/patientHeader';
+import {
+  patientFromApiResponse,
+  patientProfileLines,
+} from 'app/utility/patientHeader';
+import { exclusionLifecycle } from 'app/utility/exclusionLifecycle';
 
 const MEDIUM = colors.grey;
 const LIGHT = colors.grey_lighter;
 
 const preferenceLabel = (isLike) => {
   const n = Number(isLike);
-  if (n === 1) return 'Like';
-  if (n === -1) return 'Dislike';
+  if (n === 1) {
+    return 'Like';
+  }
+  if (n === -1) {
+    return 'Dislike';
+  }
   return 'Neutral';
 };
 
@@ -50,21 +58,35 @@ const statusChip = (kind) => {
 
 const preferenceChip = (isLike) => {
   const n = Number(isLike);
-  if (n === 1) return statusChip('like');
-  if (n === -1) return statusChip('dislike');
+  if (n === 1) {
+    return statusChip('like');
+  }
+  if (n === -1) {
+    return statusChip('dislike');
+  }
   return statusChip('neutral');
 };
 
 const recommendationChip = (value) => {
   const n = Number(value);
-  if (n === 1) return statusChip('recommend');
-  if (n === -1) return statusChip('not-recommend');
+  if (n === 1) {
+    return statusChip('recommend');
+  }
+  if (n === -1) {
+    return statusChip('not-recommend');
+  }
   return statusChip('neutral');
 };
 
 function SectionHeader({ title, count }) {
   return (
-    <Box mt={4} mb={2} flexDirection="row" alignItems="center" justifyContent="space-between">
+    <Box
+      mt={4}
+      mb={2}
+      flexDirection="row"
+      alignItems="center"
+      justifyContent="space-between"
+    >
       <Text fontSize="lg" fontWeight="700" color={colors.black}>
         {title}
       </Text>
@@ -91,8 +113,19 @@ function EmptyRow({ message }) {
   );
 }
 
-function ListRow({ title, subtitle, badge, badgeBg, badgeFg, onPress, testID }) {
-  const chip = { bg: badgeBg || colors.grey_lightest, fg: badgeFg || colors.black_darker };
+function ListRow({
+  title,
+  subtitle,
+  badge,
+  badgeBg,
+  badgeFg,
+  onPress,
+  testID,
+}) {
+  const chip = {
+    bg: badgeBg || colors.grey_lightest,
+    fg: badgeFg || colors.black_darker,
+  };
   const row = (
     <Box
       bg={colors.white}
@@ -105,7 +138,11 @@ function ListRow({ title, subtitle, badge, badgeBg, badgeFg, onPress, testID }) 
       minHeight={64}
       justifyContent="center"
     >
-      <Box flexDirection="row" alignItems="center" justifyContent="space-between">
+      <Box
+        flexDirection="row"
+        alignItems="center"
+        justifyContent="space-between"
+      >
         <Box flex={1} pr={3}>
           <Text fontSize="md" fontWeight="600" color={colors.black}>
             {title || 'Activity'}
@@ -127,7 +164,9 @@ function ListRow({ title, subtitle, badge, badgeBg, badgeFg, onPress, testID }) 
     </Box>
   );
 
-  if (!onPress) return row;
+  if (!onPress) {
+    return row;
+  }
   return (
     <TouchableOpacity testID={testID} onPress={onPress} activeOpacity={0.85}>
       {row}
@@ -137,7 +176,9 @@ function ListRow({ title, subtitle, badge, badgeBg, badgeFg, onPress, testID }) 
 
 function PatientActivityOverviewScreen(props) {
   let { patientID, patientId, patientProfile } = props.route.params || {};
-  if (patientId) patientID = patientId;
+  if (patientId) {
+    patientID = patientId;
+  }
 
   const navigation = useNavigation();
   const { user } = useContext(AuthContext) || {};
@@ -160,14 +201,19 @@ function PatientActivityOverviewScreen(props) {
     keepNamedActivities(applyActivityTitles(items, activityMap));
 
   const loadData = useCallback(async () => {
-    if (!patientID) return;
+    if (!patientID) {
+      return;
+    }
     setErrors([]);
 
     try {
       const [patientRes, prefsRes, recsRes, exclRes, centreRes, activitiesRes] =
         await Promise.all([
           patientApi.readPatientV1
-            ? patientApi.readPatientV1(patientID, { require_auth: true, mask: true })
+            ? patientApi.readPatientV1(patientID, {
+                require_auth: true,
+                mask: true,
+              })
             : patientApi.getPatient?.(patientID),
           activityApi.getActivityPreference(patientID),
           activityApi.getActivityRecommendations(patientID),
@@ -177,9 +223,15 @@ function PatientActivityOverviewScreen(props) {
         ]);
 
       const nextErrors = [];
-      if (prefsRes && !prefsRes.ok) nextErrors.push('preferences');
-      if (recsRes && !recsRes.ok) nextErrors.push('recommendations');
-      if (exclRes && !exclRes.ok) nextErrors.push('exclusions');
+      if (prefsRes && !prefsRes.ok) {
+        nextErrors.push('preferences');
+      }
+      if (recsRes && !recsRes.ok) {
+        nextErrors.push('recommendations');
+      }
+      if (exclRes && !exclRes.ok) {
+        nextErrors.push('exclusions');
+      }
 
       const activityMap = buildActivityTitleMap(
         centreRes?.ok ? centreRes.data?.data || [] : [],
@@ -203,10 +255,14 @@ function PatientActivityOverviewScreen(props) {
           : [],
       );
       setRecommendations(
-        recsRes?.ok ? resolveTitles(recsRes?.data?.data || [], activityMap) : [],
+        recsRes?.ok
+          ? resolveTitles(recsRes?.data?.data || [], activityMap)
+          : [],
       );
       setExclusions(
-        exclRes?.ok ? resolveTitles(exclRes?.data?.data || [], activityMap) : [],
+        exclRes?.ok
+          ? resolveTitles(exclRes?.data?.data || [], activityMap)
+          : [],
       );
       setErrors(nextErrors);
     } catch (e) {
@@ -291,8 +347,8 @@ function PatientActivityOverviewScreen(props) {
       <Text fontSize="md" color={colors.black} mt={2} mb={1}>
         Condensed view of preferences, doctor recommendations, and exclusions
         (aligned with web patient activity tabs). Caregivers can update
-        preferences; supervisors can add dated exclusions. Recommendations
-        stay read-only on mobile.
+        preferences; supervisors can add dated exclusions. Recommendations stay
+        read-only on mobile.
       </Text>
 
       {errors.length > 0 && (
@@ -352,7 +408,11 @@ function PatientActivityOverviewScreen(props) {
       ) : (
         preferences.map((item) => (
           <ListRow
-            key={`pref-${item.centreActivityPreferenceID || item.CentreActivityPreferenceID || item.centreActivityID}`}
+            key={`pref-${
+              item.centreActivityPreferenceID ||
+              item.CentreActivityPreferenceID ||
+              item.centreActivityID
+            }`}
             title={item.activityTitle}
             badge={preferenceLabel(item.isLike)}
             badgeBg={preferenceChip(item.isLike).bg}
@@ -361,7 +421,10 @@ function PatientActivityOverviewScreen(props) {
         ))
       )}
 
-      <SectionHeader title="Doctor Recommendations" count={recommendations.length} />
+      <SectionHeader
+        title="Doctor Recommendations"
+        count={recommendations.length}
+      />
       {recommendations.length === 0 ? (
         <EmptyRow
           message={
@@ -399,13 +462,23 @@ function PatientActivityOverviewScreen(props) {
             title={item.activityTitle}
             subtitle={[
               item.exclusionRemarks,
-              item.startDate ? `From ${String(item.startDate).slice(0, 10)}` : null,
-              item.endDate ? `to ${String(item.endDate).slice(0, 10)}` : 'ongoing',
+              item.startDate
+                ? `From ${String(item.startDate).slice(0, 10)}`
+                : null,
+              item.endDate
+                ? `to ${String(item.endDate).slice(0, 10)}`
+                : 'ongoing',
             ]
               .filter(Boolean)
               .join(' · ')}
-            badge="Excluded"
-            badgeBg={statusChip('exclude').bg}
+            badge={exclusionLifecycle(item)}
+            badgeBg={
+              statusChip(
+                exclusionLifecycle(item).startsWith('Active')
+                  ? 'exclude'
+                  : 'neutral',
+              ).bg
+            }
             badgeFg={statusChip('exclude').fg}
             testID={`activity_overview_exclusion_${item.id}`}
             onPress={
@@ -424,9 +497,9 @@ function PatientActivityOverviewScreen(props) {
       <Box mt={4} mb={8}>
         <Text fontSize="sm" color={colors.black}>
           Recommendations stay read-only on mobile (doctor-managed on web).
-          Caregivers can update preferences. Supervisors can add or edit
-          dated exclusions here. Creating centre activities and generating
-          schedules stay on Config.
+          Caregivers can update preferences. Supervisors can add or edit dated
+          exclusions here. Creating centre activities and generating schedules
+          stay on Config.
         </Text>
       </Box>
 
@@ -435,7 +508,9 @@ function PatientActivityOverviewScreen(props) {
         showModal={showExclusionModal}
         modalMode={exclusionModalMode}
         existingExclusion={editingExclusion}
-        excludedActivityIds={exclusions.map((item) => item.centreActivityID)}
+        excludedActivityIds={exclusions
+          .filter((item) => exclusionLifecycle(item) !== 'Expired')
+          .map((item) => item.centreActivityID)}
         onClose={() => {
           setShowExclusionModal(false);
           setEditingExclusion(null);

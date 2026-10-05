@@ -118,8 +118,8 @@ android {
         applicationId "com.pearreactnativeexpo"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode 4
+        versionName "1.0.3-qa.20261005"
     }
 
     splits {

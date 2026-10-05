@@ -10,7 +10,7 @@ import authStorage from 'app/auth/authStorage';
 // User Service v1 — staging (.185). Prod fallback: http://10.96.188.171:5678/api/v1
 export const V1_BASE = 'http://10.96.188.185/api/v1';
 
-export const PATIENT_V1_BASE = 'http://10.96.188.180/api/v1';  // Patient Service v1 (.180 - staging, .172:5679 - prod)
+export const PATIENT_V1_BASE = 'http://10.96.188.180/api/v1'; // Patient Service v1 (.180 - staging, .172:5679 - prod)
 
 export const ACTIVITY_V1_BASE = 'http://10.96.188.186/api/v1'; // Activity Service v1
 
@@ -81,10 +81,17 @@ client.axiosInstance.interceptors.response.use(
     const originalRequest = error.config;
 
     // Only handle 401 and only retry once per request
-    if (error.response?.status !== 401 || originalRequest._retry) {
+    if (
+      error.response?.status !== 401 ||
+      !originalRequest ||
+      originalRequest._retry ||
+      /\/login\/?$|\/refresh\/?$/.test(originalRequest.url || '')
+    ) {
       return Promise.reject(error);
     }
 
+    // Every request gets one refresh attempt, including requests in the queue.
+    originalRequest._retry = true;
     // If a refresh is already in progress, queue this request
     if (_isRefreshing) {
       return new Promise((resolve, reject) => {
@@ -95,7 +102,6 @@ client.axiosInstance.interceptors.response.use(
       });
     }
 
-    originalRequest._retry = true;
     _isRefreshing = true;
 
     try {
@@ -119,10 +125,14 @@ client.axiosInstance.interceptors.response.use(
 
       const data = refreshResponse.data || {};
       const newAccessToken =
-        data.accessToken || data.token || data.access_token ||
-        (data.data && (data.data.accessToken || data.data.token || data.data.access_token));
+        data.accessToken ||
+        data.token ||
+        data.access_token ||
+        (data.data &&
+          (data.data.accessToken || data.data.token || data.data.access_token));
       const newRefreshToken =
-        data.refreshToken || data.refresh_token ||
+        data.refreshToken ||
+        data.refresh_token ||
         (data.data && (data.data.refreshToken || data.data.refresh_token));
 
       if (!newAccessToken) {

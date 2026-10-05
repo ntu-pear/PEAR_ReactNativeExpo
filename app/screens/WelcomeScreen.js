@@ -14,6 +14,7 @@ import { Center, Icon, Box } from 'native-base';
 import { MaterialIcons } from '@expo/vector-icons';
 import jwt_decode from 'jwt-decode';
 import patientDraft from 'app/utility/patientDraft';
+import requestDeadline from 'app/utility/requestDeadline';
 import AuthContext from 'app/auth/context';
 import authStorage from 'app/auth/authStorage';
 
@@ -27,7 +28,7 @@ import routes from 'app/navigation/routes';
 import useApiHandler from 'app/hooks/useApiHandler';
 
 // Utilities
-import { parseSelectOptions } from 'app/utility/miscFunctions'
+import { parseSelectOptions } from 'app/utility/miscFunctions';
 
 // APIs
 import userApi from 'app/api/user';
@@ -44,7 +45,7 @@ import colors from 'app/config/colors';
 function WelcomeScreen(props) {
   const { navigation } = props;
   const apiHandlerHook = useApiHandler();
-  
+
   // User auth context
   const authContext = useContext(AuthContext);
 
@@ -63,101 +64,82 @@ function WelcomeScreen(props) {
   // Screen error state: This = true when the child components report error(input fields)
   // Enables use of dynamic rendering of components when the page error = true/false.
   const [isInputErrors, setIsInputErrors] = useState(false);
-  
+
   // Input error states (Child components)
   // This records the error states of each child component (ones that require tracking).
   const [isUsernameError, setIsUsernameError] = useState(false);
   const [isPasswordError, setIsPasswordError] = useState(false);
-  
+
   // This useEffect enables the page to show correct error checking.
   // The main isInputErrors is responsible for the error state of the screen.
   // This state will be true whenever any child input components are in error state.
   useEffect(() => {
-    setIsInputErrors(
-      isUsernameError ||
-      isPasswordError
-    );
-  }, [
-      isUsernameError,
-      isPasswordError,
-  ]);
-  
+    setIsInputErrors(isUsernameError || isPasswordError);
+  }, [isUsernameError, isPasswordError]);
+
   // User roles for select field
-  const listOfUserRoles = parseSelectOptions(['Supervisor', 'Guardian', 'Doctor', 'Caregiver', 'Nurse']);
-  
+  const listOfUserRoles = parseSelectOptions([
+    'Supervisor',
+    'Guardian',
+    'Doctor',
+    'Caregiver',
+    'Nurse',
+  ]);
+
   // Start login process when user presses login button
   const onPressLogin = async () => {
-    console.log('Starting login process...',username,userRole,password);
-    Keyboard.dismiss()
-    
-    setIsLoading(true);
-    setIsError(false);    
-    
-    const result = await userApi.loginUser({
-      email: (username || '').trim().toLowerCase(),
-      role: userRole,
-      password,
-    });
-
-    if(result && result.ok) {
-      console.log('User authenticated - storing tokens...');
-      // Clear any stale patient draft from a previous session
-      await patientDraft.clearDraft();
-      // Fetch profile and put it into AuthContext 
-      console.log('Fetching profile...');
-      const me = await userApi.getUser(); // GET /api/v1/user/get_user/
-      if (me?.ok) {
-        authContext.setUser(me.data);     
-        console.log('Profile loaded, user set in context'); 
-      } else {
-    // NEW: show a clean error if profile fails (don’t silently proceed)
-    console.log('Profile fetch failed after login:', me?.status, me?.data);
-    setIsLoading(false);
-    setIsError(true);
-    setStatusCode(me?.status ?? 500);
-    setErrorMsg(me?.data?.message || 'Could not load profile');
-    return;
-  }
-      setIsLoading(false);
-      setIsError(false);
-      setIsError(false);
-      setStatusCode(result.status);
-      setErrorMsg('');
-      console.log('Logging in!');
-      
-    } else if(result && !result.ok){
-      console.log('Error:', result);
-      setIsLoading(false);
-      setIsError(true);
-      setStatusCode(result.status);
-      
-      if(username == '' || password == ''){
-        setErrorMsg(errors.emptyParameters);
-      }
-      else{
-        setErrorMsg(result?.data?.message || errors.loginError);
-      }
+    Keyboard.dismiss();
+    if (isLoading) {
       return;
     }
+    if (!username.trim() || !password) {
+      setIsError(true);
+      setErrorMsg(errors.emptyParameters);
+      return;
+    }
+    setIsLoading(true);
+    setIsError(false);
+    try {
+      const result = await requestDeadline(
+        userApi.loginUser({
+          email: username.trim().toLowerCase(),
+          role: userRole,
+          password,
+        }),
+      );
+      if (!result?.ok) {
+        setIsError(true);
+        setStatusCode(result?.status ?? 0);
+        setErrorMsg(result?.data?.message || errors.loginError);
+        return;
+      }
+      await requestDeadline(patientDraft.clearDraft());
+      const me = await requestDeadline(userApi.getUser());
+      if (!me?.ok) {
+        setIsError(true);
+        setStatusCode(me?.status ?? 0);
+        setErrorMsg(me?.data?.message || 'Could not load profile');
+        return;
+      }
+      authContext.setUser(me.data);
+      setStatusCode(result.status);
+      setErrorMsg('');
+    } catch (requestError) {
+      setIsError(true);
+      setStatusCode(0);
+      setErrorMsg('Unable to sign in. Check the VPN connection and try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
-  
-  // If user is not connected to NTU network, takes about 30 seconds for call to return
-  // Instead timeout in 5 seconds
 
+  const handleUsernameError = useCallback((state) => {
+    setIsUsernameError(state);
+  }, []);
 
-  const handleUsernameError = useCallback(
-    (state) => {
-      setIsUsernameError(state);
-    },
-    [isUsernameError],
-  );
-
-  const handlePasswordError = useCallback(
-    (state) => {
-      setIsPasswordError(state);
-    },
-    [isPasswordError],
-  );    
+  const handlePasswordError = useCallback((state) => {
+    setIsPasswordError(state);
+  }, []);
 
   return (
     <ImageBackground
@@ -182,12 +164,12 @@ function WelcomeScreen(props) {
                   source={require('../assets/pear_v2.png')}
                   style={styles.logo}
                 />
-                <Text style={styles.tagLine} >PEAR</Text>
+                <Text style={styles.tagLine}>PEAR</Text>
               </View>
               <View style={styles.inputContainer}>
                 <InputField
                   testID="username"
-                  autoCapitalize='none'
+                  autoCapitalize="none"
                   isRequired
                   showTitle={false}
                   title="Email"
@@ -203,7 +185,7 @@ function WelcomeScreen(props) {
                   }
                 />
               </View>
-              
+
               <View style={styles.inputContainer}>
                 <SensitiveInputField
                   testID="password"
@@ -214,40 +196,33 @@ function WelcomeScreen(props) {
                   onChangeText={setPassword}
                   onEndEditing={handlePasswordError}
                   InputLeftElement={
-                    <Icon
-                      as={<MaterialIcons name="lock" />}
-                      size={5}
-                      ml="5"
-                    />
+                    <Icon as={<MaterialIcons name="lock" />} size={5} ml="5" />
                   }
-                  />
-                </View>
+                />
+              </View>
               <View style={styles.buttonsContainer}>
                 {isLoading ? (
                   <LoadingWheel />
-                  ) : (
-                    <AppButton
-                      title="Login"
-                      color="green"
-                      onPress={onPressLogin}
-                      testID="login"
-                      //isDisabled={isInputErrors} //for login button validation                  
-                    />
-                  )}
+                ) : (
+                  <AppButton
+                    title="Login"
+                    color="green"
+                    onPress={onPressLogin}
+                    testID="login"
+                    //isDisabled={isInputErrors} //for login button validation
+                  />
+                )}
               </View>
               <Box>
                 {isError ? (
-                <ErrorMessage
-                  message={errorMsg}
-                  testID={'loginError'}
-                  />
-                ) : null }
+                  <ErrorMessage message={errorMsg} testID={'loginError'} />
+                ) : null}
               </Box>
               <View>
                 <Text
                   style={styles.forgotPassword}
                   onPress={() => navigation.navigate(routes.RESET_PASSWORD)}
-                  >
+                >
                   Forgot Password?
                 </Text>
               </View>
@@ -272,14 +247,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.1)',
   },
   overlay: {
-    backgroundColor: colors.secondary_overlay_color
+    backgroundColor: colors.secondary_overlay_color,
   },
   formContainer: {
-    paddingHorizontal: 75
+    paddingHorizontal: 75,
   },
   buttonsContainer: {
     width: '100%',
-    paddingVertical: 8
+    paddingVertical: 8,
   },
   credentialsContainer: {
     backgroundColor: colors.white,
@@ -287,7 +262,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 50,
     paddingTop: 25,
     paddingBottom: 90,
-    borderRadius: 25  
+    borderRadius: 25,
   },
   logo: {
     width: 100,
@@ -307,14 +282,14 @@ const styles = StyleSheet.create({
   forgotPassword: {
     textDecorationLine: 'underline',
     alignSelf: 'center',
-    marginTop: "3%"
+    marginTop: '3%',
   },
   inputContainer: {
     display: 'flex',
     width: '100%',
     justifyContent: 'flex-start',
-    marginBottom: '3%'
-  }
+    marginBottom: '3%',
+  },
 });
 
 export default WelcomeScreen;

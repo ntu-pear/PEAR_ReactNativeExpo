@@ -1,8 +1,12 @@
+import { centreDay, centreInstant } from 'app/utility/centreClock';
+
 export const currentUserId = (user) =>
   user?.id || user?.userID || user?.userId || user?.user_id || '';
 
 export const idsEqual = (a, b) => {
-  if (a == null || b == null) return false;
+  if (a == null || b == null) {
+    return false;
+  }
   const left = String(a).trim().toLowerCase();
   const right = String(b).trim().toLowerCase();
   if (!left || !right || left === 'unassigned' || right === 'unassigned') {
@@ -28,49 +32,64 @@ export const normalizeAdministerTime = (value) => {
     return `${hours}${minutes}`;
   }
   const raw = String(value || '').trim();
-  if (!raw) return '';
+  if (!raw) {
+    return '';
+  }
   if (raw.includes('T')) {
     const parsed = new Date(raw);
-    if (!Number.isNaN(parsed.getTime())) return normalizeAdministerTime(parsed);
+    if (!Number.isNaN(parsed.getTime())) {
+      return normalizeAdministerTime(parsed);
+    }
   }
   const digits = raw.replace(/[^\d]/g, '');
-  if (digits.length >= 4) return digits.slice(0, 4);
+  if (digits.length >= 4) {
+    return digits.slice(0, 4);
+  }
   return digits;
 };
 
-export const todayAdministerDate = (date = new Date()) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
+export const todayAdministerDate = (date = new Date()) => centreDay(date);
 
 export const listMedicationScheduleRows = (payload) => {
-  if (Array.isArray(payload)) return payload;
-  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+  if (Array.isArray(payload?.data)) {
+    return payload.data;
+  }
   return [];
 };
 
 export const matchMedicationScheduleRow = (
   rows,
-  { patientID, prescriptionName, administerTime } = {},
+  { patientID, prescriptionName, administerTime, administerDate } = {},
 ) => {
   const pid = String(patientID ?? '');
-  const name = String(prescriptionName || '').trim().toLowerCase();
+  const name = String(prescriptionName || '')
+    .trim()
+    .toLowerCase();
   const time = normalizeAdministerTime(administerTime);
-  if (!pid || !name || !time) return null;
+  if (!pid || !name || !time) {
+    return null;
+  }
   return (
     (rows || []).find((row) => {
       const rowPid = String(row.PatientID ?? row.patientId ?? '');
-      const rowName = String(
-        row.PrescriptionName ?? row.prescriptionName ?? '',
-      )
+      const rowName = String(row.PrescriptionName ?? row.prescriptionName ?? '')
         .trim()
         .toLowerCase();
       const rowTime = normalizeAdministerTime(
         row.AdministerTime ?? row.administerTime,
       );
-      return rowPid === pid && rowName === name && rowTime === time;
+      const rowDate = String(
+        row.AdministerDate ?? row.administerDate ?? '',
+      ).slice(0, 10);
+      return (
+        rowPid === pid &&
+        rowName === name &&
+        rowTime === time &&
+        (!administerDate || rowDate === administerDate)
+      );
     }) || null
   );
 };
@@ -109,6 +128,7 @@ export const logMedicationAdministration = async ({
   prescriptionName,
   administerTime,
   userId,
+  now = new Date(),
 } = {}) => {
   if (!getSchedule || !updateSchedule) {
     return { ok: false, reason: 'missing_client' };
@@ -132,6 +152,7 @@ export const logMedicationAdministration = async ({
     patientID,
     prescriptionName,
     administerTime,
+    administerDate: todayAdministerDate(now),
   });
   if (!row) {
     return {
@@ -179,8 +200,43 @@ export const logMedicationAdministration = async ({
   };
 };
 
+export const medicationWindow = (
+  time,
+  selectedDate = new Date(),
+  now = new Date(),
+) => {
+  const selectedDay =
+    typeof selectedDate === 'string'
+      ? selectedDate
+      : todayAdministerDate(selectedDate);
+  if (selectedDay !== todayAdministerDate(now)) {
+    return {
+      allowed: false,
+      reason: 'Only today’s medication can be recorded.',
+    };
+  }
+  const hhmm = normalizeAdministerTime(time);
+  const hours = Number(hhmm.slice(0, 2));
+  const minutes = Number(hhmm.slice(2));
+  if (!/^\d{4}$/.test(hhmm) || hours > 23 || minutes > 59) {
+    return {
+      allowed: false,
+      reason: 'The scheduled medication time is unavailable.',
+    };
+  }
+  const scheduled = centreInstant(todayAdministerDate(now), hhmm);
+  return {
+    allowed: true,
+    outsideWindow: Math.abs(now.getTime() - scheduled.getTime()) > 30 * 60000,
+  };
+};
+
 export const administrationFailureMessage = (reason) => {
   switch (reason) {
+    case 'wrong_day':
+      return 'The Singapore calendar day changed. Reopen today\u2019s medication before confirming.';
+    case 'preparation_failed':
+      return 'The app could not safely prepare this request. No administration request was sent.';
     case 'schedule_unavailable':
       return 'Today’s medication schedule could not be loaded from the scheduler. Administration was not recorded.';
     case 'slot_not_found':
@@ -195,3 +251,7 @@ export const administrationFailureMessage = (reason) => {
       return 'Administration was not recorded. The scheduler endpoint is pending or unavailable.';
   }
 };
+export const canRecordMedication = (user) =>
+  String(user?.roleName || user?.role || '').toUpperCase() === 'SUPERVISOR';
+export const medicationPermissionMessage =
+  'Medication administration is currently available to supervisors only. Ask a supervisor to check this dose.';

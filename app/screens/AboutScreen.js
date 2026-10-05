@@ -26,11 +26,11 @@ function AboutScreen(props) {
             style={styles.logo}
           />
           <Text style={styles.text}>
-            You have downloaded the latest version of PEAR.
+            PEAR staging test build.
             {'\n\n\n'}
-            Version: 1.0.0
+            Version: 1.0.3-qa.20261005
             {'\n\n'}
-            Build Date: 22 March 2025
+            Build Date: 5 October 2026
           </Text>
         </View>
       </Center>

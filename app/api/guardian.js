@@ -43,11 +43,16 @@ const getPatientGuardian = (patientID, maskNRIC = false) => {
 const updateGuardian = async (data, guardianId) => {
   const params = { guardian_id: guardianId };
 
-  return client.put(guardianUpdate, data, { 
+  return client.put(guardianUpdate, data, {
     ...withPatientV1Base(),
-    params
+    params,
   });
 };
+
+const getPatientAllocation = (patientId) =>
+  client.get(`/allocation/patient/${patientId}`, {}, withPatientV1Base());
+const updatePrimaryAllocation = (allocationId, data) =>
+  client.put(`/allocation/${allocationId}`, data, withPatientV1Base());
 
 /*
  * Expose your end points here
@@ -55,4 +60,6 @@ const updateGuardian = async (data, guardianId) => {
 export default {
   getPatientGuardian,
   updateGuardian,
+  getPatientAllocation,
+  updatePrimaryAllocation,
 };

@@ -9,13 +9,16 @@ import colors from 'app/config/colors';
 import AuthContext from 'app/auth/context';
 
 // Utilities
-import {
-  formatTimeAMPM,
-  setTimeToZero,
-} from 'app/utility/miscFunctions';
+import { formatTimeAMPM } from 'app/utility/miscFunctions';
+import { centreDay } from 'app/utility/centreClock';
 import formatDateTime from 'app/hooks/useFormatDateTime.js';
 import { confirmAndLogMedicationAdministration } from 'app/utility/confirmMedicationAdministration';
-import EditDeleteBtn from './EditDeleteBtn';
+import EditDeleteBtn from 'app/components/EditDeleteBtn';
+import {
+  canRecordMedication,
+  medicationPermissionMessage,
+  medicationWindow,
+} from 'app/utility/medicationAdminister';
 
 const MedicationItem = ({
   medID: _medID,
@@ -33,10 +36,14 @@ const MedicationItem = ({
   date = new Date(),
   onEdit,
   onDelete,
+  onRecorded,
 }) => {
   const { user } = useContext(AuthContext) || {};
   //to check if the medication has ended
-  const isMedicationEnded = new Date(medEndDate) < new Date();
+  const today = centreDay();
+  const startDay = medStartDate && String(medStartDate).slice(0, 10);
+  const endDay = medEndDate && String(medEndDate).slice(0, 10);
+  const isMedicationEnded = !!endDay && endDay < today;
 
   const onClickAdminister = () => {
     confirmAndLogMedicationAdministration({
@@ -49,17 +56,17 @@ const MedicationItem = ({
       caregiverId,
       tempCaregiverId,
       formatTime: formatTimeAMPM,
+      administrationDate: date,
+      onRecorded,
     });
   };
 
   const canAdminister = () => {
-    const tempDate = setTimeToZero(date);
-    const today = setTimeToZero(new Date());
-    return !(
-      (medStartDate && tempDate < medStartDate) ||
-      (medEndDate && tempDate > medEndDate) ||
-      tempDate > today ||
-      tempDate < today
+    return (
+      canRecordMedication(user) &&
+      medicationWindow(medTime, date).allowed &&
+      (!startDay || today >= startDay) &&
+      (!endDay || today <= endDay)
     );
   };
   return (
@@ -74,7 +81,7 @@ const MedicationItem = ({
           as={<MaterialIcons name="medical-services" />}
           size={12}
           color={colors.green}
-        ></Icon>
+        />
         <View style={styles.medTextContainer}>
           <Text style={styles.heading}>
             {medName} ({medDosage})
@@ -138,7 +145,9 @@ const MedicationItem = ({
         disabled={!canAdminister() || isMedicationEnded}
       >
         <Text style={styles.medText} color={colors.white}>
-          {canAdminister() && !isMedicationEnded
+          {!canRecordMedication(user)
+            ? medicationPermissionMessage
+            : canAdminister() && !isMedicationEnded
             ? 'Click to log medicine administration'
             : 'Cannot administer today'}
         </Text>

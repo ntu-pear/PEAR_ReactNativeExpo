@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { ScrollView } from 'native-base';
 
@@ -11,6 +11,7 @@ import activity, {
   buildActivityTitleMap,
   isMissingActivityTitle,
 } from 'app/api/activity';
+import { dateKey } from 'app/utility/exclusionLifecycle';
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -26,7 +27,9 @@ const toDateOnly = (value) => String(value || '').slice(0, 10);
 
 const isIndefiniteEnd = (value) => {
   const dateOnly = toDateOnly(value);
-  if (!dateOnly) return true;
+  if (!dateOnly) {
+    return true;
+  }
   return Number(dateOnly.slice(0, 4)) >= 2999;
 };
 
@@ -46,9 +49,11 @@ function AddActivityExclusionModal({
   const [endDate, setEndDate] = useState('');
   const [isIndefinite, setIsIndefinite] = useState(false);
 
-  const isEdit = modalMode === 'edit' && existingExclusion;
+  const isEdit = modalMode === 'edit' && Boolean(existingExclusion);
+  const existingCentreActivityID = existingExclusion?.centreActivityID;
+  const excludedIdsKey = excludedActivityIds.map(String).sort().join(',');
 
-  const loadActivities = async () => {
+  const loadActivities = useCallback(async () => {
     try {
       const [centreRes, activitiesRes] = await Promise.all([
         activity.getCentreActivities(),
@@ -59,13 +64,13 @@ function AddActivityExclusionModal({
         centreRows,
         activitiesRes?.ok ? activitiesRes.data?.data || [] : [],
       );
-      const excluded = new Set(excludedActivityIds.map((id) => String(id)));
+      const excluded = new Set(excludedIdsKey.split(','));
       const options = applyActivityTitles(centreRows, titleMap)
         .filter((row) => !isMissingActivityTitle(row.activityTitle))
         .filter((row) => {
           const id = row.centreActivityID ?? row.CentreActivityID;
           if (isEdit) {
-            return String(id) === String(existingExclusion.centreActivityID);
+            return String(id) === String(existingCentreActivityID);
           }
           return !excluded.has(String(id));
         })
@@ -78,7 +83,7 @@ function AddActivityExclusionModal({
       console.error(error);
       Alert.alert('Unable to load activities', 'Please try again.');
     }
-  };
+  }, [excludedIdsKey, existingCentreActivityID, isEdit]);
 
   useEffect(() => {
     if (!showModal) {
@@ -107,22 +112,32 @@ function AddActivityExclusionModal({
       setEndDate('');
       setIsIndefinite(false);
     }
-  }, [showModal, modalMode, existingExclusion]);
+  }, [showModal, isEdit, existingExclusion, loadActivities]);
 
   const handleSubmit = () => {
     if (centreActivityID == null) {
-      Alert.alert('Missing activity', 'Select a named centre activity to exclude.');
+      Alert.alert(
+        'Missing activity',
+        'Select a named centre activity to exclude.',
+      );
       return;
     }
     if (!String(exclusionRemarks).trim()) {
       Alert.alert('Missing remarks', 'Exclusion remarks are required.');
       return;
     }
-    if (!ISO_DATE.test(String(startDate).trim())) {
+    if (
+      !ISO_DATE.test(String(startDate).trim()) ||
+      !dateKey(String(startDate).trim())
+    ) {
       Alert.alert('Invalid start date', 'Use YYYY-MM-DD.');
       return;
     }
-    if (!isIndefinite && !ISO_DATE.test(String(endDate).trim())) {
+    if (
+      !isIndefinite &&
+      (!ISO_DATE.test(String(endDate).trim()) ||
+        !dateKey(String(endDate).trim()))
+    ) {
       Alert.alert(
         'Invalid end date',
         'Enter an end date as YYYY-MM-DD, or tick Indefinite.',
@@ -174,7 +189,9 @@ function AddActivityExclusionModal({
           value={isIndefinite}
           onChangeData={(checked) => {
             setIsIndefinite(checked);
-            if (checked) setEndDate('');
+            if (checked) {
+              setEndDate('');
+            }
           }}
         />
       </View>

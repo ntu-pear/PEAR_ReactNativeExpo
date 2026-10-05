@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import requestDeadline from 'app/utility/requestDeadline';
 
 /*
 *   Purpose: Reusable useApi custom hook to prevent code repetition.
@@ -14,15 +15,43 @@ export default function useApi(apiFunc) {
   const [data, setData] = useState([]);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const latestRequest = useRef(0);
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   const request = async (...args) => {
     setLoading(true);
-    const response = await apiFunc(...args);
-    setLoading(false);
-
-    setError(!response.ok);
-    setData(response.data);
-    return response;
+    const requestId = ++latestRequest.current;
+    const isCurrent = () =>
+      mounted.current && requestId === latestRequest.current;
+    try {
+      const response = await requestDeadline(apiFunc(...args));
+      if (isCurrent()) {
+        setError(!response.ok);
+        setData(response.data);
+      }
+      return response;
+    } catch (requestError) {
+      if (isCurrent()) {
+        setError(true);
+        setData(null);
+      }
+      return {
+        ok: false,
+        status: 0,
+        problem: requestError?.problem || 'CLIENT_ERROR',
+        data: null,
+      };
+    } finally {
+      if (isCurrent()) {
+        setLoading(false);
+      }
+    }
   };
 
   return {

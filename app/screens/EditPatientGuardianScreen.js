@@ -1,506 +1,302 @@
-// Libs
-import React, { useState, useEffect, useCallback } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
-import { Box, VStack, FlatList } from 'native-base';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
-// Configurations
-import routes from 'app/navigation/routes';
-
-// Hooks
-import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
-
-// API
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { Alert, ScrollView, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import AuthContext from 'app/auth/context';
 import guardianApi from 'app/api/guardian';
-
-// Components
-import SelectionInputField from 'app/components/input-components/SelectionInputField';
-import DateInputField from 'app/components/input-components/DateInputField';
 import AppButton from 'app/components/AppButton';
 import AppText from 'app/components/AppText';
-import ActivityIndicator from 'app/components/ActivityIndicator';
-import RadioButtonInput from 'app/components/input-components/RadioButtonsInput';
 import InputField from 'app/components/input-components/InputField';
+import requestDeadline from 'app/utility/requestDeadline';
+import {
+  buildGuardianUpdate,
+  buildPrimaryGuardianUpdate,
+  canEditGuardian,
+  canSelectPrimaryGuardian,
+  guardianRecords,
+} from 'app/utility/guardianEditing';
 
-// Utilities
-import { parseSelectOptions } from 'app/utility/miscFunctions';
-
-function EditPatientGuardianScreen(props) {
-  const { guardianProfile, patientID } = props.route.params;
-  const [isLoading, setIsLoading] = useState(true);
-
+function EditPatientGuardianScreen({ route }) {
+  const { guardianProfile, patientID } = route.params;
+  const guardianId = guardianProfile.guardianID;
+  const { user } = useContext(AuthContext) || {};
   const navigation = useNavigation();
-  // Maximum and minimum valid joining dates
-  const minimumJoiningDate = new Date();
-  minimumJoiningDate.setDate(minimumJoiningDate.getDate() - 30); // 30 days ago
-  const maximumJoiningDate = new Date();
-  maximumJoiningDate.setDate(maximumJoiningDate.getDate() + 30); // 30 days later
-
-  // retrive list data from database using useGetSelectionOptions
-  const {
-    data: relationshipData,
-    isError: relationshipError,
-    isLoading: relationshipLoading,
-  } = useGetSelectionOptions('relationship');
-
-  // Set initial value for relationship select field
-  const [listOfRelationships, setListOfRelationships] = useState(
-    parseSelectOptions([
-      'Husband',
-      'Wife',
-      'Child',
-      'Parent',
-      'Sibling',
-      'Grandchild',
-      'Friend',
-      'Nephew',
-      'Niece',
-      'Aunt',
-      'Uncle',
-      'Grandparent',
-    ]),
-  );
-  
-  // Used for the RadioButtonInput dataArray prop -> follow format of "label" and "value"
-  const [listOfGenders, setListOfGenders] = useState([
-    { label: 'Male', value: 'M' },
-    { label: 'Female', value: 'F' },
-  ]);
-  
-  // Screen error state: This = true when the child components report error(input fields)
-  // Enables use of dynamic rendering of components when the page error = true/false.
-  const [isInputErrors, setIsInputErrors] = useState(false);
-
-  // Input error states (Child components)
-  const [isFirstNameError, setIsFirstNameError] = useState(false);
-  const [isLastNameError, setIsLastNameError] = useState(false);
-  const [isPrefNameError, setIsPrefNameError] = useState(false);
-  const [isNRICError, setIsNRICError] = useState(false);
-  const [isGenderError, setIsGenderError] = useState(false);
-  const [isDOBError, setIsDOBError] = useState(false);
-  const [isRelationError, setIsRelationError] = useState(false);
-  const [isTempAddrError, setIsTempAddrError] = useState(false);
-  const [isAddrError, setIsAddrError] = useState(false);
-  const [isMobileNoError, setIsMobileNoError] = useState(false);
-  const [isEmailError, setIsEmailError] = useState(false);
-  const [isLoginError, setIsLoginError] = useState(false);
-  
-  // Guardian data to be submitted 
-  const [formData, setFormData] = useState({
-    GuardianID: guardianProfile.guardianID,
-    FirstName: guardianProfile.firstName,
-    LastName: guardianProfile.lastName,
-    ContactNo: guardianProfile.contactNo,
-    PreferredName: guardianProfile.preferredName,
-    Gender: guardianProfile.gender,
-    DOB: guardianProfile.dob ? new Date(guardianProfile.dob) : minimumJoiningDate,
-    Address: guardianProfile.address ? guardianProfile.address : '',
-    Nric: guardianProfile.nric ? guardianProfile.nric : '',
-    TempAddress: guardianProfile.tempAddress ? guardianProfile.tempAddress : '',
-    Email: guardianProfile.email ? guardianProfile.email : '',
-    RelationshipID: guardianProfile.relationshipID || undefined,
-    isActive: guardianProfile.isActive,
-  });
-
-  // To ensure that when the is guardian login required checkbox is checked, guardian email
-  // must be filled before continuing. Done by verifying if guardian.Email is empty or not.
-  useEffect(() => {
-    setIsInputErrors(
-      isFirstNameError ||
-      isLastNameError ||
-      isPrefNameError ||
-      isNRICError ||
-      isGenderError ||
-      isDOBError ||
-      isRelationError ||
-      isAddrError ||
-      isTempAddrError ||
-      isMobileNoError ||
-      isEmailError ||
-      isLoginError,
+  const mounted = useRef(true);
+  const busy = useRef(false);
+  const [loading, setLoading] = useState(false);
+  const [guardian, setGuardian] = useState(null);
+  const [allocation, setAllocation] = useState(null);
+  const [edits, setEdits] = useState({});
+  const [error, setError] = useState('');
+  const [uncertain, setUncertain] = useState(false);
+  const readGuardians = async () =>
+    guardianRecords(
+      await requestDeadline(guardianApi.getPatientGuardian(patientID, false)),
+      patientID,
     );
-  }, [
-    isFirstNameError,
-    isLastNameError,
-    isPrefNameError,
-    isNRICError,
-    isGenderError,
-    isDOBError,
-    isRelationError,
-    isAddrError,
-    isTempAddrError,
-    isMobileNoError,
-    isEmailError,
-    isLoginError,
-    isInputErrors,
-  ]);
-  
-  // Try to get relationships list from backend. If retrieval from the hook is successful,
-  // replace the content in listOfRelationships with the retrieved one
-  useEffect(() => {
-    if (!relationshipLoading && !relationshipError && relationshipData && relationshipData.length > 0) {
-      setListOfRelationships(relationshipData);
-    }
-    setIsLoading(false);
-  }, [relationshipData, relationshipError, relationshipLoading]);
-  
-  // Map relationship name to ID when listOfRelationships is available
-  useEffect(() => {
-    if (listOfRelationships.length > 0 && guardianProfile.relationship && !guardianProfile.relationshipID) {
-      const matchedRelationship = listOfRelationships.find(
-        (rel) => rel.label?.toLowerCase() === guardianProfile.relationship?.toLowerCase()
+  const load = async () => {
+    if (!canEditGuardian(user) || busy.current) return;
+    busy.current = true;
+    setLoading(true);
+    setError('');
+    try {
+      const records = await readGuardians();
+      const record = records.find(
+        (item) => String(item.id) === String(guardianId),
       );
-      if (matchedRelationship) {
-        setFormData(prevState => ({
-          ...prevState,
-          RelationshipID: matchedRelationship.value
-        }));
+      if (!record)
+        throw new Error('This guardian is no longer linked to this patient.');
+      if (!mounted.current) return;
+      setGuardian(record);
+      setEdits({
+        preferredName: record.preferredName || '',
+        contactNo: record.contactNo || '',
+        address: record.address || '',
+        tempAddress: record.tempAddress || '',
+        email: record.email || '',
+        relationshipName: record.relationshipName || '',
+      });
+      if (canSelectPrimaryGuardian(user)) {
+        const response = await requestDeadline(
+          guardianApi.getPatientAllocation(patientID),
+        );
+        if (mounted.current)
+          setAllocation(
+            response?.ok &&
+              String(response.data?.patientId) === String(patientID)
+              ? response.data
+              : null,
+          );
       }
-    }
-  }, [listOfRelationships, guardianProfile.relationship, guardianProfile.relationshipID]);
-
-  // To ensure that when the is guardian login required checkbox is checked, guardian email
-  // must be filled before continuing. Done by verifying if formData['Email'] is empty or not.
-  // console.log(i);
-  //useEffect(() => {
-  //  setIsGuardianLoginError(() => {
-  //    if ((formData['isActive'] !== undefined && formData['isActive']) &&
-  //    (formData['Email'] !== undefined && formData['Email'] === '')) {
-  //      return true;
-  //    } else {
-  //      return false;
-  //    }
-  //  });
-  //}, [formData['isActive'], formData['Email']]);
-  
-  // Functions for error state reporting for the child components
-  const handleFirstNameError = useCallback(
-    (state) => {
-      setIsFirstNameError(state);
-      // console.log('FirstName: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isFirstNameError],
-  );
-
-  const handleLastNameError = useCallback(
-    (state) => {
-      setIsLastNameError(state);
-      // console.log("last name", state)
-    },
-    [isLastNameError]
-  );
-
-  const handlePrefNameError = useCallback(
-    (state) => {
-      setIsPrefNameError(state);
-      // console.log("pref name", state)
-    },
-    [isPrefNameError]
-  );
-
-  const handleNRICError = useCallback(
-    (state) => {
-      setIsNRICError(state);
-      // console.log("nric", state)
-    },
-    [isNRICError]
-  );
-
-  const handleGenderError = useCallback(
-    (state) => {
-      setIsGenderError(state);
-      // console.log("gender", state)
-    },
-    [isGenderError]
-  );
-
-  const handleDOBError = useCallback(
-    (state) => {
-      setIsDOBError(state);
-      // console.log("dob", state)
-    },
-    [isDOBError]
-  );
-
-  const handleRelationError = useCallback(
-    (state) => {
-      setIsRelationError(state);
-      // console.log("relation", state)
-    },
-    [isRelationError]
-  );
-
-  const handleAddrError = useCallback(
-    (state) => {
-      setIsAddrError(state);
-      // console.log("addr", state)
-    },
-    [isAddrError]
-  );
-
-  const handleTempAddrError = useCallback(
-    (state) => {
-      setIsTempAddrError(state);
-      // console.log("temp addr", state)
-    },
-    [isTempAddrError]
-  );
-
-  const handleMobileNoError = useCallback(
-    (state) => {
-      setIsMobileNoError(state);
-      // console.log("mobile", state)
-    },
-    [isMobileNoError]
-  );
-
-  const handleEmailError = useCallback(
-    (state) => {
-      setIsEmailError(state);
-      // console.log("email", state)
-    },
-    [isEmailError]
-  );
-
-  const handleLoginError = useCallback(
-    (state) => {
-      setIsLoginError(state);
-      // console.log("email", state)
-    },
-    [isLoginError]
-  );
-
-  // handling form input data by taking onchange value and updating our previous form data state
-    const handleFormData = (field) => (e) => {
-      if (field === 'RelationshipID') {
-        setFormData(prevState=>({
-          ...prevState,
-          [field]: parseInt(e)
-        }))
-      } else {
-        setFormData(prevState=>({
-          ...prevState,
-          [field]: e
-        }))
-      }
-    };
-
-  // form submission when save button is pressed
-  const submitForm = async () => {
-    // Get relationship name from RelationshipID
-    const relationship = listOfRelationships.find(
-      rel => rel.value === formData.RelationshipID
-    );
-    
-    // Transform formData to match API expectations
-    const apiPayload = {
-      active: formData.isActive || 'Y',
-      firstName: formData.FirstName,
-      lastName: formData.LastName,
-      preferredName: formData.PreferredName,
-      gender: formData.Gender,
-      contactNo: formData.ContactNo,
-      nric: formData.Nric,
-      email: formData.Email || null,
-      dateOfBirth: formData.DOB ? formData.DOB.toISOString() : null,
-      address: formData.Address,
-      tempAddress: formData.TempAddress || '',
-      status: 'active',
-      isDeleted: '0',
-      guardianApplicationUserId: '',
-      modifiedDate: new Date().toISOString(),
-      ModifiedById: '1',
-      patientId: patientID,
-      relationshipName: relationship ? relationship.label : guardianProfile.relationship
-    };
-    
-    const result = await guardianApi.updateGuardian(apiPayload, guardianProfile.guardianID);
-
-    let alertTitle = '';
-    let alertDetails = '';
-
-    if (result.ok) {
-      alertTitle = 'Saved Successfully';
-      alertDetails = 'Guardian information has been updated.';
-      Alert.alert(alertTitle, alertDetails, [
-        {
-          text: 'OK',
-          onPress: () => navigation.goBack()
-        }
-      ]);
-    } else {
-      const errors = result.data?.message;
-
-      result.data
-        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-        : (alertDetails = 'Please try again.');
-
-      alertTitle = 'Error in Editing Guardian Info';
-      console.log('result error ' + JSON.stringify(result));
-      Alert.alert(alertTitle, alertDetails);
+    } catch (failure) {
+      if (mounted.current)
+        setError(
+          failure.message ||
+            'Unable to load guardian information. Check the VPN and retry.',
+        );
+    } finally {
+      busy.current = false;
+      if (mounted.current) setLoading(false);
     }
   };
-
-  return relationshipLoading || isLoading ? (
-    <ActivityIndicator visible />
-  ) : (
-    <FlatList
-      data={[0]}
-      renderItem={() => (
-        <Box alignItems="center">
-          <Box w="100%">
-            <VStack>
-              <View style={styles.formContainer}>
-                <InputField
-                  isRequired
-                  title={'First Name'}
-                  value={formData.FirstName}
-                  onChangeText={handleFormData('FirstName')}
-                  onEndEditing={handleFirstNameError}
-                  dataType="name"
-                />
-
-                <InputField
-                  isRequired
-                  title={'Last Name'}
-                  value={formData.LastName}
-                  onChangeText={handleFormData('LastName')}
-                  onEndEditing={handleLastNameError}
-                  dataType="name"
-                />
-
-                <View style={styles.dateSelectionContainer}>
-                  <DateInputField
-                    isRequired
-                    selectionMode={'DOB'}
-                    hideDayOfWeek={true}
-                    title={'Date of Birth'}
-                    value={formData.DOB}
-                    handleFormData={handleFormData('DOB')}
-                    onChildData={handleDOBError}
-                  />
-                </View>  
-
-                <RadioButtonInput
-                  isRequired
-                  title={'Gender'}
-                  value={formData['Gender']}
-                  onChangeData={handleFormData('Gender')}
-                  onChildData={handleGenderError}
-                  dataArray={listOfGenders}
-                />
-
-                <InputField
-                  isRequired
-                  title={'Address'}
-                  value={formData.Address}
-                  dataType="address"
-                  onChangeText={handleFormData('Address')}
-                  onEndEditing={handleAddrError}
-                />
-
-                <InputField
-                  title={'Temporary Address'}
-                  value={formData.TempAddress}
-                  dataType="address"
-                  onChangeText={handleFormData('TempAddress')}
-                  onEndEditing={handleTempAddrError}
-                />
-
-                <InputField
-                  isRequired
-                  title={'Mobile No.'}
-                  value={formData.ContactNo}
-                  onChangeText={handleFormData('ContactNo')}
-                  onEndEditing={handleMobileNoError}
-                  dataType={'mobile phone'}
-                  keyboardType='numeric' 
-                  maxLength={8}                   
-                />
-
-                <InputField
-                  isRequired
-                  title={'Preferred Name'}
-                  value={formData.PreferredName}
-                  onChangeText={handleFormData('PreferredName')}
-                  onEndEditing={handlePrefNameError}                    
-                  dataType="name"
-                />
-
-                <SelectionInputField
-                  isRequired
-                  title={"Guardian is Patient's"}
-                  value={formData.RelationshipID}
-                  placeholder={'Select Relationship'}
-                  onDataChange={handleFormData('RelationshipID')}
-                  dataArray={listOfRelationships}
-                  onChildData={handleRelationError}
-                  isDisabled={true}
-                />
-
-                {
-                  //<SingleOptionCheckBox
-                  //  title={'Check this box to specify Guardian wants to log in'}
-                  //  value={(formData['isActive'] !== undefined && formData['isActive'])}
-                  //  onChangeData={handleFormData('isActive')}
-                  ///>
-                }
-
-                <InputField
-                  title={'Email'}
-                  value={formData.Email}
-                  onChangeText={handleFormData('Email')}
-                  onEndEditing={handleEmailError}
-                  dataType="email"
-                />
-              </View>
-              <View style={styles.saveButtonContainer}>
-                <Box width="70%">
-                  <AppButton
-                    title="Save"
-                    color="green"
-                    onPress={submitForm}
-                    isDisabled={isInputErrors}
-                  />
-                </Box>
-              </View>
-            </VStack>
-          </Box>
-        </Box>
-      )}
-    />
+  useEffect(() => {
+    mounted.current = true;
+    load();
+    return () => {
+      mounted.current = false;
+    };
+    // Route and account are fixed for this editing session.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [patientID, guardianId, user]);
+  const finish = (message) =>
+    Alert.alert('Saved successfully', message, [
+      { text: 'OK', onPress: () => navigation.goBack() },
+    ]);
+  const save = async () => {
+    if (busy.current || uncertain || !canEditGuardian(user)) return;
+    busy.current = true;
+    setLoading(true);
+    setError('');
+    let sent = false;
+    try {
+      const current = (await readGuardians()).find(
+        (item) => String(item.id) === String(guardianId),
+      );
+      const payload = buildGuardianUpdate({
+        guardian: current,
+        edits,
+        patientId: patientID,
+        user,
+      });
+      sent = true;
+      const response = await requestDeadline(
+        guardianApi.updateGuardian(payload, guardianId),
+      );
+      if (!mounted.current) return;
+      if (!response?.ok)
+        throw new Error('The guardian update was not confirmed.');
+      // Identity and relationship are committed separately by this API.
+      const updated = (await readGuardians()).find(
+        (item) => String(item.id) === String(guardianId),
+      );
+      if (
+        !updated ||
+        [
+          'preferredName',
+          'contactNo',
+          'address',
+          'tempAddress',
+          'email',
+          'relationshipName',
+        ].some(
+          (key) => String(updated[key] ?? '') !== String(payload[key] ?? ''),
+        )
+      )
+        throw new Error(
+          'The updated guardian fields and relationship could not be verified.',
+        );
+      if (mounted.current)
+        finish('Guardian information and relationship have been verified.');
+    } catch (failure) {
+      if (mounted.current) {
+        setUncertain(sent);
+        setError(
+          sent
+            ? 'The update outcome is not confirmed. It may have partially completed. Do not submit again; reopen the patient profile to check the guardian and relationship.'
+            : failure.message,
+        );
+      }
+    } finally {
+      busy.current = false;
+      if (mounted.current) setLoading(false);
+    }
+  };
+  const setPrimary = async () => {
+    if (busy.current || uncertain || !canSelectPrimaryGuardian(user)) return;
+    busy.current = true;
+    setLoading(true);
+    setError('');
+    let sent = false;
+    try {
+      const records = await readGuardians();
+      const response = await requestDeadline(
+        guardianApi.getPatientAllocation(patientID),
+      );
+      if (!response?.ok)
+        throw new Error('The current allocation is unavailable.');
+      const payload = buildPrimaryGuardianUpdate({
+        allocation: response.data,
+        guardians: records,
+        guardianId,
+        patientId: patientID,
+        user,
+      });
+      sent = true;
+      const update = await requestDeadline(
+        guardianApi.updatePrimaryAllocation(response.data.id, payload),
+      );
+      if (!update?.ok)
+        throw new Error('The primary guardian update was not confirmed.');
+      const verified = await requestDeadline(
+        guardianApi.getPatientAllocation(patientID),
+      );
+      if (
+        !verified?.ok ||
+        String(verified.data.patientId) !== String(patientID) ||
+        String(verified.data.guardianId) !== String(guardianId)
+      )
+        throw new Error('The primary guardian could not be verified.');
+      if (mounted.current)
+        finish('Primary guardian selection has been verified.');
+    } catch (failure) {
+      if (mounted.current) {
+        setUncertain(sent);
+        setError(
+          sent
+            ? 'The primary guardian update outcome is unknown. Do not submit again; reopen the profile and verify the allocation.'
+            : failure.message,
+        );
+      }
+    } finally {
+      busy.current = false;
+      if (mounted.current) setLoading(false);
+    }
+  };
+  if (!canEditGuardian(user))
+    return (
+      <AppText>
+        Guardian editing is available to caregivers and supervisors.
+      </AppText>
+    );
+  const primary =
+    allocation &&
+    String(allocation.patientId) === String(patientID) &&
+    String(allocation.guardianId) === String(guardianId);
+  return (
+    <ScrollView
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={{ padding: 24 }}
+    >
+      {loading ? <AppText>Loading...</AppText> : null}
+      {error ? <AppText testID="guardian-edit-error">{error}</AppText> : null}
+      {!guardian && !loading ? (
+        <AppButton title="Reload guardian" color="green" onPress={load} />
+      ) : null}
+      {guardian ? (
+        <View>
+          <AppText>{`${guardian.firstName} ${guardian.lastName}`}</AppText>
+          <AppText>{`Date of birth: ${String(guardian.dateOfBirth || '').slice(
+            0,
+            10,
+          )} | Gender: ${guardian.gender || '-'}`}</AppText>
+          <AppText>
+            {primary
+              ? 'Primary guardian'
+              : allocation
+              ? 'Secondary guardian'
+              : 'Primary status unavailable'}
+          </AppText>
+          {[
+            ['preferredName', 'Preferred name'],
+            ['contactNo', 'Contact number'],
+            ['address', 'Address'],
+            ['tempAddress', 'Temporary address'],
+            ['email', 'Email'],
+            ['relationshipName', "Guardian is patient's"],
+          ].map(([key, title]) => (
+            <InputField
+              key={key}
+              testID={`guardian-edit-${key}`}
+              title={title}
+              value={edits[key]}
+              autoCapitalize="none"
+              onChangeText={(value) =>
+                setEdits((previous) => ({ ...previous, [key]: value }))
+              }
+              otherProps={{ editable: !loading && !uncertain }}
+            />
+          ))}
+          <AppText>
+            Use the configured relationship name. The service validates the
+            relationship when saving.
+          </AppText>
+          <AppButton
+            title="Save guardian"
+            color="green"
+            onPress={save}
+            isDisabled={
+              loading ||
+              uncertain ||
+              !edits.contactNo?.trim() ||
+              !edits.relationshipName?.trim()
+            }
+            testID="guardian-edit-save"
+          />
+          {canSelectPrimaryGuardian(user) && allocation && !primary ? (
+            <AppButton
+              title="Make primary guardian"
+              color="green"
+              isDisabled={loading || uncertain}
+              testID="guardian-edit-primary"
+              onPress={() =>
+                Alert.alert(
+                  'Change primary guardian',
+                  `Make ${guardian.firstName} ${guardian.lastName} the primary guardian for this patient?`,
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Confirm', onPress: setPrimary },
+                  ],
+                )
+              }
+            />
+          ) : null}
+          <AppButton
+            title="Back to profile"
+            color="grey"
+            onPress={() => navigation.goBack()}
+          />
+        </View>
+      ) : null}
+    </ScrollView>
   );
 }
-
-EditPatientGuardianScreen.defaultProps = {
-  isRequired: true,
-};
-
-const styles = StyleSheet.create({
-  formContainer: {
-    flex: 1,
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-    paddingLeft: '10%',
-    width: '90%',
-    marginBottom: 20,
-  },
-  dateSelectionContainer: {
-    width: '100%',
-  },
-  saveButtonContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  warningText: {
-    fontSize: 12,
-    color: '#666',
-    fontStyle: 'italic',
-    marginTop: -10,
-    marginBottom: 10,
-    width: '100%',
-  },
-});
-
 export default EditPatientGuardianScreen;

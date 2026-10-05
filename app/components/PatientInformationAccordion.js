@@ -1,9 +1,9 @@
 /*eslint eslint-comments/no-unlimited-disable: error */
 // Libs
-import { Text } from 'native-base';
+import { Button, Text } from 'native-base';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import Accordion from 'react-native-collapsible/Accordion';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
@@ -12,6 +12,7 @@ import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
 // API
 import patientApi from 'app/api/patient';
+import requestDeadline from 'app/utility/requestDeadline';
 
 // Configurations
 import routes from 'app/navigation/routes';
@@ -23,7 +24,11 @@ import InformationCard from 'app/components/InformationCard';
 
 // Helper functions (defined outside component to avoid recreation)
 const pick = (...vals) => {
-  for (const v of vals) if (v !== undefined && v !== null && v !== '') return v;
+  for (const v of vals) {
+    if (v !== undefined && v !== null && v !== '') {
+      return v;
+    }
+  }
   return '';
 };
 
@@ -33,15 +38,23 @@ const maskNRIC = (v) => {
 };
 
 const triStateLabel = (v) => {
-  if (v === undefined || v === null || v === '') return '-';
+  if (v === undefined || v === null || v === '') {
+    return '-';
+  }
   const n = Number(v);
-  if (n === 1) return 'YES';
-  if (n === 0) return 'NO';
+  if (n === 1) {
+    return 'YES';
+  }
+  if (n === 0) {
+    return 'NO';
+  }
   return 'Not available';
 };
 
 const optionLabelById = (options, id) => {
-  if (!options || !Array.isArray(options) || id === undefined || id === null) return '';
+  if (!options || !Array.isArray(options) || id === undefined || id === null) {
+    return '';
+  }
   const needle = Number(id);
   const found = options.find((o) => Number(o.value) === needle);
   return found?.label || '';
@@ -53,22 +66,57 @@ function PatientInformationAccordion({
   guardianData,
   socialHistoryData,
   scrollViewRef,
+  guardianLoading = false,
+  guardianError,
+  socialHistoryLoading = false,
+  socialHistoryError,
+  onRetry,
+  onLoadGuardian,
+  onLoadSocialHistory,
 }) {
   const navigation = useNavigation();
-  
+
   // Only state that truly needs to be stateful
   const [activeSections, setActiveSections] = useState([]);
   const [unMaskedPatientNRIC, setUnMaskedPatientNRIC] = useState('');
   const [unMaskedGuardianNRIC, setUnMaskedGuardianNRIC] = useState('');
   const [unMasked2ndGuardianNRIC, setUnMasked2ndGuardianNRIC] = useState('');
 
+  useEffect(() => {
+    if (activeSections.includes(2)) {
+      onLoadGuardian?.();
+    }
+    if (activeSections.includes(3)) {
+      onLoadSocialHistory?.();
+    }
+  }, [activeSections, onLoadGuardian, onLoadSocialHistory]);
+
   // Social History list option lookups (used when API returns only list IDs)
-  const { data: liveWithOptions } = useGetSelectionOptions('livewith');
-  const { data: educationOptions } = useGetSelectionOptions('education');
-  const { data: occupationOptions } = useGetSelectionOptions('occupation');
-  const { data: religionOptions } = useGetSelectionOptions('religion');
-  const { data: petOptions } = useGetSelectionOptions('pet');
-  const { data: dietOptions } = useGetSelectionOptions('diet');
+  const needsSocialOptions = activeSections.includes(3);
+  const { data: liveWithOptions } = useGetSelectionOptions(
+    'livewith',
+    needsSocialOptions,
+  );
+  const { data: educationOptions } = useGetSelectionOptions(
+    'education',
+    needsSocialOptions,
+  );
+  const { data: occupationOptions } = useGetSelectionOptions(
+    'occupation',
+    needsSocialOptions,
+  );
+  const { data: religionOptions } = useGetSelectionOptions(
+    'religion',
+    needsSocialOptions,
+  );
+  const { data: petOptions } = useGetSelectionOptions(
+    'pet',
+    needsSocialOptions,
+  );
+  const { data: dietOptions } = useGetSelectionOptions(
+    'diet',
+    needsSocialOptions,
+  );
 
   // Memoized derived data - Patient Information
   const patientData = useMemo(() => {
@@ -76,26 +124,43 @@ function PatientInformationAccordion({
       return [];
     }
     const nric = pick(patientProfile.NRIC, patientProfile.nric);
-    
+
     // Format privacy level
     const getPrivacyLevelLabel = (level) => {
       // Handle null, undefined, or empty values - default to Medium (2)
       const defaultLevel = 2;
-      const levelNum = level != null && level !== '' ? parseInt(level) : defaultLevel;
-      
-      if (isNaN(levelNum)) return 'Medium'; // Fallback to Medium if parse fails
-      if (levelNum === 1) return 'Low';
-      if (levelNum === 2) return 'Medium';
-      if (levelNum === 3) return 'High';
+      const levelNum =
+        level != null && level !== '' ? parseInt(level, 10) : defaultLevel;
+
+      if (isNaN(levelNum)) {
+        return 'Medium';
+      } // Fallback to Medium if parse fails
+      if (levelNum === 1) {
+        return 'Low';
+      }
+      if (levelNum === 2) {
+        return 'Medium';
+      }
+      if (levelNum === 3) {
+        return 'High';
+      }
       return 'Medium'; // Default to Medium for any other value
     };
-    
+
     return [
       { label: 'First Name', value: patientProfile.firstName || '-' },
       { label: 'Last Name', value: patientProfile.lastName || '-' },
       { label: 'NRIC', value: nric ? maskNRIC(nric) : '-' },
       { label: 'DOB', value: patientProfile.dob || '-' },
-      { label: 'Gender', value: patientProfile.gender === 'F' ? 'FEMALE' : 'MALE' },
+      {
+        label: 'Gender',
+        value:
+          patientProfile.gender === 'F'
+            ? 'FEMALE'
+            : patientProfile.gender === 'M'
+            ? 'MALE'
+            : '-',
+      },
       { label: 'Address', value: patientProfile.address || '-' },
       { label: 'Home Number', value: patientProfile.homeNo || '-' },
       { label: 'Mobile Number', value: patientProfile.handphoneNo || '-' },
@@ -109,65 +174,82 @@ function PatientInformationAccordion({
             ? patientProfile.endDate
             : null,
       },
-      { label: 'Respite Care', value: patientProfile.isRespiteCare ? 'YES' : 'NO' },
-      { label: 'Privacy Level', value: getPrivacyLevelLabel(patientProfile.privacyLevel) },
+      {
+        label: 'Respite Care',
+        value: patientProfile.isRespiteCare ? 'YES' : 'NO',
+      },
+      {
+        label: 'Privacy Level',
+        value: getPrivacyLevelLabel(patientProfile.privacyLevel),
+      },
     ];
   }, [patientProfile]);
 
   // Memoized derived data - Patient Preferences
   const preferenceData = useMemo(() => {
-    if (!patientProfile) return [];
+    if (!patientProfile) {
+      return [];
+    }
     return [
       { label: 'Preferred name', value: patientProfile.preferredName || '-' },
-      { label: 'Preferred language', value: patientProfile.preferredLanguage || '-' },
+      {
+        label: 'Preferred language',
+        value: patientProfile.preferredLanguage || '-',
+      },
     ];
-  }, [patientProfile?.preferredName, patientProfile?.preferredLanguage]);
+  }, [patientProfile]);
 
   // Memoized derived data - Guardian Information
-  const { guardianInfoData, isSecondGuardian, secondGuardianInfoData } = useMemo(() => {
-    const result = {
-      guardianInfoData: [],
-      isSecondGuardian: false,
-      secondGuardianInfoData: [],
-    };
+  const { guardianInfoData, isSecondGuardian, secondGuardianInfoData } =
+    useMemo(() => {
+      const result = {
+        guardianInfoData: [],
+        isSecondGuardian: false,
+        secondGuardianInfoData: [],
+      };
 
-    if (guardianData?.guardian && Object.keys(guardianData.guardian).length > 0) {
-      const g = guardianData.guardian;
-      const fullName = [g.firstName, g.lastName].filter(Boolean).join(' ') || '-';
-      
-      result.guardianInfoData = [
-        { label: 'Guardian Name', value: fullName },
-        { label: 'Preferred Name', value: g.preferredName || '-' },
-        { label: 'NRIC', value: g.nric ? maskNRIC(g.nric) : '-' },
-        { label: "Patient's", value: g.relationship || '-' },
-        { label: 'Contact Number', value: g.contactNo || '-' },
-        { label: 'Address', value: g.address || '-' },
-        { label: 'Email', value: g.email || '-' },
-      ];
-    }
+      if (
+        guardianData?.guardian &&
+        Object.keys(guardianData.guardian).length > 0
+      ) {
+        const g = guardianData.guardian;
+        const fullName =
+          [g.firstName, g.lastName].filter(Boolean).join(' ') || '-';
 
-    if (
-      guardianData?.additionalGuardian?.nric != null &&
-      guardianData?.guardian &&
-      guardianData.additionalGuardian.nric !== guardianData.guardian.nric
-    ) {
-      result.isSecondGuardian = true;
-      const g2 = guardianData.additionalGuardian;
-      const fullName = [g2.firstName, g2.lastName].filter(Boolean).join(' ') || '-';
-      
-      result.secondGuardianInfoData = [
-        { label: 'Guardian Name', value: fullName },
-        { label: 'Preferred Name', value: g2.preferredName || '-' },
-        { label: 'NRIC', value: g2.nric ? maskNRIC(g2.nric) : '-' },
-        { label: "Patient's", value: g2.relationship || '-' },
-        { label: 'Contact Number', value: g2.contactNo || '-' },
-        { label: 'Address', value: g2.address || '-' },
-        { label: 'Email', value: g2.email || '-' },
-      ];
-    }
+        result.guardianInfoData = [
+          { label: 'Guardian Name', value: fullName },
+          { label: 'Preferred Name', value: g.preferredName || '-' },
+          { label: 'NRIC', value: g.nric ? maskNRIC(g.nric) : '-' },
+          { label: "Patient's", value: g.relationship || '-' },
+          { label: 'Contact Number', value: g.contactNo || '-' },
+          { label: 'Address', value: g.address || '-' },
+          { label: 'Email', value: g.email || '-' },
+        ];
+      }
 
-    return result;
-  }, [guardianData]);
+      if (
+        guardianData?.additionalGuardian?.nric != null &&
+        guardianData?.guardian &&
+        guardianData.additionalGuardian.nric !== guardianData.guardian.nric
+      ) {
+        result.isSecondGuardian = true;
+        const g2 = guardianData.additionalGuardian;
+        const fullName =
+          [g2.firstName, g2.lastName].filter(Boolean).join(' ') || '-';
+
+        result.secondGuardianInfoData = [
+          { label: 'Guardian Name', value: fullName },
+          { label: 'Preferred Name', value: g2.preferredName || '-' },
+          { label: 'NRIC', value: g2.nric ? maskNRIC(g2.nric) : '-' },
+          { label: "Patient's", value: g2.relationship || '-' },
+          { label: 'Contact Number', value: g2.contactNo || '-' },
+          { label: 'Address', value: g2.address || '-' },
+          { label: 'Email', value: g2.email || '-' },
+        ];
+      }
+
+      return result;
+    }, [guardianData]);
 
   // Memoized derived data - Social History
   const { socialHistoryInfo, isSocialHistoryEmpty } = useMemo(() => {
@@ -175,36 +257,51 @@ function PatientInformationAccordion({
     if (socialHistoryData === null) {
       return { socialHistoryInfo: [], isSocialHistoryEmpty: true };
     }
-    
-    const src = Array.isArray(socialHistoryData) ? socialHistoryData[0] : socialHistoryData;
+
+    const src = Array.isArray(socialHistoryData)
+      ? socialHistoryData[0]
+      : socialHistoryData;
     const isEmpty = !src || Object.keys(src).length === 0;
 
     if (isEmpty) {
       // Empty object {} means 404 not found - show message on left side
       // Note: Left side (label) may have different styling than right side (value) due to component design
-      return { 
-        socialHistoryInfo: [{ label: 'No social history found', value: '' }], 
-        isSocialHistoryEmpty: true 
+      return {
+        socialHistoryInfo: [{ label: 'No social history found', value: '' }],
+        isSocialHistoryEmpty: true,
       };
     }
 
-    const secondHandSmoker = src.secondhandSmoker ?? src.secondHandSmoker ?? src.SecondhandSmoker;
+    const secondHandSmoker =
+      src.secondhandSmoker ?? src.secondHandSmoker ?? src.SecondhandSmoker;
     const liveWithDesc =
       src.liveWithDescription ??
       src.LiveWithDescription ??
-      optionLabelById(liveWithOptions, src.liveWithListId ?? src.LiveWithListId);
+      optionLabelById(
+        liveWithOptions,
+        src.liveWithListId ?? src.LiveWithListId,
+      );
     const educationDesc =
       src.educationDescription ??
       src.EducationDescription ??
-      optionLabelById(educationOptions, src.educationListId ?? src.EducationListId);
+      optionLabelById(
+        educationOptions,
+        src.educationListId ?? src.EducationListId,
+      );
     const occupationDesc =
       src.occupationDescription ??
       src.OccupationDescription ??
-      optionLabelById(occupationOptions, src.occupationListId ?? src.OccupationListId);
+      optionLabelById(
+        occupationOptions,
+        src.occupationListId ?? src.OccupationListId,
+      );
     const religionDesc =
       src.religionDescription ??
       src.ReligionDescription ??
-      optionLabelById(religionOptions, src.religionListId ?? src.ReligionListId);
+      optionLabelById(
+        religionOptions,
+        src.religionListId ?? src.ReligionListId,
+      );
     const petDesc =
       src.petDescription ??
       src.PetDescription ??
@@ -223,12 +320,27 @@ function PatientInformationAccordion({
         { label: 'Religion', value: religionDesc || '-' },
         { label: 'Pet', value: petDesc || '-' },
         { label: 'Diet', value: dietDesc || '-' },
-        { label: 'Exercise', value: triStateLabel(src.exercise ?? src.Exercise) },
-        { label: 'Sexually active', value: triStateLabel(src.sexuallyActive ?? src.SexuallyActive) },
+        {
+          label: 'Exercise',
+          value: triStateLabel(src.exercise ?? src.Exercise),
+        },
+        {
+          label: 'Sexually active',
+          value: triStateLabel(src.sexuallyActive ?? src.SexuallyActive),
+        },
         { label: 'Drug use', value: triStateLabel(src.drugUse ?? src.DrugUse) },
-        { label: 'Caffeine use', value: triStateLabel(src.caffeineUse ?? src.CaffeineUse) },
-        { label: 'Alcohol use', value: triStateLabel(src.alcoholUse ?? src.AlcoholUse) },
-        { label: 'Tobacco use', value: triStateLabel(src.tobaccoUse ?? src.TobaccoUse) },
+        {
+          label: 'Caffeine use',
+          value: triStateLabel(src.caffeineUse ?? src.CaffeineUse),
+        },
+        {
+          label: 'Alcohol use',
+          value: triStateLabel(src.alcoholUse ?? src.AlcoholUse),
+        },
+        {
+          label: 'Tobacco use',
+          value: triStateLabel(src.tobaccoUse ?? src.TobaccoUse),
+        },
         { label: 'Secondhand smoker', value: triStateLabel(secondHandSmoker) },
       ],
     };
@@ -243,12 +355,15 @@ function PatientInformationAccordion({
   ]);
 
   // Memoized sections array
-  const sections = useMemo(() => [
-    { title: 'Patient Information', content: patientData },
-    { title: 'Patient Preferences', content: preferenceData },
-    { title: 'Guardian(s) Information', content: guardianInfoData },
-    { title: 'Social History', content: socialHistoryInfo },
-  ], [patientData, preferenceData, guardianInfoData, socialHistoryInfo]);
+  const sections = useMemo(
+    () => [
+      { title: 'Patient Information', content: patientData },
+      { title: 'Patient Preferences', content: preferenceData },
+      { title: 'Guardian(s) Information', content: guardianInfoData },
+      { title: 'Social History', content: socialHistoryInfo },
+    ],
+    [patientData, preferenceData, guardianInfoData, socialHistoryInfo],
+  );
 
   // Update unmasked NRICs when guardian data changes
   useEffect(() => {
@@ -260,21 +375,29 @@ function PatientInformationAccordion({
     }
   }, [guardianData]);
 
-  // Retrieve patient NRIC on focus
-  const retrievePatientNRIC = useCallback(async (id) => {
-    const response = await patientApi.getPatient(id, false);
-    if (!response.ok) {
-      console.log('Request failed with status code: ', response.status);
+  const patientInformationOpen = activeSections.includes(0);
+  // Retrieve reveal-only data when the patient-information section is opened.
+  useEffect(() => {
+    if (!patientInformationOpen) {
       return;
     }
-    setUnMaskedPatientNRIC(response.data.data.nric);
-  }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      retrievePatientNRIC(patientID);
-    }, [patientID, retrievePatientNRIC]),
-  );
+    let active = true;
+    requestDeadline(patientApi.getPatient(patientID, false))
+      .then((response) => {
+        if (active && response?.ok) {
+          const patient = response.data?.data;
+          const returnedId =
+            patient?.patientID ?? patient?.patientId ?? patient?.id;
+          if (String(returnedId) === String(patientID)) {
+            setUnMaskedPatientNRIC(patient.nric || '');
+          }
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [patientID, patientInformationOpen]);
 
   // Memoized navigation handlers
   const handlePatientInfoOnPress = useCallback(() => {
@@ -293,7 +416,10 @@ function PatientInformationAccordion({
     if (guardianData?.guardian) {
       navigation.push(routes.EDIT_PATIENT_GUARDIAN, {
         guardianProfile: guardianData.guardian,
-        patientID: patientProfile?.patientID || patientProfile?.patientId || patientProfile?.PatientID,
+        patientID:
+          patientProfile?.patientID ||
+          patientProfile?.patientId ||
+          patientProfile?.PatientID,
       });
     }
   }, [navigation, guardianData, patientProfile]);
@@ -302,13 +428,18 @@ function PatientInformationAccordion({
     if (guardianData?.additionalGuardian) {
       navigation.push(routes.EDIT_PATIENT_GUARDIAN, {
         guardianProfile: guardianData.additionalGuardian,
-        patientID: patientProfile?.patientID || patientProfile?.patientId || patientProfile?.PatientID,
+        patientID:
+          patientProfile?.patientID ||
+          patientProfile?.patientId ||
+          patientProfile?.PatientID,
       });
     }
   }, [navigation, guardianData, patientProfile]);
 
   const handlePatientSocialHistOnPress = useCallback(() => {
-    const src = Array.isArray(socialHistoryData) ? socialHistoryData[0] : socialHistoryData;
+    const src = Array.isArray(socialHistoryData)
+      ? socialHistoryData[0]
+      : socialHistoryData;
 
     if (!src || Object.keys(src).length === 0) {
       navigation.push(routes.EDIT_PATIENT_SOCIALHIST, {
@@ -323,22 +454,34 @@ function PatientInformationAccordion({
       liveWithDescription:
         src?.liveWithDescription ??
         src?.LiveWithDescription ??
-        optionLabelById(liveWithOptions, src?.liveWithListId ?? src?.LiveWithListId) ??
+        optionLabelById(
+          liveWithOptions,
+          src?.liveWithListId ?? src?.LiveWithListId,
+        ) ??
         '',
       educationDescription:
         src?.educationDescription ??
         src?.EducationDescription ??
-        optionLabelById(educationOptions, src?.educationListId ?? src?.EducationListId) ??
+        optionLabelById(
+          educationOptions,
+          src?.educationListId ?? src?.EducationListId,
+        ) ??
         '',
       occupationDescription:
         src?.occupationDescription ??
         src?.OccupationDescription ??
-        optionLabelById(occupationOptions, src?.occupationListId ?? src?.OccupationListId) ??
+        optionLabelById(
+          occupationOptions,
+          src?.occupationListId ?? src?.OccupationListId,
+        ) ??
         '',
       religionDescription:
         src?.religionDescription ??
         src?.ReligionDescription ??
-        optionLabelById(religionOptions, src?.religionListId ?? src?.ReligionListId) ??
+        optionLabelById(
+          religionOptions,
+          src?.religionListId ?? src?.ReligionListId,
+        ) ??
         '',
       petDescription:
         src?.petDescription ??
@@ -351,7 +494,10 @@ function PatientInformationAccordion({
         optionLabelById(dietOptions, src?.dietListId ?? src?.DietListId) ??
         '',
       secondhandSmoker:
-        src?.secondhandSmoker ?? src?.secondHandSmoker ?? src?.SecondhandSmoker ?? null,
+        src?.secondhandSmoker ??
+        src?.secondHandSmoker ??
+        src?.SecondhandSmoker ??
+        null,
     };
 
     navigation.push(routes.EDIT_PATIENT_SOCIALHIST, {
@@ -370,49 +516,58 @@ function PatientInformationAccordion({
     dietOptions,
   ]);
 
-  const handleOnPress = useCallback((title) => {
-    switch (title) {
-      case 'Patient Information':
-        return handlePatientInfoOnPress;
-      case 'Patient Preferences':
-        return handlePatientPrefOnPress;
-      case 'Guardian(s) Information':
-        return handlePatientGuardianOnPress;
-      case 'Guardian 2':
-        return handlePatientSecondGuardianOnPress;
-      case 'Social History':
-        return handlePatientSocialHistOnPress;
-      default:
-        return null;
-    }
-  }, [
-    handlePatientInfoOnPress,
-    handlePatientPrefOnPress,
-    handlePatientGuardianOnPress,
-    handlePatientSecondGuardianOnPress,
-    handlePatientSocialHistOnPress,
-  ]);
+  const handleOnPress = useCallback(
+    (title) => {
+      switch (title) {
+        case 'Patient Information':
+          return handlePatientInfoOnPress;
+        case 'Patient Preferences':
+          return handlePatientPrefOnPress;
+        case 'Guardian(s) Information':
+          return handlePatientGuardianOnPress;
+        case 'Guardian 2':
+          return handlePatientSecondGuardianOnPress;
+        case 'Social History':
+          return handlePatientSocialHistOnPress;
+        default:
+          return null;
+      }
+    },
+    [
+      handlePatientInfoOnPress,
+      handlePatientPrefOnPress,
+      handlePatientGuardianOnPress,
+      handlePatientSecondGuardianOnPress,
+      handlePatientSocialHistOnPress,
+    ],
+  );
 
-  const handleOnChange = useCallback((newSections) => {
-    setActiveSections(newSections);
+  const handleOnChange = useCallback(
+    (newSections) => {
+      setActiveSections(newSections);
 
-    if (scrollViewRef?.current) {
-      scrollViewRef.current.scrollTo({ y: 2000, animated: true });
-    }
-  }, [scrollViewRef]);
+      if (scrollViewRef?.current) {
+        scrollViewRef.current.scrollTo({ y: 2000, animated: true });
+      }
+    },
+    [scrollViewRef],
+  );
 
-  const getUnmaskedNRIC = useCallback((title) => {
-    switch (title) {
-      case 'Patient Information':
-        return unMaskedPatientNRIC;
-      case 'Guardian(s) Information':
-        return unMaskedGuardianNRIC;
-      case 'Guardian 2':
-        return unMasked2ndGuardianNRIC;
-      default:
-        return null;
-    }
-  }, [unMaskedPatientNRIC, unMaskedGuardianNRIC, unMasked2ndGuardianNRIC]);
+  const getUnmaskedNRIC = useCallback(
+    (title) => {
+      switch (title) {
+        case 'Patient Information':
+          return unMaskedPatientNRIC;
+        case 'Guardian(s) Information':
+          return unMaskedGuardianNRIC;
+        case 'Guardian 2':
+          return unMasked2ndGuardianNRIC;
+        default:
+          return null;
+      }
+    },
+    [unMaskedPatientNRIC, unMaskedGuardianNRIC, unMasked2ndGuardianNRIC],
+  );
 
   // Memoized render functions
   const renderHeader = useCallback((section, _, isActive) => {
@@ -431,43 +586,79 @@ function PatientInformationAccordion({
     );
   }, []);
 
-  const renderContent = useCallback((section) => {
-    return (
-      <View
-        testID={`accordion_${section.title.replace(/\s+/g, '_')}_content`}
-        style={styles.accordBody}
-      >
-        <InformationCard
-          title={section.title}
-          subtitle={
-            section.title === 'Guardian(s) Information' && isSecondGuardian
-              ? 'Guardian 1'
-              : null
-          }
-          displayData={section.content}
-          handleOnPress={handleOnPress(section.title)}
-          unMaskedNRIC={getUnmaskedNRIC(section.title)}
-          buttonTitle={section.title === 'Social History' && isSocialHistoryEmpty ? 'ADD' : null}
-        />
-        {section.title === 'Guardian(s) Information' && isSecondGuardian ? (
+  const renderContent = useCallback(
+    (section) => {
+      const loading =
+        section.title === 'Guardian(s) Information'
+          ? guardianLoading
+          : section.title === 'Social History'
+          ? socialHistoryLoading
+          : false;
+      const error =
+        section.title === 'Guardian(s) Information'
+          ? guardianError
+          : section.title === 'Social History'
+          ? socialHistoryError
+          : null;
+      if (loading || error) {
+        return (
+          <View style={styles.accordBody}>
+            <Text accessibilityRole={error ? 'alert' : undefined}>
+              {loading ? `Loading ${section.title.toLowerCase()}...` : error}
+            </Text>
+            {error && onRetry ? (
+              <Button onPress={onRetry}>Try Again</Button>
+            ) : null}
+          </View>
+        );
+      }
+      return (
+        <View
+          testID={`accordion_${section.title.replace(/\s+/g, '_')}_content`}
+          style={styles.accordBody}
+        >
           <InformationCard
             title={section.title}
-            subtitle={'Guardian 2'}
-            displayData={secondGuardianInfoData}
-            handleOnPress={handlePatientSecondGuardianOnPress}
-            unMaskedNRIC={getUnmaskedNRIC('Guardian 2')}
+            subtitle={
+              section.title === 'Guardian(s) Information' && isSecondGuardian
+                ? 'Guardian 1'
+                : null
+            }
+            displayData={section.content}
+            handleOnPress={handleOnPress(section.title)}
+            unMaskedNRIC={getUnmaskedNRIC(section.title)}
+            buttonTitle={
+              section.title === 'Social History' && isSocialHistoryEmpty
+                ? 'ADD'
+                : null
+            }
           />
-        ) : null}
-      </View>
-    );
-  }, [
-    isSecondGuardian,
-    isSocialHistoryEmpty,
-    secondGuardianInfoData,
-    handleOnPress,
-    getUnmaskedNRIC,
-    handlePatientSecondGuardianOnPress,
-  ]);
+          {section.title === 'Guardian(s) Information' && isSecondGuardian ? (
+            <InformationCard
+              title={section.title}
+              subtitle={'Guardian 2'}
+              displayData={secondGuardianInfoData}
+              handleOnPress={handlePatientSecondGuardianOnPress}
+              unMaskedNRIC={getUnmaskedNRIC('Guardian 2')}
+            />
+          ) : null}
+        </View>
+      );
+    },
+    [
+      guardianLoading,
+      guardianError,
+      socialHistoryLoading,
+      socialHistoryError,
+      onRetry,
+      isSecondGuardian,
+      isSocialHistoryEmpty,
+      secondGuardianInfoData,
+      handleOnPress,
+      getUnmaskedNRIC,
+      handlePatientSecondGuardianOnPress,
+    ],
+  );
 
   return (
     <Accordion
@@ -488,7 +679,6 @@ const styles = StyleSheet.create({
   },
   accordHeader: {
     padding: 12,
-    backgroundColor: '#eee',
     color: '#eee',
     flex: 1,
     flexDirection: 'row',

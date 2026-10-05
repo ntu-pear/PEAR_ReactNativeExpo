@@ -11,21 +11,26 @@ const v1 = {
   getUser: '/user/get_user/',
   changePassword: '/user/change_password/',
   requestReset: '/user/request_reset_password/',
-  resetPassword: (token) => `/user/reset_user_password/${encodeURIComponent(token)}`,
+  resetPassword: (token) =>
+    `/user/reset_user_password/${encodeURIComponent(token)}`,
   logout: '/logout/',
-  updateUser: '/user/update_user/',                 
-  uploadProfilePic: '/user/upload_profile_pic/',   
-  getProfilePic: '/user/profile_pic/',              
-  deleteProfilePic: '/user/delete_profile_pic/',    
-  rolesName: '/roles_name/',                        
-  resendRegistrationEmail: '/user/request/resend_registration_email', 
-  requestOtp: '/request-otp/',                      
+  updateUser: '/user/update_user/',
+  uploadProfilePic: '/user/upload_profile_pic/',
+  getProfilePic: '/user/profile_pic/',
+  deleteProfilePic: '/user/delete_profile_pic/',
+  rolesName: '/roles_name/',
+  resendRegistrationEmail: '/user/request/resend_registration_email',
+  requestOtp: '/request-otp/',
   verifyOtp: '/verify-otp/',
   activeStaff: '/supervisor/get_active_staff',
   usernameById: (userId) => `/user/username/${encodeURIComponent(userId)}`,
 };
 const audit = (label, obj) => {
-  try { console.log(label, JSON.stringify(obj)); } catch { console.log(label, obj); }
+  try {
+    console.log(label, JSON.stringify(obj));
+  } catch {
+    console.log(label, obj);
+  }
 };
 
 // **********************  GET REQUESTS *************************
@@ -67,17 +72,19 @@ const buildStaffNameMap = async () => {
 // **********************  POST REQUESTS *************************
 
 export const loginUser = async ({ email, role, password }) => {
-  console.log('[loginUser] called with:', { email, role, password });
-
   // --- Fix for React Native (no URLSearchParams support) ---
-  const form = `username=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&grant_type=password`;
+  const form = `username=${encodeURIComponent(
+    email,
+  )}&password=${encodeURIComponent(password)}&grant_type=password`;
 
   const resp = await client.post(v1.login, form, {
     baseURL: V1_BASE,
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
   });
 
-  if (!resp.ok) return resp;
+  if (!resp.ok) {
+    return resp;
+  }
 
   const data = resp.data || {};
 
@@ -86,7 +93,8 @@ export const loginUser = async ({ email, role, password }) => {
     data.accessToken ||
     data.token ||
     data.access_token ||
-    (data.data && (data.data.accessToken || data.data.token || data.data.access_token));
+    (data.data &&
+      (data.data.accessToken || data.data.token || data.data.access_token));
 
   const v1Refresh =
     data.refreshToken ||
@@ -94,45 +102,66 @@ export const loginUser = async ({ email, role, password }) => {
     (data.data && (data.data.refreshToken || data.data.refresh_token));
 
   if (!v1Access) {
-    console.log('loginUser(v1): NO ACCESS TOKEN — keys:', Object.keys(data || {}));
+    console.log(
+      'loginUser(v1): NO ACCESS TOKEN — keys:',
+      Object.keys(data || {}),
+    );
     return { ...resp, ok: false, problem: 'NO_ACCESS_TOKEN' };
   }
 
   // Store under v1-specific keys
   await authStorage.storeToken('userAuthTokenV1', v1Access);
-  if (v1Refresh) await authStorage.storeToken('userRefreshTokenV1', v1Refresh);
+  if (v1Refresh) {
+    await authStorage.storeToken('userRefreshTokenV1', v1Refresh);
+  }
 
   // Set header for future v1 calls
   client.setHeaders({ Authorization: `Bearer ${v1Access}` });
-  console.log('AUTH HEADER NOW:', client.axiosInstance?.defaults?.headers?.common?.Authorization);
 
   return resp;
 };
 
 /* Forgot password (request email with reset link) */
-const requestResetPassword = async ({ nric, email, roleName, nric_DateOfBirth }) => {
+const requestResetPassword = async ({
+  nric,
+  email,
+  roleName,
+  nric_DateOfBirth,
+}) => {
   const mkBody = (r) => {
     const b = {
       nric: (nric || '').trim().toUpperCase(),
-      email: (email || '').trim(),      // keep as stored
-      roleName: (r || '').trim(),       // send as selected
+      email: (email || '').trim(), // keep as stored
+      roleName: (r || '').trim(), // send as selected
     };
-    if (nric_DateOfBirth) b.nric_DateOfBirth = nric_DateOfBirth; // YYYY-MM-DD
+    if (nric_DateOfBirth) {
+      b.nric_DateOfBirth = nric_DateOfBirth;
+    } // YYYY-MM-DD
     return b;
   };
 
   // 1) try as-is
   let body = mkBody(roleName);
-  console.log('[REQUEST RESET v1] →', V1_BASE + v1.requestReset, JSON.stringify(body));
+  console.log(
+    '[REQUEST RESET v1] →',
+    V1_BASE + v1.requestReset,
+    JSON.stringify(body),
+  );
   let resp = await client.post(v1.requestReset, body, { baseURL: V1_BASE });
-  if (resp?.ok) return resp;
+  if (resp?.ok) {
+    return resp;
+  }
 
   // 2) if "Invalid Details", retry once with UPPERCASE role (common enum strictness)
   const msg = resp?.data?.detail || resp?.data?.message || '';
   const isNotFound = typeof msg === 'string' && /invalid\s*details/i.test(msg);
   if (isNotFound && roleName !== roleName.toUpperCase()) {
     body = mkBody(roleName.toUpperCase()); // "SUPERVISOR"
-    console.log('[REQUEST RESET v1][retry role ↑] →', V1_BASE + v1.requestReset, JSON.stringify(body));
+    console.log(
+      '[REQUEST RESET v1][retry role ↑] →',
+      V1_BASE + v1.requestReset,
+      JSON.stringify(body),
+    );
     resp = await client.post(v1.requestReset, body, { baseURL: V1_BASE });
   }
 
@@ -143,12 +172,16 @@ const resetPassword = (token, { newPassword, confirmPassword }) =>
   client.put(
     v1.resetPassword(token),
     { newPassword, confirmPassword },
-    { baseURL: V1_BASE }
+    { baseURL: V1_BASE },
   );
 
 /* ======================= PUT / UPDATE ======================= */
 
-const changePassword = async (currentPassword, newPassword, confirmPassword) => {
+const changePassword = async (
+  currentPassword,
+  newPassword,
+  confirmPassword,
+) => {
   const token = await authStorage.getToken('userAuthTokenV1');
 
   return client.put(
@@ -161,12 +194,11 @@ const changePassword = async (currentPassword, newPassword, confirmPassword) => 
     {
       baseURL: V1_BASE,
       headers: {
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 };
-
 
 //API for updateUser
 const updateUserV1 = async (data) =>
@@ -194,15 +226,23 @@ const deleteProfilePicV1 = () =>
 const v1GetRoleNames = (page = 0, page_size = 50) =>
   client.get(v1.rolesName, { page, page_size }, { baseURL: V1_BASE });
 
-const resendRegistrationEmailV1 = ({ nric, email, roleName, nric_DateOfBirth }) =>
+const resendRegistrationEmailV1 = ({
+  nric,
+  email,
+  roleName,
+  nric_DateOfBirth,
+}) =>
   client.post(
     v1.resendRegistrationEmail,
     { nric, email, roleName, nric_DateOfBirth },
-    { baseURL: V1_BASE }
+    { baseURL: V1_BASE },
   );
 
 const requestOtpV1 = (user_email) =>
-  client.post(v1.requestOtp, null, { baseURL: V1_BASE, params: { user_email } });
+  client.post(v1.requestOtp, null, {
+    baseURL: V1_BASE,
+    params: { user_email },
+  });
 
 const verifyOtpV1 = (user_email, code) =>
   client.get(v1.verifyOtp, { user_email, code }, { baseURL: V1_BASE });
