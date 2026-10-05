@@ -1,90 +1,94 @@
-// Base
-import React, { useState, useEffect, useCallback } from 'react';
-
-// Local Cache
+import { useEffect, useState } from 'react';
 import {
   getSelectionOptionCache,
   setSelectionOptionsCache,
 } from 'app/datastore/selectionDataCache';
-
-// API
 import listApi from 'app/api/list';
-import useApi from 'app/hooks/useApi';
+import requestDeadline from 'app/utility/requestDeadline';
 import { beginQaTiming, markQaTiming } from 'app/utility/qaProfileTiming';
-/*
-    This hook is used to get the list options for the input selection field component
-    it formats and returns [{label: xxx, value: yyy}, ...] suitable for use in SelectionInputField component
-*/
-export default function useGetSelectionOptions(option, enabled = true) {
-  const [data, setData] = useState([]);
-  const [isError, setIsError] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const apiFunction = useApi(listApi.getSelectionOptionList);
-  let extractedObjects = [];
 
-  // function to get data from API -> used only when no previous instance is cached.
-  const getSelectionOptions = useCallback(async () => {
-    setIsError(false);
-    setIsLoading(true);
-    // Check if there is exist a cached value in selectionDataCache.
-    const storedData = getSelectionOptionCache(option);
-    // Call API if there is no cached value.
-    if (storedData === null || storedData === undefined) {
-      const requestTiming = beginQaTiming('selection-read');
+// The cache contains selection vocabulary, never patient records.
+export default function useGetSelectionOptions(option, enabled = true) {
+  const [state, setState] = useState({
+    option,
+    data: [],
+    isError: false,
+    isLoading: false,
+  });
+
+  useEffect(() => {
+    let active = true;
+    if (!enabled) {
+      setState((previous) => {
+        if (
+          previous.option === option &&
+          !previous.isError &&
+          !previous.isLoading
+        )
+          return previous;
+        return {
+          option,
+          data: previous.option === option ? previous.data : [],
+          isError: false,
+          isLoading: false,
+        };
+      });
+      return () => {
+        active = false;
+      };
+    }
+
+    const load = async () => {
+      let timing;
       try {
-        const response = await apiFunction.request(option);
-        markQaTiming(requestTiming, 'response', {
+        const cached = getSelectionOptionCache(option);
+        if (cached !== null && cached !== undefined) {
+          if (active)
+            setState({
+              option,
+              data: cached,
+              isError: false,
+              isLoading: false,
+            });
+          return;
+        }
+        setState({ option, data: [], isError: false, isLoading: true });
+        timing = beginQaTiming('selection-read');
+        const response = await requestDeadline(
+          listApi.getSelectionOptionList(option),
+        );
+        markQaTiming(timing, 'response', {
           status: response?.status,
           requestDurationMs: response?.duration,
         });
-
-        // Handle API failure or empty response gracefully
-        if (!response.ok || !response.data || !response.data.data) {
-          setIsError(true);
-          setIsLoading(false);
+        if (!active) return;
+        if (!response?.ok || !Array.isArray(response.data?.data)) {
+          setState({ option, data: [], isError: true, isLoading: false });
           return;
         }
-
-        const responseData = response.data.data;
-        // console.log('response data = ');
-        // console.log(responseData);
-        responseData.map((object) => {
-          /* response have inconsistent key name for ID (e.g: list_RelationshipID, list_EducationID)
-             but have consistent position i.e: required value is always in position 0
-             after extracting the values(only!) from each object in responseData.
-          */
-          const valuesArray = Object.values(object);
-          const id = valuesArray[0];
-          const value = object.value;
-          const extractedObject = { label: value, value: id };
-          extractedObjects.push(extractedObject);
-        });
-        setData(extractedObjects);
-        // store the data locally after retrieval
-        try {
-          // await AsyncStorage.setItem(option, JSON.stringify(extractedObjects));
-          setSelectionOptionsCache(option, extractedObjects);
-        } catch (error) {
-          setIsError(error);
-          setIsLoading(false);
-        }
+        const data = response.data.data.map((entry) => ({
+          label: entry.value,
+          value: Object.values(entry)[0],
+        }));
+        setSelectionOptionsCache(option, data);
+        setState({ option, data, isError: false, isLoading: false });
       } catch (error) {
-        markQaTiming(requestTiming, 'error');
-        setIsError(error);
+        if (timing) markQaTiming(timing, 'error');
+        if (active)
+          setState({ option, data: [], isError: error, isLoading: false });
       }
-    } else {
-      setData(storedData);
-    }
-    setIsLoading(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [option]);
-
-  useEffect(() => {
-    if (enabled) {
-      getSelectionOptions();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    };
+    load();
+    return () => {
+      active = false;
+    };
   }, [option, enabled]);
-  // console.log(data);
-  return { data, isLoading, isError };
+
+  return state.option === option
+    ? {
+        data: state.data,
+        isError: state.isError,
+        isLoading: enabled && state.isLoading,
+      }
+    : { data: [], isError: false, isLoading: enabled };
 }

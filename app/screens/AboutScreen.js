@@ -26,9 +26,9 @@ function AboutScreen(props) {
             style={styles.logo}
           />
           <Text style={styles.text}>
-            PEAR staging test build.
+            PEAR Mobile App.
             {'\n\n\n'}
-            Version: 1.0.5-qa.20261005
+            Version: 1.0.6
             {'\n\n'}
             Build Date: 5 October 2026
           </Text>

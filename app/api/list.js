@@ -20,7 +20,11 @@ const v1EndpointMap = {
 };
 
 // Helper for Patient Service v1 base
-const withPatientV1Base = (cfg = {}) => ({ baseURL: PATIENT_V1_BASE, timeout: 15000, ...cfg });
+const withPatientV1Base = (cfg = {}) => ({
+  baseURL: PATIENT_V1_BASE,
+  timeout: 15000,
+  ...cfg,
+});
 
 /*
  * List all functions here
@@ -45,12 +49,20 @@ const getSelectionOptionList = async (option) => {
     try {
       // Some v1 endpoints are paginated; request a larger page size when using `/get_*` routes.
       const paginationParams = { pageNo: 0, pageSize: 200 };
-      const queryParams = v1Endpoint.startsWith('/get_') ? paginationParams : {};
-      const res = await client.get(v1Endpoint, queryParams, withPatientV1Base());
+      const queryParams = v1Endpoint.startsWith('/get_')
+        ? paginationParams
+        : {};
+      const res = await client.get(
+        v1Endpoint,
+        queryParams,
+        withPatientV1Base(),
+      );
 
       if (res.ok && res.data) {
         // v1 endpoints can return either an array or a paginated wrapper with `data`/`results`
-        const rawData = Array.isArray(res.data) ? res.data : (res.data.data ?? res.data.results ?? []);
+        const rawData = Array.isArray(res.data)
+          ? res.data
+          : res.data.data ?? res.data.results ?? [];
 
         const toLegacyIdValue = (item) => {
           // Prefer specific keys where we know them, otherwise fall back.
@@ -84,6 +96,7 @@ const getSelectionOptionList = async (option) => {
         };
 
         return {
+          ...res,
           ok: true,
           data: {
             data: rawData.map((item) => {

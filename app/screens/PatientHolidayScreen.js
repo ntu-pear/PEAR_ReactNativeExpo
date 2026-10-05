@@ -614,7 +614,13 @@ function PatientHoliday(props) {
         refreshing={isLoading}
         height={'70%'}
         ListEmptyComponent={() =>
-          noDataMessage(statusCode, isLoading, isError, 'No albums found', true)
+          noDataMessage(
+            statusCode,
+            isLoading,
+            isError,
+            'No holidays found',
+            true,
+          )
         }
         data={photoData}
         keyboardShouldPersistTaps="handled"

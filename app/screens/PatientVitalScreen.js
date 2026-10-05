@@ -5,7 +5,7 @@ import { FlatList, View } from 'native-base';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 // API
-import patientApi from 'app/api/patient';
+import patientApi, { normalizePatientV1 } from 'app/api/patient';
 const {
   listPatientVitalsV1,
   addPatientVitalV1,
@@ -13,7 +13,6 @@ const {
   deletePatientVitalV1,
   readPatientV1,
 } = patientApi;
-
 
 // Utilities
 import {
@@ -40,20 +39,6 @@ import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUn
 import DynamicTable from 'app/components/DynamicTable';
 import PatientVitalItem from 'app/components/PatientVitalItem';
 import AddPatientVitalModalNEW from 'app/components/AddPatientVitalModalNEW';
-
-
-// --- helper: safely extract v1 patient fields ---
-const normalizePatientV1 = (p = {}) => ({
-  patientID: p.id,
-  firstName: p.first_name || '',
-  lastName: p.last_name || '',
-  preferredName: p.preferred_name || '',
-  profilePicture: p.profile_picture || null,
-  isActive: p.is_active ?? true,
-  startDate: p.start_date || null,
-  caregiverName: p.caregiver_name || null,
-});
-
 
 function PatientVitalScreen(props) {
   let { patientID, patientId } = props.route.params;
@@ -150,10 +135,10 @@ function PatientVitalScreen(props) {
 
   const getVitalData = async () => {
     if (!patientID) return;
-  
+
     try {
       const resOrRows = await listPatientVitalsV1(patientID);
-  
+
       // Handle both shapes: array or { ok, data, status }
       let rows;
       if (Array.isArray(resOrRows)) {
@@ -164,9 +149,14 @@ function PatientVitalScreen(props) {
         rows = Array.isArray(payload) ? payload : [];
         setStatusCode(resOrRows.status ?? 200);
       } else {
-        throw resOrRows || { status: 500, data: { detail: 'Unknown vitals response' } };
+        throw (
+          resOrRows || {
+            status: 500,
+            data: { detail: 'Unknown vitals response' },
+          }
+        );
       }
-  
+
       // Normalize + make Date a guaranteed string (prevents .toLowerCase() crash)
       const normalized = rows.map((x) => ({
         vitalID: x.vitalID ?? x.id ?? x.vital_id ?? null,
@@ -177,18 +167,19 @@ function PatientVitalScreen(props) {
         diastolicBP: x.diastolicBP ?? x.DiastolicBP ?? x.diastolic_bp ?? '',
         heartRate: x.heartRate ?? x.HeartRate ?? x.heart_rate ?? '',
         spO2: x.spO2 ?? x.SpO2 ?? '',
-        bloodSugarlevel: x.bloodSugarlevel ?? x.bloodSugarLevel ?? x.blood_sugar_level ?? '',
+        bloodSugarlevel:
+          x.bloodSugarlevel ?? x.bloodSugarLevel ?? x.blood_sugar_level ?? '',
         vitalRemarks: x.vitalRemarks ?? x.VitalRemarks ?? '',
         afterMeal: x.afterMeal ?? x.AfterMeal ?? false,
         createdDateTime: String(
           x.createdDateTime ??
-          x.CreatedDateTime ??
-          x.created_at ??
-          x.date ??
-          ''
+            x.CreatedDateTime ??
+            x.created_at ??
+            x.date ??
+            '',
         ),
       }));
-  
+
       setOriginalVitalData(normalized);
       setVitalData(normalized);
       setIsDataInitialized(true);
@@ -205,12 +196,14 @@ function PatientVitalScreen(props) {
       setIsRetry(true);
     }
   };
-  
-  
+
   const getPatientData = async () => {
     if (patientID) {
       // ONLY CHANGE: use new Patient Service for header + normalize
-      const response = await readPatientV1(patientID, { require_auth: true, mask: true });
+      const response = await readPatientV1(patientID, {
+        require_auth: true,
+        mask: true,
+      });
       if (response.ok) {
         const raw = response.data?.data ?? response.data ?? {};
         setPatientData(normalizePatientV1(raw));
@@ -248,7 +241,7 @@ function PatientVitalScreen(props) {
       ...tempVitalFormData,
       bloodSugarLevel: tempVitalFormData.bloodSugarlevel,
     });
-    
+
     if (result.ok) {
       console.log('submitted vital data', tempVitalFormData);
       refreshVitalData();
@@ -287,7 +280,7 @@ function PatientVitalScreen(props) {
       ...vitalFormData,
       bloodSugarLevel: vitalFormData.bloodSugarlevel,
     });
-    
+
     if (result.ok) {
       refreshVitalData();
       setIsModalVisible(false);
@@ -471,14 +464,12 @@ function PatientVitalScreen(props) {
           }
           data={vitalData}
           keyboardShouldPersistTaps="handled"
-          keyExtractor={(item) => String(item.vitalID)} 
+          keyExtractor={(item) => String(item.vitalID)}
           renderItem={({ item }) => {
             return (
               <Swipeable
                 setIsScrolling={setIsScrolling}
-                onSwipeRight={() =>
-                  handleDeleteVital(item.vitalID)
-                }
+                onSwipeRight={() => handleDeleteVital(item.vitalID)}
                 onSwipeLeft={() => handleEditVital(item.vitalID)}
                 underlay={<EditDeleteUnderlay />}
                 item={
@@ -499,9 +490,7 @@ function PatientVitalScreen(props) {
                       vitalRemarks={item.vitalRemarks}
                       afterMeal={item.afterMeal}
                       createdDateTime={item.createdDateTime}
-                      onDelete={() =>
-                        handleDeleteVital(item.vitalID)
-                      }
+                      onDelete={() => handleDeleteVital(item.vitalID)}
                     />
                   </TouchableOpacity>
                 }
