@@ -1,5 +1,8 @@
 import { currentUserId } from 'app/utility/medicationAdminister';
-import { opaqueId } from 'app/utility/patientFieldPolicy';
+import {
+  opaqueId,
+  uppercasePersonFields,
+} from 'app/utility/patientFieldPolicy';
 
 export const canEditGuardian = (user) =>
   ['SUPERVISOR', 'CAREGIVER'].includes(
@@ -51,7 +54,7 @@ export const buildGuardianUpdate = ({ guardian, edits, patientId, user }) => {
     throw new Error('Contact number and relationship are required.');
   // The endpoint is a full update: preserve identity, status and login linkage
   // from a fresh read, not defaults or the profile display projection.
-  return {
+  return uppercasePersonFields({
     active: guardian.active,
     firstName: guardian.firstName,
     lastName: guardian.lastName,
@@ -69,7 +72,7 @@ export const buildGuardianUpdate = ({ guardian, edits, patientId, user }) => {
     ModifiedById: String(currentUserId(user)),
     patientId: opaqueId(patientId),
     relationshipName: edits.relationshipName.trim(),
-  };
+  });
 };
 
 export const buildPrimaryGuardianUpdate = ({

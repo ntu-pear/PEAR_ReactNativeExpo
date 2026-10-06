@@ -165,3 +165,92 @@ test('doctor role does not load or mutate guardian editing data', async () => {
   expect(guardianApi.updateGuardian).not.toHaveBeenCalled();
   tree.unmount();
 });
+
+test('uppercase guardian persistence verification accepts the canonical address read back', async () => {
+  const tree = await render();
+  await act(async () =>
+    tree.root
+      .findByProps({ testID: 'guardian-edit-address' })
+      .props.onChangeText('new synthetic road'),
+  );
+  guardianApi.getPatientGuardian
+    .mockResolvedValueOnce(response())
+    .mockResolvedValueOnce({
+      ...response(),
+      data: {
+        ...response().data,
+        patient_guardians: [
+          {
+            patient_guardian: { ...guardian, address: 'NEW SYNTHETIC ROAD' },
+            relationshipName: 'Child',
+          },
+        ],
+      },
+    });
+  await act(async () =>
+    tree.root
+      .findByProps({ testID: 'guardian-edit-save', disabled: false })
+      .props.onPress(),
+  );
+  expect(guardianApi.updateGuardian).toHaveBeenCalledWith(
+    expect.objectContaining({
+      address: 'NEW SYNTHETIC ROAD',
+      nric: guardian.nric,
+      guardianApplicationUserId: guardian.guardianApplicationUserId,
+      ModifiedById: 'TEST-ACTOR',
+    }),
+    2,
+  );
+  expect(Alert.alert).toHaveBeenCalledWith(
+    'Saved successfully',
+    expect.stringContaining('verified'),
+    expect.any(Array),
+  );
+  tree.unmount();
+});
+
+test('a successful guardian read with the wrong address remains uncertain and blocks replay', async () => {
+  const tree = await render();
+  await act(async () =>
+    tree.root
+      .findByProps({ testID: 'guardian-edit-address' })
+      .props.onChangeText('expected synthetic street'),
+  );
+  guardianApi.getPatientGuardian
+    .mockResolvedValueOnce(response())
+    .mockResolvedValueOnce({
+      ...response(),
+      data: {
+        ...response().data,
+        patient_guardians: [
+          {
+            patient_guardian: {
+              ...guardian,
+              address: 'GENUINELY DIFFERENT STREET',
+            },
+            relationshipName: 'Child',
+          },
+        ],
+      },
+    });
+  await act(async () =>
+    tree.root
+      .findByProps({ testID: 'guardian-edit-save', disabled: false })
+      .props.onPress(),
+  );
+  expect(guardianApi.updateGuardian).toHaveBeenCalledWith(
+    expect.objectContaining({ address: 'EXPECTED SYNTHETIC STREET' }),
+    2,
+  );
+  expect(Alert.alert).not.toHaveBeenCalled();
+  expect(
+    tree.root.findByProps({ testID: 'guardian-edit-error' }).props.children,
+  ).toContain('partially completed');
+  await act(async () =>
+    tree.root
+      .findByProps({ testID: 'guardian-edit-save', disabled: true })
+      .props.onPress(),
+  );
+  expect(guardianApi.updateGuardian).toHaveBeenCalledTimes(1);
+  tree.unmount();
+});
