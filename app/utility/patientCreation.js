@@ -59,10 +59,19 @@ export const guardianCreationFields = (g) =>
     status: 'active',
     ...(g.IsChecked ? { email: g.Email.trim() } : {}),
   });
+// NRIC identity is case-insensitive; only outer whitespace is normalized.
+const creationNric = (value) => {
+  if (!filled(value)) {
+    throw new Error('A complete patient identity is required.');
+  }
+  return value.trim().toUpperCase();
+};
+
 export const withAtomicPrimaryGuardian = (patient, guardians) => {
   validateCreationGuardians(guardians);
   return uppercasePersonFields({
     ...patient,
+    nric: creationNric(patient.nric),
     newGuardian: guardianCreationFields(guardians[0]),
     guardianRelationshipName: guardians[0].RelationshipName,
   });
@@ -106,21 +115,29 @@ export const createPatientWithPrimary = async ({
       await storage.removeItem(key);
       return { response, created: false, secondary: 'not_sent' };
     }
-    const row = response.data?.data ?? response.data;
+    // The canonical endpoint returns SingleResponse[Patient]. A valid ID alone
+    // cannot authorize writes to a possibly different patient. Missing/mismatched
+    // response identity is unconfirmed success, never evidence of rollback.
+    const row = response.data?.data;
     let id;
     try {
-      id = medicationCourseId(row?.id ?? row?.patientId);
+      if (!row || typeof row !== 'object' || Array.isArray(row)) {
+        throw new Error('The canonical patient response is unavailable.');
+      }
+      id = medicationCourseId(row.id);
+      if (
+        creationNric(row.nric) !== payload.nric ||
+        [1, '1', true].includes(row.isDeleted)
+      ) {
+        throw new Error('The returned patient identity could not be verified.');
+      }
     } catch (error) {
-      return { response, created: false, unknown: true, invalidIdentity: true };
-    }
-    if (!id || [1, '1', true].includes(row?.isDeleted)) {
       return {
         response,
         created: false,
         unknown: true,
-        patientId: id,
-        secondary: 'unknown',
         invalidIdentity: true,
+        secondary: 'not_sent',
       };
     }
     await storage.removeItem(key);

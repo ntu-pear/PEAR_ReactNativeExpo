@@ -22,9 +22,10 @@ const guardian = () => ({
 const patient = { name: 'synthetic patient', nric: 'SYNTHETIC_PAT' };
 test('patient and uppercase inline primary are one atomic POST; no second primary create', async () => {
   const api = {
-    addPatient: jest
-      .fn()
-      .mockResolvedValue({ ok: true, data: { data: { id: 7 } } }),
+    addPatient: jest.fn().mockResolvedValue({
+      ok: true,
+      data: { data: { id: 7, nric: patient.nric } },
+    }),
     addGuardian: jest.fn(),
   };
   const r = await createPatientWithPrimary({
@@ -61,7 +62,7 @@ test.each(['failed', 'unknown'])(
     const api = {
       addPatient: jest.fn().mockResolvedValue({
         ok: true,
-        data: { data: { id: '9007199254740993' } },
+        data: { data: { id: '9007199254740993', nric: patient.nric } },
       }),
       addGuardian:
         kind === 'failed'
@@ -139,7 +140,7 @@ test('unusable success identity keeps unknown marker and sends no follow-up guar
   const api = {
     addPatient: jest.fn().mockResolvedValue({
       ok: true,
-      data: { data: { id: 9007199254740992 } },
+      data: { data: { id: 9007199254740992, nric: patient.nric } },
     }),
     addGuardian: jest.fn(),
   };
@@ -171,15 +172,16 @@ test('simultaneous screen instances send at most one primary request', async () 
   const first = createPatientWithPrimary(args);
   const second = await createPatientWithPrimary(args);
   expect(second).toMatchObject({ created: false, unknown: true });
-  release({ ok: true, data: { data: { id: 7 } } });
+  release({ ok: true, data: { data: { id: 7, nric: patient.nric } } });
   expect(await first).toMatchObject({ created: true });
   expect(api.addPatient).toHaveBeenCalledTimes(1);
 });
 test('secondary HTTP500 is an unknown partial outcome without another primary POST', async () => {
   const api = {
-    addPatient: jest
-      .fn()
-      .mockResolvedValue({ ok: true, data: { data: { id: 7 } } }),
+    addPatient: jest.fn().mockResolvedValue({
+      ok: true,
+      data: { data: { id: 7, nric: patient.nric } },
+    }),
     addGuardian: jest.fn().mockResolvedValue({ ok: false, status: 500 }),
   };
   expect(
@@ -190,4 +192,113 @@ test('secondary HTTP500 is an unknown partial outcome without another primary PO
     }),
   ).toMatchObject({ created: true, secondary: 'unknown' });
   expect(api.addPatient).toHaveBeenCalledTimes(1);
+});
+
+const durableStore = () => {
+  const values = new Map();
+  return {
+    values,
+    getItem: jest.fn(async (k) => values.get(k) || null),
+    setItem: jest.fn(async (k, v) => values.set(k, v)),
+    removeItem: jest.fn(async (k) => values.delete(k)),
+  };
+};
+test.each(['SYNTHETIC_DIFFERENT', '', null, undefined, 7, '*****PAT'])(
+  'valid returned ID with unverified NRIC %p retains unknown marker and sends no secondary or replay',
+  async (nric) => {
+    const storage = durableStore();
+    const api = {
+      addPatient: jest
+        .fn()
+        .mockResolvedValue({ ok: true, data: { data: { id: 999, nric } } }),
+      addGuardian: jest.fn(),
+    };
+    const args = { api, patient, guardians: [guardian(), guardian()], storage };
+    const result = await createPatientWithPrimary(args);
+    expect(result).toMatchObject({
+      created: false,
+      unknown: true,
+      invalidIdentity: true,
+      secondary: 'not_sent',
+    });
+    expect(result.patientId).toBeUndefined();
+    expect(storage.values.size).toBe(1);
+    expect(storage.removeItem).not.toHaveBeenCalled();
+    expect(api.addGuardian).not.toHaveBeenCalled();
+    expect(await createPatientWithPrimary(args)).toMatchObject({
+      created: false,
+      unknown: true,
+    });
+    expect(api.addPatient).toHaveBeenCalledTimes(1);
+  },
+);
+test.each([null, [], { patientId: 7, nric: 'SYNTHETIC_PAT' }])(
+  'missing canonical Patient identity shape %p blocks all follow-ups',
+  async (row) => {
+    const storage = durableStore();
+    const api = {
+      addPatient: jest
+        .fn()
+        .mockResolvedValue({ ok: true, data: { data: row } }),
+      addGuardian: jest.fn(),
+    };
+    expect(
+      await createPatientWithPrimary({
+        api,
+        patient,
+        guardians: [guardian(), guardian()],
+        storage,
+      }),
+    ).toMatchObject({ created: false, unknown: true, invalidIdentity: true });
+    expect(storage.values.size).toBe(1);
+    expect(api.addGuardian).not.toHaveBeenCalled();
+  },
+);
+test('unwrapped successful response is not assumed to be canonical creation identity', async () => {
+  const storage = durableStore();
+  const api = {
+    addPatient: jest
+      .fn()
+      .mockResolvedValue({ ok: true, data: { id: 7, nric: patient.nric } }),
+    addGuardian: jest.fn(),
+  };
+  expect(
+    await createPatientWithPrimary({
+      api,
+      patient,
+      guardians: [guardian(), guardian()],
+      storage,
+    }),
+  ).toMatchObject({ unknown: true, invalidIdentity: true });
+  expect(api.addGuardian).not.toHaveBeenCalled();
+  expect(storage.removeItem).not.toHaveBeenCalled();
+});
+test('matching canonical NRIC case and outer whitespace normalization permits only the verified exact patient follow-up', async () => {
+  const storage = durableStore();
+  const api = {
+    addPatient: jest.fn().mockResolvedValue({
+      ok: true,
+      data: { data: { id: '9007199254740993', nric: ' SyNtHeTiC_pAt ' } },
+    }),
+    addGuardian: jest.fn().mockResolvedValue({ ok: true }),
+  };
+  const result = await createPatientWithPrimary({
+    api,
+    patient: { ...patient, nric: ' synthetic_pat ' },
+    guardians: [guardian(), guardian()],
+    storage,
+  });
+  expect(result).toMatchObject({
+    created: true,
+    patientId: '9007199254740993',
+    secondary: 'added',
+  });
+  expect(api.addPatient).toHaveBeenCalledWith(
+    expect.objectContaining({ nric: 'SYNTHETIC_PAT' }),
+  );
+  expect(api.addGuardian).toHaveBeenCalledWith(
+    expect.objectContaining({ patientId: '9007199254740993' }),
+  );
+  expect(storage.values.size).toBe(0);
+  expect(storage.removeItem).toHaveBeenCalledTimes(1);
 });
