@@ -83,7 +83,9 @@ beforeEach(() => {
   });
 });
 afterEach(() => {
-  if (screen) act(() => screen.unmount());
+  if (screen) {
+    act(() => screen.unmount());
+  }
   screen = null;
 });
 test('direct navigation by caregiver makes no patient or medication request', async () => {
@@ -170,4 +172,47 @@ test('date filtering keeps overlapping and ongoing courses, excludes deleted cou
   expect(() =>
     filterMedicationHistory(rows, '2026-10-06', '2026-10-05'),
   ).toThrow(/end date/);
+});
+
+test('page-local empty filter never claims a global absence and another page can supply the match', async () => {
+  patient.listPatientMedicationsV1.mockImplementation(
+    async (id, { pageNo }) => ({
+      ok: true,
+      data: {
+        totalPages: 2,
+        data: [
+          {
+            medicationID: 'Record-' + pageNo,
+            patientID: id,
+            prescriptionListID: 'Drug-A',
+            startDateTime: pageNo === 0 ? '2026-09-01' : '2026-10-01',
+            endDateTime: pageNo === 0 ? '2026-09-05' : null,
+          },
+        ],
+      },
+    }),
+  );
+  await mount();
+  await press('Synthetic A');
+  await act(async () =>
+    screen.root
+      .findByProps({ testID: 'medication_from' })
+      .props.onChangeText('2026-10-05'),
+  );
+  expect(text('Synthetic drug A')).toBe(false);
+  expect(text('No medication records in this date range.')).toBe(false);
+  expect(
+    text(
+      'No courses on this page match these dates. Check other pages for further matches.',
+    ),
+  ).toBe(true);
+  expect(
+    screen.root.findAllByProps({ testID: 'medication_history_scope' }).length,
+  ).toBeGreaterThan(0);
+  await press('Next records');
+  expect(text('Synthetic drug A')).toBe(true);
+  expect(patient.listPatientMedicationsV1).toHaveBeenLastCalledWith(
+    'Patient-A',
+    expect.objectContaining({ pageNo: 1, pageSize: 100 }),
+  );
 });

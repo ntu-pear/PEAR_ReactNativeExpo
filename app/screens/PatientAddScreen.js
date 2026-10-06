@@ -1,5 +1,11 @@
 // Libs
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, {
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+} from 'react';
 import { Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import mime from 'mime';
@@ -7,6 +13,8 @@ import * as ImagePicker from 'expo-image-picker';
 
 // API
 import patientApi from 'app/api/patient';
+import AuthContext from 'app/auth/context';
+import { currentUserId } from 'app/utility/medicationAdminister';
 import privacyLevelApi from 'app/api/privacyLevel';
 
 // Configurations
@@ -14,6 +22,8 @@ import routes from 'app/navigation/routes';
 
 // Utilities
 import patientDraft from 'app/utility/patientDraft';
+import { createPatientWithPrimary } from 'app/utility/patientCreation';
+import { opaqueId } from 'app/utility/patientFieldPolicy';
 
 // Components
 import PatientAddPatientInfoScreen from 'app/screens/PatientAddPatientInfoScreen';
@@ -23,6 +33,7 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 
 function PatientAddScreen() {
   const navigation = useNavigation();
+  const { user } = useContext(AuthContext) || {};
 
   // State to keep track of which page of the form is loaded
   const [step, setStep] = useState(1);
@@ -122,7 +133,9 @@ function PatientAddScreen() {
               onPress: () => {
                 setFormData(draft.formData);
                 setStep(draft.step);
-                if (draft.componentList) setComponentList(draft.componentList);
+                if (draft.componentList) {
+                  setComponentList(draft.componentList);
+                }
                 formTouched.current = true;
                 setIsDraftLoading(false);
               },
@@ -138,7 +151,9 @@ function PatientAddScreen() {
 
   // Auto-save draft on form or step changes (debounced 800ms)
   useEffect(() => {
-    if (isDraftLoading || !formTouched.current) return;
+    if (isDraftLoading || !formTouched.current) {
+      return;
+    }
 
     const timer = setTimeout(() => {
       patientDraft.saveDraft(formData, step, componentList);
@@ -151,7 +166,9 @@ function PatientAddScreen() {
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', (e) => {
       // Allow navigation if form hasn't been touched or submission is in progress
-      if (!formTouched.current || isSubmitting) return;
+      if (!formTouched.current || isSubmitting) {
+        return;
+      }
 
       // Prevent default back action
       e.preventDefault();
@@ -236,8 +253,6 @@ function PatientAddScreen() {
         ...prevState,
         ['patientInfo']: newData,
       }));
-
-      console.log(newData);
     }
   };
 
@@ -320,187 +335,122 @@ function PatientAddScreen() {
 
   // Helper to format date as ISO string
   const formatDate = (date) => {
-    if (date instanceof Date) return date.toISOString();
+    if (date instanceof Date) {
+      return date.toISOString();
+    }
     return date;
   };
 
-  // Function to submit form
+  const submitting = useRef(false);
   const onSubmit = async () => {
+    if (submitting.current) {
+      return;
+    }
+    submitting.current = true;
     setIsSubmitting(true);
-    console.log(formData);
-
-    const patientInfo = formData.patientInfo;
-    const guardianInfo = formData.guardianInfo;
-
-    // Build patient payload matching new API schema
-    const patientPayload = {
-      name: `${patientInfo.FirstName} ${patientInfo.LastName}`.trim(),
-      nric: String(patientInfo.NRIC || '').toUpperCase(),
-      address: patientInfo.Address || '',
-      tempAddress: patientInfo.TempAddress || '',
-      homeNo: patientInfo.HomeNo || '',
-      handphoneNo: patientInfo.HandphoneNo || '',
-      gender: patientInfo.Gender || 'M',
-      dateOfBirth: formatDate(patientInfo.DOB),
-      isApproved: '1',
-      preferredName: patientInfo.PreferredName || '',
-      preferredLanguageId: patientInfo.PreferredLanguageListID || 1,
-      updateBit: patientInfo.UpdateBit ? '1' : '0',
-      autoGame: patientInfo.AutoGame ? '1' : '0',
-      startDate: formatDate(patientInfo.StartDate),
-      endDate: patientInfo.IsChecked ? formatDate(patientInfo.EndDate) : null,
-      isActive: patientInfo.IsActive ? '1' : '0',
-      isRespiteCare: patientInfo.IsRespiteCare ? '1' : '0',
-      privacyLevel: parseInt(patientInfo.PrivacyLevel) || 2,
-      terminationReason: patientInfo.TerminationReason || '',
-      inActiveReason: patientInfo.InactiveReason || '',
-      inActiveDate: null,
-      profilePicture: '', // Will be updated separately if image was selected
-      isDeleted: 0,
-      createdDate: new Date().toISOString(),
-      modifiedDate: new Date().toISOString(),
-      CreatedById: '1',
-      ModifiedById: '1',
-    };
-
-    // Create patient first
-    const result = await patientApi.addPatient(patientPayload);
-    
-    console.log('[ADD PATIENT] API Response:', result);
-
-    let alertTitle = '';
-    let alertDetails = '';
-
-    if (result.ok) {
-      // Extract the new patient ID from the response
-      const newPatientId = result.data?.data?.id || result.data?.id || result.data?.patientId;
-      const isDeleted = result.data?.data?.isDeleted;
-      console.log('[ADD PATIENT] Patient created with ID:', newPatientId);
-      console.log('[ADD PATIENT] Patient isDeleted status:', isDeleted);
-      console.log('[ADD PATIENT] Full patient data:', result.data?.data);
-      
-      // Check if patient is marked as deleted
-      if (isDeleted === 1 || isDeleted === '1') {
-        alertTitle = 'Error in Adding Patient';
-        alertDetails = 'A patient with this NRIC already exists and is marked as deleted. Please use a different NRIC or contact support to restore the existing patient.';
-        Alert.alert(alertTitle, alertDetails);
-        setIsSubmitting(false);
+    try {
+      const actor = opaqueId(currentUserId(user));
+      const patientInfo = formData.patientInfo;
+      const patientPayload = {
+        name: `${patientInfo.FirstName} ${patientInfo.LastName}`.trim(),
+        nric: String(patientInfo.NRIC || '').toUpperCase(),
+        address: patientInfo.Address || '',
+        tempAddress: patientInfo.TempAddress || '',
+        homeNo: patientInfo.HomeNo || '',
+        handphoneNo: patientInfo.HandphoneNo || '',
+        gender: patientInfo.Gender || 'M',
+        dateOfBirth: formatDate(patientInfo.DOB),
+        isApproved: '1',
+        preferredName: patientInfo.PreferredName || '',
+        preferredLanguageId: patientInfo.PreferredLanguageListID || 1,
+        updateBit: patientInfo.UpdateBit ? '1' : '0',
+        autoGame: patientInfo.AutoGame ? '1' : '0',
+        startDate: formatDate(patientInfo.StartDate),
+        endDate: patientInfo.IsChecked ? formatDate(patientInfo.EndDate) : null,
+        isActive: patientInfo.IsActive ? '1' : '0',
+        isRespiteCare: patientInfo.IsRespiteCare ? '1' : '0',
+        privacyLevel: parseInt(patientInfo.PrivacyLevel) || 2,
+        terminationReason: patientInfo.TerminationReason || '',
+        inActiveReason: patientInfo.InactiveReason || '',
+        inActiveDate: null,
+        profilePicture: '', // Will be updated separately if image was selected
+        isDeleted: 0,
+        createdDate: new Date().toISOString(),
+        modifiedDate: new Date().toISOString(),
+        CreatedById: String(actor),
+        ModifiedById: String(actor),
+      };
+      const outcome = await createPatientWithPrimary({
+        api: patientApi,
+        patient: patientPayload,
+        guardians: formData.guardianInfo,
+      });
+      if (!outcome.created) {
+        Alert.alert(
+          outcome.unknown
+            ? 'Patient creation not confirmed'
+            : 'Patient not added',
+          outcome.unknown
+            ? 'A patient creation request is unconfirmed. Check the patient list with the staging team before submitting again. This draft has been retained.'
+            : 'The patient and primary guardian could not be created. Review the information and try again after the error is resolved.',
+        );
         return;
       }
-
-      // Upload profile picture if one was selected
-      if (newPatientId && patientInfo.UploadProfilePicture && patientInfo.UploadProfilePicture.uri) {
-        console.log('[ADD PATIENT] Uploading profile picture...');
-        const imageUploadResult = await patientApi.uploadPatientProfilePictureV1(
-          newPatientId,
-          patientInfo.UploadProfilePicture
+      const followups = [];
+      if (outcome.invalidIdentity) {
+        followups.push(
+          'The returned patient identity could not be verified. Check the patient list before taking further action.',
         );
-        
-        if (imageUploadResult.ok) {
-          console.log('[ADD PATIENT] Profile picture uploaded successfully');
-        } else {
-          console.log('[ADD PATIENT] Failed to upload profile picture:', imageUploadResult.status, imageUploadResult.data);
-          // Don't fail the whole operation if image upload fails
-        }
       }
-
-      // Create default privacy level (Medium = 2) for the new patient
-      if (newPatientId) {
-        console.log('[ADD PATIENT] Creating default privacy level (Medium)...');
-        const privacyLevelPayload = {
-          patientId: newPatientId,
-          privacyLevel: 2, // Default to Medium
-        };
-        
-        const privacyLevelResult = await privacyLevelApi.createPrivacyLevel(privacyLevelPayload);
-        
-        if (privacyLevelResult.ok) {
-          console.log('[ADD PATIENT] Privacy level created successfully');
-        } else {
-          console.log('[ADD PATIENT] Failed to create privacy level:', privacyLevelResult.status, privacyLevelResult.data);
-          // Don't fail the whole operation if privacy level creation fails
-        }
+      if (outcome.secondary === 'failed' || outcome.secondary === 'unknown') {
+        followups.push(
+          'The secondary guardian was not confirmed. Review the guardian section; do not submit this patient again.',
+        );
       }
-
-      // Create guardians (up to 2)
-      // Primary guardian (index 0) is required
-      // Secondary guardian (index 1) is optional - will be skipped if FirstName is empty
-      if (newPatientId && guardianInfo && guardianInfo.length > 0) {
-        for (let i = 0; i < Math.min(guardianInfo.length, 2); i++) {
-          const guardian = guardianInfo[i];
-          
-          // Skip if guardian has no first name (empty/incomplete guardian)
-          if (!guardian.FirstName || guardian.FirstName.trim() === '') continue;
-
-          const guardianPayload = {
-            active: 'Y',
-            firstName: guardian.FirstName || '',
-            lastName: guardian.LastName || '',
-            preferredName: guardian.PreferredName || '',
-            gender: guardian.Gender || 'M',
-            contactNo: guardian.ContactNo || '',
-            nric: String(guardian.NRIC || '').toUpperCase(),
-            dateOfBirth: formatDate(guardian.DOB),
-            address: guardian.Address || '',
-            tempAddress: guardian.TempAddress || '',
-            status: 'active',
-            isDeleted: '0',
-            guardianApplicationUserId: '',
-            createdDate: new Date().toISOString(),
-            modifiedDate: new Date().toISOString(),
-            CreatedById: '1',
-            ModifiedById: '1',
-            patientId: newPatientId,
-            relationshipName: guardian.RelationshipName || getRelationshipNameById(guardian.RelationshipID),
-          };
-          
-          // Only include email if guardian wants to log in (IsChecked is true)
-          if (guardian.IsChecked && guardian.Email && guardian.Email.trim() !== '') {
-            guardianPayload.email = guardian.Email;
-          }
-
-          const guardianResult = await patientApi.addGuardian(guardianPayload);
-          
-          if (!guardianResult.ok) {
-            console.log(`[ADD PATIENT] Failed to create guardian ${i + 1}:`, guardianResult.status, guardianResult.data);
-            console.log('[ADD PATIENT] Full error response:', JSON.stringify(guardianResult, null, 2));
-            if (guardianResult.data?.detail) {
-              console.log('[ADD PATIENT] Missing field details:', guardianResult.data.detail);
+      if (outcome.patientId && !outcome.invalidIdentity) {
+        if (patientInfo.UploadProfilePicture?.uri) {
+          try {
+            const r = await patientApi.uploadPatientProfilePictureV1(
+              outcome.patientId,
+              patientInfo.UploadProfilePicture,
+            );
+            if (!r?.ok) {
+              followups.push('The profile picture was not uploaded.');
             }
-          } else {
-            console.log(`[ADD PATIENT] Guardian ${i + 1} created successfully`);
+          } catch (error) {
+            followups.push('The profile picture upload was not confirmed.');
           }
         }
+        try {
+          const r = await privacyLevelApi.createPrivacyLevel({
+            patientId: outcome.patientId,
+            privacyLevel: patientPayload.privacyLevel,
+          });
+          if (!r?.ok) {
+            followups.push('The privacy record was not confirmed.');
+          }
+        } catch (error) {
+          followups.push('The privacy record was not confirmed.');
+        }
       }
-
-      const allocations = result.data?.data?.patientAllocationDTO;
-      if (allocations) {
-        const caregiver = allocations.caregiverName;
-        const doctor = allocations.doctorName;
-        const gameTherapist = allocations.gameTherapistName;
-        alertDetails = `Patient has been allocated to\nCaregiver: ${caregiver}\nDoctor: ${doctor}\nGame Therapist: ${gameTherapist}`;
-      } else {
-        alertDetails = 'Patient has been successfully added.';
-      }
-
-      alertTitle = 'Successfully added Patient';
-      // Clear draft on successful submission
       formTouched.current = false;
       await patientDraft.clearDraft();
       navigation.navigate(routes.PATIENTS_SCREEN);
-    } else {
-      // Extract error message from various possible locations in the response
-      const errors = result.data?.message || result.data?.error || result.data?.errors || result.problem || 'Unknown error';
-
-      alertDetails = result.data
-        ? `\n${errors}\n\nPlease try again.`
-        : 'Please try again.';
-
-      alertTitle = 'Error in Adding Patient';
-      console.log('[ADD PATIENT] Error response:', result);
+      Alert.alert(
+        followups.length
+          ? 'Patient created; follow-up required'
+          : 'Patient and primary guardian added',
+        followups.join('\n'),
+      );
+    } catch (error) {
+      Alert.alert(
+        'Patient creation not confirmed',
+        error.message || 'Check the patient list before submitting again.',
+      );
+    } finally {
+      submitting.current = false;
+      setIsSubmitting(false);
     }
-    Alert.alert(alertTitle, alertDetails);
-    setIsSubmitting(false);
   };
 
   // Show loading while checking for existing draft
@@ -512,7 +462,7 @@ function PatientAddScreen() {
     case 1:
       return (
         <PatientAddPatientInfoScreen
-          testID='addPatients_patient'
+          testID="addPatients_patient"
           nextQuestionHandler={nextQuestionHandler}
           handleFormData={handlePatientData}
           formData={formData}
@@ -520,12 +470,12 @@ function PatientAddScreen() {
         />
       );
     case 2:
-      if(isSubmitting) {
-        return (<ActivityIndicator visible/>)  
+      if (isSubmitting) {
+        return <ActivityIndicator visible />;
       }
       return (
         <PatientAddGuardianScreen
-          testID='addPatients_guardian'
+          testID="addPatients_guardian"
           nextQuestionHandler={nextQuestionHandler}
           prevQuestionHandler={prevQuestionHandler}
           handleFormData={handleGuardianData}

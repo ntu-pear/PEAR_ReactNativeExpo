@@ -1,4 +1,12 @@
 import { centreDay, centreInstant } from 'app/utility/centreClock';
+import { opaqueId } from 'app/utility/patientFieldPolicy';
+export const exactNumericPatientId = (value) => {
+  const id = opaqueId(value);
+  if (!/^[1-9]\d*$/.test(String(id))) {
+    throw new Error('A valid lossless patient identifier is required.');
+  }
+  return id;
+};
 
 export const currentUserId = (user) =>
   user?.id || user?.userID || user?.userId || user?.user_id || '';
@@ -113,7 +121,9 @@ export const buildMedicationScheduleUpdate = ({
   prescriptionName,
   administerTime,
 } = {}) => ({
-  PatientID: Number(row?.PatientID ?? row?.patientId ?? patientID),
+  PatientID: exactNumericPatientId(
+    row?.PatientID ?? row?.patientId ?? patientID,
+  ),
   PrescriptionName:
     row?.PrescriptionName ?? row?.prescriptionName ?? prescriptionName,
   AdministerDate:

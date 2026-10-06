@@ -70,8 +70,11 @@ test.each(['missing-array', 'wrong-patient'])(
   'invalid aggregate %s is not presented as an empty success',
   async (kind) => {
     const data = aggregate();
-    if (kind === 'missing-array') delete data.recommendations;
-    else data.patients = [{ id: 99 }];
+    if (kind === 'missing-array') {
+      delete data.recommendations;
+    } else {
+      data.patients = [{ id: 99 }];
+    }
     mockClient.get.mockResolvedValue({ ok: true, status: 200, data });
     expect((await activity.getPatientActivityAggregate(7)).ok).toBe(false);
     expect(mockClient.get).toHaveBeenCalledTimes(1);
@@ -124,7 +127,7 @@ test('canonical medication records retain record identity, fields and pagination
   expect(res.data.data[0]).toMatchObject({
     medicationID: 4,
     patientID: 7,
-    prescriptionName: 'Prescription 2',
+    prescriptionName: '', // A catalogue ID is not a drug name; the screen joins the canonical label.
     dosage: 'Synthetic dose',
     instruction: 'Synthetic',
     prescriptionRemarks: 'Synthetic remarks',

@@ -26,6 +26,7 @@ jest.mock('app/api/patient', () => ({
   default: {
     listPatientMedicationsV1: jest.fn(),
     readPatientV1: jest.fn(),
+    getPrescriptionListV1: jest.fn(),
     getAllocationMap: jest.fn(),
   },
 }));
@@ -50,6 +51,10 @@ jest.mock('app/components/DynamicTable', () => () => null);
 jest.mock('app/components/AppText', () => require('react-native').Text);
 beforeEach(() => {
   jest.clearAllMocks();
+  patient.getPrescriptionListV1.mockResolvedValue({
+    ok: true,
+    data: { data: [] },
+  });
   patient.readPatientV1.mockResolvedValue({
     ok: true,
     status: 200,

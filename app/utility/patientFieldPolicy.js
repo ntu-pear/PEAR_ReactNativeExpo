@@ -1,7 +1,11 @@
 // IDs are opaque: do not round long numeric strings or change their case.
 export const opaqueId = (value) => {
-  if (typeof value === 'string' && value.trim()) return value;
-  if (typeof value === 'number' && Number.isSafeInteger(value)) return value;
+  if (typeof value === 'string' && value.trim()) {
+    return value;
+  }
+  if (typeof value === 'number' && Number.isSafeInteger(value)) {
+    return value;
+  }
   throw new Error('A complete, lossless identifier is required.');
 };
 
@@ -28,6 +32,9 @@ export const uppercasePersonFields = (payload) => {
   });
   if (Array.isArray(result.newGuardian)) {
     result.newGuardian = result.newGuardian.map(uppercasePersonFields);
+  }
+  if (result.newGuardian && !Array.isArray(result.newGuardian)) {
+    result.newGuardian = uppercasePersonFields(result.newGuardian);
   }
   return result;
 };
@@ -112,16 +119,21 @@ export const buildPatientInfoUpdate = ({
   }
   const result = {};
   updateKeys.forEach((key) => {
-    if (record[key] !== undefined) result[key] = record[key];
+    if (record[key] !== undefined) {
+      result[key] = record[key];
+    }
   });
   changedFields.forEach((field) => {
     const key = editable[field];
-    if (key) result[key] = edits[field];
+    if (key) {
+      result[key] = edits[field];
+    }
   });
   if (changedFields.has('PrivacyLevel')) {
     result.privacyLevel = Number(edits.PrivacyLevel);
-    if (![1, 2, 3].includes(result.privacyLevel))
+    if (![1, 2, 3].includes(result.privacyLevel)) {
       throw new Error('Choose a valid privacy level.');
+    }
   }
   if (changedFields.has('IsRespiteCare')) {
     result.isRespiteCare = [true, 1, '1', 'true'].includes(edits.IsRespiteCare)

@@ -1,11 +1,22 @@
 // Libs
-import React, { useEffect, useState } from 'react';
-import { Alert, Keyboard, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useContext, useRef, useEffect, useState } from 'react';
+import {
+  Alert,
+  Keyboard,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+} from 'react-native';
 import { FlatList, View } from 'native-base';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 // API
 import patientApi from 'app/api/patient';
+import AuthContext from 'app/auth/context';
+import { currentUserId } from 'app/utility/medicationAdminister';
+import { readAllPages } from 'app/utility/pagedRead';
+import requestDeadline from 'app/utility/requestDeadline';
+import { patientFromApiResponse } from 'app/utility/patientHeader';
 
 // Utilities
 import {
@@ -45,6 +56,9 @@ function PatientPrescriptionScreen(props) {
   const testID = `prescription_screen_${patientID}`;
 
   const navigation = useNavigation();
+  const { user } = useContext(AuthContext) || {};
+  const saving = useRef(false);
+  const readGeneration = useRef(0);
 
   // Modal states
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -55,7 +69,6 @@ function PatientPrescriptionScreen(props) {
   const [isError, setIsError] = useState(false);
   const [isRetry, setIsRetry] = useState(false);
   const [statusCode, setStatusCode] = useState(200);
-  const [isReloadList, setIsReloadList] = useState(true);
 
   //Prescription data related states
   const [originalPrescriptionData, setOriginalPrescriptionData] = useState([]);
@@ -63,7 +76,7 @@ function PatientPrescriptionScreen(props) {
   const [formData, setFormData] = useState({
     // for add/edit form
     prescriptionID: null,
-    prescriptionListID: 1,
+    prescriptionListID: null,
     dosage: '',
     frequencyPerDay: 1,
     isChronic: true,
@@ -115,89 +128,71 @@ function PatientPrescriptionScreen(props) {
   });
 
   // Refresh list when new medication is added or user requests refresh
+  const refreshPrescriptionData = React.useCallback(async () => {
+    const generation = ++readGeneration.current;
+    setIsLoading(true);
+    setOriginalPrescriptionData([]);
+    setPrescriptionData([]);
+    setPatientData({});
+    try {
+      const [rows, catalogue, header] = await Promise.all([
+        readAllPages(
+          (p) => patientApi.listPatientPrescriptionsV1(patientID, p),
+          { idOf: (r) => r.prescriptionID },
+        ),
+        readAllPages(patientApi.getPrescriptionListV1),
+        requestDeadline(patientApi.getPatient(patientID)),
+      ]);
+      if (generation !== readGeneration.current) {
+        return;
+      }
+      const patient = header?.ok ? patientFromApiResponse(header) : {};
+      if (
+        !header?.ok ||
+        String(patient.patientID ?? patient.id) !== String(patientID)
+      ) {
+        throw new Error('The patient header could not be verified.');
+      }
+      const names = new Map(catalogue.map((r) => [String(r.Id), r.Value]));
+      if (rows.some((r) => String(r.patientID) !== String(patientID))) {
+        throw new Error('Prescriptions belong to a different patient.');
+      }
+      const joined = rows
+        .filter((r) => !r.isDeleted)
+        .map((r) => ({
+          ...r,
+          prescriptionListDesc:
+            names.get(String(r.prescriptionListID)) ||
+            r.prescriptionListDesc ||
+            'Drug name unavailable',
+        }));
+      setOriginalPrescriptionData(joined);
+      setPrescriptionData(joined);
+      setPatientData(patient);
+      setIsDataInitialized(true);
+      setIsError(false);
+      setIsRetry(false);
+      setStatusCode(200);
+    } catch (error) {
+      if (generation === readGeneration.current) {
+        setIsError(true);
+        setIsRetry(true);
+        setStatusCode(error.status);
+      }
+    } finally {
+      if (generation === readGeneration.current) {
+        setIsLoading(false);
+      }
+    }
+  }, [patientID]);
   useFocusEffect(
     React.useCallback(() => {
-      if (isReloadList) {
-        refreshPrescriptionData();
-        setIsReloadList(false);
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isReloadList]),
+      refreshPrescriptionData();
+      return () => {
+        readGeneration.current += 1;
+      };
+    }, [refreshPrescriptionData]),
   );
-
-  // Set isLoading to true when retrieving data
-  const refreshPrescriptionData = () => {
-    setIsLoading(true);
-    const promiseFunction = async () => {
-      await getPatientData();
-      await getPrescriptionData();
-    };
-    promiseFunction();
-  };
-
-  // Get prescription data from backend
-  const getPrescriptionData = async () => {
-    if (patientID) {
-      const response = await patientApi.listPatientPrescriptionsV1(patientID);
-      
-      if (response.ok) {
-        console.log(response.data.data);
-        setOriginalPrescriptionData([...response.data.data]);
-        setPrescriptionData(parsePrescriptionData([...response.data.data]));
-        setIsDataInitialized(true);
-        setIsLoading(false);
-        setIsError(false);
-        setIsRetry(false);
-        setStatusCode(response.status);
-      } else {
-        console.log('Request failed with status code: ', response.status);
-        setOriginalPrescriptionData([]);
-        setPrescriptionData([]);
-        setIsLoading(false);
-        setIsError(true);
-        setStatusCode(response.status);
-        setIsRetry(true);
-      }
-    }
-  };
-
-  // Parse data
-  const parsePrescriptionData = (tempData) => {
-    return tempData.map((item) => ({
-      prescriptionID: item.prescription_id ?? item.id ?? null,
-      prescriptionListID: item.prescription_list_id ?? item.prescriptionListID ?? null,
-      dosage: item.dosage ?? '',
-      frequencyPerDay: item.frequency_per_day ?? item.frequencyPerDay ?? 1,
-      isChronic: item.is_chronic ?? item.isChronic ?? false,
-      instruction: item.instruction ?? '',
-      startDate: item.start_date ?? item.startDate ?? null,
-      endDate: item.end_date ?? item.endDate ?? null,
-      afterMeal: item.after_meal ?? item.afterMeal ?? false,
-      prescriptionRemarks: item.prescription_remarks ?? item.prescriptionRemarks ?? '',
-      prescriptionListDesc: item.prescription_list_desc ?? item.prescriptionListDesc ?? '',
-      date: item.created_at ?? item.date ?? null,
-    }));
-  };
-  
-  // Get patient data from backend
-  const getPatientData = async () => {
-    if (patientID) {
-      const response = await patientApi.getPatient(patientID);
-      if (response.ok) {
-        setPatientData(response.data.data);
-        setIsError(false);
-        setIsRetry(false);
-        setStatusCode(response.status);
-      } else {
-        console.log('Request failed with status code: ', response.status);
-        setPatientData({});
-        setIsLoading(false);
-        setIsError(true);
-        setStatusCode(response.status);
-        setIsRetry(true);
-      }
-    }
-  };
 
   // Show form to add prescription when add button is clicked
   const handleOnClickAddPrescription = () => {
@@ -207,31 +202,42 @@ function PatientPrescriptionScreen(props) {
 
   // Submit data to add prescription
   const handleModalSubmitAdd = async (tempPrescriptionFormData) => {
+    if (saving.current) {
+      return;
+    }
+    saving.current = true;
     setIsLoading(true);
 
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.addPatientPrescriptionV1(patientID, tempPrescriptionFormData);
+    const result = await patientApi.addPatientPrescriptionV1(
+      patientID,
+      tempPrescriptionFormData,
+      currentUserId(user),
+    );
 
     if (result.ok) {
-      console.log('submitting prescription data', tempPrescriptionFormData);
-      refreshPrescriptionData();
+      await refreshPrescriptionData();
       setIsModalVisible(false);
 
       alertTitle = 'Successfully added prescription';
     } else {
-      const errors = result.data?.message;
+      const errors =
+        result.data?.detail ||
+        result.data?.message ||
+        'The prescription change was not confirmed. Check the records before trying again.';
 
-      console.log(result);
-
-      result.data
-        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-        : (alertDetails = 'Please try again.');
+      alertDetails =
+        typeof errors === 'string'
+          ? errors
+          : 'The change was not confirmed. Check the records before trying again.';
 
       alertTitle = 'Error adding prescription';
     }
 
+    saving.current = false;
+    setIsLoading(false);
     Alert.alert(alertTitle, alertDetails);
   };
 
@@ -252,7 +258,9 @@ function PatientPrescriptionScreen(props) {
       isChronic: tempPrescriptionFormData.isChronic,
       instruction: tempPrescriptionFormData.instruction,
       startDate: new Date(tempPrescriptionFormData.startDate),
-      endDate: new Date(tempPrescriptionFormData.endDate),
+      endDate: tempPrescriptionFormData.endDate
+        ? new Date(tempPrescriptionFormData.endDate)
+        : null,
       afterMeal: tempPrescriptionFormData.afterMeal,
       prescriptionRemarks: tempPrescriptionFormData.prescriptionRemarks,
       prescriptionListDesc: tempPrescriptionFormData.prescriptionListDesc,
@@ -261,6 +269,10 @@ function PatientPrescriptionScreen(props) {
 
   // Submit data to edit prescription
   const handleModalSubmitEdit = async () => {
+    if (saving.current) {
+      return;
+    }
+    saving.current = true;
     setIsLoading(true);
 
     let tempFormData = { ...formData };
@@ -268,23 +280,33 @@ function PatientPrescriptionScreen(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.updatePatientPrescriptionV1(patientID, formData.prescriptionID, tempFormData)
+    const result = await patientApi.updatePatientPrescriptionV1(
+      patientID,
+      formData.prescriptionID,
+      tempFormData,
+      currentUserId(user),
+    );
     if (result.ok) {
-      refreshPrescriptionData();
+      await refreshPrescriptionData();
       setIsModalVisible(false);
 
       alertTitle = 'Successfully edited prescription';
     } else {
-      const errors = result.data?.message;
-      console.log('Error editing prescription');
+      const errors =
+        result.data?.detail ||
+        result.data?.message ||
+        'The prescription change was not confirmed. Check the records before trying again.';
 
-      result.data
-        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-        : (alertDetails = 'Please try again.');
+      alertDetails =
+        typeof errors === 'string'
+          ? errors
+          : 'The change was not confirmed. Check the records before trying again.';
 
       alertTitle = 'Error editing prescription';
     }
 
+    saving.current = false;
+    setIsLoading(false);
     Alert.alert(alertTitle, alertDetails);
   };
 
@@ -303,10 +325,26 @@ function PatientPrescriptionScreen(props) {
         `Frequency Per Day: ${tempData.frequencyPerDay}\n` +
         `Instruction: ${tempData.instruction}\n` +
         `Start Date: ${formatDate(new Date(tempData.startDate), true)}\n` +
-        `End Date: ${formatDate(new Date(tempData.endDate), true)}\n` +
-        `After Meal: ${tempData.afterMeal ? 'After Meal' : 'Before Meal'} \n` +
+        `End Date: ${
+          tempData.endDate
+            ? formatDate(new Date(tempData.endDate), true)
+            : 'Ongoing'
+        }\n` +
+        `After Meal: ${
+          tempData.afterMeal == null
+            ? 'Does not matter'
+            : tempData.afterMeal
+            ? 'After Meal'
+            : 'Before Meal'
+        } \n` +
         `Remarks: ${tempData.prescriptionRemarks}\n` +
-        `Chronic: ${tempData.isChronic ? 'Long Term' : 'Short Term'} \n`,
+        `Chronic: ${
+          tempData.isChronic == null
+            ? 'Unspecified'
+            : tempData.isChronic
+            ? 'Long Term'
+            : 'Short Term'
+        } \n`,
       [
         {
           text: 'Cancel',
@@ -320,6 +358,10 @@ function PatientPrescriptionScreen(props) {
 
   // Delete Prescription
   const deletePrescription = async (prescriptionID) => {
+    if (saving.current) {
+      return;
+    }
+    saving.current = true;
     setIsLoading(true);
 
     let tempData = { prescriptionID: prescriptionID };
@@ -327,23 +369,31 @@ function PatientPrescriptionScreen(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.deletePatientPrescriptionV1(patientID, prescriptionID);
+    const result = await patientApi.deletePatientPrescriptionV1(
+      patientID,
+      prescriptionID,
+    );
     if (result.ok) {
-      refreshPrescriptionData();
+      await refreshPrescriptionData();
       setIsModalVisible(false);
 
       alertTitle = 'Successfully deleted prescription';
     } else {
-      const errors = result.data?.message;
-      console.log('Error deleting prescription', result);
+      const errors =
+        result.data?.detail ||
+        result.data?.message ||
+        'The prescription change was not confirmed. Check the records before trying again.';
 
-      result.data
-        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-        : (alertDetails = 'Please try again.');
+      alertDetails =
+        typeof errors === 'string'
+          ? errors
+          : 'The change was not confirmed. Check the records before trying again.';
 
       alertTitle = 'Error deleting prescription';
     }
 
+    saving.current = false;
+    setIsLoading(false);
     Alert.alert(alertTitle, alertDetails);
   };
 
@@ -356,8 +406,14 @@ function PatientPrescriptionScreen(props) {
   const getTableRowData = () => {
     return prescriptionData.map(({ patientID, prescriptionID, ...item }) => {
       // Directly map the 2 conditions accordingly
-      const afterMeal = item.afterMeal ? 'Yes' : 'No';
-      const isChronic = item.isChronic ? 'Yes' : 'No';
+      const afterMeal =
+        item.afterMeal == null
+          ? 'Does not matter'
+          : item.afterMeal
+          ? 'Yes'
+          : 'No';
+      const isChronic =
+        item.isChronic == null ? 'Unspecified' : item.isChronic ? 'Yes' : 'No';
 
       // Convert the rest of the item properties and handle the date separately
       let rowData = [
@@ -368,7 +424,7 @@ function PatientPrescriptionScreen(props) {
         item.frequencyPerDay,
         item.instruction,
         formatDate(new Date(item.startDate), true), // Assuming formatDate() formats the date as needed
-        formatDate(new Date(item.endDate), true),
+        item.endDate ? formatDate(new Date(item.endDate), true) : 'Ongoing',
         afterMeal,
         item.prescriptionRemarks,
         isChronic,
@@ -398,6 +454,16 @@ function PatientPrescriptionScreen(props) {
     <ActivityIndicator visible />
   ) : (
     <View testID={testID} style={styles.container}>
+      {isError && (
+        <TouchableOpacity
+          testID="home_prescription_retry"
+          onPress={refreshPrescriptionData}
+        >
+          <Text>
+            Prescription records could not be loaded. Retry prescriptions
+          </Text>
+        </TouchableOpacity>
+      )}
       <View style={{ justifyContent: 'space-between' }}>
         <View style={{ alignSelf: 'center', marginTop: 15, maxHeight: 120 }}>
           {!isEmptyObject(patientData) ? (

@@ -1,13 +1,20 @@
 // Libs
-import React, { useContext, useState, useEffect } from 'react';
-import { Alert, Keyboard, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useContext, useRef, useState, useEffect } from 'react';
+import {
+  Alert,
+  Keyboard,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+} from 'react-native';
 import { FlatList, View } from 'native-base';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 // APIs
 import doctorNoteApi from 'app/api/doctorNote';
+import { readDoctorNotePage } from 'app/utility/doctorNoteRead';
 import patientApi from 'app/api/patient';
-import { patientFromApiResponse, patientProfileLines } from 'app/utility/patientHeader';
+import { patientProfileLines } from 'app/utility/patientHeader';
 
 // Utilities
 import {
@@ -41,13 +48,15 @@ function DoctorNoteScreen(props) {
   const testID = `doctor_note_screen_${patientID}`;
 
   const navigation = useNavigation();
+  const readGeneration = useRef(0);
+  const [noteError, setNoteError] = useState(false);
+  const [headerError, setHeaderError] = useState(false);
 
   // API call related states
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [isRetry, setIsRetry] = useState(false);
   const [statusCode, setStatusCode] = useState(200);
-  const [isReloadList, setIsReloadList] = useState(true);
 
   // Patient data state
   const [patientData, setPatientData] = useState({});
@@ -87,22 +96,39 @@ function DoctorNoteScreen(props) {
   // Scrollview state
   const [isScrolling, setIsScrolling] = useState(false);
 
+  const refreshPageData = React.useCallback(async () => {
+    const generation = ++readGeneration.current;
+    setIsLoading(true);
+    setNoteData([]);
+    setOriginalNoteData([]);
+    setPatientData({});
+    const result = await readDoctorNotePage({
+      patientId: patientID,
+      readNotes: doctorNoteApi.getDoctorNote,
+      readPatient: patientApi.getPatient,
+    });
+    if (generation !== readGeneration.current) {
+      return;
+    }
+    setNoteData(result.notes);
+    setOriginalNoteData(result.notes);
+    setPatientData(result.patient);
+    setNoteError(result.noteError);
+    setHeaderError(result.headerError);
+    setIsError(result.noteError || result.headerError);
+    setIsRetry(result.noteError || result.headerError);
+    setStatusCode(result.status);
+    setIsDataInitialized(true);
+    setIsLoading(false);
+  }, [patientID]);
   useFocusEffect(
     React.useCallback(() => {
-      if (isReloadList) {
-        refreshPageData();
-      }
-    }, [isReloadList]),
+      refreshPageData();
+      return () => {
+        readGeneration.current += 1;
+      };
+    }, [refreshPageData]),
   );
-
-  const refreshPageData = () => {
-    setIsLoading(true);
-    const promiseFunction = async () => {
-      await getDoctorNote();
-      await getPatientData();
-    };
-    promiseFunction();
-  };
 
   const onClickProfile = () => {
     navigation.navigate(routes.PATIENT_PROFILE, { id: patientID });
@@ -123,52 +149,25 @@ function DoctorNoteScreen(props) {
     });
   };
 
-  const getDoctorNote = async () => {
-    if (patientID) {
-      const response = await doctorNoteApi.getDoctorNote(patientID);
-      if (response.ok) {
-        setOriginalNoteData([...response.data.data]);
-        setNoteData([...response.data.data]);
-        setIsDataInitialized(true);
-        setIsLoading(false);
-        setIsError(false);
-        setIsRetry(false);
-        setStatusCode(response.status);
-      } else {
-        console.log('Request failed with status code: ', response.status);
-        setOriginalNoteData([]);
-        setNoteData([]);
-        setIsLoading(false);
-        setIsError(true);
-        setStatusCode(response.status);
-        setIsRetry(true);
-      }
-    }
-  };
-
-  const getPatientData = async () => {
-    if (patientID) {
-      const response = await patientApi.getPatient(patientID);
-      if (response.ok) {
-        setPatientData(patientFromApiResponse(response));
-        setIsError(false);
-        setIsRetry(false);
-        setStatusCode(response.status);
-      } else {
-        console.log('Request failed with status code: ', response.status);
-        setPatientData({});
-        setIsLoading(false);
-        setIsError(true);
-        setStatusCode(response.status);
-        setIsRetry(true);
-      }
-    }
-  };
-
   return isLoading ? (
     <ActivityIndicator visible />
   ) : (
     <View style={styles.container}>
+      {(noteError || headerError) && (
+        <View testID="doctor_notes_read_error">
+          <Text>
+            {noteError
+              ? 'Doctor Notes could not be loaded.'
+              : 'The patient header could not be loaded.'}
+          </Text>
+          <TouchableOpacity
+            testID="doctor_notes_retry"
+            onPress={refreshPageData}
+          >
+            <Text>Retry Doctor Notes</Text>
+          </TouchableOpacity>
+        </View>
+      )}
       <View style={{ justifyContent: 'space-between' }}>
         <View style={{ alignSelf: 'center', marginTop: 15, maxHeight: 120 }}>
           {!isEmptyObject(patientData) ? (
@@ -182,6 +181,8 @@ function DoctorNoteScreen(props) {
               isVertical={false}
               size={90}
             />
+          ) : headerError ? (
+            <Text>Patient header unavailable</Text>
           ) : (
             <LoadingWheel />
           )}

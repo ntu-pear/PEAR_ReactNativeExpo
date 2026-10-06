@@ -18,11 +18,11 @@ import { useFocusEffect } from '@react-navigation/native';
 import AuthContext from 'app/auth/context';
 import patientApi from 'app/api/patient';
 import requestDeadline from 'app/utility/requestDeadline';
+import { loadMedicationPage } from 'app/utility/medicationPage';
 import { currentUserId } from 'app/utility/medicationAdminister';
 import {
   responseRows,
   filterMedicationHistory,
-  joinMedicationNames,
 } from 'app/utility/medicationHistory';
 
 const Control = ({ title, disabled = false, onPress, testID }) => (
@@ -68,7 +68,9 @@ export default function ManageMedicationScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      if (!permitted) return undefined;
+      if (!permitted) {
+        return undefined;
+      }
       const { mode: requestMode, page: requestPage } = listRequest;
       let active = true;
       setLoading(true);
@@ -88,22 +90,29 @@ export default function ManageMedicationScreen() {
               ? patientApi.listMyPatientsV1(actor, 'SUPERVISOR', params)
               : patientApi.listPatientsV1(params),
           );
-          if (!active) return;
-          if (!res?.ok)
+          if (!active) {
+            return;
+          }
+          if (!res?.ok) {
             throw new Error(
               `Patients could not be loaded${
                 res?.status ? ` (${res.status})` : ''
               }. Check the connection and retry.`,
             );
+          }
           const rows = responseRows(res);
           setPatients(rows);
           setPages(
             Number(res.data?.totalPages) || (rows.length ? requestPage + 1 : 0),
           );
         } catch (e) {
-          if (active) setError(e.message);
+          if (active) {
+            setError(e.message);
+          }
         } finally {
-          if (active) setLoading(false);
+          if (active) {
+            setLoading(false);
+          }
         }
       })();
       return () => {
@@ -125,31 +134,33 @@ export default function ManageMedicationScreen() {
       try {
         // Expand one patient at a time; do not fan out reads across the patient list.
         // These are course records, not Scheduler-generated doses or home prescriptions.
-        const [medRes, vocabRes] = await Promise.all([
-          requestDeadline(
-            patientApi.listPatientMedicationsV1(selected.id, {
-              pageNo: medPage,
-              pageSize: 100,
-            }),
-          ),
-          requestDeadline(patientApi.getPrescriptionListV1()),
-        ]);
-        if (!active) return;
-        if (!medRes?.ok || !vocabRes?.ok)
+        const medRes = await loadMedicationPage({
+          readCourses: patientApi.listPatientMedicationsV1,
+          readCatalogue: patientApi.getPrescriptionListV1,
+          patientId: selected.id,
+          params: { pageNo: medPage, pageSize: 100 },
+        });
+        if (!active) {
+          return;
+        }
+        if (!medRes?.ok) {
           throw new Error(
             'Medication records could not be loaded. Check the connection and retry.',
           );
+        }
         const rows = responseRows(medRes);
-        setRecords(
-          joinMedicationNames(rows, responseRows(vocabRes), selected.id),
-        );
+        setRecords(rows);
         setMedPages(
           Number(medRes.data?.totalPages) || (rows.length ? medPage + 1 : 0),
         );
       } catch (e) {
-        if (active) setRecordError(e.message);
+        if (active) {
+          setRecordError(e.message);
+        }
       } finally {
-        if (active) setRecordLoading(false);
+        if (active) {
+          setRecordLoading(false);
+        }
       }
     })();
     return () => {
@@ -157,12 +168,13 @@ export default function ManageMedicationScreen() {
     };
   }, [selected, medPage, recordRetry, permitted]);
 
-  if (!permitted)
+  if (!permitted) {
     return (
       <Text testID="medication_access_denied" style={styles.message}>
         Medication management is available to supervisors.
       </Text>
     );
+  }
   let shown = [];
   let dateError = '';
   try {
@@ -185,6 +197,10 @@ export default function ManageMedicationScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Centre Medication Records</Text>
+      <Text testID="medication_history_scope">
+        Medication courses are shown here. Administration, paused and stopped
+        event history is not available.
+      </Text>
       <View style={styles.row}>
         <Control
           title="My Patients"
@@ -239,8 +255,9 @@ export default function ManageMedicationScreen() {
         <View testID="medication_record_panel">
           <Text style={styles.title}>{selected.name}</Text>
           <Text>
-            Show courses overlapping these dates. Leave both blank to include
-            all dates, including ended courses.
+            Filter courses on the current page by overlapping dates. Check other
+            pages for further matches. Leave both blank to include all dates on
+            this page, including ended courses.
           </Text>
           <View style={styles.row}>
             <TextInput
@@ -284,7 +301,10 @@ export default function ManageMedicationScreen() {
             !recordError &&
             !dateError &&
             shown.length === 0 && (
-              <Text>No medication records in this date range.</Text>
+              <Text>
+                No courses on this page match these dates. Check other pages for
+                further matches.
+              </Text>
             )}
           {!dateError &&
             shown.map((record) => (

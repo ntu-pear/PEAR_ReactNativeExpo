@@ -3,6 +3,10 @@ import client, { PATIENT_V1_BASE } from 'app/api/client';
 import { Image } from 'react-native';
 import { uppercasePersonFields } from 'app/utility/patientFieldPolicy';
 import {
+  normalizeHomePrescription,
+  buildHomePrescription,
+} from 'app/utility/homePrescription';
+import {
   buildMedicationCourse,
   medicationCourseId,
   createCourseWriter,
@@ -54,12 +58,13 @@ const listMyPatientsV1 = (userId, roleName, params = {}) => {
     CAREGIVER: 'caregiver',
     GUARDIAN: 'guardian',
   }[String(roleName || '').toUpperCase()];
-  if (!userId || !pathRole)
+  if (!userId || !pathRole) {
     return Promise.resolve({
       ok: false,
       status: 400,
       data: { detail: 'A supported signed-in role and user are required.' },
     });
+  }
   return client.get(
     `/patients/by-${pathRole}/${encodeURIComponent(userId)}`,
     { ...params, require_auth: true, mask: true },
@@ -90,7 +95,9 @@ const listAllocationsV1 = (params = {}) => {
 
 // Parse allocation response into a normalized array
 const parseAllocations = (res) => {
-  if (!res.ok) return [];
+  if (!res.ok) {
+    return [];
+  }
   const d = res.data;
   return Array.isArray(d)
     ? d
@@ -109,7 +116,9 @@ const getAllocationMap = async () => {
   const allocations = parseAllocations(res);
   const map = {};
   for (const a of allocations) {
-    if (a.active === 'N' || a.isDeleted || a.is_deleted) continue;
+    if (a.active === 'N' || a.isDeleted || a.is_deleted) {
+      continue;
+    }
     const patientId = a.patientId ?? a.patientID ?? a.patient_id;
     if (patientId != null) {
       map[String(patientId)] = {
@@ -126,7 +135,9 @@ const getAllocationMap = async () => {
 
 // Get patient IDs allocated to a specific user (by role)
 const getMyAllocatedPatientIds = async (userId, roleName) => {
-  if (!userId || !roleName) return [];
+  if (!userId || !roleName) {
+    return [];
+  }
   const role = roleName.toLowerCase();
 
   const res = await listAllocationsV1({ skip: 0, limit: 5000 });
@@ -134,7 +145,9 @@ const getMyAllocatedPatientIds = async (userId, roleName) => {
 
   // Filter allocations where this user is assigned based on their role
   const myAllocations = allocations.filter((a) => {
-    if (a.active === 'N' || a.isDeleted || a.is_deleted) return false;
+    if (a.active === 'N' || a.isDeleted || a.is_deleted) {
+      return false;
+    }
     const caregiverId = a.caregiverId ?? a.caregiverID ?? a.caregiver_id;
     const tempCaregiverId = a.tempCaregiverId ?? a.temp_caregiver_id;
     const supervisorId = a.supervisorId ?? a.supervisorID ?? a.supervisor_id;
@@ -142,18 +155,21 @@ const getMyAllocatedPatientIds = async (userId, roleName) => {
     const gameTherapistId =
       a.gameTherapistId ?? a.gameTherapistID ?? a.game_therapist_id;
 
-    if (role.includes('supervisor'))
+    if (role.includes('supervisor')) {
       return String(supervisorId) === String(userId);
-    if (role.includes('doctor') || role.includes('physician'))
+    }
+    if (role.includes('doctor') || role.includes('physician')) {
       return String(doctorId) === String(userId);
+    }
     if (role.includes('caregiver')) {
       return (
         String(caregiverId) === String(userId) ||
         String(tempCaregiverId) === String(userId)
       );
     }
-    if (role.includes('game') || role.includes('therapist'))
+    if (role.includes('game') || role.includes('therapist')) {
       return String(gameTherapistId) === String(userId);
+    }
     // For admin or unknown roles, show all
     return true;
   });
@@ -174,7 +190,9 @@ const readPatientV1 = async (
     { require_auth, mask },
     withPatientV1Base(),
   );
-  if (!res.ok) return res;
+  if (!res.ok) {
+    return res;
+  }
 
   const raw = res.data?.data ?? res.data ?? {};
   const normalized = normalizePatientV1(raw);
@@ -228,9 +246,7 @@ const listPatientMedicationsV1 = async (patient_id, params = {}) => {
       item.prescriptionName ??
       item.PrescriptionName ??
       item.prescription_name ??
-      (item.PrescriptionListId != null
-        ? `Prescription ${item.PrescriptionListId}`
-        : ''),
+      '',
     dosage: item.dosage ?? item.Dosage ?? '',
     administerTime: String(item.administerTime ?? item.AdministerTime ?? ''),
     instruction: item.instruction ?? item.Instruction ?? '',
@@ -245,7 +261,9 @@ const listPatientMedicationsV1 = async (patient_id, params = {}) => {
     { pageNo: 0, pageSize: 100, ...params, patient_id },
     withPatientV1Base(),
   );
-  if (!res?.ok) return res;
+  if (!res?.ok) {
+    return res;
+  }
   const rows = unwrapMeds(res.data).map(normalizeMedicationRecord);
   return {
     ...res,
@@ -325,7 +343,7 @@ const listPatientAllergiesV1 = async (patient_id, params = {}) => {
   // NOTE: PATIENT_V1_BASE already includes `/api/v1`
   const url = `/get_patient_allergy/${patient_id}`;
   const res = await client.get(url, params, withPatientV1Base());
-  if (!res.ok) console.log('[ALLERGY v1][GET]', url, res.status, res.data);
+
   return res;
 };
 
@@ -358,8 +376,7 @@ const addPatientAllergyV1 = async (patient_id, data) => {
   // NOTE: PATIENT_V1_BASE already includes `/api/v1`
   const url = `/create_patient_allergy`;
   const res = await client.post(url, payload, withPatientV1Base());
-  if (!res.ok)
-    console.log('[ALLERGY v1][POST]', url, res.status, payload, res.data);
+
   return res;
 };
 
@@ -389,8 +406,7 @@ const updatePatientAllergyV1 = async (patient_id, allergy_id, data) => {
   // NOTE: PATIENT_V1_BASE already includes `/api/v1`
   const url = `/update_patient_allergy/${allergy_id}`;
   const res = await client.put(url, payload, withPatientV1Base());
-  if (!res.ok)
-    console.log('[ALLERGY v1][PUT]', url, res.status, payload, res.data);
+
   return res;
 };
 
@@ -406,7 +422,7 @@ const deletePatientAllergyV1 = async (patient_id, patient_allergy_id) => {
   // NOTE: PATIENT_V1_BASE already includes `/api/v1`
   const url = `/delete_patient_allergy/${patient_allergy_id}`;
   const res = await client.delete(url, {}, withPatientV1Base());
-  if (!res.ok) console.log('[ALLERGY v1][DELETE]', url, res.status, res.data);
+
   return res;
 };
 
@@ -414,7 +430,6 @@ const deletePatientAllergyV1 = async (patient_id, patient_allergy_id) => {
 const listPatientMobilityAidsV1 = async (patient_id) => {
   const url = v1MobilityMapListByPatientEndpoint(patient_id);
   const res = await client.get(url, {}, withPatientV1Base());
-  if (!res.ok) console.log('[MOBILITY v1][GET]', url, res.status, res.data);
 
   // normalize to UI shape
   const raw = Array.isArray(res.data) ? res.data : res.data?.data ?? [];
@@ -438,8 +453,7 @@ const addPatientMobilityV1 = async (patient_id, data) => {
   };
   const url = v1MobilityMapAddEndpoint();
   const res = await client.post(url, payload, withPatientV1Base());
-  if (!res.ok)
-    console.log('[MOBILITY v1][POST]', url, res.status, payload, res.data);
+
   return res;
 };
 
@@ -454,15 +468,14 @@ const updatePatientMobilityV1 = async (patient_id, data) => {
   };
   const url = v1MobilityMapUpdateEndpoint(mobility_id);
   const res = await client.put(url, payload, withPatientV1Base());
-  if (!res.ok)
-    console.log('[MOBILITY v1][PUT]', url, res.status, payload, res.data);
+
   return res;
 };
 
 const deletePatientMobilityV1 = async (patient_id, mobility_id) => {
   const url = v1MobilityMapDeleteEndpoint(mobility_id);
   const res = await client.delete(url, {}, withPatientV1Base());
-  if (!res.ok) console.log('[MOBILITY v1][DELETE]', url, res.status, res.data);
+
   return res;
 };
 
@@ -474,7 +487,6 @@ const listPatientVitalsV1 = async (patient_id, params = {}) => {
     withPatientV1Base(),
   );
   if (!res.ok) {
-    console.log('[VITAL v1][GET LIST]', res.status, res.data);
     throw res;
   }
 
@@ -548,7 +560,7 @@ const deletePatientVitalV1 = async (vital_id) => {
       { baseURL: PATIENT_V1_BASE, timeout: 15000, data: { vital_id } },
     );
   }
-  if (!res.ok) console.log('[VITAL v1][DELETE]', res.status, res.data);
+
   return res;
 };
 
@@ -565,7 +577,7 @@ const listPatientProblemLogsV1 = async (patient_id) => {
     {},
     withPatientV1Base(),
   );
-  if (!res.ok) console.log('[PROBLEM LOG v1][GET LIST]', res.status, res.data);
+
   return res;
 };
 
@@ -581,8 +593,7 @@ const addPatientProblemLogV1 = async (patient_id, data) => {
     payload,
     withPatientV1Base(),
   );
-  if (!res.ok)
-    console.log('[PROBLEM LOG v1][POST]', res.status, payload, res.data);
+
   return res;
 };
 
@@ -598,8 +609,7 @@ const updatePatientProblemLogV1 = async (patient_id, log_id, data) => {
     payload,
     withPatientV1Base(),
   );
-  if (!res.ok)
-    console.log('[PROBLEM LOG v1][PATCH]', res.status, payload, res.data);
+
   return res;
 };
 
@@ -610,7 +620,7 @@ const deletePatientProblemLogV1 = async (patient_id, log_id) => {
     {},
     withPatientV1Base(),
   );
-  if (!res.ok) console.log('[PROBLEM LOG v1][DELETE]', res.status, res.data);
+
   return res;
 };
 
@@ -627,8 +637,7 @@ const listPatientMedicalHistoriesV1 = async (patient_id) => {
     {},
     withPatientV1Base(),
   );
-  if (!res.ok)
-    console.log('[MEDICAL HISTORY v1][GET LIST]', res.status, res.data);
+
   return res;
 };
 
@@ -645,8 +654,7 @@ const addPatientMedicalHistoryV1 = async (patient_id, data) => {
     payload,
     withPatientV1Base(),
   );
-  if (!res.ok)
-    console.log('[MEDICAL HISTORY v1][POST]', res.status, payload, res.data);
+
   return res;
 };
 
@@ -657,80 +665,90 @@ const deletePatientMedicalHistoryV1 = async (patient_id, hx_id) => {
     {},
     withPatientV1Base(),
   );
-  if (!res.ok)
-    console.log('[MEDICAL HISTORY v1][DELETE]', res.status, res.data);
+
   return res;
 };
 
-// ---------- Prescriptions (v1) ----------
-const v1PatientPrescriptionsEndpoint = (patient_id) =>
-  `/patients/${patient_id}/prescriptions/`;
-const v1PatientPrescriptionDetailEndpoint = (patient_id, presc_id) =>
-  `/patients/${patient_id}/prescriptions/${presc_id}/`;
-
-const listPatientPrescriptionsV1 = async (patient_id) => {
+// Home prescriptions have a separate canonical Patient-service contract.
+const listPatientPrescriptionsV1 = async (patient_id, params = {}) => {
   const res = await client.get(
-    v1PatientPrescriptionsEndpoint(patient_id),
-    {},
+    '/Prescription/PatientPrescription',
+    {
+      ...params,
+      pageNo: params.pageNo ?? 0,
+      pageSize: params.pageSize ?? 100,
+      patient_id,
+      require_auth: true,
+    },
     withPatientV1Base(),
   );
-  if (!res.ok) console.log('[PRESCRIPTION v1][GET LIST]', res.status, res.data);
-  return res;
-};
-
-const addPatientPrescriptionV1 = async (patient_id, data) => {
-  const payload = {
-    prescription_list_id: data.prescriptionListID ?? 1,
-    dosage: data.dosage ?? '',
-    frequency_per_day: Number(data.frequencyPerDay) ?? 1,
-    is_chronic: data.isChronic ?? false,
-    instruction: data.instruction ?? '',
-    start_date: data.startDate ?? null,
-    end_date: data.endDate ?? null,
-    after_meal: data.afterMeal ?? false,
-    prescription_remarks: data.prescriptionRemarks ?? '',
+  if (!res?.ok) {
+    return res;
+  }
+  if (!Array.isArray(res.data?.data)) {
+    return { ...res, ok: false, problem: 'INVALID_RESPONSE' };
+  }
+  return {
+    ...res,
+    data: { ...res.data, data: res.data.data.map(normalizeHomePrescription) },
   };
-  const res = await client.post(
-    v1PatientPrescriptionsEndpoint(patient_id),
-    payload,
+};
+const writePrescription = createCourseWriter();
+const currentPrescription = async (patientId, id) => {
+  const res = await client.get(
+    `/Prescription/${medicationCourseId(id)}`,
+    { require_auth: true },
     withPatientV1Base(),
   );
-  if (!res.ok)
-    console.log('[PRESCRIPTION v1][POST]', res.status, payload, res.data);
-  return res;
+  const row = res?.data?.data;
+  if (
+    !res?.ok ||
+    String(row?.Id) !== String(id) ||
+    String(row?.PatientId) !== String(patientId) ||
+    [true, 1, '1'].includes(row?.IsDeleted)
+  ) {
+    throw new Error(
+      'The current prescription is unavailable or belongs to another patient.',
+    );
+  }
+  return row;
 };
-
-const updatePatientPrescriptionV1 = async (patient_id, presc_id, data) => {
-  const payload = {
-    prescription_list_id: data.prescriptionListID ?? 1,
-    dosage: data.dosage ?? '',
-    frequency_per_day: Number(data.frequencyPerDay) ?? 1,
-    is_chronic: data.isChronic ?? false,
-    instruction: data.instruction ?? '',
-    start_date: data.startDate ?? null,
-    end_date: data.endDate ?? null,
-    after_meal: data.afterMeal ?? false,
-    prescription_remarks: data.prescriptionRemarks ?? '',
-  };
-  const res = await client.patch(
-    v1PatientPrescriptionDetailEndpoint(patient_id, presc_id),
-    payload,
-    withPatientV1Base(),
-  );
-  if (!res.ok)
-    console.log('[PRESCRIPTION v1][PATCH]', res.status, payload, res.data);
-  return res;
-};
-
-const deletePatientPrescriptionV1 = async (patient_id, presc_id) => {
-  const res = await client.delete(
-    v1PatientPrescriptionDetailEndpoint(patient_id, presc_id),
-    {},
-    withPatientV1Base(),
-  );
-  if (!res.ok) console.log('[PRESCRIPTION v1][DELETE]', res.status, res.data);
-  return res;
-};
+const addPatientPrescriptionV1 = (patientId, form, actorId) =>
+  writePrescription(patientId, async () => {
+    const payload = buildHomePrescription({
+      patientId,
+      form,
+      actorId,
+      create: true,
+    });
+    return () => client.post('/Prescription/add', payload, withPatientV1Base());
+  });
+const updatePatientPrescriptionV1 = (patientId, id, form, actorId) =>
+  writePrescription(patientId, async () => {
+    const row = await currentPrescription(patientId, id);
+    const payload = buildHomePrescription({
+      patientId,
+      form,
+      actorId,
+      existing: row,
+    });
+    return () =>
+      client.put(
+        `/Prescription/update/${medicationCourseId(id)}`,
+        payload,
+        withPatientV1Base(),
+      );
+  });
+const deletePatientPrescriptionV1 = (patientId, id) =>
+  writePrescription(patientId, async () => {
+    await currentPrescription(patientId, id);
+    return () =>
+      client.delete(
+        `/Prescription/delete/${medicationCourseId(id)}`,
+        { require_auth: true },
+        withPatientV1Base(),
+      );
+  });
 
 // ---------- Helpers ----------
 const addPatientForm = (arr, str, patientData) => {
@@ -743,7 +761,9 @@ const addPatientForm = (arr, str, patientData) => {
       if (key === 'NRIC') {
         val = String(val || '').toUpperCase();
       }
-      if (key === 'IsChecked') continue;
+      if (key === 'IsChecked') {
+        continue;
+      }
 
       if (val instanceof Date) {
         val = val.toISOString().split('T')[0];
@@ -775,8 +795,12 @@ const getPatientList = async (maskNRIC = true, patientStatus = null) => {
     pageNo: 0,
     pageSize: 80, // Max patients fetched upfront for client-side pagination
   };
-  if (patientStatus) params.status = patientStatus;
-  if (maskNRIC !== undefined) params.mask = maskNRIC;
+  if (patientStatus) {
+    params.status = patientStatus;
+  }
+  if (maskNRIC !== undefined) {
+    params.mask = maskNRIC;
+  }
   return listPatientsV1(params);
 };
 
@@ -864,16 +888,14 @@ export const normalizePatientV1 = (p = {}) => {
 const getAllergyTypesV1 = async () => {
   const url = `/get_allergy_types`;
   const res = await client.get(url, {}, withPatientV1Base());
-  if (!res.ok)
-    console.log('[ALLERGY v1][GET TYPES]', url, res.status, res.data);
+
   return res;
 };
 
 const getAllergyReactionTypesV1 = async () => {
   const url = `/get_allergy_reaction_types`;
   const res = await client.get(url, {}, withPatientV1Base());
-  if (!res.ok)
-    console.log('[ALLERGY v1][GET REACTION TYPES]', url, res.status, res.data);
+
   return res;
 };
 
@@ -897,15 +919,25 @@ const photoAlbumListEndpoint = '/PhotoListAlbum/get_photo_list_albums';
 const personalPhotoEndpoint = '/PersonalPhoto';
 
 const unwrapArray = (data) => {
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.data)) return data.data;
-  if (Array.isArray(data?.results)) return data.results;
-  if (Array.isArray(data?.items)) return data.items;
+  if (Array.isArray(data)) {
+    return data;
+  }
+  if (Array.isArray(data?.data)) {
+    return data.data;
+  }
+  if (Array.isArray(data?.results)) {
+    return data.results;
+  }
+  if (Array.isArray(data?.items)) {
+    return data.items;
+  }
   return [];
 };
 
 const normalizeHolidayExperience = (holiday = {}) => {
-  if (!holiday || Object.keys(holiday).length === 0) return null;
+  if (!holiday || Object.keys(holiday).length === 0) {
+    return null;
+  }
   return {
     holidayExpID:
       holiday.holidayExpID ?? holiday.HolidayExpID ?? holiday.id ?? '',
@@ -1006,7 +1038,9 @@ const getPatientPhoto = async (patientID) => {
 };
 
 const appendFileIfPresent = (form, file) => {
-  if (!file || typeof file === 'string') return;
+  if (!file || typeof file === 'string') {
+    return;
+  }
   if (file.uri || file.name || file.type) {
     form.append('file', file);
   }

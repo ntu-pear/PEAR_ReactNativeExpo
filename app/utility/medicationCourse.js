@@ -92,7 +92,12 @@ export const createCourseWriter = ({
     },
   });
   return async (patientId, prepare) => {
-    const key = `@pear_course_pending:${identifier(patientId)}`;
+    let key;
+    try {
+      key = `@pear_course_pending:${identifier(patientId)}`;
+    } catch (error) {
+      return { ok: false, status: 400, data: { detail: error.message } };
+    }
     if (active.has(key)) {
       return uncertain();
     }

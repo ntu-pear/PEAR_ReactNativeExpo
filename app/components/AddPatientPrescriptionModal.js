@@ -1,5 +1,5 @@
 // Libs
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Modal, Button, VStack, Text } from 'native-base';
 import { StyleSheet, View } from 'react-native';
 
@@ -36,16 +36,15 @@ function AddPatientPrescriptionModal({
   const chronicOptions = [
     { label: 'Long Term', value: true },
     { label: 'Short Term', value: false },
-    
   ];
 
   // Options for aftermeal
   const afterMealOptions = [
     { label: 'After Meal', value: true },
     { label: 'Before Meal', value: false },
-    
+    { label: 'Does not matter', value: null },
   ];
-  
+
   // Input error states (Child components)
   // This records the error states of each child component (ones that require tracking).
   const [isDosageError, setIsDosageError] = useState(false);
@@ -53,7 +52,8 @@ function AddPatientPrescriptionModal({
   const [isInstructionError, setIsInstructionError] = useState(false);
   const [isStartDateError, setIsStartDateError] = useState(false);
   const [isEndDateError, setIsEndDateError] = useState(false);
-  const [isPrescriptionRemarksError, setIsPrescriptionRemarksError] = useState(false);
+  const [isPrescriptionRemarksError, setIsPrescriptionRemarksError] =
+    useState(false);
 
   // This useEffect enables the page to show correct error checking.
   // The main isInputErrors is responsible for the error state of the screen.
@@ -61,33 +61,33 @@ function AddPatientPrescriptionModal({
   useEffect(() => {
     setIsInputErrors(
       isDosageError ||
-      isFrequencyPerDayError ||
-      isInstructionError ||
-      isStartDateError ||
-      isEndDateError || 
-      isPrescriptionRemarksError ,
+        isFrequencyPerDayError ||
+        isInstructionError ||
+        isStartDateError ||
+        isEndDateError ||
+        isPrescriptionRemarksError,
     );
   }, [
-    isDosageError ,
-    isFrequencyPerDayError ,
-    isInstructionError ,
-    isStartDateError ,
-    isEndDateError ,
-    isPrescriptionRemarksError ,
+    isDosageError,
+    isFrequencyPerDayError,
+    isInstructionError,
+    isStartDateError,
+    isEndDateError,
+    isPrescriptionRemarksError,
   ]);
 
   // Reset form
-  const resetForm = () => {
-    setFormData({    
-      "prescriptionListID": 1,
-      "dosage": "",
-      "frequencyPerDay": "",
-      "isChronic": true,
-      "instruction": "",
-      "startDate": new Date(),
-      "endDate": new Date(),
-      "afterMeal": true,
-      "prescriptionRemarks": "",
+  const resetForm = useCallback(() => {
+    setFormData({
+      prescriptionListID: null,
+      dosage: '',
+      frequencyPerDay: '',
+      isChronic: true,
+      instruction: '',
+      startDate: new Date(),
+      endDate: new Date(),
+      afterMeal: true,
+      prescriptionRemarks: '',
     });
     setIsDosageError(false);
     setIsInstructionError(false);
@@ -95,14 +95,14 @@ function AddPatientPrescriptionModal({
     setIsStartDateError(false);
     setIsEndDateError(false);
     setIsPrescriptionRemarksError(false);
-  };
+  }, [setFormData]);
 
   // When modal is closed, reset form
   useEffect(() => {
     if (!showModal) {
       resetForm();
     }
-  }, [showModal]);
+  }, [showModal, resetForm]);
 
   const handleChange = (field, value) => {
     setFormData((prevState) => ({
@@ -115,122 +115,121 @@ function AddPatientPrescriptionModal({
   const handlePrescriptionData = (field) => (e) => {
     setFormData((prevState) => ({
       ...prevState,
-      [field]: field == 'prescriptionListID' ? parseInt(e) : e,
+      [field]: e,
     }));
   };
 
   // Handle form submission
   const handleSubmit = () => {
-    if (!isInputErrors) {
+    if (!isInputErrors && formData.prescriptionListID) {
       onSubmit(formData);
-      onClose();
     }
   };
-  
+
   return (
     <AddEditModal
       testID={testID}
       handleSubmit={handleSubmit}
-      isInputErrors={isInputErrors}
+      isInputErrors={isInputErrors || !formData.prescriptionListID}
       modalMode={modalMode}
       onClose={onClose}
       showModal={showModal}
-      modalTitle='Prescription'
-      modalContent={(
+      modalTitle="Prescription"
+      modalContent={
         <>
-        <SelectionInputField
-          testID={`${testID}_prescription_select`}
-          isRequired
-          title="Prescription"
-          value={formData.prescriptionListID}
-          dataArray={prescriptionOptions}
-          onDataChange={handlePrescriptionData('prescriptionListID')}
-        />        
-        
-        <InputField
-          testID={`${testID}_dosage`}
-          isRequired
-          title={'Dosage'}
-          value={formData.dosage}
-          onChangeText={handlePrescriptionData('dosage')}
-          onEndEditing={setIsDosageError}
-          autoCapitalize="characters"
-        />
+          <SelectionInputField
+            testID={`${testID}_prescription_select`}
+            isRequired
+            title="Prescription"
+            value={formData.prescriptionListID}
+            dataArray={prescriptionOptions}
+            onDataChange={handlePrescriptionData('prescriptionListID')}
+          />
 
-        <RadioButtonInput
-          testID={`${testID}_meal_taken_radio`}
-          title={'To be taken'}
-          isRequired={true}
-          value={formData.afterMeal}
-          dataArray={afterMealOptions}
-          onChangeData={(newValue) => handleChange('afterMeal', newValue)}
-        />
-        <InputField
-          testID={`${testID}_frequency`}
-          isRequired
-          title={'Frequency Per Day'}
-          keyboardType="numeric"
-          value={formData.frequencyPerDay}
-          onChangeText={handlePrescriptionData('frequencyPerDay')}
-          onEndEditing={setIsFrequencyPerDayError}
-          autoCapitalize='none'
-          dataType={'frequencyPerDay'}
-          isInvalid={false}
-          maxLength={2}
-        />
-        <RadioButtonInput
-          testID={`${testID}_period_radio`}
-          title={'Period'}
-          isRequired={true}
-          value={formData.isChronic}
-          dataArray={chronicOptions}
-          onChangeData={(newValue) => handleChange('isChronic', newValue)}
-        />
-        <InputField
-          testID={`${testID}_instruction`}
-          isRequired
-          title={'Instruction'}
-          value={formData.instruction}
-          onChangeText={handlePrescriptionData('instruction')}
-          onEndEditing={setIsInstructionError}
-          autoCapitalize="characters"
-        />
-        <View style={styles.dateSelectionContainer}>
-          <DateInputField
-            testID={`${testID}_start_date`}
+          <InputField
+            testID={`${testID}_dosage`}
             isRequired
-            title={'Start Date'}
-            value={formData.startDate}
-            hideDayOfWeek={true}
-            handleFormData={handlePrescriptionData('startDate')}
-            onEndEditing={setIsStartDateError}
-            minimumInputDate={new Date(new Date().getFullYear() - 20, 0, 1)}
-            maximumInputDate={formData.endDate}
+            title={'Dosage'}
+            value={formData.dosage}
+            onChangeText={handlePrescriptionData('dosage')}
+            onEndEditing={setIsDosageError}
+            autoCapitalize="characters"
           />
-        </View>  
-        <View style={styles.dateSelectionContainer}>
-          <DateInputField
-            testID={`${testID}_end_date`}
+
+          <RadioButtonInput
+            testID={`${testID}_meal_taken_radio`}
+            title={'To be taken'}
+            isRequired={true}
+            value={formData.afterMeal}
+            dataArray={afterMealOptions}
+            onChangeData={(newValue) => handleChange('afterMeal', newValue)}
+          />
+          <InputField
+            testID={`${testID}_frequency`}
             isRequired
-            title={'End Date'}
-            value={formData.endDate}
-            hideDayOfWeek={true}
-            handleFormData={handlePrescriptionData('endDate')}
-            onEndEditing={setIsEndDateError}
-            minimumInputDate={formData.startDate}
+            title={'Frequency Per Day'}
+            keyboardType="numeric"
+            value={formData.frequencyPerDay}
+            onChangeText={handlePrescriptionData('frequencyPerDay')}
+            onEndEditing={setIsFrequencyPerDayError}
+            autoCapitalize="none"
+            dataType={'frequencyPerDay'}
+            isInvalid={false}
+            maxLength={2}
           />
-        </View>
-        <InputField
-          testID={`${testID}_remarks`}
-          isRequired={true}
-          title={'Remarks'}
-          value={formData.prescriptionRemarks}
-          onChangeText={handlePrescriptionData('prescriptionRemarks')}
-          onEndEditing={setIsPrescriptionRemarksError}
-          autoCapitalize="characters"
-        />     
+          <RadioButtonInput
+            testID={`${testID}_period_radio`}
+            title={'Period'}
+            isRequired={true}
+            value={formData.isChronic}
+            dataArray={chronicOptions}
+            onChangeData={(newValue) => handleChange('isChronic', newValue)}
+          />
+          <InputField
+            testID={`${testID}_instruction`}
+            isRequired
+            title={'Instruction'}
+            value={formData.instruction}
+            onChangeText={handlePrescriptionData('instruction')}
+            onEndEditing={setIsInstructionError}
+            autoCapitalize="characters"
+          />
+          <View style={styles.dateSelectionContainer}>
+            <DateInputField
+              testID={`${testID}_start_date`}
+              isRequired
+              title={'Start Date'}
+              value={formData.startDate}
+              hideDayOfWeek={true}
+              handleFormData={handlePrescriptionData('startDate')}
+              onEndEditing={setIsStartDateError}
+              minimumInputDate={new Date(new Date().getFullYear() - 20, 0, 1)}
+              maximumInputDate={formData.endDate}
+            />
+          </View>
+          <View style={styles.dateSelectionContainer}>
+            <DateInputField
+              testID={`${testID}_end_date`}
+              isRequired
+              title={'End Date'}
+              value={formData.endDate}
+              hideDayOfWeek={true}
+              handleFormData={handlePrescriptionData('endDate')}
+              onEndEditing={setIsEndDateError}
+              minimumInputDate={formData.startDate}
+            />
+          </View>
+          <InputField
+            testID={`${testID}_remarks`}
+            isRequired={true}
+            title={'Remarks'}
+            value={formData.prescriptionRemarks}
+            onChangeText={handlePrescriptionData('prescriptionRemarks')}
+            onEndEditing={setIsPrescriptionRemarksError}
+            autoCapitalize="characters"
+          />
         </>
-      )}
+      }
     />
   );
 }

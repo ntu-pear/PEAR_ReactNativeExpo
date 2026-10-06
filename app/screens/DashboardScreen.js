@@ -1,5 +1,5 @@
 // Libs
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -29,6 +29,8 @@ import * as fav from 'app/utility/favorites';
 // API
 import scheduleApi from 'app/api/schedule';
 import patientApi from 'app/api/patient';
+import AuthContext from 'app/auth/context';
+import { loadDashboardPatients } from 'app/utility/dashboardPatients';
 
 // Configurations
 import colors from 'app/config/colors';
@@ -60,6 +62,15 @@ import {
 } from 'app/utility/parseScheduleString';
 
 function DashboardScreen({ navigation }) {
+  const { user } = useContext(AuthContext) || {};
+  const readGeneration = useRef(0);
+  const refreshRef = useRef(null);
+  useEffect(
+    () => () => {
+      readGeneration.current += 1;
+    },
+    [user],
+  );
   // View modes user can switch between (displayed as tab on top)
   const VIEW_MODES = {
     'My Patients': 'myPatients',
@@ -108,7 +119,7 @@ function DashboardScreen({ navigation }) {
   // API call related stated
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
-  const [isRetry, setIsRetry] = useState(false);
+  const [, setIsRetry] = useState(false);
   const [statusCode, setStatusCode] = useState(200);
   const [isReloadSchedule, setIsReloadSchedule] = useState(false);
 
@@ -177,7 +188,7 @@ function DashboardScreen({ navigation }) {
   useFocusEffect(
     React.useCallback(() => {
       if (isReloadSchedule) {
-        refreshSchedule();
+        refreshRef.current();
         setIsReloadSchedule(false);
       }
     }, [isReloadSchedule]),
@@ -188,17 +199,20 @@ function DashboardScreen({ navigation }) {
       let mounted = true;
       (async () => {
         const list = await fav.getAll();
-        if (mounted) setFavoriteIds(new Set(list.map(String)));
+        if (mounted) {
+          setFavoriteIds(new Set(list.map(String)));
+        }
       })();
-      return () => { mounted = false; };
-    }, [])
+      return () => {
+        mounted = false;
+      };
+    }, []),
   );
-
 
   // Refresh schedule from backend when user switches between 'My Patients' and 'All Patients'
   useEffect(() => {
-    refreshSchedule();
-  }, [viewMode]);
+    refreshRef.current({ mode: viewMode, authUser: user });
+  }, [viewMode, user]);
 
   useEffect(() => {
     updateSchedule({ tempSelectedDate: selectedDate });
@@ -206,18 +220,11 @@ function DashboardScreen({ navigation }) {
   }, [selectedDate]);
 
   useEffect(() => {
-      (async () => {
-        const list = await fav.getAll();
-        setFavoriteIds(new Set(list.map(String)));
-      })();
-    }, []);
-
-  // Refresh schedule if isRetry is set to true
-  useEffect(() => {
-    if (isRetry) {
-      refreshSchedule();
-    }
-  }, [isRetry]);
+    (async () => {
+      const list = await fav.getAll();
+      setFavoriteIds(new Set(list.map(String)));
+    })();
+  }, []);
 
   // Update activity list when weekly schedule is refreshed
   useEffect(() => {
@@ -281,189 +288,202 @@ function DashboardScreen({ navigation }) {
 
   // Set screen to loading wheel when retrieving schedule from backend
   // Note: Once the data is retrieved from backend, setIsLoading is set to false momentarily so SearchFilterBar can render and initialize data
-  const refreshSchedule = () => {
+  const refreshSchedule = async ({ mode = viewMode, authUser = user } = {}) => {
+    const generation = ++readGeneration.current;
     setIsLoading(true);
-    const promiseFunction = async () => {
-      await getPatientData();
-      if (viewMode === 'allPatients') {
-        await getPatientCountInfo();
-      }
-      if (!isError) {
-        setIsLoading(false);
-        setIsDataInitialized(true);
-        setIsLoading(true);
-      } else {
-        setIsLoading(false);
-      }
-    };
-    promiseFunction();
-  };
-
-
- // Fetch schedule for all patients from Scheduler v1 
-const getSchedule = async (tempPatientInfo = patientInfo) => {
-  try {
-    const response = await scheduleApi.getPatientWeeklySchedule();
-    if (response && response.ok && response.data) {
-      const scheduleData = response.data.Data || response.data.data || [];
-      if (!Array.isArray(scheduleData) || scheduleData.length === 0) {
-        setOriginalScheduleWeekly({});
-        setOriginalSchedule([]);
-        setSchedule([]);
-        return;
-      }
-
-      parseScheduleData({
-        tempPatientInfo,
-        tempSchedule: scheduleData,
-      });
-
-      setIsError(false);
-      setIsRetry(false);
-      setStatusCode(response.status);
-    } else {
-      console.log('[Dashboard] Schedule fetch failed:', response?.problem || response?.status);
-      setOriginalScheduleWeekly({});
-      setOriginalSchedule([]);
-      setSchedule([]);
-      setIsError(true);
-      setIsRetry(true);
-      setStatusCode(response?.status);
-    }
-  } catch (error) {
-    console.log('[Dashboard] Exception in getSchedule:', error);
-    setIsError(true);
-    setIsRetry(true);
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-//  Parse weekly schedule 
-const parseScheduleData = ({ tempPatientInfo, tempSchedule }) => {
-  if (!tempSchedule || tempSchedule.length === 0) {
-    console.log('⚠️ [Dashboard] Empty schedule data');
+    setIsError(false);
+    setIsRetry(false);
+    setPatientInfo([]);
     setOriginalScheduleWeekly({});
     setOriginalSchedule([]);
     setSchedule([]);
-    return;
-  }
+    try {
+      const patients = await loadDashboardPatients({
+        api: patientApi,
+        mode,
+        user: authUser,
+      });
+      if (generation !== readGeneration.current) {
+        return;
+      }
+      setPatientInfo(patients);
+      await getSchedule(patients, generation);
+      if (generation !== readGeneration.current) {
+        return;
+      }
+      if (mode === 'allPatients') {
+        await getPatientCountInfo(generation);
+      }
+      setIsDataInitialized(true);
+    } catch (error) {
+      if (generation === readGeneration.current) {
+        setIsError(true);
+        setIsRetry(true);
+        setStatusCode(error.status);
+      }
+    } finally {
+      if (generation === readGeneration.current) {
+        setIsLoading(false);
+      }
+    }
+  };
 
-  const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  let tempScheduleWeekly = {};
+  refreshRef.current = refreshSchedule;
 
-  tempSchedule.forEach((sched) => {
-    let scheduleDate = new Date(sched['StartDate']);
-    const patientData =
-      tempPatientInfo.find(
-        (x) =>
-          x.patientID == sched['PatientID'] ||
-          x.patientId == sched['PatientID'] ||
-          x.id == sched['PatientID']
-      ) || {};
-
-    // Skip if patient info cannot be matched
-    if (isEmptyObject(patientData)) return;
-
-    let hasAnyActivity = false;
-
-    for (let j = 0; j < daysOfWeek.length; j++) {
-      const day = daysOfWeek[j];
-      const dailyActivities = getScheduleDayValue(sched, day);
-      const parsedActivities = parseScheduleDay(
-        dailyActivities,
-        scheduleDate,
-        sched['PatientID'],
-        sched['Name'] || `${patientData.firstName ?? ''} ${patientData.lastName ?? ''}`,
-      );
-
-      if (parsedActivities.length > 0) hasAnyActivity = true;
-
-      const scheduleDateStr = scheduleDate.toISOString().split('T')[0];
-
-      if (parsedActivities.length > 0) {
-        if (!tempScheduleWeekly[scheduleDateStr]) {
-          tempScheduleWeekly[scheduleDateStr] = [];
+  // Fetch schedule for all patients from Scheduler v1
+  const getSchedule = async (
+    tempPatientInfo = patientInfo,
+    generation = readGeneration.current,
+  ) => {
+    try {
+      const response = await scheduleApi.getPatientWeeklySchedule();
+      if (generation !== readGeneration.current) {
+        return;
+      }
+      if (response && response.ok && response.data) {
+        const scheduleData = response.data.Data || response.data.data || [];
+        if (!Array.isArray(scheduleData) || scheduleData.length === 0) {
+          setOriginalScheduleWeekly({});
+          setOriginalSchedule([]);
+          setSchedule([]);
+          return;
         }
 
-        const patientDailySchedule = {
-          patientID: sched['PatientID'],
-          patientName:
-            sched['Name'] || `${patientData.firstName ?? ''} ${patientData.lastName ?? ''}`,
-          patientStartDate: sched['StartDate'],
-          patientFullName: `${patientData.firstName ?? ''} ${patientData.lastName ?? ''}`,
-          patientPreferredName: patientData.preferredName ?? '',
-          patientCaregiverName: patientData.caregiverName ?? '',
-          patientImage: sched['PatientImage'] || sched['patientImage'] || '',
-          activities: parsedActivities,
-          date: scheduleDateStr,
-        };
+        parseScheduleData({
+          tempPatientInfo,
+          tempSchedule: scheduleData,
+        });
 
-        tempScheduleWeekly[scheduleDateStr].push(patientDailySchedule);
+        setIsError(false);
+        setIsRetry(false);
+        setStatusCode(response.status);
+      } else {
+        throw Object.assign(
+          new Error('The existing schedule could not be loaded.'),
+          { status: response?.status },
+        );
       }
-
-      scheduleDate.setDate(scheduleDate.getDate() + 1);
+    } catch (error) {
+      if (generation !== readGeneration.current) {
+        return;
+      }
+      throw error;
     }
+  };
 
-    if (!hasAnyActivity) {
-      console.log(`[Dashboard] Skipping patient ${patientData.firstName} — no valid schedule`);
-    }
-  });
-
-  console.log(' [Dashboard] Parsed schedule dates:', Object.keys(tempScheduleWeekly));
-  setOriginalScheduleWeekly(tempScheduleWeekly);
-  updateSchedule({ tempScheduleWeekly });
-};
-
-//  Safe updateSchedule using ISO key
-const updateSchedule = ({
-  tempScheduleWeekly = originalScheduleWeekly,
-  tempSelectedDate = selectedDate,
-}) => {
-  try {
-    if (!tempScheduleWeekly || typeof tempScheduleWeekly !== 'object') {
-      console.warn('⚠️ [Dashboard] updateSchedule() invalid:', tempScheduleWeekly);
+  //  Parse weekly schedule
+  const parseScheduleData = ({ tempPatientInfo, tempSchedule }) => {
+    if (!tempSchedule || tempSchedule.length === 0) {
+      setOriginalScheduleWeekly({});
       setOriginalSchedule([]);
       setSchedule([]);
       return;
     }
 
-    const currentDate = tempSelectedDate.toISOString().split('T')[0];
-    const dailySchedule = tempScheduleWeekly[currentDate] ?? [];
-    console.log(' Dashboard] All available dates:', Object.keys(tempScheduleWeekly));
-    console.log('[Dashboard] Selected date key:', currentDate);
-    console.log('[Dashboard] tempScheduleWeekly:', JSON.stringify(tempScheduleWeekly, null, 2).substring(0, 800));
-    console.log('[Dashboard] Updating schedule for', currentDate, '| Items:', dailySchedule.length);
+    const daysOfWeek = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ];
+    let tempScheduleWeekly = {};
 
-    setOriginalSchedule([...dailySchedule]);
-    setSchedule([...dailySchedule]);
-  } catch (error) {
-    console.error('Error updating schedule:', error);
-    Alert.alert('Error', 'There was an error updating the schedule. Please try again later.', [{ text: 'OK' }]);
-  }
-};
+    tempSchedule.forEach((sched) => {
+      let scheduleDate = new Date(sched['StartDate']);
+      const patientData =
+        tempPatientInfo.find(
+          (x) =>
+            String(x.patientID) === String(sched['PatientID']) ||
+            String(x.patientId) === String(sched['PatientID']) ||
+            String(x.id) === String(sched['PatientID']),
+        ) || {};
 
+      // Skip if patient info cannot be matched
+      if (isEmptyObject(patientData)) {
+        return;
+      }
 
-  const getPatientData = async () => {
-    const response =
-      viewMode === 'myPatients'
-        ? // ? await patientApi.getPatientListByLoggedInCaregiver(undefined, status)
-          await patientApi.getPatientList(undefined, '') // actually supposed to be active patients only but rn schedule returns for inactive patiens also
-        : await patientApi.getPatientList(undefined, '');
+      let hasAnyActivity = false;
 
-    if (response.ok) {
-      setPatientInfo([...response.data.data]);
-      await getSchedule([...response.data.data]);
-      setIsError(false);
-      setIsRetry(false);
-      setStatusCode(response.status);
-    } else {
-      console.log('Error getting schedule:', response);
-      setIsError(true);
-      setStatusCode(response.status);
-      setIsRetry(true);
+      for (let j = 0; j < daysOfWeek.length; j++) {
+        const day = daysOfWeek[j];
+        const dailyActivities = getScheduleDayValue(sched, day);
+        const parsedActivities = parseScheduleDay(
+          dailyActivities,
+          scheduleDate,
+          sched['PatientID'],
+          sched['Name'] ||
+            `${patientData.firstName ?? ''} ${patientData.lastName ?? ''}`,
+        );
+
+        if (parsedActivities.length > 0) {
+          hasAnyActivity = true;
+        }
+
+        const scheduleDateStr = scheduleDate.toISOString().split('T')[0];
+
+        if (parsedActivities.length > 0) {
+          if (!tempScheduleWeekly[scheduleDateStr]) {
+            tempScheduleWeekly[scheduleDateStr] = [];
+          }
+
+          const patientDailySchedule = {
+            patientID: sched['PatientID'],
+            patientName:
+              sched['Name'] ||
+              `${patientData.firstName ?? ''} ${patientData.lastName ?? ''}`,
+            patientStartDate: sched['StartDate'],
+            patientFullName: `${patientData.firstName ?? ''} ${
+              patientData.lastName ?? ''
+            }`,
+            patientPreferredName: patientData.preferredName ?? '',
+            patientCaregiverName: patientData.caregiverName ?? '',
+            patientImage: sched['PatientImage'] || sched['patientImage'] || '',
+            activities: parsedActivities,
+            date: scheduleDateStr,
+          };
+
+          tempScheduleWeekly[scheduleDateStr].push(patientDailySchedule);
+        }
+
+        scheduleDate.setDate(scheduleDate.getDate() + 1);
+      }
+
+      if (!hasAnyActivity) {
+      }
+    });
+
+    setOriginalScheduleWeekly(tempScheduleWeekly);
+    updateSchedule({ tempScheduleWeekly });
+  };
+
+  //  Safe updateSchedule using ISO key
+  const updateSchedule = ({
+    tempScheduleWeekly = originalScheduleWeekly,
+    tempSelectedDate = selectedDate,
+  }) => {
+    try {
+      if (!tempScheduleWeekly || typeof tempScheduleWeekly !== 'object') {
+        setOriginalSchedule([]);
+        setSchedule([]);
+        return;
+      }
+
+      const currentDate = tempSelectedDate.toISOString().split('T')[0];
+      const dailySchedule = tempScheduleWeekly[currentDate] ?? [];
+
+      setOriginalSchedule([...dailySchedule]);
+      setSchedule([...dailySchedule]);
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        'There was an error updating the schedule. Please try again later.',
+        [{ text: 'OK' }],
+      );
     }
-    setIsLoading(false);
   };
 
   // Get list of activities from patient data
@@ -489,8 +509,11 @@ const updateSchedule = ({
   };
 
   // Retrieve cargivers patient count list from backend
-  const getPatientCountInfo = async () => {
+  const getPatientCountInfo = async (generation) => {
     const response = await patientApi.getPatientStatusCountList();
+    if (generation !== readGeneration.current) {
+      return;
+    }
 
     if (response.ok) {
       setPatientCountInfo(response.data);
@@ -635,17 +658,21 @@ const updateSchedule = ({
 
   const checkAllEmptySchedules = (tempSchedule = []) => {
     for (let i = 0; i < tempSchedule.length; i++) {
-      if (tempSchedule[i]?.activities?.length > 0) return false;
+      if (tempSchedule[i]?.activities?.length > 0) {
+        return false;
+      }
     }
     return true;
   };
-  
+
   const visibleSchedules = React.useMemo(() => {
-      if (!showFavOnly) return schedule || [];
-      return (schedule || []).filter(s =>
-        favoriteIds.has(String(s.patientID ?? s.PatientId ?? s.patientId))
-      );
-    }, [schedule, showFavOnly, favoriteIds]);
+    if (!showFavOnly) {
+      return schedule || [];
+    }
+    return (schedule || []).filter((s) =>
+      favoriteIds.has(String(s.patientID ?? s.PatientId ?? s.patientId)),
+    );
+  }, [schedule, showFavOnly, favoriteIds]);
 
   // const handlePullToRefresh = () => {
   //   refreshSchedule();
@@ -661,7 +688,6 @@ const updateSchedule = ({
     updateSchedule({ tempSelectedDate: today });
     setScheduleXOffset(tempOffset);
     setIsDataInitialized(true);
-    console.log('XOffset', scheduleXOffset);
 
     setIsReloadSchedule(true);
   };
@@ -757,14 +783,14 @@ const updateSchedule = ({
             </View>
           </Stack>
           <Button
-            onPress={() => setShowFavOnly(v => !v)}
+            onPress={() => setShowFavOnly((v) => !v)}
             variant={showFavOnly ? 'solid' : 'outline'}
             leftIcon={<Icon as={MaterialIcons} name="star" />}
             mx="5"
             mt="2"
             mb="1"
-         >
-           {showFavOnly ? 'Showing favourites' : '⭐ Favourites only'}
+          >
+            {showFavOnly ? 'Showing favourites' : '⭐ Favourites only'}
           </Button>
           <FlatList
             ref={scheduleRef}
@@ -779,14 +805,23 @@ const updateSchedule = ({
                 true,
               )
             }
-            data={checkAllEmptySchedules(visibleSchedules) ? [] : visibleSchedules}
+            data={
+              checkAllEmptySchedules(visibleSchedules) ? [] : visibleSchedules
+            }
             renderItem={({ item, i }) => {
               return (
                 <Box style={styles.rowBox} key={item.patientID}>
                   <HStack justifyContent="space-between">
-                    <Container style={[styles.patientContainer, { position: 'relative' }]}>
+                    <Container
+                      style={[
+                        styles.patientContainer,
+                        { position: 'relative' },
+                      ]}
+                    >
                       <ProfileNameButton
-                        handleOnPress={() => onClickPatientProfile(item.patientID)}
+                        handleOnPress={() =>
+                          onClickPatientProfile(item.patientID)
+                        }
                         profileLineOne={item.patientPreferredName}
                         profilePicture={item.patientImage}
                         isPatient={true}
@@ -804,14 +839,20 @@ const updateSchedule = ({
 
                       {viewMode == 'allPatients' ? (
                         <>
-                          <Text style={{ textAlign: 'center' }}>Caregiver:</Text>
-                          <Text style={{ textAlign: 'center' }}>{item.patientCaregiverName}</Text>
+                          <Text style={{ textAlign: 'center' }}>
+                            Caregiver:
+                          </Text>
+                          <Text style={{ textAlign: 'center' }}>
+                            {item.patientCaregiverName}
+                          </Text>
                         </>
                       ) : null}
 
                       {showStartDate() ? (
                         <>
-                          <Text style={{ textAlign: 'center' }}>Patient Start Date:</Text>
+                          <Text style={{ textAlign: 'center' }}>
+                            Patient Start Date:
+                          </Text>
                           <Text style={{ textAlign: 'center' }}>
                             {formatDate(new Date(item.patientStartDate), true)}
                           </Text>

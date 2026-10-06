@@ -58,6 +58,7 @@ import EditDeleteUnderlay from 'app/components/swipeable-components/EditDeleteUn
 import DynamicTable from 'app/components/DynamicTable';
 import AppText from 'app/components/AppText';
 import { loadPrescriptionCatalogue } from 'app/utility/prescriptionCatalogue';
+import { loadMedicationPage } from 'app/utility/medicationPage';
 
 function PatientMedicationScreen(props) {
   let { patientID, patientId } = props.route.params;
@@ -132,11 +133,20 @@ function PatientMedicationScreen(props) {
     setIsLoading(true);
     const results = await Promise.allSettled([
       requestDeadline(
-        Promise.resolve().then(() => listPatientMedicationsV1(patientID)),
+        Promise.resolve().then(() =>
+          loadMedicationPage({
+            readCourses: listPatientMedicationsV1,
+            readCatalogue: patientApi.getPrescriptionListV1,
+            patientId: patientID,
+            allCourses: true,
+          }),
+        ),
       ),
       requestDeadline(Promise.resolve().then(() => readPatientV1(patientID))),
     ]);
-    if (current !== readGeneration.current) return;
+    if (current !== readGeneration.current) {
+      return;
+    }
     const [medRes, patientRes] = results.map((result) =>
       result.status === 'fulfilled' ? result.value : null,
     );
@@ -162,7 +172,8 @@ function PatientMedicationScreen(props) {
       (medTimes.length ? medTimes : ['']).forEach((time) => {
         tempMedData.push({
           medID: item.medicationID,
-          medName: item.prescriptionName,
+          medName: item.prescriptionName || 'Drug name unavailable',
+          nameResolved: Boolean(item.prescriptionName),
           medDosage: item.dosage,
           medTime: time ? convertTimeMilitary(time) : '',
           medNote: item.instruction,
@@ -371,6 +382,13 @@ function PatientMedicationScreen(props) {
 
   const onClickAdminister = (index) => {
     const tempData = data[index];
+    if (!tempData.nameResolved) {
+      Alert.alert(
+        'Drug name unavailable',
+        'Reload the medication catalogue before recording this dose.',
+      );
+      return;
+    }
     confirmAndLogMedicationAdministration({
       user,
       patientID,

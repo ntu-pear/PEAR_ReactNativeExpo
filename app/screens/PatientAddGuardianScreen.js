@@ -6,6 +6,7 @@ import { SectionList, Center, View } from 'native-base';
 import AddPatientGuardian from 'app/components/AddPatientGuardian';
 import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import AddPatientProgress from 'app/components/AddPatientProgress';
+import { hasGuardianInput } from 'app/utility/patientCreation';
 
 function PatientAddGuardianScreen({
   nextQuestionHandler,
@@ -45,10 +46,17 @@ function PatientAddGuardianScreen({
   // errors present in the child Components or not.
   // Only check the first guardian (primary) for errors - it's required
   // Secondary guardian (index 1) is optional - can be empty or fully filled
-  let isNextDisabled = errorStates.length === 0 || errorStates[0] === true;
+  let isNextDisabled =
+    errorStates.length === 0 ||
+    errorStates[0] === true ||
+    formData.guardianInfo
+      .slice(1)
+      .some((g, i) => hasGuardianInput(g) && errorStates[i + 1] !== false);
 
   const addNewGuardianComponent = () => {
-    if (guardianCount.current >= 2) return;
+    if (guardianCount.current >= 2) {
+      return;
+    }
     guardianCount.current += 1;
     // Add new error state for new child component
     setErrorStates((prev) => [...prev, true]);

@@ -31,7 +31,9 @@ export const createMedicationRecorder = ({
   const attempts = new Map();
   const readSlot = async (args) => {
     const response = await requestDeadline(getSchedule(), timeoutMs);
-    if (!response?.ok) return { response, row: null };
+    if (!response?.ok) {
+      return { response, row: null };
+    }
     return {
       response,
       row: matchMedicationScheduleRow(
@@ -51,8 +53,9 @@ export const createMedicationRecorder = ({
         (await requestDeadline(storage.getItem(key), timeoutMs)) || 'null',
       );
       const { response, row } = await readSlot(args);
-      if (!response?.ok || !row)
+      if (!response?.ok || !row) {
         return { outcome: 'unknown', reason: 'status_unavailable' };
+      }
       if (String(row.Status ?? row.status) === '1') {
         await clear(key);
         return { outcome: 'recorded', row };
@@ -81,8 +84,9 @@ export const createMedicationRecorder = ({
       return { outcome: 'not_sent', reason: 'wrong_day' };
     }
     const key = medicationAttemptKey(args);
-    if (attempts.has(key))
+    if (attempts.has(key)) {
       return { outcome: 'unknown', reason: 'existing_attempt' };
+    }
     const attempt = { response: null };
     attempts.set(key, attempt);
     let sent = false;
@@ -103,6 +107,7 @@ export const createMedicationRecorder = ({
         attempts.delete(key);
         return { outcome: 'recorded', row };
       }
+      const payload = buildMedicationScheduleUpdate({ row, ...args });
       await requestDeadline(
         storage.setItem(key, JSON.stringify({ phase: 'pending' })),
         timeoutMs,
@@ -111,7 +116,6 @@ export const createMedicationRecorder = ({
         await clear(key);
         return { outcome: 'not_sent', reason: 'wrong_day' };
       }
-      const payload = buildMedicationScheduleUpdate({ row, ...args });
       sent = true;
       // Retain the actual write's late result. Never start a replacement write
       // because the UI deadline expired.

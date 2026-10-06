@@ -1,6 +1,5 @@
 // Libs
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import authStorage from 'app/auth/authStorage';
 import {
   Alert,
   Dimensions,
@@ -21,7 +20,10 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 // API
 import patientApi from 'app/api/patient';
-import { patientFromApiResponse, patientProfileLines } from 'app/utility/patientHeader';
+import {
+  patientFromApiResponse,
+  patientProfileLines,
+} from 'app/utility/patientHeader';
 import scheduleApi from 'app/api/schedule';
 
 // Utilities
@@ -137,14 +139,6 @@ function PatientScheduleScreen(props) {
       },
     }));
   }, [originalScheduleWeekly]);
-  useEffect(() => {
-    const checkToken = async () => {
-      const token = await authStorage.getToken('userAuthTokenV1');
-      console.log('JWT Token:', token);
-    };
-    checkToken();
-  }, []);
-  
 
   // Set isLoading to true when retrieving data
   const refreshSchedule = () => {
@@ -162,154 +156,145 @@ function PatientScheduleScreen(props) {
     promiseFunction();
   };
 
-// Fetch schedule from Scheduler v1 
-const getSchedule = async () => {
-  try {
-    const response = await scheduleApi.getPatientWeeklySchedule();
-    if (response && response.ok && response.data) {
-      const scheduleData = response.data.Data || response.data.data || [];
-      console.log('Schedule data received:', scheduleData);
+  // Fetch schedule from Scheduler v1
+  const getSchedule = async () => {
+    try {
+      const response = await scheduleApi.getPatientWeeklySchedule();
+      if (response && response.ok && response.data) {
+        const scheduleData = response.data.Data || response.data.data || [];
 
-      if (!Array.isArray(scheduleData) || scheduleData.length === 0) {
-        console.log(' No schedule data returned from server');
-        setOriginalScheduleWeekly([]);
-        setScheduleWeekly([]);
-        return;
-      }
+        if (!Array.isArray(scheduleData) || scheduleData.length === 0) {
+          setOriginalScheduleWeekly([]);
+          setScheduleWeekly([]);
+          return;
+        }
 
-      parseScheduleData({
-        tempPatientInfo: patientInfo,
-        tempSchedule: scheduleData,
-      });
-
-      setIsError(false);
-      setIsRetry(false);
-      setStatusCode(response.status);
-      return response;
-    } else {
-      console.log('❌ Schedule fetch failed:', response?.problem || response?.status);
-      setOriginalScheduleWeekly([]);
-      setScheduleWeekly([]);
-      setIsError(true);
-      setIsRetry(true);
-      setStatusCode(response?.status);
-      return null;
-    }
-  } catch (error) {
-    console.log('🔥 Exception in getSchedule:', error);
-    setIsError(true);
-    setIsRetry(true);
-  }
-};
-
-// Get patient info from Patient Service first, then fetch schedule
-const getPatientData = async () => {
-  try {
-    if (patientID) {
-      const response = await patientApi.getPatient(patientID);
-
-      if (response && response.ok) {
-        const normalized = patientFromApiResponse(response);
-        const raw = response.data.data || {};
-        setPatientInfo({
-          ...normalized,
-          patientAllocationDTO: raw.PatientAllocationDTO || raw.patientAllocationDTO || {},
+        parseScheduleData({
+          tempPatientInfo: patientInfo,
+          tempSchedule: scheduleData,
         });
-
-
-        const scheduleResponse = await getSchedule();
 
         setIsError(false);
         setIsRetry(false);
         setStatusCode(response.status);
+        return response;
       } else {
-        setPatientInfo({});
+        setOriginalScheduleWeekly([]);
+        setScheduleWeekly([]);
         setIsError(true);
-        setStatusCode(response?.status);
         setIsRetry(true);
+        setStatusCode(response?.status);
+        return null;
       }
+    } catch (error) {
+      setIsError(true);
+      setIsRetry(true);
     }
-  } catch (error) {
-    setIsError(true);
-    setIsRetry(true);
-  }
-};
+  };
 
-const parseScheduleData = ({ tempPatientInfo, tempSchedule }) => {
-  if (!tempSchedule || tempSchedule.length === 0) {
-    console.log('Empty or invalid schedule data:', tempSchedule);
-    setOriginalScheduleWeekly([]);
-    setScheduleWeekly([]);
-    return;
-  }
+  // Get patient info from Patient Service first, then fetch schedule
+  const getPatientData = async () => {
+    try {
+      if (patientID) {
+        const response = await patientApi.getPatient(patientID);
 
-  // Find the correct schedule entry for this patient
-  const matchedSchedule = tempSchedule.find(
-    (s) =>
-      s.PatientID === patientID ||
-      s.PatientID === tempPatientInfo?.id ||
-      s.PatientID === tempPatientInfo?.patientID
-  );
+        if (response && response.ok) {
+          const normalized = patientFromApiResponse(response);
+          const raw = response.data.data || {};
+          setPatientInfo({
+            ...normalized,
+            patientAllocationDTO:
+              raw.PatientAllocationDTO || raw.patientAllocationDTO || {},
+          });
 
-  if (!matchedSchedule) {
-    console.log(`No schedule found for patient ID ${patientID}`);
-    setOriginalScheduleWeekly([]);
-    setScheduleWeekly([]);
-    return;
-  }
+          const scheduleResponse = await getSchedule();
 
-  console.log(`Found schedule for patient ${matchedSchedule.Name} (ID ${matchedSchedule.PatientID})`);
+          setIsError(false);
+          setIsRetry(false);
+          setStatusCode(response.status);
+        } else {
+          setPatientInfo({});
+          setIsError(true);
+          setStatusCode(response?.status);
+          setIsRetry(true);
+        }
+      }
+    } catch (error) {
+      setIsError(true);
+      setIsRetry(true);
+    }
+  };
 
-  const daysOfWeek = [
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-    'Sunday',
-  ];
+  const parseScheduleData = ({ tempPatientInfo, tempSchedule }) => {
+    if (!tempSchedule || tempSchedule.length === 0) {
+      setOriginalScheduleWeekly([]);
+      setScheduleWeekly([]);
+      return;
+    }
 
-  let tempScheduleWeekly = [];
-  let scheduleDate = new Date(matchedSchedule['StartDate']);
+    // Find the correct schedule entry for this patient
+    const matchedSchedule = tempSchedule.find(
+      (s) =>
+        s.PatientID === patientID ||
+        s.PatientID === tempPatientInfo?.id ||
+        s.PatientID === tempPatientInfo?.patientID,
+    );
 
-  for (let j = 0; j < daysOfWeek.length; j++) {
-    const day = daysOfWeek[j];
-    const dailyActivities = getScheduleDayValue(matchedSchedule, day);
+    if (!matchedSchedule) {
+      setOriginalScheduleWeekly([]);
+      setScheduleWeekly([]);
+      return;
+    }
 
-    const patientDailySchedule = {
-      patientID: matchedSchedule['PatientID'],
-      patientName: matchedSchedule['Name'],
-      patientStartDate: matchedSchedule['StartDate'],
-      patientFullName:
-        (tempPatientInfo['firstName'] || '') +
-        ' ' +
-        (tempPatientInfo['lastName'] || ''),
-      patientPreferredName: tempPatientInfo['preferredName'] || '',
-      patientCaregiverName:
-        tempPatientInfo?.['patientAllocationDTO']?.['caregiverName'] || '',
-      activities: parseScheduleDay(
-        dailyActivities,
-        scheduleDate,
-        matchedSchedule['PatientID'],
-        matchedSchedule['Name']
-      ),
-      date: new Date(scheduleDate),
-    };
+    const daysOfWeek = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ];
 
-    scheduleDate.setDate(scheduleDate.getDate() + 1);
-    tempScheduleWeekly.push(patientDailySchedule);
-  }
+    let tempScheduleWeekly = [];
+    let scheduleDate = new Date(matchedSchedule['StartDate']);
 
-  console.log('Parsed weekly schedule:', tempScheduleWeekly);
-  setOriginalScheduleWeekly(tempScheduleWeekly);
-  setScheduleWeekly(tempScheduleWeekly);
-};
+    for (let j = 0; j < daysOfWeek.length; j++) {
+      const day = daysOfWeek[j];
+      const dailyActivities = getScheduleDayValue(matchedSchedule, day);
+
+      const patientDailySchedule = {
+        patientID: matchedSchedule['PatientID'],
+        patientName: matchedSchedule['Name'],
+        patientStartDate: matchedSchedule['StartDate'],
+        patientFullName:
+          (tempPatientInfo['firstName'] || '') +
+          ' ' +
+          (tempPatientInfo['lastName'] || ''),
+        patientPreferredName: tempPatientInfo['preferredName'] || '',
+        patientCaregiverName:
+          tempPatientInfo?.['patientAllocationDTO']?.['caregiverName'] || '',
+        activities: parseScheduleDay(
+          dailyActivities,
+          scheduleDate,
+          matchedSchedule['PatientID'],
+          matchedSchedule['Name'],
+        ),
+        date: new Date(scheduleDate),
+      };
+
+      scheduleDate.setDate(scheduleDate.getDate() + 1);
+      tempScheduleWeekly.push(patientDailySchedule);
+    }
+
+    setOriginalScheduleWeekly(tempScheduleWeekly);
+    setScheduleWeekly(tempScheduleWeekly);
+  };
 
   // Get list of activities from patient data
   const getActivityList = (tempWeeklySchedule = originalScheduleWeekly) => {
     const activities = [];
-    console.log(tempWeeklySchedule);
+
     tempWeeklySchedule.forEach((item) => {
       item.activities.forEach((activity) => {
         if (!activities.includes(activity.activityTitle)) {
