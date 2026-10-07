@@ -19,6 +19,8 @@ export default Object.freeze({
 
   CONFIG: 'Config',
   CONFIG_SCREEN: 'ConfigScreen',
+  CENTRE_ACTIVITIES: 'CentreActivities',
+  PATIENT_ADHOC: 'PatientAdhoc',
   DASHBOARD: 'Dashboard',
   DASHBOARD_SCREEN: 'Patient Schedules',
   LOGIN: 'Login',

@@ -280,6 +280,20 @@ function PatientActivityOverviewScreen(props) {
         </Box>
       )}
 
+      {isSupervisor && (
+        <TouchableOpacity
+          style={styles.manageButton}
+          testID={`patient_adhoc_${patientID}`}
+          onPress={() =>
+            navigation.navigate(routes.PATIENT_ADHOC, { patientID })
+          }
+        >
+          <Text color="white" fontWeight="700">
+            Current-week ad hoc changes
+          </Text>
+        </TouchableOpacity>
+      )}
+
       {canManagePreferences && (
         <TouchableOpacity
           style={styles.manageButton}

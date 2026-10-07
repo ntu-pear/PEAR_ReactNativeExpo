@@ -66,3 +66,18 @@ test('invalid login does not refresh a prior session', async () => {
   ).rejects.toBeTruthy();
   expect(axios.post).not.toHaveBeenCalled();
 });
+
+test('explicit activity write opt-out never refreshes or replays a rejected mutation', async () => {
+  const axios = require('axios').default;
+  axios.post.mockClear();
+  mockRetry.mockClear();
+  require('app/api/client');
+  await expect(
+    mockInterceptor({
+      config: { url: '/adhocs/', method: 'post', pearNoAuthReplay: true },
+      response: { status: 401 },
+    }),
+  ).rejects.toBeTruthy();
+  expect(axios.post).not.toHaveBeenCalled();
+  expect(mockRetry).not.toHaveBeenCalled();
+});

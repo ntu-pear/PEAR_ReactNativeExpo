@@ -398,27 +398,94 @@ const normalizeExclusion = (exclusion = {}) => ({
 // Existing patient-scoped aggregate used by PEAR_WebFE origin/main.
 // Never fall back to a global collection or fan out on an auth/transport failure.
 const getPatientActivityAggregate = async (patientID) => {
+  let requestedId;
+  try {
+    requestedId = activityEntityId(patientID);
+  } catch {
+    return { ok: false, problem: 'INVALID_REQUEST' };
+  }
   const res = await client.get(
-    `/aggregated/activity-preference-table/patient/${patientID}`,
+    `/aggregated/activity-preference-table/patient/${requestedId}`,
     { include_deleted: false },
     withActivityV1Base(),
   );
-  if (!res?.ok) return res;
-  const payload = res.data;
-  const fields = [
-    'activities',
-    'centre_activities',
-    'preferences',
-    'recommendations',
-    'exclusions',
-    'patients',
-  ];
-  if (
-    !fields.every((key) => Array.isArray(payload?.[key])) ||
-    !payload.patients.some(
-      (patient) => String(patient.id) === String(patientID),
-    )
-  ) {
+  if (!res?.ok) {
+    return res;
+  }
+  try {
+    const payload = res.data;
+    const fields = [
+      'activities',
+      'centre_activities',
+      'preferences',
+      'recommendations',
+      'exclusions',
+      'patients',
+    ];
+    if (!fields.every((key) => Array.isArray(payload?.[key]))) {
+      throw new Error('Incomplete aggregate');
+    }
+    const selected = payload.patients.filter(
+      (patient) => String(activityEntityId(patient.id)) === String(requestedId),
+    );
+    if (selected.length !== 1) {
+      throw new Error('Ambiguous patient');
+    }
+    const activitiesList = payload.activities.filter(
+      (row) => !isDeletedRow(row),
+    );
+    const centreList = payload.centre_activities.filter(
+      (row) => !isDeletedRow(row),
+    );
+    const titleMap = buildActivityTitleMap(centreList, activitiesList);
+    const scoped = (rows, normalize) =>
+      rows
+        .filter((row) => !isDeletedRow(row))
+        .map((row) => {
+          const normalized = normalize(row);
+          const id = activityEntityId(normalized.patientID);
+          const aliases = [row.patient_id, row.patientID, row.PatientID].filter(
+            (value) => value != null,
+          );
+          if (
+            !aliases.length ||
+            aliases.some(
+              (value) => String(activityEntityId(value)) !== String(id),
+            )
+          ) {
+            throw new Error('Conflicting patient identity');
+          }
+          activityEntityId(normalized.centreActivityID);
+          return normalized;
+        })
+        .filter((row) => String(row.patientID) === String(requestedId));
+    const preferences = scoped(payload.preferences, normalizePreference);
+    const recommendations = scoped(
+      payload.recommendations,
+      normalizeRecommendation,
+    );
+    const exclusions = scoped(payload.exclusions, normalizeExclusion);
+    return {
+      ...res,
+      data: {
+        // Exact explicitly returned identity, without retaining raw patient demographics.
+        patientID: activityEntityId(selected[0].id),
+        // Eligibility must retain active restrictions even when their display title is unavailable.
+        eligibility: { preferences, recommendations, exclusions },
+        preferences: mergeCataloguePreferences(
+          centreList,
+          activitiesList,
+          preferences,
+        ),
+        recommendations: keepNamedActivities(
+          applyActivityTitles(recommendations, titleMap),
+        ),
+        exclusions: keepNamedActivities(
+          applyActivityTitles(exclusions, titleMap),
+        ),
+      },
+    };
+  } catch {
     return {
       ...res,
       ok: false,
@@ -428,38 +495,6 @@ const getPatientActivityAggregate = async (patientID) => {
       },
     };
   }
-  const activitiesList = payload.activities.filter((row) => !isDeletedRow(row));
-  const centreList = payload.centre_activities.filter(
-    (row) => !isDeletedRow(row),
-  );
-  const titleMap = buildActivityTitleMap(centreList, activitiesList);
-  const scoped = (rows, normalize) =>
-    rows
-      .filter((row) => !isDeletedRow(row))
-      .map(normalize)
-      .filter((row) => String(row.patientID) === String(patientID));
-  return {
-    ...res,
-    data: {
-      preferences: mergeCataloguePreferences(
-        centreList,
-        activitiesList,
-        scoped(payload.preferences, normalizePreference),
-      ),
-      recommendations: keepNamedActivities(
-        applyActivityTitles(
-          scoped(payload.recommendations, normalizeRecommendation),
-          titleMap,
-        ),
-      ),
-      exclusions: keepNamedActivities(
-        applyActivityTitles(
-          scoped(payload.exclusions, normalizeExclusion),
-          titleMap,
-        ),
-      ),
-    },
-  };
 };
 
 const isEmptyRecommendationsNotFound = (res) => {

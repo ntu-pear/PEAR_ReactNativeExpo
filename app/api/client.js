@@ -89,6 +89,7 @@ client.axiosInstance.interceptors.response.use(
     // Only handle 401 and only retry once per request
     if (
       error.response?.status !== 401 ||
+      originalRequest?.pearNoAuthReplay ||
       !originalRequest ||
       originalRequest._retry ||
       /\/login\/?$|\/refresh\/?$/.test(originalRequest.url || '')
