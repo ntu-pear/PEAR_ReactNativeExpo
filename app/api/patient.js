@@ -225,23 +225,52 @@ const listPatientMedicationsV1 = async (patient_id, params = {}) => {
     };
   }
 
-  const unwrapMeds = (data) =>
-    Array.isArray(data)
-      ? data
-      : Array.isArray(data?.data)
-      ? data.data
-      : Array.isArray(data?.results)
-      ? data.results
-      : [];
+  const unwrapMeds = (data) => {
+    if (Array.isArray(data)) {
+      return data;
+    }
+    if (Array.isArray(data?.data)) {
+      return data.data;
+    }
+    if (Array.isArray(data?.results)) {
+      return data.results;
+    }
+    throw new Error('The server returned an invalid medication list.');
+  };
+  let requestedPatientId;
+  try {
+    requestedPatientId = medicationCourseId(patient_id);
+  } catch {
+    return {
+      ok: false,
+      status: 400,
+      problem: 'INVALID_REQUEST',
+      data: { detail: 'A lossless patient identifier is required.' },
+    };
+  }
+  const returnedPatientId = (item) => {
+    const values = [item.patientID, item.PatientId, item.patient_id].filter(
+      (value) => value != null,
+    );
+    const id = medicationCourseId(values[0]);
+    if (
+      values.some(
+        (value) =>
+          String(medicationCourseId(value)) !== String(requestedPatientId),
+      )
+    ) {
+      throw new Error('Medication records do not match the selected patient.');
+    }
+    return id;
+  };
 
   const normalizeMedicationRecord = (item = {}) => ({
     prescriptionListID: item.PrescriptionListId ?? item.prescriptionListId,
     isDeleted: [true, 1, '1', 'true'].includes(
       item.IsDeleted ?? item.isDeleted,
     ),
-    medicationID: item.medicationID ?? item.Id ?? item.id,
-    patientID:
-      item.patientID ?? item.PatientId ?? item.patient_id ?? patient_id,
+    medicationID: medicationCourseId(item.medicationID ?? item.Id ?? item.id),
+    patientID: returnedPatientId(item),
     prescriptionName:
       item.prescriptionName ??
       item.PrescriptionName ??
@@ -264,7 +293,20 @@ const listPatientMedicationsV1 = async (patient_id, params = {}) => {
   if (!res?.ok) {
     return res;
   }
-  const rows = unwrapMeds(res.data).map(normalizeMedicationRecord);
+  let rows;
+  try {
+    rows = unwrapMeds(res.data).map(normalizeMedicationRecord);
+  } catch {
+    return {
+      ...res,
+      ok: false,
+      problem: 'INVALID_RESPONSE',
+      data: {
+        detail:
+          'The medication list is invalid or does not match the selected patient. Retry.',
+      },
+    };
+  }
   return {
     ...res,
     data: {

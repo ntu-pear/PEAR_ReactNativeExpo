@@ -245,7 +245,9 @@ describe('migration API adapters', () => {
     mockClient.get.mockResolvedValueOnce({
       ok: false,
       status: 404,
-      data: { detail: 'No Centre Activity Recommendations found for Patient ID 12' },
+      data: {
+        detail: 'No Centre Activity Recommendations found for Patient ID 12',
+      },
     });
 
     const response = await activityApi.getActivityRecommendations(12);
@@ -334,7 +336,12 @@ describe('migration API adapters', () => {
       },
     });
 
-    const response = await notificationApi.getNotificationOfUser(false, 0, 20, '');
+    const response = await notificationApi.getNotificationOfUser(
+      false,
+      0,
+      20,
+      '',
+    );
 
     expect(mockClient.get).toHaveBeenCalledWith(
       '/Notification/User',
@@ -415,16 +422,27 @@ describe('migration API adapters', () => {
   });
 
   test('activity title map fills untitled centre activities from the catalog', () => {
-    const { applyActivityTitles, buildActivityTitleMap, isMissingActivityTitle } = require('app/api/activity');
+    const {
+      applyActivityTitles,
+      buildActivityTitleMap,
+      isMissingActivityTitle,
+    } = require('app/api/activity');
     const map = buildActivityTitleMap(
-      [{ centreActivityID: 22, activityID: 5, activityTitle: 'Untitled Activity' }],
+      [
+        {
+          centreActivityID: 22,
+          activityID: 5,
+          activityTitle: 'Untitled Activity',
+        },
+      ],
       [{ id: 5, title: 'Mahjong' }],
     );
 
     expect(isMissingActivityTitle('Untitled Activity')).toBe(true);
     expect(map['22']).toBe('Mahjong');
     expect(
-      applyActivityTitles([{ centreActivityID: 22, activityTitle: '' }], map)[0].activityTitle,
+      applyActivityTitles([{ centreActivityID: 22, activityTitle: '' }], map)[0]
+        .activityTitle,
     ).toBe('Mahjong');
   });
 
@@ -498,7 +516,11 @@ describe('migration API adapters', () => {
 
   test('create activity exclusion posts dated payload like web main', async () => {
     const activityApi = require('app/api/activity').default;
-    mockClient.post.mockResolvedValueOnce({ ok: true, status: 201, data: { id: 4 } });
+    mockClient.post.mockResolvedValueOnce({
+      ok: true,
+      status: 201,
+      data: { id: 4 },
+    });
 
     const response = await activityApi.createActivityExclusion({
       centreActivityID: 22,
@@ -564,6 +586,7 @@ describe('migration API adapters', () => {
         data: [
           {
             Id: 9,
+            PatientId: 1,
             PrescriptionName: 'Ibuprofen',
             Dosage: '1 tab',
             AdministerTime: '09:00',
@@ -585,6 +608,7 @@ describe('migration API adapters', () => {
     expect(response.data.data[0]).toEqual(
       expect.objectContaining({
         medicationID: 9,
+        patientID: 1,
         prescriptionName: 'Ibuprofen',
         administerTime: '09:00',
         dosage: '1 tab',
