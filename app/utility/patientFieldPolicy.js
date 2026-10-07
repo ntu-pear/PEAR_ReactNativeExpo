@@ -152,3 +152,58 @@ export const buildPatientInfoUpdate = ({
   result.modifiedDate = now.toISOString();
   return uppercasePersonFields(result);
 };
+
+export const resolvePreferredLanguage = (value, options = []) => {
+  if (typeof value !== 'string' && typeof value !== 'number') {
+    return 0;
+  }
+  const text = String(value).trim();
+  if (!text) {
+    return 0;
+  }
+  const match = (Array.isArray(options) ? options : []).find(
+    (option) =>
+      option &&
+      (String(option.value) === text ||
+        (typeof value === 'string' &&
+          String(option.label ?? '')
+            .trim()
+            .toLowerCase() === text.toLowerCase())),
+  );
+  return match?.value ?? 0;
+};
+
+export const buildPatientPreferencesUpdate = ({
+  record,
+  patientId,
+  userId,
+  preferredName,
+  preferredLanguageId,
+  languageOptions,
+}) => {
+  if (typeof preferredName !== 'string' || !preferredName.trim()) {
+    throw new Error('Enter a preferred name.');
+  }
+  const language = languageOptions?.find(
+    (option) => String(option.value) === String(preferredLanguageId),
+  );
+  const id = language?.value;
+  const valid =
+    (typeof id === 'number' && Number.isSafeInteger(id) && id > 0) ||
+    (typeof id === 'string' && /^0*[1-9]\d*$/.test(id));
+  if (!valid) {
+    throw new Error('Choose an available preferred language.');
+  }
+  const result = buildPatientInfoUpdate({
+    record,
+    patientId,
+    userId,
+    edits: {},
+    changedFields: new Set(),
+  });
+  return {
+    ...result,
+    preferredName: preferredName.trim().toUpperCase(),
+    preferredLanguageId: id,
+  };
+};

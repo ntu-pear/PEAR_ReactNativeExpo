@@ -1,303 +1,318 @@
-// Libs
-import React, { useState, useEffect, useCallback, useContext } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useContext,
+  useMemo,
+  useCallback,
+} from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
-import { Box, VStack, FlatList } from 'native-base'
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
-
-// Configurations
+import { Box, VStack, FlatList, Text } from 'native-base';
+import { useNavigation } from '@react-navigation/native';
 import routes from 'app/navigation/routes';
-
-// Hooks
 import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
-
-// Auth
 import AuthContext from 'app/auth/context';
-
-// APIs
-import patientApi from 'app/api/patient';
-
-// Components
+import client, { PATIENT_V1_BASE } from 'app/api/client';
 import AppButton from 'app/components/AppButton';
 import SelectionInputField from 'app/components/input-components/SelectionInputField';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import InputField from 'app/components/input-components/InputField';
+import { currentUserId } from 'app/utility/medicationAdminister';
+import requestDeadline from 'app/utility/requestDeadline';
+import {
+  opaqueId,
+  resolvePreferredLanguage,
+  buildPatientPreferencesUpdate,
+} from 'app/utility/patientFieldPolicy';
 
-// Utilities
-import { parseSelectOptions } from 'app/utility/miscFunctions';
+const initialDraft = (owner, name, language) => ({
+  owner,
+  name,
+  language,
+  languageEdited: false,
+  nameError: false,
+});
+const validOption = (option) =>
+  option &&
+  typeof option.label === 'string' &&
+  ((typeof option.value === 'number' &&
+    Number.isSafeInteger(option.value) &&
+    option.value > 0) ||
+    (typeof option.value === 'string' && /^0*[1-9]\d*$/.test(option.value)));
 
 function EditPatientPreferencesScreen(props) {
   const { patientProfile } = props.route.params;
-  const [isLoading, setIsLoading] = useState(true);
-
-  const { setUser } = useContext(AuthContext);
-  
   const navigation = useNavigation();
-  
-  // Variables relatied to retrieving preferred language select options from API
+  const { user } = useContext(AuthContext);
   const {
-    data: languageData,
+    data: languages,
     isError: languageError,
     isLoading: languageLoading,
   } = useGetSelectionOptions('Language');
-
-  // Set initial value for preferred language select field
-  const [listOfLanguages, setListOfLanguages] = useState(
-    parseSelectOptions([
-      'Cantonese',
-      'English',
-      'Hainanese',
-      'Hakka',
-      'Hindi',
-      'Hokkien',
-      'Malay',
-      'Mandarin',
-      'Tamil',
-      'Teochew',
-      'Japanese',
-      'Spanish',
-      'Korean',
-    ]),
+  const options = useMemo(
+    () => (Array.isArray(languages) ? languages.filter(validOption) : []),
+    [languages],
   );
-
-  // Screen error state: This = true when the child components report error(input fields)
-  // Enables use of dynamic rendering of components when the page error = true/false.
-  const [isInputErrors, setIsInputErrors] = useState(false);
-
-  // Input error states (Child components)
-  // This records the error states of each child component (ones that require tracking).
-  const [isPrefNameError, setIsPrefNameError] = useState(false);
-  const [isPrefLanguageError, setIsPrefLanguageError] = useState(false);
-
-  // States for getting list of preferred names
-  const [isPrefNamesLoading, setIsPrefNamesLoading] = useState(false);
-  const [prefNames, setPrefNames] = useState([]);
-
-  // Patient data to be submitted
-  const [formData, setFormData] = useState({
-    PatientID: patientProfile.patientID,
-    PreferredLanguageListID: parseSelectOptions([
-      'Cantonese',
-      'English',
-      'Hainanese',
-      'Hakka',
-      'Hindi',
-      'Hokkien',
-      'Malay',
-      'Mandarin',
-      'Tamil',
-      'Teochew',
-      'Japanese',
-      'Spanish',
-      'Korean',
-    ]).filter((item) => item.label === patientProfile.preferredLanguage)[0].value,
-    PrefLanguage: patientProfile.preferredLanguage,
-    FirstName: patientProfile.firstName,
-    LastName: patientProfile.lastName,
-    NRIC: patientProfile.nric,
-    Address: patientProfile.address,
-    PostalCode: patientProfile.postalCode,
-    TempAddress: patientProfile.tempAddress,
-    TempPostalCode: patientProfile.tempPostalCode,
-    HomeNo: patientProfile.homeNo,
-    HandphoneNo: patientProfile.handphoneNo,
-    Gender: patientProfile.gender,
-    DOB: patientProfile.dob,
-    PreferredName: patientProfile.preferredName,
-    PrivacyLevel: patientProfile.privacyLevel,
-    UpdateBit: patientProfile.updateBit,
-    AutoGame: patientProfile.autoGame,
-    StartDate: patientProfile.startDate,
-    IsActive: patientProfile.isActive,
-    IsRespiteCare: patientProfile.isRespiteCare,
-  });
-
-  // This useEffect enables the page to show correct error checking.
-  // The main isInputErrors is responsible for the error state of the screen.
-  // This state will be true whenever any child input components are in error state.  
-  useEffect(() => {
-    setIsInputErrors(
-      isPrefNameError || 
-      isPrefLanguageError,
-    );
-
-  }, [
-    isPrefNameError,
-    isPrefLanguageError,
-    isInputErrors,
+  const actorId = currentUserId(user);
+  const patientId = patientProfile.patientID;
+  const ownerKey = JSON.stringify([
+    patientId,
+    actorId,
+    user?.roleName ?? user?.role,
+    user?.roleId ?? user?.roleID,
   ]);
-   // Try to get langugage list from backend. If retrieval from the hook is successful, replace the content in
-  // listOfLanguages with the retrieved one.
+  const currentOwner = useRef(null);
+  // Retire old callbacks during render, before passive effects run. Returning to
+  // the same account/patient creates a new token rather than reviving old work.
+  if (currentOwner.current?.key !== ownerKey) {
+    currentOwner.current = { key: ownerKey };
+  }
+  const renderOwner = currentOwner.current;
+  const mounted = useRef(false);
   useEffect(() => {
-    if (!languageLoading) {
-      if (!languageError && Array.isArray(languageData) && languageData.length > 0) {
-        setListOfLanguages(languageData);
-      }
-      // Even if the API fails, fall back to the hard-coded list and allow the user to continue.
-      setIsLoading(false);
-    }
-  }, [languageData, languageError, languageLoading]);
-
-  // Get patient preferred names from API
-  useEffect(() => {
-    getPrefNames();
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
   }, []);
-
-  // Get list of preferred names from backend to detect duplicate preferred names
-  const getPrefNames = async () => {
-    setIsPrefNamesLoading(true);
-    const response = await patientApi.getPatientList(false, 'active');
-    if (!response.ok) {
-      setIsPrefNamesLoading(false);
+  const nameAtOpen =
+    typeof patientProfile.preferredName === 'string'
+      ? patientProfile.preferredName
+      : '';
+  const languageAtOpen = resolvePreferredLanguage(
+    patientProfile.preferredLanguage,
+    options,
+  );
+  const [draft, setDraft] = useState(() =>
+    initialDraft(renderOwner, nameAtOpen, languageAtOpen),
+  );
+  // Render the new owner's values immediately, including before the reset effect.
+  const shown =
+    draft.owner === renderOwner
+      ? draft
+      : initialDraft(renderOwner, nameAtOpen, languageAtOpen);
+  useEffect(() => {
+    setDraft((previous) => {
+      if (currentOwner.current !== renderOwner) {
+        return previous;
+      }
+      if (previous.owner !== renderOwner) {
+        return initialDraft(renderOwner, nameAtOpen, languageAtOpen);
+      }
+      if (previous.languageEdited || previous.language === languageAtOpen) {
+        return previous;
+      }
+      return { ...previous, language: languageAtOpen };
+    });
+  }, [renderOwner, nameAtOpen, languageAtOpen]);
+  const updateDraft = useCallback(
+    (changes) => {
+      if (!mounted.current || currentOwner.current !== renderOwner) {
+        return;
+      }
+      setDraft((previous) => {
+        if (!mounted.current || currentOwner.current !== renderOwner) {
+          return previous;
+        }
+        const owned =
+          previous.owner === renderOwner
+            ? previous
+            : initialDraft(renderOwner, nameAtOpen, languageAtOpen);
+        if (Object.keys(changes).every((key) => owned[key] === changes[key])) {
+          return owned;
+        }
+        return { ...owned, ...changes };
+      });
+    },
+    [renderOwner, nameAtOpen, languageAtOpen],
+  );
+  const changeName = useCallback(
+    (value) => updateDraft({ name: value }),
+    [updateDraft],
+  );
+  const reportNameError = useCallback(
+    (value) => updateDraft({ nameError: value }),
+    [updateDraft],
+  );
+  const changeLanguage = useCallback(
+    (value) => updateDraft({ language: value, languageEdited: true }),
+    [updateDraft],
+  );
+  const saving = useRef(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveUncertain, setSaveUncertain] = useState(false);
+  // Validate the selection against current options. The shared selector retains
+  // its initial error flag after a valid choice or a late prefill.
+  const validLanguage = options.some(
+    (option) => String(option.value) === String(shown.language),
+  );
+  const disabled =
+    languageLoading ||
+    Boolean(languageError) ||
+    !validLanguage ||
+    !String(shown.name).trim() ||
+    shown.nameError ||
+    isSaving ||
+    saveUncertain ||
+    !actorId;
+  const ownsOperation = () =>
+    mounted.current && currentOwner.current === renderOwner;
+  const submitForm = async () => {
+    if (!ownsOperation() || saving.current || disabled) {
       return;
     }
-    setPrefNames(response.data.data.map((x) => x.preferredName));
-    setIsPrefNamesLoading(false);
-  };
-
-  // Functions for error state reporting for the child components
-  const handlePrefNameError = useCallback(
-    (state) => {
-      setIsPrefNameError(state);
-      // console.log('FirstName: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isPrefNameError],
-  );
-  const handlePrefLanguageError = useCallback(
-    (state) => {
-      setIsPrefLanguageError(state);
-      // console.log('LastName: ', state);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isPrefLanguageError],
-  );
-
-  // Function to update patient data
-  const handleFormData = (field) => (e) => {
-    if (field === 'PreferredLanguageListID') {
-      setFormData((prevState) => ({
-        ...prevState,
-        [field]: parseInt(e)
-      }));
-    } else {
-      setFormData((prevState) => ({
-        ...prevState,
-        [field]: e
-      }));
-    }    
-  };  
-
-  // form submission when save button is pressed
-  const submitForm = async () => {
-    // Transform formData to match API schema (camelCase)
-    const updatePayload = {
-      name: `${formData.FirstName} ${formData.LastName}`.trim(),
-      nric: formData.NRIC,
-      address: formData.Address || '',
-      tempAddress: formData.TempAddress || '',
-      homeNo: formData.HomeNo || '',
-      handphoneNo: formData.HandphoneNo || '',
-      gender: formData.Gender,
-      dateOfBirth: formData.DOB instanceof Date ? formData.DOB.toISOString() : formData.DOB,
-      isApproved: '1',
-      preferredName: formData.PreferredName || '',
-      preferredLanguageId: parseInt(formData.PreferredLanguageListID) || 1,
-      updateBit: formData.UpdateBit ? '1' : '0',
-      autoGame: formData.AutoGame ? '1' : '0',
-      startDate: formData.StartDate instanceof Date ? formData.StartDate.toISOString() : formData.StartDate,
-      isActive: formData.IsActive ? '1' : '0',
-      isRespiteCare: formData.IsRespiteCare ? '1' : '0',
-      privacyLevel: parseInt(formData.PrivacyLevel) || 2,
-      modifiedDate: new Date().toISOString(),
-      ModifiedById: '1',
-    };
-
-    const result = await patientApi.updatePatient(formData.PatientID, updatePayload);
-
-    let alertTitle = '';
-    let alertDetails = '';
-
-    if (result.ok) {
-      navigation.goBack(routes.PATIENT_PROFILE, {
-        navigation: navigation,
+    saving.current = true;
+    setIsSaving(true);
+    let writeStarted = false;
+    try {
+      const id = opaqueId(patientId);
+      const pathId = encodeURIComponent(String(id));
+      const fresh = await requestDeadline(
+        client.get(
+          `/patients/${pathId}`,
+          { require_auth: true, mask: false },
+          { baseURL: PATIENT_V1_BASE, timeout: 15000 },
+        ),
+      );
+      if (!ownsOperation()) {
+        return;
+      }
+      if (!fresh?.ok) {
+        throw new Error(
+          'Patient information could not be loaded. Please retry.',
+        );
+      }
+      const payload = buildPatientPreferencesUpdate({
+        record: fresh.data?.data ?? fresh.data,
+        patientId: id,
+        userId: actorId,
+        preferredName: shown.name,
+        preferredLanguageId: shown.language,
+        languageOptions: options,
       });
-      alertTitle = 'Saved Successfully';
-      alertDetails = 'Patient preferences have been updated.';
-    } else {
-      const errors = result.data?.message;
-
-      result.data
-        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-        : (alertDetails = 'Please try again.');
-
-      alertTitle = 'Error in Editing Patient Preferences';
-      console.log("result error "+JSON.stringify(result));
+      if (!ownsOperation()) {
+        return;
+      }
+      writeStarted = true;
+      const result = await requestDeadline(
+        client.put(`/patients/update/${pathId}`, payload, {
+          baseURL: PATIENT_V1_BASE,
+          timeout: 15000,
+        }),
+      );
+      const uncertain =
+        !result?.ok && (!result?.status || result.status >= 500);
+      if (uncertain && mounted.current) {
+        setSaveUncertain(true);
+      }
+      if (!ownsOperation()) {
+        return;
+      }
+      if (!result?.ok) {
+        if (uncertain) {
+          Alert.alert(
+            'Save could not be confirmed',
+            'Reopen this patient and check the current preferences before saving again.',
+          );
+        } else {
+          Alert.alert(
+            'Patient preferences were not saved',
+            'Check your permissions and entered information, then retry.',
+          );
+        }
+        return;
+      }
+      navigation.replace(routes.PATIENT_PROFILE, { patientId: id });
+      Alert.alert(
+        'Saved Successfully',
+        'Patient preferences have been updated.',
+      );
+    } catch (error) {
+      if (writeStarted && mounted.current) {
+        setSaveUncertain(true);
+      }
+      if (!ownsOperation()) {
+        return;
+      }
+      if (writeStarted) {
+        Alert.alert(
+          'Save could not be confirmed',
+          'Reopen this patient and check the current preferences before saving again.',
+        );
+      } else {
+        Alert.alert(
+          'Patient preferences were not saved',
+          error.message || 'Please retry.',
+        );
+      }
+    } finally {
+      saving.current = false;
+      if (mounted.current) {
+        setIsSaving(false);
+      }
     }
-    Alert.alert(alertTitle, alertDetails);
-    console.log("formData "+JSON.stringify(formData));
   };
 
-  return languageLoading || isLoading ? (
-    <ActivityIndicator visible />
-  ) : (
+  if (languageLoading) {
+    return <ActivityIndicator visible />;
+  }
+  return (
     <FlatList
       data={[0]}
       renderItem={() => (
-        <Box alignItems="center">
-          <Box w="100%">
-            <VStack>
-              <View style={styles.formContainer}>
-                <InputField
-                  isRequired
-                  title={'Preferred Name'}
-                  value={formData.PreferredName}
-                  onChangeText={handleFormData('PreferredName')}
-                  onEndEditing={handlePrefNameError}                    
-                  dataType="name"
-                  otherProps={{prefNameList: prefNames}}
+        <Box key={ownerKey} alignItems="center" w="100%">
+          <VStack w="100%">
+            <View style={styles.formContainer}>
+              <InputField
+                testID="preferences-name"
+                isRequired
+                title="Preferred Name"
+                value={shown.name}
+                onChangeText={changeName}
+                onEndEditing={reportNameError}
+                dataType="name"
+              />
+              <SelectionInputField
+                testID="preferences-language"
+                isRequired
+                title="Preferred Language"
+                placeholder="Choose a language"
+                value={validLanguage ? shown.language : 0}
+                dataArray={options}
+                onDataChange={changeLanguage}
+              />
+              {languageError || !options.length ? (
+                <Text>
+                  Languages could not be loaded. Reopen this screen to retry.
+                </Text>
+              ) : null}
+              {saveUncertain ? (
+                <Text>Check the saved preferences before trying again.</Text>
+              ) : null}
+            </View>
+            <View style={styles.saveButtonContainer}>
+              <Box width="70%">
+                <AppButton
+                  title="Save"
+                  color="green"
+                  onPress={submitForm}
+                  isDisabled={disabled}
                 />
-
-                <SelectionInputField
-                  isRequired
-                  title={'Preferred Language'}
-                  placeholder={formData['PrefLanguage']}
-                  onDataChange={handleFormData('PreferredLanguageListID')}
-                  value={formData.PreferredLanguageListID}
-                  dataArray={listOfLanguages}
-                  onEndEditing={handlePrefLanguageError}
-                /> 
-              </View>
-              <View style={styles.saveButtonContainer}>
-                <Box width='70%'>
-                  <AppButton title="Save" color="green" onPress={submitForm} isDisabled={isInputErrors} />
-                </Box>
-              </View>
-            </VStack>
-          </Box>
+              </Box>
+            </View>
+          </VStack>
         </Box>
       )}
     />
   );
 }
-
-EditPatientPreferencesScreen.defaultProps = {
-  isRequired: true,
-};
-
 const styles = StyleSheet.create({
   formContainer: {
-    flex: 1,
     alignItems: 'flex-start',
-    justifyContent: 'center',
     paddingLeft: '10%',
     width: '90%',
     marginBottom: 20,
   },
-  saveButtonContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
+  saveButtonContainer: { alignItems: 'center', marginBottom: 20 },
 });
-
 export default EditPatientPreferencesScreen;
