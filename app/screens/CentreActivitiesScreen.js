@@ -197,6 +197,9 @@ export default function CentreActivitiesScreen() {
           </TouchableOpacity>
         ))}
       </View>
+      {blockedReason && kind !== 'availability' ? (
+        <Text accessibilityRole="alert">{blockedReason}</Text>
+      ) : null}
       {kind === 'availability' ? (
         <Text accessibilityRole="alert">
           The availability list may be incomplete: the inspected service caps it
@@ -239,9 +242,10 @@ export default function CentreActivitiesScreen() {
               const result = await state.reconcile();
               if (state.current()) {
                 setMessage(
-                  result.outcome === 'verified' ||
-                    result.outcome === 'no_pending'
-                    ? 'Outcome checked. Reload the activity.'
+                  result.outcome === 'observed'
+                    ? 'The recorded change was found. Changes remain read-only while confirmation is reviewed.'
+                    : result.outcome === 'no_pending'
+                    ? 'No recorded change was found. Changes remain read-only.'
                     : 'The outcome is still unconfirmed. No change was resent.',
                 );
                 if (['verified', 'no_pending'].includes(result.outcome)) {

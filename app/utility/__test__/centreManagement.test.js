@@ -143,8 +143,8 @@ test('Sunday closed and selected recurring closed weekdays cannot be saved', () 
   ).toThrow(/Saturday|Sunday/);
 });
 test('multiple fixed slots on one day remain distinct and each fits duration/hours', () => {
-  expect(build('centre', centre()).fixed_time_slots).toBe(
-    'Monday 09:00,Monday 11:00',
+  expect(() => build('centre', centre())).toThrow(
+    /safe request reconciliation/,
   );
   expect(() =>
     build('centre', { ...centre(), fixed_time_slots: 'Saturday 12:45' }),
@@ -156,10 +156,9 @@ test('documented compulsory-flexible conflict is rejected before transport', () 
   ).toThrow(/requires compulsory/));
 test('catalogue title uniqueness includes deleted records and editing excludes the same ID', () => {
   expect(() => build('activity', { title: ' deleted ' })).toThrow(/unique/);
-  expect(build('activity', { id: '1', title: 'Art' }, 'update')).toMatchObject({
-    title: 'Art',
-    id: '1',
-  });
+  expect(() => build('activity', { id: '1', title: 'Art' }, 'update')).toThrow(
+    /safe request reconciliation/,
+  );
 });
 test.each(['CAREGIVER', 'DOCTOR', 'GUARDIAN', 'ADMIN'])(
   '%s cannot construct activity or ad hoc writes',

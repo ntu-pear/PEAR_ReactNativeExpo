@@ -243,37 +243,23 @@ test('focus round trip invalidates a previous Save confirmation and closes its e
   expect(api.write).not.toHaveBeenCalled();
   expect(text()).not.toContain('Review and save');
 });
-test('Supervisor catalogue Save writes once and requires exact read-back before success', async () => {
-  const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-  api.write.mockResolvedValue({ ok: true, data: { id: 99 } });
-  api.get.mockResolvedValue({
-    ok: true,
-    data: {
-      id: 99,
-      title: 'Synthetic New',
-      description: null,
-      is_deleted: false,
-    },
-  });
-  await mount('SUPERVISOR');
-  await click('Catalogue');
-  await click('Add Catalogue');
-  const name = tree.root
-    .findAllByType(TextInput)
-    .find((n) => n.props.accessibilityLabel === 'Activity name');
-  await act(async () => name.props.onChangeText('Synthetic New'));
-  await click('Review and save');
-  await act(async () =>
-    alert.mock.calls[0][2].find((b) => b.text === 'Save').onPress(),
-  );
-  expect(api.write).toHaveBeenCalledTimes(1);
-  expect(api.write).toHaveBeenCalledWith('activity', 'create', {
-    title: 'Synthetic New',
-    description: null,
-  });
-  expect(api.get).toHaveBeenCalledWith('activity', 99);
-  expect(text()).toContain('Activity saved.');
-});
+test.each(['Catalogue', 'Centre activities'])(
+  '%s is explicitly read-only and all mutation controls are disabled',
+  async (tab) => {
+    await mount('SUPERVISOR');
+    await click(tab);
+    expect(text()).toContain('Existing records are read-only');
+    const buttons = tree.root.findAllByType(TouchableOpacity).filter((n) =>
+      n.findAllByType(Text).some((t) => {
+        const value = [t.props.children].flat(Infinity).join('');
+        return value.startsWith('Add ') || ['Edit', 'Delete'].includes(value);
+      }),
+    );
+    expect(buttons.length).toBeGreaterThan(0);
+    buttons.forEach((n) => expect(n.props.disabled).toBe(true));
+    expect(api.write).not.toHaveBeenCalled();
+  },
+);
 test('patient requests are read-only with no mutation controls or scheduler calls', async () => {
   await mount('SUPERVISOR', true);
   expect(text()).toContain('Current requests are read-only');

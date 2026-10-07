@@ -92,32 +92,10 @@ const get = (kind, id) =>
     { include_deleted: true },
     config(),
   );
-const write = (kind, action, payload) => {
-  const blocked = activityMutationBlockReason(kind);
-  if (blocked) {
-    throw new Error(blocked);
-  }
-  const path = pathFor(kind);
-  if (action === 'create') {
-    return client.post(path + '/', payload, config(true));
-  }
-  if (action === 'update') {
-    return client.put(
-      kind === 'activity'
-        ? `${path}/${activityEntityId(payload.id)}`
-        : path + '/',
-      payload,
-      config(true),
-    );
-  }
-  if (action === 'delete') {
-    return client.delete(
-      `${path}/${activityEntityId(payload.id)}`,
-      {},
-      config(true),
-    );
-  }
-  throw new Error('Unknown activity action.');
+const write = (kind) => {
+  throw new Error(
+    activityMutationBlockReason(kind) || 'Activity changes are unavailable.',
+  );
 };
 const workingHours = () =>
   client.get('/care_centres/1/working_hours', {}, config());

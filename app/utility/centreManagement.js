@@ -147,6 +147,10 @@ export const buildActivityPayload = ({
       title,
       description: String(draft.description || '').trim() || null,
     };
+    const blocked = activityMutationBlockReason(kind);
+    if (blocked) {
+      throw new Error(blocked);
+    }
     return action === 'create'
       ? payload
       : { ...identity, ...payload, is_deleted: false, modified_by_id: actor };

@@ -4,10 +4,6 @@ import AuthContext from 'app/auth/context';
 import useCentreManagement from 'app/hooks/useCentreManagement';
 import api from 'app/api/centreManagement';
 import store from '@react-native-async-storage/async-storage';
-import {
-  activityPendingKey,
-  activityReceiptGuardKey,
-} from 'app/utility/activityManagementWrite';
 let mockValues = new Map();
 jest.mock('@react-navigation/native', () => ({ useIsFocused: () => true }));
 jest.mock('@react-native-async-storage/async-storage', () => ({
@@ -132,112 +128,16 @@ test.each(['refresh', 'session replacement'])(
     expect(api.write).not.toHaveBeenCalled();
   },
 );
-test('cleanup during durable marker persistence stops dispatch and clears only the unsent marker', async () => {
-  await mount();
-  let release;
-  store.setItem.mockImplementationOnce(
-    (k, v) =>
-      new Promise((resolve) => {
-        release = () => {
-          mockValues.set(k, v);
-          resolve();
-        };
-      }),
-  );
-  let result;
-  await act(async () => {
-    result = latest.save(args());
-    await flush();
-  });
-  expect(release).toEqual(expect.any(Function));
-  await cleanup();
-  release();
-  expect((await result).outcome).toBe('not_sent');
-  expect(api.write).not.toHaveBeenCalled();
-  expect(mockValues.has(activityPendingKey(user.id))).toBe(false);
-  expect(
-    JSON.parse(mockValues.get(activityReceiptGuardKey(user.id)))
-      .cancelledBeforeDispatch,
-  ).toBe(true);
-});
-test('cleanup during dispatched POST retains exact receipt uncertainty and prevents later retry', async () => {
-  await mount();
-  let release;
-  api.write.mockReturnValue(
-    new Promise((resolve) => {
-      release = resolve;
-    }),
-  );
-  let result;
-  await act(async () => {
-    result = latest.save(args());
-    await flush();
-  });
-  expect(api.write).toHaveBeenCalledTimes(1);
-  await cleanup();
-  release({ ok: true, data: { id: 1 } });
-  expect((await result).outcome).toBe('unknown');
-  expect(JSON.parse(mockValues.get(activityPendingKey(user.id)))).toMatchObject(
-    { receiptId: 1, action: 'create' },
-  );
-  expect(api.get).not.toHaveBeenCalled();
-  await mount();
-  expect(latest.pending).toBe(true);
-  await act(async () => {
-    expect((await latest.save(args())).outcome).toBe('unknown');
-  });
-  expect(api.write).toHaveBeenCalledTimes(1);
-});
-test('cleanup during exact receipt GET retains marker and publishes no success', async () => {
-  await mount();
-  let release;
-  api.get.mockReturnValue(
-    new Promise((resolve) => {
-      release = resolve;
-    }),
-  );
-  let result;
-  await act(async () => {
-    result = latest.save(args());
-    await flush();
-  });
-  expect(api.get).toHaveBeenCalledWith('activity', 1);
-  await cleanup();
-  release({
-    ok: true,
-    data: { id: 1, title: 'Synthetic', description: null, is_deleted: false },
-  });
-  expect((await result).outcome).toBe('unknown');
-  expect(mockValues.has(activityPendingKey(user.id))).toBe(true);
-  expect(store.removeItem).not.toHaveBeenCalled();
-});
-test('cleanup during update preflight cannot reach storage or write even for a matching version', async () => {
-  await mount();
-  let release;
-  api.get.mockReturnValue(
-    new Promise((resolve) => {
-      release = resolve;
-    }),
-  );
-  let result;
-  await act(async () => {
-    result = latest.save({
-      kind: 'activity',
-      action: 'update',
-      payload: { id: 1, title: 'New' },
-      expectedModifiedDate: null,
-    });
-    await flush();
-  });
-  await cleanup();
-  release({
-    ok: true,
-    data: { id: 1, title: 'Old', is_deleted: false, modified_date: null },
-  });
-  expect((await result).outcome).toBe('not_sent');
-  expect(api.write).not.toHaveBeenCalled();
-  expect(store.setItem).not.toHaveBeenCalled();
-});
+test.each(['activity', 'centre', 'availability', 'adhoc'])(
+  'loaded actual hook denies %s mutations without transport or storage mutation',
+  async (kind) => {
+    await mount();
+    expect((await latest.save({ ...args(), kind })).outcome).toBe('not_sent');
+    expect(api.write).not.toHaveBeenCalled();
+    expect(store.setItem).not.toHaveBeenCalled();
+    expect(store.removeItem).not.toHaveBeenCalled();
+  },
+);
 test.each(['availability', 'adhoc'])(
   'hook denies %s independently of transport/UI mocks',
   async (kind) => {

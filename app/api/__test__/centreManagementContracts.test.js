@@ -53,19 +53,7 @@ test('documented empty patient ad hoc 404 differs from unrelated 404 and network
   });
   await expect(api.list('adhoc', { patientId: '7' })).rejects.toThrow();
 });
-test('CRUD uses current endpoint shapes and opt-out of automatic mutation replay', async () => {
-  await api.write('activity', 'update', { id: '7', title: 'Synthetic' });
-  expect(mockClient.put).toHaveBeenCalledWith(
-    '/activities/7',
-    expect.anything(),
-    expect.objectContaining({ pearNoAuthReplay: true }),
-  );
-  await api.write('centre', 'update', { id: '8' });
-  expect(mockClient.put).toHaveBeenLastCalledWith(
-    '/centre_activities/',
-    expect.anything(),
-    expect.objectContaining({ pearNoAuthReplay: true }),
-  );
+test('configured working-hours read stays on its approved narrow route', async () => {
   await api.workingHours();
   expect(mockClient.get).toHaveBeenLastCalledWith(
     '/care_centres/1/working_hours',
@@ -73,8 +61,7 @@ test('CRUD uses current endpoint shapes and opt-out of automatic mutation replay
     expect.objectContaining({ baseURL: 'http://synthetic.invalid/api/v1' }),
   );
 });
-
-test.each(['availability', 'adhoc'])(
+test.each(['activity', 'centre', 'availability', 'adhoc'])(
   '%s create/update/delete refuse before actual HTTP transport',
   (kind) => {
     ['create', 'update', 'delete'].forEach((action) =>
