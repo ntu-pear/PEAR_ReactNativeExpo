@@ -10,6 +10,7 @@ jest.mock('app/utility/miscFunctions', () => ({
 import {
   createActivityWriter,
   activityPendingKey,
+  activityReceiptGuardKey,
 } from 'app/utility/activityManagementWrite';
 const user = { id: 'SyntheticActor', roleName: 'SUPERVISOR' };
 const create = () => ({
@@ -41,7 +42,9 @@ test('successful create sends once and reads exact receipt before clearing its m
   expect((await writer.run(create())).outcome).toBe('verified');
   expect(transport.write).toHaveBeenCalledTimes(1);
   expect(transport.get).toHaveBeenCalledWith('activity', 1);
-  expect(store.values.size).toBe(0);
+  expect(store.values.has(activityPendingKey(user.id))).toBe(false);
+  expect(store.values.has(activityReceiptGuardKey(user.id))).toBe(true);
+  expect(await writer.pending(user)).toBeNull();
 });
 test('timeout/unknown create remains blocked across new writer instances and read-only reconciliation', async () => {
   const store = storage(),
@@ -88,7 +91,7 @@ test('a failed dispatched response remains uncertain without an authoritative no
       )
     ).outcome,
   ).toBe('unknown');
-  expect(store.values.size).toBe(1);
+  expect(store.values.has(activityPendingKey(user.id))).toBe(true);
 });
 test('double taps across writer instances dispatch only one request', async () => {
   const store = storage(),
@@ -152,7 +155,7 @@ test('a late storage write remains fenced after its deadline across writer insta
   const store = storage(),
     transport = api();
   let release;
-  store.setItem.mockImplementation(
+  store.setItem.mockImplementationOnce(
     (k, v) =>
       new Promise((r) => {
         release = () => {
@@ -229,7 +232,7 @@ test('post-commit availability 404 retains a durable marker and prevents a dupli
   expect((await reloaded.run(args)).outcome).toBe('unknown');
   expect((await reloaded.reconcile({ user })).outcome).toBe('unknown');
   expect(committed).toEqual([{ id: 777 }]);
-  expect(store.values.size).toBe(1);
+  expect(store.values.has(activityPendingKey(user.id))).toBe(true);
 });
 test.each([
   [null, '2026-10-07T06:00:00Z'],

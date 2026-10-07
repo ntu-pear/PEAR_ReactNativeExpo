@@ -4,7 +4,10 @@ import AuthContext from 'app/auth/context';
 import useCentreManagement from 'app/hooks/useCentreManagement';
 import api from 'app/api/centreManagement';
 import store from '@react-native-async-storage/async-storage';
-import { activityPendingKey } from 'app/utility/activityManagementWrite';
+import {
+  activityPendingKey,
+  activityReceiptGuardKey,
+} from 'app/utility/activityManagementWrite';
 let mockValues = new Map();
 jest.mock('@react-navigation/native', () => ({ useIsFocused: () => true }));
 jest.mock('@react-native-async-storage/async-storage', () => ({
@@ -132,7 +135,7 @@ test.each(['refresh', 'session replacement'])(
 test('cleanup during durable marker persistence stops dispatch and clears only the unsent marker', async () => {
   await mount();
   let release;
-  store.setItem.mockImplementation(
+  store.setItem.mockImplementationOnce(
     (k, v) =>
       new Promise((resolve) => {
         release = () => {
@@ -151,7 +154,11 @@ test('cleanup during durable marker persistence stops dispatch and clears only t
   release();
   expect((await result).outcome).toBe('not_sent');
   expect(api.write).not.toHaveBeenCalled();
-  expect(mockValues.size).toBe(0);
+  expect(mockValues.has(activityPendingKey(user.id))).toBe(false);
+  expect(
+    JSON.parse(mockValues.get(activityReceiptGuardKey(user.id)))
+      .cancelledBeforeDispatch,
+  ).toBe(true);
 });
 test('cleanup during dispatched POST retains exact receipt uncertainty and prevents later retry', async () => {
   await mount();

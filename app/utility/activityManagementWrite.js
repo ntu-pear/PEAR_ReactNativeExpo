@@ -5,9 +5,13 @@ import { supervisorActor } from 'app/utility/centreManagement';
 import { opaqueId } from 'app/utility/patientFieldPolicy';
 
 const locks = new Set(),
-  storageFences = new WeakMap();
+  storageFences = new WeakMap(),
+  acknowledgedGuards = new WeakMap();
+let localAttemptSequence = 0;
 export const activityPendingKey = (actor) =>
   `@pear_activity_management_pending:${actor}`;
+export const activityReceiptGuardKey = (actor) =>
+  `${activityPendingKey(actor)}:receipt_guard`;
 const sameValue = (key, actual, expected) => {
   if (/^(?:start_date|end_date)$/.test(key) && String(expected).includes('T')) {
     return Date.parse(actual) === Date.parse(expected);
@@ -30,6 +34,11 @@ export const createActivityWriter = ({
     storageFences.set(storage, new Map());
   }
   const fences = storageFences.get(storage);
+  if (!acknowledgedGuards.has(storage)) {
+    acknowledgedGuards.set(storage, new Map());
+  }
+  const acknowledgements = acknowledgedGuards.get(storage);
+  const guardKey = (key) => `${key}:receipt_guard`;
   const mutate = (key, action) => {
     const pending = Promise.resolve(fences.get(key))
       .catch(() => undefined)
@@ -43,13 +52,47 @@ export const createActivityWriter = ({
     pending.then(release, release);
     return requestDeadline(pending, timeoutMs);
   };
+  const persistMarker = (key, marker) => {
+    const raw = JSON.stringify(marker);
+    acknowledgements.delete(key);
+    // The durable guard is never removed. Persist it before every possible
+    // dispatch: an old native primary-key removal cannot erase a newer intent.
+    return mutate(key, async () => {
+      await storage.setItem(guardKey(key), raw);
+      await storage.setItem(key, raw);
+    });
+  };
+  const cancelBeforeDispatch = (key, marker) => {
+    const raw = JSON.stringify({ ...marker, cancelledBeforeDispatch: true });
+    acknowledgements.delete(key);
+    return mutate(key, async () => {
+      // This flag is written only on a path that cannot subsequently dispatch.
+      await storage.setItem(guardKey(key), raw);
+      await storage.removeItem(key);
+    });
+  };
   const pending = async (user) => {
     const key = activityPendingKey(supervisorActor(user));
     if (fences.has(key)) {
       await requestDeadline(fences.get(key), timeoutMs);
     }
-    const raw = await requestDeadline(storage.getItem(key), timeoutMs);
-    return raw ? JSON.parse(raw) : null;
+    const [raw, guard] = await requestDeadline(
+      Promise.all([storage.getItem(key), storage.getItem(guardKey(key))]),
+      timeoutMs,
+    );
+    if (guard) {
+      const marker = JSON.parse(guard);
+      if (
+        marker.cancelledBeforeDispatch === true ||
+        acknowledgements.get(key) === guard
+      ) {
+        return null;
+      }
+      // A new JS session has no acknowledgement: confirm the exact receipt
+      // read-only before another write, even if an earlier session saw success.
+      return marker;
+    }
+    return raw ? JSON.parse(raw) : null; // Legacy markers remain protected.
   };
   const verify = async (marker, user, isCurrent) => {
     const actor = supervisorActor(user);
@@ -74,18 +117,45 @@ export const createActivityWriter = ({
     ) {
       return { outcome: 'unknown' };
     }
-    const key = activityPendingKey(actor);
-    await mutate(key, () => {
-      if (!isCurrent()) {
-        throw new Error('The activity screen changed.');
-      }
-      return storage.removeItem(key);
-    });
+    const key = activityPendingKey(actor),
+      raw = JSON.stringify(marker);
+    acknowledgements.delete(key);
+    // Also promotes legacy pending markers before any destructive clear.
+    await mutate(key, () => storage.setItem(guardKey(key), raw));
     if (!isCurrent()) {
-      await mutate(key, () => storage.setItem(key, JSON.stringify(marker)));
       return { outcome: 'unknown' };
     }
-    return { outcome: 'verified', record: response.data };
+    let abandoned = false;
+    try {
+      const cleared = await mutate(key, async () => {
+        if (!isCurrent()) {
+          return false;
+        }
+        await storage.removeItem(key);
+        if (abandoned || !isCurrent()) {
+          await storage.setItem(key, raw);
+          return false;
+        }
+        return true;
+      });
+      if (!cleared || !isCurrent()) {
+        if (cleared) {
+          await mutate(key, () => storage.setItem(key, raw));
+        }
+        return { outcome: 'unknown' };
+      }
+      // Synchronous, in-session acknowledgement only after an in-time clear.
+      // No timed-out storage completion can manufacture this acknowledgement.
+      acknowledgements.set(key, raw);
+      return { outcome: 'verified', record: response.data };
+    } catch {
+      abandoned = true;
+      // The fence covers the underlying clear and queued restoration, not its
+      // deadline wrapper. The already durable guard survives restoration errors
+      // or a JS restart; it is never erased by the primary-key removal.
+      mutate(key, () => storage.setItem(key, raw)).catch(() => undefined);
+      return { outcome: 'unknown' };
+    }
   };
   const reconcile = async ({ user, isCurrent = () => true }) => {
     const key = activityPendingKey(supervisorActor(user));
@@ -123,7 +193,8 @@ export const createActivityWriter = ({
     }
     locks.add(key);
     let sent = false,
-      marked = false;
+      marked = false,
+      marker;
     try {
       const existing = await pending(user);
       if (!isCurrent()) {
@@ -175,8 +246,12 @@ export const createActivityWriter = ({
       if (!isCurrent()) {
         return { outcome: 'not_sent' };
       }
-      const marker = {
+      marker = {
         version: 1,
+        // Local correlation only; this is not a server idempotency token.
+        operationId: `${Date.now()}-${++localAttemptSequence}-${Math.random()
+          .toString(36)
+          .slice(2)}`,
         actor,
         kind,
         action,
@@ -192,10 +267,10 @@ export const createActivityWriter = ({
               }
             : payload,
       };
-      await mutate(key, () => storage.setItem(key, JSON.stringify(marker)));
+      await persistMarker(key, marker);
       marked = true;
       if (!isCurrent()) {
-        await mutate(key, () => storage.removeItem(key));
+        await cancelBeforeDispatch(key, marker);
         return { outcome: 'not_sent' };
       }
       const response = await requestDeadline(
@@ -221,12 +296,12 @@ export const createActivityWriter = ({
       ) {
         return { outcome: 'unknown' };
       }
-      await mutate(key, () => storage.setItem(key, JSON.stringify(marker)));
+      await persistMarker(key, marker);
       return await verify(marker, user, isCurrent);
     } catch (error) {
       if (marked && !sent) {
         try {
-          await mutate(key, () => storage.removeItem(key));
+          await cancelBeforeDispatch(key, marker);
         } catch {
           return { outcome: 'unknown' };
         }
