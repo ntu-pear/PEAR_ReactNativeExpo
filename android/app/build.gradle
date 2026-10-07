@@ -43,6 +43,11 @@ tasks.configureEach { task ->
     if (task.name.startsWith("createBundle") || task.name == "preBuild") {
         task.dependsOn(generatePearBuildIdentity)
     }
+    if (task.name.startsWith("createBundle")) {
+        // The React Native plugin's default source inputs exclude JSON files.
+        // Rebundle when Git/release identity changes, including a clean commit.
+        task.inputs.file(pearGeneratedIdentity)
+    }
 }
 
 // Override `debuggableVariants` for expo-updates debugging
