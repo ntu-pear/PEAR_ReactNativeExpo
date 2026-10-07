@@ -14,7 +14,7 @@ import {
   ActivityIndicator,
   StyleSheet,
 } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import AuthContext from 'app/auth/context';
 import patientApi from 'app/api/patient';
 import requestDeadline from 'app/utility/requestDeadline';
@@ -44,6 +44,7 @@ export default function ManageMedicationScreen() {
   const permitted =
     String(user?.roleName || user?.role || '').toUpperCase() === 'SUPERVISOR';
   const actor = currentUserId(user);
+  const focused = useIsFocused();
   const [mode, setMode] = useState('myPatients');
   const [page, setPage] = useState(0);
   const [pages, setPages] = useState(0);
@@ -53,7 +54,6 @@ export default function ManageMedicationScreen() {
   const [reload, setReload] = useState(0);
   const [selected, setSelected] = useState(null);
   const [medPage, setMedPage] = useState(0);
-  const [medPages, setMedPages] = useState(0);
   const [records, setRecords] = useState([]);
   const [recordLoading, setRecordLoading] = useState(false);
   const [recordError, setRecordError] = useState('');
@@ -122,7 +122,7 @@ export default function ManageMedicationScreen() {
   );
 
   useEffect(() => {
-    if (!selected || !permitted) {
+    if (!selected || !permitted || !focused) {
       setRecords([]);
       return undefined;
     }
@@ -135,10 +135,20 @@ export default function ManageMedicationScreen() {
         // Expand one patient at a time; do not fan out reads across the patient list.
         // These are course records, not Scheduler-generated doses or home prescriptions.
         const medRes = await loadMedicationPage({
-          readCourses: patientApi.listPatientMedicationsV1,
-          readCatalogue: patientApi.getPrescriptionListV1,
+          readCourses: (id, params) => {
+            if (!active) {
+              throw new Error('Medication load cancelled.');
+            }
+            return patientApi.listPatientMedicationsV1(id, params);
+          },
+          readCatalogue: (params) => {
+            if (!active) {
+              throw new Error('Medication load cancelled.');
+            }
+            return patientApi.getPrescriptionListV1(params);
+          },
           patientId: selected.id,
-          params: { pageNo: medPage, pageSize: 100 },
+          allCourses: true,
         });
         if (!active) {
           return;
@@ -150,12 +160,11 @@ export default function ManageMedicationScreen() {
         }
         const rows = responseRows(medRes);
         setRecords(rows);
-        setMedPages(
-          Number(medRes.data?.totalPages) || (rows.length ? medPage + 1 : 0),
-        );
       } catch (e) {
         if (active) {
-          setRecordError(e.message);
+          setRecordError(
+            'Medication records could not be loaded. Check the connection and retry.',
+          );
         }
       } finally {
         if (active) {
@@ -166,7 +175,7 @@ export default function ManageMedicationScreen() {
     return () => {
       active = false;
     };
-  }, [selected, medPage, recordRetry, permitted]);
+  }, [selected, recordRetry, permitted, actor, focused]);
 
   if (!permitted) {
     return (
@@ -182,6 +191,12 @@ export default function ManageMedicationScreen() {
   } catch (e) {
     dateError = e.message;
   }
+  const medPages = Math.ceil(shown.length / 100);
+  const shownPage = shown.slice(medPage * 100, (medPage + 1) * 100);
+  const changeDates = (setter, value) => {
+    setMedPage(0);
+    setter(value);
+  };
   const changeMode = (next) => {
     setSelected(null);
     setPage(0);
@@ -189,6 +204,9 @@ export default function ManageMedicationScreen() {
   };
   const choosePatient = (patient) => {
     setMedPage(0);
+    setRecords([]);
+    setRecordError('');
+    setRecordLoading(true);
     setSelected({
       id: patient.id ?? patient.patientID,
       name: patient.name ?? patient.fullName ?? 'Patient',
@@ -255,9 +273,8 @@ export default function ManageMedicationScreen() {
         <View testID="medication_record_panel">
           <Text style={styles.title}>{selected.name}</Text>
           <Text>
-            Filter courses on the current page by overlapping dates. Check other
-            pages for further matches. Leave both blank to include all dates on
-            this page, including ended courses.
+            Filter all courses for this patient by overlapping dates. Leave both
+            blank to include every date, including ended and ongoing courses.
           </Text>
           <View style={styles.row}>
             <TextInput
@@ -265,7 +282,7 @@ export default function ManageMedicationScreen() {
               accessibilityLabel="From date YYYY-MM-DD"
               placeholder="From YYYY-MM-DD"
               value={from}
-              onChangeText={setFrom}
+              onChangeText={(value) => changeDates(setFrom, value)}
               style={styles.input}
             />
             <TextInput
@@ -273,12 +290,13 @@ export default function ManageMedicationScreen() {
               accessibilityLabel="To date YYYY-MM-DD"
               placeholder="To YYYY-MM-DD"
               value={to}
-              onChangeText={setTo}
+              onChangeText={(value) => changeDates(setTo, value)}
               style={styles.input}
             />
             <Control
               title="Clear dates"
               onPress={() => {
+                setMedPage(0);
                 setFrom('');
                 setTo('');
               }}
@@ -302,12 +320,11 @@ export default function ManageMedicationScreen() {
             !dateError &&
             shown.length === 0 && (
               <Text>
-                No courses on this page match these dates. Check other pages for
-                further matches.
+                No medication courses match these dates for this patient.
               </Text>
             )}
           {!dateError &&
-            shown.map((record) => (
+            shownPage.map((record) => (
               <View key={String(record.medicationID)} style={styles.record}>
                 <Text style={styles.drug}>{record.drugName}</Text>
                 <Text>

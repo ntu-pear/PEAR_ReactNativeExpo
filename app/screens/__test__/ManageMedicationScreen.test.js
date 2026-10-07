@@ -5,6 +5,7 @@ import AuthContext from 'app/auth/context';
 import patient from 'app/api/patient';
 import { filterMedicationHistory } from 'app/utility/medicationHistory';
 jest.mock('@react-navigation/native', () => ({
+  useIsFocused: () => true,
   useFocusEffect: (cb) => require('react').useEffect(cb, [cb]),
 }));
 jest.mock('app/api/patient', () => ({
@@ -174,17 +175,18 @@ test('date filtering keeps overlapping and ongoing courses, excludes deleted cou
   ).toThrow(/end date/);
 });
 
-test('page-local empty filter never claims a global absence and another page can supply the match', async () => {
+test('date filters include matching and ongoing courses from later pages without another request', async () => {
   patient.listPatientMedicationsV1.mockImplementation(
     async (id, { pageNo }) => ({
       ok: true,
       data: {
         totalPages: 2,
+        totalRecords: 2,
         data: [
           {
             medicationID: 'Record-' + pageNo,
             patientID: id,
-            prescriptionListID: 'Drug-A',
+            prescriptionListID: pageNo === 0 ? 'Drug-A' : 'Drug-B',
             startDateTime: pageNo === 0 ? '2026-09-01' : '2026-10-01',
             endDateTime: pageNo === 0 ? '2026-09-05' : null,
           },
@@ -194,25 +196,92 @@ test('page-local empty filter never claims a global absence and another page can
   );
   await mount();
   await press('Synthetic A');
+  expect(patient.listPatientMedicationsV1).toHaveBeenCalledTimes(2);
+  expect(patient.listPatientMedicationsV1).toHaveBeenLastCalledWith(
+    'Patient-A',
+    expect.objectContaining({ pageNo: 1, pageSize: 100 }),
+  );
   await act(async () =>
     screen.root
       .findByProps({ testID: 'medication_from' })
       .props.onChangeText('2026-10-05'),
   );
   expect(text('Synthetic drug A')).toBe(false);
-  expect(text('No medication records in this date range.')).toBe(false);
+  expect(text('Synthetic drug B')).toBe(true);
+  expect(patient.listPatientMedicationsV1).toHaveBeenCalledTimes(2);
+  await act(async () =>
+    screen.root
+      .findByProps({ testID: 'medication_to' })
+      .props.onChangeText('2026-10-06'),
+  );
+  expect(text('Synthetic drug B')).toBe(true);
+  await press('Clear dates');
+  expect(text('Synthetic drug A')).toBe(true);
+  expect(text('Synthetic drug B')).toBe(true);
+});
+
+test('a failed later course page hides every partial result and retry reads afresh', async () => {
+  let failed = true;
+  patient.listPatientMedicationsV1.mockImplementation(
+    async (id, { pageNo }) => {
+      if (failed && pageNo === 1) {
+        return { ok: false, status: 500 };
+      }
+      return {
+        ok: true,
+        data: {
+          totalPages: 2,
+          totalRecords: 2,
+          data: [
+            {
+              medicationID: 'Record-' + pageNo,
+              patientID: id,
+              prescriptionListID: 'Drug-A',
+              startDateTime: '2026-10-01',
+              endDateTime: null,
+            },
+          ],
+        },
+      };
+    },
+  );
+  await mount();
+  await press('Synthetic A');
+  expect(text('Synthetic drug A')).toBe(false);
+  expect(
+    text('No medication courses match these dates for this patient.'),
+  ).toBe(false);
   expect(
     text(
-      'No courses on this page match these dates. Check other pages for further matches.',
+      'Medication records could not be loaded. Check the connection and retry.',
     ),
   ).toBe(true);
-  expect(
-    screen.root.findAllByProps({ testID: 'medication_history_scope' }).length,
-  ).toBeGreaterThan(0);
-  await press('Next records');
+  failed = false;
+  await press('Retry records');
   expect(text('Synthetic drug A')).toBe(true);
-  expect(patient.listPatientMedicationsV1).toHaveBeenLastCalledWith(
-    'Patient-A',
-    expect.objectContaining({ pageNo: 1, pageSize: 100 }),
+  expect(patient.listPatientMedicationsV1).toHaveBeenCalledTimes(4);
+});
+
+test('leaving a patient during paging prevents remaining pages and old results', async () => {
+  let finish;
+  patient.listPatientMedicationsV1
+    .mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+    )
+    .mockResolvedValueOnce(meds('Patient-B', 'Drug-B'));
+  await mount();
+  await press('Synthetic A');
+  await press('Synthetic B');
+  await act(async () =>
+    finish({
+      ...meds(),
+      data: { ...meds().data, totalPages: 2, totalRecords: 2 },
+    }),
   );
+  expect(text('Synthetic drug A')).toBe(false);
+  expect(text('Synthetic drug B')).toBe(true);
+  expect(patient.listPatientMedicationsV1).toHaveBeenCalledTimes(2);
 });
