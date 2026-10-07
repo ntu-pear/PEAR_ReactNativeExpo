@@ -31,9 +31,12 @@ test('catalogue traverses real skip/limit pages and rejects malformed success', 
   mockClient.get.mockResolvedValue({ ok: true, data: { message: 'bad' } });
   await expect(api.list('activity')).rejects.toThrow();
 });
-test('unpaged availability list is read once, including over 100 records', async () => {
+test('availability retains returned rows without claiming backend completeness', async () => {
   mockClient.get.mockResolvedValue({ ok: true, data: rows(125) });
-  expect(await api.list('availability')).toHaveLength(125);
+  const snapshot = await api.availabilitySnapshot();
+  expect(snapshot.rows).toHaveLength(125);
+  expect(snapshot.complete).toBe(false);
+  expect(snapshot.sourceLimit).toBe(100);
   expect(mockClient.get).toHaveBeenCalledTimes(1);
 });
 test('documented empty patient ad hoc 404 differs from unrelated 404 and network failure', async () => {
@@ -57,15 +60,9 @@ test('CRUD uses current endpoint shapes and opt-out of automatic mutation replay
     expect.anything(),
     expect.objectContaining({ pearNoAuthReplay: true }),
   );
-  await api.write('availability', 'update', { id: '8' });
+  await api.write('centre', 'update', { id: '8' });
   expect(mockClient.put).toHaveBeenLastCalledWith(
-    '/centre_activity_availabilities/',
-    expect.anything(),
-    expect.objectContaining({ pearNoAuthReplay: true }),
-  );
-  await api.write('adhoc', 'create', { patient_id: '9' });
-  expect(mockClient.post).toHaveBeenCalledWith(
-    '/adhocs/',
+    '/centre_activities/',
     expect.anything(),
     expect.objectContaining({ pearNoAuthReplay: true }),
   );
@@ -74,5 +71,31 @@ test('CRUD uses current endpoint shapes and opt-out of automatic mutation replay
     '/care_centres/1/working_hours',
     {},
     expect.objectContaining({ baseURL: 'http://synthetic.invalid/api/v1' }),
+  );
+});
+
+test.each(['availability', 'adhoc'])(
+  '%s create/update/delete refuse before actual HTTP transport',
+  (kind) => {
+    ['create', 'update', 'delete'].forEach((action) =>
+      expect(() => api.write(kind, action, { id: 1, patient_id: 7 })).toThrow(
+        /unavailable/,
+      ),
+    );
+    expect(mockClient.post).not.toHaveBeenCalled();
+    expect(mockClient.put).not.toHaveBeenCalled();
+    expect(mockClient.delete).not.toHaveBeenCalled();
+  },
+);
+test('100 returned availability rows expose an incomplete snapshot and do not invent pagination', async () => {
+  mockClient.get.mockResolvedValue({ ok: true, data: rows(100) });
+  const snapshot = await api.availabilitySnapshot({ includeDeleted: true });
+  expect(snapshot.rows).toHaveLength(100);
+  expect(snapshot.complete).toBe(false);
+  expect(mockClient.get).toHaveBeenCalledTimes(1);
+  expect(mockClient.get).toHaveBeenCalledWith(
+    '/centre_activity_availabilities/',
+    { include_deleted: true },
+    expect.anything(),
   );
 });

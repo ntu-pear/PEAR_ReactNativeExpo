@@ -18,6 +18,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 }));
 jest.mock('app/api/centreManagement', () => ({
   list: jest.fn(),
+  availabilitySnapshot: jest.fn(),
   workingHours: jest.fn(),
   get: jest.fn(),
   write: jest.fn(),
@@ -46,6 +47,11 @@ const payload = () => ({
 });
 beforeEach(() => {
   jest.clearAllMocks();
+  centreApi.availabilitySnapshot.mockResolvedValue({
+    rows: [],
+    complete: false,
+    sourceLimit: 100,
+  });
   centreApi.list.mockResolvedValue([]);
   centreApi.workingHours.mockResolvedValue({
     ok: true,
@@ -108,7 +114,8 @@ test.each(['valid', 'missing-patient', 'unsafe-patient'])(
           .findAllByType(Text)
           .some((t) => t.props.children === 'Add patient ad hoc request'),
       );
-    expect(add.props.disabled).toBe(kind !== 'valid');
+    expect(add).toBeUndefined();
+    expect(text).toContain('Current requests are read-only');
     expect(text.includes('No active ad hoc requests')).toBe(kind === 'valid');
     expect(centreApi.write).not.toHaveBeenCalled();
   },

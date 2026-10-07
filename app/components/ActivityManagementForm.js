@@ -82,7 +82,9 @@ export default function ActivityManagementForm({
                 kind === 'centre' ? 'Catalogue activity' : 'Centre activity'
               }
               value={String(
-                draft.activity_id ?? draft.centre_activity_id ?? '',
+                (kind === 'centre'
+                  ? draft.activity_id
+                  : draft.centre_activity_id) ?? '',
               )}
               dataArray={choices}
               onDataChange={set(

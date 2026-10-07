@@ -2,6 +2,7 @@ import client, { ACTIVITY_V1_BASE } from 'app/api/client';
 import requestDeadline from 'app/utility/requestDeadline';
 import { readAllPages } from 'app/utility/pagedRead';
 import { activityEntityId } from 'app/utility/exclusionEligibility';
+import { activityMutationBlockReason } from 'app/utility/activityManagementPolicy';
 
 const paths = {
   activity: '/activities',
@@ -92,6 +93,10 @@ const get = (kind, id) =>
     config(),
   );
 const write = (kind, action, payload) => {
+  const blocked = activityMutationBlockReason(kind);
+  if (blocked) {
+    throw new Error(blocked);
+  }
   const path = pathFor(kind);
   if (action === 'create') {
     return client.post(path + '/', payload, config(true));
@@ -118,4 +123,11 @@ const workingHours = () =>
   client.get('/care_centres/1/working_hours', {}, config());
 // Current Activity staging validates every availability against care centre 1.
 // Centre administration is Admin-only; this Supervisor adapter never changes hours.
-export default { list, get, write, workingHours };
+const availabilitySnapshot = async (options) => ({
+  rows: await list('availability', options),
+  complete: false,
+  sourceLimit: 100,
+  reason:
+    'The inspected backend caps this route at 100 without pagination or a reliable total.',
+});
+export default { list, get, write, workingHours, availabilitySnapshot };

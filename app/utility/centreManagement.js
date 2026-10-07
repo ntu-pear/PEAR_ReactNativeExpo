@@ -5,10 +5,8 @@ import {
 } from 'app/utility/exclusionEligibility';
 import { currentUserId } from 'app/utility/medicationAdminister';
 import { opaqueId } from 'app/utility/patientFieldPolicy';
-import {
-  getScheduleDayValue,
-  parseScheduleDay,
-} from 'app/utility/parseScheduleString';
+import { getScheduleDayValue } from 'app/utility/parseScheduleString';
+import { activityMutationBlockReason } from 'app/utility/activityManagementPolicy';
 
 export const weekDays = [
   'Monday',
@@ -122,6 +120,10 @@ export const buildActivityPayload = ({
   const identity =
     action === 'create' ? {} : { id: activityEntityId(draft.id) };
   if (action === 'delete') {
+    const blocked = activityMutationBlockReason(kind);
+    if (blocked) {
+      throw new Error(blocked);
+    }
     return identity;
   }
   let payload;
@@ -288,6 +290,21 @@ export const buildActivityPayload = ({
         'The service current-week boundary differs from Singapore time. This change cannot be saved yet.',
       );
     }
+    if (start !== end) {
+      throw new Error(
+        'Multi-day ad hoc intervals require authoritative service validation.',
+      );
+    }
+    if (Date.parse(startISO) <= now.getTime()) {
+      throw new Error('Ad hoc changes must start later than the current time.');
+    }
+    const weekday = (new Date(start + 'T00:00:00Z').getUTCDay() + 6) % 7;
+    assertOpen(
+      data.hours,
+      weekday,
+      timeMinutes(draft.start_time),
+      timeMinutes(draft.end_time),
+    );
     if (
       start < old.start_date ||
       end > old.end_date ||
@@ -298,9 +315,19 @@ export const buildActivityPayload = ({
         'The selected activities must cover the whole date range.',
       );
     }
-    if (!data.oldScheduledIds?.includes(String(old.id))) {
+    const scheduled = patientScheduledCentreIds({
+      rows: data.schedule,
+      patientId,
+      startDate: start,
+      endDate: end,
+      startTime: draft.start_time,
+      endTime: draft.end_time,
+      centres: data.centres,
+      activities: data.activities,
+    });
+    if (!scheduled.ids.includes(String(old.id))) {
       throw new Error(
-        'The existing schedule does not identify this activity unambiguously.',
+        'No unambiguous affected occurrence overlaps this interval.',
       );
     }
     payload = {
@@ -316,6 +343,10 @@ export const buildActivityPayload = ({
     }
   } else {
     throw new Error('Unknown activity operation.');
+  }
+  const blocked = activityMutationBlockReason(kind);
+  if (blocked) {
+    throw new Error(blocked);
   }
   return {
     ...identity,
@@ -345,6 +376,8 @@ export const patientScheduledCentreIds = ({
   patientId,
   startDate,
   endDate,
+  startTime,
+  endTime,
   centres,
   activities,
 }) => {
@@ -357,86 +390,86 @@ export const patientScheduledCentreIds = ({
   ) {
     throw new Error('The existing weekly schedule is unavailable.');
   }
+  if (start !== end || startTime == null || endTime == null) {
+    throw new Error('An exact single-day affected time interval is required.');
+  }
+  const from = timeMinutes(startTime),
+    to = timeMinutes(endTime);
+  if (from >= to) {
+    throw new Error('The affected time interval is invalid.');
+  }
   const scoped = rows.filter(
-    (r) =>
-      String(activityEntityId(r.PatientID)) ===
+    (row) =>
+      String(activityEntityId(row.PatientID)) ===
       String(activityEntityId(patientId)),
   );
-  const titles = new Set();
-  for (
-    let date = start;
-    date <= end;
-    date = new Date(Date.parse(date + 'T00:00:00Z') + 86400000)
-      .toISOString()
-      .slice(0, 10)
-  ) {
-    const matching = scoped.filter(
-      (r) =>
-        calendarDate(String(r.StartDate || '').slice(0, 10)) <= date &&
-        calendarDate(String(r.EndDate || '').slice(0, 10)) >= date,
+  const matching = scoped.filter(
+    (row) =>
+      calendarDate(String(row.StartDate || '').slice(0, 10)) <= start &&
+      calendarDate(String(row.EndDate || '').slice(0, 10)) >= end,
+  );
+  if (matching.length !== 1) {
+    throw new Error(
+      'One existing patient schedule must cover every selected date.',
     );
-    if (matching.length !== 1) {
+  }
+  const weekday = (new Date(start + 'T00:00:00Z').getUTCDay() + 6) % 7;
+  let value = getScheduleDayValue(matching[0], weekDays[weekday]);
+  if (typeof value === 'string' && value.trim()) {
+    try {
+      value = JSON.parse(value);
+    } catch {
       throw new Error(
-        'One existing patient schedule must cover every selected date.',
+        'The existing schedule has no authoritative explicit activity times.',
       );
     }
-    const weekday = (new Date(date + 'T00:00:00Z').getUTCDay() + 6) % 7;
-    let value = getScheduleDayValue(matching[0], weekDays[weekday]);
-    if (typeof value === 'string' && /^[{[]/.test(value.trim())) {
-      try {
-        value = JSON.parse(value);
-      } catch {
-        throw new Error('The existing schedule has invalid activity slots.');
-      }
-    }
-    if (
-      Array.isArray(value) ||
-      (value != null && !['string', 'object'].includes(typeof value))
-    ) {
-      throw new Error('The existing schedule has invalid activity slots.');
-    }
-    if (
-      value &&
-      typeof value === 'object' &&
-      Object.entries(value).some(
-        ([range, title]) =>
-          !/^(?:[01]?\d|2[0-3]):[0-5]\d-(?:[01]?\d|2[0-3]):[0-5]\d$/.test(
-            range,
-          ) || typeof title !== 'string',
-      )
-    ) {
-      throw new Error('The existing schedule has invalid activity slots.');
-    }
-    parseScheduleDay(
-      value,
-      date + 'T00:00:00+08:00',
-      patientId,
-      'Patient',
-    ).forEach((slot) => {
-      if (
-        !slot.activityTitle ||
-        Number.isNaN(slot.startTime.getTime()) ||
-        Number.isNaN(slot.endTime.getTime()) ||
-        slot.endTime <= slot.startTime
-      ) {
-        throw new Error('The existing schedule has invalid activity slots.');
-      }
-      titles.add(slot.activityTitle.trim().toLowerCase());
-    });
   }
-  const candidates = centres.filter(
-    (c) => !c.is_deleted && c.start_date <= start && c.end_date >= end,
-  );
-  const groups = new Map();
-  candidates.forEach((centre) => {
-    const title = activities
-      .find((a) => String(a.id) === String(centre.activity_id) && !a.is_deleted)
-      ?.title?.trim()
-      .toLowerCase();
-    if (title && titles.has(title)) {
-      groups.set(title, [...(groups.get(title) || []), String(centre.id)]);
+  if (value == null || value === '') {
+    value = {};
+  }
+  if (Array.isArray(value) || typeof value !== 'object') {
+    throw new Error('The existing schedule has invalid activity slots.');
+  }
+  const titles = new Set();
+  Object.entries(value).forEach(([range, title]) => {
+    const match =
+      /^(?:([01]?\d|2[0-3]):([0-5]\d))-(?:([01]?\d|2[0-3]):([0-5]\d))$/.exec(
+        range,
+      );
+    if (!match || typeof title !== 'string' || !title.trim()) {
+      throw new Error('The existing schedule has invalid activity slots.');
+    }
+    const slotStart = Number(match[1]) * 60 + Number(match[2]),
+      slotEnd = Number(match[3]) * 60 + Number(match[4]);
+    if (slotStart >= slotEnd) {
+      throw new Error('The existing schedule has invalid activity slots.');
+    }
+    // Wall-clock minutes on the same explicit Singapore date; no device-timezone guess.
+    if (from < slotEnd && to > slotStart) {
+      titles.add(title.split(' | ')[0].trim().toLowerCase());
     }
   });
+  const groups = new Map();
+  centres
+    .filter(
+      (centre) =>
+        !centre.is_deleted &&
+        centre.start_date <= start &&
+        centre.end_date >= end,
+    )
+    .forEach((centre) => {
+      const title = activities
+        .find(
+          (activity) =>
+            String(activity.id) === String(centre.activity_id) &&
+            !activity.is_deleted,
+        )
+        ?.title?.trim()
+        .toLowerCase();
+      if (title && titles.has(title)) {
+        groups.set(title, [...(groups.get(title) || []), String(centre.id)]);
+      }
+    });
   return {
     ids: [...groups.values()].filter((ids) => ids.length === 1).flat(),
     ambiguousTitles: [...groups.entries()]

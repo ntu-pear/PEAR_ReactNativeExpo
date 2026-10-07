@@ -55,6 +55,15 @@ const data = () => ({
   hours: hours(),
   rules: { preferences: [], recommendations: [], exclusions: [] },
   oldScheduledIds: ['11'],
+  schedule: [
+    {
+      PatientID: '9007199254740993',
+      StartDate: '2026-10-05',
+      EndDate: '2026-10-11',
+      Wednesday: '{"13:00-14:00":"Art"}',
+      Thursday: '{"15:00-16:00":"Art"}',
+    },
+  ],
 });
 const build = (kind, draft, action = 'create', extra = {}) =>
   buildActivityPayload({
@@ -109,11 +118,9 @@ test('configured hours preserve Saturday and closed Sunday without fallback', ()
   ).toThrow(/incomplete/);
 });
 test('flexible availability can span a four-hour window but respects Saturday close', () => {
-  expect(build('availability', availability())).toMatchObject({
-    start_time: '09:00:00',
-    end_time: '13:00:00',
-    days_of_week: 0,
-  });
+  expect(() => build('availability', availability())).toThrow(
+    /Availability changes are unavailable/,
+  );
   expect(() =>
     build('availability', { ...availability(), end_time: '14:00' }),
   ).toThrow(/opening hours/);
@@ -175,14 +182,10 @@ test('current week uses Singapore Sunday and never tomorrow from Sunday', () => 
     '2026-10-11',
   ]);
 });
-test('single-patient same-day replacement uses exact IDs and Singapore timestamps, Pending only', () => {
-  expect(build('adhoc', adhoc())).toMatchObject({
-    patient_id: '9007199254740993',
-    old_centre_activity_id: 11,
-    new_centre_activity_id: 12,
-    status: 'PENDING',
-    start_date: '2026-10-07T13:00:00+08:00',
-  });
+test('otherwise valid single-patient replacement stays disabled pending authoritative validation', () => {
+  expect(() => build('adhoc', adhoc())).toThrow(
+    /Ad hoc changes are unavailable/,
+  );
   expect(() => build('adhoc', { ...adhoc(), end_date: '2026-10-12' })).toThrow(
     /current Singapore week/,
   );
@@ -218,6 +221,8 @@ test('scheduled-title resolution never picks a first duplicate centre ID', () =>
     patientId: '7',
     startDate: '2026-10-07',
     endDate: '2026-10-07',
+    startTime: '09:00',
+    endTime: '10:00',
     centres: context.centres,
     activities: context.activities,
   };
@@ -238,6 +243,8 @@ test('wrong/unsafe schedule patient ID and missing date coverage cannot identify
     patientId: '9007199254740992',
     startDate: '2026-10-07',
     endDate: '2026-10-07',
+    startTime: '09:00',
+    endTime: '10:00',
     ...data(),
   };
   expect(() => patientScheduledCentreIds(args)).toThrow(/cover every/);
@@ -262,6 +269,8 @@ test('oversized date ranges and reversed schedule slots are rejected before sele
     patientId: '7',
     startDate: '2026-10-07',
     endDate: '2026-10-07',
+    startTime: '09:00',
+    endTime: '10:00',
     centres: [],
     activities: [],
   };
@@ -272,3 +281,124 @@ test('oversized date ranges and reversed schedule slots are rejected before sele
     'invalid activity slots',
   );
 });
+
+test.each([
+  [
+    'closed Sunday',
+    {
+      start_date: '2026-10-11',
+      end_date: '2026-10-11',
+      start_time: '09:00',
+      end_time: '10:00',
+    },
+    /Sunday/,
+  ],
+  [
+    'before opening',
+    {
+      start_date: '2026-10-08',
+      end_date: '2026-10-08',
+      start_time: '06:00',
+      end_time: '07:00',
+    },
+    /opening hours/,
+  ],
+  [
+    'after closing',
+    {
+      start_date: '2026-10-08',
+      end_date: '2026-10-08',
+      start_time: '16:30',
+      end_time: '17:30',
+    },
+    /opening hours/,
+  ],
+  [
+    'earlier today',
+    { start_time: '09:00', end_time: '10:00' },
+    /later than the current time/,
+  ],
+  [
+    'starts now',
+    { start_time: '14:00', end_time: '15:00' },
+    /later than the current time/,
+  ],
+  ['multi-day', { end_date: '2026-10-08' }, /Multi-day/],
+  [
+    'no selected-time overlap',
+    {
+      start_date: '2026-10-08',
+      end_date: '2026-10-08',
+      start_time: '13:00',
+      end_time: '14:00',
+    },
+    /overlaps this interval/,
+  ],
+])(
+  'ad hoc actual builder refuses %s before any payload is returned',
+  (_label, change, message) => {
+    expect(() =>
+      build('adhoc', { ...adhoc(), ...change }, 'create', {
+        now: new Date('2026-10-07T06:00:00Z'),
+      }),
+    ).toThrow(message);
+  },
+);
+test.each([
+  ['13:00', '14:00', []],
+  ['14:00', '15:00', []],
+  ['15:00', '16:00', ['11']],
+  ['15:30', '16:30', ['11']],
+  ['16:00', '17:00', []],
+])(
+  'schedule helper intersects actual Singapore wall-clock occurrence %s-%s',
+  (startTime, endTime, expected) => {
+    const context = data();
+    const rows = [
+      {
+        PatientID: '7',
+        StartDate: '2026-10-05',
+        EndDate: '2026-10-11',
+        Thursday: '{"15:00-16:00":"Art"}',
+      },
+    ];
+    expect(
+      patientScheduledCentreIds({
+        rows,
+        patientId: '7',
+        startDate: '2026-10-08',
+        endDate: '2026-10-08',
+        startTime,
+        endTime,
+        ...context,
+      }).ids,
+    ).toEqual(expected);
+  },
+);
+test('helper never invents times for legacy titles or an omitted interval', () => {
+  const base = {
+    rows: [
+      {
+        PatientID: '7',
+        StartDate: '2026-10-05',
+        EndDate: '2026-10-11',
+        Thursday: 'Art',
+      },
+    ],
+    patientId: '7',
+    startDate: '2026-10-08',
+    endDate: '2026-10-08',
+    ...data(),
+  };
+  expect(() => patientScheduledCentreIds(base)).toThrow(/exact single-day/);
+  expect(() =>
+    patientScheduledCentreIds({
+      ...base,
+      startTime: '15:00',
+      endTime: '16:00',
+    }),
+  ).toThrow(/explicit activity times/);
+});
+test.each(['availability', 'adhoc'])('%s delete remains disabled', (kind) =>
+  expect(() => build(kind, { id: 1 }, 'delete')).toThrow(/unavailable/),
+);

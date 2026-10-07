@@ -8,6 +8,7 @@ import requestDeadline from 'app/utility/requestDeadline';
 import { configuredHours, supervisorActor } from 'app/utility/centreManagement';
 import { createActivityWriter } from 'app/utility/activityManagementWrite';
 import { activityEntityId } from 'app/utility/exclusionEligibility';
+import { activityMutationBlockReason } from 'app/utility/activityManagementPolicy';
 
 const writer = createActivityWriter({ api });
 export default function useCentreManagement(patientId, requirePatient = false) {
@@ -38,25 +39,35 @@ export default function useCentreManagement(patientId, requirePatient = false) {
   }
   const scopeRevision = currentIdentity.current.revision;
   const generation = useRef(0);
+  const mounted = useRef(false);
   const [reload, setReload] = useState(0);
   const [state, setState] = useState({
     identity: '',
     scopeRevision: -1,
+    generation: 0,
     data: null,
     loading: true,
     error: '',
     pending: false,
   });
-  const [busy, setBusy] = useState('');
+  const [busy, setBusy] = useState(-1);
   const busyRef = useRef(false);
   const current = () =>
+    mounted.current &&
+    generation.current === state.generation &&
     currentIdentity.current.identity === identity &&
     currentIdentity.current.revision === scopeRevision &&
     permitted &&
     focused;
   useEffect(() => {
+    mounted.current = true;
     const attempt = ++generation.current;
+    const cleanup = () => {
+      mounted.current = false;
+      generation.current += 1;
+    };
     const active = () =>
+      mounted.current &&
       currentIdentity.current.identity === identity &&
       currentIdentity.current.revision === scopeRevision &&
       generation.current === attempt &&
@@ -65,13 +76,14 @@ export default function useCentreManagement(patientId, requirePatient = false) {
     setState({
       identity,
       scopeRevision,
+      generation: attempt,
       data: null,
       loading: permitted && focused,
       error: '',
       pending: false,
     });
     if (!permitted || !focused) {
-      return undefined;
+      return cleanup;
     }
     const load = async () => {
       let savedMarker = null;
@@ -79,7 +91,7 @@ export default function useCentreManagement(patientId, requirePatient = false) {
         const reads = [
           api.list('activity', { includeDeleted: true, isCurrent: active }),
           api.list('centre', { includeDeleted: true, isCurrent: active }),
-          api.list('availability', { includeDeleted: true, isCurrent: active }),
+          api.availabilitySnapshot({ includeDeleted: true, isCurrent: active }),
           requestDeadline(api.workingHours()),
           writer.pending(user).then((marker) => {
             savedMarker = marker;
@@ -129,10 +141,13 @@ export default function useCentreManagement(patientId, requirePatient = false) {
           setState({
             identity,
             scopeRevision,
+            generation: attempt,
             data: {
               activities,
               centres,
-              availabilities,
+              availabilities: availabilities.rows,
+              availabilityListComplete: availabilities.complete === true,
+              availabilityListLimit: availabilities.sourceLimit,
               hours,
               adhocs: adhocs || [],
               rules: rules?.data?.eligibility,
@@ -148,6 +163,7 @@ export default function useCentreManagement(patientId, requirePatient = false) {
           setState({
             identity,
             scopeRevision,
+            generation: attempt,
             data: null,
             loading: false,
             pending: !!savedMarker,
@@ -158,39 +174,55 @@ export default function useCentreManagement(patientId, requirePatient = false) {
       }
     };
     load();
-    return () => {
-      generation.current += 1;
-    };
+    return cleanup;
   }, [identity, reload, focused, patientId, permitted, user, scopeRevision]);
   const mutate = async (args) => {
     if (busyRef.current || !current()) {
       return { outcome: 'not_sent' };
     }
+    const blocked = args && activityMutationBlockReason(args.kind);
+    if (blocked) {
+      return { outcome: 'not_sent', message: blocked };
+    }
     busyRef.current = true;
-    setBusy(identity);
+    setBusy(state.generation);
     try {
       const result = args
         ? await writer.run({ ...args, user, isCurrent: current })
         : await writer.reconcile({ user, isCurrent: current });
       if (current()) {
-        setReload((n) => n + 1);
+        // Let the owner publish its verified result before replacing this lease.
+        // Unknown writes must still lock the visible screen immediately.
+        setState((previous) => ({
+          ...previous,
+          pending:
+            result.outcome === 'unknown'
+              ? true
+              : ['verified', 'no_pending'].includes(result.outcome)
+              ? false
+              : previous.pending,
+        }));
       }
       return result;
     } finally {
       busyRef.current = false;
-      setBusy('');
+      if (current()) {
+        setBusy(-1);
+      }
     }
   };
   const view =
-    state.identity === identity && state.scopeRevision === scopeRevision
+    state.identity === identity &&
+    state.scopeRevision === scopeRevision &&
+    state.generation === generation.current
       ? state
       : { data: null, loading: true, error: '', pending: false };
   return {
     ...view,
     user,
     permitted,
-    busy: busy === identity || busyRef.current,
-    identity: `${identity}:${scopeRevision}`,
+    busy: busy === state.generation || busyRef.current,
+    identity: `${identity}:${scopeRevision}:${state.generation}`,
     current,
     save: mutate,
     reconcile: () => mutate(null),

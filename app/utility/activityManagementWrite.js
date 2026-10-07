@@ -74,9 +74,17 @@ export const createActivityWriter = ({
     ) {
       return { outcome: 'unknown' };
     }
-    await mutate(activityPendingKey(actor), () =>
-      storage.removeItem(activityPendingKey(actor)),
-    );
+    const key = activityPendingKey(actor);
+    await mutate(key, () => {
+      if (!isCurrent()) {
+        throw new Error('The activity screen changed.');
+      }
+      return storage.removeItem(key);
+    });
+    if (!isCurrent()) {
+      await mutate(key, () => storage.setItem(key, JSON.stringify(marker)));
+      return { outcome: 'unknown' };
+    }
     return { outcome: 'verified', record: response.data };
   };
   const reconcile = async ({ user, isCurrent = () => true }) => {
@@ -117,10 +125,26 @@ export const createActivityWriter = ({
     let sent = false,
       marked = false;
     try {
-      if (await pending(user)) {
+      const existing = await pending(user);
+      if (!isCurrent()) {
+        return { outcome: 'not_sent' };
+      }
+      if (existing) {
         return { outcome: 'unknown' };
       }
       if (action !== 'create') {
+        if (
+          expectedModifiedDate === undefined ||
+          (expectedModifiedDate !== null &&
+            (typeof expectedModifiedDate !== 'string' ||
+              !expectedModifiedDate.trim()))
+        ) {
+          return {
+            outcome: 'not_sent',
+            message:
+              'The record version is unavailable. Reload before changing it.',
+          };
+        }
         const fresh = await requestDeadline(
           api.get(kind, payload.id),
           timeoutMs,
@@ -133,13 +157,16 @@ export const createActivityWriter = ({
           (kind === 'adhoc' &&
             String(activityEntityId(fresh.data?.patient_id)) !==
               String(activityEntityId(expectedPatientId))) ||
-          (expectedModifiedDate != null &&
-            fresh.data.modified_date !== expectedModifiedDate)
+          !Object.prototype.hasOwnProperty.call(fresh.data, 'modified_date') ||
+          fresh.data.modified_date !== expectedModifiedDate
         ) {
           return {
             outcome: 'not_sent',
             message: 'The activity changed. Reload before saving.',
           };
+        }
+        if (!isCurrent()) {
+          return { outcome: 'not_sent' };
         }
         if (action === 'update' && recordMatches(fresh.data, payload)) {
           return { outcome: 'verified', record: fresh.data };
@@ -171,20 +198,20 @@ export const createActivityWriter = ({
         await mutate(key, () => storage.removeItem(key));
         return { outcome: 'not_sent' };
       }
-      sent = true;
       const response = await requestDeadline(
-        Promise.resolve().then(() => api.write(kind, action, payload)),
+        Promise.resolve().then(() => {
+          if (!isCurrent()) {
+            throw new Error('The activity screen changed before dispatch.');
+          }
+          sent = true;
+          return api.write(kind, action, payload);
+        }),
         timeoutMs,
       );
       if (!response?.ok) {
-        if ([400, 401, 403, 404, 409, 422].includes(response?.status)) {
-          await mutate(key, () => storage.removeItem(key));
-          return {
-            outcome: 'rejected',
-            message:
-              'The service rejected the change. Reload and review the fields.',
-          };
-        }
+        // A status alone cannot prove non-commit: availability create can commit
+        // and then fail its parent lookup with 404. Keep every dispatched failure
+        // uncertain until an authoritative exact receipt can be reconciled.
         return { outcome: 'unknown' };
       }
       marker.receiptId = activityEntityId(response.data?.id);

@@ -19,6 +19,7 @@ import {
   hasWeekday,
 } from 'app/utility/centreManagement';
 import { centreDay } from 'app/utility/centreClock';
+import { activityMutationBlockReason } from 'app/utility/activityManagementPolicy';
 
 const kinds = {
   activity: 'Catalogue',
@@ -101,6 +102,7 @@ export default function CentreActivitiesScreen() {
         setMessage(
           action === 'delete' ? 'Activity deleted.' : 'Activity saved.',
         );
+        state.refresh();
       } else {
         setMessage(
           result.message ||
@@ -132,7 +134,13 @@ export default function CentreActivitiesScreen() {
   if (!state.permitted) {
     return <Text>Activity management requires Supervisor access.</Text>;
   }
-  const disabled = state.busy || state.pending || state.loading || !state.data;
+  const blockedReason = activityMutationBlockReason(kind);
+  const disabled =
+    state.busy ||
+    state.pending ||
+    state.loading ||
+    !state.data ||
+    !!blockedReason;
   const items =
     state.data?.[
       kind === 'activity'
@@ -189,6 +197,12 @@ export default function CentreActivitiesScreen() {
           </TouchableOpacity>
         ))}
       </View>
+      {kind === 'availability' ? (
+        <Text accessibilityRole="alert">
+          The availability list may be incomplete: the inspected service caps it
+          at 100 without pagination or a reliable total. {blockedReason}
+        </Text>
+      ) : null}
       {state.loading ? <ActivityIndicator /> : null}
       {state.error ? (
         <Text accessibilityRole="alert">{state.error}</Text>
@@ -230,6 +244,9 @@ export default function CentreActivitiesScreen() {
                     ? 'Outcome checked. Reload the activity.'
                     : 'The outcome is still unconfirmed. No change was resent.',
                 );
+                if (['verified', 'no_pending'].includes(result.outcome)) {
+                  state.refresh();
+                }
               }
             }}
           >
@@ -301,7 +318,11 @@ export default function CentreActivitiesScreen() {
             <Text>Add {kinds[kind]}</Text>
           </TouchableOpacity>
           {state.data && rows.length === 0 ? (
-            <Text>No matching activities.</Text>
+            <Text>
+              {kind === 'availability'
+                ? 'No matching rows in the returned availability snapshot. More records may exist.'
+                : 'No matching activities.'}
+            </Text>
           ) : null}
           <Text>
             {rows.length} matching records; page {displayPage + 1}

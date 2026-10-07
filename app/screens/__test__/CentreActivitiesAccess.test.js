@@ -18,6 +18,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 }));
 jest.mock('app/api/centreManagement', () => ({
   list: jest.fn(),
+  availabilitySnapshot: jest.fn(),
   workingHours: jest.fn(),
   get: jest.fn(),
   write: jest.fn(),
@@ -73,6 +74,11 @@ const click = async (label) => {
 };
 beforeEach(() => {
   jest.clearAllMocks();
+  api.availabilitySnapshot.mockResolvedValue({
+    rows: [],
+    complete: false,
+    sourceLimit: 100,
+  });
   mockFocused = true;
   jest.useFakeTimers();
   jest.setSystemTime(new Date('2026-10-07T03:00:00Z'));
@@ -268,48 +274,60 @@ test('Supervisor catalogue Save writes once and requires exact read-back before 
   expect(api.get).toHaveBeenCalledWith('activity', 99);
   expect(text()).toContain('Activity saved.');
 });
-test('Supervisor single-patient Save records Pending without claiming scheduler application', async () => {
-  const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-  api.write.mockImplementation(async (_kind, _action, payload) => ({
-    ok: true,
-    data: { id: 90, ...payload, is_deleted: false },
-  }));
-  api.get.mockImplementation(async () => ({
-    ok: true,
-    data: { id: 90, ...api.write.mock.calls[0][2], is_deleted: false },
-  }));
+test('patient requests are read-only with no mutation controls or scheduler calls', async () => {
   await mount('SUPERVISOR', true);
-  await click('Add patient ad hoc request');
-  const selectors = tree.root.findAllByType('MockSelection');
-  await act(async () =>
-    selectors
-      .find((n) => n.props.title === 'Scheduled activity to replace')
-      .props.onDataChange('11'),
-  );
-  await act(async () =>
-    tree.root
-      .findAllByType('MockSelection')
-      .find((n) => n.props.title === 'Replacement centre activity')
-      .props.onDataChange('12'),
-  );
-  await click('Review and save');
-  await act(async () =>
-    alert.mock.calls[0][2].find((b) => b.text === 'Save').onPress(),
-  );
-  expect(api.write).toHaveBeenCalledTimes(1);
-  expect(api.write).toHaveBeenCalledWith(
-    'adhoc',
-    'create',
-    expect.objectContaining({
-      patient_id: '7',
-      status: 'PENDING',
-      old_centre_activity_id: 11,
-      new_centre_activity_id: 12,
-    }),
-  );
-  expect(text()).toContain('saved (PENDING)');
+  expect(text()).toContain('Current requests are read-only');
+  expect(text()).not.toContain('Add patient ad hoc request');
+  expect(text()).not.toContain('Review and save');
+  expect(api.write).not.toHaveBeenCalled();
   expect(scheduleApi.generateScheduleV1).not.toHaveBeenCalled();
   expect(scheduleApi.adhocScheduleV1).not.toHaveBeenCalled();
+});
+test('availability Add/Edit/Delete are disabled and retained handlers cannot dispatch', async () => {
+  const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  api.availabilitySnapshot.mockResolvedValue({
+    rows: [
+      {
+        id: 101,
+        centre_activity_id: 11,
+        start_time: '09:00',
+        end_time: '10:00',
+        is_deleted: false,
+      },
+    ],
+    complete: false,
+    sourceLimit: 100,
+  });
+  await mount('SUPERVISOR');
+  await click('Availabilities');
+  expect(text()).toContain('may be incomplete');
+  expect(text()).toContain('caps it at 100');
+  const mutations = tree.root
+    .findAllByType(TouchableOpacity)
+    .filter((n) =>
+      n
+        .findAllByType(Text)
+        .some((t) =>
+          ['Add Availabilities', 'Edit', 'Delete'].includes(
+            [t.props.children].flat(Infinity).join(''),
+          ),
+        ),
+    );
+  expect(mutations).toHaveLength(3);
+  mutations.forEach((n) => expect(n.props.disabled).toBe(true));
+  // A retained callback bypasses the RN disabled property: the builder/hook still deny dispatch.
+  await act(async () =>
+    mutations
+      .find((n) =>
+        n.findAllByType(Text).some((t) => t.props.children === 'Delete'),
+      )
+      .props.onPress(),
+  );
+  await act(async () =>
+    alert.mock.calls[0][2].find((b) => b.text === 'Delete').onPress(),
+  );
+  expect(api.write).not.toHaveBeenCalled();
+  expect(text()).toContain('Availability changes are unavailable');
 });
 
 test('large single-patient request lists render 50 rows per page without another server fetch', async () => {
