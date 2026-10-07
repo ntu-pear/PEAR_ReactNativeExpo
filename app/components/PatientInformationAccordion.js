@@ -61,6 +61,15 @@ const optionLabelById = (options, id) => {
   return found?.label || '';
 };
 
+const hasEditableGuardian = (guardian) =>
+  guardian != null &&
+  typeof guardian === 'object' &&
+  !Array.isArray(guardian) &&
+  (typeof guardian.guardianID === 'string' ||
+    (typeof guardian.guardianID === 'number' &&
+      Number.isSafeInteger(guardian.guardianID))) &&
+  /^[1-9]\d*$/.test(String(guardian.guardianID));
+
 function PatientInformationAccordion({
   patientID,
   patientProfile,
@@ -415,7 +424,7 @@ function PatientInformationAccordion({
   }, [navigation, patientProfile]);
 
   const handlePatientGuardianOnPress = useCallback(() => {
-    if (guardianData?.guardian) {
+    if (hasEditableGuardian(guardianData?.guardian)) {
       navigation.push(routes.EDIT_PATIENT_GUARDIAN, {
         guardianProfile: guardianData.guardian,
         patientID:
@@ -427,7 +436,7 @@ function PatientInformationAccordion({
   }, [navigation, guardianData, patientProfile]);
 
   const handlePatientSecondGuardianOnPress = useCallback(() => {
-    if (guardianData?.additionalGuardian) {
+    if (hasEditableGuardian(guardianData?.additionalGuardian)) {
       navigation.push(routes.EDIT_PATIENT_GUARDIAN, {
         guardianProfile: guardianData.additionalGuardian,
         patientID:
@@ -526,9 +535,13 @@ function PatientInformationAccordion({
         case 'Patient Preferences':
           return handlePatientPrefOnPress;
         case 'Guardian(s) Information':
-          return handlePatientGuardianOnPress;
+          return hasEditableGuardian(guardianData?.guardian)
+            ? handlePatientGuardianOnPress
+            : null;
         case 'Guardian 2':
-          return handlePatientSecondGuardianOnPress;
+          return hasEditableGuardian(guardianData?.additionalGuardian)
+            ? handlePatientSecondGuardianOnPress
+            : null;
         case 'Social History':
           return handlePatientSocialHistOnPress;
         default:
@@ -536,6 +549,7 @@ function PatientInformationAccordion({
       }
     },
     [
+      guardianData,
       handlePatientInfoOnPress,
       handlePatientPrefOnPress,
       handlePatientGuardianOnPress,
@@ -634,7 +648,7 @@ function PatientInformationAccordion({
               title={section.title}
               subtitle={'Guardian 2'}
               displayData={secondGuardianInfoData}
-              handleOnPress={handlePatientSecondGuardianOnPress}
+              handleOnPress={handleOnPress('Guardian 2')}
               unMaskedNRIC={getUnmaskedNRIC('Guardian 2')}
             />
           ) : null}
@@ -652,7 +666,6 @@ function PatientInformationAccordion({
       secondGuardianInfoData,
       handleOnPress,
       getUnmaskedNRIC,
-      handlePatientSecondGuardianOnPress,
     ],
   );
 

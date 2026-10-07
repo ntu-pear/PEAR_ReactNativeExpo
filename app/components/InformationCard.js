@@ -79,15 +79,24 @@ function InformationCard({
           </View>
         )}
         {handleOnPress && !subtitle && (
-          <AppButton title={buttonTitle || "EDIT"} onPress={handleOnPress} color="green" />
+          <AppButton
+            title={buttonTitle || 'EDIT'}
+            onPress={handleOnPress}
+            color="green"
+          />
         )}
       </HStack>
-
 
       {subtitle && (
         <HStack alignItems="center" justifyContent="space-between" mb={4}>
           <Text style={styles.subtitleText}>{subtitle}</Text>
-          <AppButton title={buttonTitle || "EDIT"} onPress={handleOnPress} color="green" />
+          {handleOnPress && (
+            <AppButton
+              title={buttonTitle || 'EDIT'}
+              onPress={handleOnPress}
+              color="green"
+            />
+          )}
         </HStack>
       )}
 
@@ -126,7 +135,7 @@ function InformationCard({
                     : !data.value || data.value === 'null'
                     ? '-'
                     : ['DOB', 'Start Date', 'End Date', 'Date'].includes(
-                        data.label
+                        data.label,
                       )
                     ? formatDateTime(data.value, true)
                     : data.value}
