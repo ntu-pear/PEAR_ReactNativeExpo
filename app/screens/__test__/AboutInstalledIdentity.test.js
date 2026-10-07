@@ -2,6 +2,7 @@ import React from 'react';
 import { act, create } from 'react-test-renderer';
 import Constants from 'expo-constants';
 import AboutScreen from 'app/screens/AboutScreen';
+import buildIdentity from 'app/config/generatedBuildIdentity.json';
 jest.mock('native-base', () => ({ Center: require('react-native').View }));
 jest.mock('expo-constants', () => ({
   nativeAppVersion: '9.4.synthetic',
@@ -33,4 +34,15 @@ test('About displays installed native version/code instead of a stale JS release
   expect(updated).toContain('Version: 10.0.synthetic');
   expect(updated).toContain('Build: 322');
   act(() => tree.unmount());
+});
+
+test('About explicitly describes dirty source as uncommitted changes based on its base commit', () => {
+  buildIdentity.sourceDirty = true;
+  const tree = create(<AboutScreen />);
+  const text = tree.root
+    .findByProps({ testID: 'about_installed_build_identity' })
+    .props.children.join('');
+  expect(text).toContain('Source: Uncommitted changes based on 0123456789ab');
+  act(() => tree.unmount());
+  buildIdentity.sourceDirty = false;
 });

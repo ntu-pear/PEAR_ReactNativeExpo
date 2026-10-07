@@ -1,5 +1,5 @@
 // Libs
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useContext, useState, useCallback, useRef } from 'react';
 import { SectionList, Center, View } from 'native-base';
 
 // Components
@@ -7,6 +7,10 @@ import AddPatientGuardian from 'app/components/AddPatientGuardian';
 import AddPatientBottomButtons from 'app/components/AddPatientBottomButtons';
 import AddPatientProgress from 'app/components/AddPatientProgress';
 import { hasGuardianInput } from 'app/utility/patientCreation';
+import AuthContext from 'app/auth/context';
+import { canSelectPrimaryGuardian } from 'app/utility/guardianEditing';
+import ExistingPrimaryGuardian from 'app/components/ExistingPrimaryGuardian';
+import AppButton from 'app/components/AppButton';
 
 function PatientAddGuardianScreen({
   nextQuestionHandler,
@@ -19,6 +23,8 @@ function PatientAddGuardianScreen({
   removeFormData,
   onSubmit,
 }) {
+  const { user } = useContext(AuthContext) || {};
+  const existingPrimary = formData?.guardianInfo?.[0]?.Mode === 'existing';
   const [guardianInfoDisplay, setGuardianInfoDisplay] = useState(
     componentList.guardian,
   );
@@ -34,12 +40,15 @@ function PatientAddGuardianScreen({
     (childId, isError) => {
       setErrorStates((prevErrorStates) => {
         const updatedErrorStates = [...prevErrorStates];
+        if (prevErrorStates[childId] === isError) {
+          return prevErrorStates;
+        }
         updatedErrorStates[childId] = isError;
         return updatedErrorStates;
       });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [errorStates],
+
+    [],
   );
 
   // Variable that determines whether user can go to next page based on whether there are
@@ -47,6 +56,9 @@ function PatientAddGuardianScreen({
   // Only check the first guardian (primary) for errors - it's required
   // Secondary guardian (index 1) is optional - can be empty or fully filled
   let isNextDisabled =
+    (existingPrimary &&
+      (!canSelectPrimaryGuardian(user) ||
+        formData.guardianInfo.slice(1).some(hasGuardianInput))) ||
     errorStates.length === 0 ||
     errorStates[0] === true ||
     formData.guardianInfo
@@ -54,7 +66,10 @@ function PatientAddGuardianScreen({
       .some((g, i) => hasGuardianInput(g) && errorStates[i + 1] !== false);
 
   const addNewGuardianComponent = () => {
-    if (guardianCount.current >= 2) {
+    if (
+      guardianCount.current >= 2 ||
+      formData?.guardianInfo?.[0]?.Mode === 'existing'
+    ) {
       return;
     }
     guardianCount.current += 1;
@@ -105,19 +120,59 @@ function PatientAddGuardianScreen({
         <AddPatientProgress value={100} />
       </Center>
       <SectionList
+        keyboardShouldPersistTaps="handled"
         testID={testID}
         sections={[{ data: guardianInfoDisplay }]}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item, index }) => (
-          <AddPatientGuardian
-            testID={testID}
-            key={item}
-            i={index}
-            title={index + 1}
-            formData={formData}
-            handleFormData={handleFormData}
-            onError={handleChildError}
-          />
+          <View>
+            {index === 0 && canSelectPrimaryGuardian(user) ? (
+              <View>
+                <AppButton
+                  title="New primary guardian"
+                  color="green"
+                  testID="primary-mode-new"
+                  onPress={() => {
+                    handleFormData('Mode', 0)('new');
+                    handleFormData('ExistingGuardianId', 0)(null);
+                    handleChildError(0, true);
+                  }}
+                />
+                <AppButton
+                  title="Existing primary guardian"
+                  color="green"
+                  testID="primary-mode-existing"
+                  onPress={() => {
+                    handleFormData('Mode', 0)('existing');
+                    handleFormData('RelationshipID', 0)(0);
+                    handleFormData('RelationshipName', 0)('');
+                    handleFormData('ExistingGuardianId', 0)(null);
+                    handleFormData('SelectedNric', 0)('');
+                    handleChildError(0, true);
+                  }}
+                />
+              </View>
+            ) : null}
+            {index === 0 && existingPrimary ? (
+              canSelectPrimaryGuardian(user) ? (
+                <ExistingPrimaryGuardian
+                  guardian={formData.guardianInfo[0]}
+                  onField={(field) => handleFormData(field, 0)}
+                  onError={(error) => handleChildError(0, error)}
+                />
+              ) : null
+            ) : (
+              <AddPatientGuardian
+                testID={testID}
+                key={item}
+                i={index}
+                title={index + 1}
+                formData={formData}
+                handleFormData={handleFormData}
+                onError={handleChildError}
+              />
+            )}
+          </View>
         )}
         ListFooterComponent={() => (
           <View style={{ alignItems: 'center', justifyContent: 'center' }}>
@@ -129,7 +184,7 @@ function PatientAddGuardianScreen({
               }
               addComponent={addNewGuardianComponent}
               removeComponent={() => removeGuardianComponent(1)}
-              max={2}
+              max={existingPrimary ? 1 : 2}
               submit={true}
               isSubmitDisabled={isNextDisabled}
               onSubmit={onSubmit}

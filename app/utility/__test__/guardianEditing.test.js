@@ -83,27 +83,22 @@ test('masked or missing identity and forbidden roles cannot produce a full updat
     }),
   ).toThrow();
 });
-test('primary selection preserves every staff allocation and swaps the former primary into secondary', () => {
+test('primary selection omits staff fields and swaps the former primary into secondary', () => {
   const payload = buildPrimaryGuardianUpdate({
     allocation,
-    guardians: [guardian],
+    guardians: [{ ...guardian, id: 1 }, guardian],
     guardianId: 2,
     patientId: 7,
     user: supervisor,
   });
   expect(payload).toEqual({
-    active: 'Y',
     patientId: 7,
     guardianId: 2,
     guardian2Id: 1,
-    caregiverId: 'TEST-CG',
-    tempCaregiverId: 9,
-    doctorId: 'TEST-DOC',
-    tempDoctorId: 10,
-    supervisorId: 'TEST-SUP',
-    gameTherapistId: 'TEST-GT',
     ModifiedById: 'TEST-SUP',
   });
+  expect(payload).not.toHaveProperty('caregiverId');
+  expect(payload).not.toHaveProperty('doctorId');
   expect(allocation.guardianId).toBe(1);
 });
 test('wrong-patient, inactive, unlinked and caregiver primary-selection attempts are rejected', () => {

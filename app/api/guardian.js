@@ -38,6 +38,13 @@ const getPatientGuardian = (patientID, maskNRIC = false) => {
   return client.get(guardianPatientGuardian, params, withPatientV1Base());
 };
 
+const getGuardianByNRIC = (nric) =>
+  client.get(
+    `${endPoint}/GetPatientGuardianByNRIC`,
+    { nric },
+    withPatientV1Base(),
+  );
+
 // **********************  POST REQUESTS *************************
 
 // ************************* UPDATE REQUESTS *************************
@@ -60,6 +67,7 @@ const updatePrimaryAllocation = (allocationId, data) =>
  */
 export default {
   getPatientGuardian,
+  getGuardianByNRIC,
   updateGuardian,
   getPatientAllocation,
   updatePrimaryAllocation,

@@ -1,4 +1,5 @@
 import { currentUserId } from 'app/utility/medicationAdminister';
+import { medicationCourseId } from 'app/utility/medicationCourse';
 import {
   opaqueId,
   uppercasePersonFields,
@@ -24,13 +25,15 @@ export const guardianRecords = (response, patientId) => {
   }
   const returnedId = data?.patient?.id ?? data?.patient?.patientID;
   if (
-    String(returnedId) !== String(patientId) ||
+    String(medicationCourseId(returnedId)) !==
+      String(medicationCourseId(patientId)) ||
     !Array.isArray(data?.patient_guardians)
   ) {
     throw new Error('The guardian response did not match this patient.');
   }
   return data.patient_guardians.map((entry) => ({
     ...entry.patient_guardian,
+    id: medicationCourseId(entry.patient_guardian?.id),
     relationshipName: entry.relationshipName,
   }));
 };
@@ -84,43 +87,51 @@ export const buildPrimaryGuardianUpdate = ({
 }) => {
   if (!canSelectPrimaryGuardian(user) || !currentUserId(user))
     throw new Error('Only a supervisor may select the primary guardian.');
+  const id = medicationCourseId(patientId);
+  const selected = medicationCourseId(guardianId);
   if (
     !allocation?.id ||
-    String(allocation.patientId) !== String(patientId) ||
+    String(medicationCourseId(allocation.patientId)) !== String(id) ||
     allocation.active !== 'Y' ||
-    allocation.isDeleted
+    allocation.isDeleted !== false
   ) {
     throw new Error('An active allocation for this patient is required.');
   }
-  if (
-    !guardians.some(
-      (guardian) =>
-        String(guardian.id) === String(guardianId) &&
-        guardian.isDeleted === '0' &&
-        guardian.active === 'Y',
-    )
-  ) {
-    throw new Error('The selected guardian must still be linked and active.');
-  }
-  const payload = {};
-  [
-    'active',
-    'patientId',
-    'guardianId',
-    'guardian2Id',
-    'doctorId',
-    'tempDoctorId',
-    'gameTherapistId',
-    'supervisorId',
-    'caregiverId',
-    'tempCaregiverId',
-  ].forEach((key) => {
-    payload[key] = allocation[key] ?? null;
+  medicationCourseId(allocation.id);
+  const linked = guardians.map((guardian) => {
+    if (guardian.isDeleted !== '0' || guardian.active !== 'Y') {
+      throw new Error(
+        'Every linked guardian must be active. Reload the profile.',
+      );
+    }
+    return medicationCourseId(guardian.id);
   });
-  if (String(allocation.guardianId) !== String(guardianId)) {
-    payload.guardian2Id = allocation.guardianId;
+  const slots = [medicationCourseId(allocation.guardianId)];
+  if (allocation.guardian2Id != null) {
+    slots.push(medicationCourseId(allocation.guardian2Id));
   }
-  payload.guardianId = opaqueId(guardianId);
-  payload.ModifiedById = String(currentUserId(user));
-  return payload;
+  if (
+    linked.length < 1 ||
+    linked.length > 2 ||
+    new Set(linked.map(String)).size !== linked.length ||
+    new Set(slots.map(String)).size !== slots.length ||
+    linked.length !== slots.length ||
+    linked.some(
+      (value) => !slots.some((slot) => String(slot) === String(value)),
+    ) ||
+    !linked.some((value) => String(value) === String(selected))
+  ) {
+    throw new Error(
+      'Guardian relationships and allocation disagree. Reload before changing the primary guardian.',
+    );
+  }
+  // Current Patient CRUD uses exclude_unset=True. Omit all staff fields so a
+  // guardian switch cannot overwrite a concurrent staff allocation change.
+  return {
+    patientId: id,
+    guardianId: selected,
+    guardian2Id:
+      linked.find((value) => String(value) !== String(selected)) ?? null,
+    ModifiedById: String(opaqueId(currentUserId(user))),
+  };
 };

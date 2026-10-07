@@ -36,8 +36,9 @@ function AboutScreen(props) {
             {'\n\n'}
             Build Date: {buildIdentity.buildDate || 'Unavailable'}
             {'\n'}
-            Source: {buildIdentity.sourceCommit?.slice(0, 12) || 'Unavailable'}
-            {buildIdentity.sourceDirty ? ' (modified source)' : ''}
+            Source:{' '}
+            {buildIdentity.sourceDirty ? 'Uncommitted changes based on ' : ''}
+            {buildIdentity.sourceCommit?.slice(0, 12) || 'Unavailable'}
           </Text>
         </View>
       </Center>

@@ -2,6 +2,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import requestDeadline from 'app/utility/requestDeadline';
 import { uppercasePersonFields } from 'app/utility/patientFieldPolicy';
 import { medicationCourseId } from 'app/utility/medicationCourse';
+import {
+  canSelectPrimaryGuardian,
+  guardianRecords,
+} from 'app/utility/guardianEditing';
+import {
+  guardianLookupResult,
+  normalizeGuardianNric,
+} from 'app/utility/guardianLookup';
 const activeCreates = new Set();
 const filled = (v) => typeof v === 'string' && Boolean(v.trim());
 export const hasGuardianInput = (g = {}) =>
@@ -15,11 +23,35 @@ export const hasGuardianInput = (g = {}) =>
     'PreferredName',
     'TempAddress',
   ].some((k) => filled(g[k]));
-export const validateCreationGuardians = (guardians) => {
+export const validateCreationGuardians = (guardians, user) => {
   if (!Array.isArray(guardians) || !guardians.length || guardians.length > 2) {
     throw new Error(
       'Provide one primary guardian and at most one secondary guardian.',
     );
+  }
+  if (guardians[0].Mode === 'existing') {
+    const primary = guardians[0];
+    if (!canSelectPrimaryGuardian(user)) {
+      throw new Error(
+        'Only a supervisor may select an existing primary guardian.',
+      );
+    }
+    medicationCourseId(primary.ExistingGuardianId);
+    if (
+      !filled(primary.NRIC) ||
+      normalizeGuardianNric(primary.NRIC) !== primary.SelectedNric ||
+      !filled(primary.RelationshipName)
+    ) {
+      throw new Error(
+        'Search for and select the existing primary guardian again.',
+      );
+    }
+    if (guardians.slice(1).some(hasGuardianInput)) {
+      throw new Error(
+        'Existing-primary registration supports one guardian. Remove the optional secondary guardian.',
+      );
+    }
+    return;
   }
   guardians.forEach((g, i) => {
     if (i && !hasGuardianInput(g)) {
@@ -67,14 +99,21 @@ const creationNric = (value) => {
   return value.trim().toUpperCase();
 };
 
-export const withAtomicPrimaryGuardian = (patient, guardians) => {
-  validateCreationGuardians(guardians);
-  return uppercasePersonFields({
+export const withAtomicPrimaryGuardian = (patient, guardians, user) => {
+  validateCreationGuardians(guardians, user);
+  const result = uppercasePersonFields({
     ...patient,
     nric: creationNric(patient.nric),
-    newGuardian: guardianCreationFields(guardians[0]),
     guardianRelationshipName: guardians[0].RelationshipName,
   });
+  delete result.guardianId;
+  delete result.newGuardian;
+  if (guardians[0].Mode === 'existing') {
+    result.guardianId = medicationCourseId(guardians[0].ExistingGuardianId);
+  } else {
+    result.newGuardian = guardianCreationFields(guardians[0]);
+  }
+  return result;
 };
 // The patient and primary link succeed together. Optional follow-ups are explicit
 // partial outcomes and must never trigger another patient create.
@@ -83,8 +122,23 @@ export const createPatientWithPrimary = async ({
   patient,
   guardians,
   storage = AsyncStorage,
+  user,
+  guardianApi,
+  isSelectionCurrent = () => true,
+  timeoutMs = 30000,
 }) => {
-  const payload = withAtomicPrimaryGuardian(patient, guardians);
+  const payload = withAtomicPrimaryGuardian(patient, guardians, user);
+  const existing = guardians[0].Mode === 'existing';
+  const selectedNric = existing ? guardians[0].SelectedNric : null;
+  const selectionCurrent = () =>
+    isSelectionCurrent() &&
+    (!existing ||
+      (guardians[0].Mode === 'existing' &&
+        String(guardians[0].ExistingGuardianId) ===
+          String(payload.guardianId) &&
+        normalizeGuardianNric(guardians[0].NRIC) === selectedNric &&
+        guardians[0].SelectedNric === selectedNric &&
+        guardians[0].RelationshipName === payload.guardianRelationshipName));
   const key =
     '@pear_patient_create_pending:' +
     encodeURIComponent(String(payload.nric).toUpperCase());
@@ -93,14 +147,41 @@ export const createPatientWithPrimary = async ({
   }
   activeCreates.add(key);
   try {
-    if (await requestDeadline(storage.getItem(key))) {
+    if (await requestDeadline(storage.getItem(key), timeoutMs)) {
       return { created: false, unknown: true, secondary: 'not_sent' };
     }
-    await requestDeadline(storage.setItem(key, 'pending'));
+    if (existing) {
+      if (!guardianApi || !selectionCurrent()) {
+        return { created: false, secondary: 'not_sent' };
+      }
+      const found = guardianLookupResult(
+        await requestDeadline(
+          guardianApi.getGuardianByNRIC(selectedNric),
+          timeoutMs,
+        ),
+        selectedNric,
+      );
+      if (
+        found.status !== 'found' ||
+        String(found.id) !== String(payload.guardianId) ||
+        found.patientIds.length >= 2 ||
+        !selectionCurrent()
+      ) {
+        throw new Error(
+          'The selected guardian changed or is already linked to two patients. Search again.',
+        );
+      }
+    }
+    await requestDeadline(storage.setItem(key, 'pending'), timeoutMs);
+    if (!selectionCurrent()) {
+      await requestDeadline(storage.removeItem(key), timeoutMs);
+      return { created: false, secondary: 'not_sent' };
+    }
     let response;
     try {
       response = await requestDeadline(
         Promise.resolve().then(() => api.addPatient(payload)),
+        timeoutMs,
       );
     } catch (error) {
       return { created: false, unknown: true, secondary: 'not_sent' };
@@ -112,6 +193,16 @@ export const createPatientWithPrimary = async ({
       return { response, created: false, unknown: true, secondary: 'not_sent' };
     }
     if (!response?.ok) {
+      // The new existing-primary path never infers rollback from an error
+      // after submission. Keep the existing uncertain-create marker.
+      if (existing) {
+        return {
+          response,
+          created: false,
+          unknown: true,
+          secondary: 'not_sent',
+        };
+      }
       await storage.removeItem(key);
       return { response, created: false, secondary: 'not_sent' };
     }
@@ -140,9 +231,46 @@ export const createPatientWithPrimary = async ({
         secondary: 'not_sent',
       };
     }
-    await storage.removeItem(key);
+    if (existing) {
+      try {
+        const [recordsResponse, allocationResponse] = await Promise.all([
+          requestDeadline(guardianApi.getPatientGuardian(id, false), timeoutMs),
+          requestDeadline(guardianApi.getPatientAllocation(id), timeoutMs),
+        ]);
+        const records = guardianRecords(recordsResponse, id);
+        const allocation = allocationResponse?.data;
+        medicationCourseId(allocation?.id);
+        if (
+          !selectionCurrent() ||
+          !allocationResponse?.ok ||
+          allocation?.active !== 'Y' ||
+          allocation.isDeleted !== false ||
+          String(medicationCourseId(allocation.patientId)) !== String(id) ||
+          String(medicationCourseId(allocation.guardianId)) !==
+            String(payload.guardianId) ||
+          allocation.guardian2Id != null ||
+          records.length !== 1 ||
+          String(records[0].id) !== String(payload.guardianId) ||
+          normalizeGuardianNric(records[0].nric) !== selectedNric ||
+          records[0].relationshipName !== payload.guardianRelationshipName
+        ) {
+          throw new Error(
+            'The existing primary guardian outcome is not confirmed.',
+          );
+        }
+      } catch (error) {
+        return {
+          response,
+          created: false,
+          unknown: true,
+          primaryUnverified: true,
+          secondary: 'not_sent',
+        };
+      }
+    }
+    await requestDeadline(storage.removeItem(key), timeoutMs);
     const secondary = guardians[1];
-    if (!secondary || !hasGuardianInput(secondary)) {
+    if (existing || !secondary || !hasGuardianInput(secondary)) {
       return {
         response,
         created: true,

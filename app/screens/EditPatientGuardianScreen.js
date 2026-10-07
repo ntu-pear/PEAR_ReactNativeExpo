@@ -7,9 +7,9 @@ import AppButton from 'app/components/AppButton';
 import AppText from 'app/components/AppText';
 import InputField from 'app/components/input-components/InputField';
 import requestDeadline from 'app/utility/requestDeadline';
+import { createPrimaryGuardianWriter } from 'app/utility/guardianPrimaryWrite';
 import {
   buildGuardianUpdate,
-  buildPrimaryGuardianUpdate,
   canEditGuardian,
   canSelectPrimaryGuardian,
   guardianRecords,
@@ -21,23 +21,51 @@ function EditPatientGuardianScreen({ route }) {
   const { user } = useContext(AuthContext) || {};
   const navigation = useNavigation();
   const mounted = useRef(true);
-  const busy = useRef(false);
+  const busy = useRef(null);
+  const loadGeneration = useRef(0);
   const [loading, setLoading] = useState(false);
   const [guardian, setGuardian] = useState(null);
   const [allocation, setAllocation] = useState(null);
   const [edits, setEdits] = useState({});
   const [error, setError] = useState('');
   const [uncertain, setUncertain] = useState(false);
+  const [primaryPending, setPrimaryPending] = useState(false);
+  const [displaySession, setDisplaySession] = useState(null);
+  const session = useRef({ patientID, guardianId, user });
+  if (
+    session.current.patientID !== patientID ||
+    session.current.guardianId !== guardianId ||
+    session.current.user !== user
+  ) {
+    session.current = { patientID, guardianId, user };
+  }
+  const sessionToken = session.current;
+  const writer = useRef(null);
+  if (!writer.current)
+    writer.current = createPrimaryGuardianWriter({ api: guardianApi });
+  const isCurrent = () => mounted.current && session.current === sessionToken;
+  const displayedIdentityMatches = () =>
+    isCurrent() &&
+    displaySession === sessionToken &&
+    String(guardian?.id) === String(guardianId);
   const readGuardians = async () =>
     guardianRecords(
       await requestDeadline(guardianApi.getPatientGuardian(patientID, false)),
       patientID,
     );
   const load = async () => {
-    if (!canEditGuardian(user) || busy.current) return;
-    busy.current = true;
+    if (!canEditGuardian(user) || busy.current === sessionToken || !isCurrent())
+      return;
+    busy.current = sessionToken;
+    const generation = ++loadGeneration.current;
+    const loadCurrent = () =>
+      isCurrent() && loadGeneration.current === generation;
     setLoading(true);
     setError('');
+    setGuardian(null);
+    setAllocation(null);
+    setDisplaySession(null);
+    setEdits({});
     try {
       const records = await readGuardians();
       const record = records.find(
@@ -45,8 +73,9 @@ function EditPatientGuardianScreen({ route }) {
       );
       if (!record)
         throw new Error('This guardian is no longer linked to this patient.');
-      if (!mounted.current) return;
+      if (!loadCurrent()) return;
       setGuardian(record);
+      setDisplaySession(sessionToken);
       setEdits({
         preferredName: record.preferredName || '',
         contactNo: record.contactNo || '',
@@ -56,10 +85,23 @@ function EditPatientGuardianScreen({ route }) {
         relationshipName: record.relationshipName || '',
       });
       if (canSelectPrimaryGuardian(user)) {
+        const pending = await writer.current.reconcile({
+          patientId: patientID,
+          user,
+          isCurrent: loadCurrent,
+        });
+        if (!loadCurrent()) return;
+        if (pending.outcome === 'unknown') {
+          setPrimaryPending(true);
+          setUncertain(true);
+          setError(
+            'A previous primary guardian change is still unconfirmed. Check the primary outcome before making another change.',
+          );
+        }
         const response = await requestDeadline(
           guardianApi.getPatientAllocation(patientID),
         );
-        if (mounted.current)
+        if (loadCurrent())
           setAllocation(
             response?.ok &&
               String(response.data?.patientId) === String(patientID)
@@ -68,32 +110,53 @@ function EditPatientGuardianScreen({ route }) {
           );
       }
     } catch (failure) {
-      if (mounted.current)
+      if (loadCurrent())
         setError(
           failure.message ||
             'Unable to load guardian information. Check the VPN and retry.',
         );
     } finally {
-      busy.current = false;
-      if (mounted.current) setLoading(false);
+      if (busy.current === sessionToken) busy.current = null;
+      if (loadCurrent()) setLoading(false);
     }
   };
   useEffect(() => {
     mounted.current = true;
+    setGuardian(null);
+    setAllocation(null);
+    setDisplaySession(null);
+    setEdits({});
+    setError('');
+    setUncertain(false);
+    setPrimaryPending(false);
+    setLoading(false);
     load();
     return () => {
       mounted.current = false;
+      loadGeneration.current += 1;
     };
-    // Route and account are fixed for this editing session.
+    // A new route/account gets a distinct token, so old loads and dialog
+    // callbacks remain stale even after the new effect becomes mounted.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [patientID, guardianId, user]);
   const finish = (message) =>
     Alert.alert('Saved successfully', message, [
-      { text: 'OK', onPress: () => navigation.goBack() },
+      {
+        text: 'OK',
+        onPress: () => {
+          if (isCurrent()) navigation.goBack();
+        },
+      },
     ]);
   const save = async () => {
-    if (busy.current || uncertain || !canEditGuardian(user)) return;
-    busy.current = true;
+    if (
+      busy.current === sessionToken ||
+      uncertain ||
+      !canEditGuardian(user) ||
+      !displayedIdentityMatches()
+    )
+      return;
+    busy.current = sessionToken;
     setLoading(true);
     setError('');
     let sent = false;
@@ -101,6 +164,7 @@ function EditPatientGuardianScreen({ route }) {
       const current = (await readGuardians()).find(
         (item) => String(item.id) === String(guardianId),
       );
+      if (!displayedIdentityMatches()) return;
       const payload = buildGuardianUpdate({
         guardian: current,
         edits,
@@ -111,13 +175,14 @@ function EditPatientGuardianScreen({ route }) {
       const response = await requestDeadline(
         guardianApi.updateGuardian(payload, guardianId),
       );
-      if (!mounted.current) return;
+      if (!isCurrent()) return;
       if (!response?.ok)
         throw new Error('The guardian update was not confirmed.');
       // Identity and relationship are committed separately by this API.
       const updated = (await readGuardians()).find(
         (item) => String(item.id) === String(guardianId),
       );
+      if (!isCurrent()) return;
       if (
         !updated ||
         [
@@ -134,10 +199,10 @@ function EditPatientGuardianScreen({ route }) {
         throw new Error(
           'The updated guardian fields and relationship could not be verified.',
         );
-      if (mounted.current)
+      if (isCurrent())
         finish('Guardian information and relationship have been verified.');
     } catch (failure) {
-      if (mounted.current) {
+      if (isCurrent()) {
         setUncertain(sent);
         setError(
           sent
@@ -146,71 +211,103 @@ function EditPatientGuardianScreen({ route }) {
         );
       }
     } finally {
-      busy.current = false;
-      if (mounted.current) setLoading(false);
+      if (busy.current === sessionToken) busy.current = null;
+      if (isCurrent()) setLoading(false);
+    }
+  };
+  const handlePrimaryOutcome = (result) => {
+    if (!isCurrent()) {
+      return;
+    }
+    if (result.outcome === 'verified' || result.outcome === 'unchanged') {
+      setAllocation(result.allocation);
+      setPrimaryPending(false);
+      setUncertain(false);
+      finish('Both primary and secondary guardian slots have been verified.');
+    } else if (result.outcome === 'unknown') {
+      setPrimaryPending(true);
+      setUncertain(true);
+      setError(
+        'The primary guardian outcome is unknown. Do not submit again. Use Check primary outcome for a read-only check; an unchanged read does not prove the request cannot finish later.',
+      );
+    } else {
+      setError(
+        result.message ||
+          'The selection could not be sent. Reload the profile.',
+      );
     }
   };
   const setPrimary = async () => {
-    if (busy.current || uncertain || !canSelectPrimaryGuardian(user)) return;
-    busy.current = true;
+    if (
+      busy.current === sessionToken ||
+      uncertain ||
+      !canSelectPrimaryGuardian(user) ||
+      !displayedIdentityMatches() ||
+      String(allocation?.patientId) !== String(patientID)
+    ) {
+      return;
+    }
+    busy.current = sessionToken;
     setLoading(true);
     setError('');
-    let sent = false;
     try {
-      const records = await readGuardians();
-      const response = await requestDeadline(
-        guardianApi.getPatientAllocation(patientID),
+      handlePrimaryOutcome(
+        await writer.current.switchPrimary({
+          patientId: patientID,
+          guardianId,
+          expectedAllocationId: allocation?.id,
+          user,
+          isCurrent,
+        }),
       );
-      if (!response?.ok)
-        throw new Error('The current allocation is unavailable.');
-      const payload = buildPrimaryGuardianUpdate({
-        allocation: response.data,
-        guardians: records,
-        guardianId,
-        patientId: patientID,
-        user,
-      });
-      sent = true;
-      const update = await requestDeadline(
-        guardianApi.updatePrimaryAllocation(response.data.id, payload),
-      );
-      if (!update?.ok)
-        throw new Error('The primary guardian update was not confirmed.');
-      const verified = await requestDeadline(
-        guardianApi.getPatientAllocation(patientID),
-      );
-      if (
-        !verified?.ok ||
-        String(verified.data.patientId) !== String(patientID) ||
-        String(verified.data.guardianId) !== String(guardianId)
-      )
-        throw new Error('The primary guardian could not be verified.');
-      if (mounted.current)
-        finish('Primary guardian selection has been verified.');
-    } catch (failure) {
-      if (mounted.current) {
-        setUncertain(sent);
-        setError(
-          sent
-            ? 'The primary guardian update outcome is unknown. Do not submit again; reopen the profile and verify the allocation.'
-            : failure.message,
-        );
-      }
     } finally {
-      busy.current = false;
-      if (mounted.current) setLoading(false);
+      if (busy.current === sessionToken) {
+        busy.current = null;
+      }
+      if (isCurrent()) {
+        setLoading(false);
+      }
     }
   };
-  if (!canEditGuardian(user))
+  const checkPrimary = async () => {
+    if (
+      busy.current === sessionToken ||
+      !canSelectPrimaryGuardian(user) ||
+      !isCurrent()
+    ) {
+      return;
+    }
+    busy.current = sessionToken;
+    setLoading(true);
+    try {
+      handlePrimaryOutcome(
+        await writer.current.reconcile({
+          patientId: patientID,
+          user,
+          isCurrent,
+        }),
+      );
+    } finally {
+      if (busy.current === sessionToken) {
+        busy.current = null;
+      }
+      if (isCurrent()) {
+        setLoading(false);
+      }
+    }
+  };
+  if (!canEditGuardian(user)) {
     return (
       <AppText>
         Guardian editing is available to caregivers and supervisors.
       </AppText>
     );
+  }
   const primary =
     allocation &&
     String(allocation.patientId) === String(patientID) &&
     String(allocation.guardianId) === String(guardianId);
+  const shownGuardian = displayedIdentityMatches() ? guardian : null;
   return (
     <ScrollView
       keyboardShouldPersistTaps="handled"
@@ -218,16 +315,24 @@ function EditPatientGuardianScreen({ route }) {
     >
       {loading ? <AppText>Loading...</AppText> : null}
       {error ? <AppText testID="guardian-edit-error">{error}</AppText> : null}
-      {!guardian && !loading ? (
+      {primaryPending && displaySession === sessionToken ? (
+        <AppButton
+          title="Check primary outcome"
+          color="green"
+          testID="guardian-primary-check"
+          isDisabled={loading}
+          onPress={checkPrimary}
+        />
+      ) : null}
+      {!shownGuardian && !loading ? (
         <AppButton title="Reload guardian" color="green" onPress={load} />
       ) : null}
-      {guardian ? (
+      {shownGuardian ? (
         <View>
-          <AppText>{`${guardian.firstName} ${guardian.lastName}`}</AppText>
-          <AppText>{`Date of birth: ${String(guardian.dateOfBirth || '').slice(
-            0,
-            10,
-          )} | Gender: ${guardian.gender || '-'}`}</AppText>
+          <AppText>{`${shownGuardian.firstName} ${shownGuardian.lastName}`}</AppText>
+          <AppText>{`Date of birth: ${String(
+            shownGuardian.dateOfBirth || '',
+          ).slice(0, 10)} | Gender: ${shownGuardian.gender || '-'}`}</AppText>
           <AppText>
             {primary
               ? 'Primary guardian'
@@ -249,9 +354,11 @@ function EditPatientGuardianScreen({ route }) {
               title={title}
               value={edits[key]}
               autoCapitalize="none"
-              onChangeText={(value) =>
-                setEdits((previous) => ({ ...previous, [key]: value }))
-              }
+              onChangeText={(value) => {
+                if (displayedIdentityMatches() && !loading && !uncertain) {
+                  setEdits((previous) => ({ ...previous, [key]: value }));
+                }
+              }}
               otherProps={{ editable: !loading && !uncertain }}
             />
           ))}
@@ -277,16 +384,19 @@ function EditPatientGuardianScreen({ route }) {
               color="green"
               isDisabled={loading || uncertain}
               testID="guardian-edit-primary"
-              onPress={() =>
+              onPress={() => {
+                if (!displayedIdentityMatches()) {
+                  return;
+                }
                 Alert.alert(
                   'Change primary guardian',
-                  `Make ${guardian.firstName} ${guardian.lastName} the primary guardian for this patient?`,
+                  `Make ${shownGuardian.firstName} ${shownGuardian.lastName} the primary guardian for this patient?`,
                   [
                     { text: 'Cancel', style: 'cancel' },
                     { text: 'Confirm', onPress: setPrimary },
                   ],
-                )
-              }
+                );
+              }}
             />
           ) : null}
           <AppButton

@@ -13,6 +13,7 @@ import * as ImagePicker from 'expo-image-picker';
 
 // API
 import patientApi from 'app/api/patient';
+import guardianApi from 'app/api/guardian';
 import AuthContext from 'app/auth/context';
 import { currentUserId } from 'app/utility/medicationAdminister';
 import privacyLevelApi from 'app/api/privacyLevel';
@@ -34,6 +35,15 @@ import ActivityIndicator from 'app/components/ActivityIndicator';
 function PatientAddScreen() {
   const navigation = useNavigation();
   const { user } = useContext(AuthContext) || {};
+  const currentAccount = useRef(user);
+  currentAccount.current = user;
+  const activeScreen = useRef(true);
+  useEffect(() => {
+    activeScreen.current = true;
+    return () => {
+      activeScreen.current = false;
+    };
+  }, []);
 
   // State to keep track of which page of the form is loaded
   const [step, setStep] = useState(1);
@@ -106,6 +116,8 @@ function PatientAddScreen() {
   };
 
   const [formData, setFormData] = useState(addPatientData);
+  const currentForm = useRef(formData);
+  currentForm.current = formData;
 
   // Track whether the form has been touched (to avoid saving defaults as a draft)
   const formTouched = useRef(false);
@@ -384,6 +396,12 @@ function PatientAddScreen() {
         api: patientApi,
         patient: patientPayload,
         guardians: formData.guardianInfo,
+        user,
+        guardianApi,
+        isSelectionCurrent: () =>
+          activeScreen.current &&
+          currentAccount.current === user &&
+          currentForm.current === formData,
       });
       if (!outcome.created) {
         Alert.alert(
