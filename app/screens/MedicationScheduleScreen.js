@@ -190,7 +190,7 @@ export default function MedicationScheduleScreen() {
                 Administered by: {row.AdministeredBy || 'Not provided'}
               </Text>
               <Text>
-                Actual administration (UTC):{' '}
+                Actual administration:{' '}
                 {row.ActualAdministerTime || 'Not provided'}
               </Text>
             </View>

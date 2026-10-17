@@ -27,5 +27,6 @@ Continue cornelius/patient-loading-review-20261005; preserve its six earlier loc
 3. Stable slot identifier when patient/name/day/time is ambiguous across courses.
 4. Whether supervisor undo hiding patient-facing History meets retained-history requirements; identify the authoritative audit endpoint.
 5. Confirm freeze target deployed commits and shared staging fixtures/photos.
+6. Include timezone/offset on actual administration timestamps; Scheduler currently uses a naive server-local datetime, so mobile does not label it UTC.
 
 Contracts: https://fyppear.atlassian.net/wiki/spaces/FP/pages/968294402 and /968392705. Next-week preview is now documented, but remains outside this minimum candidate.

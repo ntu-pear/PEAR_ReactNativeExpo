@@ -112,6 +112,7 @@ test('given dose preserves actual actor/time and has no administer control', asy
   await mount();
   expect(rendered()).toContain('Actual-Actor');
   expect(rendered()).toContain('01:31:00');
+  expect(rendered()).not.toContain('(UTC)');
   expect(
     screen.root.findAllByProps({ testID: 'dose_administer_0' }),
   ).toHaveLength(0);
