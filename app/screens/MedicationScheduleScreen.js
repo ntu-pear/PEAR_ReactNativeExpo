@@ -1,9 +1,17 @@
-import React, { useCallback, useContext, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
   ActivityIndicator,
+  AppState,
   FlatList,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -19,6 +27,8 @@ import {
 import {
   medicationDoseKey,
   medicationDoseRows,
+  medicationDoseStatus,
+  medicationDoseMatches,
   medicationReadMessage,
 } from 'app/utility/medicationDoseRead';
 import { confirmAndLogMedicationAdministration } from 'app/utility/confirmMedicationAdministration';
@@ -56,12 +66,30 @@ export default function MedicationScheduleScreen() {
     loading: true,
   });
   const [busy, setBusy] = useState(false);
+  const [now, setNow] = useState(Date.now);
+  const day = todayAdministerDate(new Date(now));
+  const [search, setSearch] = useState({ owner, value: '' });
+  const query = search.owner === owner ? search.value : '';
+  // Re-evaluate visible status and the centre day without polling the data API.
+  useEffect(() => {
+    if (!focused || !permitted) return;
+    const update = () => setNow(Date.now());
+    update();
+    const timer = setInterval(update, 15000);
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') update();
+    });
+    return () => {
+      clearInterval(timer);
+      subscription.remove();
+    };
+  }, [focused, permitted]);
   useFocusEffect(
     useCallback(() => {
       const version = ++generation.current;
       let active = true;
-      if (permitted) {
-        setSnapshot({ owner, reload, rows: [], loading: true });
+      if (permitted && day === todayAdministerDate()) {
+        setSnapshot({ owner, reload, day, rows: [], loading: true });
         (async () => {
           let next;
           try {
@@ -84,7 +112,11 @@ export default function MedicationScheduleScreen() {
             version === generation.current &&
             owner === currentOwner.current
           ) {
-            setSnapshot({ ...next, owner, reload, loading: false });
+            if (day !== todayAdministerDate()) {
+              setNow(Date.now());
+              return;
+            }
+            setSnapshot({ ...next, owner, reload, day, loading: false });
           }
         })();
       }
@@ -92,7 +124,7 @@ export default function MedicationScheduleScreen() {
         active = false;
         generation.current += 1;
       };
-    }, [owner, permitted, reload]),
+    }, [owner, permitted, reload, day]),
   );
 
   if (!permitted)
@@ -105,6 +137,7 @@ export default function MedicationScheduleScreen() {
     !focused ||
     snapshot.owner !== owner ||
     snapshot.reload !== reload ||
+    snapshot.day !== day ||
     snapshot.loading
   )
     return <ActivityIndicator testID="dose_loading" style={styles.message} />;
@@ -113,7 +146,9 @@ export default function MedicationScheduleScreen() {
     if (busy) return;
     const version = generation.current;
     const isCurrent = () =>
-      currentOwner.current === owner && generation.current === version;
+      currentOwner.current === owner &&
+      generation.current === version &&
+      todayAdministerDate() === day;
     setBusy(true);
     try {
       await confirmAndLogMedicationAdministration({
@@ -137,7 +172,9 @@ export default function MedicationScheduleScreen() {
       testID="dose_list"
       style={styles.container}
       contentContainerStyle={styles.content}
-      data={snapshot.rows}
+      data={snapshot.rows.filter((row) => medicationDoseMatches(row, query))}
+      extraData={now}
+      keyboardShouldPersistTaps="handled"
       keyExtractor={medicationDoseKey}
       initialNumToRender={15}
       ListHeaderComponent={
@@ -147,12 +184,22 @@ export default function MedicationScheduleScreen() {
             {String(user?.roleName || user?.role).toUpperCase() === 'SUPERVISOR'
               ? 'All patients'
               : 'Allocated patients'}{' '}
-            · Singapore date {todayAdministerDate()}
+            · Singapore date {day}
           </Text>
           <Text style={styles.note}>
             Centre doses for today. Prescriptions and medication courses are
             separate records.
           </Text>
+          <TextInput
+            testID="dose_search"
+            accessibilityLabel="Search medication, patient ID, assigned caregiver or administered by"
+            placeholder="Search medication or patient/staff ID"
+            value={query}
+            onChangeText={(value) => setSearch({ owner, value })}
+            autoCapitalize="none"
+            autoCorrect={false}
+            style={styles.search}
+          />
           <Control
             title="Refresh doses"
             testID="dose_refresh"
@@ -169,7 +216,9 @@ export default function MedicationScheduleScreen() {
       ListEmptyComponent={
         !snapshot.error ? (
           <Text testID="dose_empty" style={styles.message}>
-            No medication doses are scheduled for today.
+            {snapshot.rows.length
+              ? 'No medication doses match your search.'
+              : 'No medication doses are scheduled for today.'}
           </Text>
         ) : null
       }
@@ -181,8 +230,12 @@ export default function MedicationScheduleScreen() {
             {row.AdministerDate} · {clock(row.AdministerTime)} (Singapore)
           </Text>
           <Text>Assigned caregiver: {row.AssignedTo || 'Unassigned'}</Text>
-          <Text>
-            {String(row.Status) === '1' ? 'Administered' : 'Not administered'}
+          <Text style={styles[medicationDoseStatus(row, new Date(now))]}>
+            {String(row.Status) === '1'
+              ? '✓ Administered'
+              : medicationDoseStatus(row, new Date(now)) === 'late'
+              ? '! Not administered (late)'
+              : '◷ Not administered'}
           </Text>
           {String(row.Status) === '1' ? (
             <View>
@@ -198,7 +251,7 @@ export default function MedicationScheduleScreen() {
             <Control
               title="Administer"
               testID={`dose_administer_${index}`}
-              disabled={busy || row.AdministerDate !== todayAdministerDate()}
+              disabled={busy || row.AdministerDate !== day}
               onPress={() => administer(row)}
             />
           )}
@@ -217,6 +270,17 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   note: { color: '#475569', marginVertical: 10 },
+  search: {
+    backgroundColor: '#fff',
+    borderColor: '#64748b',
+    borderWidth: 1,
+    borderRadius: 6,
+    padding: 12,
+    color: '#16324f',
+  },
+  administered: { color: '#167045', fontWeight: '600' },
+  pending: { color: '#855500', fontWeight: '600' },
+  late: { color: '#a51b24', fontWeight: '600' },
   card: {
     backgroundColor: '#fff',
     padding: 16,

@@ -1,3 +1,4 @@
+import { centreInstant } from 'app/utility/centreClock';
 import {
   exactNumericPatientId,
   listMedicationScheduleRows,
@@ -44,6 +45,29 @@ export const medicationDoseRows = (payload) => {
     keys.add(key);
     return row;
   });
+};
+
+// Search only supplied fields; do not fan out to patient/user services for names.
+export const medicationDoseMatches = (row, query) => {
+  const term = query.trim().toLowerCase();
+  return (
+    !term ||
+    ['PrescriptionName', 'PatientID', 'AssignedTo', 'AdministeredBy'].some(
+      (field) =>
+        String(row[field] ?? '')
+          .toLowerCase()
+          .includes(term),
+    )
+  );
+};
+
+// A late label describes the slot, never authorization for an override.
+export const medicationDoseStatus = (row, instant = new Date()) => {
+  if (String(row.Status) === '1') return 'administered';
+  return instant.getTime() >
+    centreInstant(row.AdministerDate, row.AdministerTime).getTime()
+    ? 'late'
+    : 'pending';
 };
 
 export const medicationReadMessage = (status) => {

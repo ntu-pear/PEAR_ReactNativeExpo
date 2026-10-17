@@ -4,11 +4,19 @@ import AuthContext from 'app/auth/context';
 import MedicationScheduleScreen from 'app/screens/MedicationScheduleScreen';
 import scheduleApi from 'app/api/schedule';
 import { confirmAndLogMedicationAdministration } from 'app/utility/confirmMedicationAdministration';
-import { medicationDoseRows } from 'app/utility/medicationDoseRead';
+import {
+  medicationDoseRows,
+  medicationDoseStatus,
+} from 'app/utility/medicationDoseRead';
 
+let mockFocused = true;
 jest.mock('@react-navigation/native', () => ({
-  useIsFocused: () => true,
-  useFocusEffect: (cb) => require('react').useEffect(cb, [cb]),
+  useIsFocused: () => mockFocused,
+  useFocusEffect: (cb) =>
+    require('react').useEffect(
+      () => (mockFocused ? cb() : undefined),
+      [cb, mockFocused],
+    ),
 }));
 jest.mock('app/api/schedule', () => ({ getMedicationScheduleV1: jest.fn() }));
 jest.mock('app/utility/confirmMedicationAdministration', () => ({
@@ -50,6 +58,7 @@ const rendered = () => {
 beforeEach(() => {
   jest.useFakeTimers().setSystemTime(new Date('2026-10-18T09:30:00+08:00'));
   jest.clearAllMocks();
+  mockFocused = true;
   scheduleApi.getMedicationScheduleV1.mockResolvedValue({
     ok: true,
     status: 200,
@@ -205,4 +214,124 @@ test('pending confirmation is invalidated by unmount or account change', async (
   act(() => screen.unmount());
   screen = null;
   expect(next.isCurrent()).toBe(false);
+});
+
+test('search uses supplied fields case-insensitively without extra requests', async () => {
+  scheduleApi.getMedicationScheduleV1.mockResolvedValue({
+    ok: true,
+    data: [
+      row,
+      {
+        ...row,
+        PatientID: 8,
+        PrescriptionName: 'Another medication',
+        AssignedTo: 'Other caregiver',
+        AdministeredBy: 'Actual-Actor',
+        Status: '1',
+      },
+    ],
+  });
+  await mount();
+  const search = async (query) =>
+    act(async () =>
+      screen.root
+        .findAllByProps({ testID: 'dose_search' })[0]
+        .props.onChangeText(query),
+    );
+  for (const query of [' synthetic ', '7', 'CAREGIVER-a']) {
+    await search(query);
+    expect(rendered()).toContain('Patient 7');
+    expect(rendered()).not.toContain('Patient 8');
+  }
+  await search('actual-ACTOR');
+  expect(rendered()).not.toContain('Patient 7');
+  expect(rendered()).toContain('Patient 8');
+  await search('missing');
+  expect(rendered()).toContain('No medication doses match your search');
+  expect(rendered()).not.toContain('No medication doses are scheduled');
+  await search('');
+  expect(rendered()).toContain('Patient 7');
+  expect(rendered()).toContain('Patient 8');
+  expect(scheduleApi.getMedicationScheduleV1).toHaveBeenCalledTimes(1);
+});
+
+test('status becomes late after its Singapore slot without refetching; given stays given', async () => {
+  expect(medicationDoseStatus(row, new Date('2026-10-18T01:29:59Z'))).toBe(
+    'pending',
+  );
+  expect(medicationDoseStatus(row, new Date('2026-10-18T01:30:00Z'))).toBe(
+    'pending',
+  );
+  expect(medicationDoseStatus(row, new Date('2026-10-18T01:30:01Z'))).toBe(
+    'late',
+  );
+  expect(
+    medicationDoseStatus(
+      { ...row, Status: '1' },
+      new Date('2026-10-19T00:00:00Z'),
+    ),
+  ).toBe('administered');
+  await mount();
+  expect(rendered()).not.toContain('(late)');
+  await act(async () => jest.advanceTimersByTime(15000));
+  expect(rendered()).toContain('Not administered (late)');
+  expect(scheduleApi.getMedicationScheduleV1).toHaveBeenCalledTimes(1);
+});
+
+test('centre midnight invalidates confirmation, hides old rows and fetches the new day once', async () => {
+  jest.setSystemTime(new Date('2026-10-18T23:59:50+08:00'));
+  await mount();
+  await press('dose_administer_0');
+  const args = confirmAndLogMedicationAdministration.mock.calls[0][0];
+  expect(args.isCurrent()).toBe(true);
+  let resolve;
+  scheduleApi.getMedicationScheduleV1.mockImplementationOnce(
+    () =>
+      new Promise((done) => {
+        resolve = done;
+      }),
+  );
+  await act(async () => jest.advanceTimersByTime(15000));
+  expect(args.isCurrent()).toBe(false);
+  expect(rendered()).not.toContain('Patient 7');
+  expect(
+    screen.root.findAllByProps({ testID: 'dose_loading' }).length,
+  ).toBeGreaterThan(0);
+  expect(scheduleApi.getMedicationScheduleV1).toHaveBeenCalledTimes(2);
+  await act(async () =>
+    resolve({
+      ok: true,
+      data: [{ ...row, PatientID: 8, AdministerDate: '2026-10-19' }],
+    }),
+  );
+  expect(rendered()).toContain('Singapore date 2026-10-19');
+  expect(rendered()).toContain('Patient 8');
+  await act(async () => jest.advanceTimersByTime(15000));
+  expect(scheduleApi.getMedicationScheduleV1).toHaveBeenCalledTimes(2);
+});
+
+test('search is cleared on account change', async () => {
+  await mount();
+  await act(async () =>
+    screen.root
+      .findAllByProps({ testID: 'dose_search' })[0]
+      .props.onChangeText('private search'),
+  );
+  await act(async () => screen.update(view('CAREGIVER', 'Actor-B')));
+  expect(
+    screen.root.findAllByProps({ testID: 'dose_search' })[0].props.value,
+  ).toBe('');
+  expect(rendered()).toContain('Patient 7');
+});
+
+test('refocusing after midnight skips an obsolete-day request', async () => {
+  await mount();
+  mockFocused = false;
+  await act(async () => screen.update(view()));
+  jest.setSystemTime(new Date('2026-10-19T09:30:00+08:00'));
+  scheduleApi.getMedicationScheduleV1.mockResolvedValue({ ok: true, data: [] });
+  mockFocused = true;
+  await act(async () => screen.update(view()));
+  expect(scheduleApi.getMedicationScheduleV1).toHaveBeenCalledTimes(2);
+  expect(rendered()).toContain('Singapore date 2026-10-19');
 });
