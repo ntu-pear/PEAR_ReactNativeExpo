@@ -27,6 +27,7 @@ jest.mock('@react-navigation/native-stack', () => ({
 const leafScreens = [
   'PatientsScreen',
   'ManageMedicationScreen',
+  'MedicationScheduleScreen',
   'PatientProfileScreen',
   'PatientMedicalHistoryScreen',
   'PatientAllergyScreen',

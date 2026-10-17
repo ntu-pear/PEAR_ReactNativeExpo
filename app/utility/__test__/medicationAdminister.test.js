@@ -12,6 +12,7 @@ import {
   logMedicationAdministration,
   matchMedicationScheduleRow,
   normalizeAdministerTime,
+  canRecordMedication,
 } from 'app/utility/medicationAdminister';
 
 describe('medicationAdminister helpers', () => {
@@ -84,7 +85,7 @@ describe('medicationAdminister helpers', () => {
     ).toEqual([]);
   });
 
-  test('buildMedicationScheduleUpdate records the clicker as AdministeredBy', () => {
+  test('buildMedicationScheduleUpdate sends returned dose fields; the token decides the actor', () => {
     expect(
       buildMedicationScheduleUpdate({
         row: {
@@ -101,7 +102,6 @@ describe('medicationAdminister helpers', () => {
       AdministerDate: '2026-08-17',
       AdministerTime: '1130',
       Status: '1',
-      AdministeredBy: 'CG-9',
     });
   });
 
@@ -153,7 +153,6 @@ describe('medicationAdminister helpers', () => {
       expect.objectContaining({
         PatientID: 7,
         Status: '1',
-        AdministeredBy: 'CG-9',
       }),
     );
   });
@@ -174,4 +173,44 @@ describe('medicationAdminister helpers', () => {
       /not recorded/i,
     );
   });
+});
+
+test.each(['CAREGIVER', 'SUPERVISOR'])(
+  'role %s may request administration; allocation is enforced by Scheduler',
+  (roleName) => {
+    expect(canRecordMedication({ roleName })).toBe(true);
+  },
+);
+test.each(['DOCTOR', 'GUARDIAN', 'ADMIN', ''])(
+  'role %s cannot administer',
+  (roleName) => {
+    expect(canRecordMedication({ roleName })).toBe(false);
+  },
+);
+test('ambiguous slots and missing status never select a dose', () => {
+  const row = {
+    PatientID: 7,
+    PrescriptionName: 'TEST',
+    AdministerTime: '1000',
+    AdministerDate: '2026-10-18',
+    Status: '0',
+  };
+  const args = {
+    patientID: 7,
+    prescriptionName: 'TEST',
+    administerTime: '1000',
+    administerDate: '2026-10-18',
+  };
+  expect(
+    matchMedicationScheduleRow([row, { ...row, MedicationID: 99 }], args),
+  ).toBeNull();
+  expect(
+    matchMedicationScheduleRow([{ ...row, Status: undefined }], args),
+  ).toBeNull();
+});
+test('unexpected message-only or malformed schedule payloads are not treated as valid empty schedules', () => {
+  expect(() =>
+    listMedicationScheduleRows({ message: 'dependency failed' }),
+  ).toThrow();
+  expect(() => listMedicationScheduleRows(null)).toThrow();
 });

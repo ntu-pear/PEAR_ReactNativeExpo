@@ -845,6 +845,18 @@ function PatientsScreen({ navigation }) {
             setSearchQuery={setSearchQuery}
           />
 
+          {['SUPERVISOR', 'CAREGIVER'].includes(
+            String(user?.roleName || user?.role || '').toUpperCase(),
+          ) && (
+            <Button
+              mx="5"
+              mt="2"
+              testID="patients_today_medication"
+              onPress={() => navigation.navigate(routes.TODAY_MEDICATION)}
+            >
+              Today’s Medication
+            </Button>
+          )}
           {String(user?.roleName || user?.role || '').toUpperCase() ===
             'SUPERVISOR' && (
             <>

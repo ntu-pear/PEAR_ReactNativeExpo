@@ -28,6 +28,7 @@ const persistAdministration = async ({
   userId,
   onRecorded,
   administerDate,
+  isCurrent,
 }) => {
   const args = {
     patientID,
@@ -35,8 +36,11 @@ const persistAdministration = async ({
     administerTime,
     userId,
     administerDate,
+    ...(isCurrent ? { isCurrent } : {}),
   };
+  if (isCurrent && !isCurrent()) return false;
   const result = await recorder.record(args);
+  if (isCurrent && !isCurrent()) return true;
 
   if (result.outcome === 'accepted' || result.outcome === 'recorded') {
     onRecorded?.();
@@ -60,7 +64,9 @@ const persistAdministration = async ({
     return false;
   }
   const checkStatus = async () => {
+    if (isCurrent && !isCurrent()) return;
     const state = await recorder.reconcile(args);
+    if (isCurrent && !isCurrent()) return;
     if (state.outcome === 'recorded') {
       onRecorded?.();
       Alert.alert(
@@ -129,7 +135,10 @@ export const confirmAndLogMedicationAdministration = async ({
   formatTime,
   administrationDate = new Date(),
   onRecorded,
+  isCurrent,
 }) => {
+  const active = isCurrent || (() => true);
+  if (!active()) return;
   if (!canRecordMedication(user)) {
     Alert.alert('Administration unavailable', medicationPermissionMessage);
     return;
@@ -157,6 +166,7 @@ export const confirmAndLogMedicationAdministration = async ({
     const listRes = await requestDeadline(
       scheduleApi.getMedicationScheduleV1(),
     );
+    if (!active()) return;
     if (!listRes?.ok) {
       Alert.alert(
         'Administration not recorded',
@@ -189,6 +199,7 @@ export const confirmAndLogMedicationAdministration = async ({
       return;
     }
   } catch (error) {
+    if (!active()) return;
     Alert.alert(
       'Administration not recorded',
       administrationFailureMessage('schedule_unavailable'),
@@ -201,7 +212,7 @@ export const confirmAndLogMedicationAdministration = async ({
   });
   let submitted = false;
   const onConfirm = async () => {
-    if (submitted) {
+    if (submitted || !active()) {
       return;
     }
     submitted = true;
@@ -213,6 +224,7 @@ export const confirmAndLogMedicationAdministration = async ({
         userId,
         onRecorded,
         administerDate,
+        ...(isCurrent ? { isCurrent } : {}),
       });
       if (!recorded) {
         submitted = false;
@@ -224,7 +236,8 @@ export const confirmAndLogMedicationAdministration = async ({
       );
     }
   };
-  const finalConfirm = () =>
+  const finalConfirm = () => {
+    if (!active()) return;
     showFinalConfirm({
       patientName,
       medName,
@@ -233,7 +246,9 @@ export const confirmAndLogMedicationAdministration = async ({
       administerDate,
       onConfirm,
     });
+  };
   const confirmCaregiver = () => {
+    if (!active()) return;
     if (
       !isAssignedCaregiver({ userId, assignedTo, caregiverId, tempCaregiverId })
     ) {

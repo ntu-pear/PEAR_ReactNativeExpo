@@ -83,6 +83,8 @@ export const createMedicationRecorder = ({
     if (args.administerDate !== todayAdministerDate()) {
       return { outcome: 'not_sent', reason: 'wrong_day' };
     }
+    const isCurrent = args.isCurrent || (() => true);
+    if (!isCurrent()) return { outcome: 'not_sent', reason: 'context_changed' };
     const key = medicationAttemptKey(args);
     if (attempts.has(key)) {
       return { outcome: 'unknown', reason: 'existing_attempt' };
@@ -107,20 +109,31 @@ export const createMedicationRecorder = ({
         attempts.delete(key);
         return { outcome: 'recorded', row };
       }
+      if (!isCurrent()) {
+        attempts.delete(key);
+        return { outcome: 'not_sent', reason: 'context_changed' };
+      }
       const payload = buildMedicationScheduleUpdate({ row, ...args });
       await requestDeadline(
         storage.setItem(key, JSON.stringify({ phase: 'pending' })),
         timeoutMs,
       );
-      if (args.administerDate !== todayAdministerDate()) {
+      if (args.administerDate !== todayAdministerDate() || !isCurrent()) {
         await clear(key);
-        return { outcome: 'not_sent', reason: 'wrong_day' };
+        return {
+          outcome: 'not_sent',
+          reason: !isCurrent() ? 'context_changed' : 'wrong_day',
+        };
       }
       sent = true;
       // Retain the actual write's late result. Never start a replacement write
       // because the UI deadline expired.
       const write = Promise.resolve()
-        .then(() => updateSchedule(payload))
+        .then(() =>
+          args.isCurrent
+            ? updateSchedule(payload, isCurrent)
+            : updateSchedule(payload),
+        )
         .then(async (result) => {
           attempt.response = result;
           if (definitiveRejection(result)) {
@@ -133,6 +146,10 @@ export const createMedicationRecorder = ({
           return result;
         });
       const result = await requestDeadline(write, timeoutMs);
+      if (result?.notSent) {
+        await clear(key);
+        return { outcome: 'not_sent', reason: 'context_changed' };
+      }
       if (result?.ok) {
         await clear(key);
         return { outcome: 'accepted', row };

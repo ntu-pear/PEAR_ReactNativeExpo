@@ -81,7 +81,6 @@ test('outside-time and alternate-caregiver confirmations both precede the final 
     .onPress();
   expect(scheduleApi.updateMedicationScheduleV1).toHaveBeenCalledWith(
     expect.objectContaining({
-      AdministeredBy: 'TEST-CG-1',
       AdministerDate: '2026-10-05',
     }),
   );
@@ -134,7 +133,7 @@ test('a slot administered after opening confirmation is rechecked before any upd
   expect(lastAlert()[0]).toBe('Medication administered');
 });
 
-test.each(['CAREGIVER', 'DOCTOR', 'GUARDIAN', 'ADMIN', ''])(
+test.each(['DOCTOR', 'GUARDIAN', 'ADMIN', ''])(
   'role %s cannot request or submit medication administration',
   async (roleName) => {
     await confirmAndLogMedicationAdministration({
@@ -180,4 +179,93 @@ test('a timed-out administration stays unknown and Check status reads without an
   expect(lastAlert()[0]).toBe('Administration verified');
   expect(lastAlert()[1]).toContain('TEST-CG-2');
   expect(scheduleApi.updateMedicationScheduleV1).toHaveBeenCalledTimes(1);
+});
+
+test.each(['TEST-CG-1', 'TEST-TEMP-CG'])(
+  'caregiver %s confirms a returned allocated dose and server receives no actor override',
+  async (id) => {
+    await confirmAndLogMedicationAdministration({
+      ...args,
+      user: { id, roleName: 'CAREGIVER' },
+      caregiverId: 'TEST-CG-1',
+      tempCaregiverId: 'TEST-TEMP-CG',
+    });
+    expect(lastAlert()[0]).toBe('Confirm medication administration');
+    await lastAlert()[2]
+      .find((b) => b.text === 'OK')
+      .onPress();
+    expect(scheduleApi.updateMedicationScheduleV1).toHaveBeenCalledWith({
+      PatientID: 7,
+      PrescriptionName: slot.PrescriptionName,
+      AdministerDate: slot.AdministerDate,
+      AdministerTime: slot.AdministerTime,
+      Status: '1',
+    });
+  },
+);
+test('caregiver missing a dose in the server-scoped list cannot submit', async () => {
+  scheduleApi.getMedicationScheduleV1.mockResolvedValue({ ok: true, data: [] });
+  await confirmAndLogMedicationAdministration({
+    ...args,
+    user: { id: 'TEST-CG-1', roleName: 'CAREGIVER' },
+  });
+  expect(lastAlert()[0]).toBe('Administration not recorded');
+  expect(scheduleApi.updateMedicationScheduleV1).not.toHaveBeenCalled();
+});
+test('allocation revoked after confirmation is rejected by Scheduler; no success is claimed', async () => {
+  await confirmAndLogMedicationAdministration({
+    ...args,
+    patientID: 17,
+    user: { id: 'TEST-CG-1', roleName: 'CAREGIVER' },
+  });
+  // First establish a valid synthetic slot for this separate patient.
+  scheduleApi.getMedicationScheduleV1.mockResolvedValue({
+    ok: true,
+    data: [{ ...slot, PatientID: 17 }],
+  });
+  await confirmAndLogMedicationAdministration({
+    ...args,
+    patientID: 17,
+    user: { id: 'TEST-CG-1', roleName: 'CAREGIVER' },
+  });
+  scheduleApi.updateMedicationScheduleV1.mockResolvedValueOnce({
+    ok: false,
+    status: 403,
+  });
+  await lastAlert()[2]
+    .find((b) => b.text === 'OK')
+    .onPress();
+  expect(lastAlert()[0]).toBe('Administration outcome unknown');
+});
+
+test('a preflight response after leaving the active account/page cannot open confirmation or write', async () => {
+  let finish;
+  let active = true;
+  scheduleApi.getMedicationScheduleV1.mockReturnValue(
+    new Promise((resolve) => {
+      finish = resolve;
+    }),
+  );
+  const pending = confirmAndLogMedicationAdministration({
+    ...args,
+    isCurrent: () => active,
+  });
+  active = false;
+  finish({ ok: true, data: [slot] });
+  await pending;
+  expect(Alert.alert).not.toHaveBeenCalled();
+  expect(scheduleApi.updateMedicationScheduleV1).not.toHaveBeenCalled();
+});
+test('a previously opened final confirmation cannot write after active context changes', async () => {
+  let active = true;
+  await confirmAndLogMedicationAdministration({
+    ...args,
+    isCurrent: () => active,
+  });
+  expect(lastAlert()[0]).toBe('Confirm medication administration');
+  active = false;
+  await lastAlert()[2]
+    .find((button) => button.text === 'OK')
+    .onPress();
+  expect(scheduleApi.updateMedicationScheduleV1).not.toHaveBeenCalled();
 });

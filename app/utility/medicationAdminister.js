@@ -70,7 +70,10 @@ export const listMedicationScheduleRows = (payload) => {
   if (Array.isArray(payload?.data)) {
     return payload.data;
   }
-  return [];
+  if (payload?.message === 'No medication schedules to be returned') {
+    return [];
+  }
+  throw new Error('Medication schedule response is invalid.');
 };
 
 export const matchMedicationScheduleRow = (
@@ -85,26 +88,30 @@ export const matchMedicationScheduleRow = (
   if (!pid || !name || !time) {
     return null;
   }
-  return (
-    (rows || []).find((row) => {
-      const rowPid = String(row.PatientID ?? row.patientId ?? '');
-      const rowName = String(row.PrescriptionName ?? row.prescriptionName ?? '')
-        .trim()
-        .toLowerCase();
-      const rowTime = normalizeAdministerTime(
-        row.AdministerTime ?? row.administerTime,
-      );
-      const rowDate = String(
-        row.AdministerDate ?? row.administerDate ?? '',
-      ).slice(0, 10);
-      return (
-        rowPid === pid &&
-        rowName === name &&
-        rowTime === time &&
-        (!administerDate || rowDate === administerDate)
-      );
-    }) || null
-  );
+  const matches = (rows || []).filter((row) => {
+    if (!row || !['0', '1'].includes(String(row.Status ?? row.status))) {
+      return false;
+    }
+    const rowPid = String(row.PatientID ?? row.patientId ?? '');
+    const rowName = String(row.PrescriptionName ?? row.prescriptionName ?? '')
+      .trim()
+      .toLowerCase();
+    const rowTime = normalizeAdministerTime(
+      row.AdministerTime ?? row.administerTime,
+    );
+    const rowDate = String(
+      row.AdministerDate ?? row.administerDate ?? '',
+    ).slice(0, 10);
+    return (
+      rowPid === pid &&
+      rowName === name &&
+      rowTime === time &&
+      (!administerDate || rowDate === administerDate)
+    );
+  });
+  // The update contract identifies a slot by patient/name/day/time. An ambiguous
+  // response must never choose one medication course arbitrarily.
+  return matches.length === 1 ? matches[0] : null;
 };
 
 export const assignedCaregiverIdFrom = ({ row, allocation } = {}) =>
@@ -116,7 +123,6 @@ export const assignedCaregiverIdFrom = ({ row, allocation } = {}) =>
 
 export const buildMedicationScheduleUpdate = ({
   row,
-  userId,
   patientID,
   prescriptionName,
   administerTime,
@@ -133,7 +139,7 @@ export const buildMedicationScheduleUpdate = ({
     row?.administerTime ??
     normalizeAdministerTime(administerTime),
   Status: '1',
-  AdministeredBy: String(userId || ''),
+  // The server derives the actor exclusively from the bearer token.
 });
 
 export const logMedicationAdministration = async ({
@@ -248,6 +254,8 @@ export const medicationWindow = (
 
 export const administrationFailureMessage = (reason) => {
   switch (reason) {
+    case 'context_changed':
+      return 'The active account or page changed. Reopen today’s medication before confirming.';
     case 'wrong_day':
       return 'The Singapore calendar day changed. Reopen today\u2019s medication before confirming.';
     case 'preparation_failed':
@@ -267,6 +275,8 @@ export const administrationFailureMessage = (reason) => {
   }
 };
 export const canRecordMedication = (user) =>
-  String(user?.roleName || user?.role || '').toUpperCase() === 'SUPERVISOR';
+  ['SUPERVISOR', 'CAREGIVER'].includes(
+    String(user?.roleName || user?.role || '').toUpperCase(),
+  );
 export const medicationPermissionMessage =
-  'Medication administration is currently available to supervisors only. Ask a supervisor to check this dose.';
+  'Medication administration is available to caregivers for allocated patients and to supervisors.';

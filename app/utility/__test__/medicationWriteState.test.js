@@ -181,3 +181,28 @@ test('a day change during preparation also prevents submitting yesterday', async
   expect(f.updateSchedule).not.toHaveBeenCalled();
   expect(f.markers.size).toBe(0);
 });
+
+test('context change while persisting a prepared attempt cancels without PUT or retained marker', async () => {
+  const f = fixture();
+  let active = true;
+  f.storage.setItem.mockImplementation(async (key, value) => {
+    f.markers.set(key, value);
+    active = false;
+  });
+  const result = await coordinator(f).record({
+    ...args,
+    isCurrent: () => active,
+  });
+  expect(result).toEqual({ outcome: 'not_sent', reason: 'context_changed' });
+  expect(f.updateSchedule).not.toHaveBeenCalled();
+  expect(f.markers.size).toBe(0);
+});
+test('adapter confirms cancellation before sending; marker is cleared without reconciliation', async () => {
+  const f = fixture();
+  f.updateSchedule.mockResolvedValue({ ok: false, status: 409, notSent: true });
+  expect(await coordinator(f).record(args)).toEqual({
+    outcome: 'not_sent',
+    reason: 'context_changed',
+  });
+  expect(f.markers.size).toBe(0);
+});

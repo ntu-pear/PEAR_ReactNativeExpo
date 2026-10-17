@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import PatientsScreen from 'app/screens/PatientsScreen';
 import ActivityWideAdhocPreviewScreen from 'app/screens/ActivityWideAdhocPreviewScreen';
 import ManageMedicationScreen from 'app/screens/ManageMedicationScreen';
+import MedicationScheduleScreen from 'app/screens/MedicationScheduleScreen';
 import PatientProfile from 'app/screens/PatientProfileScreen';
 import PatientInformationAccordion from 'app/components/PatientInformationAccordion';
 import { format } from 'date-fns';
@@ -49,6 +50,11 @@ function PatientsNavigator() {
         name={routes.ACTIVITY_WIDE_ADHOC_PREVIEW}
         component={ActivityWideAdhocPreviewScreen}
         options={{ headerShown: true, title: 'Activity-wide Ad Hoc Preview' }}
+      />
+      <Stack.Screen
+        name={routes.TODAY_MEDICATION}
+        component={MedicationScheduleScreen}
+        options={{ headerShown: true, title: 'Today’s Medication' }}
       />
       <Stack.Screen
         name={routes.MANAGE_MEDICATION}

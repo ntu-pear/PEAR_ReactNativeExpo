@@ -1,7 +1,8 @@
 // Libs
-import React, { useContext } from 'react';
+import React, { useContext, useCallback, useRef } from 'react';
 import { Text, Icon, View } from 'native-base';
 import { StyleSheet, TouchableOpacity } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 // Configurations
@@ -15,6 +16,7 @@ import formatDateTime from 'app/hooks/useFormatDateTime.js';
 import { confirmAndLogMedicationAdministration } from 'app/utility/confirmMedicationAdministration';
 import EditDeleteBtn from 'app/components/EditDeleteBtn';
 import {
+  currentUserId,
   canRecordMedication,
   medicationPermissionMessage,
   medicationWindow,
@@ -39,6 +41,25 @@ const MedicationItem = ({
   onRecorded,
 }) => {
   const { user } = useContext(AuthContext) || {};
+  const owner = JSON.stringify([
+    currentUserId(user),
+    user?.roleName || user?.role,
+    patientID,
+  ]);
+  const currentOwner = useRef(owner);
+  currentOwner.current = owner;
+  const generation = useRef(0);
+  const focusOwner = useRef(null);
+  useFocusEffect(
+    useCallback(() => {
+      focusOwner.current = owner;
+      generation.current += 1;
+      return () => {
+        focusOwner.current = null;
+        generation.current += 1;
+      };
+    }, [owner]),
+  );
   //to check if the medication has ended
   const today = centreDay();
   const startDay = medStartDate && String(medStartDate).slice(0, 10);
@@ -46,8 +67,13 @@ const MedicationItem = ({
   const isMedicationEnded = !!endDay && endDay < today;
 
   const onClickAdminister = () => {
+    const version = generation.current;
     confirmAndLogMedicationAdministration({
       user,
+      isCurrent: () =>
+        currentOwner.current === owner &&
+        focusOwner.current === owner &&
+        generation.current === version,
       patientID,
       patientName,
       medName,

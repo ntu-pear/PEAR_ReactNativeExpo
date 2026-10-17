@@ -1,96 +1,106 @@
-// Libs
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import {
-  Alert,
-  Dimensions,
-  Keyboard,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native';
-import {
-  Box,
-  FlatList,
-  HStack,
-  ScrollView,
-  View,
-  Text,
-  Divider,
-} from 'native-base';
+import React, { useCallback, useRef, useState } from 'react';
+import { Dimensions, StyleSheet, TouchableOpacity } from 'react-native';
+import { FlatList, ScrollView, View, Text, Divider } from 'native-base';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-
-// API
-import patientApi from 'app/api/patient';
-import {
-  patientFromApiResponse,
-  patientProfileLines,
-} from 'app/utility/patientHeader';
 import scheduleApi from 'app/api/schedule';
-
-// Utilities
 import {
-  isEmptyObject,
-  noDataMessage,
-  sortFilterInitialState,
-  formatDate,
-} from 'app/utility/miscFunctions';
-import {
-  getScheduleDayValue,
-  parseScheduleDay,
-} from 'app/utility/parseScheduleString';
-
-// Navigation
+  patientScheduleFailure,
+  patientScheduleParameters,
+  patientScheduleResult,
+} from 'app/utility/patientScheduleRead';
+import requestDeadline from 'app/utility/requestDeadline';
+import { sortFilterInitialState, formatDate } from 'app/utility/miscFunctions';
 import routes from 'app/navigation/routes';
-
-// Configurations
 import colors from 'app/config/colors';
-
-// Components
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
-import LoadingWheel from 'app/components/LoadingWheel';
 import ActivityCard from 'app/components/ActivityCard';
 
-function PatientScheduleScreen(props) {
-  let { patientID, patientId } = props.route.params;
-  if (patientId) {
-    patientID = patientId;
-  }
-
-  const testID = `schedule_screen_${patientID}`;
-
+function PatientScheduleScreen({ route }) {
+  const patientID = route.params?.patientId ?? route.params?.patientID;
+  const date = route.params?.date;
+  const readKey = JSON.stringify([patientID, date]);
+  const currentKey = useRef(readKey);
+  currentKey.current = readKey;
+  const generation = useRef(0);
   const navigation = useNavigation();
-
-  // Ref used to programmatically scroll to beginning of list
-  const scheduleRef = useRef(null);
-
-  // Filter options
-  const FILTER_OPTIONS = ['Activity Type', 'Activity Time'];
-
-  // Mapping between sort/filter/search names and the respective field in the patient data retrieved from the backend
-  const FIELD_MAPPING = {
-    'Activity Type': 'activityTitle',
-    'Activity Time': 'startTime',
-  };
-
-  // Sort/filter related states
+  const [snapshot, setSnapshot] = useState({
+    key: null,
+    loading: true,
+    weekly: [],
+    original: [],
+  });
   const [dropdown, setDropdown] = useState(sortFilterInitialState);
   const [datetime, setDatetime] = useState(sortFilterInitialState);
 
-  // Filter details related state
-  // Details of filter options
-  // --------------------------
-  // type - chip | dropdown | autocomplete (what kind of UI/component to use to display the filter)
-  // options - {} | custom dict that maps options for filtering to corresponding values in the patient data
-  //                e.g.: {'Active': true, 'Inactive': false, 'All': undefined} for filter corresponding to isActive
-  //                      where 'Active' filter option corresponds to isActive=true etc.
-  // isFilter - whether the filter is actually to be used for filtering,
-  //            since some filters like patient status may be used to make an API call instead of normal filtering
-  // --------------------------
-  const [filterOptionDetails, setFilterOptionDetails] = useState({
+  const refreshSchedule = useCallback(async () => {
+    const requestGeneration = ++generation.current;
+    setSnapshot({
+      key: readKey,
+      generation: requestGeneration,
+      loading: true,
+      weekly: [],
+      original: [],
+      patientName: '',
+    });
+    setDropdown(sortFilterInitialState);
+    setDatetime(sortFilterInitialState);
+    let result;
+    try {
+      // Validate before even invoking the API, including in mocked/test transports.
+      patientScheduleParameters(patientID, date);
+      const response = await requestDeadline(
+        scheduleApi.getPatientScheduleV1(patientID, date),
+      );
+      result = patientScheduleResult(response, patientID);
+    } catch {
+      result = patientScheduleFailure();
+    }
+    if (
+      generation.current !== requestGeneration ||
+      currentKey.current !== readKey
+    ) {
+      return;
+    }
+    setSnapshot({
+      ...result,
+      key: readKey,
+      generation: requestGeneration,
+      loading: false,
+      original: result.weekly,
+      initialize: true,
+    });
+  }, [patientID, date, readKey]);
+
+  useFocusEffect(
+    useCallback(() => {
+      refreshSchedule();
+      return () => {
+        generation.current += 1;
+      };
+    }, [refreshSchedule]),
+  );
+
+  // Hide the preceding patient's data on the route-change render, before effects run.
+  if (snapshot.key !== readKey || snapshot.loading) {
+    return <ActivityIndicator visible />;
+  }
+  const isCurrentSnapshot = () =>
+    currentKey.current === readKey &&
+    generation.current === snapshot.generation;
+
+  const activities = [
+    ...new Set(
+      snapshot.original.flatMap((day) =>
+        day.activities.map((activity) => activity.activityTitle),
+      ),
+    ),
+  ].sort();
+  const filterOptionDetails = {
     'Activity Type': {
       type: 'dropdown',
-      options: {},
+      options: Object.fromEntries(activities.map((title) => [title, title])),
       isFilter: false,
       nestedFilter: 'activities',
     },
@@ -100,371 +110,145 @@ function PatientScheduleScreen(props) {
       isFilter: false,
       nestedFilter: 'activities',
     },
-  });
-
-  // API call related states
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [isRetry, setIsRetry] = useState(false);
-  const [statusCode, setStatusCode] = useState(200);
-  const [isReloadSchedule, setIsReloadSchedule] = useState(true);
-
-  // Schedule data related states
-  const [originalScheduleWeekly, setOriginalScheduleWeekly] = useState([]);
-  const [scheduleWeekly, setScheduleWeekly] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [isDataInitialized, setIsDataInitialized] = useState(false);
-
-  // Patient data related states
-  const [patientInfo, setPatientInfo] = useState({});
-
-  // Refresh list when user requests refresh
-  useFocusEffect(
-    React.useCallback(() => {
-      if (isReloadSchedule) {
-        refreshSchedule();
-        setIsReloadSchedule(false);
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isReloadSchedule]),
-  );
-
-  // Update activity list when weekly schedule is refreshed
-  useEffect(() => {
-    setFilterOptionDetails((prevState) => ({
-      ...prevState,
-      'Activity Type': {
-        ...prevState['Activity Type'],
-        options: getActivityList([...originalScheduleWeekly]),
-      },
-    }));
-  }, [originalScheduleWeekly]);
-
-  // Set isLoading to true when retrieving data
-  const refreshSchedule = () => {
-    setIsLoading(true);
-    const promiseFunction = async () => {
-      await getPatientData();
-      if (!isError) {
-        setIsLoading(false);
-        setIsDataInitialized(true);
-        // setIsLoading(true);
-      } else {
-        setIsLoading(false);
-      }
-    };
-    promiseFunction();
   };
+  const scheduleWeekly = snapshot.weekly.some((day) => day.activities.length)
+    ? snapshot.weekly
+    : [];
 
-  // Fetch schedule from Scheduler v1
-  const getSchedule = async () => {
-    try {
-      const response = await scheduleApi.getPatientWeeklySchedule();
-      if (response && response.ok && response.data) {
-        const scheduleData = response.data.Data || response.data.data || [];
-
-        if (!Array.isArray(scheduleData) || scheduleData.length === 0) {
-          setOriginalScheduleWeekly([]);
-          setScheduleWeekly([]);
-          return;
-        }
-
-        parseScheduleData({
-          tempPatientInfo: patientInfo,
-          tempSchedule: scheduleData,
-        });
-
-        setIsError(false);
-        setIsRetry(false);
-        setStatusCode(response.status);
-        return response;
-      } else {
-        setOriginalScheduleWeekly([]);
-        setScheduleWeekly([]);
-        setIsError(true);
-        setIsRetry(true);
-        setStatusCode(response?.status);
-        return null;
-      }
-    } catch (error) {
-      setIsError(true);
-      setIsRetry(true);
-    }
-  };
-
-  // Get patient info from Patient Service first, then fetch schedule
-  const getPatientData = async () => {
-    try {
-      if (patientID) {
-        const response = await patientApi.getPatient(patientID);
-
-        if (response && response.ok) {
-          const normalized = patientFromApiResponse(response);
-          const raw = response.data.data || {};
-          setPatientInfo({
-            ...normalized,
-            patientAllocationDTO:
-              raw.PatientAllocationDTO || raw.patientAllocationDTO || {},
-          });
-
-          const scheduleResponse = await getSchedule();
-
-          setIsError(false);
-          setIsRetry(false);
-          setStatusCode(response.status);
-        } else {
-          setPatientInfo({});
-          setIsError(true);
-          setStatusCode(response?.status);
-          setIsRetry(true);
-        }
-      }
-    } catch (error) {
-      setIsError(true);
-      setIsRetry(true);
-    }
-  };
-
-  const parseScheduleData = ({ tempPatientInfo, tempSchedule }) => {
-    if (!tempSchedule || tempSchedule.length === 0) {
-      setOriginalScheduleWeekly([]);
-      setScheduleWeekly([]);
-      return;
-    }
-
-    // Find the correct schedule entry for this patient
-    const matchedSchedule = tempSchedule.find(
-      (s) =>
-        s.PatientID === patientID ||
-        s.PatientID === tempPatientInfo?.id ||
-        s.PatientID === tempPatientInfo?.patientID,
-    );
-
-    if (!matchedSchedule) {
-      setOriginalScheduleWeekly([]);
-      setScheduleWeekly([]);
-      return;
-    }
-
-    const daysOfWeek = [
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-      'Sunday',
-    ];
-
-    let tempScheduleWeekly = [];
-    let scheduleDate = new Date(matchedSchedule['StartDate']);
-
-    for (let j = 0; j < daysOfWeek.length; j++) {
-      const day = daysOfWeek[j];
-      const dailyActivities = getScheduleDayValue(matchedSchedule, day);
-
-      const patientDailySchedule = {
-        patientID: matchedSchedule['PatientID'],
-        patientName: matchedSchedule['Name'],
-        patientStartDate: matchedSchedule['StartDate'],
-        patientFullName:
-          (tempPatientInfo['firstName'] || '') +
-          ' ' +
-          (tempPatientInfo['lastName'] || ''),
-        patientPreferredName: tempPatientInfo['preferredName'] || '',
-        patientCaregiverName:
-          tempPatientInfo?.['patientAllocationDTO']?.['caregiverName'] || '',
-        activities: parseScheduleDay(
-          dailyActivities,
-          scheduleDate,
-          matchedSchedule['PatientID'],
-          matchedSchedule['Name'],
-        ),
-        date: new Date(scheduleDate),
-      };
-
-      scheduleDate.setDate(scheduleDate.getDate() + 1);
-      tempScheduleWeekly.push(patientDailySchedule);
-    }
-
-    setOriginalScheduleWeekly(tempScheduleWeekly);
-    setScheduleWeekly(tempScheduleWeekly);
-  };
-
-  // Get list of activities from patient data
-  const getActivityList = (tempWeeklySchedule = originalScheduleWeekly) => {
-    const activities = [];
-
-    tempWeeklySchedule.forEach((item) => {
-      item.activities.forEach((activity) => {
-        if (!activities.includes(activity.activityTitle)) {
-          activities.push(activity.activityTitle);
-        }
-      });
-    });
-    activities.sort();
-
-    const dictActivities = activities.reduce((acc, currentValue) => {
-      acc[currentValue] = currentValue;
-      return acc;
-    }, {});
-
-    return dictActivities;
-  };
-  // Handle searching, sorting, and filtering of schedule
-  const handleSearchSortFilter = async ({
-    text,
-    tempSelSort,
-    tempSelDropdownFilters,
-    tempSelDateFilters,
-    tempSearchMode,
-    setFilteredList,
-  }) => {
-    setIsLoading(true);
-
-    setFilteredList({
-      text: text,
-      tempSelSort: tempSelSort,
-      tempSelDropdownFilters: tempSelDropdownFilters,
-      tempSelDateFilters: tempSelDateFilters,
-      tempSearchMode: tempSearchMode,
-    });
-
-    scheduleRef.current?.scrollToOffset({ offset: 0, animated: true });
-    setIsLoading(false);
-  };
-
-  const handlePullToRefresh = () => {
-    refreshSchedule();
-  };
-
-  // Navigate to patient profile on click profile image
-  const onClickProfile = () => {
-    navigation.navigate(routes.PATIENT_PROFILE, { id: patientID });
-  };
-
-  // Check if all schedules are empty
-  const checkAllEmptySchedules = () => {
-    for (var i = 0; i < scheduleWeekly.length; i++) {
-      if (scheduleWeekly[i]['activities'].length > 0) {
-        return false;
-      }
-    }
-    return true;
-  };
-
-  return isLoading ? (
-    <ActivityIndicator visible />
-  ) : (
+  return (
     <View style={styles.container}>
+      {snapshot.error && (
+        <View testID="patient_schedule_read_error">
+          <Text>{snapshot.message}</Text>
+          {snapshot.retry && (
+            <TouchableOpacity
+              testID="patient_schedule_retry"
+              onPress={refreshSchedule}
+            >
+              <Text>Retry schedule</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
       <View style={{ justifyContent: 'space-between' }}>
-        <View style={{ alignSelf: 'center', marginTop: 15, maxHeight: 120 }}>
-          {!isEmptyObject(patientInfo) ? (
+        {snapshot.patientName ? (
+          <View style={{ alignSelf: 'center', marginTop: 15, maxHeight: 120 }}>
             <ProfileNameButton
-              testID={`${testID}_profileNameButton`}
-              profilePicture={patientInfo.profilePicture}
-              profileLineOne={patientProfileLines(patientInfo).line1}
-              profileLineTwo={patientProfileLines(patientInfo).line2}
-              handleOnPress={onClickProfile}
+              testID={`schedule_screen_${patientID}_profileNameButton`}
+              profileLineOne={snapshot.patientName}
+              profileLineTwo=""
+              handleOnPress={() =>
+                navigation.navigate(routes.PATIENT_PROFILE, { id: patientID })
+              }
               isPatient
               isVertical={false}
               size={90}
             />
-          ) : (
-            <LoadingWheel />
-          )}
-        </View>
-        <Divider width={'94%'} alignSelf={'center'} />
-        <View marginRight={'3%'} marginLeft={'3%'}>
+          </View>
+        ) : null}
+        <Divider width="94%" alignSelf="center" />
+        <View marginRight="3%" marginLeft="3%">
           <SearchFilterBar
-            originalList={originalScheduleWeekly}
-            setList={setScheduleWeekly}
-            FIELD_MAPPING={FIELD_MAPPING}
-            FILTER_OPTIONS={FILTER_OPTIONS}
+            key={readKey}
+            originalList={snapshot.original}
+            setList={(weekly) => {
+              if (isCurrentSnapshot())
+                setSnapshot((previous) =>
+                  previous.key === readKey &&
+                  previous.generation === snapshot.generation
+                    ? { ...previous, weekly }
+                    : previous,
+                );
+            }}
+            FIELD_MAPPING={{
+              'Activity Type': 'activityTitle',
+              'Activity Time': 'startTime',
+            }}
+            FILTER_OPTIONS={['Activity Type', 'Activity Time']}
             filterOptionDetails={filterOptionDetails}
             datetime={datetime}
             setDatetime={setDatetime}
             dropdown={dropdown}
             setDropdown={setDropdown}
-            initializeData={isDataInitialized}
-            onInitialize={() => setIsDataInitialized(false)}
+            initializeData={snapshot.initialize}
+            onInitialize={() =>
+              setSnapshot((previous) =>
+                previous.key === readKey &&
+                previous.generation === snapshot.generation
+                  ? { ...previous, initialize: false }
+                  : previous,
+              )
+            }
             hideSearchBar
           />
         </View>
       </View>
       <FlatList
-        ref={scheduleRef}
-        marginLeft={'4%'}
-        marginRight={'4%'}
-        marginBottom={'4%'}
-        marginTop={'1%'}
+        marginLeft="4%"
+        marginRight="4%"
+        marginBottom="4%"
+        marginTop="1%"
         horizontal
-        height={'80%'}
-        // onRefresh={handlePullToRefresh}
-        // refreshing={isLoading}
-        ListEmptyComponent={() => (
-          <View width={Dimensions.get('window').width - 85} height="80%">
-            {noDataMessage(
-              statusCode,
-              isLoading,
-              isError,
-              'No schedules found',
-            )}
+        height="80%"
+        ListEmptyComponent={() =>
+          snapshot.error ? null : (
+            <View width={Dimensions.get('window').width - 85} height="80%">
+              <Text testID="patient_schedule_empty">
+                No saved schedule found for this week.
+              </Text>
+            </View>
+          )
+        }
+        data={scheduleWeekly}
+        keyExtractor={(item) => `${item.patientID}-${item.date.toISOString()}`}
+        renderItem={({ item }) => (
+          <View style={styles.col}>
+            <View style={styles.dateContainer}>
+              <Text style={styles.dateText}>
+                {formatDate(item.date, false)}
+              </Text>
+            </View>
+            <ScrollView
+              width="100%"
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{
+                flexGrow: 1,
+                alignItems: 'center',
+                justifyContent: item.activities.length
+                  ? 'flex-start'
+                  : 'center',
+              }}
+            >
+              {item.activities.map((activity, index) => (
+                <ActivityCard
+                  key={index}
+                  activityTitle={activity.activityTitle}
+                  activityStartTime={activity.startTime}
+                  activityEndTime={activity.endTime}
+                  currentTime={new Date()}
+                  medications={activity.medications}
+                  patientName={item.patientName}
+                  patientID={item.patientID}
+                  date={formatDate(item.date, true)}
+                  navigation={navigation}
+                />
+              ))}
+            </ScrollView>
           </View>
         )}
-        data={checkAllEmptySchedules() ? [] : scheduleWeekly}
-        renderItem={({ item, i }) => {
-          return (
-            <View style={styles.col} key={i}>
-              <View style={styles.dateContainer}>
-                <Text style={styles.dateText}>
-                  {formatDate(new Date(item.date), false)}
-                </Text>
-              </View>
-              <ScrollView
-                width="100%"
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{
-                  flexGrow: 1,
-                  alignItems: 'center',
-                  justifyContent:
-                    item.activities.length > 0 ? 'flex-start' : 'center',
-                }}
-              >
-                {item.activities.map((activity, i) => (
-                  <ActivityCard
-                    key={i}
-                    activityTitle={activity.activityTitle}
-                    activityStartTime={activity.startTime}
-                    activityEndTime={activity.endTime}
-                    currentTime={new Date()}
-                    medications={activity.medications}
-                    patientName={item.patientName}
-                    patientID={item.patientID}
-                    date={formatDate(new Date(item.date), true)}
-                    navigation={navigation}
-                  />
-                ))}
-              </ScrollView>
-            </View>
-          );
-        }}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: { flex: 1 },
   col: {
     justifyContent: 'center',
     borderRightColor: colors.grey_lighter,
     borderRightWidth: 0.5,
   },
-  dateText: {
-    color: colors.white,
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
+  dateText: { color: colors.white, fontSize: 18, fontWeight: 'bold' },
   dateContainer: {
     backgroundColor: colors.green,
     width: 210,

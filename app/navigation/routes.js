@@ -43,6 +43,7 @@ export default Object.freeze({
   PATIENT_MEDICATION: 'PatientMedication',
   ACTIVITY_WIDE_ADHOC_PREVIEW: 'ActivityWideAdhocPreview',
   MANAGE_MEDICATION: 'ManageMedication',
+  TODAY_MEDICATION: 'TodayMedication',
   PATIENT_PHOTO_ALBUM: 'PatientPhotoAlbum',
   PATIENT_PHOTO_GRID: 'PatientPhotoGrid',
   PATIENT_VIEW_PHOTO: 'PatientViewPhoto',
