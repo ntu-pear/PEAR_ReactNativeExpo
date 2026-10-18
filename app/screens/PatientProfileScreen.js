@@ -35,6 +35,7 @@ import PatientProfileCard from 'app/components/PatientProfileCard';
 import PatientInformationAccordion from 'app/components/PatientInformationAccordion';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import requestDeadline from 'app/utility/requestDeadline';
+import { splitPostalAddress } from 'app/utility/postalAddress';
 import { beginQaTiming, markQaTiming } from 'app/utility/qaProfileTiming';
 
 // Import default placeholder image
@@ -415,22 +416,10 @@ function PatientProfileScreen(props) {
           'zipCode',
         ]);
 
-        let Address = nonEmpty(fullAddressRaw);
-        let PostalCode = nonEmpty(postalRaw);
-
-        // If postal is missing but address ends with a 6-digit code (optionally prefixed by S)
-        // Handles: "… 123456", "… S123456", "… S 123456", "… S(123456)".
-        if (!PostalCode && Address) {
-          const tail = Address.match(/(?:\bS\s*\(?\s*)?(\d{6})\)?\s*$/i);
-          if (tail) {
-            PostalCode = tail[1];
-            // Remove the matched S(123456)/S 123456/123456 from the end of the address
-            Address = Address.replace(
-              /(?:\bS\s*\(?\s*)?\d{6}\)?\s*$/i,
-              '',
-            ).trim();
-          }
-        }
+        const { address: Address, postalCode: PostalCode } = splitPostalAddress(
+          fullAddressRaw,
+          postalRaw,
+        );
 
         const toBool01 = (v) =>
           v === true || v === 1 || v === '1' || v === 'true';
@@ -448,21 +437,8 @@ function PatientProfileScreen(props) {
           'TempPostalCode',
         ]);
 
-        let TempAddress = (fullTempAddrRaw ?? '').toString().trim();
-        let TempPostalCode = (tempPostalRaw ?? '').toString().trim();
-
-        // If temp postal missing but TempAddress ends with postal, extract it.
-        // Handles "… 123456", "… S123456", "… S 123456", "… S(123456)"
-        if (!TempPostalCode && TempAddress) {
-          const t = TempAddress.match(/(?:\bS\s*\(?\s*)?(\d{6})\)?\s*$/i);
-          if (t) {
-            TempPostalCode = t[1];
-            TempAddress = TempAddress.replace(
-              /(?:\bS\s*\(?\s*)?\d{6}\)?\s*$/i,
-              '',
-            ).trim();
-          }
-        }
+        const { address: TempAddress, postalCode: TempPostalCode } =
+          splitPostalAddress(fullTempAddrRaw, tempPostalRaw);
 
         // Home telephone
         const HomeNo = toStr(

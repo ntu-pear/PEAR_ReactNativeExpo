@@ -10,7 +10,6 @@ import { Box, VStack, Avatar, Text, HStack, Icon } from 'native-base';
 import { MaterialIcons } from '@expo/vector-icons';
 import colors from 'app/config/colors';
 import routes from 'app/navigation/routes';
-import { useNavigate } from 'react-router-dom';
 
 // Hook
 import formatDateTime from 'app/hooks/useFormatDateTime.js';
@@ -21,9 +20,6 @@ function PatientInformationCard(props) {
     useState(
       `https://picsum.photos/400/400/?image=${Math.floor(Math.random() * 85)}`,
     );
-
-  // useNavigate() hook cannot work on mobile
-  const navigate = Platform.OS === 'web' ? useNavigate() : null;
 
   const calcAge = (dob) => {
     const today = new Date().getFullYear();
@@ -38,17 +34,17 @@ function PatientInformationCard(props) {
     if (!patientProfile?.profilePicture) {
       return null; // Will show initials
     }
-    
+
     // If it's a number (local require), use it directly
     if (typeof patientProfile.profilePicture === 'number') {
       return patientProfile.profilePicture;
     }
-    
+
     // If it's a string URL, wrap it in { uri: ... }
     if (typeof patientProfile.profilePicture === 'string') {
       return { uri: patientProfile.profilePicture };
     }
-    
+
     return null;
   };
 
@@ -70,15 +66,15 @@ function PatientInformationCard(props) {
           borderColor={colors.grey_lightest}
           borderWidth="2"
         >
-          {patientProfile?.firstName?.substring(0, 1) || 
-           patientProfile?.preferredName?.substring(0, 1) || 
-           '--'}
+          {patientProfile?.firstName?.substring(0, 1) ||
+            patientProfile?.preferredName?.substring(0, 1) ||
+            '--'}
         </Avatar>
-        
+
         {/* Content Section - All in one HStack for mobile */}
-        <HStack flex={1} justifyContent="space-between">
+        <HStack flex={1} minW={0} justifyContent="space-between">
           {/* Left side: Name, Gender, Language */}
-          <VStack justifyContent="center">
+          <VStack flex={1} minW={0} justifyContent="center" pr={3}>
             <Text
               testID="patient_preferred_name"
               bold
@@ -93,8 +89,11 @@ function PatientInformationCard(props) {
               fontSize={SCREEN_HEIGHT * 0.024}
               color={colors.grey_lightest}
             >
-              {patientProfile?.gender === 'F' ? 'FEMALE' : 
-               patientProfile?.gender === 'M' ? 'MALE' : '-'}
+              {patientProfile?.gender === 'F'
+                ? 'FEMALE'
+                : patientProfile?.gender === 'M'
+                ? 'MALE'
+                : '-'}
             </Text>
             <Text
               testID="patient_preferred_language"
@@ -107,7 +106,7 @@ function PatientInformationCard(props) {
           </VStack>
 
           {/* Right side: NRIC/DOB and Age/Mobile */}
-          <HStack space={4}>
+          <HStack space={4} flexShrink={0}>
             {/* NRIC and DOB Column */}
             <VStack>
               <Text
@@ -143,7 +142,9 @@ function PatientInformationCard(props) {
                 lineHeight="xs"
                 color={colors.grey_lightest}
               >
-                {patientProfile?.dob ? formatDateTime(patientProfile.dob, true) : '-'}
+                {patientProfile?.dob
+                  ? formatDateTime(patientProfile.dob, true)
+                  : '-'}
               </Text>
             </VStack>
 
