@@ -56,6 +56,7 @@ jest.mock('app/components/PatientInformationAccordion', () => (props) => {
         {JSON.stringify({
           guardianError: props.guardianError,
           socialHistoryError: props.socialHistoryError,
+          socialHistoryData: props.socialHistoryData,
           guardianLoading: props.guardianLoading,
           socialHistoryLoading: props.socialHistoryLoading,
         })}
@@ -231,3 +232,35 @@ test('timeout retry recovers and a late response cannot replace the recovered pr
   expect(hasText(screen, 'STALE TIMED OUT PATIENT')).toBe(false);
   expect(hasText(screen, 'RECOVERED TEST PATIENT')).toBe(true);
 });
+
+test('the documented no-social-history response enables an empty optional section', async () => {
+  socialHistoryApi.getSocialHistory.mockResolvedValue({
+    ok: false,
+    status: 404,
+    data: { detail: 'Social history record not found for the patient' },
+  });
+  const screen = await mount();
+  await act(async () => byId(screen, 'open-optional-sections').props.onPress());
+  const section = JSON.parse(byId(screen, 'section-state').props.children);
+  expect(section.socialHistoryError).toBeNull();
+  expect(section.socialHistoryData).toEqual({});
+  expect(section.socialHistoryLoading).toBe(false);
+});
+
+test.each([401, 403, 503])(
+  'HTTP%s cannot be mistaken for an empty social-history record',
+  async (status) => {
+    socialHistoryApi.getSocialHistory.mockResolvedValue({
+      ok: false,
+      status,
+      data: { detail: 'Social history record not found for the patient' },
+    });
+    const screen = await mount();
+    await act(async () =>
+      byId(screen, 'open-optional-sections').props.onPress(),
+    );
+    const section = JSON.parse(byId(screen, 'section-state').props.children);
+    expect(section.socialHistoryError).toContain(String(status));
+    expect(section.socialHistoryData).toBeNull();
+  },
+);

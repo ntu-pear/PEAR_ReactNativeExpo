@@ -642,7 +642,15 @@ function PatientProfileScreen(props) {
         return;
       }
 
-      if (resp?.ok) {
+      // Patient v1 returns this specific 404 when the patient has no record yet.
+      // Authorization failures and unknown 404s must remain visible errors.
+      if (
+        resp?.status === 404 &&
+        resp?.data?.detail === 'Social history record not found for the patient'
+      ) {
+        setSocialHistoryData({});
+        setSocialHistoryError(null);
+      } else if (resp?.ok) {
         let payload = resp?.data?.data ?? resp?.data;
         if (Array.isArray(payload)) {
           payload = payload[0];
