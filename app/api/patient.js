@@ -1072,6 +1072,8 @@ const getPatientPhoto = async (patientID) => {
     ...photoRes,
     data: {
       ...(photoRes.data && !Array.isArray(photoRes.data) ? photoRes.data : {}),
+      albums: albumRes.ok ? albumRes.data : [],
+      albumCatalogueAvailable: Boolean(albumRes.ok),
       data: unwrapArray(photoRes.data).map((photo) =>
         normalizePhoto(photo, albumMap),
       ),

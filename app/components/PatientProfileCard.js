@@ -35,13 +35,18 @@ function PatientProfileCard(props) {
   return (
     <TouchableOpacity
       onPress={handleOnPressToNextScreen}
+      disabled={!text}
       testID={testID}
-      style={[styles.container, style]}
+      style={[
+        styles.container,
+        text ? { minHeight: Math.max(80, SCREEN_HEIGHT * 0.08 + 20) } : null,
+        style,
+      ]}
     >
       {vectorIconComponent}
       <Text
         fontSize={SCREEN_HEIGHT * 0.013}
-        mt={SCREEN_HEIGHT * 0.01}
+        mt={2}
         color={colors.black}
         textAlign="center"
         flexWrap="wrap"
@@ -60,6 +65,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 12,
     flex: 1,
+    paddingVertical: 8,
     margin: '3%',
     aspectRatio: 1.1,
   },

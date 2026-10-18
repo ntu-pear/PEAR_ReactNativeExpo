@@ -19,7 +19,7 @@ import typography from 'app/config/typography';
 
 const { width, height } = Dimensions.get('window');
 
-const photoHeight = (height - 750) / 3;
+const photoHeight = Math.max(120, (height - 750) / 3);
 const photoWidth = (width - 160) / 2;
 
 const AlbumItem = ({
@@ -47,6 +47,7 @@ const AlbumItem = ({
       <Card style={styles.card}>
         <Card.Content>
           <Image
+            testID={`patient_album_image_${albumCategoryListID}`}
             source={photoPath ? { uri: photoPath } : placeholderImage}
             style={styles.photo}
           />

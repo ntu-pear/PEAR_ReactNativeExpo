@@ -12,6 +12,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 // API
 import patientApi from 'app/api/patient';
+import { patientPhotoAlbums } from 'app/utility/patientPhotoAlbums';
 
 // Utilities
 import {
@@ -111,7 +112,7 @@ function PatientPhotoAlbum(props) {
     albumCategoryListID: 1,
     patientPhotoID: 1,
   });
-  const [photoCount, setPhotoCount] = useState([]);
+  const [catalogueAvailable, setCatalogueAvailable] = useState(true);
 
   // Patient data related states
   const [patientData, setPatientData] = useState({});
@@ -119,11 +120,52 @@ function PatientPhotoAlbum(props) {
   // Scrollview state
   const [isScrolling, setIsScrolling] = useState(false);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      refreshPhotoData();
-    }, []),
-  );
+  // Get photo data from backend
+  const getPhotoData = React.useCallback(async () => {
+    if (patientID) {
+      const response = await patientApi.getPatientPhoto(patientID);
+      const savedEmpty =
+        response.status === 404 &&
+        response.data?.detail === 'Photo not found or deleted';
+      if (response.ok || savedEmpty) {
+        const albums = patientPhotoAlbums(
+          response.data.data,
+          response.data.albums,
+          patientID,
+        );
+        setPhotoData(albums);
+        setOriginalData(albums);
+        setCatalogueAvailable(response.data.albumCatalogueAvailable !== false);
+        setIsDataInitialized(true);
+        setIsError(false);
+        setIsRetry(false);
+        setStatusCode(savedEmpty ? 200 : response.status);
+      } else {
+        console.log('Request failed with status code: ', response.status);
+        setOriginalData([]);
+        setPhotoData([]);
+        setIsError(true);
+        setStatusCode(response.status);
+        setIsRetry(true);
+      }
+    }
+  }, [patientID]);
+
+  // Get patient data from backend
+  const getPatientData = React.useCallback(async () => {
+    if (patientID) {
+      const response = await patientApi.getPatient(patientID);
+      if (response.ok) {
+        setPatientData(response.data.data);
+      } else {
+        console.log('Request failed with status code: ', response.status);
+        setPatientData({});
+        setIsError(true);
+        setStatusCode(response.status);
+        setIsRetry(true);
+      }
+    }
+  }, [patientID]);
 
   // Memoized data refresh function
   const refreshPhotoData = React.useCallback(async () => {
@@ -133,117 +175,22 @@ function PatientPhotoAlbum(props) {
       await getPatientData();
     } catch (error) {
       console.error('Error refreshing photo data:', error);
+      setOriginalData([]);
+      setPhotoData([]);
+      setPatientData({});
+      setIsError(true);
+      setIsRetry(true);
+      setStatusCode(0);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [getPhotoData, getPatientData]);
 
-  // Get photo data from backend
-  const getPhotoData = async () => {
-    if (patientID) {
-      const response = await patientApi.getPatientPhoto(patientID);
-      if (response.ok) {
-        const photoCount = countPhotosByAlbum([...response.data.data]);
-        setPhotoCount(photoCount);
-        setPhotoData(
-          mergeSeededAlbumsWithPhotos(
-            parsePhotoData([...response.data.data]),
-            seededAlbums,
-          ),
-        );
-        setOriginalData(
-          mergeSeededAlbumsWithPhotos(
-            parsePhotoData([...response.data.data]),
-            seededAlbums,
-          ),
-        );
-        setIsDataInitialized(true);
-        setIsLoading(false);
-        setIsError(false);
-        setIsRetry(false);
-        setStatusCode(response.status);
-      } else {
-        console.log('Request failed with status code: ', response.status);
-        setOriginalData([]);
-        setPhotoData([]);
-        setIsLoading(false);
-        setIsError(true);
-        setStatusCode(response.status);
-        setIsRetry(true);
-      }
-    }
-  };
-
-  // Parse photo album data and return the latest photo per album category
-  const parsePhotoData = (tempData) => {
-    const groupedPhotos = tempData.reduce((acc, item) => {
-      const albumName = item.albumCategoryName.toString();
-      if (!acc[albumName]) {
-        acc[albumName] = [];
-      }
-      acc[albumName].push(item);
-      return acc;
-    }, {});
-
-    // For each album category, select the most recent photo based on the patientPhotoID
-    const latestPhotos = Object.values(groupedPhotos).map((photos) => {
-      return photos.reduce((latest, current) => {
-        return current.patientPhotoID > latest.patientPhotoID
-          ? current
-          : latest;
-      });
-    });
-
-    // Return the parsed and filtered photo data with only the latest photos per album
-    return latestPhotos.map((item) => ({
-      patientID: item.patientID,
-      photoPath: item.photoPath.toString() || null, // Handle null values
-      albumCategoryName: item.albumCategoryName.toString(),
-      albumCategoryListID: item.albumCategoryListID.toString(),
-      photoDetails: item.photoDetails.toString() || null,
-    }));
-  };
-
-  // Function to merge seeded albums with photo data
-  const mergeSeededAlbumsWithPhotos = (photoData, seededAlbums) => {
-    // Create a map of photoData by albumCategoryListID for quick lookup
-    const photoDataMap = photoData.reduce((acc, item) => {
-      acc[item.albumCategoryListID] = item;
-      return acc;
-    }, {});
-
-    // Combine seededAlbums with photoData
-    return seededAlbums.map((album) => {
-      const photo = photoDataMap[album.albumCategoryListID];
-      return {
-        albumCategoryListID: album.albumCategoryListID,
-        albumCategoryName: album.albumCategoryName,
-        patientID: patientID, // Use photo data if available
-        photoPath: photo ? photo.photoPath : null, // Use photo data if available
-        photoDetails: photo ? photo.photoDetails : null, // Use photo data if available
-      };
-    });
-  };
-
-  // Get patient data from backend
-  const getPatientData = async () => {
-    if (patientID) {
-      const response = await patientApi.getPatient(patientID);
-      if (response.ok) {
-        setPatientData(response.data.data);
-        setIsError(false);
-        setIsRetry(false);
-        setStatusCode(response.status);
-      } else {
-        console.log('Request failed with status code: ', response.status);
-        setPatientData({});
-        setIsLoading(false);
-        setIsError(true);
-        setStatusCode(response.status);
-        setIsRetry(true);
-      }
-    }
-  };
+  useFocusEffect(
+    React.useCallback(() => {
+      refreshPhotoData();
+    }, [refreshPhotoData]),
+  );
 
   // Navigate to patient profile on click profile image
   const onClickProfile = () => {
@@ -260,26 +207,6 @@ function PatientPhotoAlbum(props) {
       patientPhotoID,
     });
   };
-
-  // Group photos by albumCategoryListID
-  const countPhotosByAlbum = (tempData) => {
-    return tempData.reduce((acc, item) => {
-      const albumID = item.albumCategoryListID.toString();
-      if (!acc[albumID]) {
-        acc[albumID] = 0;
-      }
-      acc[albumID] += 1;
-      return acc;
-    }, {});
-  };
-
-  const seededAlbums = [
-    { albumCategoryListID: '1', albumCategoryName: 'Family' },
-    { albumCategoryListID: '2', albumCategoryName: 'Friends' },
-    { albumCategoryListID: '4', albumCategoryName: 'Pet' },
-    { albumCategoryListID: '5', albumCategoryName: 'Food' },
-    { albumCategoryListID: '6', albumCategoryName: 'Activity' },
-  ];
 
   return isLoading ? (
     <ActivityIndicator visible />
@@ -325,13 +252,16 @@ function PatientPhotoAlbum(props) {
           />
         </View>
       </View>
+      {!catalogueAvailable && (
+        <Text>Album names are unavailable. Pull to refresh.</Text>
+      )}
       <FlatList
         onTouchStart={() => Keyboard.dismiss()}
         onScrollBeginDrag={() => setIsScrolling(true)}
         onScrollEndDrag={() => setIsScrolling(false)}
         onRefresh={refreshPhotoData}
         refreshing={isLoading}
-        height={'77%'}
+        style={{ flex: 1 }}
         ListEmptyComponent={() =>
           noDataMessage(statusCode, isLoading, isError, 'No albums found', true)
         }
@@ -355,7 +285,7 @@ function PatientPhotoAlbum(props) {
                     albumCategoryName={item.albumCategoryName}
                     albumCategoryListID={item.albumCategoryListID}
                     patientID={item.patientID}
-                    photoCount={photoCount[item.albumCategoryListID] || 0}
+                    photoCount={item.photoCount || 0}
                     handleOnPress={onClickAlbum}
                   />
                 </TouchableOpacity>
@@ -370,6 +300,7 @@ function PatientPhotoAlbum(props) {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     backgroundColor: colors.white,
   },
   albumContainer: {

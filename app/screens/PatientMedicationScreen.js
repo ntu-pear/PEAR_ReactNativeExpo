@@ -573,6 +573,8 @@ function PatientMedicationScreen(props) {
       <View style={styles.addBtn}>
         <AddButton
           title="Add Medication"
+          testID="patient_medication_add"
+          containerStyle={{ flex: 0, marginTop: 0 }}
           onPress={handleOnClickAddMedication}
         />
       </View>
@@ -608,7 +610,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
   },
-  addBtn: { marginTop: '0.01%' },
+  addBtn: { paddingVertical: 8 },
 });
 
 export default PatientMedicationScreen;

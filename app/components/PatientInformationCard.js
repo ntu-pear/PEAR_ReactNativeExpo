@@ -13,6 +13,7 @@ import routes from 'app/navigation/routes';
 
 // Hook
 import formatDateTime from 'app/hooks/useFormatDateTime.js';
+import { patientAge } from 'app/utility/patientAge';
 
 function PatientInformationCard(props) {
   const { patientProfile, navigation } = props;
@@ -20,12 +21,6 @@ function PatientInformationCard(props) {
     useState(
       `https://picsum.photos/400/400/?image=${Math.floor(Math.random() * 85)}`,
     );
-
-  const calcAge = (dob) => {
-    const today = new Date().getFullYear();
-    const _dob = new Date(dob).getFullYear();
-    return today - _dob;
-  };
 
   const SCREEN_HEIGHT = Dimensions.get('window').height;
   const compact = Dimensions.get('window').width < 600;
@@ -177,7 +172,7 @@ function PatientInformationCard(props) {
                 lineHeight="xs"
                 color={colors.grey_lightest}
               >
-                {patientProfile?.dob ? calcAge(patientProfile.dob) : '-'}
+                {patientAge(patientProfile?.dob) ?? '-'}
               </Text>
               <Text
                 testID="mobile_number_label"
