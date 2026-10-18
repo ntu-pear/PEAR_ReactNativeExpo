@@ -327,7 +327,7 @@ function EditPatientGuardianScreen({ route }) {
       {!shownGuardian && !loading ? (
         <AppButton title="Reload guardian" color="green" onPress={load} />
       ) : null}
-      {shownGuardian ? (
+      {shownGuardian && !loading ? (
         <View>
           <AppText>{`${shownGuardian.firstName} ${shownGuardian.lastName}`}</AppText>
           <AppText>{`Date of birth: ${String(

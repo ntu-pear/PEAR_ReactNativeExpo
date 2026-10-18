@@ -495,3 +495,31 @@ test('unknown primary outcome offers a read-only check and blocks another confir
   ).toContain('unknown');
   tree.unmount();
 });
+
+test('waits for the complete fresh load before mounting stateful guardian inputs', async () => {
+  let finishAllocation;
+  guardianApi.getPatientAllocation.mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        finishAllocation = resolve;
+      }),
+  );
+  const tree = await render();
+  expect(
+    tree.root.findAllByProps({ testID: 'guardian-edit-contactNo' }),
+  ).toHaveLength(0);
+  await act(async () => {
+    finishAllocation({
+      ok: true,
+      data: { id: 3, patientId: 7, guardianId: 2, guardian2Id: null },
+    });
+  });
+  expect(
+    tree.root.findByProps({ testID: 'guardian-edit-contactNo' }).props.value,
+  ).toBe('12345678');
+  expect(
+    tree.root.findByProps({ testID: 'guardian-edit-relationshipName' }).props
+      .value,
+  ).toBe('Child');
+  act(() => tree.unmount());
+});
