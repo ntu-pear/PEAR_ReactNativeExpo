@@ -487,7 +487,7 @@ function PatientMedicationScreen(props) {
           onScrollEndDrag={() => setIsScrolling(false)}
           onRefresh={refreshMedData}
           refreshing={isLoading}
-          height={'72%'}
+          style={{ flex: 1 }}
           ListEmptyComponent={() =>
             noDataMessage(
               statusCode,
@@ -537,7 +537,7 @@ function PatientMedicationScreen(props) {
           )}
         />
       ) : (
-        <View style={{ height: '72%', marginBottom: 20, marginHorizontal: 40 }}>
+        <View style={{ flex: 1, marginBottom: 20, marginHorizontal: 40 }}>
           <DynamicTable
             headerData={getTableHeaderData()}
             rowData={getTableRowData()}
@@ -602,7 +602,7 @@ function PatientMedicationScreen(props) {
 }
 
 const styles = StyleSheet.create({
-  container: { backgroundColor: colors.white },
+  container: { flex: 1, backgroundColor: colors.white },
   medContainer: {
     padding: 20,
     borderBottomWidth: 1,

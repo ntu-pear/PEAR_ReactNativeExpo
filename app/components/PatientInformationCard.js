@@ -28,6 +28,7 @@ function PatientInformationCard(props) {
   };
 
   const SCREEN_HEIGHT = Dimensions.get('window').height;
+  const compact = Dimensions.get('window').width < 600;
 
   // Helper function to get the correct image source format
   const getImageSource = () => {
@@ -71,10 +72,21 @@ function PatientInformationCard(props) {
             '--'}
         </Avatar>
 
-        {/* Content Section - All in one HStack for mobile */}
-        <HStack flex={1} minW={0} justifyContent="space-between">
+        {/* Stack identity above metadata on narrow screens. */}
+        <HStack
+          flex={1}
+          minW={0}
+          flexDirection={compact ? 'column' : 'row'}
+          justifyContent="space-between"
+        >
           {/* Left side: Name, Gender, Language */}
-          <VStack flex={1} minW={0} justifyContent="center" pr={3}>
+          <VStack
+            flex={compact ? undefined : 1}
+            minW={0}
+            width={compact ? '100%' : undefined}
+            justifyContent="center"
+            pr={compact ? 0 : 3}
+          >
             <Text
               testID="patient_preferred_name"
               bold
@@ -106,7 +118,7 @@ function PatientInformationCard(props) {
           </VStack>
 
           {/* Right side: NRIC/DOB and Age/Mobile */}
-          <HStack space={4} flexShrink={0}>
+          <HStack space={4} flexShrink={0} mt={compact ? 3 : 0}>
             {/* NRIC and DOB Column */}
             <VStack>
               <Text
