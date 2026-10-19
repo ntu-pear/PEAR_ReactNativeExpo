@@ -1,10 +1,12 @@
 import {
   activityEntityId,
   exclusionBlockedIds,
-  validateExclusionDates,
+  validateExclusionDates as validateDates,
 } from 'app/utility/exclusionEligibility';
 import { exclusionLifecycle } from 'app/utility/exclusionLifecycle';
 const now = new Date('2026-10-05T16:01:00Z');
+const validateExclusionDates = (start, end, indefinite) =>
+  validateDates(start, end, indefinite, now);
 test('Singapore midnight advances exclusion lifecycle independently of host timezone', () => {
   expect(
     exclusionLifecycle({ startDate: '2026-10-05', endDate: '2026-10-05' }, now),
@@ -95,3 +97,61 @@ test.each([
 ])('invalid range %s to %s is rejected', (start, end) =>
   expect(() => validateExclusionDates(start, end, false)).toThrow(),
 );
+
+test('30-day lower bound includes centre-today minus30 and rejects minus31 for both finite and indefinite dates', () => {
+  const instant = new Date('2026-10-19T12:00:00Z');
+  expect(
+    validateDates('2026-09-19', '2026-10-19', false, instant).startDate,
+  ).toBe('2026-09-19');
+  expect(validateDates('2026-09-19', '', true, instant).endDate).toBeNull();
+  expect(() =>
+    validateDates('2026-09-18', '2026-10-19', false, instant),
+  ).toThrow(/30 days/);
+  expect(() => validateDates('2026-09-18', '', true, instant)).toThrow(
+    /30 days/,
+  );
+});
+test('Singapore midnight advances the30-day boundary without changing historical records', () => {
+  const historical = { startDate: '2026-09-19', endDate: '2026-10-20' };
+  expect(
+    validateDates(
+      historical.startDate,
+      historical.endDate,
+      false,
+      new Date('2026-10-19T15:59:59Z'),
+    ).startDate,
+  ).toBe('2026-09-19');
+  expect(() =>
+    validateDates(
+      historical.startDate,
+      historical.endDate,
+      false,
+      new Date('2026-10-19T16:00:00Z'),
+    ),
+  ).toThrow(/30 days/);
+  expect(historical).toEqual({
+    startDate: '2026-09-19',
+    endDate: '2026-10-20',
+  });
+});
+test('30-day bound crosses leap-year month and year ends and retains future ranges', () => {
+  expect(
+    validateDates(
+      '2024-01-31',
+      '2024-03-01',
+      false,
+      new Date('2024-03-01T00:00:00Z'),
+    ).startDate,
+  ).toBe('2024-01-31');
+  expect(() =>
+    validateDates('2024-01-30', '', true, new Date('2024-03-01T00:00:00Z')),
+  ).toThrow(/30 days/);
+  expect(
+    validateDates('2025-12-02', '', true, new Date('2026-01-01T00:00:00Z'))
+      .startDate,
+  ).toBe('2025-12-02');
+  expect(
+    validateDates('2026-12-31', '', true, new Date('2026-01-01T00:00:00Z'))
+      .startDate,
+  ).toBe('2026-12-31');
+});

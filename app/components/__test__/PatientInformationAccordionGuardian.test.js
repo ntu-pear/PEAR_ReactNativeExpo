@@ -3,6 +3,7 @@ import { act, create } from 'react-test-renderer';
 import PatientInformationAccordion from 'app/components/PatientInformationAccordion';
 import InformationCard from 'app/components/InformationCard';
 import routes from 'app/navigation/routes';
+import AuthContext from 'app/auth/context';
 
 const mockPush = jest.fn();
 jest.mock('@react-navigation/native', () => ({
@@ -43,6 +44,32 @@ jest.mock('app/components/AppButton', () => ({ title, onPress }) => {
 });
 
 const patientId = '90071992547409931';
+test.each(['CAREGIVER', 'SUPERVISOR'])(
+  'SocialHistory editing follows verified mobile staff policy for %s',
+  async (roleName) => {
+    let tree;
+    await act(async () => {
+      tree = create(
+        <AuthContext.Provider value={{ user: { roleName } }}>
+          <PatientInformationAccordion
+            patientID={patientId}
+            patientProfile={{ patientID: patientId }}
+            guardianData={{}}
+            socialHistoryData={{ id: 12, exercise: -1 }}
+          />
+        </AuthContext.Provider>,
+      );
+    });
+    const card = tree.root
+      .findAllByType(InformationCard)
+      .find((item) => item.props.title === 'Social History');
+    expect(Boolean(card.props.handleOnPress)).toBe(roleName === 'SUPERVISOR');
+    expect(
+      card.props.displayData.some((item) => item.label === 'Exercise'),
+    ).toBe(false);
+    await act(async () => tree.unmount());
+  },
+);
 const guardian = {
   guardianID: '90071992547409933',
   firstName: 'SYNTHETIC',
@@ -173,3 +200,28 @@ test.each([
     expect(mockPush).not.toHaveBeenCalled();
   },
 );
+
+test('guardian identifier is masked on first render and remasks when data changes', async () => {
+  const tree = await render({ guardian: { ...guardian, nric: 'S1234567A' } });
+  const card = guardianCards(tree)[0];
+  expect(card.props.displayData.find((row) => row.label === 'NRIC').value).toBe(
+    '*****567A',
+  );
+  expect(JSON.stringify(tree.toJSON())).not.toContain('S1234567A');
+  const eye = card.findAll(
+    (node) => node.props._icon?.name === 'eye-outline',
+  )[0];
+  await act(async () => eye.props.onPress());
+  expect(JSON.stringify(tree.toJSON())).toContain('S1234567A');
+  await act(async () =>
+    tree.update(
+      <PatientInformationAccordion
+        patientID={patientId}
+        patientProfile={{ patientID: patientId }}
+        guardianData={{ guardian: { ...guardian, nric: 'T7654321B' } }}
+      />,
+    ),
+  );
+  expect(JSON.stringify(tree.toJSON())).not.toContain('S1234567A');
+  expect(JSON.stringify(tree.toJSON())).not.toContain('T7654321B');
+});

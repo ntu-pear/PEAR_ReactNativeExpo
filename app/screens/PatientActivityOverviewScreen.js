@@ -1,10 +1,15 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
+import {
+  orderActivityPreferences,
+  recommendationFor,
+} from 'app/utility/activityDisplayOrder';
 import {
   Alert,
   RefreshControl,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  TextInput,
 } from 'react-native';
 import { Box, Text } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
@@ -114,6 +119,7 @@ function ListRow({
   badgeFg,
   onPress,
   testID,
+  actionLabel,
 }) {
   const chip = {
     bg: badgeBg || colors.grey_lightest,
@@ -146,6 +152,11 @@ function ListRow({
             </Text>
           )}
         </Box>
+        {!!actionLabel && (
+          <Text color={colors.black} fontWeight="700" mr={3}>
+            {actionLabel}
+          </Text>
+        )}
         {!!badge && (
           <Box px={3} py={1} borderRadius={999} bg={chip.bg}>
             <Text fontSize="xs" fontWeight="700" color={chip.fg}>
@@ -241,6 +252,25 @@ function PatientActivityOverviewScreen(props) {
     eligibilityUnavailable = true;
   }
 
+  const [preferenceQuery, setPreferenceQuery] = useState('');
+  const [preferenceFilter, setPreferenceFilter] = useState('all');
+  const [preferenceSort, setPreferenceSort] = useState('priority');
+  const orderedPreferences = useMemo(
+    () =>
+      orderActivityPreferences(preferences, recommendations, {
+        query: preferenceQuery,
+        filter: preferenceFilter,
+        sort: preferenceSort,
+      }),
+    [
+      preferences,
+      recommendations,
+      preferenceQuery,
+      preferenceFilter,
+      preferenceSort,
+    ],
+  );
+
   if (isLoading) {
     return <ActivityIndicator visible />;
   }
@@ -330,17 +360,62 @@ function PatientActivityOverviewScreen(props) {
         </TouchableOpacity>
       )}
 
-      <SectionHeader title="Preferences" count={preferences.length} />
-      {preferences.length === 0 ? (
+      <SectionHeader title="Preferences" count={orderedPreferences.length} />
+      <TextInput
+        accessibilityLabel="Search activity preferences"
+        placeholder="Search activity name"
+        value={preferenceQuery}
+        onChangeText={setPreferenceQuery}
+        style={styles.preferenceSearch}
+      />
+      <TouchableOpacity
+        style={styles.manageButton}
+        onPress={() =>
+          setPreferenceSort((value) =>
+            value === 'priority' ? 'name' : 'priority',
+          )
+        }
+      >
+        <Text color="white">
+          Sort:{' '}
+          {preferenceSort === 'priority'
+            ? 'Liked / recommended first'
+            : 'Activity name'}
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.manageButton}
+        onPress={() =>
+          setPreferenceFilter((value) =>
+            value === 'all'
+              ? 'liked'
+              : value === 'liked'
+              ? 'recommended'
+              : 'all',
+          )
+        }
+      >
+        <Text color="white">
+          Show:{' '}
+          {preferenceFilter === 'all'
+            ? 'All activities'
+            : preferenceFilter === 'liked'
+            ? 'Liked activities'
+            : 'Recommended activities'}
+        </Text>
+      </TouchableOpacity>
+      {orderedPreferences.length === 0 ? (
         <EmptyRow
           message={
             errors.includes('preferences')
               ? 'Could not load preferences. Pull to refresh.'
+              : preferenceQuery || preferenceFilter !== 'all'
+              ? 'No activities match this search or filter.'
               : 'No named centre activities to show.'
           }
         />
       ) : (
-        preferences.map((item) => (
+        orderedPreferences.map((item) => (
           <ListRow
             key={`pref-${
               item.centreActivityPreferenceID ||
@@ -348,6 +423,10 @@ function PatientActivityOverviewScreen(props) {
               item.centreActivityID
             }`}
             title={item.activityTitle}
+            subtitle={`Preference: ${preferenceLabel(item.isLike)} | Doctor: ${
+              recommendationFor(item, recommendations)
+                ?.doctorRecommendationLabel || 'Not recorded'
+            }`}
             badge={preferenceLabel(item.isLike)}
             badgeBg={preferenceChip(item.isLike).bg}
             badgeFg={preferenceChip(item.isLike).fg}
@@ -415,6 +494,7 @@ function PatientActivityOverviewScreen(props) {
             }
             badgeFg={statusChip('exclude').fg}
             testID={`activity_overview_exclusion_${item.id}`}
+            actionLabel={isSupervisor ? 'EDIT' : undefined}
             onPress={
               isSupervisor
                 ? () => {
@@ -455,6 +535,13 @@ function PatientActivityOverviewScreen(props) {
 }
 
 const styles = StyleSheet.create({
+  preferenceSearch: {
+    borderWidth: 1,
+    borderColor: colors.grey_lighter,
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 8,
+  },
   container: {
     flex: 1,
     backgroundColor: colors.grey_lightest,

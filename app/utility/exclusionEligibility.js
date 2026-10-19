@@ -1,5 +1,6 @@
 import { exclusionLifecycle, dateKey } from 'app/utility/exclusionLifecycle';
 import { opaqueId } from 'app/utility/patientFieldPolicy';
+import { centreDay } from 'app/utility/centreClock';
 
 export const activityEntityId = (value) => {
   const id = opaqueId(value);
@@ -42,11 +43,24 @@ export const exclusionBlockedIds = (
   ];
   return [...new Set(rows.map((row) => String(activityEntityId(idOf(row)))))];
 };
-export const validateExclusionDates = (startDate, endDate, indefinite) => {
+export const earliestExclusionStart = (now = new Date()) =>
+  centreDay(new Date(now.getTime() - 30 * 86400000));
+
+export const validateExclusionDates = (
+  startDate,
+  endDate,
+  indefinite,
+  now = new Date(),
+) => {
   const start = String(startDate).trim();
   const end = indefinite ? null : String(endDate).trim();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(start) || !dateKey(start)) {
     throw new Error('Enter a valid start date as YYYY-MM-DD.');
+  }
+  if (start < earliestExclusionStart(now)) {
+    throw new Error(
+      'Start date must be within the last 30 days in Singapore time, or a future date.',
+    );
   }
   if (!indefinite && (!/^\d{4}-\d{2}-\d{2}$/.test(end) || !dateKey(end))) {
     throw new Error(

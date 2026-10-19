@@ -2,7 +2,15 @@
 // Libs
 import { Button, Text } from 'native-base';
 import { guardianRoleLabel } from 'app/utility/guardianPrimary';
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import { maskIdentifier } from 'app/utility/identifierMask';
+import { socialHistoryVisibleLabels } from 'app/utility/socialHistoryFields';
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  useContext,
+} from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Accordion from 'react-native-collapsible/Accordion';
@@ -13,6 +21,7 @@ import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
 // API
 import patientApi from 'app/api/patient';
+import AuthContext from 'app/auth/context';
 import requestDeadline from 'app/utility/requestDeadline';
 
 // Configurations
@@ -33,10 +42,7 @@ const pick = (...vals) => {
   return '';
 };
 
-const maskNRIC = (v) => {
-  const s = String(v || '');
-  return s.replace(/\d{4}(\d{3})$/, 'xxxx$1');
-};
+const maskNRIC = maskIdentifier;
 
 const triStateLabel = (v) => {
   if (v === undefined || v === null || v === '') {
@@ -84,12 +90,16 @@ function PatientInformationAccordion({
   onLoadSocialHistory,
 }) {
   const navigation = useNavigation();
+  const { user } = useContext(AuthContext) || {};
+  const canWriteSocialHistory =
+    String(user?.roleName || user?.role || '').toUpperCase() === 'SUPERVISOR';
 
   // Only state that truly needs to be stateful
   const [activeSections, setActiveSections] = useState([]);
-  const [unMaskedPatientNRIC, setUnMaskedPatientNRIC] = useState('');
-  const [unMaskedGuardianNRIC, setUnMaskedGuardianNRIC] = useState('');
-  const [unMasked2ndGuardianNRIC, setUnMasked2ndGuardianNRIC] = useState('');
+  const [unMaskedPatientNRIC, setUnMaskedPatientNRIC] = useState({
+    patientId: null,
+    value: '',
+  });
 
   useEffect(() => {
     if (activeSections.includes(2)) {
@@ -353,7 +363,7 @@ function PatientInformationAccordion({
           value: triStateLabel(src.tobaccoUse ?? src.TobaccoUse),
         },
         { label: 'Secondhand smoker', value: triStateLabel(secondHandSmoker) },
-      ],
+      ].filter(({ label }) => socialHistoryVisibleLabels(src).includes(label)),
     };
   }, [
     socialHistoryData,
@@ -376,16 +386,6 @@ function PatientInformationAccordion({
     [patientData, preferenceData, guardianInfoData, socialHistoryInfo],
   );
 
-  // Update unmasked NRICs when guardian data changes
-  useEffect(() => {
-    if (guardianData?.guardian?.nric) {
-      setUnMaskedGuardianNRIC(guardianData.guardian.nric);
-    }
-    if (guardianData?.additionalGuardian?.nric) {
-      setUnMasked2ndGuardianNRIC(guardianData.additionalGuardian.nric);
-    }
-  }, [guardianData]);
-
   const patientInformationOpen = activeSections.includes(0);
   // Retrieve reveal-only data when the patient-information section is opened.
   useEffect(() => {
@@ -393,14 +393,20 @@ function PatientInformationAccordion({
       return;
     }
     let active = true;
-    requestDeadline(patientApi.getPatient(patientID, false))
+    setUnMaskedPatientNRIC({ patientId: null, value: '' });
+    requestDeadline(
+      patientApi.readPatientV1(patientID, { require_auth: true, mask: false }),
+    )
       .then((response) => {
         if (active && response?.ok) {
-          const patient = response.data?.data;
+          const patient = response.data?.data ?? response.data;
           const returnedId =
             patient?.patientID ?? patient?.patientId ?? patient?.id;
           if (String(returnedId) === String(patientID)) {
-            setUnMaskedPatientNRIC(patient.nric || '');
+            setUnMaskedPatientNRIC({
+              patientId: String(patientID),
+              value: patient.nric || patient.NRIC || '',
+            });
           }
         }
       })
@@ -462,6 +468,7 @@ function PatientInformationAccordion({
 
     const decoded = {
       ...(src || {}),
+      visibleSocialHistoryFields: socialHistoryVisibleLabels(src),
       liveWithDescription:
         src?.liveWithDescription ??
         src?.LiveWithDescription ??
@@ -543,7 +550,7 @@ function PatientInformationAccordion({
             ? handlePatientSecondGuardianOnPress
             : null;
         case 'Social History':
-          return handlePatientSocialHistOnPress;
+          return canWriteSocialHistory ? handlePatientSocialHistOnPress : null;
         default:
           return null;
       }
@@ -555,6 +562,7 @@ function PatientInformationAccordion({
       handlePatientGuardianOnPress,
       handlePatientSecondGuardianOnPress,
       handlePatientSocialHistOnPress,
+      canWriteSocialHistory,
     ],
   );
 
@@ -567,16 +575,18 @@ function PatientInformationAccordion({
     (title) => {
       switch (title) {
         case 'Patient Information':
-          return unMaskedPatientNRIC;
+          return unMaskedPatientNRIC.patientId === String(patientID)
+            ? unMaskedPatientNRIC.value
+            : '';
         case 'Guardian(s) Information':
-          return unMaskedGuardianNRIC;
+          return guardianData?.guardian?.nric || '';
         case 'Guardian 2':
-          return unMasked2ndGuardianNRIC;
+          return guardianData?.additionalGuardian?.nric || '';
         default:
           return null;
       }
     },
-    [unMaskedPatientNRIC, unMaskedGuardianNRIC, unMasked2ndGuardianNRIC],
+    [unMaskedPatientNRIC, guardianData, patientID],
   );
 
   // Memoized render functions
@@ -628,6 +638,7 @@ function PatientInformationAccordion({
           style={styles.accordBody}
         >
           <InformationCard
+            key={`${patientID}-${section.title}-${activeSections.join(',')}`}
             title={section.title}
             subtitle={
               section.title === 'Guardian(s) Information' && isSecondGuardian
@@ -645,6 +656,7 @@ function PatientInformationAccordion({
           />
           {section.title === 'Guardian(s) Information' && isSecondGuardian ? (
             <InformationCard
+              key={`${patientID}-Guardian2-${activeSections.join(',')}`}
               title={section.title}
               subtitle={'Guardian 2'}
               displayData={secondGuardianInfoData}
@@ -666,6 +678,8 @@ function PatientInformationAccordion({
       secondGuardianInfoData,
       handleOnPress,
       getUnmaskedNRIC,
+      patientID,
+      activeSections,
     ],
   );
 

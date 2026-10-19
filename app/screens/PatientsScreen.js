@@ -477,8 +477,9 @@ function PatientsScreen({ navigation }) {
             'supervisorId',
             'gameTherapistId',
           ]) {
-            if (alloc[field] && !staffNameMap[alloc[field]])
+            if (alloc[field] && !staffNameMap[alloc[field]]) {
               missingIds.add(alloc[field]);
+            }
           }
         }
 
@@ -631,7 +632,7 @@ function PatientsScreen({ navigation }) {
 
     // If we have backend data, use it
     for (var caregiverID of Object.keys(tempPatientCountInfo)) {
-      const caregiverName = tempPatientCountInfo[caregiverID]['fullName'];
+      const caregiverName = tempPatientCountInfo[caregiverID].fullName;
       caregiverPatientCount[caregiverName] = caregiverName;
     }
 
@@ -699,7 +700,7 @@ function PatientsScreen({ navigation }) {
     let tempPatientStatus =
       PATIENT_STATUSES[
         !isEmptyObject(tempSelChipFilters)
-          ? tempSelChipFilters['Patient Status']['label']
+          ? tempSelChipFilters['Patient Status'].label
           : 'Active'
       ];
 
@@ -750,22 +751,26 @@ function PatientsScreen({ navigation }) {
   // Whether to show start date for each patient - depends on whether sort/filter using start date applied
   const showStartDate = useMemo(() => {
     return (
-      (!isEmptyObject(sort['sel'])
-        ? sort['sel']['option']['label'] == 'Start Date'
+      (!isEmptyObject(sort.sel)
+        ? sort.sel.option.label == 'Start Date'
         : false) ||
-      ('Start Date' in datetime['sel']
-        ? (datetime['sel']['Start Date']['min'] &&
-            datetime['sel']['Start Date']['min'] != null) ||
-          (datetime['sel']['Start Date']['max'] &&
-            datetime['sel']['Start Date']['max'] != null)
+      ('Start Date' in datetime.sel
+        ? (datetime.sel['Start Date'].min &&
+            datetime.sel['Start Date'].min != null) ||
+          (datetime.sel['Start Date'].max &&
+            datetime.sel['Start Date'].max != null)
         : false)
     );
   }, [sort, datetime]);
 
   //  derived list: favourites first, then keep existing order from SearchFilterBar
   const listWithFavPinned = React.useMemo(() => {
-    if (!listOfPatients || listOfPatients.length === 0) return [];
-    if (favoriteIds.size === 0) return listOfPatients; // No sorting needed
+    if (!listOfPatients || listOfPatients.length === 0) {
+      return [];
+    }
+    if (favoriteIds.size === 0) {
+      return listOfPatients;
+    } // No sorting needed
 
     // Partition into favorites and non-favorites for performance
     const favorites = [];
@@ -784,7 +789,9 @@ function PatientsScreen({ navigation }) {
   }, [listOfPatients, favoriteIds]);
 
   const visiblePatients = React.useMemo(() => {
-    if (!showFavOnly) return listWithFavPinned;
+    if (!showFavOnly) {
+      return listWithFavPinned;
+    }
     return listWithFavPinned.filter((p) =>
       favoriteIds.has(String(p.patientID ?? fav.getPatientId(p))),
     );
@@ -842,7 +849,7 @@ function PatientsScreen({ navigation }) {
             onInitialize={() => setIsDataInitialized(false)}
             applySortFilter={applySortFilter}
             setApplySortFilter={setApplySortFilter}
-            itemCount={displayedPatients ? displayedPatients.length : null}
+            itemCount={visiblePatients ? visiblePatients.length : null}
             handleSearchSortFilterCustom={handleSearchSortFilter}
             VIEW_MODES={VIEW_MODES}
             viewMode={viewMode}

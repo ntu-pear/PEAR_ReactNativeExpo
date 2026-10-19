@@ -37,7 +37,6 @@ import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
 import LoadingWheel from 'app/components/LoadingWheel';
 import DynamicTable from 'app/components/DynamicTable';
 import DoctorNoteItem from 'app/components/DoctorNoteItem';
-import Swipeable from 'app/components/swipeable-components/Swipeable';
 
 function DoctorNoteScreen(props) {
   let { patientID, patientId } = props.route.params;
@@ -94,7 +93,6 @@ function DoctorNoteScreen(props) {
   const [datetime, setDatetime] = useState(sortFilterInitialState);
 
   // Scrollview state
-  const [isScrolling, setIsScrolling] = useState(false);
 
   const refreshPageData = React.useCallback(async () => {
     const generation = ++readGeneration.current;
@@ -214,8 +212,6 @@ function DoctorNoteScreen(props) {
         {displayMode == 'rows' ? (
           <FlatList
             onTouchStart={() => Keyboard.dismiss()}
-            onScrollBeginDrag={() => setIsScrolling(true)}
-            onScrollEndDrag={() => setIsScrolling(false)}
             onRefresh={refreshPageData}
             refreshing={isLoading}
             style={{ flex: 1 }}
@@ -234,23 +230,13 @@ function DoctorNoteScreen(props) {
             keyExtractor={(item) => item.doctorNoteId}
             renderItem={({ item }) => {
               return (
-                <Swipeable
-                  key={item.doctorNoteId}
-                  setIsScrolling={setIsScrolling}
-                  item={
-                    <TouchableOpacity
-                      style={styles.logContainer}
-                      activeOpacity={1}
-                      disabled={!isScrolling}
-                    >
-                      <DoctorNoteItem
-                        date={item.date}
-                        doctorName={item.doctorName}
-                        doctorRemarks={item.doctorRemarks}
-                      />
-                    </TouchableOpacity>
-                  }
-                />
+                <View style={styles.logContainer}>
+                  <DoctorNoteItem
+                    date={item.date}
+                    doctorName={item.doctorName}
+                    doctorRemarks={item.doctorRemarks}
+                  />
+                </View>
               );
             }}
           />

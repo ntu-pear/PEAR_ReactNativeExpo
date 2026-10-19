@@ -5,6 +5,7 @@ import AppButton from 'app/components/AppButton';
 
 import AddEditModal from 'app/components/AddEditModal';
 import InputField from 'app/components/input-components/InputField';
+import DateInputField from 'app/components/input-components/DateInputField';
 import SelectionInputField from 'app/components/input-components/SelectionInputField';
 import SingleOptionCheckBox from 'app/components/input-components/SingleOptionCheckBox';
 import activity, {
@@ -17,10 +18,25 @@ import requestDeadline from 'app/utility/requestDeadline';
 import {
   activityEntityId,
   validateExclusionDates,
+  earliestExclusionStart,
 } from 'app/utility/exclusionEligibility';
 const todayIso = () => centreDay();
 
 const toDateOnly = (value) => String(value || '').slice(0, 10);
+const pickerDate = (day) => {
+  if (!day) {
+    return null;
+  }
+  const [year, month, date] = day.split('-').map(Number);
+  return new Date(year, month - 1, date, 12);
+};
+const pickerKey = (date) =>
+  date
+    ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+        2,
+        '0',
+      )}-${String(date.getDate()).padStart(2, '0')}`
+    : '';
 
 const isIndefiniteEnd = (value) => {
   const dateOnly = toDateOnly(value);
@@ -235,14 +251,13 @@ function AddActivityExclusionModal({
         onChangeText={setExclusionRemarks}
         autoCapitalize="none"
       />
-      <InputField
+      <DateInputField
         testID={`${testID}_start_date`}
         isRequired
-        title="Start date (YYYY-MM-DD)"
-        value={startDate}
-        onChangeText={setStartDate}
-        autoCapitalize="none"
-        keyboardType="numbers-and-punctuation"
+        title="Start date"
+        value={pickerDate(startDate)}
+        minimumInputDate={pickerDate(earliestExclusionStart())}
+        handleFormData={(date) => setStartDate(pickerKey(date))}
       />
       <View style={styles.checkbox}>
         <SingleOptionCheckBox
@@ -258,14 +273,13 @@ function AddActivityExclusionModal({
         />
       </View>
       {!isIndefinite && (
-        <InputField
+        <DateInputField
           testID={`${testID}_end_date`}
           isRequired
-          title="End date (YYYY-MM-DD)"
-          value={endDate}
-          onChangeText={setEndDate}
-          autoCapitalize="none"
-          keyboardType="numbers-and-punctuation"
+          title="End date"
+          value={pickerDate(endDate)}
+          minimumInputDate={pickerDate(startDate)}
+          handleFormData={(date) => setEndDate(pickerKey(date))}
         />
       )}
     </ScrollView>

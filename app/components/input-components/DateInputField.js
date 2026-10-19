@@ -63,9 +63,12 @@ function DateInputField({
   // Validation function for user input:
   // Error if:
   // 1) required but empty
-  const validation = () => {
+  const validation = (candidate = value) => {
     let message = '';
-    if (isRequired && value.toDateString() <= 0) {
+    if (
+      isRequired &&
+      (candidate == null || Number.isNaN(new Date(candidate).getTime()))
+    ) {
       message = 'This field cannot be empty';
     } else {
       message = '';
@@ -81,7 +84,7 @@ function DateInputField({
     setShow(false);
     if (event == null || event.type != 'dismissed') {
       handleFormData(selected);
-      validation();
+      validation(selected);
     }
   };
 

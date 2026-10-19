@@ -47,6 +47,10 @@ function InputField({
   // State for value in input component
   const [inputText, setInputText] = useState(value);
 
+  useEffect(() => {
+    setInputText(value == null ? '' : String(value));
+  }, [value]);
+
   // In first render of component, set isError to true to ensure submission blocking in the parent component
   // is active (as it is first rendered, user will not likely have filled anything).
   // This also ensures that since there will be no input, the component error message does not show until

@@ -1,14 +1,19 @@
 // Libs
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import requestDeadline from 'app/utility/requestDeadline';
 import { StyleSheet, View } from 'react-native';
-import { ScrollView } from 'native-base';
+import { ScrollView, Text } from 'native-base';
 
 // Components
 import AddEditModal from 'app/components/AddEditModal';
 import RadioButtonInput from 'app/components/input-components/RadioButtonsInput';
 
 // API
-import activity, { applyActivityTitles, buildActivityTitleMap, isMissingActivityTitle } from 'app/api/activity';
+import activity, {
+  applyActivityTitles,
+  buildActivityTitleMap,
+  isMissingActivityTitle,
+} from 'app/api/activity';
 
 function AddActivityPreferenceModal({
   testID,
@@ -25,6 +30,8 @@ function AddActivityPreferenceModal({
   // Object to store preferences: key = centreActivityID, value = preference (0 for Neutral, 1 for Like, -1 for Dislike)
   const [preferences, setPreferences] = useState({});
   const [isError, setIsError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const initialPreferences = useRef({});
 
   // Define radio button options for each activity preference
   const preferenceOptions = [
@@ -34,12 +41,17 @@ function AddActivityPreferenceModal({
   ];
 
   // Fetch the full list of activities and initialize preferences to neutral
-  const getListData = async () => {
+  const getListData = async (isCurrent) => {
     try {
-      const [centreRes, activitiesRes] = await Promise.all([
-        activity.getCentreActivities(),
-        activity.getActivities(),
-      ]);
+      const [centreRes, activitiesRes] = await requestDeadline(
+        Promise.all([activity.getCentreActivities(), activity.getActivities()]),
+      );
+      if (!isCurrent()) {
+        return;
+      }
+      if (!centreRes?.ok || !activitiesRes?.ok) {
+        throw new Error('Catalogue unavailable');
+      }
       const responseData = centreRes.data.data || [];
       const titleMap = buildActivityTitleMap(
         responseData,
@@ -55,27 +67,42 @@ function AddActivityPreferenceModal({
       const initialPrefs = {};
       extractedObjects.forEach((item) => {
         const existing = existingActivityPreferences?.find(
-          (pref) => pref.CentreActivityID === item.value,
+          (pref) =>
+            String(pref.CentreActivityID ?? pref.centreActivityID) ===
+            String(item.value),
         );
-        initialPrefs[item.value] = existing ? existing.isLike : 0;
+        initialPrefs[item.value] =
+          existing && [-1, 0, 1].includes(Number(existing.isLike))
+            ? Number(existing.isLike)
+            : 0;
       });
+      initialPreferences.current = initialPrefs;
       setPreferences(initialPrefs);
-    } catch (error) {
-      setIsError(true);
-      console.error(error);
+    } catch {
+      if (isCurrent()) {
+        setIsError(true);
+      }
+    } finally {
+      if (isCurrent()) {
+        setIsLoading(false);
+      }
     }
   };
 
-  // Load activity list when the modal is shown
   useEffect(() => {
+    let active = true;
+    setActivityList([]);
+    setPreferences({});
+    initialPreferences.current = {};
+    setIsError(false);
+    setIsLoading(showModal);
     if (showModal) {
-      getListData();
-    } else {
-      // Optionally reset when modal is closed
-      setActivityList([]);
-      setPreferences({});
+      getListData(() => active);
     }
-  }, [showModal, existingActivityIDs]);
+    return () => {
+      active = false;
+    };
+  }, [showModal, existingActivityPreferences]);
 
   // Handler to update the preference for a given activity
   const handlePreferenceChange = (activityId, newValue) => {
@@ -84,19 +111,28 @@ function AddActivityPreferenceModal({
 
   // Handle form submission
   const handleSubmit = () => {
-    const submission = Object.entries(preferences).map(
-      ([activityId, pref]) => ({
+    if (isLoading || isError) {
+      return;
+    }
+    const submission = Object.entries(preferences)
+      .filter(([id, value]) => value !== initialPreferences.current[id])
+      .map(([activityId, pref]) => ({
         centreActivityID: parseInt(activityId, 10),
         isLike: pref,
-      }),
-    );
-    onSubmit(submission);
+      }));
+    if (submission.length) {
+      onSubmit(submission);
+    }
     onClose();
   };
 
   // Build the modal content: list all activities with a radio group for each
   const modalContent = (
     <ScrollView>
+      {isLoading ? <Text>Loading activities...</Text> : null}
+      {isError ? (
+        <Text>Activities could not be loaded. Close and reopen to retry.</Text>
+      ) : null}
       {activityList.map((activityItem) => (
         <View key={activityItem.value} style={styles.activityRow}>
           <RadioButtonInput
@@ -119,7 +155,7 @@ function AddActivityPreferenceModal({
     <AddEditModal
       testID={testID}
       handleSubmit={handleSubmit}
-      isInputErrors={false}
+      isInputErrors={isLoading || isError}
       modalMode={modalMode}
       onClose={onClose}
       showModal={showModal}

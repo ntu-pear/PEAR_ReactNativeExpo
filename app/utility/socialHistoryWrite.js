@@ -1,4 +1,5 @@
 import requestDeadline from 'app/utility/requestDeadline';
+import { socialHistoryCanEdit } from 'app/utility/socialHistoryFields';
 
 const expectedFields = (form) => ({
   patientId: form.PatientID,
@@ -38,10 +39,21 @@ export const socialHistoryMatches = (form, record) => {
 export const writeSocialHistory = async ({
   form,
   api,
+  sourceRecord,
   isCurrent = () => true,
 }) => {
   if (!isCurrent()) {
     return { outcome: 'stale' };
+  }
+  if (
+    sourceRecord &&
+    Object.keys(sourceRecord).length > 0 &&
+    !socialHistoryCanEdit(sourceRecord)
+  ) {
+    return {
+      outcome: 'rejected',
+      message: 'This privacy-limited record cannot be safely updated.',
+    };
   }
   const patientId = Number(form.PatientID);
   if (!Number.isInteger(patientId) || patientId < 1) {

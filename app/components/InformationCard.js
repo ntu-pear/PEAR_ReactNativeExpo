@@ -1,5 +1,5 @@
 // Lib
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, Platform } from 'react-native';
 import { VStack, HStack, Text, IconButton, Box, Divider } from 'native-base';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -10,6 +10,7 @@ import formatDateTime from 'app/hooks/useFormatDateTime.js';
 // Config
 import typography from 'app/config/typography';
 import colors from 'app/config/colors';
+import { maskIdentifier } from 'app/utility/identifierMask';
 
 // Components
 import AppButton from 'app/components/AppButton';
@@ -22,31 +23,25 @@ function InformationCard({
   unMaskedNRIC = null,
   buttonTitle = null,
 }) {
-  const [itemizedData, setItemizedData] = useState(displayData);
-  const [masked, setMasked] = useState(true);
+  const [revealedFor, setRevealedFor] = useState(null);
+  const masked =
+    revealedFor?.rows !== displayData || revealedFor?.nric !== unMaskedNRIC;
 
-  const handleUnmaskNRIC = () => {
-    const newData = itemizedData.map((item) => {
-      if (item.label === 'NRIC') {
-        return {
+  const itemizedData = (displayData || []).map((item) =>
+    item.label === 'NRIC'
+      ? {
           ...item,
           value: masked
-            ? unMaskedNRIC
-            : String(unMaskedNRIC || '').replace(/\d{4}(\d{3})/, 'xxxx$1'),
-        };
-      }
-      return item;
-    });
-    setItemizedData(newData);
-    setMasked(!masked);
+            ? maskIdentifier(item.value)
+            : unMaskedNRIC || maskIdentifier(item.value),
+        }
+      : item,
+  );
+  const handleUnmaskNRIC = () => {
+    if (unMaskedNRIC) {
+      setRevealedFor(masked ? { rows: displayData, nric: unMaskedNRIC } : null);
+    }
   };
-
-  useEffect(() => {
-    // Always sync with displayData when it changes
-    setItemizedData(displayData);
-    // Reset masked state when data changes
-    setMasked(true);
-  }, [displayData]);
 
   return (
     <Box
@@ -148,6 +143,7 @@ function InformationCard({
                       name: masked ? 'eye-outline' : 'eye',
                     }}
                     onPress={handleUnmaskNRIC}
+                    isDisabled={!unMaskedNRIC}
                     minW={48}
                     minH={48}
                     p={2}

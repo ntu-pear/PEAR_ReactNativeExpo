@@ -1,5 +1,11 @@
 // Libs
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useContext,
+} from 'react';
 import { Alert, StyleSheet, View, Text } from 'react-native';
 import { Box, VStack, FlatList } from 'native-base';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -11,7 +17,9 @@ import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
 //API
 import socialHistoryApi from 'app/api/socialHistory';
+import AuthContext from 'app/auth/context';
 import { writeSocialHistory } from 'app/utility/socialHistoryWrite';
+import { socialHistoryCanEdit } from 'app/utility/socialHistoryFields';
 
 // Components
 import SelectionInputField from 'app/components/input-components/SelectionInputField';
@@ -23,6 +31,9 @@ function EditPatientSocialHistScreen(props) {
   const { socialHistory, patientID } = props.route.params;
 
   const navigation = useNavigation();
+  const { user } = useContext(AuthContext) || {};
+  const canWriteSocialHistory =
+    String(user?.roleName || user?.role || '').toUpperCase() === 'SUPERVISOR';
   const mounted = useRef(true);
   const currentPatient = useRef(String(patientID));
   currentPatient.current = String(patientID);
@@ -525,6 +536,7 @@ function EditPatientSocialHistScreen(props) {
     try {
       const result = await writeSocialHistory({
         form: { ...formData },
+        sourceRecord: socialHistory,
         api: socialHistoryApi,
         isCurrent: () =>
           mounted.current && currentPatient.current === submittedPatient,
@@ -602,6 +614,26 @@ function EditPatientSocialHistScreen(props) {
     petError,
     dietError,
   ].some(Boolean);
+
+  if (
+    !canWriteSocialHistory ||
+    (Object.keys(socialHistory || {}).length > 0 &&
+      !socialHistoryCanEdit(socialHistory))
+  ) {
+    return (
+      <View style={styles.formContainer}>
+        <Text testID="social_history_privacy_edit_blocked">
+          Editing is unavailable for this role or record. A Supervisor can edit
+          a fully available record; protected or unavailable fields must not be
+          overwritten.
+        </Text>
+        <AppButton
+          title="Back to profile"
+          onPress={() => navigation.goBack()}
+        />
+      </View>
+    );
+  }
 
   return liveWithLoading ||
     educationLoading ||
