@@ -145,8 +145,7 @@ function InformationCard({
                     }}
                     onPress={handleUnmaskNRIC}
                     isDisabled={!unMaskedNRIC}
-                    minW={48}
-                    minH={48}
+                    style={styles.nricToggle}
                     p={2}
                     ml={1}
                   />
@@ -190,6 +189,11 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     color: colors.grey_dark,
     flexBasis: '45%',
+  },
+  nricToggle: {
+    minWidth: 48,
+    minHeight: 48,
+    flexShrink: 0,
   },
   fieldValue: {
     ...typography.subheading1SemiBold,
