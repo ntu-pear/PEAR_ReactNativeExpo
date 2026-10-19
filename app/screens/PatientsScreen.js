@@ -69,6 +69,8 @@ const PatientRow = memo(
     screenWidth,
   }) => {
     const patientID = item.patientID;
+    const compact = screenWidth < 600;
+    const caregiverName = item.caregiverName || 'No Caregiver';
 
     const handlePress = useCallback(() => {
       onPressPatient(patientID);
@@ -81,29 +83,37 @@ const PatientRow = memo(
     return (
       <TouchableOpacity
         testID={`patientprofile_${item.patientID}`}
-        style={rowStyles.patientRowContainer}
+        style={[
+          rowStyles.patientRowContainer,
+          compact && rowStyles.compactPatientRow,
+        ]}
         onPress={handlePress}
       >
-        <ProfileNameButton
-          profileLineOne={`${item.firstName} ${item.lastName}`}
-          profileLineTwo={item.preferredName}
-          profilePicture={item.profilePicture}
-          handleOnPress={handlePress}
-          isPatient={true}
-          size={screenWidth / 10}
-          isVertical={false}
-          isActive={patientStatus === '' ? item.isActive : null}
-          startDate={showStartDate ? item.startDate : null}
-        />
-        <View style={rowStyles.caregiverNameContainer}>
-          <Text style={rowStyles.caregiverName}>
-            {viewMode === 'allPatients'
-              ? item.caregiverName !== null
-                ? item.caregiverName
-                : 'No Caregiver'
-              : null}
-          </Text>
+        <View style={rowStyles.patientDetails}>
+          <ProfileNameButton
+            profileLineOne={`${item.firstName} ${item.lastName}`}
+            profileLineTwo={item.preferredName}
+            profilePicture={item.profilePicture}
+            handleOnPress={handlePress}
+            isPatient={true}
+            size={Math.max(64, Math.min(80, screenWidth / 10))}
+            wrapperStyle={rowStyles.profileWrapper}
+            textContainerStyle={rowStyles.profileText}
+            isVertical={false}
+            isActive={patientStatus === '' ? item.isActive : null}
+            startDate={showStartDate ? item.startDate : null}
+          />
+          {compact && viewMode === 'allPatients' ? (
+            <Text style={rowStyles.compactCaregiverName}>
+              Caregiver: {caregiverName}
+            </Text>
+          ) : null}
         </View>
+        {!compact && viewMode === 'allPatients' ? (
+          <View style={rowStyles.caregiverNameContainer}>
+            <Text style={rowStyles.caregiverName}>{caregiverName}</Text>
+          </View>
+        ) : null}
         <IconButton
           onPress={handleToggleFav}
           icon={
@@ -142,16 +152,37 @@ const PatientRow = memo(
 // Styles for PatientRow (defined outside component to prevent recreation)
 const rowStyles = StyleSheet.create({
   patientRowContainer: {
-    marginVertical: '3%',
+    marginVertical: 8,
     width: '100%',
-    flex: 2,
+    minHeight: 96,
     flexDirection: 'row',
-    alignItems: 'stretch',
+    alignItems: 'center',
     justifyContent: 'space-between',
     paddingRight: 100,
   },
+  compactPatientRow: {
+    paddingRight: 72,
+  },
+  patientDetails: {
+    flex: 1,
+    minWidth: 0,
+  },
+  profileWrapper: {
+    width: '100%',
+  },
+  profileText: {
+    flex: 1,
+    minWidth: 0,
+    marginLeft: 12,
+  },
+  compactCaregiverName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginTop: 4,
+  },
   caregiverNameContainer: {
-    marginLeft: '5%',
+    marginLeft: 16,
+    maxWidth: '30%',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -796,16 +827,6 @@ function PatientsScreen({ navigation }) {
     ],
   );
 
-  // Fixed item layout for better scroll performance
-  const getItemLayout = useCallback(
-    (data, index) => ({
-      length: 70,
-      offset: 70 * index,
-      index,
-    }),
-    [],
-  );
-
   return (
     <>
       {isLoading ? (
@@ -923,9 +944,8 @@ function PatientsScreen({ navigation }) {
               }
               style={styles.patientListContainer}
               renderItem={renderPatientItem}
-              getItemLayout={getItemLayout}
               extraData={favoriteIds}
-              removeClippedSubviews={true}
+              removeClippedSubviews={false}
               maxToRenderPerBatch={5}
               updateCellsBatchingPeriod={100}
               windowSize={21}

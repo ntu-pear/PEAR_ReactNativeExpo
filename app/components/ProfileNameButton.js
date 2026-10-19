@@ -24,6 +24,8 @@ function ProfileNameButton({
   handleOnPress,
   isActive=null,
   startDate=null,
+  wrapperStyle,
+  textContainerStyle,
 }) {
 
   // Reset error if profile picture uri changes
@@ -65,7 +67,7 @@ function ProfileNameButton({
     profilePicture.trim().toLowerCase() !== "string";
   
   return (
-    <View alignItems="center">
+    <View style={wrapperStyle} alignItems="center">
       <TouchableOpacity testID={testID} onPress={handleOnPress}>
         <View style={containerStyle}>
           <Image
@@ -79,7 +81,7 @@ function ProfileNameButton({
                 : DefaultImage
             }
           />
-          <View style={customTextContainerStyle}>
+          <View style={[customTextContainerStyle, textContainerStyle]}>
             {profileLineOne ? (
               <Text
               style={[
