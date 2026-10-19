@@ -11,9 +11,8 @@ import React, {
   useCallback,
   useContext,
 } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import Accordion from 'react-native-collapsible/Accordion';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 // Hooks
@@ -684,26 +683,47 @@ function PatientInformationAccordion({
   );
 
   return (
-    <Accordion
-      align="bottom"
-      sections={sections}
-      activeSections={activeSections}
-      renderHeader={renderHeader}
-      renderContent={renderContent}
-      onChange={handleOnChange}
-      sectionContainerStyle={styles.accordContainer}
-    />
+    <View>
+      {sections.map((section, index) => {
+        const expanded = activeSections.includes(index);
+        return (
+          <View key={section.title} style={styles.accordContainer}>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel={section.title}
+              accessibilityState={{ expanded }}
+              onPress={() => handleOnChange(expanded ? [] : [index])}
+            >
+              {renderHeader(section, index, expanded)}
+            </TouchableOpacity>
+            {/* Async responses must grow naturally, without a cached animation height. */}
+            <View
+              testID={`accordion_section_${index}`}
+              style={expanded ? undefined : styles.collapsedContent}
+              accessibilityElementsHidden={!expanded}
+              importantForAccessibility={
+                expanded ? 'auto' : 'no-hide-descendants'
+              }
+            >
+              {renderContent(section)}
+            </View>
+          </View>
+        );
+      })}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  collapsedContent: {
+    display: 'none',
+  },
   accordContainer: {
     paddingBottom: 4,
   },
   accordHeader: {
     padding: 12,
     color: '#eee',
-    flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     backgroundColor: colors.green,

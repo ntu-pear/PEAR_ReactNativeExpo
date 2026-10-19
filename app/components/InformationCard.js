@@ -58,7 +58,6 @@ function InformationCard({
         justifyContent="space-between"
         mb={subtitle ? 3 : 4}
         px={1}
-        style={{ flexGrow: 1, flexShrink: 1 }}
       >
         {title && (
           <View style={{ flex: 1, paddingRight: 12 }}>

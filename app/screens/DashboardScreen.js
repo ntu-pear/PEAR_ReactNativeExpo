@@ -1,12 +1,12 @@
 // Libs
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  Dimensions,
-  Alert,
-} from 'react-native';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { StyleSheet, Text, TouchableOpacity, Alert } from 'react-native';
 import {
   Box,
   Container,
@@ -30,6 +30,14 @@ import * as fav from 'app/utility/favorites';
 import scheduleApi from 'app/api/schedule';
 import patientApi from 'app/api/patient';
 import AuthContext from 'app/auth/context';
+import { centreDay } from 'app/utility/centreClock';
+import { weekMonday, shiftDay } from 'app/utility/careReadResults';
+import {
+  calendarDay,
+  calendarDate,
+  dashboardTimeline,
+  dashboardScrollOffset,
+} from 'app/utility/dashboardTimeline';
 import { loadDashboardPatients } from 'app/utility/dashboardPatients';
 
 // Configurations
@@ -51,8 +59,6 @@ import {
   isEmptyObject,
   noDataMessage,
   sortFilterInitialState,
-  getSunday,
-  getMonday,
   isSunday,
   isMonday,
 } from 'app/utility/miscFunctions';
@@ -131,7 +137,9 @@ function DashboardScreen({ navigation }) {
   const [schedule, setSchedule] = useState([]); // day schedule after sort, search, filter
   const [patientCountInfo, setPatientCountInfo] = useState({}); // list of patients for each caregiver (differentiated by patient status)
   const [viewMode, setViewMode] = useState('myPatients'); // myPatients, allPatients
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(() =>
+    calendarDate(centreDay()),
+  );
 
   // Search related states
   const [searchQuery, setSearchQuery] = useState('');
@@ -141,13 +149,11 @@ function DashboardScreen({ navigation }) {
   const [sort, setSort] = useState(sortFilterInitialState);
   const [dropdown, setDropdown] = useState(sortFilterInitialState);
   const [datetime, setDatetime] = useState(sortFilterInitialState);
-  const [currentTimePosition, setCurrentTimePosition] = useState(null);
-  const [scheduleXOffset, setScheduleXOffset] = useState(0);
-  const [tempOffset, setTempOffset] = useState(0);
+  const [clockNow, setClockNow] = useState(() => new Date());
+  const rowScrolls = useRef(new Map());
+  const rowWidths = useRef(new Map());
   const [favoriteIds, setFavoriteIds] = useState(new Set());
   const [showFavOnly, setShowFavOnly] = useState(false);
-
-  const SCREEN_WIDTH = Dimensions.get('window').width;
 
   // Filter details related state
   // Details of filter options
@@ -237,54 +243,30 @@ function DashboardScreen({ navigation }) {
     }));
   }, [originalScheduleWeekly]);
 
-  const isSameDay = (date1, date2) => {
-    return (
-      date1.getFullYear() === date2.getFullYear() &&
-      date1.getMonth() === date2.getMonth() &&
-      date1.getDate() === date2.getDate()
-    );
-  };
-
   useEffect(() => {
-    const updateCurrentTimePosition = () => {
-      const timeNow = new Date();
-      const tempTime = timeNow.getHours();
+    const interval = setInterval(() => setClockNow(new Date()), 60000);
+    return () => clearInterval(interval);
+  }, []);
 
-      if (isSameDay(timeNow, selectedDate) && tempTime >= 9 && tempTime < 17) {
-        //to display only on actual day 9-5
-        const startTime = new Date(selectedDate);
-        startTime.setHours(9, 0, 0, 0); // Assuming schedule starts at 9 AM
-        const endTime = new Date(selectedDate);
-        endTime.setHours(17, 0, 0, 0); // Assuming schedule ends at 5 PM
-        const position = calculateCurrentTimePosition(
-          timeNow,
-          startTime,
-          endTime,
-        );
-        setCurrentTimePosition(position);
-
-        if (tempTime >= 11 && tempTime < 17) {
-          setTempOffset(SCREEN_WIDTH / 4 + 200 * (tempTime % 11)); //to move schedule to current time
-        } else {
-          setTempOffset(0);
-        }
-      } else {
-        setTempOffset(0);
-        setCurrentTimePosition(null);
-      }
-    };
-
-    updateCurrentTimePosition();
-    const intervalId = setInterval(updateCurrentTimePosition, 60000); // Update every 1 minute
-
-    return () => clearInterval(intervalId); // Clean up the interval on component unmount
-  }, [selectedDate, originalSchedule]);
-
-  const calculateCurrentTimePosition = (currentTime, startTime, endTime) => {
-    const totalDuration = endTime - startTime;
-    const elapsed = currentTime - startTime;
-    return Math.max(0, Math.min((elapsed / totalDuration) * 100, 100)); // Return percentage position
-  };
+  const alignScheduleRow = useCallback(
+    (item) => {
+      const key = String(item.patientID);
+      const position = dashboardTimeline(item.activities, item.date, clockNow);
+      rowScrolls.current.get(key)?.scrollTo({
+        x: dashboardScrollOffset(
+          position,
+          item.activities.length,
+          rowWidths.current.get(key) || 0,
+        ),
+        y: 0,
+        animated: false,
+      });
+    },
+    [clockNow],
+  );
+  useEffect(() => {
+    schedule.forEach(alignScheduleRow);
+  }, [schedule, alignScheduleRow, selectedDate]);
 
   // Set screen to loading wheel when retrieving schedule from backend
   // Note: Once the data is retrieved from backend, setIsLoading is set to false momentarily so SearchFilterBar can render and initialize data
@@ -392,7 +374,7 @@ function DashboardScreen({ navigation }) {
     let tempScheduleWeekly = {};
 
     tempSchedule.forEach((sched) => {
-      let scheduleDate = new Date(sched['StartDate']);
+      let scheduleDate = calendarDate(sched['StartDate']);
       const patientData =
         tempPatientInfo.find(
           (x) =>
@@ -423,7 +405,7 @@ function DashboardScreen({ navigation }) {
           hasAnyActivity = true;
         }
 
-        const scheduleDateStr = scheduleDate.toISOString().split('T')[0];
+        const scheduleDateStr = calendarDay(scheduleDate);
 
         if (parsedActivities.length > 0) {
           if (!tempScheduleWeekly[scheduleDateStr]) {
@@ -472,7 +454,7 @@ function DashboardScreen({ navigation }) {
         return;
       }
 
-      const currentDate = tempSelectedDate.toISOString().split('T')[0];
+      const currentDate = calendarDay(tempSelectedDate);
       const dailySchedule = tempScheduleWeekly[currentDate] ?? [];
 
       setOriginalSchedule([...dailySchedule]);
@@ -565,7 +547,7 @@ function DashboardScreen({ navigation }) {
       tempSearchMode: tempSearchMode,
     });
 
-    setScheduleXOffset(tempOffset);
+    setClockNow(new Date());
     setIsLoading(false);
   };
 
@@ -683,10 +665,10 @@ function DashboardScreen({ navigation }) {
   };
 
   const handleOnClickHome = () => {
-    const today = new Date();
+    const today = calendarDate(centreDay());
     setSelectedDate(today);
     updateSchedule({ tempSelectedDate: today });
-    setScheduleXOffset(tempOffset);
+    setClockNow(new Date());
     setIsDataInitialized(true);
 
     setIsReloadSchedule(true);
@@ -761,12 +743,17 @@ function DashboardScreen({ navigation }) {
                   }
                 />
               </TouchableOpacity>
-              <DateInputField
-                handleFormData={setSelectedDate}
-                value={selectedDate}
-                maximumInputDate={getSunday()}
-                minimumInputDate={getMonday()}
-              />
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <DateInputField
+                  testID="dashboard_selected_date"
+                  handleFormData={setSelectedDate}
+                  value={selectedDate}
+                  maximumInputDate={calendarDate(
+                    shiftDay(weekMonday(centreDay()), 6),
+                  )}
+                  minimumInputDate={calendarDate(weekMonday(centreDay()))}
+                />
+              </View>
               {/* > icon button */}
               <TouchableOpacity
                 onPress={handleNextDate}
@@ -861,9 +848,21 @@ function DashboardScreen({ navigation }) {
                     </Container>
 
                     <ScrollView
-                      contentOffset={{ x: scheduleXOffset }}
+                      ref={(ref) => {
+                        const key = String(item.patientID);
+                        if (ref) rowScrolls.current.set(key, ref);
+                        else rowScrolls.current.delete(key);
+                      }}
+                      onLayout={(event) => {
+                        rowWidths.current.set(
+                          String(item.patientID),
+                          event.nativeEvent.layout.width,
+                        );
+                        alignScheduleRow(item);
+                      }}
+                      onContentSizeChange={() => alignScheduleRow(item)}
                       horizontal={true}
-                      width="100%"
+                      style={{ flex: 1, minWidth: 0 }}
                       showsHorizontalScrollIndicator={false}
                       contentContainerStyle={{
                         flexGrow: 1,
@@ -872,7 +871,7 @@ function DashboardScreen({ navigation }) {
                           item.activities.length > 0 ? 'flex-start' : 'center',
                       }}
                     >
-                      <HStack styles={styles.hStack}>
+                      <HStack style={styles.hStack}>
                         {item.activities.map((activity, i) => (
                           <ActivityCard
                             key={i}
@@ -887,11 +886,22 @@ function DashboardScreen({ navigation }) {
                             navigation={navigation}
                           />
                         ))}
-                        {currentTimePosition !== null && (
+                        {dashboardTimeline(
+                          item.activities,
+                          item.date,
+                          clockNow,
+                        ) !== null && (
                           <View
+                            testID={`dashboard_current_time_${item.patientID}`}
                             style={[
                               styles.currentTimeLine,
-                              { left: `${currentTimePosition}%` },
+                              {
+                                left: dashboardTimeline(
+                                  item.activities,
+                                  item.date,
+                                  clockNow,
+                                ),
+                              },
                             ]}
                           />
                         )}
@@ -935,7 +945,8 @@ const styles = StyleSheet.create({
   dateSelectionContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: '50%',
+    width: '90%',
+    maxWidth: 600,
   },
   patientName: {
     textAlign: 'center',

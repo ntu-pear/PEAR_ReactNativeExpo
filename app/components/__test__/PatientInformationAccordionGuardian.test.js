@@ -225,3 +225,67 @@ test('guardian identifier is masked on first render and remasks when data change
   expect(JSON.stringify(tree.toJSON())).not.toContain('S1234567A');
   expect(JSON.stringify(tree.toJSON())).not.toContain('T7654321B');
 });
+
+test('async guardian response grows within the already expanded section and retains all eight fields', async () => {
+  const onLoadGuardian = jest.fn();
+  const tree = await render({}, { guardianLoading: true, onLoadGuardian });
+  const button = tree.root.findAll(
+    (node) =>
+      node.props.accessibilityLabel === 'Guardian(s) Information' &&
+      typeof node.props.onPress === 'function',
+  )[0];
+  await act(async () => button.props.onPress());
+  expect(onLoadGuardian).toHaveBeenCalled();
+  expect(
+    tree.root.findByProps({ testID: 'accordion_section_2' }).props.style,
+  ).toBeUndefined();
+  expect(guardianCards(tree)).toHaveLength(0);
+  const complete = {
+    ...guardian,
+    preferredName: 'PREFILLED',
+    relationship: 'Daughter',
+    contactNo: '00000000',
+    address: 'SYNTHETIC ADDRESS',
+    email: 'synthetic@example.invalid',
+  };
+  await act(async () =>
+    tree.update(
+      <PatientInformationAccordion
+        patientID={patientId}
+        patientProfile={{ patientID: patientId }}
+        guardianData={{ guardian: complete }}
+        guardianLoading={false}
+        onLoadGuardian={onLoadGuardian}
+      />,
+    ),
+  );
+  const card = guardianCards(tree)[0];
+  expect(card.props.displayData.map((row) => row.label)).toEqual([
+    'Guardian Role',
+    'Guardian Name',
+    'Preferred Name',
+    'NRIC',
+    "Patient's",
+    'Contact Number',
+    'Address',
+    'Email',
+  ]);
+  expect(
+    card.props.displayData.find((row) => row.label === 'Address').value,
+  ).toBe('SYNTHETIC ADDRESS');
+  const section = tree.root.findByProps({ testID: 'accordion_section_2' });
+  expect(section.props.style).toBeUndefined();
+  expect(section.props.accessibilityElementsHidden).toBe(false);
+  // Collapse hides descendants from accessibility without storing a measured height.
+  const reopened = tree.root.findAll(
+    (node) =>
+      node.props.accessibilityLabel === 'Guardian(s) Information' &&
+      typeof node.props.onPress === 'function',
+  )[0];
+  await act(async () => reopened.props.onPress());
+  expect(
+    tree.root.findByProps({ testID: 'accordion_section_2' }).props
+      .importantForAccessibility,
+  ).toBe('no-hide-descendants');
+  await act(async () => tree.unmount());
+});
