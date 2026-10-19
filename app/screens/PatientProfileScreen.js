@@ -545,7 +545,9 @@ function PatientProfileScreen(props) {
           ? requestDeadline(guardianApi.getPatientAllocation(id))
           : Promise.resolve(null),
       ]);
-      if (guardianResult.status !== 'fulfilled') throw guardianResult.reason;
+      if (guardianResult.status !== 'fulfilled') {
+        throw guardianResult.reason;
+      }
       const resp = guardianResult.value;
       const primaryId = primaryGuardianId(
         allocationResult.status === 'fulfilled' ? allocationResult.value : null,
@@ -571,10 +573,11 @@ function PatientProfileScreen(props) {
               String(row?.patient?.id ?? row?.patient?.patientID) ===
               String(id),
           );
-          if (returnedRows.length && !responseData)
+          if (returnedRows.length && !responseData) {
             throw new Error(
               'The guardian response did not match this patient.',
             );
+          }
         }
         // Extract guardians from patient_guardians array
         let guardianArray = [];
@@ -1026,12 +1029,24 @@ function PatientProfileScreen(props) {
                     patientProfile={patientProfile}
                   />
                 )}
-                <PatientProfileCard
-                  routes={routes.DOCTORNOTE_SCREEN}
-                  navigation={navigation}
-                  style={styles.container}
-                  patientProfile={patientProfile}
-                />
+                {['SUPERVISOR', 'CAREGIVER', 'DOCTOR'].includes(
+                  String(user?.roleName || user?.role || '').toUpperCase(),
+                ) ? (
+                  <PatientProfileCard
+                    vectorIconComponent={
+                      <MaterialCommunityIcons
+                        name="history"
+                        size={SCREEN_HEIGHT * 0.04}
+                        color={colors.pink}
+                      />
+                    }
+                    text="History"
+                    testID={`history_${patientID}`}
+                    routes={routes.PATIENT_HISTORY}
+                    navigation={navigation}
+                    patientProfile={patientProfile}
+                  />
+                ) : null}
                 <PatientProfileCard
                   routes={routes.DOCTORNOTE_SCREEN}
                   navigation={navigation}

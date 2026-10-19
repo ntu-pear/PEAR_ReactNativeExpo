@@ -20,7 +20,7 @@ import formatDateTime from 'app/hooks/useFormatDateTime.js';
 
 // Components
 import ErrorMessage from 'app/components/ErrorMessage';
-import RequiredIndicator from '../RequiredIndicator';
+import RequiredIndicator from 'app/components/RequiredIndicator';
 
 // Utilities
 import { formatDate, formatTimeAMPM } from 'app/utility/miscFunctions';
@@ -197,12 +197,13 @@ DateInputField.defaultProps = {
 const styles = StyleSheet.create({
   componentContainer: {
     flexDirection: 'column',
-    marginTop: 5,
+    marginTop: 0,
+    marginBottom: 12,
     justifyContent: 'flex-start',
   },
   titleMsg: {
-    marginBottom: 5,
-    marginTop: 10,
+    marginBottom: 8,
+    marginTop: 0,
     color: colors.grey,
     ...typography.body1SemiBold,
   },
@@ -223,14 +224,16 @@ const styles = StyleSheet.create({
     borderColor: colors.grey_lighter,
   },
   dateContainer: {
-    width: '90%',
+    flex: 1,
     borderTopLeftRadius: 25,
     borderBottomLeftRadius: 25,
     height: 50,
     justifyContent: 'center',
   },
   resetIcon: {
-    width: '10%',
+    width: 48,
+    minHeight: 48,
+    alignItems: 'center',
     justifyContent: 'flex-end',
     borderTopRightRadius: 25,
     borderBottomRightRadius: 25,

@@ -19,14 +19,14 @@ import colors from 'app/config/colors';
  */
 function ErrorRetryApiCard({ handleError }) {
   return (
-    <Box h="100%">
+    <Box flex={1} px={4} py={6}>
       <Alert w="100%" status="error">
         <VStack space={2} flexShrink={1} w="100%">
           <HStack flexShrink={1} space={2} justifyContent="space-between">
             <HStack space={2} flexShrink={1}>
               <Alert.Icon mt="1" />
               <Text fontSize="md" color="coolGray.800">
-                Unable to retrieve api data. Try again? Or Relogin
+                This information could not be loaded. Please try again.
               </Text>
             </HStack>
             <IconButton
@@ -42,7 +42,7 @@ function ErrorRetryApiCard({ handleError }) {
           </HStack>
         </VStack>
       </Alert>
-      <Box flex={1} w="60%" mx="auto" justifyContent="center">
+      <Box flex={1} w="60%" mx="auto" justifyContent="center" py={6}>
         {/* Take not to pass in handleError from parent component */}
         <AppButton title="Try Again" color="red" onPress={handleError} />
       </Box>

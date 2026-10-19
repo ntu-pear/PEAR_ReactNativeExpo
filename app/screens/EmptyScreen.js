@@ -19,7 +19,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   redText: {
-    fontSize: 35,
+    fontSize: 18,
+    lineHeight: 26,
+    maxWidth: 560,
     color: colors.red,
     textAlign: 'center',
     paddingHorizontal: 20,

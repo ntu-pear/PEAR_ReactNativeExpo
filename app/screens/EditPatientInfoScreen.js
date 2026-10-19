@@ -272,7 +272,9 @@ function EditPatientInfoScreen(props) {
   };
 
   const submitForm = async () => {
-    if (saving.current || saveUncertain || isInputErrors) return;
+    if (saving.current || saveUncertain || isInputErrors) {
+      return;
+    }
     saving.current = true;
     setIsSaving(true);
     let writeStarted = false;
@@ -285,10 +287,11 @@ function EditPatientInfoScreen(props) {
           { baseURL: PATIENT_V1_BASE, timeout: 15000 },
         ),
       );
-      if (!fresh?.ok)
+      if (!fresh?.ok) {
         throw new Error(
           'Patient information could not be loaded. Please retry.',
         );
+      }
       const record = fresh.data?.data ?? fresh.data;
       const payload = buildPatientInfoUpdate({
         record,
@@ -345,6 +348,9 @@ function EditPatientInfoScreen(props) {
 
   return (
     <FlatList
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
+      contentContainerStyle={{ paddingBottom: 32 }}
       data={[0]}
       renderItem={() => (
         <Box alignItems="center">
@@ -418,9 +424,7 @@ function EditPatientInfoScreen(props) {
                     isRequired
                     title={'Start Date'}
                     value={
-                      formData['StartDate']
-                        ? new Date(formData['StartDate'])
-                        : null
+                      formData.StartDate ? new Date(formData.StartDate) : null
                     }
                     hideDayOfWeek={true}
                     handleFormData={handleFormData('StartDate')}
@@ -432,12 +436,12 @@ function EditPatientInfoScreen(props) {
                   <DateInputField
                     title={'End Date'}
                     value={
-                      !formData['EndDate'] ||
-                      formData['EndDate'] === '1970-01-01T00:00:00' ||
-                      formData['EndDate'] === '1970-01-01T00:00:00Z' ||
-                      formData['EndDate'] === '1970-01-01T00:00:000Z'
+                      !formData.EndDate ||
+                      formData.EndDate === '1970-01-01T00:00:00' ||
+                      formData.EndDate === '1970-01-01T00:00:00Z' ||
+                      formData.EndDate === '1970-01-01T00:00:000Z'
                         ? null
-                        : new Date(formData['EndDate'])
+                        : new Date(formData.EndDate)
                     }
                     handleFormData={handleFormData('EndDate')}
                     hideDayOfWeek={true}
@@ -458,7 +462,7 @@ function EditPatientInfoScreen(props) {
                 </Text>
               )}
               <View style={styles.saveButtonContainer}>
-                <Box width="70%">
+                <Box width="100%" maxWidth={760} px={4}>
                   <AppButton
                     title="Save"
                     color="green"
@@ -484,8 +488,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'flex-start',
     justifyContent: 'center',
-    paddingLeft: '10%',
-    width: '90%',
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    width: '100%',
+    maxWidth: 760,
+    alignSelf: 'center',
     marginBottom: 20,
   },
   dateSelectionContainer: {
@@ -497,7 +504,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   redText: {
-    marginBottom: 4,
+    marginTop: 12,
+    marginBottom: 16,
+    lineHeight: 20,
     alignSelf: 'center',
     color: colors.red,
   },

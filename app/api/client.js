@@ -16,6 +16,9 @@ export const PATIENT_V1_BASE = 'http://10.96.188.180/api/v1'; // Patient Service
 
 export const ACTIVITY_V1_BASE = 'http://10.96.188.186:5681/api/v1'; // Verified staging Activity
 
+// Current staging Logging compose service, Confluence Server Access guide113442817.
+export const LOGGING_V1_BASE = 'http://10.96.188.184:30002/api';
+
 export const SCHEDULER_V1_BASE = 'http://10.96.188.186:5682'; // Verified staging Scheduler
 
 const client = create({

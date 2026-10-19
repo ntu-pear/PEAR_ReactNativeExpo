@@ -1,5 +1,5 @@
 // Libs
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Platform, StyleSheet, View, Text } from 'react-native';
 import { VStack, Input } from 'native-base';
 import PropTypes from 'prop-types';
@@ -14,7 +14,7 @@ import * as validation from 'app/utility/inputValidation';
 // Components
 import ErrorMessage from 'app/components/ErrorMessage';
 import { TextInput } from 'react-native';
-import RequiredIndicator from '../RequiredIndicator';
+import RequiredIndicator from 'app/components/RequiredIndicator';
 
 function InputField({
   testID = '',
@@ -36,6 +36,8 @@ function InputField({
   style = null,
   otherProps = {},
 }) {
+  const prefNameList = otherProps.prefNameList;
+
   // Track error state via input validation
   const [error, setError] = useState({ isError: false, errorMsg: '' });
 
@@ -58,13 +60,6 @@ function InputField({
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Update error state if isRequired value changes
-  useEffect(() => {
-    if (value.length > 0) {
-      validateInput(value.length == 0);
-    }
-  }, [isRequired]);
 
   // Update the parent component that there is a validation error.
   // Validation is passed via the onEndEditing prop.
@@ -101,23 +96,33 @@ function InputField({
 
   // Function used for input validation depending on the type of input data (given by the type prop)
   // When checking for forms that are prefilled, ignore isRequired so msg is not displayed
-  const validateInput = (ignoreIsRequired = false) => {
-    msg = '';
-    if (!ignoreIsRequired && isRequired) {
-      msg = validation.notEmpty(value);
-    }
-    if ('prefNameList' in otherProps) {
-      msg = msg || validation.uniquePrefName(value, otherProps['prefNameList']);
-    }
-    const selValidationFunctions = validation.validationFunctions[dataType];
-    if (selValidationFunctions) {
-      for (const validationFunction of selValidationFunctions) {
-        msg = msg || validationFunction(value);
+  const validateInput = useCallback(
+    (ignoreIsRequired = false) => {
+      let msg = '';
+      if (!ignoreIsRequired && isRequired) {
+        msg = validation.notEmpty(value);
       }
+      if (prefNameList) {
+        msg = msg || validation.uniquePrefName(value, prefNameList);
+      }
+      const selValidationFunctions = validation.validationFunctions[dataType];
+      if (selValidationFunctions) {
+        for (const validationFunction of selValidationFunctions) {
+          msg = msg || validationFunction(value);
+        }
+      }
+      setError({ isError: msg ? true : false, errorMsg: msg });
+      return !!msg;
+    },
+    [isRequired, value, dataType, prefNameList],
+  );
+
+  // Update error state if isRequired value changes
+  useEffect(() => {
+    if (value.length > 0) {
+      validateInput(value.length == 0);
     }
-    setError({ isError: msg ? true : false, errorMsg: msg });
-    return msg ? true : false;
-  };
+  }, [isRequired, validateInput, value.length]);
 
   return (
     <View style={styles.componentContainer}>
@@ -187,12 +192,13 @@ const styles = StyleSheet.create({
   componentContainer: {
     display: 'flex',
     width: '100%',
-    marginTop: 5,
+    marginTop: 0,
+    marginBottom: 12,
     justifyContent: 'flex-start',
   },
   titleMsg: {
-    marginBottom: 5,
-    marginTop: 10,
+    marginBottom: 8,
+    marginTop: 0,
     color: colors.grey,
     ...typography.body1SemiBold,
   },

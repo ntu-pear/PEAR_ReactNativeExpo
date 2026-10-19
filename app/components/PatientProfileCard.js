@@ -39,13 +39,17 @@ function PatientProfileCard(props) {
       testID={testID}
       style={[
         styles.container,
-        text ? { minHeight: Math.max(80, SCREEN_HEIGHT * 0.08 + 20) } : null,
+        text
+          ? {
+              minHeight: Math.max(120, Math.min(160, SCREEN_HEIGHT * 0.1 + 20)),
+            }
+          : null,
         style,
       ]}
     >
       {vectorIconComponent}
       <Text
-        fontSize={SCREEN_HEIGHT * 0.013}
+        fontSize={Math.max(14, Math.min(18, SCREEN_HEIGHT * 0.013))}
         mt={2}
         color={colors.black}
         textAlign="center"

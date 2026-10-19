@@ -32,7 +32,7 @@ function InformationCard({
           ...item,
           value: masked
             ? unMaskedNRIC
-            : unMaskedNRIC.replace(/\d{4}(\d{3})/, 'xxxx$1'),
+            : String(unMaskedNRIC || '').replace(/\d{4}(\d{3})/, 'xxxx$1'),
         };
       }
       return item;
@@ -112,7 +112,7 @@ function InformationCard({
             >
               {/* Label */}
               <Text
-                numberOfLines={1}
+                numberOfLines={undefined}
                 ellipsizeMode="tail"
                 style={styles.fieldLabel}
               >
@@ -122,12 +122,12 @@ function InformationCard({
               {/* Value + Eye icon */}
               <HStack alignItems="center" flexShrink={1}>
                 <Text
-                  numberOfLines={1}
+                  numberOfLines={undefined}
                   ellipsizeMode="tail"
                   style={styles.fieldValue}
                 >
                   {data === undefined
-                    ? 'undefined'
+                    ? '-'
                     : data.value === 1 || data.value === true
                     ? 'Yes'
                     : data.value === 0
@@ -148,7 +148,9 @@ function InformationCard({
                       name: masked ? 'eye-outline' : 'eye',
                     }}
                     onPress={handleUnmaskNRIC}
-                    p={0}
+                    minW={48}
+                    minH={48}
+                    p={2}
                     ml={1}
                   />
                 )}
@@ -193,7 +195,7 @@ const styles = StyleSheet.create({
     flexBasis: '45%',
   },
   fieldValue: {
-    ...typography.subheading1SemiBoldheading1,
+    ...typography.subheading1SemiBold,
     color: colors.black,
     textAlign: 'right',
     flexShrink: 1,

@@ -1,22 +1,21 @@
 // Libs
-import React, { useState, useEffect, useCallback } from 'react';
-import { Platform, Alert, ActivityIndicator, TouchableOpacity, StyleSheet, View } from 'react-native';
-import {
-  Image,
-  VStack,
-  AspectRatio,
-  Center,
-  FlatList,
-  Text,
-  Box,
-} from 'native-base';
-import * as ImagePicker from 'expo-image-picker';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useContext,
+  useRef,
+} from 'react';
+import { Alert, ActivityIndicator, StyleSheet, View } from 'react-native';
+import { VStack, FlatList, Text, Box } from 'native-base';
 
 // APIs
 import userApi from 'app/api/user';
+import AuthContext from 'app/auth/context';
+import { currentUserId } from 'app/utility/medicationAdminister';
+import { writePersonalProfile } from 'app/utility/personalProfileWrite';
 
 // Configurations
-import routes from 'app/navigation/routes';
 import colors from 'app/config/colors';
 
 // Components
@@ -26,8 +25,21 @@ import InputField from 'app/components/input-components/InputField';
 
 function AccountEditScreen(props) {
   const [isLoading, setIsLoading] = useState(false);
-  const { navigation, userData, unMaskedUserNRIC } = props.route.params;
-  const [profilePicture, setProfilePicture] = useState(props.route.params.profilePicture);
+  const { navigation } = props;
+  const { userData, unMaskedUserNRIC } = props.route.params || {};
+  const { user } = useContext(AuthContext) || {};
+  const actor = String(currentUserId(user));
+  const current = useRef(actor);
+  current.current = actor;
+  const alive = useRef(true),
+    saving = useRef(false);
+  const [uncertain, setUncertain] = useState(false);
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+    };
+  }, []);
 
   // Screen error state: This = true when the child components report error(input fields)
   // Enables use of dynamic rendering of components when the page error = true/false.
@@ -42,23 +54,14 @@ function AccountEditScreen(props) {
   const [formData, setFormData] = useState({
     PreferredName: props.route.params?.preferredName ?? '',
     ContactNo: props.route.params?.contactNo ?? '',
-    Email: props.route.params?.email ?? '',          // if you show email
-    TwoFactorEnabled: !!props.route.params?.twoFactorEnabled,
   });
 
   // This useEffect enables the page to show correct error checking.
   // The main isInputErrors is responsible for the error state of the screen.
-  // This state will be true whenever any child input components are in error state.  
+  // This state will be true whenever any child input components are in error state.
   useEffect(() => {
-    setIsInputErrors(
-      isPrefNameError ||
-      isMobileNoError,
-    );
-  }, [
-    isPrefNameError,
-    isMobileNoError,
-    isInputErrors,
-  ]);
+    setIsInputErrors(isPrefNameError || isMobileNoError);
+  }, [isPrefNameError, isMobileNoError]);
 
   // Functions for error state reporting for the child components
   const handlePrefNameError = useCallback(
@@ -80,75 +83,65 @@ function AccountEditScreen(props) {
   const handleFormData = (field) => (e) => {
     setFormData((prevState) => ({
       ...prevState,
-      [field]: e
+      [field]: e,
     }));
   };
 
   // form submission when save button is pressed
   const submitForm = async () => {
+    if (saving.current || uncertain) {
+      return;
+    }
+    const owner = actor;
+    saving.current = true;
     setIsLoading(true);
-    const payload = {
-      preferredName: (formData?.PreferredName || '').trim() || undefined, // map YOUR state → v1 keys
-      contactNo: formData?.ContactNo || undefined,
-      email: (formData?.Email || '').trim() || undefined,
-      twoFactorEnabled: !!formData?.TwoFactorEnabled,
-    };
-    const result = await userApi.updateUser(payload); // uses your v1-first wrapper, auto-fallback to legacy
-    
-    let alertTitle = '';
-    let alertDetails = '';
-
-    if (result.ok) {
-      navigation.goBack(routes.ACCOUNT_SCREEN, {
-        navigation: navigation,
+    try {
+      const result = await writePersonalProfile({
+        api: userApi,
+        actor: owner,
+        name: formData.PreferredName,
+        contact: formData.ContactNo,
+        isCurrent: () => alive.current && current.current === owner,
       });
-      alertTitle = 'Saved Successfully';
-    } else {
-      const errors = result.data?.message;
-
-      result.data
-        ? (alertDetails = `\n${errors}\n\nPlease try again.`)
-        : (alertDetails = 'Please try again.');
-
-      alertTitle = 'Error in Editing Personal Information';
-      console.log("result error "+JSON.stringify(result));
-    }
-    Alert.alert(alertTitle, alertDetails);
-    console.log("formData "+JSON.stringify(formData));
-    setIsLoading(false);
-  };
-
-  // Function to launch image picker and handle image picking.
-  // Reference: https://docs.expo.dev/versions/latest/sdk/imagepicker/
-  const pickImage = (input) => async () => {
-    // No permissions request is necessary for launching the image library
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-    if (!result.canceled) {
-      const newImageUri = 'file:///' + result.uri.split('file:/').join('');
-
-      var newData = formData['patientInfo'];
-      newData[input] = {
-        uri: newImageUri,
-        name: newImageUri.split('/').pop(),
-        type: mime.getType(newImageUri),
-      };
-
-      setFormData((prevState) => ({
-        ...prevState,
-        ['patientInfo']: newData,
-      }));
+      if (
+        !alive.current ||
+        current.current !== owner ||
+        result.outcome === 'stale'
+      ) {
+        return;
+      }
+      if (result.outcome === 'verified') {
+        navigation.goBack();
+        Alert.alert(
+          'Saved Successfully',
+          'Your personal information has been verified.',
+        );
+      } else {
+        if (result.outcome === 'uncertain') {
+          setUncertain(true);
+        }
+        Alert.alert(
+          result.outcome === 'uncertain'
+            ? 'Check the saved record'
+            : 'Unable to save',
+          result.message,
+        );
+      }
+    } finally {
+      saving.current = false;
+      if (alive.current && current.current === owner) {
+        setIsLoading(false);
+      }
     }
   };
-  
+
   return isLoading ? (
     <ActivityIndicator visible />
   ) : (
     <FlatList
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
+      contentContainerStyle={{ paddingBottom: 32 }}
       data={[0]}
       renderItem={() => (
         <Box alignItems="center">
@@ -171,7 +164,7 @@ function AccountEditScreen(props) {
                   onChangeText={handleFormData('ContactNo')}
                   onEndEditing={handleMobileNoError}
                   dataType={'mobile phone'}
-                  keyboardType='numeric'                      
+                  keyboardType="numeric"
                   maxLength={8}
                 />
 
@@ -181,16 +174,39 @@ function AccountEditScreen(props) {
                 />
 
                 <Text style={styles.redText}>
-                  Note: To edit other information, please contact system administrator.
+                  Note: To edit other information, please contact system
+                  administrator.
                 </Text>
               </View>
               <View style={styles.saveButtonContainer}>
-                <Box width='70%'>
-                  {isLoading ? 
-                  <AppButton title="Save" color="green" onPress={submitForm} isDisabled={true} /> :
-                  <AppButton title="Save" color="green" onPress={submitForm} isDisabled={isInputErrors} /> 
-                  }
+                <Box width="100%" maxWidth={760} px={4}>
+                  {isLoading ? (
+                    <AppButton
+                      title="Save"
+                      color="green"
+                      onPress={submitForm}
+                      isDisabled={true}
+                    />
+                  ) : (
+                    <AppButton
+                      title="Save"
+                      color="green"
+                      onPress={submitForm}
+                      isDisabled={isInputErrors || uncertain}
+                    />
+                  )}
                 </Box>
+                {uncertain ? (
+                  <Text style={styles.redText}>
+                    The saved outcome is unconfirmed. Return to Personal
+                    Information to reload it before editing again.
+                  </Text>
+                ) : null}
+                <AppButton
+                  title="Back to personal information"
+                  color="grey"
+                  onPress={() => navigation.goBack()}
+                />
               </View>
             </VStack>
           </Box>
@@ -205,13 +221,18 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'flex-start',
     justifyContent: 'center',
-    paddingLeft: '10%',
-    width: '90%',
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    width: '100%',
+    maxWidth: 760,
+    alignSelf: 'center',
     marginBottom: 20,
   },
   redText: {
-    marginBottom: 4,
-    alignSelf: "center",
+    marginTop: 12,
+    marginBottom: 16,
+    lineHeight: 20,
+    alignSelf: 'center',
     color: colors.red,
   },
   saveButtonContainer: {

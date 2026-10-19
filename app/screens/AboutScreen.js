@@ -1,16 +1,18 @@
 import React from 'react';
-import { Text, View, Image, StyleSheet } from 'react-native';
+import { Text, View, Image, StyleSheet, ScrollView } from 'react-native';
 import colors from 'app/config/colors';
 import { Center } from 'native-base';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
+import layout from 'app/config/layout';
 import buildIdentity from 'app/config/generatedBuildIdentity.json';
 
 function AboutScreen(props) {
   const { sidebar } = props;
 
   return (
-    <View
+    <ScrollView
+      contentContainerStyle={styles.content}
       style={
         Platform.OS === 'web'
           ? {
@@ -29,7 +31,7 @@ function AboutScreen(props) {
           />
           <Text style={styles.text} testID="about_installed_build_identity">
             PEAR Mobile App.
-            {'\n\n\n'}
+            {'\n\n'}
             Version: {Constants.nativeAppVersion || 'Unavailable'}
             {'\n'}
             Build: {Constants.nativeBuildVersion || 'Unavailable'}
@@ -42,22 +44,22 @@ function AboutScreen(props) {
           </Text>
         </View>
       </Center>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  content: { ...layout.formContent, paddingTop: 48 },
   logo: {
     width: 100,
     height: 150,
     tintColor: colors.black,
   },
   logoContainer: {
-    top: 100,
     alignItems: 'center',
   },
   text: {
-    paddingTop: 100,
+    paddingTop: 32,
     fontSize: 20,
     maxWidth: 300,
     textAlign: 'center',

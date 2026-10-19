@@ -10,7 +10,7 @@ import colors from 'app/config/colors';
 
 // Components
 import ErrorMessage from 'app/components/ErrorMessage';
-import RequiredIndicator from '../RequiredIndicator';
+import RequiredIndicator from 'app/components/RequiredIndicator';
 
 function RadioButtonInput({
   testID = '',
@@ -113,12 +113,13 @@ const styles = StyleSheet.create({
   componentContainer: {
     display: 'flex',
     width: '100%',
-    marginTop: 5,
+    marginTop: 0,
+    marginBottom: 12,
     justifyContent: 'flex-start',
   },
   titleMsg: {
-    marginBottom: 5,
-    marginTop: 10,
+    marginBottom: 8,
+    marginTop: 0,
     color: colors.grey,
     ...typography.body1SemiBold,
   },
@@ -131,7 +132,8 @@ const styles = StyleSheet.create({
   radioButton: {
     paddingLeft: 10,
     paddingRight: 0,
-    paddingVertical: 0,
+    paddingVertical: 4,
+    minHeight: 48,
   },
 });
 

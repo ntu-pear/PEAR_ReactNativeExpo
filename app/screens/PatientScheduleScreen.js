@@ -12,6 +12,9 @@ import requestDeadline from 'app/utility/requestDeadline';
 import { sortFilterInitialState, formatDate } from 'app/utility/miscFunctions';
 import routes from 'app/navigation/routes';
 import colors from 'app/config/colors';
+import AppButton from 'app/components/AppButton';
+import { centreDay } from 'app/utility/centreClock';
+import { weekMonday, shiftDay } from 'app/utility/careReadResults';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
@@ -117,6 +120,33 @@ function PatientScheduleScreen({ route }) {
 
   return (
     <View style={styles.container}>
+      <View style={{ paddingHorizontal: 16, paddingTop: 12 }}>
+        <Text testID="patient_schedule_week">
+          Saved week starting {weekMonday(date || centreDay())}
+        </Text>
+        <View style={{ flexDirection: 'row', marginHorizontal: -6 }}>
+          <View style={{ flex: 1, marginHorizontal: 6 }}>
+            <AppButton
+              title="Previous week"
+              color="grey"
+              testID="patient_schedule_previous"
+              onPress={() =>
+                navigation.setParams({
+                  date: shiftDay(weekMonday(date || centreDay()), -7),
+                })
+              }
+            />
+          </View>
+          <View style={{ flex: 1, marginHorizontal: 6 }}>
+            <AppButton
+              title="This week"
+              color="green"
+              testID="patient_schedule_current"
+              onPress={() => navigation.setParams({ date: undefined })}
+            />
+          </View>
+        </View>
+      </View>
       {snapshot.error && (
         <View testID="patient_schedule_read_error">
           <Text>{snapshot.message}</Text>
@@ -152,13 +182,14 @@ function PatientScheduleScreen({ route }) {
             key={readKey}
             originalList={snapshot.original}
             setList={(weekly) => {
-              if (isCurrentSnapshot())
+              if (isCurrentSnapshot()) {
                 setSnapshot((previous) =>
                   previous.key === readKey &&
                   previous.generation === snapshot.generation
                     ? { ...previous, weekly }
                     : previous,
                 );
+              }
             }}
             FIELD_MAPPING={{
               'Activity Type': 'activityTitle',
@@ -189,12 +220,12 @@ function PatientScheduleScreen({ route }) {
         marginBottom="4%"
         marginTop="1%"
         horizontal
-        height="80%"
+        style={{ flex: 1 }}
         ListEmptyComponent={() =>
           snapshot.error ? null : (
             <View width={Dimensions.get('window').width - 85} height="80%">
               <Text testID="patient_schedule_empty">
-                No saved schedule found for this week.
+                No saved schedule found for the selected week.
               </Text>
             </View>
           )

@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { Alert, ScrollView, View } from 'react-native';
+import { Alert, ScrollView, View, Text, StyleSheet } from 'react-native';
+import layout from 'app/config/layout';
 import { useNavigation } from '@react-navigation/native';
 import AuthContext from 'app/auth/context';
 import guardianApi from 'app/api/guardian';
@@ -41,8 +42,9 @@ function EditPatientGuardianScreen({ route }) {
   }
   const sessionToken = session.current;
   const writer = useRef(null);
-  if (!writer.current)
+  if (!writer.current) {
     writer.current = createPrimaryGuardianWriter({ api: guardianApi });
+  }
   const isCurrent = () => mounted.current && session.current === sessionToken;
   const displayedIdentityMatches = () =>
     isCurrent() &&
@@ -54,8 +56,13 @@ function EditPatientGuardianScreen({ route }) {
       patientID,
     );
   const load = async () => {
-    if (!canEditGuardian(user) || busy.current === sessionToken || !isCurrent())
+    if (
+      !canEditGuardian(user) ||
+      busy.current === sessionToken ||
+      !isCurrent()
+    ) {
       return;
+    }
     busy.current = sessionToken;
     const generation = ++loadGeneration.current;
     const loadCurrent = () =>
@@ -71,9 +78,12 @@ function EditPatientGuardianScreen({ route }) {
       const record = records.find(
         (item) => String(item.id) === String(guardianId),
       );
-      if (!record)
+      if (!record) {
         throw new Error('This guardian is no longer linked to this patient.');
-      if (!loadCurrent()) return;
+      }
+      if (!loadCurrent()) {
+        return;
+      }
       setGuardian(record);
       setDisplaySession(sessionToken);
       setEdits({
@@ -90,7 +100,9 @@ function EditPatientGuardianScreen({ route }) {
           user,
           isCurrent: loadCurrent,
         });
-        if (!loadCurrent()) return;
+        if (!loadCurrent()) {
+          return;
+        }
         if (pending.outcome === 'unknown') {
           setPrimaryPending(true);
           setUncertain(true);
@@ -101,23 +113,29 @@ function EditPatientGuardianScreen({ route }) {
         const response = await requestDeadline(
           guardianApi.getPatientAllocation(patientID),
         );
-        if (loadCurrent())
+        if (loadCurrent()) {
           setAllocation(
             response?.ok &&
               String(response.data?.patientId) === String(patientID)
               ? response.data
               : null,
           );
+        }
       }
     } catch (failure) {
-      if (loadCurrent())
+      if (loadCurrent()) {
         setError(
           failure.message ||
             'Unable to load guardian information. Check the VPN and retry.',
         );
+      }
     } finally {
-      if (busy.current === sessionToken) busy.current = null;
-      if (loadCurrent()) setLoading(false);
+      if (busy.current === sessionToken) {
+        busy.current = null;
+      }
+      if (loadCurrent()) {
+        setLoading(false);
+      }
     }
   };
   useEffect(() => {
@@ -144,7 +162,9 @@ function EditPatientGuardianScreen({ route }) {
       {
         text: 'OK',
         onPress: () => {
-          if (isCurrent()) navigation.goBack();
+          if (isCurrent()) {
+            navigation.goBack();
+          }
         },
       },
     ]);
@@ -154,8 +174,9 @@ function EditPatientGuardianScreen({ route }) {
       uncertain ||
       !canEditGuardian(user) ||
       !displayedIdentityMatches()
-    )
+    ) {
       return;
+    }
     busy.current = sessionToken;
     setLoading(true);
     setError('');
@@ -164,7 +185,9 @@ function EditPatientGuardianScreen({ route }) {
       const current = (await readGuardians()).find(
         (item) => String(item.id) === String(guardianId),
       );
-      if (!displayedIdentityMatches()) return;
+      if (!displayedIdentityMatches()) {
+        return;
+      }
       const payload = buildGuardianUpdate({
         guardian: current,
         edits,
@@ -175,14 +198,19 @@ function EditPatientGuardianScreen({ route }) {
       const response = await requestDeadline(
         guardianApi.updateGuardian(payload, guardianId),
       );
-      if (!isCurrent()) return;
-      if (!response?.ok)
+      if (!isCurrent()) {
+        return;
+      }
+      if (!response?.ok) {
         throw new Error('The guardian update was not confirmed.');
+      }
       // Identity and relationship are committed separately by this API.
       const updated = (await readGuardians()).find(
         (item) => String(item.id) === String(guardianId),
       );
-      if (!isCurrent()) return;
+      if (!isCurrent()) {
+        return;
+      }
       if (
         !updated ||
         [
@@ -195,12 +223,14 @@ function EditPatientGuardianScreen({ route }) {
         ].some(
           (key) => String(updated[key] ?? '') !== String(payload[key] ?? ''),
         )
-      )
+      ) {
         throw new Error(
           'The updated guardian fields and relationship could not be verified.',
         );
-      if (isCurrent())
+      }
+      if (isCurrent()) {
         finish('Guardian information and relationship have been verified.');
+      }
     } catch (failure) {
       if (isCurrent()) {
         setUncertain(sent);
@@ -211,8 +241,12 @@ function EditPatientGuardianScreen({ route }) {
         );
       }
     } finally {
-      if (busy.current === sessionToken) busy.current = null;
-      if (isCurrent()) setLoading(false);
+      if (busy.current === sessionToken) {
+        busy.current = null;
+      }
+      if (isCurrent()) {
+        setLoading(false);
+      }
     }
   };
   const handlePrimaryOutcome = (result) => {
@@ -311,7 +345,10 @@ function EditPatientGuardianScreen({ route }) {
   return (
     <ScrollView
       keyboardShouldPersistTaps="handled"
-      contentContainerStyle={{ padding: 24 }}
+      style={layout.page}
+      keyboardDismissMode="on-drag"
+      automaticallyAdjustKeyboardInsets
+      contentContainerStyle={layout.formContent}
     >
       {loading ? <AppText>Loading...</AppText> : null}
       {error ? <AppText testID="guardian-edit-error">{error}</AppText> : null}
@@ -329,17 +366,19 @@ function EditPatientGuardianScreen({ route }) {
       ) : null}
       {shownGuardian && !loading ? (
         <View>
-          <AppText>{`${shownGuardian.firstName} ${shownGuardian.lastName}`}</AppText>
-          <AppText>{`Date of birth: ${String(
-            shownGuardian.dateOfBirth || '',
-          ).slice(0, 10)} | Gender: ${shownGuardian.gender || '-'}`}</AppText>
-          <AppText>
-            {primary
-              ? 'Primary guardian'
-              : allocation
-              ? 'Secondary guardian'
-              : 'Primary status unavailable'}
-          </AppText>
+          <View style={styles.identity}>
+            <AppText>{`${shownGuardian.firstName} ${shownGuardian.lastName}`}</AppText>
+            <AppText>{`Date of birth: ${String(
+              shownGuardian.dateOfBirth || '',
+            ).slice(0, 10)} | Gender: ${shownGuardian.gender || '-'}`}</AppText>
+            <AppText>
+              {primary
+                ? 'Primary guardian'
+                : allocation
+                ? 'Secondary guardian'
+                : 'Primary status unavailable'}
+            </AppText>
+          </View>
           {[
             ['preferredName', 'Preferred name'],
             ['contactNo', 'Contact number'],
@@ -362,11 +401,11 @@ function EditPatientGuardianScreen({ route }) {
               otherProps={{ editable: !loading && !uncertain }}
             />
           ))}
-          <AppText>
-            Use the configured relationship name. The service validates the
-            relationship when saving.
-          </AppText>
+          <Text testID="guardian-edit-help" style={layout.helper}>
+            Enter the guardian's relationship to this patient.
+          </Text>
           <AppButton
+            style={styles.primaryAction}
             title="Save guardian"
             color="green"
             onPress={save}
@@ -380,6 +419,7 @@ function EditPatientGuardianScreen({ route }) {
           />
           {canSelectPrimaryGuardian(user) && allocation && !primary ? (
             <AppButton
+              style={layout.action}
               title="Make primary guardian"
               color="green"
               isDisabled={loading || uncertain}
@@ -400,6 +440,8 @@ function EditPatientGuardianScreen({ route }) {
             />
           ) : null}
           <AppButton
+            style={layout.action}
+            testID="guardian-edit-back"
             title="Back to profile"
             color="grey"
             onPress={() => navigation.goBack()}
@@ -409,4 +451,8 @@ function EditPatientGuardianScreen({ route }) {
     </ScrollView>
   );
 }
+const styles = StyleSheet.create({
+  identity: { marginBottom: 24 },
+  primaryAction: { marginTop: 4 },
+});
 export default EditPatientGuardianScreen;

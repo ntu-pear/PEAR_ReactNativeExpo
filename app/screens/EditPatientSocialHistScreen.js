@@ -1,7 +1,7 @@
 // Libs
-import React, { useState, useEffect, useCallback } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
-import { Box, VStack, FlatList } from 'native-base'
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Alert, StyleSheet, View, Text } from 'react-native';
+import { Box, VStack, FlatList } from 'native-base';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 // Configurations
 import routes from 'app/navigation/routes';
@@ -11,6 +11,7 @@ import useGetSelectionOptions from 'app/hooks/useGetSelectionOptions';
 
 //API
 import socialHistoryApi from 'app/api/socialHistory';
+import { writeSocialHistory } from 'app/utility/socialHistoryWrite';
 
 // Components
 import SelectionInputField from 'app/components/input-components/SelectionInputField';
@@ -22,17 +23,32 @@ function EditPatientSocialHistScreen(props) {
   const { socialHistory, patientID } = props.route.params;
 
   const navigation = useNavigation();
-  
+  const mounted = useRef(true);
+  const currentPatient = useRef(String(patientID));
+  currentPatient.current = String(patientID);
+  const saving = useRef(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveUncertain, setSaveUncertain] = useState(false);
+  const [saveMessage, setSaveMessage] = useState('');
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
   // Detect if this is add mode (no socialHistoryId)
   const isAddMode = !socialHistory?.socialHistoryId && !socialHistory?.id;
-  
+
   // Set the screen title based on mode
   useEffect(() => {
     navigation.setOptions({
-      title: isAddMode ? 'Add Patient Social History' : 'Edit Patient Social History',
+      title: isAddMode
+        ? 'Add Patient Social History'
+        : 'Edit Patient Social History',
     });
   }, [navigation, isAddMode]);
-  
+
   // retrive list data from database using useGetSelectionOptions
   const {
     data: liveWithData,
@@ -184,7 +200,7 @@ function EditPatientSocialHistScreen(props) {
     { value: 0, label: 'No' },
     { value: 1, label: 'Yes' },
     { value: 2, label: 'Not available' },
-  ]
+  ];
 
   const [isInputErrors, setIsInputErrors] = useState(false);
 
@@ -297,18 +313,18 @@ function EditPatientSocialHistScreen(props) {
   useEffect(() => {
     setIsInputErrors(
       isLiveWithError ||
-      isEducationError ||
-      isOccupationError ||
-      isReligionError ||
-      isPetError ||
-      isDietError ||
-      isExerciseError ||
-      isSexuallyActiveError ||
-      isDrugUseError ||
-      isCaffeineUseError ||
-      isAlcoholUseError ||
-      isTobaccoUseError ||
-      isSecondhandSmokerError,
+        isEducationError ||
+        isOccupationError ||
+        isReligionError ||
+        isPetError ||
+        isDietError ||
+        isExerciseError ||
+        isSexuallyActiveError ||
+        isDrugUseError ||
+        isCaffeineUseError ||
+        isAlcoholUseError ||
+        isTobaccoUseError ||
+        isSecondhandSmokerError,
     );
     // console.log(isInputErrors);
   }, [
@@ -330,33 +346,108 @@ function EditPatientSocialHistScreen(props) {
 
   const [formData, setFormData] = useState({
     PatientID: patientID,
-    SocialHistoryId: Object.keys(socialHistory).length>0 ? socialHistory.socialHistoryId : null,
-    LiveWithDescription: Object.keys(socialHistory).length>0 ? socialHistory.liveWithDescription : "Alone",
-    LiveWithListId: Object.keys(socialHistory).length>0 ? socialHistory.liveWithListId : 1,
-    EducationDescription: Object.keys(socialHistory).length>0 ? socialHistory.educationDescription : 'Primary or lower',
-    EducationListId: Object.keys(socialHistory).length>0 ? socialHistory.educationListId : 1,
-    OccupationDescription: Object.keys(socialHistory).length>0 ? socialHistory.occupationDescription : 'Accountant',
-    OccupationListId: Object.keys(socialHistory).length>0 ? socialHistory.occupationListId : 1,
-    ReligionDescription: Object.keys(socialHistory).length>0 ? socialHistory.religionDescription : 'Atheist',
-    ReligionListId: Object.keys(socialHistory).length>0 ? socialHistory.religionListId : 1,
-    PetDescription: Object.keys(socialHistory).length>0 ? socialHistory.petDescription : 'Bird',
-    PetListId: Object.keys(socialHistory).length>0 ? socialHistory.petListId : 1,
-    DietDescription: Object.keys(socialHistory).length>0 ? socialHistory.dietDescription : 'Diabetic',
-    DietListId: Object.keys(socialHistory).length>0 ? socialHistory.dietListId : 1,
-    Exercise: Object.keys(socialHistory).length>0 ? socialHistory.exercise : null,
-    ExerciseDisplay: Object.keys(socialHistory).length>0 ? socialHistory.exercise !== null ? socialHistory.exercise : 2 : 2,
-    SexuallyActive: Object.keys(socialHistory).length>0 ? socialHistory.sexuallyActive : null,
-    SexuallyActiveDisplay: Object.keys(socialHistory).length>0 ? socialHistory.sexuallyActive !== null ? socialHistory.sexuallyActive : 2 : 2,
-    DrugUse: Object.keys(socialHistory).length>0 ? socialHistory.drugUse : null,
-    DrugUseDisplay: Object.keys(socialHistory).length>0 ? socialHistory.drugUse !== null ? socialHistory.drugUse : 2 : 2,
-    CaffeineUse: Object.keys(socialHistory).length>0 ? socialHistory.caffeineUse : null,
-    CaffeineUseDisplay: Object.keys(socialHistory).length>0 ? socialHistory.caffeineUse !== null ? socialHistory.caffeineUse : 2 : 2,
-    AlcoholUse: Object.keys(socialHistory).length>0 ? socialHistory.alcoholUse : null,
-    AlcoholUseDisplay: Object.keys(socialHistory).length>0 ? socialHistory.alcoholUse !== null ? socialHistory.alcoholUse : 2 : 2,
-    TobaccoUse: Object.keys(socialHistory).length>0 ? socialHistory.tobaccoUse : null,
-    TobaccoUseDisplay: Object.keys(socialHistory).length>0 ? socialHistory.tobaccoUse !== null ? socialHistory.tobaccoUse : 2 : 2,
-    SecondhandSmoker: Object.keys(socialHistory).length>0 ? socialHistory.secondhandSmoker : null,
-    SecondhandSmokerDisplay: Object.keys(socialHistory).length>0 ? socialHistory.secondhandSmoker !== null ? socialHistory.secondhandSmoker : 2 : 2,
+    SocialHistoryId:
+      Object.keys(socialHistory).length > 0
+        ? socialHistory.socialHistoryId
+        : null,
+    LiveWithDescription:
+      Object.keys(socialHistory).length > 0
+        ? socialHistory.liveWithDescription
+        : 'Alone',
+    LiveWithListId:
+      Object.keys(socialHistory).length > 0 ? socialHistory.liveWithListId : 1,
+    EducationDescription:
+      Object.keys(socialHistory).length > 0
+        ? socialHistory.educationDescription
+        : 'Primary or lower',
+    EducationListId:
+      Object.keys(socialHistory).length > 0 ? socialHistory.educationListId : 1,
+    OccupationDescription:
+      Object.keys(socialHistory).length > 0
+        ? socialHistory.occupationDescription
+        : 'Accountant',
+    OccupationListId:
+      Object.keys(socialHistory).length > 0
+        ? socialHistory.occupationListId
+        : 1,
+    ReligionDescription:
+      Object.keys(socialHistory).length > 0
+        ? socialHistory.religionDescription
+        : 'Atheist',
+    ReligionListId:
+      Object.keys(socialHistory).length > 0 ? socialHistory.religionListId : 1,
+    PetDescription:
+      Object.keys(socialHistory).length > 0
+        ? socialHistory.petDescription
+        : 'Bird',
+    PetListId:
+      Object.keys(socialHistory).length > 0 ? socialHistory.petListId : 1,
+    DietDescription:
+      Object.keys(socialHistory).length > 0
+        ? socialHistory.dietDescription
+        : 'Diabetic',
+    DietListId:
+      Object.keys(socialHistory).length > 0 ? socialHistory.dietListId : 1,
+    Exercise:
+      Object.keys(socialHistory).length > 0 ? socialHistory.exercise : null,
+    ExerciseDisplay:
+      Object.keys(socialHistory).length > 0
+        ? socialHistory.exercise !== null
+          ? socialHistory.exercise
+          : 2
+        : 2,
+    SexuallyActive:
+      Object.keys(socialHistory).length > 0
+        ? socialHistory.sexuallyActive
+        : null,
+    SexuallyActiveDisplay:
+      Object.keys(socialHistory).length > 0
+        ? socialHistory.sexuallyActive !== null
+          ? socialHistory.sexuallyActive
+          : 2
+        : 2,
+    DrugUse:
+      Object.keys(socialHistory).length > 0 ? socialHistory.drugUse : null,
+    DrugUseDisplay:
+      Object.keys(socialHistory).length > 0
+        ? socialHistory.drugUse !== null
+          ? socialHistory.drugUse
+          : 2
+        : 2,
+    CaffeineUse:
+      Object.keys(socialHistory).length > 0 ? socialHistory.caffeineUse : null,
+    CaffeineUseDisplay:
+      Object.keys(socialHistory).length > 0
+        ? socialHistory.caffeineUse !== null
+          ? socialHistory.caffeineUse
+          : 2
+        : 2,
+    AlcoholUse:
+      Object.keys(socialHistory).length > 0 ? socialHistory.alcoholUse : null,
+    AlcoholUseDisplay:
+      Object.keys(socialHistory).length > 0
+        ? socialHistory.alcoholUse !== null
+          ? socialHistory.alcoholUse
+          : 2
+        : 2,
+    TobaccoUse:
+      Object.keys(socialHistory).length > 0 ? socialHistory.tobaccoUse : null,
+    TobaccoUseDisplay:
+      Object.keys(socialHistory).length > 0
+        ? socialHistory.tobaccoUse !== null
+          ? socialHistory.tobaccoUse
+          : 2
+        : 2,
+    SecondhandSmoker:
+      Object.keys(socialHistory).length > 0
+        ? socialHistory.secondhandSmoker
+        : null,
+    SecondhandSmokerDisplay:
+      Object.keys(socialHistory).length > 0
+        ? socialHistory.secondhandSmoker !== null
+          ? socialHistory.secondhandSmoker
+          : 2
+        : 2,
   });
 
   // handling form input data by taking onchange value and updating our previous form data state
@@ -366,25 +457,30 @@ function EditPatientSocialHistScreen(props) {
       if (input === 'LiveWithDescription') {
         setFormData((previousState) => ({
           ...previousState,
-          LiveWithDescription: listOfLiveWith.find((item) => item.value === e).label,
+          LiveWithDescription: listOfLiveWith.find((item) => item.value === e)
+            .label,
           LiveWithListId: e,
         }));
       } else if (input === 'EducationDescription') {
         setFormData((previousState) => ({
           ...previousState,
-          EducationDescription: listOfEducation.find((item) => item.value === e).label,
+          EducationDescription: listOfEducation.find((item) => item.value === e)
+            .label,
           EducationListId: e,
         }));
       } else if (input === 'OccupationDescription') {
         setFormData((previousState) => ({
           ...previousState,
-          OccupationDescription: listOfOccupation.find((item) => item.value === e).label,
+          OccupationDescription: listOfOccupation.find(
+            (item) => item.value === e,
+          ).label,
           OccupationListId: e,
         }));
       } else if (input === 'ReligionDescription') {
         setFormData((previousState) => ({
           ...previousState,
-          ReligionDescription: listOfReligion.find((item) => item.value === e).label,
+          ReligionDescription: listOfReligion.find((item) => item.value === e)
+            .label,
           ReligionListId: e,
         }));
       } else if (input === 'PetDescription') {
@@ -399,63 +495,65 @@ function EditPatientSocialHistScreen(props) {
           DietDescription: listOfDiet.find((item) => item.value === e).label,
           DietListId: e,
         }));
-      } else if (e === 2){
+      } else if (e === 2) {
         setFormData((previousState) => ({
           ...previousState,
           [input]: null,
-          [input+"Display"]: 2,
+          [input + 'Display']: 2,
         }));
       } else {
         setFormData((previousState) => ({
           ...previousState,
           [input]: e,
-          [input+"Display"]: e,
+          [input + 'Display']: e,
         }));
       }
     };
-  
+
   // form submission when save button is pressed
   const submitForm = async () => {
-    // Detect if this is add or update based on presence of ID
-    const isAddMode = !formData.SocialHistoryId && !formData.id;
-    
-    let result;
-    
-    if (isAddMode) {
-      console.log('[EditPatientSocialHist] ADD mode - calling addSocialHistory');
-      console.log('[EditPatientSocialHist] formData:', JSON.stringify(formData, null, 2));
-      result = await socialHistoryApi.addSocialHistory(formData);
-    } else {
-      console.log('[EditPatientSocialHist] UPDATE mode - calling updateSocialHistory');
-      console.log('[EditPatientSocialHist] formData:', JSON.stringify(formData, null, 2));
-      result = await socialHistoryApi.updateSocialHistory(formData);
+    if (saving.current || saveUncertain || isInputErrors || lookupUnavailable) {
+      return;
     }
-
-    let alertTitle = '';
-    let alertDetails = '';
-
-    if (result.ok) {
-      alertTitle = isAddMode ? 'Added Successfully' : 'Saved Successfully';
-      alertDetails = isAddMode 
-        ? 'Social history has been added successfully.' 
-        : 'Social history has been updated successfully.';
-      
-      Alert.alert(alertTitle, alertDetails, [
-        {
-          text: 'OK',
-          onPress: () => navigation.goBack()
-        }
-      ]);
-    } else {
-      const backendDetail = result.data?.detail;
-      const backendMessage = result.data?.message;
-      const errors = backendDetail || backendMessage || 'Unknown error occurred';
-
-      alertTitle = isAddMode ? 'Error Adding Social History' : 'Error Updating Social History';
-      alertDetails = `${errors}\n\nPlease try again.`;
-      
-      console.log('[EditPatientSocialHist] API Error:', JSON.stringify(result, null, 2));
-      Alert.alert(alertTitle, alertDetails);
+    if (String(formData.PatientID) !== String(patientID)) {
+      return;
+    }
+    saving.current = true;
+    setIsSaving(true);
+    setSaveMessage('');
+    const submittedPatient = String(patientID);
+    try {
+      const result = await writeSocialHistory({
+        form: { ...formData },
+        api: socialHistoryApi,
+        isCurrent: () =>
+          mounted.current && currentPatient.current === submittedPatient,
+      });
+      if (!mounted.current || result.outcome === 'stale') {
+        return;
+      }
+      if (result.outcome === 'verified') {
+        setSaveUncertain(true);
+        Alert.alert(
+          isAddMode ? 'Added Successfully' : 'Saved Successfully',
+          'The saved social history has been reloaded and verified.',
+          [{ text: 'OK', onPress: () => navigation.goBack() }],
+        );
+      } else {
+        setSaveUncertain(result.outcome === 'uncertain');
+        setSaveMessage(result.message);
+        Alert.alert(
+          result.outcome === 'uncertain'
+            ? 'Check the saved record'
+            : 'Social history was not saved',
+          result.message,
+        );
+      }
+    } finally {
+      saving.current = false;
+      if (mounted.current) {
+        setIsSaving(false);
+      }
     }
   };
 
@@ -471,7 +569,7 @@ function EditPatientSocialHistScreen(props) {
       setListOfEducation(educationData);
     }
   }, [educationData, educationError, educationLoading]);
-  
+
   useEffect(() => {
     if (!occupationLoading && !occupationError && occupationData) {
       setListOfOccupation(occupationData);
@@ -496,72 +594,92 @@ function EditPatientSocialHistScreen(props) {
     }
   }, [dietData, dietError, dietLoading]);
 
-  return liveWithLoading || educationLoading || occupationLoading || religionLoading || petLoading || dietLoading ? (
+  const lookupUnavailable = [
+    liveWithError,
+    educationError,
+    occupationError,
+    religionError,
+    petError,
+    dietError,
+  ].some(Boolean);
+
+  return liveWithLoading ||
+    educationLoading ||
+    occupationLoading ||
+    religionLoading ||
+    petLoading ||
+    dietLoading ? (
     <ActivityIndicator visible />
   ) : (
     <FlatList
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
+      contentContainerStyle={{ paddingBottom: 32 }}
       data={[0]}
       renderItem={() => (
         <Box alignItems="center">
           <Box w="100%">
             <VStack>
-              <View style={styles.formContainer}>
+              <View
+                style={styles.formContainer}
+                pointerEvents={isSaving || saveUncertain ? 'none' : 'auto'}
+              >
                 <SelectionInputField
                   isRequired
                   title={'Live with'}
-                  placeholderText={formData['LiveWithDescription']}
+                  placeholderText={formData.LiveWithDescription}
                   onDataChange={handleFormData('LiveWithDescription')}
-                  value={formData['LiveWithListId']}
+                  value={formData.LiveWithListId}
                   dataArray={listOfLiveWith}
                   onEndEditing={handleLiveWithState}
                 />
-                
+
                 <SelectionInputField
                   isRequired
                   title={'Education'}
-                  placeholderText={formData['EducationDescription']}
+                  placeholderText={formData.EducationDescription}
                   onDataChange={handleFormData('EducationDescription')}
-                  value={formData['EducationListId']}
+                  value={formData.EducationListId}
                   dataArray={listOfEducation}
                   onEndEditing={handleEducationState}
                 />
-                
+
                 <SelectionInputField
                   isRequired
                   title={'Occupation'}
-                  placeholderText={formData['OccupationDescription']}
+                  placeholderText={formData.OccupationDescription}
                   onDataChange={handleFormData('OccupationDescription')}
-                  value={formData['OccupationListId']}
+                  value={formData.OccupationListId}
                   dataArray={listOfOccupation}
                   onEndEditing={handleOccupationState}
                 />
-                
+
                 <SelectionInputField
                   isRequired
                   title={'Religion'}
-                  placeholderText={formData['ReligionDescription']}
+                  placeholderText={formData.ReligionDescription}
                   onDataChange={handleFormData('ReligionDescription')}
-                  value={formData['ReligionListId']}
+                  value={formData.ReligionListId}
                   dataArray={listOfReligion}
                   onEndEditing={handleReligionState}
                 />
-                
+
                 <SelectionInputField
                   isRequired
                   title={'Pet'}
-                  placeholderText={formData['PetDescription']}
+                  placeholderText={formData.PetDescription}
                   onDataChange={handleFormData('PetDescription')}
-                  value={formData['PetListId']}
+                  value={formData.PetListId}
                   dataArray={listOfPet}
                   onEndEditing={handlePetState}
                 />
-                
+
                 <SelectionInputField
                   isRequired
                   title={'Diet'}
-                  placeholderText={formData['DietDescription']}
+                  placeholderText={formData.DietDescription}
                   onDataChange={handleFormData('DietDescription')}
-                  value={formData['DietListId']}
+                  value={formData.DietListId}
                   dataArray={listOfDiet}
                   onChildData={handleDietState}
                 />
@@ -569,7 +687,7 @@ function EditPatientSocialHistScreen(props) {
                 <RadioButtonInput
                   isRequired
                   title={'Exercise'}
-                  value={formData['ExerciseDisplay']}
+                  value={formData.ExerciseDisplay}
                   onChangeData={handleFormData('Exercise')}
                   onChildData={handleExerciseState}
                   dataArray={listYesNo}
@@ -578,7 +696,7 @@ function EditPatientSocialHistScreen(props) {
                 <RadioButtonInput
                   isRequired
                   title={'Sexually active'}
-                  value={formData['SexuallyActiveDisplay']}
+                  value={formData.SexuallyActiveDisplay}
                   onChangeData={handleFormData('SexuallyActive')}
                   onChildData={handleSexuallyActiveState}
                   dataArray={listYesNo}
@@ -587,7 +705,7 @@ function EditPatientSocialHistScreen(props) {
                 <RadioButtonInput
                   isRequired
                   title={'Drug use'}
-                  value={formData['DrugUseDisplay']}
+                  value={formData.DrugUseDisplay}
                   onChangeData={handleFormData('DrugUse')}
                   onChildData={handleDrugUseState}
                   dataArray={listYesNo}
@@ -596,7 +714,7 @@ function EditPatientSocialHistScreen(props) {
                 <RadioButtonInput
                   isRequired
                   title={'Caffeine use'}
-                  value={formData['CaffeineUseDisplay']}
+                  value={formData.CaffeineUseDisplay}
                   onChangeData={handleFormData('CaffeineUse')}
                   onChildData={handleCaffeineUseState}
                   dataArray={listYesNo}
@@ -605,7 +723,7 @@ function EditPatientSocialHistScreen(props) {
                 <RadioButtonInput
                   isRequired
                   title={'Alcohol use'}
-                  value={formData['AlcoholUseDisplay']}
+                  value={formData.AlcoholUseDisplay}
                   onChangeData={handleFormData('AlcoholUse')}
                   onChildData={handleAlcoholUseState}
                   dataArray={listYesNo}
@@ -614,7 +732,7 @@ function EditPatientSocialHistScreen(props) {
                 <RadioButtonInput
                   isRequired
                   title={'Tobacco use'}
-                  value={formData['TobaccoUseDisplay']}
+                  value={formData.TobaccoUseDisplay}
                   onChangeData={handleFormData('TobaccoUse')}
                   onChildData={handleTobaccoUseState}
                   dataArray={listYesNo}
@@ -623,15 +741,48 @@ function EditPatientSocialHistScreen(props) {
                 <RadioButtonInput
                   isRequired
                   title={'Secondhand smoker'}
-                  value={formData['SecondhandSmokerDisplay']}
+                  value={formData.SecondhandSmokerDisplay}
                   onChangeData={handleFormData('SecondhandSmoker')}
                   onChildData={handleSecondhandSmokerState}
                   dataArray={listYesNo}
                 />
               </View>
               <View style={styles.saveButtonContainer}>
-                <Box width='70%'>
-                  <AppButton title="Save" color="green" onPress={submitForm} isDisabled={isInputErrors} />
+                <Box width="100%" maxWidth={760} px={4}>
+                  {lookupUnavailable ? (
+                    <Text style={styles.statusMessage}>
+                      Some choices could not be loaded. Return to the profile
+                      and reopen this form.
+                    </Text>
+                  ) : null}
+                  {saveMessage ? (
+                    <Text
+                      testID="social-save-message"
+                      style={styles.statusMessage}
+                    >
+                      {saveMessage}
+                    </Text>
+                  ) : null}
+                  <AppButton
+                    testID="social-history-save"
+                    title={isSaving ? 'Saving...' : 'Save'}
+                    color="green"
+                    onPress={submitForm}
+                    isDisabled={
+                      isInputErrors ||
+                      isSaving ||
+                      saveUncertain ||
+                      lookupUnavailable
+                    }
+                  />
+                  {saveUncertain ? (
+                    <AppButton
+                      style={{ marginTop: 12 }}
+                      title="Back to profile"
+                      color="grey"
+                      onPress={() => navigation.goBack()}
+                    />
+                  ) : null}
                 </Box>
               </View>
             </VStack>
@@ -647,12 +798,16 @@ EditPatientSocialHistScreen.defaultProps = {
 };
 
 const styles = StyleSheet.create({
+  statusMessage: { marginBottom: 16, lineHeight: 22, color: '#484848' },
   formContainer: {
     flex: 1,
     alignItems: 'flex-start',
     justifyContent: 'center',
-    paddingLeft: '10%',
-    width: '90%',
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    width: '100%',
+    maxWidth: 760,
+    alignSelf: 'center',
     marginBottom: 20,
   },
   saveButtonContainer: {

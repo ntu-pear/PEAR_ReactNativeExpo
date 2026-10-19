@@ -30,6 +30,7 @@ import EditPatientGuardianScreen from 'app/screens/EditPatientGuardianScreen';
 import EditPatientSocialHistScreen from 'app/screens/EditPatientSocialHistScreen';
 import PatientMedicationScreen from 'app/screens/PatientMedicationScreen';
 import PatientScheduleScreen from 'app/screens/PatientScheduleScreen';
+import PatientHistoryScreen from 'app/screens/PatientHistoryScreen';
 import PatientAdhocScreen from 'app/screens/PatientAdhocScreen';
 import PatientMobilityAidScreen from 'app/screens/PatientMobilityAidsScreen';
 import DoctorNoteScreen from 'app/screens/DoctorNoteScreen';
@@ -41,6 +42,11 @@ const Stack = createNativeStackNavigator();
 function PatientsNavigator() {
   return (
     <Stack.Navigator initialRouteName={routes.PATIENTS_SCREEN}>
+      <Stack.Screen
+        name={routes.PATIENT_HISTORY}
+        component={PatientHistoryScreen}
+        options={{ title: 'Patient history' }}
+      />
       <Stack.Screen
         name={routes.PATIENT_ADHOC}
         component={PatientAdhocScreen}

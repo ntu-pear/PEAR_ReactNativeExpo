@@ -2,6 +2,9 @@
 import React, { useState, useContext, useEffect, useCallback } from 'react';
 import {
   ImageBackground,
+  ScrollView,
+  KeyboardAvoidingView,
+  useWindowDimensions,
   View,
   StyleSheet,
   Image,
@@ -15,6 +18,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import jwt_decode from 'jwt-decode';
 import patientDraft from 'app/utility/patientDraft';
 import requestDeadline from 'app/utility/requestDeadline';
+import { canUseMobile } from 'app/utility/mobileAccess';
 import AuthContext from 'app/auth/context';
 import authStorage from 'app/auth/authStorage';
 
@@ -44,6 +48,7 @@ import colors from 'app/config/colors';
 
 function WelcomeScreen(props) {
   const { navigation } = props;
+  const compact = useWindowDimensions().width < 600;
   const apiHandlerHook = useApiHandler();
 
   // User auth context
@@ -121,6 +126,20 @@ function WelcomeScreen(props) {
         setErrorMsg(me?.data?.message || 'Could not load profile');
         return;
       }
+      if (!canUseMobile(me.data)) {
+        try {
+          await requestDeadline(userApi.logoutUser());
+        } catch (error) {
+          /* clear the local session below */
+        }
+        await authStorage.removeToken();
+        setIsError(true);
+        setStatusCode(403);
+        setErrorMsg(
+          'Mobile access is available to caregivers, supervisors and doctors. This account can use the web application.',
+        );
+        return;
+      }
       authContext.setUser(me.data);
       setStatusCode(result.status);
       setErrorMsg('');
@@ -157,77 +176,108 @@ function WelcomeScreen(props) {
         }}
       >
         <View testID={'loginContentContainer'} style={styles.overlay}>
-          <Center flex={1} style={styles.formContainer}>
-            <View style={styles.credentialsContainer}>
-              <View style={styles.logoContainer}>
-                <Image
-                  source={require('../assets/pear_v2.png')}
-                  style={styles.logo}
-                />
-                <Text style={styles.tagLine}>PEAR</Text>
-              </View>
-              <View style={styles.inputContainer}>
-                <InputField
-                  testID="username"
-                  autoCapitalize="none"
-                  isRequired
-                  showTitle={false}
-                  title="Email"
-                  value={username}
-                  onChangeText={setUsername}
-                  onEndEditing={handleUsernameError}
-                  InputLeftElement={
-                    <Icon
-                      as={<MaterialIcons name="person" />}
-                      size={5}
-                      ml="5"
-                    />
-                  }
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <SensitiveInputField
-                  testID="password"
-                  isRequired
-                  showTitle={false}
-                  title="Password"
-                  value={password}
-                  onChangeText={setPassword}
-                  onEndEditing={handlePasswordError}
-                  InputLeftElement={
-                    <Icon as={<MaterialIcons name="lock" />} size={5} ml="5" />
-                  }
-                />
-              </View>
-              <View style={styles.buttonsContainer}>
-                {isLoading ? (
-                  <LoadingWheel />
-                ) : (
-                  <AppButton
-                    title="Login"
-                    color="green"
-                    onPress={onPressLogin}
-                    testID="login"
-                    //isDisabled={isInputErrors} //for login button validation
-                  />
-                )}
-              </View>
-              <Box>
-                {isError ? (
-                  <ErrorMessage message={errorMsg} testID={'loginError'} />
-                ) : null}
-              </Box>
-              <View>
-                <Text
-                  style={styles.forgotPassword}
-                  onPress={() => navigation.navigate(routes.RESET_PASSWORD)}
+          <KeyboardAvoidingView
+            style={{ flex: 1, width: '100%' }}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          >
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="on-drag"
+              contentContainerStyle={styles.formContainer}
+            >
+              <Center w="100%">
+                <View
+                  style={[
+                    styles.credentialsContainer,
+                    {
+                      paddingHorizontal: compact ? 24 : 40,
+                      paddingBottom: compact ? 32 : 48,
+                    },
+                  ]}
                 >
-                  Forgot Password?
-                </Text>
-              </View>
-            </View>
-          </Center>
+                  <View
+                    style={[
+                      styles.logoContainer,
+                      { paddingVertical: compact ? 16 : 32 },
+                    ]}
+                  >
+                    <Image
+                      source={require('../assets/pear_v2.png')}
+                      style={[
+                        styles.logo,
+                        compact ? { width: 72, height: 108 } : null,
+                      ]}
+                    />
+                    <Text style={styles.tagLine}>PEAR</Text>
+                  </View>
+                  <View style={styles.inputContainer}>
+                    <InputField
+                      testID="username"
+                      autoCapitalize="none"
+                      isRequired
+                      showTitle={false}
+                      title="Email"
+                      value={username}
+                      onChangeText={setUsername}
+                      onEndEditing={handleUsernameError}
+                      InputLeftElement={
+                        <Icon
+                          as={<MaterialIcons name="person" />}
+                          size={5}
+                          ml="5"
+                        />
+                      }
+                    />
+                  </View>
+
+                  <View style={styles.inputContainer}>
+                    <SensitiveInputField
+                      testID="password"
+                      isRequired
+                      showTitle={false}
+                      title="Password"
+                      value={password}
+                      onChangeText={setPassword}
+                      onEndEditing={handlePasswordError}
+                      InputLeftElement={
+                        <Icon
+                          as={<MaterialIcons name="lock" />}
+                          size={5}
+                          ml="5"
+                        />
+                      }
+                    />
+                  </View>
+                  <View style={styles.buttonsContainer}>
+                    {isLoading ? (
+                      <LoadingWheel />
+                    ) : (
+                      <AppButton
+                        title="Login"
+                        color="green"
+                        onPress={onPressLogin}
+                        testID="login"
+                        //isDisabled={isInputErrors} //for login button validation
+                      />
+                    )}
+                  </View>
+                  <Box>
+                    {isError ? (
+                      <ErrorMessage message={errorMsg} testID={'loginError'} />
+                    ) : null}
+                  </Box>
+                  <View>
+                    <Text
+                      style={styles.forgotPassword}
+                      onPress={() => navigation.navigate(routes.RESET_PASSWORD)}
+                    >
+                      Forgot Password?
+                    </Text>
+                  </View>
+                </View>
+              </Center>
+            </ScrollView>
+          </KeyboardAvoidingView>
         </View>
       </TouchableWithoutFeedback>
     </ImageBackground>
@@ -236,6 +286,8 @@ function WelcomeScreen(props) {
 
 const styles = StyleSheet.create({
   background: {
+    flex: 1,
+    width: '100%',
     alignItems: 'center',
   },
   vignette: {
@@ -247,10 +299,15 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.1)',
   },
   overlay: {
+    flex: 1,
+    width: '100%',
     backgroundColor: colors.secondary_overlay_color,
   },
   formContainer: {
-    paddingHorizontal: 75,
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 24,
   },
   buttonsContainer: {
     width: '100%',
@@ -259,7 +316,8 @@ const styles = StyleSheet.create({
   credentialsContainer: {
     backgroundColor: colors.white,
     width: '100%',
-    paddingHorizontal: 50,
+    maxWidth: 560,
+    paddingHorizontal: 40,
     paddingTop: 25,
     paddingBottom: 90,
     borderRadius: 25,
@@ -270,7 +328,7 @@ const styles = StyleSheet.create({
     tintColor: colors.black,
   },
   logoContainer: {
-    padding: 50,
+    paddingHorizontal: 16,
     alignItems: 'center',
   },
   tagLine: {

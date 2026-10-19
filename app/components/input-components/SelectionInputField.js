@@ -17,7 +17,7 @@ import colors from 'app/config/colors';
 
 // Components
 import ErrorMessage from 'app/components/ErrorMessage';
-import RequiredIndicator from '../RequiredIndicator';
+import RequiredIndicator from 'app/components/RequiredIndicator';
 
 function SelectionInputField({
   testID = '',
@@ -35,8 +35,8 @@ function SelectionInputField({
   displayTextStyle = {},
   arrowIconColor = colors.grey,
 }) {
-  const [isFirstRender, setIsFirstRender] = useState(true);
-  const [error, setError] = useState({ isError: false, errorMsg: '' });
+  const invalid = isRequired && (value === 0 || value == null || value === '');
+  const error = { isError: invalid, errorMsg: '' };
   const [selectedValue, setSelectedValue] = useState(value ? value : null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredData, setFilteredData] = useState(dataArray);
@@ -44,13 +44,8 @@ function SelectionInputField({
   const { isOpen, onOpen, onClose } = useDisclose(); // Controls dropdown visibility
 
   useEffect(() => {
-    onEndEditing ? onEndEditing(isFirstRender || error.isError) : null;
-    setIsFirstRender(false);
-    setError({
-      ...error,
-      isError: isRequired && value === 0,
-    });
-  }, []);
+    onEndEditing(invalid);
+  }, [invalid, onEndEditing]);
 
   useEffect(() => {
     if (isDisabledItems.length > 0) {
@@ -62,13 +57,7 @@ function SelectionInputField({
         );
       }
     }
-  }, [isDisabledItems]);
-
-  useEffect(() => {
-    if (!isFirstRender) {
-      onEndEditing ? onEndEditing(error.isError) : null;
-    }
-  }, [error, onEndEditing]);
+  }, [isDisabledItems, value]);
 
   // Keep internal selected value in sync with prop changes (e.g. edit-mode prefills)
   useEffect(() => {
@@ -117,7 +106,9 @@ function SelectionInputField({
             ]}
           >
             {selectedValue
-              ? dataArray.find((item) => String(item.value) === String(selectedValue))?.label
+              ? dataArray.find(
+                  (item) => String(item.value) === String(selectedValue),
+                )?.label
               : placeholder}
           </Text>
           <MaterialIcons
@@ -191,12 +182,13 @@ const styles = {
   componentContainer: {
     display: 'flex',
     width: '100%',
-    marginTop: 5,
+    marginTop: 0,
+    marginBottom: 12,
     justifyContent: 'flex-start',
   },
   titleMsg: {
-    marginBottom: 5,
-    marginTop: 10,
+    marginBottom: 8,
+    marginTop: 0,
     color: colors.grey,
     ...typography.body1SemiBold,
   },

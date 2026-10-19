@@ -10,7 +10,14 @@ jest.mock('native-base', () => {
 });
 jest.mock('@expo/vector-icons', () => ({ MaterialIcons: () => null }));
 jest.mock('app/hooks/useApiHandler', () => () => ({}));
-jest.mock('app/api/user', () => ({ loginUser: jest.fn(), getUser: jest.fn() }));
+jest.mock('app/api/user', () => ({
+  loginUser: jest.fn(),
+  getUser: jest.fn(),
+  logoutUser: jest.fn(async () => ({ ok: true })),
+}));
+jest.mock('app/auth/authStorage', () => ({
+  removeToken: jest.fn(async () => {}),
+}));
 jest.mock('app/utility/patientDraft', () => ({
   clearDraft: jest.fn().mockResolvedValue(),
 }));
@@ -55,9 +62,10 @@ const press = (screen) => screen.root.findByType('AppButton').props.onPress();
 beforeEach(() => {
   jest.clearAllMocks();
   userApi.loginUser.mockReset().mockResolvedValue({ ok: true, status: 200 });
-  userApi.getUser
-    .mockReset()
-    .mockResolvedValue({ ok: true, data: { id: 'TEST-CG-1' } });
+  userApi.getUser.mockReset().mockResolvedValue({
+    ok: true,
+    data: { id: 'TEST-CG-1', roleName: 'CAREGIVER' },
+  });
 });
 afterEach(() => {
   mounted.splice(0).forEach((s) => act(() => s.unmount()));
@@ -102,6 +110,26 @@ test('profile failure cannot enter an authenticated session, and retry can succe
   expect(setUser).not.toHaveBeenCalled();
   expect(screen.root.findAllByType('LoadingWheel')).toHaveLength(0);
   await act(async () => press(screen));
-  expect(setUser).toHaveBeenCalledWith({ id: 'TEST-CG-1' });
+  expect(setUser).toHaveBeenCalledWith({
+    id: 'TEST-CG-1',
+    roleName: 'CAREGIVER',
+  });
   expect(screen.root.findAllByType('ErrorMessage')).toHaveLength(0);
 });
+
+test.each(['GUARDIAN', 'ADMIN'])(
+  'unsupported mobile role %s is logged out without entering the app',
+  async (roleName) => {
+    userApi.getUser.mockResolvedValue({
+      ok: true,
+      data: { id: 'other', roleName },
+    });
+    const s = await mount();
+    await act(async () => press(s));
+    expect(setUser).not.toHaveBeenCalled();
+    expect(userApi.logoutUser).toHaveBeenCalledTimes(1);
+    expect(s.root.findByType('ErrorMessage').props.message).toContain(
+      'web application',
+    );
+  },
+);

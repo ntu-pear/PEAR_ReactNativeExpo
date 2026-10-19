@@ -258,6 +258,9 @@ function EditPatientPreferencesScreen(props) {
   }
   return (
     <FlatList
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
+      contentContainerStyle={{ paddingBottom: 32 }}
       data={[0]}
       renderItem={() => (
         <Box key={ownerKey} alignItems="center" w="100%">
@@ -291,7 +294,7 @@ function EditPatientPreferencesScreen(props) {
               ) : null}
             </View>
             <View style={styles.saveButtonContainer}>
-              <Box width="70%">
+              <Box width="100%" maxWidth={760} px={4}>
                 <AppButton
                   title="Save"
                   color="green"
@@ -309,8 +312,11 @@ function EditPatientPreferencesScreen(props) {
 const styles = StyleSheet.create({
   formContainer: {
     alignItems: 'flex-start',
-    paddingLeft: '10%',
-    width: '90%',
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    width: '100%',
+    maxWidth: 760,
+    alignSelf: 'center',
     marginBottom: 20,
   },
   saveButtonContainer: { alignItems: 'center', marginBottom: 20 },

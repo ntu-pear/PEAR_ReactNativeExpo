@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import { Alert, StyleSheet, ActivityIndicator, Keyboard, Platform } from 'react-native';
+import {
+  Alert,
+  StyleSheet,
+  ActivityIndicator,
+  Keyboard,
+  Platform,
+} from 'react-native';
 import { VStack, View, Center } from 'native-base';
 import userApi from 'app/api/user';
 import authStorage from 'app/auth/authStorage';
@@ -17,7 +23,10 @@ function ChangePasswordScreen(props) {
   const [confirmPassword, setConfirmPassword] = useState(''); // ✅ NEW FIELD
   const [isPasswordError, setIsPasswordError] = useState(false);
 
-  const handlePasswordError = useCallback((state) => setIsPasswordError(state), []);
+  const handlePasswordError = useCallback(
+    (state) => setIsPasswordError(state),
+    [],
+  );
 
   // Server policy: ≥12 chars, ≥1 uppercase, ≥1 lowercase, ≥1 special char
   const normalize = (s) => (s || '').trim();
@@ -35,7 +44,10 @@ function ChangePasswordScreen(props) {
 
     // Step 2: Validate new vs old difference
     if (normalize(currentPassword) === normalize(newPassword)) {
-      Alert.alert('Please try again', 'New password must be different from current password.');
+      Alert.alert(
+        'Please try again',
+        'New password must be different from current password.',
+      );
       return;
     }
 
@@ -43,7 +55,10 @@ function ChangePasswordScreen(props) {
     const isPasswordFormatValid =
       passwordFormat(currentPassword) && passwordFormat(newPassword);
     if (!isPasswordFormatValid) {
-      Alert.alert('Please try again', 'Password does not follow the specified format!');
+      Alert.alert(
+        'Please try again',
+        'Password does not follow the specified format!',
+      );
       return;
     }
 
@@ -52,15 +67,16 @@ function ChangePasswordScreen(props) {
     const resp = await userApi.changePassword(
       currentPassword,
       newPassword,
-      confirmPassword
+      confirmPassword,
     );
-    
 
     if (!resp?.ok) {
       const data = resp?.data || {};
       const apiMsg =
         data?.message ||
-        (Array.isArray(data?.detail) ? data.detail.map((d) => d.msg).join('\n') : null) ||
+        (Array.isArray(data?.detail)
+          ? data.detail.map((d) => d.msg).join('\n')
+          : null) ||
         (typeof data?.detail === 'string' ? data.detail : null) ||
         'Unable to change password.';
       Alert.alert('Please try again', apiMsg);
@@ -121,7 +137,11 @@ function ChangePasswordScreen(props) {
             {isLoading ? (
               <ActivityIndicator visible />
             ) : (
-              <AppButton title="Confirm" color="green" onPress={handleOnPress} />
+              <AppButton
+                title="Confirm"
+                color="green"
+                onPress={handleOnPress}
+              />
             )}
           </View>
         </Center>
@@ -133,8 +153,11 @@ function ChangePasswordScreen(props) {
 const styles = StyleSheet.create({
   formContainer: {
     justifyContent: 'center',
-    paddingLeft: '10%',
-    width: '90%',
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    width: '100%',
+    maxWidth: 760,
+    alignSelf: 'center',
   },
   buttonsContainer: {
     width: '50%',

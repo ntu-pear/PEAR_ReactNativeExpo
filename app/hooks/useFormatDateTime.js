@@ -1,4 +1,3 @@
-
 // Function used to format date data into dd-mm-yyyy
 export default function useFormatDateTime(strDate, boolDate) {
   function formatAMPM(date) {
@@ -7,23 +6,29 @@ export default function useFormatDateTime(strDate, boolDate) {
     var ampm = hours >= 12 ? 'PM' : 'AM';
     hours = hours % 12;
     hours = hours ? hours : 12; // the hour '0' should be '12'
-    if (hours.toString().length !== 2){
+    if (hours.toString().length !== 2) {
       hours = '0' + hours;
     }
-    minutes = minutes < 10 ? '0'+minutes : minutes;
+    minutes = minutes < 10 ? '0' + minutes : minutes;
     var strTime = hours + ':' + minutes + ' ' + ampm;
     return strTime;
   }
 
-  if(strDate === 'null' || strDate === null) {
+  if (
+    !strDate ||
+    strDate === 'null' ||
+    Number.isNaN(new Date(strDate).getTime())
+  ) {
     return '-';
   }
 
-  if (boolDate){
+  if (boolDate) {
     const originalDate = new Date(strDate);
-    
+
     const day = String(originalDate.getDate()).padStart(2, '0');
-    const month = originalDate.toLocaleString('default', { month: 'short' }).toUpperCase();
+    const month = originalDate
+      .toLocaleString('default', { month: 'short' })
+      .toUpperCase();
     const year = originalDate.getFullYear();
 
     const formattedDate = `${day}-${month}-${year}`;

@@ -1,6 +1,12 @@
 // Libs
 import React, { useState, useEffect } from 'react';
-import { Platform, StyleSheet, View, Text } from 'react-native';
+import {
+  Platform,
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+} from 'react-native';
 import { VStack, Input, Icon } from 'native-base';
 import PropTypes from 'prop-types';
 
@@ -13,11 +19,11 @@ import * as validation from 'app/utility/inputValidation';
 
 // Components
 import { TextInput } from 'react-native';
-import InputField from './InputField';
+import InputField from 'app/components/input-components/InputField';
 import { MaterialIcons } from '@expo/vector-icons';
 
 function SensitiveInputField({
-  testID='',
+  testID = '',
   isRequired = false,
   autoCapitalize = 'none',
   hideError = true,
@@ -53,15 +59,29 @@ function SensitiveInputField({
           onChangeText={onChangeText}
           InputLeftElement={InputLeftElement}
           InputRightElement={
-            <Icon
-              as={
-                <MaterialIcons testID={`${testID}_mask`} name={show ? 'visibility' : 'visibility-off'} />
-              }
-              color={colors.black}
-              mr="5"
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel={show ? 'Hide password' : 'Show password'}
               onPress={handleVisibilityToggle}
-              size={5}
-            />
+              style={{
+                minWidth: 48,
+                minHeight: 48,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Icon
+                as={
+                  <MaterialIcons
+                    testID={`${testID}_mask`}
+                    name={show ? 'visibility' : 'visibility-off'}
+                  />
+                }
+                color={colors.black}
+                mr="0"
+                size={5}
+              />
+            </TouchableOpacity>
           }
           dataType={dataType}
           type={show ? 'text' : 'password'}
@@ -93,7 +113,7 @@ const styles = StyleSheet.create({
   ComponentContainer: {
     display: 'flex',
     width: '100%',
-    marginTop: 5,
+    marginTop: 0,
     justifyContent: 'flex-start',
   },
 });
