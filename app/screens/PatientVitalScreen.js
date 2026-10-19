@@ -452,7 +452,8 @@ function PatientVitalScreen(props) {
           onScrollEndDrag={() => setIsScrolling(false)}
           onRefresh={refreshVitalData}
           refreshing={isLoading}
-          height={'72%'}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ flexGrow: 1 }}
           ListEmptyComponent={() =>
             noDataMessage(
               statusCode,
@@ -499,7 +500,7 @@ function PatientVitalScreen(props) {
           }}
         />
       ) : (
-        <View style={{ height: '72%', marginBottom: 20, marginHorizontal: 40 }}>
+        <View style={{ flex: 1, marginBottom: 20, marginHorizontal: 40 }}>
           <DynamicTable
             headerData={getTableHeaderData()}
             rowData={getTableRowData()}
@@ -520,7 +521,11 @@ function PatientVitalScreen(props) {
         </View>
       )}
       <View style={styles.addBtn}>
-        <AddButton title="Add Vital" onPress={handleOnClickAddVital} />
+        <AddButton
+          containerStyle={{ flex: 0, marginTop: 0, marginBottom: 0 }}
+          title="Add Vital"
+          onPress={handleOnClickAddVital}
+        />
       </View>
       <AddPatientVitalModalNEW
         showModal={isModalVisible}
@@ -539,6 +544,8 @@ function PatientVitalScreen(props) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.white,
+    flex: 1,
+    paddingBottom: 10,
   },
   logContainer: {
     padding: 20,
@@ -546,7 +553,8 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
   },
   addBtn: {
-    marginTop: '0.01%',
+    marginTop: 8,
+    paddingBottom: 8,
   },
 });
 

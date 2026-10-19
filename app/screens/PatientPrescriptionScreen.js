@@ -516,7 +516,8 @@ function PatientPrescriptionScreen(props) {
           onScrollEndDrag={() => setIsScrolling(false)}
           onRefresh={refreshPrescriptionData}
           refreshing={isLoading}
-          height={'72%'}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ flexGrow: 1 }}
           ListEmptyComponent={() =>
             noDataMessage(
               statusCode,
@@ -569,7 +570,7 @@ function PatientPrescriptionScreen(props) {
           }}
         />
       ) : (
-        <View style={{ height: '72%', marginBottom: 20, marginHorizontal: 40 }}>
+        <View style={{ flex: 1, marginBottom: 20, marginHorizontal: 40 }}>
           <DynamicTable
             headerData={getTableHeaderData()}
             rowData={getTableRowData()}
@@ -589,6 +590,7 @@ function PatientPrescriptionScreen(props) {
       )}
       <View style={styles.addBtn}>
         <AddButton
+          containerStyle={{ flex: 0, marginTop: 0, marginBottom: 0 }}
           testID={`${testID}_addPrescription`}
           title="Add Prescription"
           onPress={handleOnClickAddPrescription}
@@ -612,6 +614,8 @@ function PatientPrescriptionScreen(props) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.white,
+    flex: 1,
+    paddingBottom: 10,
   },
   logContainer: {
     padding: 20,
@@ -619,7 +623,8 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
   },
   addBtn: {
-    marginTop: '0.01%',
+    marginTop: 8,
+    paddingBottom: 8,
   },
 });
 

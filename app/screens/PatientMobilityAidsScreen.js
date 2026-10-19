@@ -43,20 +43,19 @@ import MobilityAidItem from 'app/components/MobilityAidItem';
 import AddPatientMobilityAidModal from 'app/components/AddPatientMobilityAidModal';
 
 function PatientMobilityAidScreen(props) {
- // --- Retrieve patientID safely from navigation params ---
-let { patientID, patientId, patientProfile } = props.route.params ?? {};
+  // --- Retrieve patientID safely from navigation params ---
+  let { patientID, patientId, patientProfile } = props.route.params ?? {};
 
-if (!patientID && !patientId && patientProfile) {
-  patientID =
-    patientProfile.patientID ||
-    patientProfile.patientId ||
-    patientProfile.PatientID ||
-    patientProfile.id;
-}
-if (patientId) patientID = patientId;
-console.log('[MOBILITY] Route params:', props.route.params);
-console.log('[MOBILITY] Using patientID:', patientID);
-
+  if (!patientID && !patientId && patientProfile) {
+    patientID =
+      patientProfile.patientID ||
+      patientProfile.patientId ||
+      patientProfile.PatientID ||
+      patientProfile.id;
+  }
+  if (patientId) patientID = patientId;
+  console.log('[MOBILITY] Route params:', props.route.params);
+  console.log('[MOBILITY] Using patientID:', patientID);
 
   const testID = `mobility_aid_screen_${patientID}`;
 
@@ -194,24 +193,26 @@ console.log('[MOBILITY] Using patientID:', patientID);
       const response = await readPatientV1(patientID);
       const p = response?.data?.data || response?.data || {};
       console.log('[MOBILITY] Patient data from API:', p);
-  
+
       // Normalize key names and assign sensible fallbacks
       const preferredName =
         p.preferredName || p.PreferredName || p.fullName || p.FullName || '';
       const firstName =
         p.firstName || p.FirstName || preferredName?.split(' ')[0] || '';
       const lastName =
-        p.lastName || p.LastName || preferredName?.split(' ').slice(1).join(' ') || '';
-      const profilePicture =
-        p.profilePicture || p.ProfilePicture || null;
-  
+        p.lastName ||
+        p.LastName ||
+        preferredName?.split(' ').slice(1).join(' ') ||
+        '';
+      const profilePicture = p.profilePicture || p.ProfilePicture || null;
+
       setPatientData({
         preferredName,
         firstName,
         lastName,
         profilePicture,
       });
-  
+
       setIsError(false);
       setIsRetry(false);
       setStatusCode(200);
@@ -224,8 +225,7 @@ console.log('[MOBILITY] Using patientID:', patientID);
       setIsRetry(true);
     }
   };
-  
-  
+
   // Show form to add mobility aid when add button is clicked
   const handleOnClickAddMobility = () => {
     setIsModalVisible(true);
@@ -354,24 +354,23 @@ console.log('[MOBILITY] Using patientID:', patientID);
       const isRecoveredDisplay = item.isRecovered
         ? 'Fully Recovered'
         : 'Not Recovered';
-  
+
       // ✅ Fix invalid or empty date values
       let displayDate = 'N/A';
       if (item.date && !isNaN(new Date(item.date).getTime())) {
         displayDate = formatDate(new Date(item.date), true);
       }
-  
+
       let rowData = [
         item.mobilityListDesc,
         item.mobilityRemark,
         isRecoveredDisplay,
         displayDate,
       ];
-  
+
       return rowData;
     });
   };
-  
 
   const getTableHeaderData = () => {
     return ['Mobility Aids', 'Remark', 'Condition', 'Date'];
@@ -435,7 +434,8 @@ console.log('[MOBILITY] Using patientID:', patientID);
           onScrollEndDrag={() => setIsScrolling(false)}
           onRefresh={refreshMobilityData}
           refreshing={isLoading}
-          height={'72%'}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ flexGrow: 1 }}
           ListEmptyComponent={() =>
             noDataMessage(
               statusCode,
@@ -467,11 +467,14 @@ console.log('[MOBILITY] Using patientID:', patientID);
                       mobilityRemarks={item.mobilityRemark}
                       isRecovered={item.isRecovered}
                       mobilityListDesc={item.mobilityListDesc}
-                      date={item.date && !isNaN(new Date(item.date).getTime()) ? item.date : null}
+                      date={
+                        item.date && !isNaN(new Date(item.date).getTime())
+                          ? item.date
+                          : null
+                      }
                       onDelete={() => handleDeleteMobilityAid(item.mobilityId)}
                       onEdit={() => handleEditMobilityAid(item.mobilityId)}
                     />
-
                   </TouchableOpacity>
                 }
               />
@@ -479,7 +482,7 @@ console.log('[MOBILITY] Using patientID:', patientID);
           }}
         />
       ) : (
-        <View style={{ height: '72%', marginBottom: 20, marginHorizontal: 40 }}>
+        <View style={{ flex: 1, marginBottom: 20, marginHorizontal: 40 }}>
           <DynamicTable
             headerData={getTableHeaderData()}
             rowData={getTableRowData()}
@@ -499,6 +502,7 @@ console.log('[MOBILITY] Using patientID:', patientID);
       )}
       <View style={styles.addBtn}>
         <AddButton
+          containerStyle={{ flex: 0, marginTop: 0, marginBottom: 0 }}
           testID={`${testID}_addMobilityAid`}
           title="Add Mobility Aid"
           onPress={handleOnClickAddMobility}
@@ -522,6 +526,8 @@ console.log('[MOBILITY] Using patientID:', patientID);
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.white,
+    flex: 1,
+    paddingBottom: 10,
   },
   logContainer: {
     padding: 20,
@@ -529,7 +535,8 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
   },
   addBtn: {
-    marginTop: '0.01%',
+    marginTop: 8,
+    paddingBottom: 8,
   },
 });
 

@@ -876,7 +876,7 @@ function PatientsScreen({ navigation }) {
                 onPress={() => navigation.navigate(routes.MANAGE_MEDICATION)}
                 testID="patients_manage_medication"
               >
-                Centre Medication Records
+                Centre medication courses
               </Button>
             </>
           )}

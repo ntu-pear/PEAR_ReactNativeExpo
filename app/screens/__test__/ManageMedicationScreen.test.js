@@ -43,11 +43,12 @@ const meds = (id = 'Patient-A', nameId = 'Drug-A') => ({
   },
 });
 let screen;
+const navigation = { navigate: jest.fn() };
 const mount = async (role = 'SUPERVISOR') => {
   await act(async () => {
     screen = create(
       <AuthContext.Provider value={{ user: { roleName: role, id: 'Actor-X' } }}>
-        <ManageMedicationScreen />
+        <ManageMedicationScreen navigation={navigation} />
       </AuthContext.Provider>,
     );
   });
@@ -284,4 +285,64 @@ test('leaving a patient during paging prevents remaining pages and old results',
   expect(text('Synthetic drug A')).toBe(false);
   expect(text('Synthetic drug B')).toBe(true);
   expect(patient.listPatientMedicationsV1).toHaveBeenCalledTimes(2);
+});
+
+test('patient name search is server-side, preserves scope, and resets paging and selection', async () => {
+  patient.listMyPatientsV1.mockResolvedValue({
+    ...patients,
+    data: { ...patients.data, totalPages: 3 },
+  });
+  await mount();
+  await press('Next patients');
+  await press('Synthetic A');
+  await act(async () =>
+    screen.root
+      .findByProps({ testID: 'medication_patient_search' })
+      .props.onChangeText('  Synthetic B  '),
+  );
+  await press('Search patients');
+  expect(patient.listMyPatientsV1).toHaveBeenLastCalledWith(
+    'Actor-X',
+    'SUPERVISOR',
+    expect.objectContaining({ pageNo: 0, name: 'Synthetic B' }),
+  );
+  expect(
+    screen.root.findAllByProps({ testID: 'medication_record_panel' }),
+  ).toHaveLength(0);
+  expect(patient.listPatientsV1).not.toHaveBeenCalled();
+  await press('All Patients');
+  expect(patient.listPatientsV1).toHaveBeenLastCalledWith(
+    expect.objectContaining({ pageNo: 0, name: 'Synthetic B' }),
+  );
+  await press('Clear search');
+  expect(patient.listPatientsV1.mock.calls.at(-1)[0]).not.toHaveProperty(
+    'name',
+  );
+});
+
+test('supervisor course actions navigate with the selected patient and course without writing', async () => {
+  await mount();
+  await press('Synthetic A');
+  await press('Add course');
+  expect(navigation.navigate).toHaveBeenLastCalledWith(
+    expect.any(String),
+    expect.objectContaining({
+      patientId: 'Patient-A',
+      courseEditor: expect.objectContaining({ mode: 'add' }),
+    }),
+  );
+  await press('Edit course');
+  expect(navigation.navigate).toHaveBeenLastCalledWith(
+    expect.any(String),
+    expect.objectContaining({
+      patientId: 'Patient-A',
+      courseEditor: expect.objectContaining({
+        mode: 'edit',
+        medicationId: 'Record-Patient-A',
+      }),
+    }),
+  );
+  expect(text('Scheduled time: 09:00')).toBe(true);
+  await press('Manage patient courses');
+  expect(navigation.navigate.mock.calls.at(-1)[1].courseEditor).toBeUndefined();
 });

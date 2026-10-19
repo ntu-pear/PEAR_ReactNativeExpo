@@ -168,7 +168,7 @@ function DoctorNoteScreen(props) {
           </TouchableOpacity>
         </View>
       )}
-      <View style={{ justifyContent: 'space-between' }}>
+      <View style={{ flex: 1, justifyContent: 'space-between' }}>
         <View style={{ alignSelf: 'center', marginTop: 15, maxHeight: 120 }}>
           {!isEmptyObject(patientData) ? (
             <ProfileNameButton
@@ -218,7 +218,8 @@ function DoctorNoteScreen(props) {
             onScrollEndDrag={() => setIsScrolling(false)}
             onRefresh={refreshPageData}
             refreshing={isLoading}
-            height={'72%'}
+            style={{ flex: 1 }}
+            contentContainerStyle={{ flexGrow: 1 }}
             ListEmptyComponent={() =>
               noDataMessage(
                 statusCode,
@@ -254,9 +255,7 @@ function DoctorNoteScreen(props) {
             }}
           />
         ) : (
-          <View
-            style={{ height: '72%', marginBottom: 20, marginHorizontal: 40 }}
-          >
+          <View style={{ flex: 1, marginBottom: 20, marginHorizontal: 40 }}>
             <DynamicTable
               headerData={getTableHeaderData()}
               rowData={getTableRowData()}
@@ -282,6 +281,8 @@ function DoctorNoteScreen(props) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.white,
+    flex: 1,
+    paddingBottom: 10,
   },
   logContainer: {
     padding: 20,

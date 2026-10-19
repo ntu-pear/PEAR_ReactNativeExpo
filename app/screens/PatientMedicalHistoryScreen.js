@@ -140,7 +140,9 @@ function PatientMedicalHistory(props) {
   // Get medical history data from backend
   const getHxData = async () => {
     if (patientID) {
-      const response = await patientApi.listPatientMedicalHistoriesV1(patientID);
+      const response = await patientApi.listPatientMedicalHistoriesV1(
+        patientID,
+      );
       if (response.ok) {
         setOriginalList([...response.data.data]);
         setData(parseHxData([...response.data.data]));
@@ -164,14 +166,16 @@ function PatientMedicalHistory(props) {
   // Parse data
   const parseHxData = (tempData) => {
     return tempData.map((item) => ({
-      medicalHistoryId: item.medicalHistoryId ?? item.id ?? item.medical_history_id,
-      informationSource: item.informationSource ?? item.information_source ?? '',
+      medicalHistoryId:
+        item.medicalHistoryId ?? item.id ?? item.medical_history_id,
+      informationSource:
+        item.informationSource ?? item.information_source ?? '',
       medicalDetails: item.medicalDetails ?? item.medical_details ?? '',
       medicalRemarks: item.medicalRemarks ?? item.medical_remarks ?? '',
-      medicalEstimatedDate: item.medicalEstimatedDate ?? item.estimated_date ?? item.date ?? null,
+      medicalEstimatedDate:
+        item.medicalEstimatedDate ?? item.estimated_date ?? item.date ?? null,
     }));
   };
-  
 
   // Get patient data from backend
   const getPatientData = async () => {
@@ -206,7 +210,10 @@ function PatientMedicalHistory(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.addPatientMedicalHistoryV1(patientID, medData);
+    const result = await patientApi.addPatientMedicalHistoryV1(
+      patientID,
+      medData,
+    );
     if (result.ok) {
       console.log('submitting medical history data', medData);
       alertTitle = 'Sucessfully added medical history';
@@ -258,7 +265,10 @@ function PatientMedicalHistory(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.deletePatientMedicalHistoryV1(patientID, hxID);
+    const result = await patientApi.deletePatientMedicalHistoryV1(
+      patientID,
+      hxID,
+    );
     if (result.ok) {
       refreshData();
       setIsModalVisible(false);
@@ -371,7 +381,8 @@ function PatientMedicalHistory(props) {
           onScrollEndDrag={() => setIsScrolling(false)}
           onRefresh={refreshData}
           refreshing={isLoading}
-          height={'72%'}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ flexGrow: 1 }}
           ListEmptyComponent={() =>
             noDataMessage(
               statusCode,
@@ -411,7 +422,7 @@ function PatientMedicalHistory(props) {
           }}
         />
       ) : (
-        <View style={{ height: '72%', marginBottom: 20, marginHorizontal: 40 }}>
+        <View style={{ flex: 1, marginBottom: 20, marginHorizontal: 40 }}>
           <DynamicTable
             headerData={getTableHeaderData()}
             rowData={getTableRowData()}
@@ -430,7 +441,11 @@ function PatientMedicalHistory(props) {
         </View>
       )}
       <View style={styles.addBtn}>
-        <AddButton title="Add Medical History" onPress={handleOnClickAddHx} />
+        <AddButton
+          containerStyle={{ flex: 0, marginTop: 0, marginBottom: 0 }}
+          title="Add Medical History"
+          onPress={handleOnClickAddHx}
+        />
       </View>
       <AddPatientMedicalHistoryModal
         showModal={isModalVisible}
@@ -447,6 +462,8 @@ function PatientMedicalHistory(props) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.white,
+    flex: 1,
+    paddingBottom: 10,
   },
   medContainer: {
     padding: 20,
@@ -454,7 +471,8 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
   },
   addBtn: {
-    marginTop: '0.01%',
+    marginTop: 8,
+    paddingBottom: 8,
   },
 });
 

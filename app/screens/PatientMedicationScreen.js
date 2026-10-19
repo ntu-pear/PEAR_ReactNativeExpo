@@ -1,5 +1,5 @@
 // Libs
-import React, { useContext, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Alert, Keyboard, StyleSheet, TouchableOpacity } from 'react-native';
 import { FlatList, View } from 'native-base';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -71,6 +71,8 @@ function PatientMedicationScreen(props) {
   const { user } = useContext(AuthContext);
 
   // States
+  const handledCourseEditor = useRef(null);
+  const courseEditorHandlers = useRef(null);
   const courseSaving = useRef(false);
   const [isSavingCourse, setIsSavingCourse] = useState(false);
   const [courseUncertain, setCourseUncertain] = useState(false);
@@ -402,6 +404,50 @@ function PatientMedicationScreen(props) {
       onRecorded: refreshMedData,
     });
   };
+
+  courseEditorHandlers.current = {
+    add: handleOnClickAddMedication,
+    edit: handleEditMedication,
+  };
+  const requestedEditor = props.route.params?.courseEditor;
+  useEffect(() => {
+    if (!requestedEditor || isLoading || isError || !isDataInitialized) return;
+    const key = JSON.stringify([patientID, requestedEditor]);
+    if (handledCourseEditor.current === key) return;
+    if (String(patientData.patientID ?? patientData.id) !== String(patientID))
+      return;
+    handledCourseEditor.current = key;
+    navigation.setParams?.({ courseEditor: undefined });
+    if (
+      String(user?.roleName || user?.role || '').toUpperCase() !== 'SUPERVISOR'
+    )
+      return;
+    if (requestedEditor.mode === 'add') courseEditorHandlers.current.add();
+    else if (
+      requestedEditor.mode === 'edit' &&
+      originalUnparsedData.some(
+        (row) =>
+          String(row.medicationID) === String(requestedEditor.medicationId) &&
+          String(row.patientID) === String(patientID),
+      )
+    )
+      courseEditorHandlers.current.edit(requestedEditor.medicationId);
+    else
+      Alert.alert(
+        'Course unavailable',
+        'Reload this patient before editing the course.',
+      );
+  }, [
+    requestedEditor,
+    patientID,
+    patientData,
+    originalUnparsedData,
+    isLoading,
+    isError,
+    isDataInitialized,
+    user,
+    navigation,
+  ]);
 
   return isLoading ? (
     <ActivityIndicator visible />

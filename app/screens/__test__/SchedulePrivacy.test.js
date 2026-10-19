@@ -51,6 +51,7 @@ jest.mock('app/api/schedule', () => ({
 }));
 jest.mock('app/components/ProfileNameButton', () => 'MockProfile');
 jest.mock('app/components/ActivityIndicator', () => 'MockLoading');
+jest.mock('app/components/AppButton', () => 'MockButton');
 jest.mock(
   'app/components/filter-components/SearchFilterBar',
   () => 'MockFilters',
@@ -352,4 +353,14 @@ test('a prior filter callback cannot restore old activities after a fresh read f
   expect(tree.root.findAllByType('MockCard')).toHaveLength(0);
   expect(tree.root.findAllByType('MockProfile')).toHaveLength(0);
   expect(JSON.stringify(tree.toJSON())).toMatch(/service.*unavailable/);
+});
+
+test('an invalid route date shows a bounded error and disables previous week without a request', async () => {
+  await render({ patientID: '7', date: '2026-02-31' });
+  expect(schedule.getPatientScheduleV1).not.toHaveBeenCalled();
+  expect(
+    tree.root.findByProps({ testID: 'patient_schedule_previous' }).props
+      .isDisabled,
+  ).toBe(true);
+  expect(JSON.stringify(tree.toJSON())).toContain('Select a valid saved week');
 });

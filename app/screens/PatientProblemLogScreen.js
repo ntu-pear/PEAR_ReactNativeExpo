@@ -172,13 +172,15 @@ function PatientProblemLog(props) {
   const parseLogData = (tempData) => {
     return tempData.map((item) => ({
       problemLogID: item.problemLogID ?? item.problem_log_id ?? item.id,
-      problemLogRemarks: item.problemLogRemarks ?? item.problem_log_remarks ?? '',
+      problemLogRemarks:
+        item.problemLogRemarks ?? item.problem_log_remarks ?? '',
       authorName: item.authorName ?? item.author_name ?? '',
-      problemLogListDesc: item.problemLogListDesc ?? item.problem_log_list_desc ?? '',
-      createdDateTime: item.createdDateTime ?? item.created_at ?? item.date ?? null,
+      problemLogListDesc:
+        item.problemLogListDesc ?? item.problem_log_list_desc ?? '',
+      createdDateTime:
+        item.createdDateTime ?? item.created_at ?? item.date ?? null,
     }));
   };
-  
 
   // Get patient data from backend
   const getPatientData = async () => {
@@ -217,7 +219,7 @@ function PatientProblemLog(props) {
       patientID,
       tempLogFormData,
     );
-    
+
     if (result.ok) {
       console.log('submitting problem log data', tempLogFormData);
       refreshLogData();
@@ -268,7 +270,7 @@ function PatientProblemLog(props) {
       formData.problemLogID,
       tempFormData,
     );
-    
+
     if (result.ok) {
       refreshLogData();
       setIsModalVisible(false);
@@ -318,11 +320,8 @@ function PatientProblemLog(props) {
     let alertTitle = '';
     let alertDetails = '';
 
-    const result = await patientApi.deletePatientProblemLogV1(
-      patientID,
-      logID,
-    );
-    
+    const result = await patientApi.deletePatientProblemLogV1(patientID, logID);
+
     if (result.ok) {
       refreshLogData();
       setIsModalVisible(false);
@@ -437,7 +436,8 @@ function PatientProblemLog(props) {
           onScrollEndDrag={() => setIsScrolling(false)}
           onRefresh={refreshLogData}
           refreshing={isLoading}
-          height={'72%'}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ flexGrow: 1 }}
           ListEmptyComponent={() =>
             noDataMessage(
               statusCode,
@@ -478,7 +478,7 @@ function PatientProblemLog(props) {
           }}
         />
       ) : (
-        <View style={{ height: '72%', marginBottom: 20, marginHorizontal: 40 }}>
+        <View style={{ flex: 1, marginBottom: 20, marginHorizontal: 40 }}>
           <DynamicTable
             headerData={getTableHeaderData()}
             rowData={getTableRowData()}
@@ -499,7 +499,11 @@ function PatientProblemLog(props) {
         </View>
       )}
       <View style={styles.addBtn}>
-        <AddButton title="Add Problem Log" onPress={handleOnClickAddLog} />
+        <AddButton
+          containerStyle={{ flex: 0, marginTop: 0, marginBottom: 0 }}
+          title="Add Problem Log"
+          onPress={handleOnClickAddLog}
+        />
       </View>
       <AddPatientProblemLogModal
         showModal={isModalVisible}
@@ -518,6 +522,8 @@ function PatientProblemLog(props) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.white,
+    flex: 1,
+    paddingBottom: 10,
   },
   logContainer: {
     padding: 20,
@@ -525,7 +531,8 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
   },
   addBtn: {
-    marginTop: '0.01%',
+    marginTop: 8,
+    paddingBottom: 8,
   },
 });
 

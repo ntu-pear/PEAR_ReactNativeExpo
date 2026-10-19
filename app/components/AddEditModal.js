@@ -1,7 +1,7 @@
 // Libs
 import React, { useEffect, useState } from 'react';
 import { Modal, Button, Text } from 'native-base';
-import { StyleSheet, Keyboard, View } from 'react-native';
+import { StyleSheet, Keyboard, View, useWindowDimensions } from 'react-native';
 
 // Components
 import AppButton from './AppButton';
@@ -19,6 +19,7 @@ function AddEditModal({
   handleSubmit,
   isInputErrors = false,
 }) {
+  const { width } = useWindowDimensions();
   const [keyboardOffset, setKeyboardOffset] = useState(0);
 
   useEffect(() => {
@@ -52,7 +53,7 @@ function AddEditModal({
           { marginBottom: keyboardOffset }, // Adjust margin based on keyboardOffset
         ]}
       >
-        <Modal.Content maxWidth="65%">
+        <Modal.Content width={width < 600 ? '92%' : '65%'} maxWidth={760}>
           <Modal.CloseButton _icon={{ color: colors.white }} />
           <Modal.Header style={styles.modalHeader}>
             <Text style={styles.modalHeaderText}>
@@ -86,6 +87,7 @@ function AddEditModal({
 }
 
 const styles = StyleSheet.create({
+  centeredView: { width: '100%', alignItems: 'center', maxHeight: '90%' },
   modalHeader: {
     backgroundColor: colors.green, // Change to your preferred green color
     alignItems: 'center',

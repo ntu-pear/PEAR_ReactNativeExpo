@@ -118,11 +118,20 @@ function PatientScheduleScreen({ route }) {
     ? snapshot.weekly
     : [];
 
+  let selectedWeek;
+  try {
+    patientScheduleParameters(patientID, date);
+    selectedWeek = weekMonday(date || centreDay());
+  } catch {
+    selectedWeek = null;
+  }
   return (
     <View style={styles.container}>
       <View style={{ paddingHorizontal: 16, paddingTop: 12 }}>
         <Text testID="patient_schedule_week">
-          Saved week starting {weekMonday(date || centreDay())}
+          {selectedWeek
+            ? `Saved week starting ${selectedWeek}`
+            : 'Select a valid saved week'}
         </Text>
         <View style={{ flexDirection: 'row', marginHorizontal: -6 }}>
           <View style={{ flex: 1, marginHorizontal: 6 }}>
@@ -130,9 +139,10 @@ function PatientScheduleScreen({ route }) {
               title="Previous week"
               color="grey"
               testID="patient_schedule_previous"
+              isDisabled={!selectedWeek}
               onPress={() =>
                 navigation.setParams({
-                  date: shiftDay(weekMonday(date || centreDay()), -7),
+                  date: shiftDay(selectedWeek, -7),
                 })
               }
             />

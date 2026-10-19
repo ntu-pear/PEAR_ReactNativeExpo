@@ -65,7 +65,7 @@ function PatientsNavigator() {
       <Stack.Screen
         name={routes.MANAGE_MEDICATION}
         component={ManageMedicationScreen}
-        options={{ headerShown: true, title: 'Centre Medication Records' }}
+        options={{ headerShown: true, title: 'Centre medication courses' }}
       />
       <Stack.Screen
         name={routes.PATIENTS_SCREEN}

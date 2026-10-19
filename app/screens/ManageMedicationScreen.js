@@ -15,6 +15,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useFocusEffect, useIsFocused } from '@react-navigation/native';
+import routes from 'app/navigation/routes';
 import AuthContext from 'app/auth/context';
 import patientApi from 'app/api/patient';
 import requestDeadline from 'app/utility/requestDeadline';
@@ -39,12 +40,14 @@ const Control = ({ title, disabled = false, onPress, testID }) => (
   </TouchableOpacity>
 );
 
-export default function ManageMedicationScreen() {
+export default function ManageMedicationScreen({ navigation }) {
   const { user } = useContext(AuthContext);
   const permitted =
     String(user?.roleName || user?.role || '').toUpperCase() === 'SUPERVISOR';
   const actor = currentUserId(user);
   const focused = useIsFocused();
+  const [searchDraft, setSearchDraft] = useState('');
+  const [patientSearch, setPatientSearch] = useState('');
   const [mode, setMode] = useState('myPatients');
   const [page, setPage] = useState(0);
   const [pages, setPages] = useState(0);
@@ -62,8 +65,8 @@ export default function ManageMedicationScreen() {
   const [to, setTo] = useState('');
 
   const listRequest = useMemo(
-    () => ({ mode, page, reload }),
-    [mode, page, reload],
+    () => ({ mode, page, reload, name: patientSearch }),
+    [mode, page, reload, patientSearch],
   );
 
   useFocusEffect(
@@ -71,7 +74,7 @@ export default function ManageMedicationScreen() {
       if (!permitted) {
         return undefined;
       }
-      const { mode: requestMode, page: requestPage } = listRequest;
+      const { mode: requestMode, page: requestPage, name } = listRequest;
       let active = true;
       setLoading(true);
       setError('');
@@ -84,6 +87,7 @@ export default function ManageMedicationScreen() {
             pageSize: 10,
             mask: true,
             require_auth: true,
+            ...(name ? { name } : {}),
           };
           const res = await requestDeadline(
             requestMode === 'myPatients'
@@ -212,9 +216,38 @@ export default function ManageMedicationScreen() {
       name: patient.name ?? patient.fullName ?? 'Patient',
     });
   };
+  const openCourses = (mode, medicationId) => {
+    if (!permitted || !selected?.id) return;
+    navigation.navigate(routes.PATIENT_MEDICATION, {
+      patientId: selected.id,
+      courseEditor: mode
+        ? { mode, medicationId, requestId: String(Date.now()) }
+        : undefined,
+    });
+  };
+  const applyPatientSearch = (value) => {
+    setSelected(null);
+    setPage(0);
+    setPatientSearch(value.trim());
+  };
+  const courseTime = (value) =>
+    String(value || '')
+      .split(',')
+      .map((part) => {
+        const time = part.trim();
+        return /^([01]\d|2[0-3])[0-5]\d$/.test(time)
+          ? time.slice(0, 2) + ':' + time.slice(2)
+          : time || 'Unavailable';
+      })
+      .join(', ');
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Centre Medication Records</Text>
+    <ScrollView
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
+      style={styles.container}
+      contentContainerStyle={styles.content}
+    >
+      <Text style={styles.title}>Centre medication courses</Text>
       <Text testID="medication_history_scope">
         Medication courses are shown here. Administration, paused and stopped
         event history is not available.
@@ -233,6 +266,35 @@ export default function ManageMedicationScreen() {
           onPress={() => changeMode('allPatients')}
         />
       </View>
+      <Text style={styles.label}>Find a patient by name</Text>
+      <View style={styles.row}>
+        <TextInput
+          testID="medication_patient_search"
+          accessibilityLabel="Patient name"
+          placeholder="Patient name"
+          value={searchDraft}
+          onChangeText={setSearchDraft}
+          onSubmitEditing={() => applyPatientSearch(searchDraft)}
+          returnKeyType="search"
+          style={[styles.input, styles.searchInput]}
+        />
+        <Control
+          title="Search patients"
+          testID="medication_patient_search_apply"
+          onPress={() => applyPatientSearch(searchDraft)}
+        />
+        <Control
+          title="Clear search"
+          disabled={!patientSearch && !searchDraft}
+          onPress={() => {
+            setSearchDraft('');
+            applyPatientSearch('');
+          }}
+        />
+      </View>
+      {patientSearch ? (
+        <Text>Patient name contains: {patientSearch}</Text>
+      ) : null}
       {loading && <ActivityIndicator testID="medication_patients_loading" />}
       {!!error && (
         <View>
@@ -272,6 +334,18 @@ export default function ManageMedicationScreen() {
       {selected && (
         <View testID="medication_record_panel">
           <Text style={styles.title}>{selected.name}</Text>
+          <View style={styles.row}>
+            <Control
+              title="Add course"
+              testID="medication_add_course"
+              onPress={() => openCourses('add')}
+            />
+            <Control
+              title="Manage patient courses"
+              testID="medication_manage_courses"
+              onPress={() => openCourses()}
+            />
+          </View>
           <Text>
             Filter all courses for this patient by overlapping dates. Leave both
             blank to include every date, including ended and ongoing courses.
@@ -327,9 +401,7 @@ export default function ManageMedicationScreen() {
             shownPage.map((record) => (
               <View key={String(record.medicationID)} style={styles.record}>
                 <Text style={styles.drug}>{record.drugName}</Text>
-                <Text>
-                  Administer time: {record.administerTime || 'Unavailable'}
-                </Text>
+                <Text>Scheduled time: {courseTime(record.administerTime)}</Text>
                 <Text>Dosage: {record.dosage || 'Unavailable'}</Text>
                 <Text>Instruction: {record.instruction || 'Unavailable'}</Text>
                 <Text>
@@ -341,6 +413,11 @@ export default function ManageMedicationScreen() {
                     : 'Ongoing'}
                 </Text>
                 <Text>Remarks: {record.prescriptionRemarks || 'None'}</Text>
+                <Control
+                  title="Edit course"
+                  testID={`medication_edit_course_${record.medicationID}`}
+                  onPress={() => openCourses('edit', record.medicationID)}
+                />
               </View>
             ))}
           <View style={styles.row}>
@@ -381,6 +458,8 @@ const styles = StyleSheet.create({
   },
   disabled: { opacity: 0.5 },
   buttonText: { color: '#fff', fontSize: 16 },
+  label: { fontSize: 16, marginTop: 12 },
+  searchInput: { flexGrow: 1 },
   input: {
     minWidth: 190,
     borderWidth: 1,
