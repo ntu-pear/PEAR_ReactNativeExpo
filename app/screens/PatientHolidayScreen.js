@@ -612,14 +612,15 @@ function PatientHoliday(props) {
         onScrollEndDrag={() => setIsScrolling(false)}
         onRefresh={refreshPhotoData}
         refreshing={isLoading}
-        height={'70%'}
+        style={styles.list}
+        contentContainerStyle={styles.listContent}
         ListEmptyComponent={() =>
           noDataMessage(
             statusCode,
             isLoading,
             isError,
             'No holidays found',
-            true,
+            false,
           )
         }
         data={photoData}
@@ -688,7 +689,11 @@ function PatientHoliday(props) {
       />
 
       <View style={styles.addBtn}>
-        <AddButton title="Add Holiday" onPress={handleOnClickAddLog} />
+        <AddButton
+          title="Add Holiday"
+          onPress={handleOnClickAddLog}
+          containerStyle={styles.addButtonContainer}
+        />
       </View>
       <AddPatientPhotoModal
         showModal={isModalVisible}
@@ -708,7 +713,19 @@ function PatientHoliday(props) {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     backgroundColor: colors.white,
+  },
+  list: {
+    flex: 1,
+  },
+  listContent: {
+    flexGrow: 1,
+    paddingVertical: 16,
+  },
+  addButtonContainer: {
+    flex: 0,
+    marginTop: 0,
   },
   holidayContainer: {
     padding: 20,
@@ -716,7 +733,8 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.white,
   },
   addBtn: {
-    marginTop: '0.01%',
+    flexShrink: 0,
+    paddingVertical: 8,
   },
 });
 
