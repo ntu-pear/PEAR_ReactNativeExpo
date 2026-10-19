@@ -93,43 +93,45 @@ export default function AccountViewScreen({ navigation }) {
   ];
   return (
     <ScrollView style={layout.page} contentContainerStyle={layout.formContent}>
-      <AspectRatio w="80%" maxW={240} ratio={1} mb="6" alignSelf="center">
-        <Box w="100%" h="100%">
-          <Pressable
-            testID="account-edit-photo"
-            accessibilityRole="button"
-            accessibilityLabel="Edit profile photo"
-            onPress={() => navigation.navigate(routes.ACCOUNT_PHOTO)}
-            style={styles.photo}
-          >
-            <Image
-              w="100%"
-              h="100%"
-              borderRadius="full"
-              source={
-                state.data.photo ? { uri: state.data.photo } : DefaultImage
-              }
-              alt="Profile photo"
-            />
-          </Pressable>
-          <Badge
-            pointerEvents="none"
-            position="absolute"
-            right="3"
-            bottom="3"
-            rounded="full"
-            bg="primary.600"
-            p="2"
-          >
-            <Icon
-              as={MaterialIcons}
-              name="photo-camera"
-              color="white"
-              size="sm"
-            />
-          </Badge>
-        </Box>
-      </AspectRatio>
+      <Box w="80%" maxW={240} mb="6" alignSelf="center">
+        <AspectRatio w="100%" ratio={1}>
+          <Box w="100%" h="100%">
+            <Pressable
+              testID="account-edit-photo"
+              accessibilityRole="button"
+              accessibilityLabel="Edit profile photo"
+              onPress={() => navigation.navigate(routes.ACCOUNT_PHOTO)}
+              style={styles.photo}
+            >
+              <Image
+                w="100%"
+                h="100%"
+                borderRadius="full"
+                source={
+                  state.data.photo ? { uri: state.data.photo } : DefaultImage
+                }
+                alt="Profile photo"
+              />
+            </Pressable>
+            <Badge
+              pointerEvents="none"
+              position="absolute"
+              right="3"
+              bottom="3"
+              rounded="full"
+              bg="primary.600"
+              p="2"
+            >
+              <Icon
+                as={MaterialIcons}
+                name="photo-camera"
+                color="white"
+                size="sm"
+              />
+            </Badge>
+          </Box>
+        </AspectRatio>
+      </Box>
       <InformationCard
         title="Personal Information"
         displayData={rows}

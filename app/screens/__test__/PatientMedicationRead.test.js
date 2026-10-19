@@ -42,7 +42,17 @@ jest.mock('app/components/ActivityIndicator', () => () => null);
 jest.mock('app/components/AddButton', () => () => null);
 jest.mock('app/components/AddPatientMedicationModal', () => 'MockCourseModal');
 jest.mock('app/components/MedicationItem', () => () => null);
-jest.mock('app/components/filter-components/SearchFilterBar', () => () => null);
+// The real filter consumes its initialization flag in an effect. Preserve that
+// lifecycle here: editor readiness must survive filter initialization.
+jest.mock('app/components/filter-components/SearchFilterBar', () => {
+  const React = require('react');
+  return function ConsumingFilter({ initializeData, onInitialize }) {
+    React.useEffect(() => {
+      if (initializeData) onInitialize();
+    }, [initializeData, onInitialize]);
+    return null;
+  };
+});
 jest.mock('app/components/LoadingWheel', () => () => null);
 jest.mock('app/components/swipeable-components/Swipeable', () => () => null);
 jest.mock(

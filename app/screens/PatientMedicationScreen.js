@@ -107,6 +107,7 @@ function PatientMedicationScreen(props) {
   });
 
   const [patientData, setPatientData] = useState({});
+  const [courseReadSnapshot, setCourseReadSnapshot] = useState(null);
   const [isScrolling, setIsScrolling] = useState(false);
   const assignedCaregiverId = null;
   const tempCaregiverId = null;
@@ -132,6 +133,7 @@ function PatientMedicationScreen(props) {
 
   const refreshMedData = async () => {
     const current = ++readGeneration.current;
+    setCourseReadSnapshot(null);
     setIsLoading(true);
     const results = await Promise.allSettled([
       requestDeadline(
@@ -161,6 +163,11 @@ function PatientMedicationScreen(props) {
     setIsRetry(failed);
     setStatusCode(!medRes?.ok ? medRes?.status : patientRes?.status);
     setIsLoading(false);
+    // Filter initialization is transient and may be consumed before the header
+    // renders. Editor intents require a completed read for this patient/focus.
+    setCourseReadSnapshot(
+      failed ? null : { patientId: String(patientID), generation: current },
+    );
   };
   refreshMedDataRef.current = refreshMedData;
 
@@ -188,7 +195,6 @@ function PatientMedicationScreen(props) {
     setOriginalData(tempMedData);
     setData(tempMedData);
     setIsDataInitialized(true);
-    setIsLoading(false);
   };
 
   const loadChoices = async () => {
@@ -411,7 +417,14 @@ function PatientMedicationScreen(props) {
   };
   const requestedEditor = props.route.params?.courseEditor;
   useEffect(() => {
-    if (!requestedEditor || isLoading || isError || !isDataInitialized) return;
+    if (
+      !requestedEditor ||
+      isLoading ||
+      isError ||
+      courseReadSnapshot?.patientId !== String(patientID) ||
+      courseReadSnapshot?.generation !== readGeneration.current
+    )
+      return;
     const key = JSON.stringify([patientID, requestedEditor]);
     if (handledCourseEditor.current === key) return;
     if (String(patientData.patientID ?? patientData.id) !== String(patientID))
@@ -444,7 +457,7 @@ function PatientMedicationScreen(props) {
     originalUnparsedData,
     isLoading,
     isError,
-    isDataInitialized,
+    courseReadSnapshot,
     user,
     navigation,
   ]);
