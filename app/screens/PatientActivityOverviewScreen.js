@@ -134,7 +134,7 @@ function ListRow({
       px={4}
       py={3}
       mb={2}
-      minHeight={64}
+      style={styles.activityRow}
       justifyContent="center"
     >
       <Box
@@ -535,6 +535,9 @@ function PatientActivityOverviewScreen(props) {
 }
 
 const styles = StyleSheet.create({
+  activityRow: {
+    minHeight: 64,
+  },
   preferenceSearch: {
     borderWidth: 1,
     borderColor: colors.grey_lighter,
