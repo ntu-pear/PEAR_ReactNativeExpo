@@ -9,12 +9,7 @@ import colors from 'app/config/colors';
 // Hook
 import formatDateTime from 'app/hooks/useFormatDateTime.js';
 
-
-const DoctorNoteItem = ({
-  date,
-  doctorName,
-  doctorRemarks,
-}) => {
+const DoctorNoteItem = ({ date, doctorName, doctorRemarks }) => {
   return (
     <View style={styles.container}>
       <Icon
@@ -25,10 +20,7 @@ const DoctorNoteItem = ({
       <View style={styles.textContainer}>
         <TextRow label="Doctor" value={doctorName} />
         <TextRow label="Remarks" value={doctorRemarks} />
-        <TextRow
-          label="Created"
-          value={formatDateTime(new Date(date), true)}
-        />
+        <TextRow label="Created" value={formatDateTime(new Date(date), true)} />
       </View>
     </View>
   );
@@ -53,6 +45,8 @@ const styles = StyleSheet.create({
   textContainer: {
     marginLeft: 20,
     flexDirection: 'column',
+    flex: 1,
+    minWidth: 0,
   },
   row: {
     flexDirection: 'row',
@@ -60,11 +54,14 @@ const styles = StyleSheet.create({
   },
   label: {
     fontWeight: 'bold',
+    flexShrink: 0,
     color: colors.alert,
     marginRight: 5,
   },
   value: {
     fontWeight: 'normal',
+    flex: 1,
+    minWidth: 0,
     color: colors.text,
   },
 });

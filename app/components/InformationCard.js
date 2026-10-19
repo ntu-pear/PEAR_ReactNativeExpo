@@ -115,7 +115,7 @@ function InformationCard({
               </Text>
 
               {/* Value + Eye icon */}
-              <HStack alignItems="center" flexShrink={1}>
+              <HStack alignItems="center" flex={1} minWidth={0}>
                 <Text
                   numberOfLines={undefined}
                   ellipsizeMode="tail"
@@ -138,6 +138,7 @@ function InformationCard({
 
                 {data.label === 'NRIC' && (
                   <IconButton
+                    accessibilityLabel={masked ? 'Reveal NRIC' : 'Hide NRIC'}
                     _icon={{
                       as: MaterialCommunityIcons,
                       name: masked ? 'eye-outline' : 'eye',
@@ -194,6 +195,8 @@ const styles = StyleSheet.create({
     ...typography.subheading1SemiBold,
     color: colors.black,
     textAlign: 'right',
+    flex: 1,
+    minWidth: 0,
     flexShrink: 1,
   },
 });
