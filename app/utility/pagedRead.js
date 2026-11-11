@@ -42,10 +42,10 @@ export const readAllPages = async (
         throw new Error('The list ended before the reported total.');
       }
       if (pageNo + 1 >= pages) {
-        const count = res.data?.totalRecords;
-        if (Number.isInteger(count) && rows.length !== count) {
-          throw new Error('The list changed or is incomplete. Please retry.');
-        }
+        // Every page was read and no row repeated, so the rows are complete.
+        // totalRecords is not checked: Patient service list endpoints count
+        // without their name/isActive filters, so the total can exceed the
+        // rows a filtered read returns.
         return rows;
       }
     } else if (page.length < pageSize) {

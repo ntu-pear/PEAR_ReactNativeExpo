@@ -204,7 +204,7 @@ export const noDataMessage = (statusCode=null, isLoading=false, isError=false, d
     } else if (statusCode >= 500) {
       message = 'Error: Server is down. Please try again later.';
     } else {
-      message = `${statusCode || 'Some'} error has occured`;
+      message = 'This information could not be loaded. Please try again.';
     }
   }
   return (

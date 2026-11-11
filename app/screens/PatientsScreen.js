@@ -52,6 +52,7 @@ import {
   sortFilterInitialState,
 } from 'app/utility/miscFunctions';
 import * as fav from 'app/utility/favorites'; // ⭐ favourites helper
+import { enrichPatientsWithStaffNames } from 'app/utility/patientStaffNames';
 
 // NEW (TEMP): disable legacy Core counts during Patient Service migration
 const ENABLE_OLD_COUNTS = false;
@@ -111,6 +112,7 @@ const PatientRow = memo(
         </View>
         {!compact && viewMode === 'allPatients' ? (
           <View style={rowStyles.caregiverNameContainer}>
+            <Text style={rowStyles.caregiverLabel}>Caregiver</Text>
             <Text style={rowStyles.caregiverName}>{caregiverName}</Text>
           </View>
         ) : null}
@@ -184,11 +186,16 @@ const rowStyles = StyleSheet.create({
     marginLeft: 16,
     maxWidth: '30%',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'flex-end',
+  },
+  caregiverLabel: {
+    fontSize: 12,
+    color: colors.grey,
   },
   caregiverName: {
     fontSize: 15,
     fontWeight: 'bold',
+    textAlign: 'right',
   },
 });
 
@@ -462,59 +469,10 @@ function PatientsScreen({ navigation }) {
     let allocFiltered = normalizedPage;
     try {
       if (viewMode === 'allPatients') {
-        // Fetch allocations and staff names in parallel
-        const [allocationMap, staffNameMap] = await Promise.all([
-          patientApi.getAllocationMap(),
-          userApi.buildStaffNameMap(),
-        ]);
-
-        // Collect caregiver/doctor/supervisor IDs that are missing from staffNameMap
-        const missingIds = new Set();
-        for (const alloc of Object.values(allocationMap)) {
-          for (const field of [
-            'caregiverId',
-            'doctorId',
-            'supervisorId',
-            'gameTherapistId',
-          ]) {
-            if (alloc[field] && !staffNameMap[alloc[field]]) {
-              missingIds.add(alloc[field]);
-            }
-          }
-        }
-
-        // Resolve missing names individually (fallback)
-        await Promise.all(
-          [...missingIds].map(async (uid) => {
-            try {
-              const r = await userApi.getUsernameById(uid);
-              if (r.ok && r.data) {
-                staffNameMap[uid] =
-                  r.data.preferredName || r.data.nric_FullName || uid;
-              }
-            } catch {}
-          }),
-        );
-
-        // Enrich each patient with caregiver/doctor/supervisor names from allocation + staff data
-        allocFiltered = normalizedPage.map((p) => {
-          const alloc = allocationMap[String(p.patientID)];
-          if (alloc) {
-            const caregiverName =
-              p.caregiverName || staffNameMap[alloc.caregiverId] || null;
-            const doctorName =
-              p.doctorName || staffNameMap[alloc.doctorId] || null;
-            const supervisorName =
-              p.supervisorName || staffNameMap[alloc.supervisorId] || null;
-
-            return {
-              ...p,
-              caregiverName,
-              doctorName,
-              supervisorName,
-            };
-          }
-          return p;
+        allocFiltered = await enrichPatientsWithStaffNames({
+          patients: normalizedPage,
+          patientApi,
+          userApi,
         });
       }
     } catch (err) {

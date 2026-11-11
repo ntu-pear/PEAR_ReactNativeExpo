@@ -29,6 +29,7 @@ import * as fav from 'app/utility/favorites';
 // API
 import scheduleApi from 'app/api/schedule';
 import patientApi from 'app/api/patient';
+import userApi from 'app/api/user';
 import AuthContext from 'app/auth/context';
 import { centreDay } from 'app/utility/centreClock';
 import { weekMonday, shiftDay } from 'app/utility/careReadResults';
@@ -39,6 +40,7 @@ import {
   dashboardScrollOffset,
 } from 'app/utility/dashboardTimeline';
 import { loadDashboardPatients } from 'app/utility/dashboardPatients';
+import { enrichPatientsWithStaffNames } from 'app/utility/patientStaffNames';
 
 // Configurations
 import colors from 'app/config/colors';
@@ -70,6 +72,8 @@ import {
 function DashboardScreen({ navigation }) {
   const { user } = useContext(AuthContext) || {};
   const readGeneration = useRef(0);
+  // Patients in the current scope, so rows without activities still show.
+  const scopePatients = useRef([]);
   const refreshRef = useRef(null);
   useEffect(
     () => () => {
@@ -280,14 +284,26 @@ function DashboardScreen({ navigation }) {
     setOriginalSchedule([]);
     setSchedule([]);
     try {
-      const patients = await loadDashboardPatients({
+      let patients = await loadDashboardPatients({
         api: patientApi,
         mode,
         user: authUser,
       });
+      if (mode === 'allPatients') {
+        try {
+          patients = await enrichPatientsWithStaffNames({
+            patients,
+            patientApi,
+            userApi,
+          });
+        } catch {
+          // Show patients without caregiver names rather than fail the view.
+        }
+      }
       if (generation !== readGeneration.current) {
         return;
       }
+      scopePatients.current = patients;
       setPatientInfo(patients);
       await getSchedule(patients, generation);
       if (generation !== readGeneration.current) {
@@ -326,8 +342,7 @@ function DashboardScreen({ navigation }) {
         const scheduleData = response.data.Data || response.data.data || [];
         if (!Array.isArray(scheduleData) || scheduleData.length === 0) {
           setOriginalScheduleWeekly({});
-          setOriginalSchedule([]);
-          setSchedule([]);
+          updateSchedule({ tempScheduleWeekly: {} });
           return;
         }
 
@@ -357,8 +372,7 @@ function DashboardScreen({ navigation }) {
   const parseScheduleData = ({ tempPatientInfo, tempSchedule }) => {
     if (!tempSchedule || tempSchedule.length === 0) {
       setOriginalScheduleWeekly({});
-      setOriginalSchedule([]);
-      setSchedule([]);
+      updateSchedule({ tempScheduleWeekly: {} });
       return;
     }
 
@@ -423,7 +437,11 @@ function DashboardScreen({ navigation }) {
             }`,
             patientPreferredName: patientData.preferredName ?? '',
             patientCaregiverName: patientData.caregiverName ?? '',
-            patientImage: sched['PatientImage'] || sched['patientImage'] || '',
+            patientImage:
+              sched['PatientImage'] ||
+              sched['patientImage'] ||
+              patientData.profilePicture ||
+              '',
             activities: parsedActivities,
             date: scheduleDateStr,
           };
@@ -442,6 +460,26 @@ function DashboardScreen({ navigation }) {
     updateSchedule({ tempScheduleWeekly });
   };
 
+  // Every patient in scope gets a row, matching the Patients tab count.
+  // Patients without activities that day show an empty row.
+  const withUnscheduledPatients = (dailySchedule, currentDate) => {
+    const scheduled = new Set(dailySchedule.map((s) => String(s.patientID)));
+    const unscheduled = scopePatients.current
+      .filter((p) => !scheduled.has(String(p.patientID ?? p.id)))
+      .map((p) => ({
+        patientID: p.patientID ?? p.id,
+        patientName: p.preferredName || p.fullName || '',
+        patientStartDate: p.startDate,
+        patientFullName: `${p.firstName ?? ''} ${p.lastName ?? ''}`,
+        patientPreferredName: p.preferredName ?? '',
+        patientCaregiverName: p.caregiverName ?? '',
+        patientImage: p.profilePicture || '',
+        activities: [],
+        date: currentDate,
+      }));
+    return [...dailySchedule, ...unscheduled];
+  };
+
   //  Safe updateSchedule using ISO key
   const updateSchedule = ({
     tempScheduleWeekly = originalScheduleWeekly,
@@ -455,7 +493,10 @@ function DashboardScreen({ navigation }) {
       }
 
       const currentDate = calendarDay(tempSelectedDate);
-      const dailySchedule = tempScheduleWeekly[currentDate] ?? [];
+      const dailySchedule = withUnscheduledPatients(
+        tempScheduleWeekly[currentDate] ?? [],
+        currentDate,
+      );
 
       setOriginalSchedule([...dailySchedule]);
       setSchedule([...dailySchedule]);
@@ -638,15 +679,6 @@ function DashboardScreen({ navigation }) {
     }));
   };
 
-  const checkAllEmptySchedules = (tempSchedule = []) => {
-    for (let i = 0; i < tempSchedule.length; i++) {
-      if (tempSchedule[i]?.activities?.length > 0) {
-        return false;
-      }
-    }
-    return true;
-  };
-
   const visibleSchedules = React.useMemo(() => {
     if (!showFavOnly) {
       return schedule || [];
@@ -792,9 +824,7 @@ function DashboardScreen({ navigation }) {
                 true,
               )
             }
-            data={
-              checkAllEmptySchedules(visibleSchedules) ? [] : visibleSchedules
-            }
+            data={visibleSchedules}
             renderItem={({ item, i }) => {
               return (
                 <Box style={styles.rowBox} key={item.patientID}>
@@ -872,6 +902,11 @@ function DashboardScreen({ navigation }) {
                       }}
                     >
                       <HStack style={styles.hStack}>
+                        {item.activities.length === 0 ? (
+                          <Text style={styles.noActivities}>
+                            No activities scheduled
+                          </Text>
+                        ) : null}
                         {item.activities.map((activity, i) => (
                           <ActivityCard
                             key={i}
@@ -977,6 +1012,12 @@ const styles = StyleSheet.create({
   hStack: {
     flexDirection: 'row',
     position: 'relative',
+  },
+  noActivities: {
+    color: colors.grey,
+    fontStyle: 'italic',
+    paddingHorizontal: 16,
+    alignSelf: 'center',
   },
 });
 

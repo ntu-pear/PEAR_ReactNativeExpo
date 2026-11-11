@@ -71,6 +71,22 @@ test.each([{}, { id: 'actor', roleName: 'UNKNOWN' }])(
     expect(api.listPatientsV1).not.toHaveBeenCalled();
   },
 );
+test('filtered All Patients loads when the server total ignores the filter', async () => {
+  // Staging Patient service: isActive=1 returns 33 rows but totalRecords 34.
+  const api = {
+    listMyPatientsV1: jest.fn(),
+    listPatientsV1: jest
+      .fn()
+      .mockResolvedValue(ok(rows(33), { totalPages: 1, totalRecords: 34 })),
+    normalizePatientV1: (r) => r,
+  };
+  const result = await loadDashboardPatients({
+    api,
+    mode: 'allPatients',
+    user: { id: 'actor', roleName: 'SUPERVISOR' },
+  });
+  expect(result).toHaveLength(33);
+});
 test('repeating pages are rejected rather than looped/truncated', async () => {
   const read = jest.fn().mockResolvedValue(ok([{ id: 1 }], { totalPages: 2 }));
   await expect(readAllPages(read)).rejects.toThrow(/repeating/);
@@ -83,12 +99,13 @@ test('later page failure does not return a successful first page', async () => {
     .mockResolvedValueOnce({ ok: false, status: 500 });
   await expect(readAllPages(read)).rejects.toThrow();
 });
-test('missing records relative to reported count are rejected', async () => {
+test('a reported total that disagrees with fully read pages is not an error', async () => {
+  // Patient service totals ignore list filters, so they cannot gate the read.
   await expect(
     readAllPages(async () =>
       ok([{ id: 1 }], { totalPages: 1, totalRecords: 2 }),
     ),
-  ).rejects.toThrow(/incomplete/);
+  ).resolves.toEqual([{ id: 1 }]);
 });
 test('canonical course label resolves from catalogue page 2 and matches the actual dose', async () => {
   const catalogue = jest
@@ -134,6 +151,7 @@ test('canonical course label resolves from catalogue page 2 and matches the actu
     PatientID: 7,
     PrescriptionName: 'SYNTHETIC DRUG',
     AdministerTime: '0900',
+    Status: '0',
   };
   expect(
     matchMedicationScheduleRow([dose], {

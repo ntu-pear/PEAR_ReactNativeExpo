@@ -289,7 +289,7 @@ function PatientDailyHighlights() {
       } else if (statusCode >= 500) {
         message = 'Server is down. Please try again later.';
       } else {
-        message = `${statusCode} error has occured`;
+        message = 'This information could not be loaded. Please try again.';
       }
     }
     // Display message when there are no new highlights
