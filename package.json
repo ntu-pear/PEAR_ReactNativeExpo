@@ -147,6 +147,9 @@
     "moduleDirectories": [
       "node_modules",
       "./app"
+    ],
+    "setupFiles": [
+      "./jest.setup.js"
     ]
   },
   "detox": {
