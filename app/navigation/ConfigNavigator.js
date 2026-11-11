@@ -25,14 +25,14 @@ function ConfigNavigator() {
         <Stack.Screen
           name={routes.ACTIVITY_TEMPLATES}
           component={ActivityTemplatesScreen}
-          options={{ title: 'Activity templates' }}
+          options={{ title: 'Activity Templates' }}
         />
       ) : null}
       {isSupervisor ? (
         <Stack.Screen
           name={routes.NEXT_WEEK_PREVIEW}
           component={NextWeekPreviewScreen}
-          options={{ title: 'Next-week preview' }}
+          options={{ title: 'Next-Week Preview' }}
         />
       ) : null}
       {isSupervisor ? (
@@ -45,7 +45,7 @@ function ConfigNavigator() {
       <Stack.Screen
         name={isSupervisor ? routes.CONFIG_SCREEN : routes.EMPTY_SCREEN}
         component={isSupervisor ? ConfigScreen : EmptyScreen}
-        options={{ headerShown: false }}
+        options={{ headerShown: true, title: 'Config' }}
       />
     </Stack.Navigator>
   );

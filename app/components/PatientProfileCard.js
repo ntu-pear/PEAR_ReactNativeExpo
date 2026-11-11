@@ -68,7 +68,8 @@ const styles = StyleSheet.create({
     borderColor: colors.pink,
     borderWidth: 1,
     borderRadius: 12,
-    flex: 1,
+    // Four tiles per row on every row, whichever tiles a role can see.
+    width: '19%',
     paddingVertical: 8,
     margin: '3%',
     aspectRatio: 1.1,

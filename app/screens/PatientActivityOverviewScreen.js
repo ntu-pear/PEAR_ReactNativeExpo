@@ -10,6 +10,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   TextInput,
+  View,
 } from 'react-native';
 import { Box, Text } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
@@ -295,10 +296,9 @@ function PatientActivityOverviewScreen(props) {
       />
 
       <Text fontSize="md" color={colors.black} mt={2} mb={1}>
-        Condensed view of preferences, doctor recommendations, and exclusions
-        (aligned with web patient activity tabs). Caregivers can update
-        preferences; supervisors can add dated exclusions. Recommendations stay
-        read-only on mobile.
+        Activity preferences, doctor recommendations and exclusions for this
+        patient. Caregivers can update preferences. Supervisors can also add
+        exclusions.
       </Text>
 
       {errors.length > 0 && (
@@ -368,42 +368,44 @@ function PatientActivityOverviewScreen(props) {
         onChangeText={setPreferenceQuery}
         style={styles.preferenceSearch}
       />
-      <TouchableOpacity
-        style={styles.manageButton}
-        onPress={() =>
-          setPreferenceSort((value) =>
-            value === 'priority' ? 'name' : 'priority',
-          )
-        }
-      >
-        <Text color="white">
-          Sort:{' '}
-          {preferenceSort === 'priority'
-            ? 'Liked / recommended first'
-            : 'Activity name'}
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.manageButton}
-        onPress={() =>
-          setPreferenceFilter((value) =>
-            value === 'all'
-              ? 'liked'
-              : value === 'liked'
-              ? 'recommended'
-              : 'all',
-          )
-        }
-      >
-        <Text color="white">
-          Show:{' '}
-          {preferenceFilter === 'all'
-            ? 'All activities'
-            : preferenceFilter === 'liked'
-            ? 'Liked activities'
-            : 'Recommended activities'}
-        </Text>
-      </TouchableOpacity>
+      <View style={styles.chipRow}>
+        <TouchableOpacity
+          style={styles.chipButton}
+          onPress={() =>
+            setPreferenceSort((value) =>
+              value === 'priority' ? 'name' : 'priority',
+            )
+          }
+        >
+          <Text color="white" fontSize="sm">
+            Sort:{' '}
+            {preferenceSort === 'priority'
+              ? 'Liked / recommended first'
+              : 'Activity name'}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.chipButton}
+          onPress={() =>
+            setPreferenceFilter((value) =>
+              value === 'all'
+                ? 'liked'
+                : value === 'liked'
+                ? 'recommended'
+                : 'all',
+            )
+          }
+        >
+          <Text color="white" fontSize="sm">
+            Show:{' '}
+            {preferenceFilter === 'all'
+              ? 'All activities'
+              : preferenceFilter === 'liked'
+              ? 'Liked activities'
+              : 'Recommended activities'}
+          </Text>
+        </TouchableOpacity>
+      </View>
       {orderedPreferences.length === 0 ? (
         <EmptyRow
           message={
@@ -554,9 +556,23 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 32,
   },
+  chipRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 8,
+  },
+  chipButton: {
+    backgroundColor: colors.green,
+    borderRadius: 20,
+    minHeight: 36,
+    paddingHorizontal: 14,
+    marginRight: 8,
+    marginTop: 4,
+    justifyContent: 'center',
+  },
   manageButton: {
     marginTop: 12,
-    backgroundColor: colors.pink,
+    backgroundColor: colors.green,
     borderRadius: 12,
     minHeight: 48,
     paddingHorizontal: 16,

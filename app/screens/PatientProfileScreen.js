@@ -1,7 +1,7 @@
 import { primaryGuardianId } from 'app/utility/guardianPrimary';
 // Libs
 import React, { useContext, useState, useRef } from 'react';
-import { Dimensions, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import {
   Button,
   Center,
@@ -761,7 +761,6 @@ function PatientProfileScreen(props) {
     retrieveSocialHistory(patientID, () => scope.active, scope.timing);
   };
 
-  const SCREEN_HEIGHT = Dimensions.get('window').height;
   return (
     <>
       {isPatientLoading ||
@@ -814,7 +813,7 @@ function PatientProfileScreen(props) {
             </View>
 
             <ScrollView style={{ flex: 1, padding: '3%' }}>
-              <View flexDirection="row" width="100%">
+              <View flexDirection="row" width="100%" flexWrap="wrap">
                 <PatientProfileCard
                   vectorIconComponent={
                     <MaterialCommunityIcons
@@ -873,8 +872,6 @@ function PatientProfileScreen(props) {
                   routes={routes.PATIENT_PRESCRIPTION}
                   patientId={patientID}
                 />
-              </View>
-              <View flexDirection="row" width="100%">
                 <PatientProfileCard
                   vectorIconComponent={
                     <FontAwesome5
@@ -908,7 +905,7 @@ function PatientProfileScreen(props) {
                     vectorIconComponent={
                       <MaterialCommunityIcons
                         name="clock"
-                        size={SCREEN_HEIGHT * 0.04}
+                        size={ICON}
                         color={colors.pink}
                       />
                     }
@@ -923,7 +920,7 @@ function PatientProfileScreen(props) {
                   vectorIconComponent={
                     <FontAwesome5
                       name="calendar-week"
-                      size={SCREEN_HEIGHT * 0.04}
+                      size={ICON}
                       color={colors.pink}
                     />
                   }
@@ -933,14 +930,12 @@ function PatientProfileScreen(props) {
                   routes={routes.PATIENT_SCHEDULE}
                   patientId={patientID}
                 />
-              </View>
-              <View flexDirection="row" width="100%" flexWrap="wrap">
                 {canViewActivityOverview && (
                   <PatientProfileCard
                     vectorIconComponent={
                       <MaterialCommunityIcons
                         name="view-list"
-                        size={SCREEN_HEIGHT * 0.04}
+                        size={ICON}
                         color={colors.pink}
                       />
                     }
@@ -957,7 +952,7 @@ function PatientProfileScreen(props) {
                     vectorIconComponent={
                       <MaterialCommunityIcons
                         name="dumbbell"
-                        size={SCREEN_HEIGHT * 0.04}
+                        size={ICON}
                         color={colors.pink}
                       />
                     }
@@ -973,7 +968,7 @@ function PatientProfileScreen(props) {
                   vectorIconComponent={
                     <MaterialIcons
                       name="insert-photo"
-                      size={SCREEN_HEIGHT * 0.04}
+                      size={ICON}
                       color={colors.pink}
                     />
                   }
@@ -987,7 +982,7 @@ function PatientProfileScreen(props) {
                   vectorIconComponent={
                     <MaterialCommunityIcons
                       name="umbrella-beach"
-                      size={SCREEN_HEIGHT * 0.04}
+                      size={ICON}
                       color={colors.pink}
                     />
                   }
@@ -1001,7 +996,7 @@ function PatientProfileScreen(props) {
                   vectorIconComponent={
                     <MaterialCommunityIcons
                       name="wheelchair-accessibility"
-                      size={SCREEN_HEIGHT * 0.04}
+                      size={ICON}
                       color={colors.pink}
                     />
                   }
@@ -1011,14 +1006,12 @@ function PatientProfileScreen(props) {
                   routes={routes.PATIENT_MOBILITY_AIDS}
                   patientProfile={patientProfile}
                 />
-              </View>
-              <View flexDirection="row" width="100%">
                 {canViewDoctorNotes && (
                   <PatientProfileCard
                     vectorIconComponent={
                       <MaterialCommunityIcons
                         name="doctor"
-                        size={SCREEN_HEIGHT * 0.04}
+                        size={ICON}
                         color={colors.pink}
                       />
                     }
@@ -1036,7 +1029,7 @@ function PatientProfileScreen(props) {
                     vectorIconComponent={
                       <MaterialCommunityIcons
                         name="history"
-                        size={SCREEN_HEIGHT * 0.04}
+                        size={ICON}
                         color={colors.pink}
                       />
                     }
@@ -1047,18 +1040,6 @@ function PatientProfileScreen(props) {
                     patientProfile={patientProfile}
                   />
                 ) : null}
-                <PatientProfileCard
-                  routes={routes.DOCTORNOTE_SCREEN}
-                  navigation={navigation}
-                  style={styles.container}
-                  patientProfile={patientProfile}
-                />
-                <PatientProfileCard
-                  routes={routes.DOCTORNOTE_SCREEN}
-                  navigation={navigation}
-                  style={styles.container}
-                  patientProfile={patientProfile}
-                />
               </View>
             </ScrollView>
             <View w="100%" style={{ flex: 1 }}>
