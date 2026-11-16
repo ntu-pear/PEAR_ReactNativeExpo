@@ -18,6 +18,9 @@ import {
 import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import AuthContext from 'app/auth/context';
 import scheduleApi from 'app/api/schedule';
+import patientApi from 'app/api/patient';
+import userApi from 'app/api/user';
+import colors from 'app/config/colors';
 import requestDeadline from 'app/utility/requestDeadline';
 import {
   canRecordMedication,
@@ -32,6 +35,11 @@ import {
   medicationReadMessage,
 } from 'app/utility/medicationDoseRead';
 import { confirmAndLogMedicationAdministration } from 'app/utility/confirmMedicationAdministration';
+import {
+  loadDoseNames,
+  patientLabel,
+  staffLabel,
+} from 'app/utility/medicationDoseNames';
 
 const Control = ({ title, testID, disabled, onPress }) => (
   <TouchableOpacity
@@ -66,6 +74,8 @@ export default function MedicationScheduleScreen() {
     loading: true,
   });
   const [busy, setBusy] = useState(false);
+  const [names, setNames] = useState({ owner: null, patients: {}, staff: {} });
+  const shownNames = names.owner === owner ? names : null;
   const [now, setNow] = useState(Date.now);
   const day = todayAdministerDate(new Date(now));
   const [search, setSearch] = useState({ owner, value: '' });
@@ -93,7 +103,8 @@ export default function MedicationScheduleScreen() {
         (async () => {
           let next;
           try {
-            // This endpoint generates today's slots; do not add patient/header fan-out.
+            // This endpoint generates today's slots, so it is called once per load.
+            // Names are looked up afterwards and never delay the doses.
             const response = await requestDeadline(
               scheduleApi.getMedicationScheduleV1(),
             );
@@ -117,6 +128,28 @@ export default function MedicationScheduleScreen() {
               return;
             }
             setSnapshot({ ...next, owner, reload, day, loading: false });
+            if (next.rows.length) {
+              loadDoseNames({ rows: next.rows, patientApi, userApi })
+                .then((found) => {
+                  if (
+                    active &&
+                    version === generation.current &&
+                    owner === currentOwner.current
+                  )
+                    setNames((prev) => {
+                      const same = prev.owner === owner;
+                      return {
+                        owner,
+                        patients: {
+                          ...(same ? prev.patients : {}),
+                          ...found.patients,
+                        },
+                        staff: { ...(same ? prev.staff : {}), ...found.staff },
+                      };
+                    });
+                })
+                .catch(() => {});
+            }
           }
         })();
       }
@@ -155,7 +188,7 @@ export default function MedicationScheduleScreen() {
         user,
         isCurrent,
         patientID: row.PatientID,
-        patientName: `Patient ${row.PatientID}`,
+        patientName: patientLabel(row, shownNames),
         medName: row.PrescriptionName,
         medDosage: 'Not supplied by the schedule',
         medTime: row.AdministerTime,
@@ -172,8 +205,10 @@ export default function MedicationScheduleScreen() {
       testID="dose_list"
       style={styles.container}
       contentContainerStyle={styles.content}
-      data={snapshot.rows.filter((row) => medicationDoseMatches(row, query))}
-      extraData={now}
+      data={snapshot.rows.filter((row) =>
+        medicationDoseMatches(row, query, shownNames),
+      )}
+      extraData={[now, shownNames]}
       keyboardShouldPersistTaps="handled"
       keyExtractor={medicationDoseKey}
       initialNumToRender={15}
@@ -192,8 +227,8 @@ export default function MedicationScheduleScreen() {
           </Text>
           <TextInput
             testID="dose_search"
-            accessibilityLabel="Search medication, patient ID, assigned caregiver or administered by"
-            placeholder="Search medication or patient/staff ID"
+            accessibilityLabel="Search by medication, patient or caregiver"
+            placeholder="Search medication, patient or caregiver"
             value={query}
             onChangeText={(value) => setSearch({ owner, value })}
             autoCapitalize="none"
@@ -225,11 +260,14 @@ export default function MedicationScheduleScreen() {
       renderItem={({ item: row, index }) => (
         <View style={styles.card} testID={`dose_row_${index}`}>
           <Text style={styles.medication}>{row.PrescriptionName}</Text>
-          <Text>Patient {row.PatientID}</Text>
+          <Text style={styles.patient}>{patientLabel(row, shownNames)}</Text>
           <Text>
             {row.AdministerDate} · {clock(row.AdministerTime)} (Singapore)
           </Text>
-          <Text>Assigned caregiver: {row.AssignedTo || 'Unassigned'}</Text>
+          <Text>
+            Assigned caregiver:{' '}
+            {staffLabel(row.AssignedTo, shownNames) || 'Unassigned'}
+          </Text>
           <Text style={styles[medicationDoseStatus(row, new Date(now))]}>
             {String(row.Status) === '1'
               ? '✓ Administered'
@@ -240,7 +278,8 @@ export default function MedicationScheduleScreen() {
           {String(row.Status) === '1' ? (
             <View>
               <Text>
-                Administered by: {row.AdministeredBy || 'Not provided'}
+                Administered by:{' '}
+                {staffLabel(row.AdministeredBy, shownNames) || 'Not provided'}
               </Text>
               <Text>
                 Actual administration:{' '}
@@ -266,7 +305,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#16324f',
+    color: colors.black_darker,
     marginBottom: 8,
   },
   note: { color: '#475569', marginVertical: 10 },
@@ -276,7 +315,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 6,
     padding: 12,
-    color: '#16324f',
+    color: colors.black_darker,
   },
   administered: { color: '#167045', fontWeight: '600' },
   pending: { color: '#855500', fontWeight: '600' },
@@ -288,10 +327,11 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     gap: 6,
   },
-  medication: { fontSize: 18, fontWeight: '600', color: '#16324f' },
+  medication: { fontSize: 18, fontWeight: '600', color: colors.black_darker },
+  patient: { fontSize: 16, fontWeight: '600', color: colors.black },
   button: {
     alignSelf: 'flex-start',
-    backgroundColor: '#176b8c',
+    backgroundColor: colors.green,
     paddingVertical: 12,
     paddingHorizontal: 18,
     borderRadius: 6,

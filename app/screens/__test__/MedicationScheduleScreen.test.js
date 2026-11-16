@@ -3,6 +3,8 @@ import { act, create } from 'react-test-renderer';
 import AuthContext from 'app/auth/context';
 import MedicationScheduleScreen from 'app/screens/MedicationScheduleScreen';
 import scheduleApi from 'app/api/schedule';
+import patientApi from 'app/api/patient';
+import userApi from 'app/api/user';
 import { confirmAndLogMedicationAdministration } from 'app/utility/confirmMedicationAdministration';
 import {
   medicationDoseRows,
@@ -19,6 +21,11 @@ jest.mock('@react-navigation/native', () => ({
     ),
 }));
 jest.mock('app/api/schedule', () => ({ getMedicationScheduleV1: jest.fn() }));
+jest.mock('app/api/patient', () => ({ readPatientV1: jest.fn() }));
+jest.mock('app/api/user', () => ({
+  buildStaffNameMap: jest.fn(),
+  getUsernameById: jest.fn(),
+}));
 jest.mock('app/utility/confirmMedicationAdministration', () => ({
   confirmAndLogMedicationAdministration: jest.fn(),
 }));
@@ -64,6 +71,9 @@ beforeEach(() => {
     status: 200,
     data: [row],
   });
+  patientApi.readPatientV1.mockResolvedValue({ ok: false, status: 503 });
+  userApi.buildStaffNameMap.mockResolvedValue({});
+  userApi.getUsernameById.mockResolvedValue({ ok: false, status: 404 });
 });
 afterEach(() => {
   if (screen) act(() => screen.unmount());
@@ -334,4 +344,39 @@ test('refocusing after midnight skips an obsolete-day request', async () => {
   await act(async () => screen.update(view()));
   expect(scheduleApi.getMedicationScheduleV1).toHaveBeenCalledTimes(2);
   expect(rendered()).toContain('Singapore date 2026-10-19');
+});
+
+test('doses show patient and caregiver names once looked up, and search matches them', async () => {
+  scheduleApi.getMedicationScheduleV1.mockResolvedValue({
+    ok: true,
+    data: [row, { ...row, PatientID: 8, AssignedTo: 'Another-Caregiver' }],
+  });
+  patientApi.readPatientV1.mockImplementation(async (id) =>
+    String(id) === '7'
+      ? { ok: true, data: { data: { fullName: 'SYNTHETIC PATIENT' } } }
+      : { ok: false, status: 503 },
+  );
+  userApi.buildStaffNameMap.mockResolvedValue({
+    'Caregiver-A': 'SYNTHETIC CAREGIVER',
+  });
+  await mount('SUPERVISOR');
+  await act(async () => {});
+  expect(rendered()).toContain('SYNTHETIC PATIENT');
+  expect(rendered()).toContain('Assigned caregiver: SYNTHETIC CAREGIVER');
+  // Unresolved IDs keep their ID label.
+  expect(rendered()).toContain('Patient 8');
+  expect(rendered()).toContain('Assigned caregiver: Another-Caregiver');
+  expect(userApi.getUsernameById).toHaveBeenCalledWith('Another-Caregiver');
+  expect(scheduleApi.getMedicationScheduleV1).toHaveBeenCalledTimes(1);
+  await act(async () =>
+    screen.root
+      .findAllByProps({ testID: 'dose_search' })[0]
+      .props.onChangeText('synthetic caregiver'),
+  );
+  expect(rendered()).toContain('SYNTHETIC PATIENT');
+  expect(rendered()).not.toContain('Patient 8');
+  await press('dose_administer_0');
+  expect(
+    confirmAndLogMedicationAdministration.mock.calls[0][0].patientName,
+  ).toBe('SYNTHETIC PATIENT');
 });

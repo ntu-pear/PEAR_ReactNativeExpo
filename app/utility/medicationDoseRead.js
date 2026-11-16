@@ -47,17 +47,22 @@ export const medicationDoseRows = (payload) => {
   });
 };
 
-// Search only supplied fields; do not fan out to patient/user services for names.
-export const medicationDoseMatches = (row, query) => {
+// Search the supplied fields and, once looked up, the patient and staff names.
+export const medicationDoseMatches = (row, query, names) => {
   const term = query.trim().toLowerCase();
-  return (
-    !term ||
-    ['PrescriptionName', 'PatientID', 'AssignedTo', 'AdministeredBy'].some(
-      (field) =>
-        String(row[field] ?? '')
-          .toLowerCase()
-          .includes(term),
-    )
+  if (!term) return true;
+  const values = [
+    ...['PrescriptionName', 'PatientID', 'AssignedTo', 'AdministeredBy'].map(
+      (field) => row[field],
+    ),
+    names?.patients?.[String(row.PatientID)],
+    names?.staff?.[String(row.AssignedTo)],
+    names?.staff?.[String(row.AdministeredBy)],
+  ];
+  return values.some((value) =>
+    String(value ?? '')
+      .toLowerCase()
+      .includes(term),
   );
 };
 
