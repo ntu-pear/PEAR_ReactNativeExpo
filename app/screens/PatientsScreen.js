@@ -40,6 +40,7 @@ import colors from 'app/config/colors';
 
 // Components
 import ActivityIndicator from 'app/components/ActivityIndicator';
+import FavouritesToggle from 'app/components/FavouritesToggle';
 import ProfileNameButton from 'app/components/ProfileNameButton';
 import MessageDisplayCard from 'app/components/MessageDisplayCard';
 import SearchFilterBar from 'app/components/filter-components/SearchFilterBar';
@@ -51,7 +52,7 @@ import {
   noDataMessage,
   sortFilterInitialState,
 } from 'app/utility/miscFunctions';
-import * as fav from 'app/utility/favorites'; // ⭐ favourites helper
+import * as fav from 'app/utility/favorites'; // favourites helper
 import { enrichPatientsWithStaffNames } from 'app/utility/patientStaffNames';
 
 // NEW (TEMP): disable legacy Core counts during Patient Service migration
@@ -198,6 +199,13 @@ const rowStyles = StyleSheet.create({
     textAlign: 'right',
   },
 });
+
+// Links to the medication and preview screens, in the app's teal.
+const LINK_BUTTON = {
+  bg: colors.green,
+  _pressed: { bg: colors.green_lighter },
+  _text: { color: colors.white, fontWeight: '600' },
+};
 
 function PatientsScreen({ navigation }) {
   // View modes user can switch between (displayed as tab on top)
@@ -835,6 +843,7 @@ function PatientsScreen({ navigation }) {
             String(user?.roleName || user?.role || '').toUpperCase(),
           ) && (
             <Button
+              {...LINK_BUTTON}
               mx="5"
               mt="2"
               testID="patients_today_medication"
@@ -847,6 +856,7 @@ function PatientsScreen({ navigation }) {
             'SUPERVISOR' && (
             <>
               <Button
+                {...LINK_BUTTON}
                 testID="patients_adhoc_preview"
                 mx="5"
                 mt="2"
@@ -857,6 +867,7 @@ function PatientsScreen({ navigation }) {
                 Activity-wide Ad Hoc Preview
               </Button>
               <Button
+                {...LINK_BUTTON}
                 mx="5"
                 mt="2"
                 onPress={() => navigation.navigate(routes.MANAGE_MEDICATION)}
@@ -866,17 +877,11 @@ function PatientsScreen({ navigation }) {
               </Button>
             </>
           )}
-          {/* show favourites-only toggle */}
-          <Button
+          <FavouritesToggle
+            active={showFavOnly}
             onPress={() => setShowFavOnly((v) => !v)}
-            variant={showFavOnly ? 'solid' : 'outline'}
-            leftIcon={<Icon as={MaterialIcons} name="star" />}
-            mx="5"
-            mt="2"
-            mb="1"
-          >
-            {showFavOnly ? 'Showing favourites' : '⭐ Favourites only'}
-          </Button>
+            testID="patients_favourites_toggle"
+          />
 
           <View style={styles.listWrapper}>
             <FlatList

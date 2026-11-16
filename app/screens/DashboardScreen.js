@@ -44,6 +44,7 @@ import { enrichPatientsWithStaffNames } from 'app/utility/patientStaffNames';
 
 // Configurations
 import colors from 'app/config/colors';
+import FavouritesToggle from 'app/components/FavouritesToggle';
 import routes from 'app/navigation/routes';
 
 // Components
@@ -801,16 +802,11 @@ function DashboardScreen({ navigation }) {
               </TouchableOpacity>
             </View>
           </Stack>
-          <Button
+          <FavouritesToggle
+            active={showFavOnly}
             onPress={() => setShowFavOnly((v) => !v)}
-            variant={showFavOnly ? 'solid' : 'outline'}
-            leftIcon={<Icon as={MaterialIcons} name="star" />}
-            mx="5"
-            mt="2"
-            mb="1"
-          >
-            {showFavOnly ? 'Showing favourites' : '⭐ Favourites only'}
-          </Button>
+            testID="dashboard_favourites_toggle"
+          />
           <FlatList
             ref={scheduleRef}
             onRefresh={refreshSchedule}
