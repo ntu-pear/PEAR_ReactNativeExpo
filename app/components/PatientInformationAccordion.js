@@ -638,10 +638,14 @@ function PatientInformationAccordion({
         >
           <InformationCard
             key={`${patientID}-${section.title}-${activeSections.join(',')}`}
-            title={section.title}
+            title={
+              section.title === 'Guardian(s) Information' ? null : section.title
+            }
             subtitle={
-              section.title === 'Guardian(s) Information' && isSecondGuardian
-                ? 'Guardian 1'
+              section.title === 'Guardian(s) Information'
+                ? isSecondGuardian
+                  ? 'Guardian 1'
+                  : 'Guardian'
                 : null
             }
             displayData={section.content}
@@ -656,7 +660,7 @@ function PatientInformationAccordion({
           {section.title === 'Guardian(s) Information' && isSecondGuardian ? (
             <InformationCard
               key={`${patientID}-Guardian2-${activeSections.join(',')}`}
-              title={section.title}
+              title={null}
               subtitle={'Guardian 2'}
               displayData={secondGuardianInfoData}
               handleOnPress={handleOnPress('Guardian 2')}

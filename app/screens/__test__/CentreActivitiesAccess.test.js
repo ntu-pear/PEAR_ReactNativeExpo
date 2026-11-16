@@ -172,19 +172,11 @@ test('configured Saturday hours and closed Sunday are visible; page is not hardc
   expect(text()).toContain('13:00');
   expect(text()).toContain('Sunday: Closed');
 });
-test('cancelled editor invalidates an already-open Save confirmation', async () => {
-  const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+test('blocked catalogue offers no editor, so no Save confirmation can be opened', async () => {
   await mount('SUPERVISOR');
   await click('Catalogue');
-  await click('Add Catalogue');
-  const name = tree.root
-    .findAllByType(TextInput)
-    .find((n) => n.props.accessibilityLabel === 'Activity name');
-  await act(async () => name.props.onChangeText('Synthetic New'));
-  await click('Review and save');
-  const save = alert.mock.calls[0][2].find((b) => b.text === 'Save');
-  await click('Cancel');
-  await act(async () => save.onPress());
+  expect(text()).not.toContain('Add Catalogue');
+  expect(text()).not.toContain('Review and save');
   expect(api.write).not.toHaveBeenCalled();
 });
 test('actor/role switch hides loaded rows immediately and ignores late previous reads', async () => {
@@ -224,45 +216,36 @@ test('failed patient rule read is an error rather than a successful empty reques
   expect(api.write).not.toHaveBeenCalled();
 });
 
-test('focus round trip invalidates a previous Save confirmation and closes its editor', async () => {
-  const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+test('focus round trip keeps the blocked catalogue read-only', async () => {
   await mount('SUPERVISOR');
   await click('Catalogue');
-  await click('Add Catalogue');
-  const name = tree.root
-    .findAllByType(TextInput)
-    .find((n) => n.props.accessibilityLabel === 'Activity name');
-  await act(async () => name.props.onChangeText('Synthetic New'));
-  await click('Review and save');
-  const save = alert.mock.calls[0][2].find((b) => b.text === 'Save');
   mockFocused = false;
   await act(async () => tree.update(render('SUPERVISOR')));
   mockFocused = true;
   await act(async () => tree.update(render('SUPERVISOR')));
-  await act(async () => save.onPress());
-  expect(api.write).not.toHaveBeenCalled();
   expect(text()).not.toContain('Review and save');
+  expect(text()).toContain('Editing activities is not available yet');
+  expect(api.write).not.toHaveBeenCalled();
 });
 test.each(['Catalogue', 'Centre activities'])(
-  '%s is explicitly read-only and all mutation controls are disabled',
+  '%s is explicitly read-only and shows no mutation controls',
   async (tab) => {
     await mount('SUPERVISOR');
     await click(tab);
-    expect(text()).toContain('Existing records are read-only');
+    expect(text()).toContain('Editing activities is not available yet');
     const buttons = tree.root.findAllByType(TouchableOpacity).filter((n) =>
       n.findAllByType(Text).some((t) => {
         const value = [t.props.children].flat(Infinity).join('');
         return value.startsWith('Add ') || ['Edit', 'Delete'].includes(value);
       }),
     );
-    expect(buttons.length).toBeGreaterThan(0);
-    buttons.forEach((n) => expect(n.props.disabled).toBe(true));
+    expect(buttons).toHaveLength(0);
     expect(api.write).not.toHaveBeenCalled();
   },
 );
 test('patient requests are read-only with no mutation controls or scheduler calls', async () => {
   await mount('SUPERVISOR', true);
-  expect(text()).toContain('Current requests are read-only');
+  expect(text()).toContain('can be viewed but not changed');
   expect(text()).not.toContain('Add patient ad hoc request');
   expect(text()).not.toContain('Review and save');
   expect(api.write).not.toHaveBeenCalled();
@@ -287,7 +270,7 @@ test('availability Add/Edit/Delete are disabled and retained handlers cannot dis
   await mount('SUPERVISOR');
   await click('Availabilities');
   expect(text()).toContain('may be incomplete');
-  expect(text()).toContain('caps it at 100');
+  expect(text()).toContain('at most 100 entries');
   const mutations = tree.root
     .findAllByType(TouchableOpacity)
     .filter((n) =>
@@ -299,21 +282,10 @@ test('availability Add/Edit/Delete are disabled and retained handlers cannot dis
           ),
         ),
     );
-  expect(mutations).toHaveLength(3);
-  mutations.forEach((n) => expect(n.props.disabled).toBe(true));
-  // A retained callback bypasses the RN disabled property: the builder/hook still deny dispatch.
-  await act(async () =>
-    mutations
-      .find((n) =>
-        n.findAllByType(Text).some((t) => t.props.children === 'Delete'),
-      )
-      .props.onPress(),
-  );
-  await act(async () =>
-    alert.mock.calls[0][2].find((b) => b.text === 'Delete').onPress(),
-  );
+  // Blocked mutations are not rendered at all, so no handler can dispatch.
+  expect(mutations).toHaveLength(0);
   expect(api.write).not.toHaveBeenCalled();
-  expect(text()).toContain('Availability changes are unavailable');
+  expect(text()).toContain('Editing availability is not available yet');
 });
 
 test('large single-patient request lists render 50 rows per page without another server fetch', async () => {

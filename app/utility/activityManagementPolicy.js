@@ -3,13 +3,13 @@
 // management mutations remain disabled; existing records can be read.
 export const activityMutationBlockReason = (kind) => {
   if (['activity', 'centre'].includes(kind)) {
-    return 'Activity changes are unavailable while safe request reconciliation is reviewed. Existing records are read-only.';
+    return "Editing activities is not available yet. You can view the centre's activities and opening hours.";
   }
   if (kind === 'availability') {
-    return 'Availability changes are unavailable until the service provides a complete availability read and safe write reconciliation.';
+    return 'Editing availability is not available yet.';
   }
   if (kind === 'adhoc') {
-    return 'Ad hoc changes are unavailable until the service validates the affected occurrence and replacement availability.';
+    return 'Ad hoc changes are not available yet.';
   }
   return '';
 };

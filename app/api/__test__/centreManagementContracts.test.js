@@ -66,7 +66,7 @@ test.each(['activity', 'centre', 'availability', 'adhoc'])(
   (kind) => {
     ['create', 'update', 'delete'].forEach((action) =>
       expect(() => api.write(kind, action, { id: 1, patient_id: 7 })).toThrow(
-        /unavailable/,
+        /not available yet/,
       ),
     );
     expect(mockClient.post).not.toHaveBeenCalled();

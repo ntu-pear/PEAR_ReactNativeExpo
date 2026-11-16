@@ -10,9 +10,35 @@ import {
 import useCentreManagement from 'app/hooks/useCentreManagement';
 import { activityLabel, currentWeekDates } from 'app/utility/centreManagement';
 import { activityMutationBlockReason } from 'app/utility/activityManagementPolicy';
+import colors from 'app/config/colors';
+
+const MONTHS = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
+// '2026-04-30T17:46:59.137000' -> '30 Apr 2026, 17:46'; anything else is shown as given.
+export const readableDateTime = (value) => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}))?/.exec(
+    String(value ?? ''),
+  );
+  if (!m || Number(m[2]) < 1 || Number(m[2]) > 12) return value ?? '';
+  const day = `${Number(m[3])} ${MONTHS[Number(m[2]) - 1]} ${m[1]}`;
+  return m[4] ? `${day}, ${m[4]}:${m[5]}` : day;
+};
 
 export default function PatientAdhocScreen({ route }) {
   const patientId = route?.params?.patientID ?? route?.params?.patientId;
+  const patientName = route?.params?.patientName;
   const state = useCentreManagement(patientId, true);
   const [paging, setPaging] = useState({ identity: '', page: 0 });
   if (!state.permitted || !patientId) {
@@ -41,14 +67,16 @@ export default function PatientAdhocScreen({ route }) {
       contentContainerStyle={styles.content}
       testID="patient_current_week_adhoc"
     >
-      <Text style={styles.heading}>Patient ad hoc requests</Text>
-      <Text>
-        Patient {patientId}. Singapore dates: {dates[0]} through{' '}
-        {dates[dates.length - 1]}.
+      <Text style={styles.heading}>
+        {patientName || `Patient ${patientId}`}
       </Text>
-      <Text accessibilityRole="alert">
-        {activityMutationBlockReason('adhoc')} Current requests are read-only. A
-        saved Pending request does not prove that the scheduler applied it.
+      <Text style={styles.meta}>
+        This week: {readableDateTime(dates[0])} to{' '}
+        {readableDateTime(dates[dates.length - 1])}
+      </Text>
+      <Text accessibilityRole="alert" style={styles.notice}>
+        {activityMutationBlockReason('adhoc')} The requests below can be viewed
+        but not changed. A pending request may not yet be in the schedule.
       </Text>
       {state.loading ? <ActivityIndicator /> : null}
       {state.error ? (
@@ -59,7 +87,7 @@ export default function PatientAdhocScreen({ route }) {
         style={styles.button}
         onPress={state.refresh}
       >
-        <Text>Reload patient activities and requests</Text>
+        <Text style={styles.buttonText}>Reload requests</Text>
       </TouchableOpacity>
       {state.pending ? (
         <Text accessibilityRole="alert">
@@ -71,21 +99,23 @@ export default function PatientAdhocScreen({ route }) {
         <Text>No active ad hoc requests for this patient.</Text>
       ) : null}
       {state.data ? (
-        <Text>
-          {rows.length} patient requests; page {page + 1}
+        <Text style={styles.meta}>
+          {rows.length} {rows.length === 1 ? 'request' : 'requests'}
+          {rows.length > 50 ? `, page ${page + 1}` : ''}
         </Text>
       ) : null}
       {rows.slice(page * 50, (page + 1) * 50).map((row) => (
         <View key={String(row.id)} style={styles.card}>
-          <Text>
+          <Text style={styles.name}>
             Request {row.id}: {row.status}
           </Text>
-          <Text>
+          <Text style={styles.detail}>
             {label(row.old_centre_activity_id)} to{' '}
             {label(row.new_centre_activity_id)}
           </Text>
-          <Text>
-            {row.start_date} to {row.end_date}
+          <Text style={styles.detail}>
+            {readableDateTime(row.start_date)} to{' '}
+            {readableDateTime(row.end_date)}
           </Text>
         </View>
       ))}
@@ -96,14 +126,14 @@ export default function PatientAdhocScreen({ route }) {
             style={styles.button}
             onPress={() => changePage(page - 1)}
           >
-            <Text>Previous requests</Text>
+            <Text style={styles.buttonText}>Previous requests</Text>
           </TouchableOpacity>
           <TouchableOpacity
             disabled={(page + 1) * 50 >= rows.length}
             style={styles.button}
             onPress={() => changePage(page + 1)}
           >
-            <Text>Next requests</Text>
+            <Text style={styles.buttonText}>Next requests</Text>
           </TouchableOpacity>
         </View>
       ) : null}
@@ -114,17 +144,36 @@ const styles = StyleSheet.create({
   content: { padding: 20, paddingBottom: 40 },
   heading: { fontSize: 19, fontWeight: '600', marginVertical: 10 },
   button: {
-    padding: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     minHeight: 48,
     marginVertical: 4,
-    backgroundColor: '#e7edf5',
+    backgroundColor: colors.green,
     borderRadius: 6,
+    justifyContent: 'center',
+    alignSelf: 'flex-start',
   },
+  buttonText: { color: colors.white, fontWeight: '600' },
+  notice: {
+    backgroundColor: colors.green_lightest,
+    color: colors.black,
+    padding: 12,
+    borderRadius: 6,
+    marginVertical: 8,
+  },
+  meta: { color: colors.grey, marginVertical: 6 },
+  name: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.black,
+    marginBottom: 4,
+  },
+  detail: { color: colors.black, lineHeight: 21 },
   card: {
     padding: 12,
     marginVertical: 8,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: colors.grey_lighter,
     borderRadius: 8,
   },
 });

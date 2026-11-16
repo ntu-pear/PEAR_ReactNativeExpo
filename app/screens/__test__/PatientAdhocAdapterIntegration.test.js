@@ -115,7 +115,7 @@ test.each(['valid', 'missing-patient', 'unsafe-patient'])(
           .some((t) => t.props.children === 'Add patient ad hoc request'),
       );
     expect(add).toBeUndefined();
-    expect(text).toContain('Current requests are read-only');
+    expect(text).toContain('can be viewed but not changed');
     expect(text.includes('No active ad hoc requests')).toBe(kind === 'valid');
     expect(centreApi.write).not.toHaveBeenCalled();
   },

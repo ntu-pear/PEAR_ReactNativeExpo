@@ -119,7 +119,7 @@ test('configured hours preserve Saturday and closed Sunday without fallback', ()
 });
 test('flexible availability can span a four-hour window but respects Saturday close', () => {
   expect(() => build('availability', availability())).toThrow(
-    /Availability changes are unavailable/,
+    /Editing availability is not available yet/,
   );
   expect(() =>
     build('availability', { ...availability(), end_time: '14:00' }),
@@ -144,7 +144,7 @@ test('Sunday closed and selected recurring closed weekdays cannot be saved', () 
 });
 test('multiple fixed slots on one day remain distinct and each fits duration/hours', () => {
   expect(() => build('centre', centre())).toThrow(
-    /safe request reconciliation/,
+    /Editing activities is not available yet/,
   );
   expect(() =>
     build('centre', { ...centre(), fixed_time_slots: 'Saturday 12:45' }),
@@ -157,7 +157,7 @@ test('documented compulsory-flexible conflict is rejected before transport', () 
 test('catalogue title uniqueness includes deleted records and editing excludes the same ID', () => {
   expect(() => build('activity', { title: ' deleted ' })).toThrow(/unique/);
   expect(() => build('activity', { id: '1', title: 'Art' }, 'update')).toThrow(
-    /safe request reconciliation/,
+    /Editing activities is not available yet/,
   );
 });
 test.each(['CAREGIVER', 'DOCTOR', 'GUARDIAN', 'ADMIN'])(
@@ -183,7 +183,7 @@ test('current week uses Singapore Sunday and never tomorrow from Sunday', () => 
 });
 test('otherwise valid single-patient replacement stays disabled pending authoritative validation', () => {
   expect(() => build('adhoc', adhoc())).toThrow(
-    /Ad hoc changes are unavailable/,
+    /Ad hoc changes are not available yet/,
   );
   expect(() => build('adhoc', { ...adhoc(), end_date: '2026-10-12' })).toThrow(
     /current Singapore week/,
@@ -399,5 +399,5 @@ test('helper never invents times for legacy titles or an omitted interval', () =
   ).toThrow(/explicit activity times/);
 });
 test.each(['availability', 'adhoc'])('%s delete remains disabled', (kind) =>
-  expect(() => build(kind, { id: 1 }, 'delete')).toThrow(/unavailable/),
+  expect(() => build(kind, { id: 1 }, 'delete')).toThrow(/not available yet/),
 );

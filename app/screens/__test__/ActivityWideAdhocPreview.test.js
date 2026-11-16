@@ -76,7 +76,7 @@ test('Supervisor previews exact names/count without generating or writing', asyn
   const select = tree.root.findByType('MockSelection');
   expect(select.props.dataArray).toEqual([{ value: 'Art', label: 'Art' }]);
   await act(async () => select.props.onDataChange('Art'));
-  expect(text()).toContain('1 affected patients');
+  expect(text()).toContain('1 patient scheduled for Art');
   expect(text()).toContain('Synthetic One');
   expect(scheduleApi.getScheduleV1).toHaveBeenCalledTimes(1);
   expect(scheduleApi.generateScheduleV1).not.toHaveBeenCalled();

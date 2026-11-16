@@ -17,6 +17,7 @@ import {
   affectedPatients,
 } from 'app/utility/adhocPreview';
 import SelectionInputField from 'app/components/input-components/SelectionInputField';
+import colors from 'app/config/colors';
 
 export default function ActivityWideAdhocPreviewScreen() {
   const { user } = useContext(AuthContext);
@@ -97,10 +98,10 @@ export default function ActivityWideAdhocPreviewScreen() {
       contentContainerStyle={styles.content}
       testID="activity_wide_adhoc_preview"
     >
-      <Text>Preview patients already scheduled for an activity</Text>
-      <Text>
-        Dates use Singapore time. This preview reads the existing weekly
-        schedule.
+      <Text style={styles.heading}>Patients scheduled for an activity</Text>
+      <Text style={styles.meta}>
+        Choose a day and an activity to see which patients are scheduled for it.
+        Dates use Singapore time.
       </Text>
       <View style={styles.dates}>
         {dates.map((value, index) => (
@@ -111,11 +112,16 @@ export default function ActivityWideAdhocPreviewScreen() {
               setDate(value);
               setSelected('');
             }}
-            style={styles.dateButton}
+            accessibilityState={{ selected: date === value }}
+            style={[styles.chip, date === value && styles.chipSelected]}
           >
-            <Text>
+            <Text
+              style={[
+                styles.chipText,
+                date === value && styles.chipTextSelected,
+              ]}
+            >
               {index ? 'Tomorrow' : 'Today'} ({value})
-              {date === value ? ' - selected' : ''}
             </Text>
           </TouchableOpacity>
         ))}
@@ -126,9 +132,10 @@ export default function ActivityWideAdhocPreviewScreen() {
       ) : null}
       <TouchableOpacity
         accessibilityRole="button"
+        style={styles.button}
         onPress={() => setReload((n) => n + 1)}
       >
-        <Text>Refresh existing schedule</Text>
+        <Text style={styles.buttonText}>Refresh existing schedule</Text>
       </TouchableOpacity>
       {preview ? (
         <SelectionInputField
@@ -144,15 +151,20 @@ export default function ActivityWideAdhocPreviewScreen() {
       ) : null}
       {selected && preview && !previewError ? (
         <>
-          <Text>
-            {patients.length} affected patients for {selected} on {date}
+          <Text style={styles.subheading}>
+            {patients.length} {patients.length === 1 ? 'patient' : 'patients'}{' '}
+            scheduled for {selected} on {date}
           </Text>
-          {patients.map((patient) => (
-            <Text key={String(patient.id)}>{patient.name}</Text>
-          ))}
+          <View style={styles.list}>
+            {patients.map((patient) => (
+              <Text key={String(patient.id)} style={styles.listRow}>
+                {patient.name}
+              </Text>
+            ))}
+          </View>
         </>
       ) : null}
-      <Text>
+      <Text style={styles.notice}>
         Activity-wide changes are not available yet. This preview does not
         change any patient or schedule.
       </Text>
@@ -162,6 +174,57 @@ export default function ActivityWideAdhocPreviewScreen() {
 
 const styles = StyleSheet.create({
   content: { padding: 24 },
-  dates: { flexDirection: 'row' },
-  dateButton: { padding: 16 },
+  heading: {
+    fontSize: 19,
+    fontWeight: '600',
+    color: colors.black,
+    marginBottom: 6,
+  },
+  subheading: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.black,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  meta: { color: colors.grey, marginBottom: 12 },
+  dates: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 8 },
+  chip: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    marginRight: 8,
+    marginVertical: 4,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: colors.green,
+  },
+  chipSelected: { backgroundColor: colors.green },
+  chipText: { color: colors.green, fontWeight: '600' },
+  chipTextSelected: { color: colors.white },
+  button: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    minHeight: 48,
+    marginVertical: 8,
+    backgroundColor: colors.green,
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignSelf: 'flex-start',
+  },
+  buttonText: { color: colors.white, fontWeight: '600' },
+  list: { borderWidth: 1, borderColor: colors.grey_lighter, borderRadius: 8 },
+  listRow: {
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.grey_lighter,
+    color: colors.black,
+  },
+  notice: {
+    backgroundColor: colors.green_lightest,
+    color: colors.black,
+    padding: 12,
+    borderRadius: 6,
+    marginTop: 16,
+  },
 });

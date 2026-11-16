@@ -1,3 +1,4 @@
+import colors from 'app/config/colors';
 import React, { useRef, useState } from 'react';
 import {
   Alert,
@@ -183,27 +184,34 @@ export default function CentreActivitiesScreen() {
           <TouchableOpacity
             key={value}
             disabled={state.busy}
-            style={styles.button}
+            accessibilityState={{ selected: kind === value }}
+            style={[styles.chip, kind === value && styles.chipSelected]}
             onPress={() => {
               close();
               setKind(value);
               setPage(0);
             }}
           >
-            <Text>
+            <Text
+              style={[
+                styles.chipText,
+                kind === value && styles.chipTextSelected,
+              ]}
+            >
               {title}
-              {kind === value ? ' ✓' : ''}
             </Text>
           </TouchableOpacity>
         ))}
       </View>
       {blockedReason && kind !== 'availability' ? (
-        <Text accessibilityRole="alert">{blockedReason}</Text>
+        <Text accessibilityRole="alert" style={styles.notice}>
+          {blockedReason}
+        </Text>
       ) : null}
       {kind === 'availability' ? (
-        <Text accessibilityRole="alert">
-          The availability list may be incomplete: the inspected service caps it
-          at 100 without pagination or a reliable total. {blockedReason}
+        <Text accessibilityRole="alert" style={styles.notice}>
+          This list shows at most 100 entries, so it may be incomplete.{' '}
+          {blockedReason}
         </Text>
       ) : null}
       {state.loading ? <ActivityIndicator /> : null}
@@ -218,13 +226,13 @@ export default function CentreActivitiesScreen() {
           state.refresh();
         }}
       >
-        <Text>Reload activities and hours</Text>
+        <Text style={styles.buttonText}>Reload activities and hours</Text>
       </TouchableOpacity>
       {state.data ? (
         <View>
           <Text style={styles.heading}>Configured centre hours</Text>
           {state.data.hours.map((r) => (
-            <Text key={r.day}>
+            <Text key={r.day} style={styles.detail}>
               {r.day}: {r.open ? `${r.open}–${r.close}` : 'Closed'}
             </Text>
           ))}
@@ -254,7 +262,7 @@ export default function CentreActivitiesScreen() {
               }
             }}
           >
-            <Text>Check saved outcome</Text>
+            <Text style={styles.buttonText}>Check saved outcome</Text>
           </TouchableOpacity>
         </View>
       ) : null}
@@ -281,14 +289,14 @@ export default function CentreActivitiesScreen() {
               )
             }
           >
-            <Text>Review and save</Text>
+            <Text style={styles.buttonText}>Review and save</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.button}
             disabled={state.busy}
             onPress={close}
           >
-            <Text>Cancel</Text>
+            <Text style={styles.buttonText}>Cancel</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -314,13 +322,15 @@ export default function CentreActivitiesScreen() {
               }}
             />
           </View>
-          <TouchableOpacity
-            style={styles.button}
-            disabled={disabled}
-            onPress={() => open(null)}
-          >
-            <Text>Add {kinds[kind]}</Text>
-          </TouchableOpacity>
+          {!blockedReason ? (
+            <TouchableOpacity
+              style={styles.button}
+              disabled={disabled}
+              onPress={() => open(null)}
+            >
+              <Text style={styles.buttonText}>Add {kinds[kind]}</Text>
+            </TouchableOpacity>
+          ) : null}
           {state.data && rows.length === 0 ? (
             <Text>
               {kind === 'availability'
@@ -328,17 +338,18 @@ export default function CentreActivitiesScreen() {
                 : 'No matching activities.'}
             </Text>
           ) : null}
-          <Text>
-            {rows.length} matching records; page {displayPage + 1}
+          <Text style={styles.meta}>
+            {rows.length} {rows.length === 1 ? 'record' : 'records'}
+            {rows.length > 50 ? `, page ${displayPage + 1}` : ''}
           </Text>
           {rows.slice(displayPage * 50, (displayPage + 1) * 50).map((row) => (
             <View key={String(row.id)} style={styles.card}>
-              <Text>
+              <Text style={styles.name}>
                 {label(row)}
-                {row.is_deleted ? ' — Deleted' : ''}
+                {row.is_deleted ? ' (deleted)' : ''}
               </Text>
               {kind !== 'activity' ? (
-                <Text>
+                <Text style={styles.detail}>
                   {row.start_date} to {row.end_date}
                   {kind === 'centre'
                     ? `; ${row.min_duration} minutes; ${
@@ -353,19 +364,21 @@ export default function CentreActivitiesScreen() {
                       }`}
                 </Text>
               ) : (
-                <Text>{row.description || ''}</Text>
+                <Text style={styles.detail}>{row.description || ''}</Text>
               )}
               {row.fixed_time_slots ? (
-                <Text>{row.fixed_time_slots}</Text>
+                <Text style={styles.detail}>
+                  {String(row.fixed_time_slots).split(',').join(', ')}
+                </Text>
               ) : null}
-              {!row.is_deleted ? (
+              {!row.is_deleted && !blockedReason ? (
                 <View style={styles.tabs}>
                   <TouchableOpacity
                     style={styles.button}
                     disabled={disabled}
                     onPress={() => open(row)}
                   >
-                    <Text>Edit</Text>
+                    <Text style={styles.buttonText}>Edit</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.button}
@@ -375,28 +388,30 @@ export default function CentreActivitiesScreen() {
                       confirm('delete', row);
                     }}
                   >
-                    <Text>Delete</Text>
+                    <Text style={styles.buttonText}>Delete</Text>
                   </TouchableOpacity>
                 </View>
               ) : null}
             </View>
           ))}
-          <View style={styles.tabs}>
-            <TouchableOpacity
-              disabled={displayPage === 0}
-              style={styles.button}
-              onPress={() => setPage(Math.max(0, displayPage - 1))}
-            >
-              <Text>Previous</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              disabled={(displayPage + 1) * 50 >= rows.length}
-              style={styles.button}
-              onPress={() => setPage(displayPage + 1)}
-            >
-              <Text>Next</Text>
-            </TouchableOpacity>
-          </View>
+          {rows.length > 50 ? (
+            <View style={styles.tabs}>
+              <TouchableOpacity
+                disabled={displayPage === 0}
+                style={styles.button}
+                onPress={() => setPage(Math.max(0, displayPage - 1))}
+              >
+                <Text style={styles.buttonText}>Previous</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                disabled={(displayPage + 1) * 50 >= rows.length}
+                style={styles.button}
+                onPress={() => setPage(displayPage + 1)}
+              >
+                <Text style={styles.buttonText}>Next</Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
         </>
       )}
     </ScrollView>
@@ -407,18 +422,49 @@ const styles = StyleSheet.create({
   heading: { fontSize: 19, fontWeight: '600', marginVertical: 10 },
   tabs: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center' },
   button: {
-    padding: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     minHeight: 48,
     marginVertical: 4,
     marginRight: 6,
-    backgroundColor: '#e7edf5',
+    backgroundColor: colors.green,
     borderRadius: 6,
+    justifyContent: 'center',
+    alignSelf: 'flex-start',
   },
+  buttonText: { color: colors.white, fontWeight: '600' },
+  chip: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    marginRight: 8,
+    marginVertical: 4,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: colors.green,
+  },
+  chipSelected: { backgroundColor: colors.green },
+  chipText: { color: colors.green, fontWeight: '600' },
+  chipTextSelected: { color: colors.white },
+  notice: {
+    backgroundColor: colors.green_lightest,
+    color: colors.black,
+    padding: 12,
+    borderRadius: 6,
+    marginVertical: 8,
+  },
+  name: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.black,
+    marginBottom: 4,
+  },
+  detail: { color: colors.black, lineHeight: 21 },
+  meta: { color: colors.grey, marginVertical: 8 },
   card: {
     padding: 12,
     marginVertical: 8,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: colors.grey_lighter,
     borderRadius: 8,
   },
   search: {

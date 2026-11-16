@@ -315,7 +315,13 @@ function PatientActivityOverviewScreen(props) {
           style={styles.manageButton}
           testID={`patient_adhoc_${patientID}`}
           onPress={() =>
-            navigation.navigate(routes.PATIENT_ADHOC, { patientID })
+            navigation.navigate(routes.PATIENT_ADHOC, {
+              patientID,
+              patientName:
+                patientData?.fullName ||
+                profileLines.line2 ||
+                profileLines.line1,
+            })
           }
         >
           <Text color="white" fontWeight="700">

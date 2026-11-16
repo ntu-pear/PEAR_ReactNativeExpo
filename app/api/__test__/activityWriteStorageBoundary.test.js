@@ -40,7 +40,7 @@ test.each(['activity', 'centre', 'availability', 'adhoc'])(
   async (kind) => {
     const e = environment();
     for (const action of ['create', 'update', 'delete']) {
-      expect(() => api.write(kind, action, { id: 1 })).toThrow(/unavailable/);
+      expect(() => api.write(kind, action, { id: 1 })).toThrow(/not available yet/);
       expect(
         (await e.reader.run({ kind, action, payload: { id: 1 }, user }))
           .outcome,

@@ -97,7 +97,7 @@ const render = async (guardianData, extra = {}) => {
 const guardianCards = (tree) =>
   tree.root
     .findAllByType(InformationCard)
-    .filter((card) => card.props.title === 'Guardian(s) Information');
+    .filter((card) => String(card.props.subtitle || '').startsWith('Guardian'));
 beforeEach(() => mockPush.mockClear());
 
 test.each([

@@ -10,6 +10,7 @@ import {
   FlatList,
   ScrollView,
   Switch,
+  TouchableOpacity,
   Text,
   View,
   StyleSheet,
@@ -27,6 +28,7 @@ import useCareRead from 'app/hooks/useCareRead';
 import { requireRead } from 'app/utility/careReadResults';
 import InputField from 'app/components/input-components/InputField';
 import AppButton from 'app/components/AppButton';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ActivityIndicator from 'app/components/ActivityIndicator';
 import layout from 'app/config/layout';
 import colors from 'app/config/colors';
@@ -387,33 +389,43 @@ export default function ActivityTemplatesScreen() {
       }
       ListEmptyComponent={<Text>No templates were returned on this page.</Text>}
       renderItem={({ item }) => (
-        <View style={styles.row}>
-          <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.meta}>{item.title}</Text>
-          <AppButton
-            title="Edit template"
-            color="grey"
-            testID={`template-edit-${item.id}`}
-            isDisabled={busy || !!unconfirmed}
-            onPress={() => open(item)}
+        <TouchableOpacity
+          style={styles.row}
+          accessibilityRole="button"
+          accessibilityLabel={`Edit template ${item.name}`}
+          testID={`template-edit-${item.id}`}
+          disabled={busy || !!unconfirmed}
+          onPress={() => open(item)}
+        >
+          <View style={styles.rowText}>
+            <Text style={styles.name}>{item.name}</Text>
+            <Text style={styles.meta}>{item.title}</Text>
+          </View>
+          <Text style={styles.editLink}>Edit</Text>
+          <MaterialCommunityIcons
+            name="chevron-right"
+            size={24}
+            color={colors.green}
           />
-        </View>
+        </TouchableOpacity>
       )}
       ListFooterComponent={
-        <View style={styles.paging}>
-          <AppButton
-            title="Previous page"
-            color="grey"
-            isDisabled={busy || page === 0}
-            onPress={() => setPage((n) => n - 1)}
-          />
-          <AppButton
-            title="Next page"
-            color="green"
-            isDisabled={busy || state.data.length < 20}
-            onPress={() => setPage((n) => n + 1)}
-          />
-        </View>
+        page === 0 && state.data.length < 20 ? null : (
+          <View style={styles.paging}>
+            <AppButton
+              title="Previous page"
+              color="green"
+              isDisabled={busy || page === 0}
+              onPress={() => setPage((n) => n - 1)}
+            />
+            <AppButton
+              title="Next page"
+              color="green"
+              isDisabled={busy || state.data.length < 20}
+              onPress={() => setPage((n) => n + 1)}
+            />
+          </View>
+        )
       }
     />
   );
@@ -436,7 +448,12 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderBottomColor: colors.grey_lighter,
     borderBottomWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 64,
   },
+  rowText: { flex: 1 },
+  editLink: { color: colors.green, fontWeight: '600', marginRight: 4 },
   paging: { paddingVertical: 20 },
   switchRow: {
     minHeight: 48,

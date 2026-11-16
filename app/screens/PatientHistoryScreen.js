@@ -69,12 +69,10 @@ export default function PatientHistoryScreen({ route }) {
           <Text style={styles.heading}>
             {state.data.rows[0]?.patient_full_name ||
               route.params?.patientProfile?.preferredName ||
-              `Patient ${patientId}`}{' '}
-            — history
+              `Patient ${patientId}`}
           </Text>
           <Text style={styles.message}>
-            Changes to this patient's records. This is separate from centre-wide
-            medication records.
+            Changes made to this patient's records, newest first.
           </Text>
           <Text style={styles.meta}>
             Page {page + 1} of {Math.max(1, state.data.totalPages)} ·{' '}
@@ -99,20 +97,22 @@ export default function PatientHistoryScreen({ route }) {
         </View>
       )}
       ListFooterComponent={
-        <View style={styles.paging}>
-          <AppButton
-            title="Previous page"
-            color="grey"
-            isDisabled={page === 0}
-            onPress={() => setChoice({ patientId, page: page - 1 })}
-          />
-          <AppButton
-            title="Next page"
-            color="green"
-            isDisabled={page + 1 >= state.data.totalPages}
-            onPress={() => setChoice({ patientId, page: page + 1 })}
-          />
-        </View>
+        state.data.totalPages <= 1 ? null : (
+          <View style={styles.paging}>
+            <AppButton
+              title="Previous page"
+              color="green"
+              isDisabled={page === 0}
+              onPress={() => setChoice({ patientId, page: page - 1 })}
+            />
+            <AppButton
+              title="Next page"
+              color="green"
+              isDisabled={page + 1 >= state.data.totalPages}
+              onPress={() => setChoice({ patientId, page: page + 1 })}
+            />
+          </View>
+        )
       }
     />
   );
