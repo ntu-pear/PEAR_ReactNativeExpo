@@ -9,7 +9,6 @@ import NotificationsReadScreen from 'app/screens/notifications/NotificationsRead
 import NotificationsApprovalRequestScreen from 'app/screens/notifications/NotificationsApprovalRequestScreen';
 import colors from '../config/colors';
 import typography from '../config/typography';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import NotificationType from 'app/screens/notifications/NotificationType';
 import NotificationContext from 'app/screens/notifications/NotificationContext';
 import { useState } from 'react';
@@ -54,7 +53,6 @@ const NOTIFICATION_SUBTABS = [
  * the same four lists without a pager.
  */
 function NotificationTabNavigator({ navigation }) {
-  const safeArea = useSafeAreaInsets();
   const [activeKey, setActiveKey] = useState(NOTIFICATION_SUBTABS[0].key);
   const current =
     NOTIFICATION_SUBTABS.find((tab) => tab.key === activeKey) ||
@@ -66,7 +64,6 @@ function NotificationTabNavigator({ navigation }) {
       collapsable={false}
       style={{
         flex: 1,
-        paddingTop: safeArea.top,
         backgroundColor: colors.white,
       }}
     >
@@ -88,7 +85,7 @@ function NotificationTabNavigator({ navigation }) {
                 alignItems: 'center',
                 paddingVertical: 12,
                 borderBottomWidth: selected ? 2 : 0,
-                borderBottomColor: colors.pink,
+                borderBottomColor: colors.green,
               }}
               testID={`notification_subtab_${tab.key}`}
             >
@@ -97,7 +94,7 @@ function NotificationTabNavigator({ navigation }) {
                   fontFamily: typography.subheading1.fontFamily,
                   fontSize: typography.subheading1.fontSize,
                   fontWeight: selected ? '600' : '400',
-                  color: selected ? colors.pink : colors.black,
+                  color: selected ? colors.green : colors.black,
                 }}
               >
                 {tab.title}
@@ -138,7 +135,11 @@ function NotificationNavigator() {
         <Stack.Screen
           name={routes.NOTIFICATION_TAB}
           component={NotificationTabNavigator}
-          options={{ headerShown: false, animation: 'none' }}
+          options={{
+            headerShown: true,
+            title: 'Notifications',
+            animation: 'none',
+          }}
         />
         <Stack.Screen
           name={routes.NOTIFICATION_APPROVAL_REQUEST}

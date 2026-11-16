@@ -560,6 +560,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginTop: 8,
+    marginBottom: 8,
   },
   chipButton: {
     backgroundColor: colors.green,

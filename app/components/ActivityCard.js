@@ -60,8 +60,9 @@ const ActivityCard = ({
               isCurrentActivity() ? styles.darkText : styles.lightText,
             ]}
           >
-            {formatTimeHM24(activityStartTime)}-{' '}
-            {formatTimeHM24(activityEndTime)}
+            {`${formatTimeHM24(activityStartTime)}–${formatTimeHM24(
+              activityEndTime,
+            )}`}
           </Text>
         </View>
         <View

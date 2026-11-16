@@ -1,13 +1,5 @@
 import AppButton from 'app/components/AppButton';
-import {
-  Alert,
-  Box,
-  CloseIcon,
-  HStack,
-  IconButton,
-  Text,
-  VStack,
-} from 'native-base';
+import { Alert, Box, HStack, Text, VStack } from 'native-base';
 import React from 'react';
 
 // Configurations
@@ -29,22 +21,12 @@ function ErrorRetryApiCard({ handleError }) {
                 This information could not be loaded. Please try again.
               </Text>
             </HStack>
-            <IconButton
-              variant="unstyled"
-              _focus={{
-                borderWidth: 0,
-              }}
-              icon={<CloseIcon size="3" />}
-              _icon={{
-                color: 'coolGray.600',
-              }}
-            />
           </HStack>
         </VStack>
       </Alert>
       <Box flex={1} w="60%" mx="auto" justifyContent="center" py={6}>
         {/* Take not to pass in handleError from parent component */}
-        <AppButton title="Try Again" color="red" onPress={handleError} />
+        <AppButton title="Try Again" color="green" onPress={handleError} />
       </Box>
     </Box>
   );

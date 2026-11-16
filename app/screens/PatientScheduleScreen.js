@@ -23,6 +23,12 @@ import ActivityCard from 'app/components/ActivityCard';
 function PatientScheduleScreen({ route }) {
   const patientID = route.params?.patientId ?? route.params?.patientID;
   const date = route.params?.date;
+  // The profile screen passes the patient it showed; use its photo for the header.
+  const passedProfile = route.params?.patientProfile;
+  const profilePicture =
+    passedProfile && String(passedProfile.patientID) === String(patientID)
+      ? passedProfile.profilePicture
+      : undefined;
   const readKey = JSON.stringify([patientID, date]);
   const currentKey = useRef(readKey);
   currentKey.current = readKey;
@@ -177,6 +183,7 @@ function PatientScheduleScreen({ route }) {
               testID={`schedule_screen_${patientID}_profileNameButton`}
               profileLineOne={snapshot.patientName}
               profileLineTwo=""
+              profilePicture={profilePicture}
               handleOnPress={() =>
                 navigation.navigate(routes.PATIENT_PROFILE, { id: patientID })
               }

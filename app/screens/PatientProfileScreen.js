@@ -929,6 +929,7 @@ function PatientProfileScreen(props) {
                   navigation={navigation}
                   routes={routes.PATIENT_SCHEDULE}
                   patientId={patientID}
+                  patientProfile={patientProfile}
                 />
                 {canViewActivityOverview && (
                   <PatientProfileCard

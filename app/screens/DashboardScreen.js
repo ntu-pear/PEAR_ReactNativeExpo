@@ -809,6 +809,8 @@ function DashboardScreen({ navigation }) {
           />
           <FlatList
             ref={scheduleRef}
+            // Room below the last row so the home and back-to-top buttons never cover it.
+            contentContainerStyle={styles.listContent}
             onRefresh={refreshSchedule}
             refreshing={isLoading}
             ListEmptyComponent={() =>
@@ -973,6 +975,7 @@ function DashboardScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  listContent: { paddingBottom: 160 },
   dateSelectionContainer: {
     flexDirection: 'row',
     alignItems: 'center',
