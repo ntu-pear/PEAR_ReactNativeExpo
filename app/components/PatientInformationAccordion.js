@@ -404,6 +404,8 @@ function PatientInformationAccordion({
           if (String(returnedId) === String(patientID)) {
             const value = String(patient.nric || patient.NRIC || '');
             // A value that is still masked is not a full NRIC: keep reveal disabled.
+            // TODO(next PEAR team, backend): see patientFieldPolicy.js; some staging
+            // patients have a masked NRIC stored as their real NRIC.
             setUnMaskedPatientNRIC({
               patientId: String(patientID),
               value: /\*/.test(value) ? '' : value,

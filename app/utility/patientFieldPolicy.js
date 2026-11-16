@@ -112,6 +112,12 @@ export const buildPatientInfoUpdate = ({
       );
     }
   });
+  // TODO(next PEAR team, backend): the Patient service masks NRICs by assigning
+  // the masked value to the loaded ORM object (crud/patient_crud.py get_patient),
+  // and DoctorNote/MedicalHistory create/update then commit the same session, so
+  // the masked value is saved as the real NRIC. Fix: mask a copy for the response
+  // only, then restore affected patients' NRICs (ALICE LEE on staging, Nov 2026).
+  // Until then this guard refuses to save over a record whose NRIC is masked.
   if (/\*|x{2,}/i.test(record.nric)) {
     throw new Error(
       "This patient's full NRIC is not available from the Patient service, so the record cannot be saved safely. Ask the backend team to restore the patient's NRIC.",
