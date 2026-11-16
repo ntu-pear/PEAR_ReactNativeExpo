@@ -48,13 +48,13 @@ test('history rejects cross-patient records or wrong page and handles empty page
     data: { data: [], pageNo: 0, totalPages: 0, totalRecords: 0 },
   };
   expect(historyResult(r, 7, 0).rows).toEqual([]);
-  expect(() =>
+  expect(
     historyResult(
       { ...r, data: { ...r.data, data: [{ patient_id: 8 }] } },
       7,
       0,
-    ),
-  ).toThrow();
+    ).rows,
+  ).toEqual([]);
   expect(() => historyResult(r, 7, 1)).toThrow();
 });
 test('history accepts entries without a patient id, as returned for Activity-service changes', () => {
@@ -69,6 +69,27 @@ test('history accepts entries without a patient id, as returned for Activity-ser
     },
   };
   expect(historyResult(page, 7, 1).rows).toHaveLength(3);
+});
+test('history leaves out entries recorded against another patient', () => {
+  const page = {
+    ok: true,
+    status: 200,
+    data: {
+      data: [
+        { patient_id: 7, message: 'mine' },
+        { patient_id: 12, message: 'other' },
+        { patient_id: '12', message: 'other text id' },
+        { patient_id: null, message: 'activity' },
+      ],
+      pageNo: 1,
+      totalPages: 4,
+      totalRecords: 79,
+    },
+  };
+  expect(historyResult(page, 7, 1).rows.map((row) => row.message)).toEqual([
+    'mine',
+    'activity',
+  ]);
 });
 test.each([401, 403])('authorization %s is not a retry action', (status) => {
   try {

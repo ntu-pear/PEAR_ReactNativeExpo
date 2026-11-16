@@ -67,8 +67,15 @@ export default function PatientHistoryScreen({ route }) {
       ListHeaderComponent={
         <View style={layout.section}>
           <Text style={styles.heading}>
-            {state.data.rows[0]?.patient_full_name ||
-              route.params?.patientProfile?.preferredName ||
+            {[
+              route.params?.patientProfile?.firstName,
+              route.params?.patientProfile?.lastName,
+            ]
+              .filter(Boolean)
+              .join(' ') ||
+              state.data.rows.find(
+                (row) => row.patient_id != null && row.patient_full_name,
+              )?.patient_full_name ||
               `Patient ${patientId}`}
           </Text>
           <Text style={styles.message}>

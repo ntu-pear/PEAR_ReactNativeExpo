@@ -164,12 +164,14 @@ function EditPatientInfoScreen(props) {
         ? patientProfile.endDate
         : null,
     IsRespiteCare: fromBoolish(patientProfile.isRespiteCare),
-    // The profile may hold the level as a number (1-3) or as its label.
+    // The profile may hold the level as a number (1-3) or as its label; the
+    // Patient service stores 0 when none has been chosen, shown as not set.
     PrivacyLevel: (() => {
-      const raw = patientProfile.privacyLevel;
-      const byLabel = { low: '1', medium: '2', high: '3' };
-      if (raw == null || raw === 'null' || raw === '') return '2';
-      return byLabel[String(raw).trim().toLowerCase()] || String(raw);
+      const raw = String(patientProfile.privacyLevel ?? '')
+        .trim()
+        .toLowerCase();
+      const level = { low: '1', medium: '2', high: '3' }[raw] || raw;
+      return ['1', '2', '3'].includes(level) ? level : '';
     })(),
     UpdateBit:
       patientProfile.updateBit != null && patientProfile.updateBit != 'null'
@@ -403,13 +405,15 @@ function EditPatientInfoScreen(props) {
                 <SelectionInputField
                   title={'Privacy Level'}
                   value={
-                    formData.PrivacyLevel ? parseInt(formData.PrivacyLevel) : 2
+                    formData.PrivacyLevel
+                      ? parseInt(formData.PrivacyLevel)
+                      : null
                   }
                   onDataChange={(selectedValue) => {
                     handleFormData('PrivacyLevel')(selectedValue.toString());
                   }}
                   dataArray={privacyLevelOptions}
-                  placeholder="Select privacy level"
+                  placeholder="Not set"
                 />
 
                 <RadioButtonInput

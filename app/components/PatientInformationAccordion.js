@@ -143,27 +143,9 @@ function PatientInformationAccordion({
     }
     const nric = pick(patientProfile.NRIC, patientProfile.nric);
 
-    // Format privacy level
-    const getPrivacyLevelLabel = (level) => {
-      // Handle null, undefined, or empty values - default to Medium (2)
-      const defaultLevel = 2;
-      const levelNum =
-        level != null && level !== '' ? parseInt(level, 10) : defaultLevel;
-
-      if (isNaN(levelNum)) {
-        return 'Medium';
-      } // Fallback to Medium if parse fails
-      if (levelNum === 1) {
-        return 'Low';
-      }
-      if (levelNum === 2) {
-        return 'Medium';
-      }
-      if (levelNum === 3) {
-        return 'High';
-      }
-      return 'Medium'; // Default to Medium for any other value
-    };
+    // The Patient service stores 0 when no privacy level has been chosen.
+    const getPrivacyLevelLabel = (level) =>
+      ({ 1: 'Low', 2: 'Medium', 3: 'High' }[parseInt(level, 10)] || 'Not set');
 
     return [
       { label: 'First Name', value: patientProfile.firstName || '-' },

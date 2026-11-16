@@ -511,7 +511,7 @@ function PatientProfileScreen(props) {
             p.privacy_level ??
             p.PrivacyLevel ??
             p.accessLevelSensitive ??
-            2, // Default to Medium
+            null, // 0 or missing means no level has been set
         };
 
         // Optional or masked fields must not erase a successfully returned patient.

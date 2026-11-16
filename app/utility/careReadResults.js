@@ -69,6 +69,12 @@ export const previewResult = (response, now = new Date()) => {
     builtAt: typeof body.BuiltAt === 'string' ? body.BuiltAt : '',
   };
 };
+const belongsToPatient = (row, patientId) =>
+  row.patient_id == null ||
+  row.patient_id === '' ||
+  String(row.patient_id) === String(patientId) ||
+  Number(row.patient_id) === Number(patientId);
+
 export const historyResult = (response, patientId, page) => {
   requireRead(response, 'patient history');
   const body = response.data;
@@ -76,23 +82,20 @@ export const historyResult = (response, patientId, page) => {
     !Array.isArray(body?.data) ||
     Number(body.pageNo) !== page ||
     !Number.isInteger(Number(body.totalPages)) ||
-    Number(body.totalPages) < 0 ||
-    body.data.some(
-      // The endpoint is already scoped to this patient. Activity-service
-      // entries can carry no patient_id; only an explicit other id is wrong.
-      (row) =>
-        row.patient_id != null &&
-        row.patient_id !== '' &&
-        String(row.patient_id) !== String(patientId) &&
-        Number(row.patient_id) !== Number(patientId),
-    )
+    Number(body.totalPages) < 0
   ) {
     throw new Error(
       'The history response did not match this patient and page.',
     );
   }
+  // The endpoint is scoped to this patient, but its legacy text match can also
+  // return another patient's entries (for example when an 'id' value matches).
+  // Entries from the Activity service carry no patient_id and are kept; an
+  // entry recorded against a different patient is never shown here.
+  // TODO(next team): remove this filter once the Logging service matches
+  // legacy entries on the patient field only.
   return {
-    rows: body.data,
+    rows: body.data.filter((row) => belongsToPatient(row, patientId)),
     totalPages: Number(body.totalPages),
     totalRecords: Number(body.totalRecords) || 0,
   };
