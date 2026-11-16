@@ -402,9 +402,11 @@ function PatientInformationAccordion({
           const returnedId =
             patient?.patientID ?? patient?.patientId ?? patient?.id;
           if (String(returnedId) === String(patientID)) {
+            const value = String(patient.nric || patient.NRIC || '');
+            // A value that is still masked is not a full NRIC: keep reveal disabled.
             setUnMaskedPatientNRIC({
               patientId: String(patientID),
-              value: patient.nric || patient.NRIC || '',
+              value: /\*/.test(value) ? '' : value,
             });
           }
         }

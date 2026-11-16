@@ -114,7 +114,7 @@ export const buildPatientInfoUpdate = ({
   });
   if (/\*|x{2,}/i.test(record.nric)) {
     throw new Error(
-      'The complete patient identity is unavailable. Reload before editing.',
+      "This patient's full NRIC is not available from the Patient service, so the record cannot be saved safely. Ask the backend team to restore the patient's NRIC.",
     );
   }
   const result = {};

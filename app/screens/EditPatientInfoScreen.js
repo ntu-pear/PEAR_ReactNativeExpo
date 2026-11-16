@@ -164,11 +164,13 @@ function EditPatientInfoScreen(props) {
         ? patientProfile.endDate
         : null,
     IsRespiteCare: fromBoolish(patientProfile.isRespiteCare),
-    PrivacyLevel:
-      patientProfile.privacyLevel != null &&
-      patientProfile.privacyLevel !== 'null'
-        ? String(patientProfile.privacyLevel)
-        : '2',
+    // The profile may hold the level as a number (1-3) or as its label.
+    PrivacyLevel: (() => {
+      const raw = patientProfile.privacyLevel;
+      const byLabel = { low: '1', medium: '2', high: '3' };
+      if (raw == null || raw === 'null' || raw === '') return '2';
+      return byLabel[String(raw).trim().toLowerCase()] || String(raw);
+    })(),
     UpdateBit:
       patientProfile.updateBit != null && patientProfile.updateBit != 'null'
         ? patientProfile.updateBit

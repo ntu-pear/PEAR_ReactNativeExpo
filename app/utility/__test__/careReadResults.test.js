@@ -57,6 +57,19 @@ test('history rejects cross-patient records or wrong page and handles empty page
   ).toThrow();
   expect(() => historyResult(r, 7, 1)).toThrow();
 });
+test('history accepts entries without a patient id, as returned for Activity-service changes', () => {
+  const page = {
+    ok: true,
+    status: 200,
+    data: {
+      data: [{ patient_id: '7' }, { patient_id: null }, { table: 'Activity' }],
+      pageNo: 1,
+      totalPages: 4,
+      totalRecords: 77,
+    },
+  };
+  expect(historyResult(page, 7, 1).rows).toHaveLength(3);
+});
 test.each([401, 403])('authorization %s is not a retry action', (status) => {
   try {
     requireRead({ status }, 'history');

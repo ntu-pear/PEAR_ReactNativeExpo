@@ -77,7 +77,15 @@ export const historyResult = (response, patientId, page) => {
     Number(body.pageNo) !== page ||
     !Number.isInteger(Number(body.totalPages)) ||
     Number(body.totalPages) < 0 ||
-    body.data.some((row) => String(row.patient_id) !== String(patientId))
+    body.data.some(
+      // The endpoint is already scoped to this patient. Activity-service
+      // entries can carry no patient_id; only an explicit other id is wrong.
+      (row) =>
+        row.patient_id != null &&
+        row.patient_id !== '' &&
+        String(row.patient_id) !== String(patientId) &&
+        Number(row.patient_id) !== Number(patientId),
+    )
   ) {
     throw new Error(
       'The history response did not match this patient and page.',
