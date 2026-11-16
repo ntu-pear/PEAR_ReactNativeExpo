@@ -265,7 +265,7 @@ test('async guardian response grows within the already expanded section and reta
     'Guardian Name',
     'Preferred Name',
     'NRIC',
-    "Patient's",
+    'Relationship to patient',
     'Contact Number',
     'Address',
     'Email',

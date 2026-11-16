@@ -8,7 +8,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import useCentreManagement from 'app/hooks/useCentreManagement';
-import { activityLabel, currentWeekDates } from 'app/utility/centreManagement';
+import { activityLabel } from 'app/utility/centreManagement';
 import { activityMutationBlockReason } from 'app/utility/activityManagementPolicy';
 import colors from 'app/config/colors';
 
@@ -48,8 +48,7 @@ export default function PatientAdhocScreen({ route }) {
       </Text>
     );
   }
-  const dates = currentWeekDates(),
-    rows = state.data?.adhocs || [];
+  const rows = state.data?.adhocs || [];
   const page = Math.min(
     paging.identity === state.identity ? paging.page : 0,
     Math.max(0, Math.ceil(rows.length / 50) - 1),
@@ -70,10 +69,7 @@ export default function PatientAdhocScreen({ route }) {
       <Text style={styles.heading}>
         {patientName || `Patient ${patientId}`}
       </Text>
-      <Text style={styles.meta}>
-        This week: {readableDateTime(dates[0])} to{' '}
-        {readableDateTime(dates[dates.length - 1])}
-      </Text>
+      <Text style={styles.meta}>Active ad hoc requests for this patient.</Text>
       <Text accessibilityRole="alert" style={styles.notice}>
         {activityMutationBlockReason('adhoc')} The requests below can be viewed
         but not changed. A pending request may not yet be in the schedule.
